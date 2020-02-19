@@ -1,0 +1,1191 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Global Administration &mdash; chopin-core 3.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="End User Portal" href="EndUser.html" />
+    <link rel="prev" title="Getting Started" href="../General/General.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> chopin-core
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../General/General.html">Getting Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Global File System</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Global Administration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#instantiate-a-global-admin-object">Instantiate a Global Admin object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#logging-in">Logging in</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#navigating">Navigating</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-methods">Core Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#portals">Portals</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#retrieve-portals">Retrieve Portals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-a-team-portal">Create a Team Portal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#delete-a-team-portal">Delete a Team Portal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#recover-a-team-portal">Recover a Team Portal</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#servers">Servers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#users">Users</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#local-users">Local Users</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#domain-users">Domain Users</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fetch-users-groups">Fetch Users &amp; Groups</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#devices">Devices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#generate-activation-codes">Generate Activation Codes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#code-snippets">Code Snippets</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#zones">Zones</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#retrieving-the-zones-class-object">Retrieving the Zones Class Object</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#retrieve-a-zone">Retrieve a Zone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-a-zone">Create a Zone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-folders-to-a-zone">Add Folders to a Zone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-devices-to-a-zone">Add Devices to a Zone</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#delete-a-zone">Delete a Zone</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cloudfs">CloudFS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#retrieving-the-cloudfs-class-object">Retrieving the CloudFS Class Object</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#create-a-folder-group">Create a Folder Group</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#delete-a-folder-group">Delete a Folder Group</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-a-cloud-drive-folder">Create a Cloud Drive Folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#delete-a-cloud-drive-folder">Delete a Cloud Drive Folder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#recover-a-cloud-drive-folder">Recover a Cloud Drive Folder</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="EndUser.html">End User Portal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FileBrowser.html">File Browser</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Edge Filer</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Gateway/Gateway.html">Gateway</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Gateway/FileBrowser.html">File Browser</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Drive App</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Agent/Agent.html">Agent</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Misc/Miscellaneous.html">Miscellaneous</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">chopin-core</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>Global Administration</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/docs/Portal/GlobalAdmin.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="global-administration">
+<h1><a class="toc-backref" href="#id1">Global Administration</a><a class="headerlink" href="#global-administration" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#global-administration" id="id1">Global Administration</a></p>
+<ul>
+<li><p><a class="reference internal" href="#instantiate-a-global-admin-object" id="id2">Instantiate a Global Admin object</a></p>
+<ul>
+<li><p><a class="reference internal" href="#logging-in" id="id3">Logging in</a></p></li>
+<li><p><a class="reference internal" href="#navigating" id="id4">Navigating</a></p></li>
+<li><p><a class="reference internal" href="#core-methods" id="id5">Core Methods</a></p></li>
+<li><p><a class="reference internal" href="#portals" id="id6">Portals</a></p>
+<ul>
+<li><p><a class="reference internal" href="#retrieve-portals" id="id7">Retrieve Portals</a></p></li>
+<li><p><a class="reference internal" href="#create-a-team-portal" id="id8">Create a Team Portal</a></p></li>
+<li><p><a class="reference internal" href="#delete-a-team-portal" id="id9">Delete a Team Portal</a></p></li>
+<li><p><a class="reference internal" href="#recover-a-team-portal" id="id10">Recover a Team Portal</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#servers" id="id11">Servers</a></p></li>
+<li><p><a class="reference internal" href="#users" id="id12">Users</a></p>
+<ul>
+<li><p><a class="reference internal" href="#local-users" id="id13">Local Users</a></p></li>
+<li><p><a class="reference internal" href="#domain-users" id="id14">Domain Users</a></p></li>
+<li><p><a class="reference internal" href="#fetch-users-groups" id="id15">Fetch Users &amp; Groups</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#devices" id="id16">Devices</a></p>
+<ul>
+<li><p><a class="reference internal" href="#generate-activation-codes" id="id17">Generate Activation Codes</a></p></li>
+<li><p><a class="reference internal" href="#code-snippets" id="id18">Code Snippets</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#zones" id="id19">Zones</a></p>
+<ul>
+<li><p><a class="reference internal" href="#retrieving-the-zones-class-object" id="id20">Retrieving the Zones Class Object</a></p>
+<ul>
+<li><p><a class="reference internal" href="#retrieve-a-zone" id="id21">Retrieve a Zone</a></p></li>
+<li><p><a class="reference internal" href="#create-a-zone" id="id22">Create a Zone</a></p></li>
+<li><p><a class="reference internal" href="#add-folders-to-a-zone" id="id23">Add Folders to a Zone</a></p></li>
+<li><p><a class="reference internal" href="#add-devices-to-a-zone" id="id24">Add Devices to a Zone</a></p></li>
+<li><p><a class="reference internal" href="#delete-a-zone" id="id25">Delete a Zone</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#cloudfs" id="id26">CloudFS</a></p>
+<ul>
+<li><p><a class="reference internal" href="#retrieving-the-cloudfs-class-object" id="id27">Retrieving the CloudFS Class Object</a></p>
+<ul>
+<li><p><a class="reference internal" href="#create-a-folder-group" id="id28">Create a Folder Group</a></p></li>
+<li><p><a class="reference internal" href="#delete-a-folder-group" id="id29">Delete a Folder Group</a></p></li>
+<li><p><a class="reference internal" href="#create-a-cloud-drive-folder" id="id30">Create a Cloud Drive Folder</a></p></li>
+<li><p><a class="reference internal" href="#delete-a-cloud-drive-folder" id="id31">Delete a Cloud Drive Folder</a></p></li>
+<li><p><a class="reference internal" href="#recover-a-cloud-drive-folder" id="id32">Recover a Cloud Drive Folder</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="instantiate-a-global-admin-object">
+<h2><a class="toc-backref" href="#id2">Instantiate a Global Admin object</a><a class="headerlink" href="#instantiate-a-global-admin-object" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="GlobalAdmin">
+<em class="property">class </em><code class="sig-name descname">GlobalAdmin</code><span class="sig-paren">(</span><em class="sig-param">host[, port = 443][, https = True]</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>host</strong> (<em>str</em>) – The fully qualified domain name, hostname or an IPv4 address of the Gateway</p></li>
+<li><p><strong>port</strong> (<em>int</em>) – Set a custom port number (0 - 65535), defaults to <code class="docutils literal notranslate"><span class="pre">443</span></code></p></li>
+<li><p><strong>https</strong> (<em>bool</em>) – Set to <code class="docutils literal notranslate"><span class="pre">False</span></code> to use HTTP, defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">admin</span> <span class="o">=</span> <span class="n">GlobalAdmin</span><span class="p">(</span><span class="s1">&#39;chopin.ctera.com&#39;</span><span class="p">)</span> <span class="c1"># will use HTTPS over port 443</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure <cite>chopin-core</cite> to automatically trust the server’s certificate, using: <code class="docutils literal notranslate"><span class="pre">config.http['ssl']</span> <span class="pre">=</span> <span class="pre">'Trust'</span></code></p>
+</div>
+<div class="section" id="logging-in">
+<h3><a class="toc-backref" href="#id3">Logging in</a><a class="headerlink" href="#logging-in" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="GlobalAdmin.test">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Verification check to ensure the target host is a Portal.</p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">admin</span><span class="o">.</span><span class="n">test</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="GlobalAdmin.login">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">login</code><span class="sig-paren">(</span><em class="sig-param">username</em>, <em class="sig-param">password</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.login" title="Permalink to this definition">¶</a></dt>
+<dd><p>Login to CTERA Portal as a Global Administrator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>username</strong> (<em>str</em>) – username</p></li>
+<li><p><strong>password</strong> (<em>str</em>) – password</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">admin</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span> <span class="s1">&#39;G3neralZ0d!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="GlobalAdmin.logout">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">logout</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.logout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logout from CTERA Portal.</p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">admin</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="GlobalAdmin.whoami">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">whoami</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.whoami" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the name of the logged in user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the name of the logged in user</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">admin</span><span class="o">.</span><span class="n">whoami</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="navigating">
+<h3><a class="toc-backref" href="#id4">Navigating</a><a class="headerlink" href="#navigating" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="GlobalAdmin.browse_global_admin">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">browse_global_admin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.browse_global_admin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Browse the Global Administration Portal.</p>
+<p>admin.browse_global_admin()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GlobalAdmin.browse_tenant">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">browse_tenant</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.browse_tenant" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – a Virtual Portal name</p>
+</dd>
+</dl>
+<p>Browse a Team Portal.</p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">admin</span><span class="o">.</span><span class="n">browse_tenant</span><span class="p">(</span><span class="s1">&#39;chopin&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="core-methods">
+<h3><a class="toc-backref" href="#id5">Core Methods</a><a class="headerlink" href="#core-methods" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="GlobalAdmin.show">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">show</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.show" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a Portal schema object as a JSON string.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GlobalAdmin.show_multi">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">show_multi</code><span class="sig-paren">(</span><em class="sig-param">paths</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.show_multi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print one or more Portal schema objects as a JSON string.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GlobalAdmin.get">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve a Portal schema object as a Python object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GlobalAdmin.get_multi">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">get_multi</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">paths</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.get_multi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve one or more Portal schema objects as a Python object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GlobalAdmin.put">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update a Portal schema object or attribute.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GlobalAdmin.execute">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">execute</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">name</em><span class="optional">[</span>, <em class="sig-param">param = None</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute a Portal schema object method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="GlobalAdmin.query">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">query</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">params</em>, <em class="sig-param">startFrom</em>, <em class="sig-param">countLimit</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="GlobalAdmin.show_query">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">show_query</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">params</em>, <em class="sig-param">startFrom</em>, <em class="sig-param">countLimit</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.show_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="portals">
+<h3><a class="toc-backref" href="#id6">Portals</a><a class="headerlink" href="#portals" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="retrieve-portals">
+<h4><a class="toc-backref" href="#id7">Retrieve Portals</a><a class="headerlink" href="#retrieve-portals" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="GlobalAdmin.tenants">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">tenants</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.tenants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve a list of Virtual Portals</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a list of virtual portals</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">tenant</span> <span class="ow">in</span> <span class="n">admin</span><span class="o">.</span><span class="n">tenants</span><span class="p">():</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">tenant</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">tenant</span><span class="o">.</span><span class="n">usedStorageQuota</span><span class="p">,</span> <span class="n">tenant</span><span class="o">.</span><span class="n">totalStorageQuota</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-a-team-portal">
+<h4><a class="toc-backref" href="#id8">Create a Team Portal</a><a class="headerlink" href="#create-a-team-portal" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="GlobalAdmin.add_tenant">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">add_tenant</code><span class="sig-paren">(</span><em class="sig-param">name[, display_name = None][, billing_id = None][, company = None]</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.add_tenant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Team Portal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – name of the Team Portal</p></li>
+<li><p><strong>display_name</strong> (<em>str</em>) – display name</p></li>
+<li><p><strong>billing_id</strong> (<em>str</em>) – a billing id</p></li>
+<li><p><strong>company</strong> (<em>str</em>) – company</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a relative url path to the Team Portal</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Create a Team Portal&quot;&quot;&quot;</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">add_tenant</span><span class="p">(</span><span class="s1">&#39;acme&#39;</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;Create a Team Portal, including a display name, billing id and a company name&quot;&quot;&quot;</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">add_tenant</span><span class="p">(</span><span class="s1">&#39;ctera&#39;</span><span class="p">,</span> <span class="s1">&#39;CTERA&#39;</span><span class="p">,</span> <span class="s1">&#39;Tz9YRDSd8LNfaouzr3Db&#39;</span><span class="p">,</span> <span class="s1">&#39;CTERA Networks&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="delete-a-team-portal">
+<h4><a class="toc-backref" href="#id9">Delete a Team Portal</a><a class="headerlink" href="#delete-a-team-portal" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="GlobalAdmin.delete_tenant">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">delete_tenant</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.delete_tenant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a Team Portal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – name of the Team Portal</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">admin</span><span class="o">.</span><span class="n">delete_tenant</span><span class="p">(</span><span class="s1">&#39;acme&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="recover-a-team-portal">
+<h4><a class="toc-backref" href="#id10">Recover a Team Portal</a><a class="headerlink" href="#recover-a-team-portal" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="GlobalAdmin.undelete_tenant">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">undelete_tenant</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.undelete_tenant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recover a Team Portal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – name of the Team Portal</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">admin</span><span class="o">.</span><span class="n">undelete_tenant</span><span class="p">(</span><span class="s1">&#39;acme&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="servers">
+<h3><a class="toc-backref" href="#id11">Servers</a><a class="headerlink" href="#servers" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="GlobalAdmin.servers">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">servers</code><span class="sig-paren">(</span><em class="sig-param">[include = ['name']]</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.servers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the servers that comprise CTERA Portal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>include</strong> (<em>list</em>) – a list of attributes you wish to retrieve</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list of server objects</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<p>To retrieve servers, you must first browse the Global Administration Portal, using: <a class="reference internal" href="#GlobalAdmin.browse_global_admin" title="GlobalAdmin.browse_global_admin"><code class="xref py py-func docutils literal notranslate"><span class="pre">GlobalAdmin.browse_global_admin()</span></code></a></p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Retrieve all servers&quot;&quot;&quot;</span>
+
+<span class="n">servers</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">servers</span><span class="p">()</span> <span class="c1"># will only retrieve the server name</span>
+
+<span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">servers</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;Retrieve multiple server attributes&quot;&quot;&quot;</span>
+
+<span class="n">servers</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">servers</span><span class="p">(</span><span class="n">include</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;connected&#39;</span><span class="p">,</span> <span class="s1">&#39;isApplicationServer&#39;</span><span class="p">,</span> <span class="s1">&#39;mainDB&#39;</span><span class="p">])</span>
+
+<span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">servers</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="users">
+<h3><a class="toc-backref" href="#id12">Users</a><a class="headerlink" href="#users" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="local-users">
+<h4><a class="toc-backref" href="#id13">Local Users</a><a class="headerlink" href="#local-users" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="GlobalAdmin.local_users">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">local_users</code><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param">include = []</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.local_users" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve local user accounts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>include</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – a list of user attributes you wish to retrieve</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list of user objects</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<p>The <cite>local_users</cite> method will always retrieve the <cite>name</cite> attribute</p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">users</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">local_users</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+<span class="n">users</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">local_users</span><span class="p">(</span><span class="n">include</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="s1">&#39;firstName&#39;</span><span class="p">,</span> <span class="s1">&#39;lastName&#39;</span><span class="p">])</span>
+
+<span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="GlobalAdmin.add_user">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">add_user</code><span class="sig-paren">(</span><em class="sig-param">username, email, first_name, last_name, password[, role = Role.EndUser][, company = None][, comment = None]</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.add_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a Portal user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>username</strong> (<em>str</em>) – username</p></li>
+<li><p><strong>email</strong> (<em>str</em>) – e-mail address</p></li>
+<li><p><strong>first_name</strong> (<em>str</em>) – first name</p></li>
+<li><p><strong>last_name</strong> (<em>str</em>) – last name</p></li>
+<li><p><strong>password</strong> (<em>str</em>) – password</p></li>
+<li><p><strong>role</strong> (<em>str</em>) – role</p></li>
+<li><p><strong>company</strong> (<em>str</em>) – company</p></li>
+<li><p><strong>comment</strong> (<em>str</em>) – comment</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Create an end user&quot;&quot;&quot;</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">add_user</span><span class="p">(</span><span class="s1">&#39;bruce&#39;</span><span class="p">,</span> <span class="s1">&#39;bruce.wayne@we.com&#39;</span><span class="p">,</span> <span class="s1">&#39;Bruce&#39;</span><span class="p">,</span> <span class="s1">&#39;Wayne&#39;</span><span class="p">,</span> <span class="s1">&#39;G0th4amCity!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="GlobalAdmin.delete_user">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">delete_user</code><span class="sig-paren">(</span><em class="sig-param">username</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.delete_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a Portal user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>username</strong> (<em>str</em>) – username</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Delete a local user&quot;&quot;&quot;</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">delete_user</span><span class="p">(</span><span class="s1">&#39;bruce&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="domain-users">
+<h4><a class="toc-backref" href="#id14">Domain Users</a><a class="headerlink" href="#domain-users" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="GlobalAdmin.domains">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">domains</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.domains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the list of Active Directory domains.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a list of fully qualified domain names</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="GlobalAdmin.domain_users">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">domain_users</code><span class="sig-paren">(</span><em class="sig-param">domain</em><span class="optional">[</span>, <em class="sig-param">include = []</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.domain_users" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve domain users.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>domain</strong> (<em>str</em>) – the fully qualified domain name</p></li>
+<li><p><strong>include</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – the list of user attributes you wish to retrieve</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list of domain user objects</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<p>The <cite>domain_users</cite> method will always include the <cite>name</cite> attribute</p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">users</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">domain_users</span><span class="p">(</span><span class="s1">&#39;domain.ctera.local&#39;</span><span class="p">)</span> <span class="c1"># will only retrieve the &#39;name&#39; attribute</span>
+
+<span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;Retrieve additional user attributes&quot;&quot;&quot;</span>
+
+<span class="n">users</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">domain_users</span><span class="p">(</span><span class="s1">&#39;domain.ctera.local&#39;</span><span class="p">,</span> <span class="n">include</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="s1">&#39;firstName&#39;</span><span class="p">,</span> <span class="s1">&#39;lastName&#39;</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fetch-users-groups">
+<h4><a class="toc-backref" href="#id15">Fetch Users &amp; Groups</a><a class="headerlink" href="#fetch-users-groups" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="GlobalAdmin.fetch">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">fetch</code><span class="sig-paren">(</span><em class="sig-param">tuples</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.fetch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch Active Directory domain users and groups.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tuples</strong> – list of 3-tuple domain user or group entries</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a path to a Portal background task</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="devices">
+<h3><a class="toc-backref" href="#id16">Devices</a><a class="headerlink" href="#devices" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="GlobalAdmin.device">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">device</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="optional">[</span>, <em class="sig-param">include = []</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.device" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – device name</p></li>
+<li><p><strong>include</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – list of device attributes you wish to retrieve</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a device object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">Object</span></code>, <a class="reference internal" href="../Gateway/Gateway.html#Gateway" title="Gateway"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gateway</span></code></a> or <a class="reference internal" href="../Agent/Agent.html#Agent" title="Agent"><code class="xref py py-class docutils literal notranslate"><span class="pre">Agent</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="GlobalAdmin.filers">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">filers</code><span class="sig-paren">(</span><em class="sig-param">[include = []][, allPortals = False][, deviceTypes = None]</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.filers" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>include</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – list of Gateway attributes you wish to retrieve</p></li>
+<li><p><strong>allPortals</strong> (<em>bool</em>) – whether to retrieve Gateways from all virtual portals, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>deviceTypes</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – list of Gateway device types, defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an interable list of <a class="reference internal" href="../Gateway/Gateway.html#Gateway" title="Gateway"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gateway</span></code></a> objects</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<p>The <cite>filers</cite> method will always retrieve the following Gateway attributes: <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">deviceType</span></code>, <code class="docutils literal notranslate"><span class="pre">portal</span></code>. You may use the <cite>include</cite> parameter to include additional attributes. To retrieve Gateways from all Portals, you must first browse the Global Administration Portal, using: <a class="reference internal" href="#GlobalAdmin.browse_global_admin" title="GlobalAdmin.browse_global_admin"><code class="xref py py-func docutils literal notranslate"><span class="pre">GlobalAdmin.browse_global_admin()</span></code></a> and then set <code class="docutils literal notranslate"><span class="pre">allPortals</span> <span class="pre">=</span> <span class="pre">True</span></code>. To filter specific device types, use the <cite>deviceTypes</cite> parameter as follows: <code class="docutils literal notranslate"><span class="pre">deviceTypes</span> <span class="pre">=</span> <span class="pre">['C200',</span> <span class="pre">'C800P']</span></code></p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Retrieve all Gateways from the current tenant&quot;&quot;&quot;</span>
+
+<span class="n">filers</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">filers</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">filer</span> <span class="ow">in</span> <span class="n">filers</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">filer</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="c1"># will print the Gateway name</span>
+
+<span class="sd">&quot;&quot;&quot;Retrieve additional Gateway attributes&quot;&quot;&quot;</span>
+
+<span class="n">filers</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">filers</span><span class="p">([</span><span class="s1">&#39;owner&#39;</span><span class="p">,</span> <span class="s1">&#39;deviceConnectionStatus&#39;</span><span class="p">])</span>
+
+<span class="sd">&quot;&quot;&quot;Retrieve nested attributes using the &#39;.&#39; delimiter&quot;&quot;&quot;</span>
+
+<span class="n">filers</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">filers</span><span class="p">([</span><span class="s1">&#39;deviceReportedStatus.status.device.runningFirmware&#39;</span><span class="p">])</span>
+
+<span class="sd">&quot;&quot;&quot;Retrieve filers from all portals&quot;&quot;&quot;</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">browse_global_admin</span><span class="p">()</span>
+
+<span class="n">filers</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">filers</span><span class="p">(</span><span class="n">allPortals</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;Retrieve C200&#39;s and C400&#39;s from all portals&quot;&quot;&quot;</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">browse_global_admin</span><span class="p">()</span>
+
+<span class="n">filers</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">filers</span><span class="p">(</span><span class="n">allPortals</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">deviceTypes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C200&#39;</span><span class="p">,</span> <span class="s1">&#39;C400&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="GlobalAdmin.agents">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">agents</code><span class="sig-paren">(</span><em class="sig-param">[include = []][, allPortals = False]</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.agents" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>include</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – list of Agent attributes you wish to retrieve</p></li>
+<li><p><strong>allPortals</strong> (<em>bool</em>) – whether to retrieve Agents from all virtual portals, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an interable list of <a class="reference internal" href="../Agent/Agent.html#Agent" title="Agent"><code class="xref py py-class docutils literal notranslate"><span class="pre">Agent</span></code></a> objects</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+<p>The <cite>agents</cite> method will always retrieve the following Agent attributes: <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">deviceType</span></code>, <code class="docutils literal notranslate"><span class="pre">portal</span></code>. You may use the <cite>include</cite> parameter to include additional attributes. To retrieve Agents from all Portals, you must first browse the Global Administration Portal, using: <a class="reference internal" href="#GlobalAdmin.browse_global_admin" title="GlobalAdmin.browse_global_admin"><code class="xref py py-func docutils literal notranslate"><span class="pre">GlobalAdmin.browse_global_admin()</span></code></a> and then set <code class="docutils literal notranslate"><span class="pre">allPortals</span> <span class="pre">=</span> <span class="pre">True</span></code>. To filter specific device types, use the <cite>deviceType</cite> parameter as follows: <code class="docutils literal notranslate"><span class="pre">deviceType</span> <span class="pre">=</span> <span class="pre">'Server'</span></code> or <code class="docutils literal notranslate"><span class="pre">deviceType</span> <span class="pre">=</span> <span class="pre">'Workstation'</span></code></p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Retrieve all Agents from the current tenant&quot;&quot;&quot;</span>
+
+<span class="n">agents</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">agents</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="n">agents</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="c1"># will print the Agent name</span>
+
+<span class="sd">&quot;&quot;&quot;Retrieve all Agents and the underlying OS name&quot;&quot;&quot;</span>
+
+<span class="n">agents</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">agents</span><span class="p">([</span><span class="s1">&#39;deviceReportedStatus.status.agent.details.osName&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="GlobalAdmin.server_agents">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">server_agents</code><span class="sig-paren">(</span><em class="sig-param">[include = []][, allPortals = False]</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.server_agents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve server agents.</p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">server_agents</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">server_agents</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="GlobalAdmin.desktop_agents">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">desktop_agents</code><span class="sig-paren">(</span><em class="sig-param">[include = []][, allPortals = False]</em><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.desktop_agents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve workstation agents.</p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">desktop_agents</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">desktop_agents</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="GlobalAdmin.devices_by_name">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">devices_by_name</code><span class="sig-paren">(</span><em class="sig-param">names</em><span class="optional">[</span>, <em class="sig-param">include = []</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.devices_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve devices by name.</p>
+</dd></dl>
+
+<div class="section" id="generate-activation-codes">
+<h4><a class="toc-backref" href="#id17">Generate Activation Codes</a><a class="headerlink" href="#generate-activation-codes" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="GlobalAdmin.generate_code">
+<code class="sig-prename descclassname">GlobalAdmin.</code><code class="sig-name descname">generate_code</code><span class="sig-paren">(</span><em class="sig-param">user</em><span class="optional">[</span>, <em class="sig-param">tenant = None</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#GlobalAdmin.generate_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a device activation code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user</strong> (<em>str</em>) – user name</p></li>
+<li><p><strong>tenant</strong> (<em>str</em>) – a virtual portal name, defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<p>This method will attempt to generate an activation code for user <cite>user</cite> in portal <cite>portal</cite>.</p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Generate a device activation code&quot;&quot;&quot;</span>
+
+<span class="n">code</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">generate_code</span><span class="p">(</span><span class="s1">&#39;bruce&#39;</span><span class="p">)</span> <span class="c1"># will look for &#39;bruce&#39; in the current tenant</span>
+
+<span class="n">code</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">generate_code</span><span class="p">(</span><span class="s1">&#39;batman&#39;</span><span class="p">,</span> <span class="s1">&#39;gotham&#39;</span><span class="p">)</span> <span class="c1"># will look for &#39;bruce&#39; in the gotham tenant</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Read Write Administrator, granted with the “Super User” role permission, can generate 200 codes every 5 minutes</p>
+</div>
+<p>generate_code(self, username, tenant = None)</p>
+</div>
+<div class="section" id="code-snippets">
+<h4><a class="toc-backref" href="#id18">Code Snippets</a><a class="headerlink" href="#code-snippets" title="Permalink to this headline">¶</a></h4>
+<p>Generate activation codes for all domain users</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ... login ...</span>
+
+<span class="n">users</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">domain_users</span><span class="p">(</span><span class="s1">&#39;dc.ctera.local&#39;</span><span class="p">)</span> <span class="c1"># obtain a list of domain users</span>
+
+<span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span><span class="p">:</span>
+
+    <span class="n">activation_code</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">generate_code</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="c1"># generate activation code</span>
+
+    <span class="nb">print</span><span class="p">((</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">activation_code</span><span class="p">))</span>
+
+<span class="c1"># ... logout ...</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="zones">
+<h2><a class="toc-backref" href="#id19">Zones</a><a class="headerlink" href="#zones" title="Permalink to this headline">¶</a></h2>
+<p>To manage zones, you must be a Read Write Administrator</p>
+<div class="section" id="retrieving-the-zones-class-object">
+<h3><a class="toc-backref" href="#id20">Retrieving the Zones Class Object</a><a class="headerlink" href="#retrieving-the-zones-class-object" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">admin</span> <span class="o">=</span> <span class="n">GlobalAdmin</span><span class="p">(</span><span class="s1">&#39;chopin.ctera.com&#39;</span><span class="p">)</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="s1">&#39;USERNAME&#39;</span><span class="p">,</span> <span class="s1">&#39;PASSWORD&#39;</span><span class="p">)</span>
+
+<span class="n">zones</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">zones</span><span class="p">()</span> <span class="c1"># returns a instance of Zones class object</span>
+</pre></div>
+</div>
+<div class="section" id="retrieve-a-zone">
+<h4><a class="toc-backref" href="#id21">Retrieve a Zone</a><a class="headerlink" href="#retrieve-a-zone" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="Zones.get">
+<code class="sig-prename descclassname">Zones.</code><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#Zones.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve a zone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – zone name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">zone</span> <span class="o">=</span> <span class="n">zones</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ZN-001&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-a-zone">
+<h4><a class="toc-backref" href="#id22">Create a Zone</a><a class="headerlink" href="#create-a-zone" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="Zones.add">
+<code class="sig-prename descclassname">Zones.</code><code class="sig-name descname">add</code><span class="sig-paren">(</span><em class="sig-param">name[, policy_type = 'Select'][, description = None]</em><span class="sig-paren">)</span><a class="headerlink" href="#Zones.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a zone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – zone name</p></li>
+<li><p><strong>policy_type</strong> (<em>str</em>) – the policy type, defaults to <code class="docutils literal notranslate"><span class="pre">'Select'</span></code></p></li>
+<li><p><strong>description</strong> (<em>str</em>) – description</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Policy Types:</span>
+<span class="sd">- All: Include all cloud folders</span>
+<span class="sd">- Select: Select one or more cloud folders to include</span>
+<span class="sd">- None: Create an empty zone</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;Create a zone with a description&quot;&quot;&quot;</span>
+
+<span class="n">zones</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;ZN-NYS-001&#39;</span><span class="p">,</span> <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;The New York State Zone&#39;</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;Create a zone and include all folders&quot;&quot;&quot;</span>
+
+<span class="n">zones</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;ZN-NYS-002&#39;</span><span class="p">,</span> <span class="s1">&#39;All&#39;</span><span class="p">,</span> <span class="s1">&#39;All Folders&#39;</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;Create an empty zone&quot;&quot;&quot;</span>
+
+<span class="n">zones</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;ZN-NYS-003&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;Empty Zone&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="add-folders-to-a-zone">
+<h4><a class="toc-backref" href="#id23">Add Folders to a Zone</a><a class="headerlink" href="#add-folders-to-a-zone" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="Zones.add_folders">
+<code class="sig-prename descclassname">Zones.</code><code class="sig-name descname">add_folders</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">tuples</em><span class="sig-paren">)</span><a class="headerlink" href="#Zones.add_folders" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add devices to a zone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – zone name</p></li>
+<li><p><strong>tuples</strong> (<em>list</em><em>(</em><em>tuple</em><em>(</em><em>str</em><em>, </em><em>str</em><em>)</em><em>, </em><em>..</em><em>)</em>) – a list of 2-tuple cloud folder entries (folder, owner)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Add the following cloud folders to zone: &#39;ZN-001&#39;</span>
+
+<span class="sd">1) &#39;Accounting&#39; folder owned by &#39;Bruce&#39;</span>
+<span class="sd">2) &#39;HR&#39; folder owned by &#39;Diana&#39;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">zones</span><span class="o">.</span><span class="n">add_folders</span><span class="p">(</span><span class="s1">&#39;ZN-001&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;Accounting&#39;</span><span class="p">,</span> <span class="s1">&#39;Bruce&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;HR&#39;</span><span class="p">,</span> <span class="s1">&#39;Diana&#39;</span><span class="p">)])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="add-devices-to-a-zone">
+<h4><a class="toc-backref" href="#id24">Add Devices to a Zone</a><a class="headerlink" href="#add-devices-to-a-zone" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="Zones.add_devices">
+<code class="sig-prename descclassname">Zones.</code><code class="sig-name descname">add_devices</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">devices</em><span class="sig-paren">)</span><a class="headerlink" href="#Zones.add_devices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add devices to a zone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – zone name</p></li>
+<li><p><strong>devices</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – a list of device names</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">zones</span><span class="o">.</span><span class="n">add_devices</span><span class="p">(</span><span class="s1">&#39;ZN-001&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;vGateway-01ba&#39;</span><span class="p">,</span> <span class="s1">&#39;vGateway-bd02&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="delete-a-zone">
+<h4><a class="toc-backref" href="#id25">Delete a Zone</a><a class="headerlink" href="#delete-a-zone" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="Zones.delete">
+<code class="sig-prename descclassname">Zones.</code><code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#Zones.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a zone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – zone name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">zones</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;ZN-001&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="cloudfs">
+<h2><a class="toc-backref" href="#id26">CloudFS</a><a class="headerlink" href="#cloudfs" title="Permalink to this headline">¶</a></h2>
+<p>To manage the Cloud File System, folder groups, backup and cloud drive folders, you must be a Read Write Administrator</p>
+<div class="section" id="retrieving-the-cloudfs-class-object">
+<h3><a class="toc-backref" href="#id27">Retrieving the CloudFS Class Object</a><a class="headerlink" href="#retrieving-the-cloudfs-class-object" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">admin</span> <span class="o">=</span> <span class="n">GlobalAdmin</span><span class="p">(</span><span class="s1">&#39;chopin.ctera.com&#39;</span><span class="p">)</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="s1">&#39;USERNAME&#39;</span><span class="p">,</span> <span class="s1">&#39;PASSWORD&#39;</span><span class="p">)</span>
+
+<span class="n">cloudfs</span> <span class="o">=</span> <span class="n">admin</span><span class="o">.</span><span class="n">cloudfs</span><span class="p">()</span> <span class="c1"># returns a instance of CloudFS class object</span>
+</pre></div>
+</div>
+<div class="section" id="create-a-folder-group">
+<h4><a class="toc-backref" href="#id28">Create a Folder Group</a><a class="headerlink" href="#create-a-folder-group" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="CloudFS.mkfg">
+<code class="sig-prename descclassname">CloudFS.</code><code class="sig-name descname">mkfg</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="optional">[</span>, <em class="sig-param">user = None</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#CloudFS.mkfg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a folder group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – folder group name</p></li>
+<li><p><strong>user</strong> (<em>str</em>) – owner, defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cloudfs</span><span class="o">.</span><span class="n">mkfg</span><span class="p">(</span><span class="s1">&#39;FG-001&#39;</span><span class="p">,</span> <span class="s1">&#39;svc_account&#39;</span><span class="p">)</span>
+
+<span class="n">cloudfs</span><span class="o">.</span><span class="n">mkfg</span><span class="p">(</span><span class="s1">&#39;FG-002&#39;</span><span class="p">)</span> <span class="c1"># without an owner</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="delete-a-folder-group">
+<h4><a class="toc-backref" href="#id29">Delete a Folder Group</a><a class="headerlink" href="#delete-a-folder-group" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="CloudFS.rmfg">
+<code class="sig-prename descclassname">CloudFS.</code><code class="sig-name descname">rmfg</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#CloudFS.rmfg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a folder group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – folder group name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cloudfs</span><span class="o">.</span><span class="n">rmfg</span><span class="p">(</span><span class="s1">&#39;FG-002&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-a-cloud-drive-folder">
+<h4><a class="toc-backref" href="#id30">Create a Cloud Drive Folder</a><a class="headerlink" href="#create-a-cloud-drive-folder" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="CloudFS.mkdir">
+<code class="sig-prename descclassname">CloudFS.</code><code class="sig-name descname">mkdir</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">group</em>, <em class="sig-param">owner</em><span class="optional">[</span>, <em class="sig-param">winacls = True</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#CloudFS.mkdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a cloud drive folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – cloud drive folder name</p></li>
+<li><p><strong>group</strong> (<em>str</em>) – folder group name</p></li>
+<li><p><strong>user</strong> (<em>str</em>) – user name (owner)</p></li>
+<li><p><strong>winacls</strong> (<em>bool</em>) – enable Windows ACL’s, defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cloudfs</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;DIR-001&#39;</span><span class="p">,</span> <span class="s1">&#39;FG-001&#39;</span><span class="p">,</span> <span class="s1">&#39;svc_account&#39;</span><span class="p">)</span>
+
+<span class="n">cloudfs</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;DIR-002&#39;</span><span class="p">,</span> <span class="s1">&#39;FG-001&#39;</span><span class="p">,</span> <span class="s1">&#39;svc_account&#39;</span><span class="p">,</span> <span class="n">winacls</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="c1"># disable Windows ACL&#39;s</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="delete-a-cloud-drive-folder">
+<h4><a class="toc-backref" href="#id31">Delete a Cloud Drive Folder</a><a class="headerlink" href="#delete-a-cloud-drive-folder" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="CloudFS.delete">
+<code class="sig-prename descclassname">CloudFS.</code><code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">owner</em><span class="sig-paren">)</span><a class="headerlink" href="#CloudFS.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a cloud drive folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – cloud drive folder name</p></li>
+<li><p><strong>owner</strong> (<em>str</em>) – user name</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cloudfs</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;DIR-001&#39;</span><span class="p">,</span> <span class="s1">&#39;svc_account&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="recover-a-cloud-drive-folder">
+<h4><a class="toc-backref" href="#id32">Recover a Cloud Drive Folder</a><a class="headerlink" href="#recover-a-cloud-drive-folder" title="Permalink to this headline">¶</a></h4>
+<dl class="method">
+<dt id="CloudFS.undelete">
+<code class="sig-prename descclassname">CloudFS.</code><code class="sig-name descname">undelete</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">owner</em><span class="sig-paren">)</span><a class="headerlink" href="#CloudFS.undelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recover a deleted cloud drive folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – cloud drive folder name</p></li>
+<li><p><strong>owner</strong> (<em>str</em>) – user name</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cloudfs</span><span class="o">.</span><span class="n">undelete</span><span class="p">(</span><span class="s1">&#39;DIR-001&#39;</span><span class="p">,</span> <span class="s1">&#39;svc_account&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="EndUser.html" class="btn btn-neutral float-right" title="End User Portal" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../General/General.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, CTERA Networks Ltd
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

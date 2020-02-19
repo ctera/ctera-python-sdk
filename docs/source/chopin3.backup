@@ -1,0 +1,133 @@
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+This library defines the following classes:
+
+.. py:class:: ServicesPortal(host[, port = 443][, https = True])
+
+GlobalAdmin Object
+******************
+   
+.. py:method:: GlobalAdmin.agents([include = []][, allPortals = False][, deviceType = None])
+
+   Returns an iterable list of Agents.
+   
+   `include` should specify a list_ of attributes you would like to retrieve for each Gateway. By default, the following attributes are returned: ``['name', 'portal', 'deviceType']``
+   
+   `deviceType` should specify the Agent type. Use ``deviceType = 'Server'`` to retrieve server agents and ``deviceType = 'Workstation'`` to retrieve workstation agents
+   
+   Set `allPortals` to ``True`` to retrieve Gateways from all portals.
+   
+.. note:: You must first browse the global administration portal to retrieve device objects from all portals. See: :py:func:`GlobalAdmin.browse_global_admin()`
+   
+.. code-block:: python
+   
+   >>> server_agents = admin.agents(deviceType = 'Server')
+   >>> for server_agent in server_agents:
+   ...     print(server_agent)
+   
+.. py:method:: GlobalAdmin.devices([include = []][, allPortals = False])
+
+   Returns an iterable list of devices.
+   
+   `include` should specify a list_ of attributes you would like to retrieve for each Gateway. By default, the following attributes are returned: ``['name', 'portal', 'deviceType']``
+   
+   Set `allPortals` to ``True`` to retrieve Gateways from all portals. Note you must first browse the global administration portal :py:func:`GlobalAdmin.browse_global_admin()`
+   
+.. note:: You must first browse the global administration portal to retrieve device objects from all portals. See: :py:func:`GlobalAdmin.browse_global_admin()`
+   
+.. code-block:: python
+
+   >>> devices = admin.devices()
+   >>> for device in devices:
+   ...     print('Name:', device.name, 'Type:', device.deviceType)
+   Name: Kryptonite Type: C200
+   Name: NYC Type: C200
+   Name: vGateway-0dbc Type: vGateway
+   
+..
+
+Gateway Object
+**************
+
+.. py:method:: Gateway.run_shell_command(shell_command)
+
+.. py:method:: Gateway.run_cli_command(cli_command)
+
+   Run a Gateway CLI command.
+   
+   `cli_command` should be a string containing the cli command.
+   
+.. code-block:: python
+
+   >>> output = device.run_cli_command('dbg level backup process cttp samba')
+   >>> print output
+   Setting debug level to 0x00004818
+   
+.. seealso:: For an alternative way of setting the Gateway's debug level, see: :py:func:`Gateway.set_debug_level()`
+
+.. py:method:: Gateway.enable_log_to_file()
+
+.. py:method:: Gateway.disable_log_to_file()
+
+Formatting
+**********
+
+.. code-block:: python
+
+   >>> user = Object()
+   >>> user.name = 'alice'
+   >>> user.firstName = 'Alice'
+   >>> user.lastName = 'Wonderland'
+   >>> user.email = 'alice@adventures.com'
+   >>> user.password = 'Passw0rd1!'
+   >>> print toxmlstr(user)
+   <obj><att id="lastName"><val>Wonderland</val></att><att id="password"><val>Passw0rd1!</val></att><att id="name"><val>alice</val></att><att id="firstName"><val>Alice</val></att><att id="email"><val>alice@adventures.com</val></att></obj>
+   >>> print toxmlstr(user, True)
+   <obj>
+      <att id="lastName">
+         <val>Wonderland</val>
+      </att>
+      <att id="password">
+         <val>Passw0rd1!</val>
+      </att>
+      <att id="name">
+         <val>alice</val>
+      </att>
+      <att id="firstName">
+         <val>Alice</val>
+      </att>
+      <att id="email">
+         <val>alice@adventures.com</val>
+      </att>
+   </obj>
+
+.. code-block:: python
+
+   >>> user = Object()
+   >>> user.name = 'alice'
+   >>> user.firstName = 'Alice'
+   >>> user.lastName = 'Wonderland'
+   >>> user.email = 'alice@adventures.com'
+   >>> user.password = 'Passw0rd1!'
+   >>> print tojsonstr(user)
+   {
+        "lastName": "Wonderland",
+        "password": "Passw0rd1!",
+        "name": "alice",
+        "firstName": "Alice",
+        "email": "alice@adventures.com"
+   }
+
+..
+
+.. _list: https://docs.python.org/2.7/tutorial/datastructures.html#list-comprehensions
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

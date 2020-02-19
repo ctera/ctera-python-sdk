@@ -1,0 +1,311 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>File Browser &mdash; chopin-core 3.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Agent" href="../Agent/Agent.html" />
+    <link rel="prev" title="Gateway" href="Gateway.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> chopin-core
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../General/General.html">Getting Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Global File System</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Portal/GlobalAdmin.html">Global Administration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Portal/EndUser.html">End User Portal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Portal/FileBrowser.html">File Browser</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Edge Filer</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Gateway.html">Gateway</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">File Browser</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#obtaining-access-to-the-gateway-s-file-system">Obtaining Access to the Gateway’s File System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#list">List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download">Download</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-directory">Create Directory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#delete">Delete</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Drive App</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Agent/Agent.html">Agent</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Miscellaneous</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Misc/Miscellaneous.html">Miscellaneous</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">chopin-core</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>File Browser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/docs/Gateway/FileBrowser.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="file-browser">
+<h1><a class="toc-backref" href="#id1">File Browser</a><a class="headerlink" href="#file-browser" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#file-browser" id="id1">File Browser</a></p>
+<ul>
+<li><p><a class="reference internal" href="#obtaining-access-to-the-gateway-s-file-system" id="id2">Obtaining Access to the Gateway’s File System</a></p>
+<ul>
+<li><p><a class="reference internal" href="#list" id="id3">List</a></p></li>
+<li><p><a class="reference internal" href="#download" id="id4">Download</a></p></li>
+<li><p><a class="reference internal" href="#create-directory" id="id5">Create Directory</a></p></li>
+<li><p><a class="reference internal" href="#delete" id="id6">Delete</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="obtaining-access-to-the-gateway-s-file-system">
+<h2><a class="toc-backref" href="#id2">Obtaining Access to the Gateway’s File System</a><a class="headerlink" href="#obtaining-access-to-the-gateway-s-file-system" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">filer</span> <span class="o">=</span> <span class="n">Gateway</span><span class="p">(</span><span class="s1">&#39;vGateway-0dbc&#39;</span><span class="p">)</span>
+
+<span class="n">filer</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="s1">&#39;USERNAME&#39;</span><span class="p">,</span> <span class="s1">&#39;PASSWORD&#39;</span><span class="p">)</span>
+
+<span class="n">file_browser</span> <span class="o">=</span> <span class="n">filer</span><span class="o">.</span><span class="n">files</span><span class="p">()</span> <span class="c1"># returns a instance of FileBrowser class object</span>
+</pre></div>
+</div>
+<div class="section" id="list">
+<h3><a class="toc-backref" href="#id3">List</a><a class="headerlink" href="#list" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="FileBrowser.ls">
+<code class="sig-prename descclassname">FileBrowser.</code><code class="sig-name descname">ls</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#FileBrowser.ls" title="Permalink to this definition">¶</a></dt>
+<dd><p>List a directory.</p>
+<p>TODO</p>
+</dd></dl>
+
+</div>
+<div class="section" id="download">
+<h3><a class="toc-backref" href="#id4">Download</a><a class="headerlink" href="#download" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="FileBrowser.download">
+<code class="sig-prename descclassname">FileBrowser.</code><code class="sig-name descname">download</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#FileBrowser.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download a file.</p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">file_browser</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;cloud/users/Service Account/My Files/Documents/Sample.docx&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-directory">
+<h3><a class="toc-backref" href="#id5">Create Directory</a><a class="headerlink" href="#create-directory" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="FileBrowser.mkdir">
+<code class="sig-prename descclassname">FileBrowser.</code><code class="sig-name descname">mkdir</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="optional">[</span>, <em class="sig-param">recurse = False</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#FileBrowser.mkdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>recurse</strong> (<em>bool</em>) – no error if existing, make parent directories as needed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">file_browser</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;cloud/users/Service Account/My Files/Documents&#39;</span><span class="p">)</span>
+
+<span class="n">file_browser</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;cloud/users/Service Account/My Files/The/quick/brown/fox&#39;</span><span class="p">,</span> <span class="n">recurse</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="delete">
+<h3><a class="toc-backref" href="#id6">Delete</a><a class="headerlink" href="#delete" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="FileBrowser.delete">
+<code class="sig-prename descclassname">FileBrowser.</code><code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="headerlink" href="#FileBrowser.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download a file or a folder.</p>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">file_browser</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;cloud/users/Service Account/My Files/Documents&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../Agent/Agent.html" class="btn btn-neutral float-right" title="Agent" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Gateway.html" class="btn btn-neutral float-left" title="Gateway" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, CTERA Networks Ltd
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
