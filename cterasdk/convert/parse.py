@@ -1,267 +1,148 @@
-from .exception import ParseException
-
-from ..common import Item, Object
-
+import logging
+import json
+import queue
 from xml.etree.ElementTree import fromstring, ParseError
 
-import queue, json
+from cterasdk.convert.xml_types import XMLTypes
+from .exception import ParseException
+from ..common import Item, Object
 
-import logging
 
 def ParseValue(data):
-    
+    if not data:
+        return data
+
     try:
-        
-        if not data:
-            
-            return data
-
         if "." in data:
-
             return float(data)
-
     except ValueError:
-
         pass
 
     try:
-
         return int(data)
-
     except ValueError:
-
         pass
 
     text = data.strip()
-
     if text == "true":
-
         return True
-    
-    elif text == "false":
-        
+    if text == "false":
         return False
 
-    else:
+    return text
 
-        return text
-    
-def SetAppendValue(item, value):    
-    
-    if item.parent != None:
-        
-        if type(item.parent.value) == list:
-            
+def SetAppendValue(item, value):
+    if item.parent is not None:
+        if isinstance(item.parent.value, list):
             item.parent.value.append(value)
-        
         else:
-            
             setattr(item.parent.value, item.id, value)
-            
-        return
-    
-    item.value = value
+    else:
+        item.value = value
 
-def fromjsonstr(fromstring):
-    
-    # Check if fromstring is empty
-    
-    if not fromstring:
-        
-        return fromstring
-    
+def fromjsonstr(fromstr):
+    if not fromstr:
+        return fromstr
+
     root = Item()
-    
-    root.node = json.loads(fromstring)
-    
+    root.node = json.loads(fromstr)
     root.parent = None
-    
     root.value = None
-    
+
     q = queue.Queue()
-    
     q.put(root)
-    
     while not q.empty():
-
         item = q.get()
-        
-        if item.node == None:
-            
+        if item.node is None:
             SetAppendValue(item, None)
-        
-        if type(item.node) in [int, float, bool, str]:
-
+        elif isinstance(item.node, (int, float, bool, str)):
             SetAppendValue(item, item.node)
-            
-        if type(item.node) == list:
-            
+        elif isinstance(item.node, list):
             item.value = []
-            
             SetAppendValue(item, item.value)
-            
             for kidnode in item.node:
-                
                 kid = Item()
-                    
                 kid.parent = item
-
                 kid.node = kidnode
-
                 q.put(kid)
-                
-        if type(item.node) == dict:
-            
+        elif isinstance(item.node, dict):
             item.value = Object()
-            
             SetAppendValue(item, item.value)
-            
             for kidnode, kidvalue in item.node.items():
-                
                 kid = Item()
-                    
                 kid.parent = item
-                
                 kid.id = kidnode
-
                 kid.node = kidvalue
-
                 q.put(kid)
-        
+
     return root.value
 
-def fromxmlstr(string):
-    
-    string = string.decode('utf-8')
-    
-    # Check for empty string
-    
+def fromxmlstr(string):  # pylint: disable=too-many-branches,too-many-statements
     if not string:
-        
         logging.getLogger().debug('Skipping.')
-        
         return string
-    
+
+    string = string.decode('utf-8')
+
     # Do not attempt to parse HTML
-    
     if string.startswith('<!DOCTYPE HTML>'):
-        
-        logging.getLogger().debug('Skipping. {0}'.format({'type' : 'HTML'}))
-        
+        logging.getLogger().debug('Skipping. %s', {'type' : 'HTML'})
         return string
-    
-    OBJ     = 'obj'
-    
-    ATT     = 'att'
-    
-    VAL     = 'val'
-    
-    LIST    = 'list'
-    
-    ID      = 'id'
-    
-    CLASS   = 'class'
-    
-    UUID    = 'uuid'
-    
+
     root = Item()
-    
     root.value = None
-    
     root.parent = None
-    
+
     try:
-    
         root.node = fromstring(string)
-        
-    except ParseError as e:
-        
+    except ParseError:
         raise ParseException()
-    
+
     q = queue.Queue()
-    
     q.put(root)
-    
     while not q.empty():
-        
         item = q.get()
-    
-        if item.node.tag == VAL:
-            
+        if item.node.tag == XMLTypes.VAL:
             value = ParseValue(item.node.text)
-            
             SetAppendValue(item, value)
-                
-        if item.node.tag == LIST:
-            
+        elif item.node.tag == XMLTypes.LIST:
             item.value = []
-            
             SetAppendValue(item, item.value)
-            
             for kidnode in item.node:
-                
-                if kidnode.tag in [OBJ, VAL]:
-                    
+                if kidnode.tag in [XMLTypes.OBJ, XMLTypes.VAL]:
                     kid = Item()
-                    
                     kid.parent = item
-                    
                     kid.node = kidnode
-                    
                     q.put(kid)
-                    
-        if item.node.tag == OBJ:
-            
-            classname = item.node.attrib.get(CLASS)
-            
-            uuid = item.node.attrib.get(UUID)
-                                    
+        elif item.node.tag == XMLTypes.OBJ:
+            classname = item.node.attrib.get(XMLTypes.CLASS)
+            uuid = item.node.attrib.get(XMLTypes.UUID)
+
             item.value = Object()
-            
-            if classname != None:                   # Convert <obj class="ShareConfig"> to { "_classname" : "ShareConfig" }
-            
-                item.value._classname = classname
-                
-            if uuid != None:                        # Convert <obj uuid="6f0e8c79-..."> to { "_uuid" : "6f0e8c79-..." }
-                
-                item.value._uuid = uuid
-            
+            if classname is not None:  # Convert <obj class="ShareConfig"> to { "_classname" : "ShareConfig" }
+                item.value._classname = classname  # pylint: disable=protected-access
+            if uuid is not None:  # Convert <obj uuid="6f0e8c79-..."> to { "_uuid" : "6f0e8c79-..." }
+                item.value._uuid = uuid  # pylint: disable=protected-access
+
             SetAppendValue(item, item.value)
-            
+
             for kidnode in item.node:
-                
-                if kidnode.tag == ATT:
-                    
+                if kidnode.tag == XMLTypes.ATT:
                     kid = Item()
-                    
-                    kid.id = kidnode.attrib[ID]
-                    
+                    kid.id = kidnode.attrib[XMLTypes.ID]
                     kid.parent = item
-                    
                     kid.node = kidnode
-                    
                     q.put(kid)
-                    
-        if item.node.tag == ATT:
-            
+        elif item.node.tag == XMLTypes.ATT:
             if len(item.node) > 0:
-            
                 for kidnode in item.node:
-
-                    if kidnode.tag in [OBJ, LIST, VAL]:
-
+                    if kidnode.tag in [XMLTypes.OBJ, XMLTypes.LIST, XMLTypes.VAL]:
                         kid = Item()
-
                         kid.id = item.id
-
                         kid.parent = item.parent
-
                         kid.node = kidnode
-
                         q.put(kid)
-                        
             else:
-
                 SetAppendValue(item, None)              # include empty attrs
 
     return root.value

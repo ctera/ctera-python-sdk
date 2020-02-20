@@ -1,35 +1,20 @@
 from ..exception import ConsentException
 
+
 def ask(question):
-    
     answer = None
-    
     answers = ['Y', 'n']
-    
     question = question + ' (' + '/'.join(answers) + '): '
 
     try:
-        
         while answer not in answers:
-            
             try:
-            
                 answer = input(question)
-                
-            except EOFError as error:
-                
+            except EOFError:
                 raise ConsentException()
-    
-    except KeyboardInterrupt as e:
-        
+
+    except KeyboardInterrupt:
         answer = 'n'
-        
     if answer == 'Y':
-        
         return True
-    
-    else:
-        
-        return False
-        
-        
+    return False

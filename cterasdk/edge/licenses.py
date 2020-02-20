@@ -1,31 +1,24 @@
-from ..exception import InputError
-
 import logging
 
+from ..exception import InputError
 from .enum import License
 
-def infer(license):
-    
-    if License.__dict__.get(license) == None:
-        
-        logging.getLogger().error('Invalid license type. {0}'.format({'license' : license}))
-        
-        options = [v for k,v in License.__dict__.items() if not k.startswith('_')]
-        
-        raise InputError('Invalid license type', license, options)
-        
-    else:
-        
-        license = License.__dict__.get(license)
-        
-        return 'vGateway' + ('' if license == 'EV16' else license[2:])
-    
-def apply(ctera_host, license):
-    
-    inferred_license = infer(license)
-    
-    logging.getLogger().info('Applying license. {0}'.format({'license' : license}))
-    
+
+def infer(ctera_license):
+    if License.__dict__.get(ctera_license) is None:
+        logging.getLogger().error('Invalid license type. %s', {'license' : ctera_license})
+        options = [v for k, v in License.__dict__.items() if not k.startswith('_')]
+        raise InputError('Invalid license type', ctera_license, options)
+
+    ctera_license = License.__dict__.get(ctera_license)
+    return 'vGateway' + ('' if ctera_license == 'EV16' else ctera_license[2:])
+
+
+def apply(ctera_host, ctera_license):
+    inferred_license = infer(ctera_license)
+
+    logging.getLogger().info('Applying license. %s', {'license' : ctera_license})
+
     ctera_host.put('/config/device/activeLicenseType', inferred_license)
 
-    logging.getLogger().info('License applied. {0}'.format({'license' : license}))
+    logging.getLogger().info('License applied. %s', {'license' : ctera_license})

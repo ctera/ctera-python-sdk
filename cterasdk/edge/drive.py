@@ -1,7 +1,8 @@
+import logging
+
 from ..common import Object
 
-import logging
-    
+
 def format_drive(ctera_host, name):
     '''
     {
@@ -9,12 +10,12 @@ def format_drive(ctera_host, name):
     }
     '''
     param = Object()
-
     param.name = name
 
     ctera_host.execute("/proc/storage", "format", param)
 
-    logging.getLogger().info('Formatting drive. {0}'.format({ 'drive' : name }))
+    logging.getLogger().info('Formatting drive. %s', {'drive': name})
+
 
 def format_all(ctera_host):
     '''
@@ -25,6 +26,4 @@ def format_all(ctera_host):
     drives = ctera_host.get('/status/storage/disks')
 
     for drive in drives:
-        
         format_drive(ctera_host, drive.name)
-        
