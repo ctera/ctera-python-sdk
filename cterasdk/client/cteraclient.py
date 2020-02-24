@@ -6,40 +6,43 @@ from ..common import Object
 from ..transcript import transcribe
 from .. import config
 
-class CTERAClient(HTTPClient):
+class CTERAClient:
+
+    def __init__(self):
+        self.http_client = HTTPClient()
 
     def get(self, baseurl, path, params=None):
-        function = Command(HTTPClient.get, self, geturi(baseurl, path), params if params else {})
+        function = Command(HTTPClient.get, self.http_client, geturi(baseurl, path), params if params else {})
         return self._execute(function, CTERAClient.fromxmlstr)
 
     def download(self, baseurl, path, params):
-        function = Command(HTTPClient.get, self, geturi(baseurl, path), params)
+        function = Command(HTTPClient.get, self.http_client, geturi(baseurl, path), params)
         return self._execute(function, CTERAClient.file_descriptor)
 
     def get_multi(self, baseurl, path, paths):
         return self.db(baseurl, path, "get-multi", paths)
 
     def put(self, baseurl, path, data):
-        function = Command(HTTPClient.put, self, geturi(baseurl, path), ContentType.textplain, toxmlstr(data))
+        function = Command(HTTPClient.put, self.http_client, geturi(baseurl, path), ContentType.textplain, toxmlstr(data))
         return self._execute(function, CTERAClient.fromxmlstr)
 
     def post(self, baseurl, path, data):
-        function = Command(HTTPClient.post, self, geturi(baseurl, path), ContentType.textplain, toxmlstr(data))
+        function = Command(HTTPClient.post, self.http_client, geturi(baseurl, path), ContentType.textplain, toxmlstr(data))
         return self._execute(function, CTERAClient.fromxmlstr)
 
     def form_data(self, baseurl, path, form_data):
-        function = Command(HTTPClient.post, self, geturi(baseurl, path), ContentType.urlencoded, form_data, True)
+        function = Command(HTTPClient.post, self.http_client, geturi(baseurl, path), ContentType.urlencoded, form_data, True)
         return self._execute(function, CTERAClient.fromxmlstr)
 
     def execute(self, baseurl, path, name, param=None):
         return self._ctera_exec(baseurl, path, 'user-defined', name, param)
 
     def delete(self, baseurl, path):
-        function = Command(HTTPClient.delete, self, geturi(baseurl, path))
+        function = Command(HTTPClient.delete, self.http_client, geturi(baseurl, path))
         return self._execute(function, CTERAClient.fromxmlstr)
 
     def mkcol(self, baseurl, path):
-        function = Command(HTTPClient.mkcol, self, geturi(baseurl, path))
+        function = Command(HTTPClient.mkcol, self.http_client, geturi(baseurl, path))
         return self._execute(function, CTERAClient.fromxmlstr)
 
     def db(self, baseurl, path, name, param):
@@ -50,7 +53,7 @@ class CTERAClient(HTTPClient):
         obj.type = exec_type
         obj.name = name
         obj.param = param
-        function = Command(HTTPClient.post, self, geturi(baseurl, path), ContentType.textplain, toxmlstr(obj))
+        function = Command(HTTPClient.post, self.http_client, geturi(baseurl, path), ContentType.textplain, toxmlstr(obj))
         return self._execute(function, CTERAClient.fromxmlstr)
 
     @staticmethod
