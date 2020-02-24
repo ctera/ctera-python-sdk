@@ -6,8 +6,7 @@ from ..common import Object
 from ..exception import CTERAException, InputError
 
 
-def add(
-        ctera_host,
+def add(ctera_host,
         name,
         directory,
         acl,
@@ -21,7 +20,7 @@ def add(
         exportToPCAgent,
         exportToRSync,
         indexed
-    ):  # pylint: disable=too-many-arguments,too-many-locals
+        ):  # pylint: disable=too-many-arguments,too-many-locals
 
     param = Object()
     param.name = name
@@ -52,7 +51,7 @@ def add(
 
     try:
         ctera_host.add('/config/fileservices/share', param)
-        logging.getLogger().info("Share created. %s", {'name' : name})
+        logging.getLogger().info("Share created. %s", {'name': name})
     except Exception as error:
         logging.getLogger().error("Share creation failed.")
         raise CTERAException('Share creation failed', error)
@@ -65,10 +64,10 @@ def validate_root_directory(ctera_host, name):
     response = ctera_host.execute('/status/fileManager', 'listPhysicalFolders', param)
     for root in response:
         if root.fullpath == ('/%s' % name):
-            logging.getLogger().debug("Found root directory. %s", {'name' : root.name, 'type' : root.type, 'fullpath' : root.fullpath})
+            logging.getLogger().debug("Found root directory. %s", {'name': root.name, 'type': root.type, 'fullpath': root.fullpath})
             return name
 
-    logging.getLogger().error("Could not find root directory. %s", {'name' : name})
+    logging.getLogger().error("Could not find root directory. %s", {'name': name})
 
     options = [root.fullpath[1:] for root in response]
     raise InputError('Invalid root directory.', name, options)
@@ -79,7 +78,7 @@ def addShareACLRule(acls, principal_type_field, name, perm):
     ace._classname = "ShareACLRule"  # pylint: disable=protected-access
     ace.principal2 = Object()
 
-    options = {k : v for k, v in PrincipalType.__dict__.items() if not k.startswith('_')}
+    options = {k: v for k, v in PrincipalType.__dict__.items() if not k.startswith('_')}
     principal_type = options.get(principal_type_field)
     if principal_type == PrincipalType.LU:
         ace.principal2._classname = PrincipalType.LU  # pylint: disable=protected-access
@@ -99,7 +98,7 @@ def addShareACLRule(acls, principal_type_field, name, perm):
     ace.permissions = Object()
     ace.permissions._classname = "FileAccessPermissions"  # pylint: disable=protected-access
 
-    options = {k : v for k, v in FileAccessMode.__dict__.items() if not k.startswith('_')}
+    options = {k: v for k, v in FileAccessMode.__dict__.items() if not k.startswith('_')}
     permission = options.get(perm)
     if permission is not None:
         ace.permissions.allowedFileAccess = permission
@@ -127,7 +126,7 @@ def add_acl(ctera_host, name, acl):
         ace_type = entry.principal2._classname  # pylint: disable=protected-access
         if ace_type in [PrincipalType.LU, PrincipalType.LG]:
             ace_name = entry.principal2.ref
-            ace_name = ace_name[ace_name.rfind('#') + 1 :]
+            ace_name = ace_name[ace_name.rfind('#') + 1:]
         else:
             ace_name = entry.principal2.name
         entry_key = ace_type + '#' + ace_name
@@ -142,13 +141,13 @@ def add_acl(ctera_host, name, acl):
 def remove_acl(ctera_host, name, tuples):
     current_acl = ctera_host.get('/config/fileservices/share/' + name + '/acl')
 
-    options = {v : k for k, v in PrincipalType.__dict__.items() if not k.startswith('_')} # reverse
+    options = {v: k for k, v in PrincipalType.__dict__.items() if not k.startswith('_')}  # reverse
     new_acl = []
     for entry in current_acl:
         ace_type = entry.principal2._classname  # pylint: disable=protected-access
         if ace_type in [PrincipalType.LU, PrincipalType.LG]:
             ace_name = entry.principal2.ref
-            ace_name = ace_name[ace_name.rfind('#') + 1 :]
+            ace_name = ace_name[ace_name.rfind('#') + 1:]
         else:
             ace_name = entry.principal2.name
 
@@ -161,7 +160,7 @@ def remove_acl(ctera_host, name, tuples):
 def delete(ctera_host, name):
     try:
         ctera_host.delete('/config/fileservices/share/' + name)
-        logging.getLogger().info("Share deleted. %s", {'name' : name})
+        logging.getLogger().info("Share deleted. %s", {'name': name})
     except Exception as error:
         logging.getLogger().error("Share deletion failed.")
         raise CTERAException('Share deletion failed', error)

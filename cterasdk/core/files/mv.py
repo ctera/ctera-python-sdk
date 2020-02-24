@@ -2,8 +2,10 @@ import logging
 
 from .common import SrcDstParam, ActionResourcesParam
 
+
 def move(ctera_host, src, dest):
     return move_multi(ctera_host, [src], dest)
+
 
 def move_multi(ctera_host, src, dest):
     move_param = ActionResourcesParam.instance()

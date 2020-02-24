@@ -25,12 +25,13 @@ class HTTPException(Exception):
         response = fp.read()
         try:
             self.response.body = fromxmlstr(response)
-        except:  # pylint: disable=bare-except
+        except:  # pylint: disable=bare-except  # noqa: E722
             pass
 
         if config.http['verbose']:
             self.response.headers = hdrs
             self.request = parse_request(req)
+
 
 class CTERAClientHandler(BaseHandler):
 
@@ -71,6 +72,7 @@ class TLSHandler(HTTPSHandler):
             host, port = hostport
             context = CertificateServices.add_trusted_cert(host, port)
         super().__init__(context=context)
+
 
 class HTTPResponse:
 
@@ -183,7 +185,7 @@ class AbstractHTTPClient(ABC):
                 return self._dispatch(request)
             except HTTPError as error:
                 raise HTTPException(request, error.code, error.hdrs, error.msg, error.fp)
-            except socket.timeout as error:
+            except socket.timeout:
                 self.on_timeout(attempt)
             except URLError as error:
                 if isinstance(error.reason, socket.gaierror):
@@ -194,14 +196,14 @@ class AbstractHTTPClient(ABC):
                 else:
                     logging.getLogger().warning(error.reason)
             attempt = attempt + 1
-        logging.getLogger().error('Reached maximum number of retries. %s', {'retries' : self.retries, 'timeout' : self.timeout})
+        logging.getLogger().error('Reached maximum number of retries. %s', {'retries': self.retries, 'timeout': self.timeout})
         raise ExhaustedException(self.retries, self.timeout)
 
     @staticmethod
     def on_unreachable(request, error):
         target = parse_request(request)
         scheme, host, port = target.host.scheme, target.host.hostname, target.host.port
-        logging.getLogger().error('Cannot reach target host. %s', {'host' : host, 'port' : port})
+        logging.getLogger().error('Cannot reach target host. %s', {'host': host, 'port': port})
         socket_error = Object()
         socket_error.errno = error.reason.errno
         socket_error.message = error.reason.strerror
@@ -209,7 +211,7 @@ class AbstractHTTPClient(ABC):
 
     @staticmethod
     def on_timeout(attempt):
-        logging.getLogger().warning('Request timed out. %s', {'attempt' : (attempt + 1)})
+        logging.getLogger().warning('Request timed out. %s', {'attempt': (attempt + 1)})
 
     def on_ssl_error(self, request):
         host, port = parse_host(request)

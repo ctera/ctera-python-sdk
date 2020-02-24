@@ -26,7 +26,7 @@ def enable(ctera_host, SMTPServer, port, username, password, useTLS):
 
     logging.getLogger().info(
         'Updated mail server settings. %s',
-        {'SMTPServer' : SMTPServer, 'port' : port, 'username' : username, 'useTLS' : useTLS}
+        {'SMTPServer': SMTPServer, 'port': port, 'username': username, 'useTLS': useTLS}
     )
 
 

@@ -31,6 +31,7 @@ def ParseValue(data):
 
     return text
 
+
 def SetAppendValue(item, value):
     if item.parent is not None:
         if isinstance(item.parent.value, list):
@@ -39,6 +40,7 @@ def SetAppendValue(item, value):
             setattr(item.parent.value, item.id, value)
     else:
         item.value = value
+
 
 def fromjsonstr(fromstr):
     if not fromstr:
@@ -77,6 +79,7 @@ def fromjsonstr(fromstr):
 
     return root.value
 
+
 def fromxmlstr(string):  # pylint: disable=too-many-branches,too-many-statements
     if not string:
         logging.getLogger().debug('Skipping.')
@@ -86,7 +89,7 @@ def fromxmlstr(string):  # pylint: disable=too-many-branches,too-many-statements
 
     # Do not attempt to parse HTML
     if string.startswith('<!DOCTYPE HTML>'):
-        logging.getLogger().debug('Skipping. %s', {'type' : 'HTML'})
+        logging.getLogger().debug('Skipping. %s', {'type': 'HTML'})
         return string
 
     root = Item()

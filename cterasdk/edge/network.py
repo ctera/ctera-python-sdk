@@ -23,7 +23,7 @@ def set_static_ipaddr(ctera_host, address, subnet, gateway, DNSServer1, DNSServe
 
     logging.getLogger().info(
         'Network settings updated. %s',
-        {'address' : address, 'subnet' : subnet, 'gateway' : gateway, 'DNS1' : DNSServer1, 'DNS2' : DNSServer2}
+        {'address': address, 'subnet': subnet, 'gateway': gateway, 'DNS1': DNSServer1, 'DNS2': DNSServer2}
     )
 
 
@@ -39,7 +39,7 @@ def set_static_nameserver(ctera_host, DNSServer1, DNSServer2):
 
     ctera_host.put('/config/network/ports/0/ip', ip)
 
-    logging.getLogger().info('Nameserver settings updated. %s', {'DNS1' : DNSServer1, 'DNS2' : DNSServer2})
+    logging.getLogger().info('Nameserver settings updated. %s', {'DNS1': DNSServer1, 'DNS2': DNSServer2})
 
 
 def enable_dhcp(ctera_host):
@@ -59,17 +59,17 @@ def tcp_connect(ctera_host, address, port):
     param.address = address
     param.port = port
 
-    logging.getLogger().info("Testing connection. %s", {'address' : address, 'port' : port})
+    logging.getLogger().info("Testing connection. %s", {'address': address, 'port': port})
 
     task = ctera_host.execute("/status/network", "tcpconnect", param)
     try:
         task = TaskManager.wait(ctera_host, task)
-        logging.getLogger().debug("Obtained connection status. %s", {'status' : task.result.rc})
+        logging.getLogger().debug("Obtained connection status. %s", {'status': task.result.rc})
         if task.result.rc == "Open":
             return True
     except TaskManager.TaskError:
         pass
 
-    logging.getLogger().warning("Couldn't establish TCP connection. %s", {'address' : address, 'port' : port})
+    logging.getLogger().warning("Couldn't establish TCP connection. %s", {'address': address, 'port': port})
 
     return False

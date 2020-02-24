@@ -6,6 +6,7 @@ from ..common import Object
 from ..transcript import transcribe
 from .. import config
 
+
 class CTERAClient:
 
     def __init__(self):

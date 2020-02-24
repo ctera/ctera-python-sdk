@@ -48,7 +48,7 @@ def unsuspend(CTERAHost):
             CTERAHost.put('/config/fileservices/share/cloud/access', Acl.WindowsNT)
             logging.getLogger().info('Updated network share access. %s', {'share': 'cloud', 'access': Acl.WindowsNT})
         else:
-            logging.getLogger().error("An error occurred while unsuspendeding sync. %s", {'status' : error.status})
+            logging.getLogger().error("An error occurred while unsuspendeding sync. %s", {'status': error.status})
 
 
 def refresh(CTERAHost):

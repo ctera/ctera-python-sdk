@@ -24,12 +24,12 @@ def disable_abe(ctera_host):
 
 def set_packet_signing(ctera_host, packet_signing):
     options = [v for k, v in CIFSPacketSigning.__dict__.items() if not k.startswith('_')]
-    if not packet_signing in options:
+    if packet_signing not in options:
         raise InputError('Invalid packet signing option', packet_signing, options)
     logging.getLogger().info('Updating SMB packet signing configuration.')
     try:
         ctera_host.put('/config/fileservices/cifs/packetSigning', packet_signing)
-        logging.getLogger().info('SMB packet signing configuration updated. %s', {'packet_signing' : packet_signing})
+        logging.getLogger().info('SMB packet signing configuration updated. %s', {'packet_signing': packet_signing})
     except CTERAException as error:
         logging.getLogger().error('Failed to update SMB packet signing configuration.')
         raise CTERAException('Invalid packet signing co', error)

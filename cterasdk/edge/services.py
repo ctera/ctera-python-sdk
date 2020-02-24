@@ -48,7 +48,7 @@ def validate_license(ctera_license):
     try:
         infer(ctera_license)
     except InputError as error:
-        logging.getLogger().error('Connection failed. Invalid license type. %s', {'license' : ctera_license})
+        logging.getLogger().error('Connection failed. Invalid license type. %s', {'license': ctera_license})
         raise error
 
 
@@ -99,7 +99,7 @@ def handle_untrusted_cert(ctera_host, server, obj):
 
 
 def attach(ctera_host, param):
-    logging.getLogger().info("Connecting to Portal. %s", {'server' : param.server, 'user' : param.user})
+    logging.getLogger().info("Connecting to Portal. %s", {'server': param.server, 'user': param.user})
     obj = ctera_host.execute("/status/services", "attachAndSave", param)
     return obj.id
 

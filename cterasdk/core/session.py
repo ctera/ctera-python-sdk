@@ -5,7 +5,7 @@ from .enum import Context
 
 
 def inactive_session(Portal):
-    session = Session(Portal.host(), Portal._context())  #pylint: disable=protected-access
+    session = Session(Portal.host(), Portal._context())  # pylint: disable=protected-access
     Portal.register_session(session)
 
 
@@ -17,8 +17,10 @@ def activate(Portal):
     user, role = obtain_user(Portal)
     session.activate(tenant, user, role)
 
+
 def terminate(Portal):
     inactive_session(Portal)
+
 
 def obtain_user(CTERAHost):
     logging.getLogger().debug('Obtaining current user session.')
@@ -29,14 +31,16 @@ def obtain_user(CTERAHost):
 
     return (current_session.username, current_session.role)
 
+
 def obtain_tenant(CTERAHost):
     logging.getLogger().debug('Obtaining current tenant.')
 
     current_tenant = CTERAHost.get('/currentPortal')
 
-    logging.getLogger().debug('Obtained current tenant. %s', {'name' : current_tenant})
+    logging.getLogger().debug('Obtained current tenant. %s', {'name': current_tenant})
 
     return current_tenant
+
 
 class SessionStatus:
     Initializing = 'Initializing'

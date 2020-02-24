@@ -13,10 +13,12 @@ def local_users(CTERAHost, include):
     param = query.QueryParamBuilder().include(include).build()
     return CTERAHost.iterator('/users', param)
 
+
 def domain_users(CTERAHost, domain, include):
     include = union.union(include, default)
     param = query.QueryParamBuilder().include(include).build()
     return CTERAHost.iterator('/domains/' + domain + '/adUsers', param)
+
 
 def add(ctera_host, name, email, first_name, last_name, password, role, company, comment):
     param = Object()
@@ -30,19 +32,20 @@ def add(ctera_host, name, email, first_name, last_name, password, role, company,
     param.company = company
     param.comment = comment
 
-    logging.getLogger().info('Creating user. %s', {'user' : name})
+    logging.getLogger().info('Creating user. %s', {'user': name})
 
     response = ctera_host.add('/users', param)
 
-    logging.getLogger().info('User created. %s', {'user' : name, 'email' : email, 'role' : role})
+    logging.getLogger().info('User created. %s', {'user': name, 'email': email, 'role': role})
 
     return response
 
+
 def delete(ctera_host, name):
-    logging.getLogger().info('Deleting user. %s', {'user' : name})
+    logging.getLogger().info('Deleting user. %s', {'user': name})
 
     response = ctera_host.execute('/users/' + name, 'delete', True)
 
-    logging.getLogger().info('User deleted. %s', {'user' : name})
+    logging.getLogger().info('User deleted. %s', {'user': name})
 
     return response

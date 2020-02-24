@@ -25,7 +25,7 @@ def add(CTERAHost, name, size, filesystem, device, passphrase):
 
     logging.getLogger().info(
         'Creating volume. %s',
-        {'name' : name, 'device' : device_name, 'size' : size, 'filesystem' : filesystem, 'passphrase' : passphrase}
+        {'name': name, 'device': device_name, 'size': size, 'filesystem': filesystem, 'passphrase': passphrase}
     )
 
     ref = '/status/storage/volumes/' + param.name + '/status'
@@ -40,7 +40,7 @@ def add(CTERAHost, name, size, filesystem, device, passphrase):
         [VolumeStatus.Mounting, VolumeStatus.Checking, VolumeStatus.Repairing], [VolumeStatus.Corrupted, VolumeStatus.Unknown]
     )
 
-    logging.getLogger().info('Volume created. %s', {'name' : name, 'size' : size, 'status' : status})
+    logging.getLogger().info('Volume created. %s', {'name': name, 'size': size, 'status': status})
 
     return response
 
@@ -68,36 +68,36 @@ def device_volume(device_name, ctera_devices):
     if device_name is not None:
         device_size = ctera_devices.get(device_name)
         if device_size is not None:
-            logging.getLogger().debug('Found drive. %s', {'name' : device_name, 'size' : device_size})
+            logging.getLogger().debug('Found drive. %s', {'name': device_name, 'size': device_size})
             return (device_name, device_size)
 
         device_names = [k for k, v in ctera_devices.items()]
-        logging.getLogger().error('Invalid device name. %s', {'name' : device_name})
+        logging.getLogger().error('Invalid device name. %s', {'name': device_name})
         raise InputError('Invalid device name', device_name, device_names)
 
     if len(ctera_devices) == 1:
         device_name, device_size = ctera_devices.popitem()
-        logging.getLogger().debug('Found drive. %s', {'name' : device_name, 'size' : device_size})
+        logging.getLogger().debug('Found drive. %s', {'name': device_name, 'size': device_size})
         return device_name, device_size
 
     device_names = [k for k, v in ctera_devices.items()]
-    logging.getLogger().error('You must specify a drive or an array name. %s', {'options' : device_names})
+    logging.getLogger().error('You must specify a drive or an array name. %s', {'options': device_names})
     raise CTERAException('You must specify a drive or an array name', None, options=device_names)
 
 
 def volume_size(size, device_name, device_size):
     if size is not None:
         if size > device_size:
-            logging.getLogger().error('You cannot exceed the available storage capacity. %s', {'size' : size, 'free_size' : device_size})
+            logging.getLogger().error('You cannot exceed the available storage capacity. %s', {'size': size, 'free_size': device_size})
             raise InputError("You cannot exceed the available storage capacity", size, device_size)
         return size
 
     if device_size > 0:
         logging.getLogger().warning('You did not specify a volume size.')
-        logging.getLogger().warning('Allocating available storage capacity. %s', {'name' : device_name, 'free_size' : device_size})
+        logging.getLogger().warning('Allocating available storage capacity. %s', {'name': device_name, 'free_size': device_size})
         return device_size
 
-    logging.getLogger().error('Insufficient storage space. %s', {'name' : device_name})
+    logging.getLogger().error('Insufficient storage space. %s', {'name': device_name})
     raise CTERAException('Insufficient storage space', None, device=device_name, free_size=device_size)
 
 
@@ -111,15 +111,15 @@ def volume_filesystem(filesystem):
 def delete(ctera_host, name):
     wait_pending_mount(ctera_host, name)
     try:
-        logging.getLogger().info('Deleting volume. %s', {'name' : name})
+        logging.getLogger().info('Deleting volume. %s', {'name': name})
 
         response = ctera_host.delete('/config/storage/volumes/' + name)
 
-        logging.getLogger().info("Volume deleted. %s", {'name' : name})
+        logging.getLogger().info("Volume deleted. %s", {'name': name})
 
         return response
     except CTERAException as error:
-        logging.getLogger().error("Volume deletion failed. %s", {'name' : name})
+        logging.getLogger().error("Volume deletion failed. %s", {'name': name})
         raise CTERAException('Volume deletion falied', error)
 
 
@@ -145,7 +145,7 @@ def wait_pending_filesystem_mounts(CTERAHost):
 
 
 def wait_pending_mount(CTERAHost, volume):
-    logging.getLogger().debug('Checking for pending mount tasks. %s', {'volume' : volume})
+    logging.getLogger().debug('Checking for pending mount tasks. %s', {'volume': volume})
 
     tasks = TaskManager.by_name(CTERAHost, ' '.join(['Mounting', volume, 'file system']))
     for mount in tasks:
@@ -156,4 +156,4 @@ def wait_mount(CTERAHost, tid):
     try:
         TaskManager.wait(CTERAHost, tid)
     except TaskManager.TaskError:
-        logging.getLogger().debug('Failed mounting volume. %s', {'tid' : tid})
+        logging.getLogger().debug('Failed mounting volume. %s', {'tid': tid})

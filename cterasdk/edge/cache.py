@@ -15,7 +15,7 @@ def disable(ctera_host):
 
 def _set_operation_mode(ctera_host, mode):
     ctera_host.put('/config/cloudsync/cloudExtender/operationMode', mode)
-    logging.getLogger().info('Device opreation mode changed. %s', {'mode' : mode})
+    logging.getLogger().info('Device opreation mode changed. %s', {'mode': mode})
 
 
 def force_eviction(ctera_host):

@@ -13,10 +13,10 @@ def test_network(CTERAHost):
 def test_application(CTERAHost):
     ref = '/nosession/logininfo'
 
-    logging.getLogger().debug('Trying to obtain login info. %s', {'ref' : ref})
+    logging.getLogger().debug('Trying to obtain login info. %s', {'ref': ref})
 
     response = CTERAHost.get(ref)
 
-    logging.getLogger().debug('Successfully obtained login info. %s', {'ref' : ref, 'hostname' : response.hostname})
+    logging.getLogger().debug('Successfully obtained login info. %s', {'ref': ref, 'hostname': response.hostname})
 
     return response

@@ -22,10 +22,10 @@ class ReservedName(CTERAException):
 
 
 FileManagerTaskRC = {
-    "FileWithTheSameNameExist" : ItemExists,
-    "DestinationNotExists" : InvalidPath,
-    "InvalidName" : InvalidName,
-    "ReservedName" : ReservedName
+    "FileWithTheSameNameExist": ItemExists,
+    "DestinationNotExists": InvalidPath,
+    "InvalidName": InvalidName,
+    "ReservedName": ReservedName
 }
 
 
@@ -49,7 +49,7 @@ def _mkdir(ctera_host, path):
 
     relativepath = str(path.relativepath)
 
-    logging.getLogger().info('Creating directory. %s', {'path' : relativepath})
+    logging.getLogger().info('Creating directory. %s', {'path': relativepath})
 
     response = ctera_host.execute('', 'makeCollection', param)
     _process_response(response, relativepath)
@@ -59,19 +59,19 @@ def _process_response(response, path):
     try:
         _process_error(response, path)
     except ItemExists as error:
-        logging.getLogger().warning('A file or folder with the same name already exists. %s', {'path' : path})
+        logging.getLogger().warning('A file or folder with the same name already exists. %s', {'path': path})
         raise error
     except InvalidPath as error:
-        logging.getLogger().error('Invalid parent directory path. %s', {'path' : path})
+        logging.getLogger().error('Invalid parent directory path. %s', {'path': path})
         raise error
     except InvalidName as error:
-        logging.getLogger().error('Directory name contains invalid characters. %s', {'name' : path})
+        logging.getLogger().error('Directory name contains invalid characters. %s', {'name': path})
         raise error
     except ReservedName as error:
-        logging.getLogger().error('Reserved directory name. %s', {'name' : path})
+        logging.getLogger().error('Reserved directory name. %s', {'name': path})
         raise error
     else:
-        logging.getLogger().info('Directory created. %s', {'path' : path})
+        logging.getLogger().info('Directory created. %s', {'path': path})
 
 
 def _process_error(response, path):

@@ -31,7 +31,7 @@ class Task:
     def wait(self):
         task = None
         while self.running:
-            logging.getLogger().debug('Obtaining task status. %s', {'path' : self.path, 'attempt' : (self.attempt + 1)})
+            logging.getLogger().debug('Obtaining task status. %s', {'path': self.path, 'attempt': (self.attempt + 1)})
             task = self.CTERAHost.get(self.path)
             self.increment()
             self.running = task.status == TaskStatusEnum.Running
@@ -40,19 +40,19 @@ class Task:
     @staticmethod
     def resolve(task):
         if task.status != TaskStatusEnum.Completed:
-            logging.getLogger().error('Task did not complete successfully. %s', {'id' : task.id, 'status' : task.status})
+            logging.getLogger().error('Task did not complete successfully. %s', {'id': task.id, 'status': task.status})
             raise TaskError(task)
 
-        logging.getLogger().debug('Task completed successfully. %s', {'id' : task.id})
+        logging.getLogger().debug('Task completed successfully. %s', {'id': task.id})
         return task
 
     def increment(self):
         if self.attempt >= self.retries:
             duration = time.strftime("%H:%M:%S", time.gmtime(self.retries * self.seconds))
-            logging.getLogger().error('Could not obtain task status in a timely manner. %s', {'duration' : duration})
+            logging.getLogger().error('Could not obtain task status in a timely manner. %s', {'duration': duration})
             raise CTERAException('Timed out. Could not obtain task status in a timely manner', None, duration=duration)
         self.attempt = self.attempt + 1
-        logging.getLogger().debug('Sleep. %s', {'seconds' : self.seconds})
+        logging.getLogger().debug('Sleep. %s', {'seconds': self.seconds})
         time.sleep(self.seconds)
 
     @staticmethod
@@ -64,10 +64,10 @@ class Task:
             match = re.search('[1-9][0-9]*', ref)
             if match is not None:
                 start, end = match.span()
-                uid = ref[start : end]
+                uid = ref[start: end]
         if uid is not None:
             return '/proc/bgtasks/' + uid
-        logging.getLogger().error('Could not parse task id. %s', {'ref' : ref})
+        logging.getLogger().error('Could not parse task id. %s', {'ref': ref})
         raise InputError('Invalid task id', ref, [64, '/proc/bgtasks/64'])
 
 

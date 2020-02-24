@@ -16,8 +16,8 @@ class CTERAPath:
             href = unquote(item.href)
             match = re.search('^/(ServicesPortal|Users)/webdav', href)
             start, end = match.span()
-            self.basepath = PurePosixPath(href[start : end])
-            self.relativepath = PurePosixPath(href[end + 1: ])
+            self.basepath = PurePosixPath(href[start: end])
+            self.relativepath = PurePosixPath(href[end + 1:])
         else:
             raise InputError('Invalid path', item, 'comma separated str path segments, or a ResourceInfo object')
 

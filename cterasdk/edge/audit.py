@@ -15,5 +15,6 @@ def enable(ctera_host, path, auditEvents, logKeepPeriod, maxLogKBSize, maxRotate
 
     ctera_host.put('/config/logging/files', settings)
 
+
 def disable(ctera_host):
     ctera_host.put('/config/logging/files/mode', Mode.Disabled)

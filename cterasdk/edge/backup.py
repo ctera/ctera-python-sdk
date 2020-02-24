@@ -104,15 +104,15 @@ def process_attach_response(response):
         raise IncorrectPassphrase()
 
     if rc == 'ClocksOutOfSync':
-        logging.getLogger().error('Intializing backup failed. Clocks are out of sync. %s', {'rc' : rc})
+        logging.getLogger().error('Intializing backup failed. Clocks are out of sync. %s', {'rc': rc})
         raise ClockOutOfSync()
 
     if rc == 'InternalServerError':
-        logging.getLogger().error('Attach failed. %s', {'rc' : rc})
+        logging.getLogger().error('Attach failed. %s', {'rc': rc})
     elif rc == 'PermissionDenied':
-        logging.getLogger().error('Attach failed. %s', {'rc' : rc})
+        logging.getLogger().error('Attach failed. %s', {'rc': rc})
     else:
-        logging.getLogger().error('Unknow error, %s', {'rc' : rc})
+        logging.getLogger().error('Unknow error, %s', {'rc': rc})
     raise CTERAException(message="Failed to Attach")
 
 
@@ -149,9 +149,9 @@ def process_create_response(response):
         return param
 
     if rc == 'InternalServerError':
-        logging.getLogger().error('Backup folder creation failed. %s', {'rc' : rc})
+        logging.getLogger().error('Backup folder creation failed. %s', {'rc': rc})
     elif rc == 'PermissionDenied':
-        logging.getLogger().error('Backup folder creation failed. %s', {'rc' : rc})
+        logging.getLogger().error('Backup folder creation failed. %s', {'rc': rc})
     elif rc == 'FolderAlreadyExists':
         return None
     raise CTERAException(message="Failed to Create")

@@ -2,6 +2,7 @@ import sys
 
 import logging
 
+
 class Logging:
 
     __instance = None
@@ -48,6 +49,7 @@ class Logging:
     @staticmethod
     def df():
         return logconf['df']
+
 
 logconf = dict(
     disabled=False,

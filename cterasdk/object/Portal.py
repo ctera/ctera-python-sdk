@@ -18,7 +18,6 @@ from ..core import files
 from ..core import decorator
 
 
-
 class Portal(CTERAHost):  # pylint: disable=too-many-public-methods
 
     def __init__(self, host, port, https):
@@ -133,14 +132,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-public-methods
     def files(self):
         return files.FileBrowser(self)
 
-    def logs(
-            self,
-            topic=enum.LogTopic.System,
-            minSeverity=enum.Severity.INFO,
-            originType=enum.OriginType.Portal,
-            before=None,
-            after=None
-        ):
+    def logs(self, topic=enum.LogTopic.System, minSeverity=enum.Severity.INFO, originType=enum.OriginType.Portal, before=None, after=None):
         return logs.logs(self, topic, minSeverity, originType, before, after)
 
     def _api(self):
@@ -148,6 +140,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-public-methods
 
     def _baseurl(self):
         raise NotImplementedError("Subclass must implement the _baseurl method")
+
 
 class GlobalAdmin(Portal):
 
@@ -185,6 +178,7 @@ class GlobalAdmin(Portal):
     @staticmethod
     def _context():
         return 'admin'
+
 
 class ServicesPortal(Portal):
 

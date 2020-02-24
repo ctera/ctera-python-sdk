@@ -27,31 +27,31 @@ def add(ctera_host, name, display_name, billing_id, company):
 
     ctera_host.browse_global_admin()
 
-    logging.getLogger().info('Creating Team Portal. %s', {'name' : name})
+    logging.getLogger().info('Creating Team Portal. %s', {'name': name})
 
     response = ctera_host.add('/teamPortals', param)
 
-    logging.getLogger().info('Team Portal created. %s', {'name' : name})
+    logging.getLogger().info('Team Portal created. %s', {'name': name})
 
     return response
 
 
 def delete(ctera_host, name):
-    logging.getLogger().info('Deleting Portal. %s', {'name' : name})
+    logging.getLogger().info('Deleting Portal. %s', {'name': name})
 
     response = ctera_host.execute('/teamPortals/' + name, 'delete')
 
-    logging.getLogger().info('Portal deleted. %s', {'name' : name})
+    logging.getLogger().info('Portal deleted. %s', {'name': name})
 
     return response
 
 
 def undelete(ctera_host, name):
-    logging.getLogger().info('Recovering Portal. %s', {'name' : name})
+    logging.getLogger().info('Recovering Portal. %s', {'name': name})
 
     response = ctera_host.execute('/teamPortals/' + name, 'moveFromTrashcan')
 
-    logging.getLogger().info('Portal recovered. %s', {'name' : name})
+    logging.getLogger().info('Portal recovered. %s', {'name': name})
 
     return response
 

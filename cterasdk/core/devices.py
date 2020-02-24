@@ -19,6 +19,7 @@ def device(CTERAHost, device_name, include):
 
     return remote.remote_command(CTERAHost, dev)
 
+
 def filers(CTERAHost, include, allPortals, deviceTypes):
     deviceTypes = [deviceType for deviceType in deviceTypes if deviceType in DeviceType.Gateways]
     if not deviceTypes:
@@ -27,21 +28,26 @@ def filers(CTERAHost, include, allPortals, deviceTypes):
     filters = [query.FilterBuilder(type_attr).eq(deviceType) for deviceType in deviceTypes]
     return devices(CTERAHost, include, allPortals, filters)
 
+
 def agents(CTERAHost, include, allPortals):
     filters = [query.FilterBuilder(type_attr).like('Agent')]
     return devices(CTERAHost, include, allPortals, filters)
+
 
 def desktops(CTERAHost, include, allPortals):
     filters = [query.FilterBuilder(type_attr).eq(DeviceType.WorkstationAgent)]
     return devices(CTERAHost, include, allPortals, filters)
 
+
 def servers(CTERAHost, include, allPortals):
     filters = [query.FilterBuilder(type_attr).eq(DeviceType.ServerAgent)]
     return devices(CTERAHost, include, allPortals, filters)
 
+
 def by_name(CTERAHost, include, names):
     filters = [query.FilterBuilder('name').eq(name) for name in names]
     return devices(CTERAHost, include, False, filters)
+
 
 def devices(CTERAHost, include, allPortals, filters):
     include = union.union(include, default)

@@ -26,12 +26,12 @@ def start_remote_session(Gateway, Portal):
 def terminate(Gateway):
     session = Gateway.session()
     if session.local():
-        logging.getLogger().debug('Terminating local session. %s', {'host' : session.target_host(), 'user' : session.username()})
+        logging.getLogger().debug('Terminating local session. %s', {'host': session.target_host(), 'user': session.username()})
         inactive_session(Gateway)
     elif session.remote():
         logging.getLogger().debug(
             'Terminating remote session. %s',
-            {'host' : session.target_host(), 'tenant' : session.tenant(), 'user' : session.username()}
+            {'host': session.target_host(), 'tenant': session.tenant(), 'user': session.username()}
         )
         session.disable_remote_access()
 

@@ -46,15 +46,16 @@ def set_debug_level(ctera_host, *levels):
     options = [v for k, v in DebugLevel.__dict__.items() if not k.startswith('_')]
     cli_command = 'dbg level'
     for level in levels:
-        if not level in options:
+        if level not in options:
             raise InputError('Invalid debug level', level, options)
         cli_command = cli_command + ' ' + level
     return run_cli_command(ctera_host, cli_command)
 
+
 def get_support_report(ctera_host):
     dirpath = config.filesystem['dl']
     filename = 'Support-' + ctera_host.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.zip'
-    logging.getLogger().info('Downloading support report. %s', {'host' : ctera_host.host()})
+    logging.getLogger().info('Downloading support report. %s', {'host': ctera_host.host()})
     handle = ctera_host.openfile(ctera_host._api(), '/supportreport', params={})  # pylint: disable=protected-access
     filepath = FileSystem.instance().save(dirpath, filename, handle)
-    logging.getLogger().info('Support report downloaded. %s', {'filepath' : filepath})
+    logging.getLogger().info('Support report downloaded. %s', {'filepath': filepath})

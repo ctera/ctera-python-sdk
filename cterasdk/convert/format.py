@@ -12,6 +12,7 @@ def tojsonstr(obj, pretty_print=True):
         return json.dumps(obj, default=lambda o: o.__dict__, indent=5)
     return json.dumps(obj, default=lambda o: o.__dict__)
 
+
 def toxmlstr(obj, pretty_print=False):
     if obj is None:
         return None
@@ -20,6 +21,7 @@ def toxmlstr(obj, pretty_print=False):
         string = minidom.parseString(tostring(xml)).toprettyxml(indent="   ")
         return ''.join(string.split('\n', 1)[1:])
     return tostring(xml)
+
 
 def toxml(obj):
     root = Item()
@@ -65,6 +67,7 @@ def toxml(obj):
                 q.put(kid)
 
     return root.node
+
 
 def CreateElement(parent, tag):
     if parent is not None:

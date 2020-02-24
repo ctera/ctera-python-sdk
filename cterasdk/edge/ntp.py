@@ -11,11 +11,11 @@ def enable(ctera_host, servers):
     logging.getLogger().info("Time synchronization enabled.")
 
     if len(servers) > 0:
-        logging.getLogger().info("Updating time servers. %s", {'servers' : servers})
+        logging.getLogger().info("Updating time servers. %s", {'servers': servers})
 
         ctera_host.put('/config/time/NTPServer', servers)
 
-        logging.getLogger().info("Time servers updated. %s", {'servers' : servers})
+        logging.getLogger().info("Time servers updated. %s", {'servers': servers})
 
 
 def disable(ctera_host):

@@ -33,7 +33,7 @@ class FileSystem:
             destination = os.path.join(dirpath, dst)
             os.rename(source, destination)
             return (dirpath, dst)
-        logging.getLogger().error('Could not rename temporary file. File not found. %s', {'path' : dirpath, 'temp' : src})
+        logging.getLogger().error('Could not rename temporary file. File not found. %s', {'path': dirpath, 'temp': src})
         raise RenameException(dirpath, src, dst)
 
     def save(self, dirpath, filename, handle):
@@ -49,15 +49,15 @@ class FileSystem:
         while True:
             try:
                 dirpath, filename = self.rename(dirpath, tempfile, filename)
-                logging.getLogger().debug('Renamed temporary file. %s', {'path' : dirpath, 'temp' : tempfile, 'name' : filename})
+                logging.getLogger().debug('Renamed temporary file. %s', {'path': dirpath, 'temp': tempfile, 'name': filename})
                 break
             except (FileExistsError, IsADirectoryError):
-                logging.getLogger().debug('File exists. %s', {'path' : dirpath, 'name' : filename})
+                logging.getLogger().debug('File exists. %s', {'path': dirpath, 'name': filename})
                 version = version + 1
                 filename = self.version(origin, version)
 
         filepath = os.path.join(dirpath, filename)
-        logging.getLogger().info('Saved. %s', {'path' : filepath})
+        logging.getLogger().info('Saved. %s', {'path': filepath})
         return filepath
 
     @staticmethod
@@ -88,6 +88,6 @@ class FileSystem:
         finally:
             if f is not None:
                 f.close()
-                logging.getLogger().debug('Saved temporary file. %s', {'path' : filepath})
+                logging.getLogger().debug('Saved temporary file. %s', {'path': filepath})
             if handle is not None:
                 handle.close()

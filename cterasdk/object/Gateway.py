@@ -189,15 +189,15 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-public-methods
         syslog.disable(self)
 
     def enable_audit_logs(
-            self,
-            path,
-            auditEvents=None,
-            logKeepPeriod=30,
-            maxLogKBSize=102400,
-            maxRotateTime=1440,
-            includeAuditLogTag=True,
-            humanReadableAuditLog=False
-        ):
+                self,
+                path,
+                auditEvents=None,
+                logKeepPeriod=30,
+                maxLogKBSize=102400,
+                maxRotateTime=1440,
+                includeAuditLogTag=True,
+                humanReadableAuditLog=False
+                ):
         defaultAuditEvents = [
             enum.AuditEvents.CreateFilesWriteData,
             enum.AuditEvents.CreateFoldersAppendData,
@@ -299,21 +299,21 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-public-methods
         array.delete_all(self)
 
     def add_share(
-            self,
-            name,
-            directory,
-            acl=None,
-            access=enum.Acl.WindowsNT,
-            csc=enum.ClientSideCaching.Manual,
-            dirPermissions=777,
-            comment=None,
-            exportToAFP=False,
-            exportToFTP=False,
-            exportToNFS=False,
-            exportToPCAgent=False,
-            exportToRSync=False,
-            indexed=False
-        ):  # pylint: disable=too-many-arguments
+                self,
+                name,
+                directory,
+                acl=None,
+                access=enum.Acl.WindowsNT,
+                csc=enum.ClientSideCaching.Manual,
+                dirPermissions=777,
+                comment=None,
+                exportToAFP=False,
+                exportToFTP=False,
+                exportToNFS=False,
+                exportToPCAgent=False,
+                exportToRSync=False,
+                indexed=False
+                ):  # pylint: disable=too-many-arguments
         shares.add(
             self,
             name,

@@ -8,6 +8,7 @@ def query_logs(ctera_host, param):
     response = ctera_host.execute('', 'queryLogs', param)
     return (response.hasMore, response.logs)
 
+
 def logs(ctera_host, topic, minSeverity, _originType, before, after):
     builder = query.QueryParamBuilder().put('topic', topic).put('minSeverity', minSeverity)
 
@@ -21,6 +22,7 @@ def logs(ctera_host, topic, minSeverity, _originType, before, after):
     function = Command(query_logs, ctera_host)
 
     return Iterator(function, param)
+
 
 def strptime(datetime_str):
     try:

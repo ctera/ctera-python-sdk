@@ -19,5 +19,6 @@ def authenticated(function):
 
     return check_authenticated_and_call
 
+
 def is_nosession(function, path):
     return function.__name__ == 'get' and path.startswith('/nosession')

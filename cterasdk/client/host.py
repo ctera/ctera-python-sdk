@@ -14,20 +14,20 @@ class NetworkHost:
         self._https = https
 
     def test_conn(self):
-        logging.getLogger().debug('Testing connection. %s', {'host' : self.host(), 'port' : self.port()})
+        logging.getLogger().debug('Testing connection. %s', {'host': self.host(), 'port': self.port()})
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         rc = None
         try:
             rc = sock.connect_ex((self._host, self._port))
         except socket.gaierror:
-            logging.getLogger().debug('Host unreachable. %s', {'host' : self.host(), 'port' : self.port()})
+            logging.getLogger().debug('Host unreachable. %s', {'host': self.host(), 'port': self.port()})
             raise HostUnreachable(None, self._host, self._port, self.scheme().upper())
 
         if rc != 0:
-            logging.getLogger().debug('Host unreachable. %s', {'host' : self.host(), 'port' : self.port()})
+            logging.getLogger().debug('Host unreachable. %s', {'host': self.host(), 'port': self.port()})
             raise HostUnreachable(None, self._host, self._port, self.scheme().upper())
 
-        logging.getLogger().debug('Host is reachable. %s', {'host' : self.host(), 'port' : self.port()})
+        logging.getLogger().debug('Host is reachable. %s', {'host': self.host(), 'port': self.port()})
 
     def scheme(self):
         return 'http' + ("s" if self._https else '')
@@ -46,7 +46,7 @@ class NetworkHost:
 
     def __str__(self):
         x = Object()
-        x.__dict__ = {k : v for k, v in self.__dict__.items() if not k.startswith('_')}
+        x.__dict__ = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
         return tojsonstr(x)
 
 
@@ -107,7 +107,7 @@ class CTERAHost(NetworkHost):
 
     def delete(self, baseurl, path):
         response = self._ctera_client.delete(baseurl, path)
-        logging.getLogger().debug('Deleted. %s', {'url' : path})
+        logging.getLogger().debug('Deleted. %s', {'url': path})
         return response
 
     def mkcol(self, baseurl, path):

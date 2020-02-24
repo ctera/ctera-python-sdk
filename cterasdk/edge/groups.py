@@ -22,27 +22,27 @@ def add_members(ctera_host, group, new_members):
 
         if current_member_type in [PrincipalType.LU, PrincipalType.LG]:
             current_member_name = current_member.ref
-            current_member_name = current_member_name[current_member_name.rfind('#') + 1 :]
+            current_member_name = current_member_name[current_member_name.rfind('#') + 1:]
         else:
             current_member_name = current_member.name
 
         current_member_key = current_member_type + '#' + current_member_name
 
-        if not current_member_key in new_member_dict:
+        if current_member_key not in new_member_dict:
             new_member_dict[current_member_key] = current_member
 
     members = [v for k, v in new_member_dict.items()]
 
-    logging.getLogger().info('Adding group members. %s', {'group' : group})
+    logging.getLogger().info('Adding group members. %s', {'group': group})
 
     ctera_host.put('/config/auth/groups/' + group + '/members', members)
 
-    logging.getLogger().info('Group members added. %s', {'group' : group})
+    logging.getLogger().info('Group members added. %s', {'group': group})
 
 
 def remove_members(ctera_host, group, tuples):
     current_members = ctera_host.get('/config/auth/groups/' + group + '/members')
-    options = {v : k for k, v in PrincipalType.__dict__.items() if not k.startswith('_')}  # reverse
+    options = {v: k for k, v in PrincipalType.__dict__.items() if not k.startswith('_')}  # reverse
 
     members = []
     for current_member in current_members:
@@ -50,22 +50,22 @@ def remove_members(ctera_host, group, tuples):
 
         if current_member_type in [PrincipalType.LU, PrincipalType.LG]:
             current_member_name = current_member.ref
-            current_member_name = current_member_name[current_member_name.rfind('#') + 1 :]
+            current_member_name = current_member_name[current_member_name.rfind('#') + 1:]
         else:
             current_member_name = current_member.name
 
         if not (options.get(current_member_type), current_member_name) in tuples:
             members.append(current_member)
 
-    logging.getLogger().info('Removing group members. %s', {'group' : group})
+    logging.getLogger().info('Removing group members. %s', {'group': group})
 
     ctera_host.put('/config/auth/groups/' + group + '/members', members)
 
-    logging.getLogger().info('Group members removed. %s', {'group' : group})
+    logging.getLogger().info('Group members removed. %s', {'group': group})
 
 
 def _member(member_type, name):
-    options = {k : v for k, v in PrincipalType.__dict__.items() if not k.startswith('_')}
+    options = {k: v for k, v in PrincipalType.__dict__.items() if not k.startswith('_')}
 
     member = Object()
     member_type = options.get(member_type)

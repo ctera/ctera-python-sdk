@@ -13,7 +13,7 @@ def download(ctera_host, path):
         FileSystem.instance().save(dirpath, path.name(), handle)
     except LocalDirectoryNotFound as error:
         dirpath = FileSystem.instance().expanduser(dirpath)
-        logging.getLogger().error('Download failed. Check the following directory exists. %s', {'path' : dirpath})
+        logging.getLogger().error('Download failed. Check the following directory exists. %s', {'path': dirpath})
         if handle is not None:
             handle.close()
         raise error

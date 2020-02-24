@@ -16,7 +16,7 @@ def enable(ctera_host, server, port, proto, minSeverity):
     ctera_host.put('/config/logging/syslog', obj)
     logging.getLogger().info(
         "Syslog server configured. %s",
-        {'server' : server, 'port' : port, 'protocol' : proto, 'minSeverity' : minSeverity}
+        {'server': server, 'port': port, 'protocol': proto, 'minSeverity': minSeverity}
     )
 
 

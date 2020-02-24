@@ -24,7 +24,7 @@ def delete(ctera_host, array_name):
     try:
         logging.getLogger().info("Deleting a storage array.")
         response = ctera_host.delete("/config/storage/arrays/" + array_name)
-        logging.getLogger().info("Storage array deleted. %s", {'array_name' : array_name})
+        logging.getLogger().info("Storage array deleted. %s", {'array_name': array_name})
         return response
     except CTERAException as error:
         logging.getLogger().error("Storage array deletion failed.")

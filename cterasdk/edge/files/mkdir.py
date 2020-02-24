@@ -13,8 +13,8 @@ class Forbidden(CTERAException):
 
 
 CreateDirectoryRC = {
-    "File exists" : ItemExists,
-    "Creating a folder in this location is forbidden" : Forbidden
+    "File exists": ItemExists,
+    "Creating a folder in this location is forbidden": Forbidden
 }
 
 
@@ -33,12 +33,13 @@ def mkdir(ctera_host, path, recurse=False):
 
 def _mkdir(ctera_host, path):
     fullpath = path.fullpath()
-    logging.getLogger().info('Creating directory. %s', {'path' : fullpath})
+    logging.getLogger().info('Creating directory. %s', {'path': fullpath})
     try:
         ctera_host.mkcol(ctera_host._files(), fullpath)  # pylint: disable=protected-access
     except CTERAException as error:
         _process_error(error, fullpath)
-    logging.getLogger().info('Directory created. %s', {'path' : fullpath})
+    logging.getLogger().info('Directory created. %s', {'path': fullpath})
+
 
 def _process_error(error, path):
     if hasattr(error.response.body, 'msg'):

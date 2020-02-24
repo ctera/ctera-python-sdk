@@ -124,6 +124,7 @@ class SyncStatus:
     CatalogReadOnlyMode = "CatalogReadOnlyMode"
     InvalidAverageBlockSize = "InvalidAverageBlockSize"
 
+
 class AuditEvents:
     ListFolderReadData = "RD"
     CreateFilesWriteData = "WD"

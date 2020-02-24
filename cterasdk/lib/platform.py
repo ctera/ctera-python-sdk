@@ -1,5 +1,6 @@
 import platform
 
+
 class Platform:
 
     __instance = None

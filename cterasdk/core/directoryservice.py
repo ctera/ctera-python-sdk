@@ -16,12 +16,12 @@ def fetch(ctera_host, tuples):
             raise InputError('Invalid entry', entry, '[("domain", "account_type", "account_name"), ...]')
 
         domain, account_type, name = entry
-        if not domain in domains:
-            logging.getLogger().error('Invalid domain name. %s', {'domain' : domain})
+        if domain not in domains:
+            logging.getLogger().error('Invalid domain name. %s', {'domain': domain})
             raise CTERAException('Invalid domain', None, domain=domain, domains=domains)
 
-        if not account_type in account_types:
-            logging.getLogger().error('Invalid account type. %s', {'type' : account_type})
+        if account_type not in account_types:
+            logging.getLogger().error('Invalid account type. %s', {'type': account_type})
             raise CTERAException('Invalid account type', None, type=account_type, options=account_types)
 
     for domain, account_type, name in tuples:
@@ -38,11 +38,14 @@ def fetch(ctera_host, tuples):
 
     return response
 
+
 def search_users(ctera_host, domain, user):
     return search_directory_services(ctera_host, SearchType.Users, domain, user)
 
+
 def search_groups(ctera_host, domain, group):
     return search_directory_services(ctera_host, SearchType.Groups, domain, group)
+
 
 def search_directory_services(ctera_host, search_type, domain, name):
     param = Object()
@@ -50,11 +53,11 @@ def search_directory_services(ctera_host, search_type, domain, name):
     param.name = name
     param.domain = domain
 
-    logging.getLogger().info('Searching %(search_type)s: %(info)s', dict(search_type=search_type, info={'domain' : domain, 'name' : name}))
+    logging.getLogger().info('Searching %(search_type)s: %(info)s', dict(search_type=search_type, info={'domain': domain, 'name': name}))
 
     objects = ctera_host.execute('', 'searchAD', param)
     if not objects:
-        logging.getLogger().info('Could not find results that match your search criteria. %s', {'domain' : domain, 'name' : name})
+        logging.getLogger().info('Could not find results that match your search criteria. %s', {'domain': domain, 'name': name})
         raise CTERAException(
             'Could not find results that match your search criteria',
             None,
@@ -65,7 +68,7 @@ def search_directory_services(ctera_host, search_type, domain, name):
 
     for principal in objects:
         if principal.name == name:
-            logging.getLogger().info('Found. %s', {'domain' : domain, 'name' : name})
+            logging.getLogger().info('Found. %s', {'domain': domain, 'name': name})
             return principal
 
     raise CTERAException(

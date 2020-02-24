@@ -32,28 +32,28 @@ def get(CTERAHost, name):
     query_filter = query.FilterBuilder('name').eq(name)
     param = query.QueryParamBuilder().include_classname().startFrom(0).countLimit(1).addFilter(query_filter).orFilter(False).build()
 
-    logging.getLogger().info('Retrieving zone. %s', {'name' : name})
+    logging.getLogger().info('Retrieving zone. %s', {'name': name})
 
     response = CTERAHost.execute('', 'getZonesDisplayInfo', param)
 
     objects = response.objects
     if len(objects) < 1:
-        logging.getLogger().error('Zone not found. %s', {'name' : name})
+        logging.getLogger().error('Zone not found. %s', {'name': name})
         raise CTERAException('Zone not found', None, name=name)
 
     zone = objects[0]
 
-    logging.getLogger().info('Zone found. %s', {'name' : name, 'id' : zone.zoneId})
+    logging.getLogger().info('Zone found. %s', {'name': name, 'id': zone.zoneId})
 
     return zone
 
 
 def zone_info(CTERAHost, zid):
-    logging.getLogger().debug('Obtaining zone info. %s', {'id' : zid})
+    logging.getLogger().debug('Obtaining zone info. %s', {'id': zid})
 
     response = CTERAHost.execute('', 'getZoneBasicInfo', zid)
 
-    logging.getLogger().debug('Obtained zone info. %s', {'id' : zid})
+    logging.getLogger().debug('Obtained zone info. %s', {'id': zid})
 
     return response
 
@@ -68,7 +68,7 @@ def add_devices(CTERAHost, zone_name, device_names):
     for device in devices:
         param.delta.devicesDelta.added.append(device.uid)
 
-    logging.getLogger().info('Adding devices to zone. %s', {'zone' : info.name})
+    logging.getLogger().info('Adding devices to zone. %s', {'zone': info.name})
 
     try:
         save(CTERAHost, param)
@@ -123,37 +123,37 @@ def find_folders(CTERAHost, tuples):
 def save(CTERAHost, param):
     zone_name = param.basicInfo.name
 
-    logging.getLogger().debug('Applying changes to zone. %s', {'zone' : param.basicInfo.name})
+    logging.getLogger().debug('Applying changes to zone. %s', {'zone': param.basicInfo.name})
 
     response = CTERAHost.execute('', 'saveZone', param)
     try:
         process_response(response)
     except CTERAException as error:
-        logging.getLogger().error('Failed applying changes to zone. %s', {'zone' : zone_name, 'rc' : response.rc})
+        logging.getLogger().error('Failed applying changes to zone. %s', {'zone': zone_name, 'rc': response.rc})
         raise error
 
-    logging.getLogger().debug('Zone changes applied successfully. %s', {'zone' : zone_name})
+    logging.getLogger().debug('Zone changes applied successfully. %s', {'zone': zone_name})
 
 
 def add(CTERAHost, name, policy_type, description):
     policy_type = {
-        'All' : 'allFolders',
-        'Select' : 'selectedFolders',
-        'None' : 'noFolders'
+        'All': 'allFolders',
+        'Select': 'selectedFolders',
+        'None': 'noFolders'
     }.get(policy_type)
 
     param = zone_param(name, policy_type, description)
 
-    logging.getLogger().info('Adding zone. %s', {'name' : name})
+    logging.getLogger().info('Adding zone. %s', {'name': name})
 
     response = CTERAHost.execute('', 'addZone', param)
     try:
         process_response(response)
     except CTERAException as error:
-        logging.getLogger().error('Zone creation failed. %s', {'rc' : response.rc})
+        logging.getLogger().error('Zone creation failed. %s', {'rc': response.rc})
         raise error
 
-    logging.getLogger().info('Zone added. %s', {'name' : name})
+    logging.getLogger().info('Zone added. %s', {'name': name})
 
 
 def process_response(response):
@@ -183,8 +183,8 @@ def zone_param(name, policy_type, description=None, zid=None):
 def delete(CTERAHost, name):
     zone = get(CTERAHost, name)
 
-    logging.getLogger().info('Deleting zone. %s', {'zone' : name})
+    logging.getLogger().info('Deleting zone. %s', {'zone': name})
 
     response = CTERAHost.execute('', 'deleteZones', [zone.zoneId])
     if response == 'ok':
-        logging.getLogger().info('Zone deleted. %s', {'zone' : name})
+        logging.getLogger().info('Zone deleted. %s', {'zone': name})

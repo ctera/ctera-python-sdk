@@ -26,7 +26,7 @@ def connect(ctera_host, domain, username, password, ou):
     if ou is not None:
         param.ouPath = ou
 
-    logging.getLogger().info("Connecting to Active Directory. %s", {'domain' : domain, 'user' : username})
+    logging.getLogger().info("Connecting to Active Directory. %s", {'domain': domain, 'user': username})
 
     try:
         ctera_host.execute("/status/fileservices/cifs", "joinDomain", param)
@@ -43,10 +43,10 @@ def advanced_mapping(ctera_host, domain, start, end):
         if domain == mapping.domainFlatName:
             mapping.minID = start
             mapping.maxID = end
-            logging.getLogger().debug('Configuring advanced mapping. %s', {'domain' : domain, 'start' : start, 'end' : end})
+            logging.getLogger().debug('Configuring advanced mapping. %s', {'domain': domain, 'start': start, 'end': end})
             return ctera_host.put('/config/fileservices/cifs/idMapping/map', mappings)
 
-    logging.getLogger().error('Could not find domain name. %s', {'domain' : domain})
+    logging.getLogger().error('Could not find domain name. %s', {'domain': domain})
     raise CTERAException('Could not find domain name', None, domain=domain, domains=domains(ctera_host))
 
 
