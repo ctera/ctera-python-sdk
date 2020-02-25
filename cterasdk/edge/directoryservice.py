@@ -1,66 +1,62 @@
 import logging
 
-from .network import tcp_connect
 from ..common import Object
 from ..exception import CTERAException, CTERAConnectionError
+from .base_command import BaseCommand
 
 
-def connect(ctera_host, domain, username, password, ou):
-    host = ctera_host.host()
-    port = 389
-    tcp_conn_status = tcp_connect(ctera_host, address=domain, port=port)
+class DirectoryService(BaseCommand):
 
-    if not tcp_conn_status:
-        logging.getLogger().error("Connection failed. No traffic allowed over port %(port)s", dict(port=port))
-        raise CTERAConnectionError('Unable to establish connection', None, host=host, port=port, protocol='LDAP')
+    def connect(self, domain, username, password, ou=None):
+        host = self._gateway.host()
+        port = 389
+        tcp_conn_status = self._gateway.network.tcp_connect(address=domain, port=port)
+        if not tcp_conn_status:
+            logging.getLogger().error("Connection failed. No traffic allowed over port %(port)s", dict(port=port))
+            raise CTERAConnectionError('Unable to establish connection', None, host=host, port=port, protocol='LDAP')
 
-    cifs = ctera_host.get('/config/fileservices/cifs')
-    cifs.type = "domain"
-    cifs.domain = domain
-    cifs.workgroup = None
-    ctera_host.put('/config/fileservices/cifs', cifs)
+        cifs = self._gateway.get('/config/fileservices/cifs')
+        cifs.type = "domain"
+        cifs.domain = domain
+        cifs.workgroup = None
+        self._gateway.put('/config/fileservices/cifs', cifs)
 
-    param = Object()
-    param.username = username
-    param.password = password
-    if ou is not None:
-        param.ouPath = ou
+        param = Object()
+        param.username = username
+        param.password = password
+        if ou is not None:
+            param.ouPath = ou
+        logging.getLogger().info("Connecting to Active Directory. %s", {'domain': domain, 'user': username})
 
-    logging.getLogger().info("Connecting to Active Directory. %s", {'domain': domain, 'user': username})
+        try:
+            self._gateway.execute("/status/fileservices/cifs", "joinDomain", param)
+        except CTERAException as error:
+            logging.getLogger().error("Failed connecting to Active Directory.")
+            raise error
+        logging.getLogger().info("Connected to Active Directory.")
 
-    try:
-        ctera_host.execute("/status/fileservices/cifs", "joinDomain", param)
-    except CTERAException as error:
-        logging.getLogger().error("Failed connecting to Active Directory.")
-        raise error
+    def advanced_mapping(self, domain, start, end):
+        mappings = self._gateway.get('/config/fileservices/cifs/idMapping/map')
+        for mapping in mappings:
+            if domain == mapping.domainFlatName:
+                mapping.minID = start
+                mapping.maxID = end
+                logging.getLogger().debug('Configuring advanced mapping. %s', {'domain': domain, 'start': start, 'end': end})
+                return self._gateway.put('/config/fileservices/cifs/idMapping/map', mappings)
 
-    logging.getLogger().info("Connected to Active Directory.")
+        logging.getLogger().error('Could not find domain name. %s', {'domain': domain})
+        raise CTERAException('Could not find domain name', None, domain=domain, domains=self.domains())
 
+    def domains(self):
+        return [domain.flatName for domain in self._gateway.execute('/status/fileservices/cifs', 'enumDiscoveredDomains')]
 
-def advanced_mapping(ctera_host, domain, start, end):
-    mappings = ctera_host.get('/config/fileservices/cifs/idMapping/map')
-    for mapping in mappings:
-        if domain == mapping.domainFlatName:
-            mapping.minID = start
-            mapping.maxID = end
-            logging.getLogger().debug('Configuring advanced mapping. %s', {'domain': domain, 'start': start, 'end': end})
-            return ctera_host.put('/config/fileservices/cifs/idMapping/map', mappings)
+    def disconnect(self):
+        logging.getLogger().info("Disconnecting from Active Directory.")
 
-    logging.getLogger().error('Could not find domain name. %s', {'domain': domain})
-    raise CTERAException('Could not find domain name', None, domain=domain, domains=domains(ctera_host))
+        cifs = self._gateway.get('/config/fileservices/cifs')
+        cifs.type = "workgroup"
+        cifs.workgroup = "CTERA"
+        cifs.domain = None
 
-
-def domains(ctera_host):
-    return [domain.flatName for domain in ctera_host.execute('/status/fileservices/cifs', 'enumDiscoveredDomains')]
-
-
-def disconnect(ctera_host):
-    logging.getLogger().info("Disconnecting from Active Directory.")
-
-    cifs = ctera_host.get('/config/fileservices/cifs')
-    cifs.type = "workgroup"
-    cifs.workgroup = "CTERA"
-    cifs.domain = None
-
-    ctera_host.put('/config/fileservices/cifs', cifs)
-    logging.getLogger().info("Disconnected from Active Directory.")
+        self._gateway.put('/config/fileservices/cifs', cifs)
+        logging.getLogger().info("Disconnected from Active Directory.")

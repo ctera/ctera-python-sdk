@@ -1,32 +1,34 @@
 import logging
 
 from ..common import Object
-from .enum import Mode
+from . import enum
+from .base_command import BaseCommand
 
 
-def enable(ctera_host, server, port, proto, minSeverity):
-    obj = Object()
-    obj.mode = Mode.Enabled
-    obj.server = server
-    obj.port = port
-    obj.proto = proto
-    obj.minSeverity = minSeverity
+class Syslog(BaseCommand):
 
-    logging.getLogger().info("Configuring syslog server.")
-    ctera_host.put('/config/logging/syslog', obj)
-    logging.getLogger().info(
-        "Syslog server configured. %s",
-        {'server': server, 'port': port, 'protocol': proto, 'minSeverity': minSeverity}
-    )
+    def enable(self, server, port=514, proto=enum.IPProtocol.UDP, minSeverity=enum.Severity.INFO):
+        obj = Object()
+        obj.mode = enum.Mode.Enabled
+        obj.server = server
+        obj.port = port
+        obj.proto = proto
+        obj.minSeverity = minSeverity
 
+        logging.getLogger().info("Configuring syslog server.")
+        self._gateway.put('/config/logging/syslog', obj)
+        logging.getLogger().info(
+            "Syslog server configured. %s",
+            {'server': server, 'port': port, 'protocol': proto, 'minSeverity': minSeverity}
+        )
 
-def disable(ctera_host):
-    '''
-    {
-        "desc": "Disable log forwarding over syslog"
-    }
-    '''
+    def disable(self):
+        '''
+        {
+            "desc": "Disable log forwarding over syslog"
+        }
+        '''
 
-    logging.getLogger().info("Disabling syslog server.")
-    ctera_host.put('/config/logging/syslog/mode', Mode.Disabled)
-    logging.getLogger().info("Syslog server disabled.")
+        logging.getLogger().info("Disabling syslog server.")
+        self._gateway.put('/config/logging/syslog/mode', enum.Mode.Disabled)
+        logging.getLogger().info("Syslog server disabled.")

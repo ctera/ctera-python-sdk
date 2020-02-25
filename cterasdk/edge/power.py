@@ -2,56 +2,57 @@ import logging
 import time
 
 from ..exception import HostUnreachable, ExhaustedException
+from .base_command import BaseCommand
 
 
-def reboot(CTERAHost, wait):
-    logging.getLogger().info("Rebooting device. %s", {'host': CTERAHost.host()})
-    CTERAHost.execute("/status/device", "reboot", None)
-    if wait:
-        Boot(CTERAHost).wait()
+class Power(BaseCommand):
 
+    def reboot(self, wait=False):
+        logging.getLogger().info("Rebooting device. %s", {'host': self._gateway.host()})
+        self._gateway.execute("/status/device", "reboot", None)
+        if wait:
+            Boot(self._gateway).wait()
 
-def shutdown(ctera_host):
-    ctera_host.execute("/status/device", "poweroff", None)
+    def shutdown(self):
+        self._gateway.execute("/status/device", "poweroff", None)
 
-
-def reset(CTERAHost, wait):
-    CTERAHost.execute("/status/device", "reset2default", None)
-    logging.getLogger().info("Resetting device to default settings. %s", {'host': CTERAHost.host()})
-    if wait:
-        Boot(CTERAHost).wait()
+    def reset(self, wait=False):
+        self._gateway.execute("/status/device", "reset2default", None)
+        logging.getLogger().info("Resetting device to default settings. %s", {'host': self._gateway.host()})
+        if wait:
+            Boot(self._gateway).wait()
 
 
 class Boot:
 
-    def __init__(self, CTERAHost, retries=60, seconds=5):
-        self.CTERAHost = CTERAHost
-        self.retries = retries
-        self.seconds = seconds
-        self.attempt = 0
+    def __init__(self, gateway, retries=60, seconds=5):
+        self._gateway = gateway
+        self._retries = retries
+        self._seconds = seconds
+        self._attempt = 0
 
     def wait(self):
         while True:
             try:
-                self.increment()
-                logging.getLogger().debug('Checking if device is up and running. %s', {'attempt': self.attempt})
-                self.CTERAHost.test()
+                self._increment()
+                logging.getLogger().debug('Checking if device is up and running. %s', {'attempt': self._attempt})
+                self._gateway.test()
                 logging.getLogger().info("Device is back up and running.")
                 break
             except (HostUnreachable, ExhaustedException) as e:
                 logging.getLogger().debug('Exception. %s', {'exception': e.classname, 'message': e.message})
 
-    def increment(self):
-        self.attempt = self.attempt + 1
-        if self.attempt >= self.retries:
-            self.unreachable()
-        logging.getLogger().debug('Sleep. %s', {'seconds': self.seconds})
-        time.sleep(self.seconds)
+    def _increment(self):
+        self._attempt = self._attempt + 1
+        if self._attempt >= self._retries:
+            self._unreachable()
+        logging.getLogger().debug('Sleep. %s', {'seconds': self._seconds})
+        time.sleep(self._seconds)
 
-    def unreachable(self):
-        scheme = self.CTERAHost.scheme()
-        host = self.CTERAHost.host()
-        port = self.CTERAHost.port()
+    def _unreachable(self):
+        scheme = self._gateway.scheme()
+        host = self._gateway.host()
+        port = self._gateway.port()
 
         logging.getLogger().error('Timed out. Could not reach host. %s', {'scheme': scheme, 'host': host, 'port': port})
         raise HostUnreachable(None, host, port, scheme)

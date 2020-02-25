@@ -1,60 +1,58 @@
 import logging
 
+from .base_command import BaseCommand
 from ..lib import Iterator, Command
 from ..common import Object
 from . import query
 
 
-def query_portals(ctera_host, param):
-    response = ctera_host.execute('', 'getPortalsDisplayInfo', param)
-    return (response.hasMore, response.objects)
+class Portals(BaseCommand):
+    def query_portals(self, param):
+        response = self._portal.execute('', 'getPortalsDisplayInfo', param)
+        return (response.hasMore, response.objects)
 
+    def tenants(self, include_deleted=False):
+        # Check if current session is global admin
+        param = query.QueryParamBuilder().include_classname().put('isTrashcan', include_deleted).build()
+        function = Command(self.query_portals)
+        return Iterator(function, param)
 
-def portals(ctera_host, include_deleted=False):
-    # Check if current session is global admin
-    param = query.QueryParamBuilder().include_classname().put('isTrashcan', include_deleted).build()
-    function = Command(query_portals, ctera_host)
-    return Iterator(function, param)
+    def add(self, name, display_name=None, billing_id=None, company=None):
+        param = Object()
+        param._classname = 'TeamPortal'  # pylint: disable=protected-access
+        param.name = name
+        param.displayName = display_name
+        param.externalPortalId = billing_id
+        param.companyName = company
 
+        logging.getLogger().info('Creating Team Portal. %s', {'name': name})
 
-def add(ctera_host, name, display_name, billing_id, company):
-    param = Object()
-    param._classname = 'TeamPortal'  # pylint: disable=protected-access
-    param.name = name
-    param.displayName = display_name
-    param.externalPortalId = billing_id
-    param.companyName = company
+        response = self._portal.add('/teamPortals', param)
 
-    ctera_host.browse_global_admin()
+        logging.getLogger().info('Team Portal created. %s', {'name': name})
 
-    logging.getLogger().info('Creating Team Portal. %s', {'name': name})
+        return response
 
-    response = ctera_host.add('/teamPortals', param)
+    def delete(self, name):
+        logging.getLogger().info('Deleting Portal. %s', {'name': name})
 
-    logging.getLogger().info('Team Portal created. %s', {'name': name})
+        response = self._portal.execute('/teamPortals/' + name, 'delete')
 
-    return response
+        logging.getLogger().info('Portal deleted. %s', {'name': name})
 
+        return response
 
-def delete(ctera_host, name):
-    logging.getLogger().info('Deleting Portal. %s', {'name': name})
+    def undelete(self, name):
+        logging.getLogger().info('Recovering Portal. %s', {'name': name})
 
-    response = ctera_host.execute('/teamPortals/' + name, 'delete')
+        response = self._portal.execute('/teamPortals/' + name, 'moveFromTrashcan')
 
-    logging.getLogger().info('Portal deleted. %s', {'name': name})
+        logging.getLogger().info('Portal recovered. %s', {'name': name})
 
-    return response
+        return response
 
+    def browse(self, tenant):
+        self._portal.put('/currentPortal', tenant)
 
-def undelete(ctera_host, name):
-    logging.getLogger().info('Recovering Portal. %s', {'name': name})
-
-    response = ctera_host.execute('/teamPortals/' + name, 'moveFromTrashcan')
-
-    logging.getLogger().info('Portal recovered. %s', {'name': name})
-
-    return response
-
-
-def browse(ctera_host, tenant):
-    ctera_host.put('/currentPortal', tenant)
+    def browse_global_admin(self):
+        self.browse('')

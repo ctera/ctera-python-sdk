@@ -1,11 +1,14 @@
 import logging
 
 from .enum import Mode
+from .base_command import BaseCommand
 
 
-def disable(ctera_host):
-    logging.getLogger().info('Disabling AFP server.')
+class AFP(BaseCommand):
 
-    ctera_host.put('/config/fileservices/afp/mode', Mode.Disabled)
+    def disable(self):
+        logging.getLogger().info('Disabling AFP server.')
 
-    logging.getLogger().info('AFP server disabled.')
+        self._gateway.put('/config/fileservices/afp/mode', Mode.Disabled)
+
+        logging.getLogger().info('AFP server disabled.')

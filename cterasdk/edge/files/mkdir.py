@@ -35,7 +35,7 @@ def _mkdir(ctera_host, path):
     fullpath = path.fullpath()
     logging.getLogger().info('Creating directory. %s', {'path': fullpath})
     try:
-        ctera_host.mkcol(ctera_host._files(), fullpath)  # pylint: disable=protected-access
+        ctera_host.mkcol(fullpath, use_file_url=True)
     except CTERAException as error:
         _process_error(error, fullpath)
     logging.getLogger().info('Directory created. %s', {'path': fullpath})

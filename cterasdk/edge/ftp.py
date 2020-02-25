@@ -1,11 +1,14 @@
 import logging
 
 from .enum import Mode
+from .base_command import BaseCommand
 
 
-def disable(ctera_host):
-    logging.getLogger().info('Disabling FTP server.')
+class FTP(BaseCommand):
 
-    ctera_host.put('/config/fileservices/ftp/mode', Mode.Disabled)
+    def disable(self):
+        logging.getLogger().info('Disabling FTP server.')
 
-    logging.getLogger().info('FTP server disabled.')
+        self._gateway.put('/config/fileservices/ftp/mode', Mode.Disabled)
+
+        logging.getLogger().info('FTP server disabled.')

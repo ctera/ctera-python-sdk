@@ -1,20 +1,41 @@
-from .enum import Mode
+from . import enum
 from ..common import Object
+from .base_command import BaseCommand
 
 
-def enable(ctera_host, path, auditEvents, logKeepPeriod, maxLogKBSize, maxRotateTime, includeAuditLogTag, humanReadableAuditLog):
-    settings = Object()
-    settings.mode = Mode.Enabled
-    settings.path = path
-    settings.auditEvents = auditEvents
-    settings.logKeepPeriod = logKeepPeriod
-    settings.maxLogKBSize = maxLogKBSize
-    settings.maxRotateTime = maxRotateTime
-    settings.includeAuditLogTag = includeAuditLogTag
-    settings.humanReadableAuditLog = humanReadableAuditLog
+class Audit(BaseCommand):
 
-    ctera_host.put('/config/logging/files', settings)
+    defaultAuditEvents = [
+        enum.AuditEvents.CreateFilesWriteData,
+        enum.AuditEvents.CreateFoldersAppendData,
+        enum.AuditEvents.WriteExtendedAttributes,
+        enum.AuditEvents.DeleteSubfoldersAndFiles,
+        enum.AuditEvents.WriteAttributes,
+        enum.AuditEvents.Delete,
+        enum.AuditEvents.ChangePermissions,
+        enum.AuditEvents.ChangeOwner
+    ]
 
+    def enable(
+            self,
+            path,
+            auditEvents=None,
+            logKeepPeriod=30,
+            maxLogKBSize=102400,
+            maxRotateTime=1440,
+            includeAuditLogTag=True,
+            humanReadableAuditLog=False):
+        settings = Object()
+        settings.mode = enum.Mode.Enabled
+        settings.path = path
+        settings.auditEvents = auditEvents or Audit.defaultAuditEvents
+        settings.logKeepPeriod = logKeepPeriod
+        settings.maxLogKBSize = maxLogKBSize
+        settings.maxRotateTime = maxRotateTime
+        settings.includeAuditLogTag = includeAuditLogTag
+        settings.humanReadableAuditLog = humanReadableAuditLog
 
-def disable(ctera_host):
-    ctera_host.put('/config/logging/files/mode', Mode.Disabled)
+        self._gateway.put('/config/logging/files', settings)
+
+    def disable(self):
+        self._gateway.put('/config/logging/files/mode', enum.Mode.Disabled)

@@ -23,6 +23,3 @@ class FileBrowser:
     @staticmethod
     def mkpath(path):
         return CTERAPath(path, '/')
-
-    def _files(self):
-        return self._CTERAHost._files()  # pylint: disable=protected-access

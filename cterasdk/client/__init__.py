@@ -1,1 +1,1 @@
-from .host import NetworkHost, CTERAHost  # noqa: E402, F401
+from .host import NetworkHost, CTERAHost, authenticated  # noqa: E402, F401

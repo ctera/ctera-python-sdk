@@ -6,10 +6,10 @@ from ..exception import CTERAException
 def api(Gateway):
     session = Gateway.session()
     if session.local():                             # direct access, via IP, hostname or FQDN
-        return local(Gateway._baseurl())  # pylint: disable=protected-access
+        return local(Gateway.baseurl())
 
     if session.remote():
-        baseurl = Gateway._Portal._baseurl()  # pylint: disable=protected-access
+        baseurl = Gateway._Portal.base_api_url()  # pylint: disable=protected-access
         device = Gateway.host()
         if session.remote_access():
             return remote_access(baseurl, device)   # remote: Gateway.remote_access()
@@ -36,12 +36,12 @@ def remote_access(baseurl, device):
 def files(Gateway):
     session = Gateway.session()
     if session.local():
-        baseurl = Gateway._baseurl()  # pylint: disable=protected-access
+        baseurl = Gateway.baseurl()
         return '%s/localFiles' % (baseurl)
 
     if session.remote():
         if session.remote_access():
-            baseurl = Gateway._Portal._baseurl()  # pylint: disable=protected-access
+            baseurl = Gateway._Portal.base_api_url()  # pylint: disable=protected-access
             device = Gateway.host()
             return '%s/devices/%s/localFiles' % (baseurl, device)
     raise CTERAException('Invalid connection type', session)

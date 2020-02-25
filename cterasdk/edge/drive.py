@@ -1,29 +1,31 @@
 import logging
 
 from ..common import Object
+from .base_command import BaseCommand
 
 
-def format_drive(ctera_host, name):
-    '''
-    {
-        "desc": "Format a drive"
-    }
-    '''
-    param = Object()
-    param.name = name
+class Drive(BaseCommand):
 
-    ctera_host.execute("/proc/storage", "format", param)
+    def format(self, name):
+        '''
+        {
+            "desc": "Format a drive"
+        }
+        '''
+        param = Object()
+        param.name = name
 
-    logging.getLogger().info('Formatting drive. %s', {'drive': name})
+        self._gateway.execute("/proc/storage", "format", param)
 
+        logging.getLogger().info('Formatting drive. %s', {'drive': name})
 
-def format_all(ctera_host):
-    '''
-    {
-        "desc": "Format all drives"
-    }
-    '''
-    drives = ctera_host.get('/status/storage/disks')
+    def format_all(self):
+        '''
+        {
+            "desc": "Format all drives"
+        }
+        '''
+        drives = self._gateway.get('/status/storage/disks')
 
-    for drive in drives:
-        format_drive(ctera_host, drive.name)
+        for drive in drives:
+            self.format(drive.name)

@@ -1,9 +1,12 @@
 import logging
 
 from .enum import Mode
+from .base_command import BaseCommand
 
 
-def disable(ctera_host):
-    logging.getLogger().info('Disabling RSync server.')
-    ctera_host.put('/config/fileservices/rsync/server', Mode.Disabled)
-    logging.getLogger().info('RSync server disabled.')
+class RSync(BaseCommand):
+
+    def disable(self):
+        logging.getLogger().info('Disabling RSync server.')
+        self._gateway.put('/config/fileservices/rsync/server', Mode.Disabled)
+        logging.getLogger().info('RSync server disabled.')

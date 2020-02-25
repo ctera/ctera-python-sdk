@@ -19,7 +19,6 @@ __all__ = list(
             'groups',
             'licenses',
             'login',
-            'whoami',
             'logs',
             'mail',
             'network',

@@ -1,31 +1,34 @@
 from datetime import datetime
 
+from .base_command import BaseCommand
 from ..lib import Iterator, Command
+from ..core import enum
 from . import query
 
 
-def query_logs(ctera_host, param):
-    response = ctera_host.execute('', 'queryLogs', param)
-    return (response.hasMore, response.logs)
+class Logs(BaseCommand):
 
+    def logs(self, topic=enum.LogTopic.System, minSeverity=enum.Severity.INFO, _originType=enum.OriginType.Portal, before=None, after=None):
+        builder = query.QueryParamBuilder().put('topic', topic).put('minSeverity', minSeverity)
 
-def logs(ctera_host, topic, minSeverity, _originType, before, after):
-    builder = query.QueryParamBuilder().put('topic', topic).put('minSeverity', minSeverity)
+        if before is not None:
+            builder.addFilter(query.FilterBuilder('time').before(self.strptime(before)))
 
-    if before is not None:
-        builder.addFilter(query.FilterBuilder('time').before(strptime(before)))
+        if after is not None:
+            builder.addFilter(query.FilterBuilder('time').after(self.strptime(after)))
 
-    if after is not None:
-        builder.addFilter(query.FilterBuilder('time').after(strptime(after)))
+        param = builder.build()
+        function = Command(self._query_logs)
 
-    param = builder.build()
-    function = Command(query_logs, ctera_host)
+        return Iterator(function, param)
 
-    return Iterator(function, param)
+    def _query_logs(self, param):
+        response = self._portal.execute('', 'queryLogs', param)
+        return (response.hasMore, response.logs)
 
-
-def strptime(datetime_str):
-    try:
-        return datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
-    except ValueError as error:
-        raise error
+    @staticmethod
+    def strptime(datetime_str):
+        try:
+            return datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
+        except ValueError as error:
+            raise error

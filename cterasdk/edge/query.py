@@ -6,7 +6,7 @@ def query(CTERAHost, path, key, value):
     param = Object()
     param.key = key
     param.value = value
-    return CTERAHost.db(CTERAHost._api(), path, 'query', param)  # pylint: disable=protected-access
+    return CTERAHost.db(path, 'query', param)
 
 
 def show(CTERAHost, path, key, value):

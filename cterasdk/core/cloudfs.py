@@ -1,120 +1,81 @@
 import logging
 
+from .base_command import BaseCommand
 from . import query
 from ..common import Object
 from ..exception import CTERAException
 
 
-class CloudFS:
-
-    def __init__(self, Portal):
-        self._CTERAHost = Portal
+class CloudFS(BaseCommand):
 
     def mkfg(self, name, user=None):
-        return mkfg(self._CTERAHost, name, user)
+        param = Object()
+        param.name = name
+        param.disabled = True
+        param.owner = self._portal.get('/users/' + user + '/baseObjectRef') if user is not None else None
+
+        try:
+            response = self._portal.execute('', 'createFolderGroup', param)
+            logging.getLogger().info('Folder group created. %s', {'name': name, 'owner': param.owner})
+            return response
+        except CTERAException as error:
+            logging.getLogger().error('Folder group creation failed. %s', {'name': name, 'owner': user})
+            raise error
 
     def rmfg(self, name):
-        return rmfg(self._CTERAHost, name)
+        logging.getLogger().info('Deleting folder group. %s', {'name': name})
+        self._portal.execute('/foldersGroups/' + name, 'deleteGroup', True)
+        logging.getLogger().info('Folder group deleted. %s', {'name': name})
 
     def mkdir(self, name, group, owner, winacls=True):
-        return mkdir(self._CTERAHost, name, group, owner, winacls)
+        owner = self._portal.get('/users/' + owner + '/baseObjectRef')
+        group = self._portal.get('/foldersGroups/' + group + '/baseObjectRef')
+
+        param = Object()
+        param.name = name
+        param.owner = owner
+        param.group = group
+        param.enableSyncWinNtExtendedAttributes = winacls
+
+        try:
+            response = self._portal.execute('', 'addCloudDrive', param)
+            logging.getLogger().info(
+                'Created directory. %s',
+                {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls}
+            )
+            return response
+        except CTERAException as error:
+            logging.getLogger().error(
+                'Cloud drive folder creation failed. %s',
+                {'name': name, 'folder_group': group, 'owner': owner, 'win_acls': winacls}
+            )
+            raise error
 
     def delete(self, name, owner):
-        return delete(self._CTERAHost, name, owner)
+        path = self._dirpath(name, owner)
+        logging.getLogger().info('Deleting cloud drive folder. %s', {'path': path})
+        self._portal.files().delete(path)
 
     def undelete(self, name, owner):
-        return undelete(self._CTERAHost, name, owner)
+        path = self._dirpath(name, owner)
+        logging.getLogger().info('Restoring cloud drive folder. %s', {'path': path})
+        self._portal.files().undelete(path)
 
     def find(self, name, owner, include):
-        return find(self._CTERAHost, name, owner, include)
+        builder = query.QueryParamBuilder().include(include)
+        query_filter = query.FilterBuilder('name').eq(name)
+        builder.addFilter(query_filter)
+        param = builder.build()
 
-    def _files(self):
-        return self._CTERAHost._files()  # pylint: disable=protected-access
+        iterator = query.iterator(self._portal, '/cloudDrives', param)
+        for cloud_folder in iterator:
+            if cloud_folder.owner.endswith(owner):
+                return cloud_folder
 
-    def _baseurl(self):
-        return self._CTERAHost.baseurl() + self._CTERAHost._files()  # pylint: disable=protected-access
+        logging.getLogger().info('Could not find cloud folder. %s', {'folder': name, 'owner': owner})
+        raise CTERAException('Could not find cloud folder', None, folder=name, owner=owner)
 
-
-def mkdir(ctera_host, name, group, owner, winacls):
-    owner = ctera_host.get('/users/' + owner + '/baseObjectRef')
-    group = ctera_host.get('/foldersGroups/' + group + '/baseObjectRef')
-
-    param = Object()
-    param.name = name
-    param.owner = owner
-    param.group = group
-    param.enableSyncWinNtExtendedAttributes = winacls
-
-    try:
-        response = ctera_host.execute('', 'addCloudDrive', param)
-        logging.getLogger().info(
-            'Created directory. %s',
-            {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls}
-        )
-        return response
-    except CTERAException as error:
-        logging.getLogger().error(
-            'Cloud drive folder creation failed. %s',
-            {'name': name, 'folder_group': group, 'owner': owner, 'win_acls': winacls}
-        )
-        raise error
-
-
-def delete(ctera_host, name, owner):
-    path = _dirpath(ctera_host, name, owner)
-    logging.getLogger().info('Deleting cloud drive folder. %s', {'path': path})
-    ctera_host.files().delete(path)
-
-
-def undelete(ctera_host, name, owner):
-    path = _dirpath(ctera_host, name, owner)
-    logging.getLogger().info('Restoring cloud drive folder. %s', {'path': path})
-    ctera_host.files().undelete(path)
-
-
-def find(ctera_host, name, owner, include):
-    builder = query.QueryParamBuilder().include(include)
-    query_filter = query.FilterBuilder('name').eq(name)
-    builder.addFilter(query_filter)
-    param = builder.build()
-
-    iterator = ctera_host.iterator('/cloudDrives', param)
-    for cloud_folder in iterator:
-        if cloud_folder.owner.endswith(owner):
-            return cloud_folder
-
-    logging.getLogger().info('Could not find cloud folder. %s', {'folder': name, 'owner': owner})
-    raise CTERAException('Could not find cloud folder', None, folder=name, owner=owner)
-
-
-def _dirpath(ctera_host, name, owner):
-    owner = ctera_host.get('/users/' + owner + '/displayName')
-    path = owner + '/' + name
-    return path
-
-
-def mkfg(ctera_host, name, user):
-    param = Object()
-    param.name = name
-    param.disabled = True
-
-    if user is None:
-        param.owner = None
-    else:
-        param.owner = ctera_host.get('/users/' + user + '/baseObjectRef')
-
-    try:
-        response = ctera_host.execute('', 'createFolderGroup', param)
-        logging.getLogger().info('Folder group created. %s', {'name': name, 'owner': param.owner})
-        return response
-    except CTERAException as error:
-        logging.getLogger().error('Folder group creation failed. %s', {'name': name, 'owner': user})
-        raise error
-
-
-def rmfg(ctera_host, name):
-    logging.getLogger().info('Deleting folder group. %s', {'name': name})
-
-    ctera_host.execute('/foldersGroups/' + name, 'deleteGroup', True)
-
-    logging.getLogger().info('Folder group deleted. %s', {'name': name})
+    def _dirpath(self, name, owner):
+        owner = self._portal.get('/users/' + owner + '/displayName')
+        path = owner + '/' + name
+        return path

@@ -1,19 +1,21 @@
 import logging
 
+from .base_command import BaseCommand
 from . import session
 
 
-def login(ctera_host, username, password):
-    ctera_host.form_data('/login', {'j_username': username, 'j_password': password})
+class Login(BaseCommand):
 
-    logging.getLogger().info("User logged in. %s", {'host': ctera_host.host(), 'user': username})
+    def login(self, username, password):
+        self._portal.form_data('/login', {'j_username': username, 'j_password': password})
 
-    session.activate(ctera_host)
+        logging.getLogger().info("User logged in. %s", {'host': self._portal.host(), 'user': username})
 
+        session.activate(self._portal)
 
-def logout(ctera_host):
-    ctera_host.form_data('/logout', {})
+    def logout(self):
+        self._portal.form_data('/logout', {})
 
-    logging.getLogger().info("User logged out. %s", {'host': ctera_host.host()})
+        logging.getLogger().info("User logged out. %s", {'host': self._portal.host()})
 
-    session.terminate(ctera_host)
+        session.terminate(self._portal)

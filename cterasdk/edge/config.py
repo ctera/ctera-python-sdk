@@ -1,19 +1,20 @@
 import logging
 
-
-def get_location(ctera_host):
-    return ctera_host.get('/config/device/location')
+from .base_command import BaseCommand
 
 
-def set_location(ctera_host, location):
-    logging.getLogger().info('Configuring device location. %s', {'location': location})
-    return ctera_host.put('/config/device/location', location)
+class Config(BaseCommand):
 
+    def get_location(self):
+        return self._gateway.get('/config/device/location')
 
-def get_hostname(ctera_host):
-    return ctera_host.get('/config/device/hostname')
+    def set_location(self, location):
+        logging.getLogger().info('Configuring device location. %s', {'location': location})
+        return self._gateway.put('/config/device/location', location)
 
+    def get_hostname(self):
+        return self._gateway.get('/config/device/hostname')
 
-def set_hostname(ctera_host, hostname):
-    logging.getLogger().info('Configuring device hostname. %s', {'hostname': hostname})
-    return ctera_host.put('/config/device/hostname', hostname)
+    def set_hostname(self, hostname):
+        logging.getLogger().info('Configuring device hostname. %s', {'hostname': hostname})
+        return self._gateway.put('/config/device/hostname', hostname)
