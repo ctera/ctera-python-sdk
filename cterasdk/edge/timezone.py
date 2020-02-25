@@ -1,9 +1,12 @@
 import logging
+from .base_command import BaseCommand
 
 
-def set_timezone(ctera_host, timezone):
-    logging.getLogger().info("Updating timezone. %s", {'timezone': timezone})
+class Timezone(BaseCommand):
 
-    ctera_host.put('/config/time/TimeZone', timezone)
+    def set_timezone(self, timezone):
+        logging.getLogger().info("Updating timezone. %s", {'timezone': timezone})
 
-    logging.getLogger().info("Timezone updated. %s", {'timezone': timezone})
+        self._gateway.put('/config/time/TimeZone', timezone)
+
+        logging.getLogger().info("Timezone updated. %s", {'timezone': timezone})

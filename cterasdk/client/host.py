@@ -1,3 +1,4 @@
+import functools
 import logging
 import socket
 
@@ -5,6 +6,18 @@ from ..common import Object
 from ..convert import tojsonstr
 from ..exception import HostUnreachable
 from .cteraclient import CTERAClient
+from ..exception import CTERAException
+
+
+def authenticated(function):
+    @functools.wraps(function)
+    def check_authenticated_and_call(self, *args, **kwargs):
+        if self._is_authenticated(function, *args, **kwargs):  # pylint: disable=protected-access
+            return function(self, *args, **kwargs)
+        logging.getLogger().error('Not logged in.')
+        raise CTERAException('Not logged in')
+
+    return check_authenticated_and_call
 
 
 class NetworkHost:
@@ -12,6 +25,10 @@ class NetworkHost:
         self._host = host
         self._port = port
         self._https = https
+
+    @property
+    def _omit_fields(self):
+        return []
 
     def test_conn(self):
         logging.getLogger().debug('Testing connection. %s', {'host': self.host(), 'port': self.port()})
@@ -46,16 +63,27 @@ class NetworkHost:
 
     def __str__(self):
         x = Object()
-        x.__dict__ = {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+        x.__dict__ = {k: v for k, v in self.__dict__.items() if not (k.startswith('_') or k in self._omit_fields)}
         return tojsonstr(x)
 
 
 class CTERAHost(NetworkHost):
 
     def __init__(self, host, port, https):
-        super(CTERAHost, self).__init__(host, port, https)
+        super().__init__(host, port, https)
         self._ctera_client = CTERAClient()
         self._session = None
+
+    @property
+    def base_api_url(self):
+        raise NotImplementedError("Implementing class must implement the base_api_url property")
+
+    @property
+    def base_file_url(self):
+        raise NotImplementedError("Implementing class must implement the base_api_url property")
+
+    def _is_authenticated(self, function, *args, **kwargs):
+        raise NotImplementedError("Implementing class must implement the _is_authenticated method")
 
     def session(self):
         return self._session
@@ -63,52 +91,66 @@ class CTERAHost(NetworkHost):
     def register_session(self, session):
         self._session = session
 
-    def get(self, baseurl, path, params):
-        return self._ctera_client.get(baseurl, path, params)
+    @authenticated
+    def get(self, path, params=None, use_file_url=False):
+        return self._ctera_client.get(self.base_file_url if use_file_url else self.base_api_url, path, params or {})
 
-    def openfile(self, baseurl, path, params):
-        return self._ctera_client.download(baseurl, path, params)
+    @authenticated
+    def openfile(self, path, params=None, use_file_url=False):
+        return self._ctera_client.download(self.base_file_url if use_file_url else self.base_api_url, path, params or {})
 
-    def show(self, baseurl, path):
-        print(tojsonstr(CTERAHost.get(self, baseurl, path, params={})))
+    @authenticated
+    def show(self, path, use_file_url=False):
+        print(tojsonstr(self.get(path, params={}, use_file_url=use_file_url)))
 
-    def get_multi(self, baseurl, path, paths):
-        return self._ctera_client.get_multi(baseurl, path, paths)
+    @authenticated
+    def get_multi(self, path, paths, use_file_url=False):
+        return self._ctera_client.get_multi(self.base_file_url if use_file_url else self.base_api_url, path, paths)
 
-    def show_multi(self, baseurl, path, paths):
-        print(tojsonstr(self.get_multi(baseurl, path, paths)))
+    @authenticated
+    def show_multi(self, path, paths, use_file_url=False):
+        print(tojsonstr(self.get_multi(path, paths, use_file_url=use_file_url)))
 
-    def put(self, baseurl, path, value):
-        response = self._ctera_client.put(baseurl, path, value)
+    @authenticated
+    def put(self, path, value, use_file_url=False):
+        response = self._ctera_client.put(self.base_file_url if use_file_url else self.base_api_url, path, value)
         logging.getLogger().debug('Configuration changed. %s', {'url': path, 'value': value})
         return response
 
-    def post(self, baseurl, path, value):
-        response = self._ctera_client.post(baseurl, path, value)
+    @authenticated
+    def post(self, path, value, use_file_url=False):
+        response = self._ctera_client.post(self.base_file_url if use_file_url else self.base_api_url, path, value)
         logging.getLogger().debug('Added. %s', {'url': path, 'value': value})
         return response
 
-    def form_data(self, baseurl, path, form_data):
+    def form_data(self, path, form_data, use_file_url=False):
+        return self._ctera_client.form_data(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
 
-        return self._ctera_client.form_data(baseurl, path, form_data)
-
-    def db(self, baseurl, path, name, param):
-        response = self._ctera_client.db(baseurl, path, name, param)
+    @authenticated
+    def db(self, path, name, param, use_file_url=False):
+        response = self._ctera_client.db(self.base_file_url if use_file_url else self.base_api_url, path, name, param)
         logging.getLogger().debug('Database method executed. %s', {'url': path, 'name': name, 'param': param})
         return response
 
-    def execute(self, baseurl, path, name, param):
-        response = self._ctera_client.execute(baseurl, path, name, param)
+    @authenticated
+    def execute(self, path, name, param=None, use_file_url=False):
+        response = self._ctera_client.execute(self.base_file_url if use_file_url else self.base_api_url, path, name, param)
         logging.getLogger().debug('User-defined method executed. %s', {'url': path, 'name': name, 'param': param})
         return response
 
-    def add(self, baseurl, path, param):
-        return self.db(baseurl, path, 'add', param)
+    @authenticated
+    def add(self, path, param, use_file_url=False):
+        return self.db(path, 'add', param, use_file_url=use_file_url)
 
-    def delete(self, baseurl, path):
-        response = self._ctera_client.delete(baseurl, path)
+    @authenticated
+    def delete(self, path, use_file_url=False):
+        response = self._ctera_client.delete(self.base_file_url if use_file_url else self.base_api_url, path)
         logging.getLogger().debug('Deleted. %s', {'url': path})
         return response
 
-    def mkcol(self, baseurl, path):
-        return self._ctera_client.mkcol(baseurl, path)
+    @authenticated
+    def mkcol(self, path, use_file_url=False):
+        return self._ctera_client.mkcol(self.base_file_url if use_file_url else self.base_api_url, path)
+
+    def whoami(self):
+        return self._session.whoami()

@@ -2,30 +2,32 @@ import logging
 
 from ..common import Object
 from ..exception import CTERAException
+from .base_command import BaseCommand
 
 
-def enable(ctera_host, code):
-    status = ctera_host.get('/status/device')
-    version = status.runningFirmware
-    if version.count('.') == 2:
-        version = version + '.0'
+class Telnet(BaseCommand):
 
-    param = Object()
-    param.code = code
+    def enable(self, code):
+        status = self._gateway.get('/status/device')
+        version = status.runningFirmware
+        if version.count('.') == 2:
+            version = version + '.0'
 
-    logging.getLogger().info("Enabling telnet access.")
+        param = Object()
+        param.code = code
 
-    response = ctera_host.execute("/config/device", "startTelnetd", param)
-    if response == 'telnetd already running':
-        logging.getLogger().info("Telnet access already enabled.")
-    elif response != "OK":
-        logging.getLogger().error("Failed enabling telnet access. %s", {'reason': response})
-        raise CTERAException("Failed enabling telnet access", None, reason=response)
-    else:
-        logging.getLogger().info("Telnet access enabled.")
+        logging.getLogger().info("Enabling telnet access.")
 
+        response = self._gateway.execute("/config/device", "startTelnetd", param)
+        if response == 'telnetd already running':
+            logging.getLogger().info("Telnet access already enabled.")
+        elif response != "OK":
+            logging.getLogger().error("Failed enabling telnet access. %s", {'reason': response})
+            raise CTERAException("Failed enabling telnet access", None, reason=response)
+        else:
+            logging.getLogger().info("Telnet access enabled.")
 
-def disable(ctera_host):
-    logging.getLogger().info("Disabling telnet access.")
-    ctera_host.execute("/config/device", "stopTelnetd")
-    logging.getLogger().info("Telnet access disabled.")
+    def disable(self):
+        logging.getLogger().info("Disabling telnet access.")
+        self._gateway.execute("/config/device", "stopTelnetd")
+        logging.getLogger().info("Telnet access disabled.")

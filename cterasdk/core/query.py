@@ -6,7 +6,7 @@ from ..convert import tojsonstr
 
 
 def query(CTERAHost, path, param):
-    response = CTERAHost.db(CTERAHost._api(), path, 'query', param)  # pylint: disable=protected-access
+    response = CTERAHost.db(path, 'query', param)
     return (response.hasMore, response.objects)
 
 
@@ -17,7 +17,7 @@ def show(CTERAHost, path, param):
 
 
 def iterator(CTERAHost, path, param):
-    function = Command(CTERAHost.query, path)
+    function = Command(query, CTERAHost, path)
     return Iterator(function, param)
 
 

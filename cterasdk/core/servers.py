@@ -1,12 +1,14 @@
+from .base_command import BaseCommand
 from . import query
 from . import union
 
 
-default = ['name']
+class Servers(BaseCommand):
 
+    default = ['name']
 
-def servers(CTERAHost, include):
-    # browse administration
-    include = union.union(include, default)
-    param = query.QueryParamBuilder().include(include).build()
-    return CTERAHost.iterator('/servers', param)
+    def servers(self, include=None):
+        # browse administration
+        include = union.union(include or [], Servers.default)
+        param = query.QueryParamBuilder().include(include).build()
+        return query.iterator(self._portal, '/servers', param)

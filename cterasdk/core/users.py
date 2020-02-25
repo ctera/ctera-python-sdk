@@ -1,51 +1,53 @@
 import logging
 
+from .base_command import BaseCommand
 from ..common import Object
 from . import query
 from . import union
 
 
-default = ['name']
+class Users(BaseCommand):
 
+    default = ['name']
 
-def local_users(CTERAHost, include):
-    include = union.union(include, default)
-    param = query.QueryParamBuilder().include(include).build()
-    return CTERAHost.iterator('/users', param)
+    def local_users(self, include=None):
+        include = union.union(include or [], Users.default)
+        param = query.QueryParamBuilder().include(include).build()
+        return query.iterator(self._portal, '/users', param)
 
+    def domains(self):
+        return self._portal.get('/domains')
 
-def domain_users(CTERAHost, domain, include):
-    include = union.union(include, default)
-    param = query.QueryParamBuilder().include(include).build()
-    return CTERAHost.iterator('/domains/' + domain + '/adUsers', param)
+    def domain_users(self, domain, include=None):
+        include = union.union(include or [], Users.default)
+        param = query.QueryParamBuilder().include(include).build()
+        return query.iterator(self._portal, '/domains/' + domain + '/adUsers', param)
 
+    def add(self, name, email, first_name, last_name, password, role, company=None, comment=None):
+        param = Object()
+        param._classname = "PortalUser"  # pylint: disable=protected-access
+        param.name = name
+        param.email = email
+        param.firstName = first_name
+        param.lastName = last_name
+        param.password = password
+        param.role = role
+        param.company = company
+        param.comment = comment
 
-def add(ctera_host, name, email, first_name, last_name, password, role, company, comment):
-    param = Object()
-    param._classname = "PortalUser"  # pylint: disable=protected-access
-    param.name = name
-    param.email = email
-    param.firstName = first_name
-    param.lastName = last_name
-    param.password = password
-    param.role = role
-    param.company = company
-    param.comment = comment
+        logging.getLogger().info('Creating user. %s', {'user': name})
 
-    logging.getLogger().info('Creating user. %s', {'user': name})
+        response = self._portal.add('/users', param)
 
-    response = ctera_host.add('/users', param)
+        logging.getLogger().info('User created. %s', {'user': name, 'email': email, 'role': role})
 
-    logging.getLogger().info('User created. %s', {'user': name, 'email': email, 'role': role})
+        return response
 
-    return response
+    def delete(self, name):
+        logging.getLogger().info('Deleting user. %s', {'user': name})
 
+        response = self._portal.execute('/users/' + name, 'delete', True)
 
-def delete(ctera_host, name):
-    logging.getLogger().info('Deleting user. %s', {'user': name})
+        logging.getLogger().info('User deleted. %s', {'user': name})
 
-    response = ctera_host.execute('/users/' + name, 'delete', True)
-
-    logging.getLogger().info('User deleted. %s', {'user': name})
-
-    return response
+        return response

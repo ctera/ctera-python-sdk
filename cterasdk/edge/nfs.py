@@ -1,12 +1,15 @@
 import logging
 
 from .enum import Mode
+from .base_command import BaseCommand
 
 
-def disable(ctera_host):
+class NFS(BaseCommand):
 
-    logging.getLogger().info('Disabling NFS server.')
+    def disable(self):
 
-    ctera_host.put('/config/fileservices/nfs/mode', Mode.Disabled)
+        logging.getLogger().info('Disabling NFS server.')
 
-    logging.getLogger().info('NFS server disabled.')
+        self._gateway.put('/config/fileservices/nfs/mode', Mode.Disabled)
+
+        logging.getLogger().info('NFS server disabled.')

@@ -7,7 +7,6 @@ __all__ = list(
             'directoryservice',
             'enum',
             'login',
-            'whoami',
             'query',
             'logs',
             'portals',

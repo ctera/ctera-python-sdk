@@ -1,30 +1,27 @@
 import logging
+from .base_command import BaseCommand
 
 
-def enable(ctera_host):
-    logging.getLogger().info('Enabling asynchronous io.')
+class AIO(BaseCommand):
 
-    async_io(ctera_host, True, 1, 1)
+    def enable(self):
+        logging.getLogger().info('Enabling asynchronous io.')
+        self._async_io(True, 1, 1)
+        logging.getLogger().info('Asynchronous io enabled.')
 
-    logging.getLogger().info('Asynchronous io enabled.')
+    def disable(self):
+        logging.getLogger().info('Disabling asynchronous io.')
+        self._async_io(False, 0, 0)
+        logging.getLogger().info('Asynchronous io disabled.')
 
+    def _async_io(self, robustMutexes, aioReadThreshold, aioWriteThreshold):
+        logging.getLogger().debug('Obtaining CIFS server settings.')
 
-def disable(ctera_host):
-    logging.getLogger().info('Disabling asynchronous io.')
+        cifs = self._gateway.get('/config/fileservices/cifs')
+        cifs.robustMutexes = robustMutexes
+        cifs.aioReadThreshold = aioReadThreshold
+        cifs.aioWriteThreshold = aioWriteThreshold
 
-    async_io(ctera_host, False, 0, 0)
+        logging.getLogger().debug('Updating CIFS server settings.')
 
-    logging.getLogger().info('Asynchronous io disabled.')
-
-
-def async_io(ctera_host, robustMutexes, aioReadThreshold, aioWriteThreshold):
-    logging.getLogger().debug('Obtaining CIFS server settings.')
-
-    cifs = ctera_host.get('/config/fileservices/cifs')
-    cifs.robustMutexes = robustMutexes
-    cifs.aioReadThreshold = aioReadThreshold
-    cifs.aioWriteThreshold = aioWriteThreshold
-
-    logging.getLogger().debug('Updating CIFS server settings.')
-
-    ctera_host.put('/config/fileservices/cifs', cifs)
+        self._gateway.put('/config/fileservices/cifs', cifs)

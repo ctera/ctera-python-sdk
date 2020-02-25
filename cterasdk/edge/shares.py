@@ -1,166 +1,165 @@
 import logging
 
-from .enum import PrincipalType, FileAccessMode
+from . import enum
 from .files import path
 from ..common import Object
 from ..exception import CTERAException, InputError
+from .base_command import BaseCommand
 
 
-def add(ctera_host,
-        name,
-        directory,
-        acl,
-        access,
-        csc,
-        dirPermissions,
-        comment,
-        exportToAFP,
-        exportToFTP,
-        exportToNFS,
-        exportToPCAgent,
-        exportToRSync,
-        indexed
-        ):  # pylint: disable=too-many-arguments,too-many-locals
+class Shares(BaseCommand):
 
-    param = Object()
-    param.name = name
+    def add(self,
+            name,
+            directory,
+            acl=None,
+            access=enum.Acl.WindowsNT,
+            csc=enum.ClientSideCaching.Manual,
+            dirPermissions=777,
+            comment=None,
+            exportToAFP=False,
+            exportToFTP=False,
+            exportToNFS=False,
+            exportToPCAgent=False,
+            exportToRSync=False,
+            indexed=False
+            ):  # pylint: disable=too-many-arguments,too-many-locals
 
-    parts = path.CTERAPath(directory, '/').parts()
-    volume = parts[0]
-    validate_root_directory(ctera_host, volume)
-    param.volume = volume
+        param = Object()
+        param.name = name
 
-    directory = '/'.join(parts[1:])
-    param.directory = directory
+        parts = path.CTERAPath(directory, '/').parts()
+        volume = parts[0]
+        self._validate_root_directory(volume)
+        param.volume = volume
 
-    param.access = access
-    param.dirPermissions = dirPermissions
-    param.exportToAFP = exportToAFP
-    param.exportToFTP = exportToFTP
-    param.exportToNFS = exportToNFS
-    param.exportToPCAgent = exportToPCAgent
-    param.exportToRSync = exportToRSync
-    param.indexed = indexed
-    param.comment = comment
+        directory = '/'.join(parts[1:])
+        param.directory = directory
 
-    param.acl = []
-    for entry in acl:
-        if len(entry) != 3:
-            raise InputError('Invalid input', repr(entry), '[("type", "name", "perm"), ...]')
-        addShareACLRule(param.acl, entry[0], entry[1], entry[2])
+        param.access = access
+        param.dirPermissions = dirPermissions
+        param.exportToAFP = exportToAFP
+        param.exportToFTP = exportToFTP
+        param.exportToNFS = exportToNFS
+        param.exportToPCAgent = exportToPCAgent
+        param.exportToRSync = exportToRSync
+        param.indexed = indexed
+        param.comment = comment
 
-    try:
-        ctera_host.add('/config/fileservices/share', param)
-        logging.getLogger().info("Share created. %s", {'name': name})
-    except Exception as error:
-        logging.getLogger().error("Share creation failed.")
-        raise CTERAException('Share creation failed', error)
+        param.acl = []
+        for entry in acl:
+            if len(entry) != 3:
+                raise InputError('Invalid input', repr(entry), '[("type", "name", "perm"), ...]')
+            Shares._add_share_acl_rule(param.acl, entry[0], entry[1], entry[2])
 
+        try:
+            self._gateway.add('/config/fileservices/share', param)
+            logging.getLogger().info("Share created. %s", {'name': name})
+        except Exception as error:
+            logging.getLogger().error("Share creation failed.")
+            raise CTERAException('Share creation failed', error)
 
-def validate_root_directory(ctera_host, name):
-    param = Object()
-    param.path = '/'
+    def add_acl(self, name, acl):
+        current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
 
-    response = ctera_host.execute('/status/fileManager', 'listPhysicalFolders', param)
-    for root in response:
-        if root.fullpath == ('/%s' % name):
-            logging.getLogger().debug("Found root directory. %s", {'name': root.name, 'type': root.type, 'fullpath': root.fullpath})
-            return name
+        new_acl_dict = {}
+        for entry in acl:
+            temp_acl = []
+            if len(entry) != 3:
+                raise InputError('Invalid input', repr(entry), '[("type", "name", "perm"), ...]')
+            Shares._add_share_acl_rule(temp_acl, entry[0], entry[1], entry[2])
+            entry_key = entry[0] + '#' + entry[1]
+            new_acl_dict[entry_key] = temp_acl[0]
 
-    logging.getLogger().error("Could not find root directory. %s", {'name': name})
+        for entry in current_acl:
+            ace_type = entry.principal2._classname  # pylint: disable=protected-access
+            if ace_type in [enum.PrincipalType.LU, enum.PrincipalType.LG]:
+                ace_name = entry.principal2.ref
+                ace_name = ace_name[ace_name.rfind('#') + 1:]
+            else:
+                ace_name = entry.principal2.name
+            entry_key = ace_type + '#' + ace_name
 
-    options = [root.fullpath[1:] for root in response]
-    raise InputError('Invalid root directory.', name, options)
+            if entry_key not in new_acl_dict:
+                new_acl_dict[entry_key] = entry
 
+        acl = [v for k, v in new_acl_dict.items()]
+        self._gateway.put('/config/fileservices/share/' + name + '/acl', acl)
 
-def addShareACLRule(acls, principal_type_field, name, perm):
-    ace = Object()
-    ace._classname = "ShareACLRule"  # pylint: disable=protected-access
-    ace.principal2 = Object()
+    def remove_acl(self, name, tuples):
+        current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
 
-    options = {k: v for k, v in PrincipalType.__dict__.items() if not k.startswith('_')}
-    principal_type = options.get(principal_type_field)
-    if principal_type == PrincipalType.LU:
-        ace.principal2._classname = PrincipalType.LU  # pylint: disable=protected-access
-        ace.principal2.ref = "#config#auth#users#" + name
-    elif principal_type == PrincipalType.LG:
-        ace.principal2._classname = PrincipalType.LG  # pylint: disable=protected-access
-        ace.principal2.ref = "#config#auth#groups#" + name
-    elif principal_type == PrincipalType.DU:
-        ace.principal2._classname = PrincipalType.DU  # pylint: disable=protected-access
-        ace.principal2.name = name
-    elif principal_type == PrincipalType.DG:
-        ace.principal2._classname = PrincipalType.DG  # pylint: disable=protected-access
-        ace.principal2.name = name
-    else:
-        raise InputError('Invalid principal type', principal_type_field, list(options.keys()))
+        options = {v: k for k, v in enum.PrincipalType.__dict__.items() if not k.startswith('_')}  # reverse
+        new_acl = []
+        for entry in current_acl:
+            ace_type = entry.principal2._classname  # pylint: disable=protected-access
+            if ace_type in [enum.PrincipalType.LU, enum.PrincipalType.LG]:
+                ace_name = entry.principal2.ref
+                ace_name = ace_name[ace_name.rfind('#') + 1:]
+            else:
+                ace_name = entry.principal2.name
 
-    ace.permissions = Object()
-    ace.permissions._classname = "FileAccessPermissions"  # pylint: disable=protected-access
+            if (options.get(ace_type), ace_name) not in tuples:
+                new_acl.append(entry)
 
-    options = {k: v for k, v in FileAccessMode.__dict__.items() if not k.startswith('_')}
-    permission = options.get(perm)
-    if permission is not None:
-        ace.permissions.allowedFileAccess = permission
-    else:
-        raise InputError('Invalid permission', perm, list(options.keys()))
+        self._gateway.put('/config/fileservices/share/' + name + '/acl', new_acl)
 
-    acls.append(ace)
+    def delete(self, name):
+        try:
+            self._gateway.delete('/config/fileservices/share/' + name)
+            logging.getLogger().info("Share deleted. %s", {'name': name})
+        except Exception as error:
+            logging.getLogger().error("Share deletion failed.")
+            raise CTERAException('Share deletion failed', error)
 
-    return acls
+    def _validate_root_directory(self, name):
+        param = Object()
+        param.path = '/'
 
+        response = self._gateway.execute('/status/fileManager', 'listPhysicalFolders', param)
+        for root in response:
+            if root.fullpath == ('/%s' % name):
+                logging.getLogger().debug("Found root directory. %s", {'name': root.name, 'type': root.type, 'fullpath': root.fullpath})
+                return name
 
-def add_acl(ctera_host, name, acl):
-    current_acl = ctera_host.get('/config/fileservices/share/' + name + '/acl')
+        logging.getLogger().error("Could not find root directory. %s", {'name': name})
 
-    new_acl_dict = {}
-    for entry in acl:
-        temp_acl = []
-        if len(entry) != 3:
-            raise InputError('Invalid input', repr(entry), '[("type", "name", "perm"), ...]')
-        addShareACLRule(temp_acl, entry[0], entry[1], entry[2])
-        entry_key = entry[0] + '#' + entry[1]
-        new_acl_dict[entry_key] = temp_acl[0]
+        options = [root.fullpath[1:] for root in response]
+        raise InputError('Invalid root directory.', name, options)
 
-    for entry in current_acl:
-        ace_type = entry.principal2._classname  # pylint: disable=protected-access
-        if ace_type in [PrincipalType.LU, PrincipalType.LG]:
-            ace_name = entry.principal2.ref
-            ace_name = ace_name[ace_name.rfind('#') + 1:]
+    @staticmethod
+    def _add_share_acl_rule(acls, principal_type_field, name, perm):
+        ace = Object()
+        ace._classname = "ShareACLRule"  # pylint: disable=protected-access
+        ace.principal2 = Object()
+
+        options = {k: v for k, v in enum.PrincipalType.__dict__.items() if not k.startswith('_')}
+        principal_type = options.get(principal_type_field)
+        if principal_type == enum.PrincipalType.LU:
+            ace.principal2._classname = enum.PrincipalType.LU  # pylint: disable=protected-access
+            ace.principal2.ref = "#config#auth#users#" + name
+        elif principal_type == enum.PrincipalType.LG:
+            ace.principal2._classname = enum.PrincipalType.LG  # pylint: disable=protected-access
+            ace.principal2.ref = "#config#auth#groups#" + name
+        elif principal_type == enum.PrincipalType.DU:
+            ace.principal2._classname = enum.PrincipalType.DU  # pylint: disable=protected-access
+            ace.principal2.name = name
+        elif principal_type == enum.PrincipalType.DG:
+            ace.principal2._classname = enum.PrincipalType.DG  # pylint: disable=protected-access
+            ace.principal2.name = name
         else:
-            ace_name = entry.principal2.name
-        entry_key = ace_type + '#' + ace_name
+            raise InputError('Invalid principal type', principal_type_field, list(options.keys()))
 
-        if entry_key not in new_acl_dict:
-            new_acl_dict[entry_key] = entry
+        ace.permissions = Object()
+        ace.permissions._classname = "FileAccessPermissions"  # pylint: disable=protected-access
 
-    acl = [v for k, v in new_acl_dict.items()]
-    ctera_host.put('/config/fileservices/share/' + name + '/acl', acl)
-
-
-def remove_acl(ctera_host, name, tuples):
-    current_acl = ctera_host.get('/config/fileservices/share/' + name + '/acl')
-
-    options = {v: k for k, v in PrincipalType.__dict__.items() if not k.startswith('_')}  # reverse
-    new_acl = []
-    for entry in current_acl:
-        ace_type = entry.principal2._classname  # pylint: disable=protected-access
-        if ace_type in [PrincipalType.LU, PrincipalType.LG]:
-            ace_name = entry.principal2.ref
-            ace_name = ace_name[ace_name.rfind('#') + 1:]
+        options = {k: v for k, v in enum.FileAccessMode.__dict__.items() if not k.startswith('_')}
+        permission = options.get(perm)
+        if permission is not None:
+            ace.permissions.allowedFileAccess = permission
         else:
-            ace_name = entry.principal2.name
+            raise InputError('Invalid permission', perm, list(options.keys()))
 
-        if (options.get(ace_type), ace_name) not in tuples:
-            new_acl.append(entry)
+        acls.append(ace)
 
-    ctera_host.put('/config/fileservices/share/' + name + '/acl', new_acl)
-
-
-def delete(ctera_host, name):
-    try:
-        ctera_host.delete('/config/fileservices/share/' + name)
-        logging.getLogger().info("Share deleted. %s", {'name': name})
-    except Exception as error:
-        logging.getLogger().error("Share deletion failed.")
-        raise CTERAException('Share deletion failed', error)
+        return acls

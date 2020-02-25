@@ -5,7 +5,7 @@ from .enum import Context
 
 
 def inactive_session(Portal):
-    session = Session(Portal.host(), Portal._context())  # pylint: disable=protected-access
+    session = Session(Portal.host(), Portal.context)
     Portal.register_session(session)
 
 
@@ -88,5 +88,7 @@ class Session(Object):
         return self.status == SessionStatus.Initializing
 
     def authenticated(self):
-
         return self.status == SessionStatus.Active
+
+    def whoami(self):
+        print(self)
