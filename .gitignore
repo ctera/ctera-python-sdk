@@ -1,2 +1,3 @@
 *.pyc
 reports/
+docs/build/

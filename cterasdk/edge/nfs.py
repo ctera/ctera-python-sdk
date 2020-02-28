@@ -5,8 +5,10 @@ from .base_command import BaseCommand
 
 
 class NFS(BaseCommand):
+    """ Gateway NFS configuration """
 
     def disable(self):
+        """ Disable NFS """
 
         logging.getLogger().info('Disabling NFS server.')
 

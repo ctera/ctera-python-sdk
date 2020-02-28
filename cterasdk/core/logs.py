@@ -7,15 +7,29 @@ from . import query
 
 
 class Logs(BaseCommand):
+    """
+    Portal Logs APIs
+    """
 
-    def logs(self, topic=enum.LogTopic.System, minSeverity=enum.Severity.INFO, _originType=enum.OriginType.Portal, before=None, after=None):
+    def get(self, topic=enum.LogTopic.System, minSeverity=enum.Severity.INFO, _originType=enum.OriginType.Portal, before=None, after=None):
+        """
+        Get logs from the Portal
+
+        :param cterasdk.core.enum.LogTopic,optional topic: Log topic to get, defaults to cterasdk.core.enum.LogTopic.System
+        :param cterasdk.core.enum.Severity,optional minSeverity:
+         Minimun severity of logs to get, defaults to cterasdk.core.enum.Severity.INFO
+        :param cterasdk.core.enum.OriginType,optional _originType:
+         Origin type of the logs to get, defaults to cterasdk.core.enum.OriginType.Portal
+        :param str,optional before: Get logs before this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
+        :param str,optional after: Get logs after this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
+        """
         builder = query.QueryParamBuilder().put('topic', topic).put('minSeverity', minSeverity)
 
         if before is not None:
-            builder.addFilter(query.FilterBuilder('time').before(self.strptime(before)))
+            builder.addFilter(query.FilterBuilder('time').before(self._strptime(before)))
 
         if after is not None:
-            builder.addFilter(query.FilterBuilder('time').after(self.strptime(after)))
+            builder.addFilter(query.FilterBuilder('time').after(self._strptime(after)))
 
         param = builder.build()
         function = Command(self._query_logs)
@@ -27,7 +41,7 @@ class Logs(BaseCommand):
         return (response.hasMore, response.logs)
 
     @staticmethod
-    def strptime(datetime_str):
+    def _strptime(datetime_str):
         try:
             return datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
         except ValueError as error:

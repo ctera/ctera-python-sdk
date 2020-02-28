@@ -11,8 +11,20 @@ from .base_command import BaseCommand
 
 
 class Services(BaseCommand):
+    """ Gateway Cloud Services configuration APIs """
 
     def connect(self, server, user, password, ctera_license=enum.License.EV16):
+        """
+        Connect to a Portal.\n
+        The connect method will first validate the `license` argument,
+         ensure the Gateway can establish a TCP connection over port 995 to `server` using :py:func:`Gateway.tcp_connect()` and
+         verify the Portal does not require device activation via code
+
+        :param str server: Address of the Portal
+        :param str user: User for the Portal connection
+        :param str password: Password for the Portal connection
+        :param cterasdk.edge.enum.License,optional ctera_license: CTERA License, defaults to cterasdk.edge.enum.License.EV16
+        """
         Services._validate_license(ctera_license)
         self._check_cttp_traffic(address=server)
         self._check_connection(server)
@@ -24,6 +36,14 @@ class Services(BaseCommand):
         self._connect_to_services(param, ctera_license)
 
     def activate(self, server, user, code, ctera_license=enum.License.EV16):
+        """
+        Activate the gateway using an activation code
+
+        :param str server: Address of the Portal
+        :param str user: User for  the Portal connection
+        :param str code: Activation code for the Portal connection
+        :param cterasdk.edge.enum.License,optional ctera_license: CTERA License, defaults to cterasdk.edge.enum.License.EV16
+        """
         Services._validate_license(ctera_license)
         self._check_cttp_traffic(address=server)
 
@@ -34,18 +54,21 @@ class Services(BaseCommand):
         self._connect_to_services(param, ctera_license)
 
     def reconnect(self):
+        """ Reconnect to the Portal """
         self._gateway.execute("/status/services", "reconnect", None)
 
     def disconnect(self):
+        """ Disconnect from the Portal """
         self._gateway.put('/config/services', None)
 
     def enable_sso(self):
+        """ Enable SSO connection """
         logging.getLogger().info('Enabling single sign-on from CTERA Portal.')
         self._gateway.put('/config/gui/adminRemoteAccessSSO', True)
         logging.getLogger().info('Single sign-on enabled.')
 
     def _connect_to_services(self, param, ctera_license):
-        task = self.attach(param)
+        task = self._attach(param)
         try:
             TaskManager.wait(self._gateway, task)
             logging.getLogger().info("Connected to Portal.")
@@ -74,12 +97,12 @@ class Services(BaseCommand):
         param.server = server
         param.trustCertificate = trust_cert
         obj = self._gateway.execute('/status/services', 'isWebSsoEnabled', param)
-        if Services.check_web_sso(obj):
+        if Services._check_web_sso(obj):
             return
         self._handle_untrusted_cert(server, obj)
 
     @staticmethod
-    def check_web_sso(obj):
+    def _check_web_sso(obj):
         try:
             if obj.result.hasWebSSO:
                 message = "Connection failed. You must activate this Gateway using an activation code."
@@ -106,7 +129,7 @@ class Services(BaseCommand):
             pass
         return False
 
-    def attach(self, param):
+    def _attach(self, param):
         logging.getLogger().info("Connecting to Portal. %s", {'server': param.server, 'user': param.user})
         obj = self._gateway.execute("/status/services", "attachAndSave", param)
         return obj.id

@@ -6,6 +6,7 @@ from .base_command import BaseCommand
 
 
 class Licenses(BaseCommand):
+    """ Gateway License configuration APIs """
 
     @staticmethod
     def infer(ctera_license):
@@ -18,6 +19,11 @@ class Licenses(BaseCommand):
         return 'vGateway' + ('' if ctera_license == 'EV16' else ctera_license[2:])
 
     def apply(self, ctera_license):
+        """
+        Apply a license
+
+        :param str ctera_license
+        """
         inferred_license = Licenses.infer(ctera_license)
 
         logging.getLogger().info('Applying license. %s', {'license': ctera_license})

@@ -4,3 +4,7 @@ flake8==3.7.9
 pylint==2.4.4
 pytest==3.0.6
 cov-core==1.15.0
+sphinx
+sphinx_rtd_theme
+m2r
+doc8

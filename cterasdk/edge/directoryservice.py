@@ -6,8 +6,19 @@ from .base_command import BaseCommand
 
 
 class DirectoryService(BaseCommand):
+    """
+    Gateway Active Directory configuration APIs
+    """
 
     def connect(self, domain, username, password, ou=None):
+        """
+        Connect the gateway to an Active Directory
+
+        :param str domain: The active directory domain to connect to
+        :param str username: The user name to use when connecting to the active directory services
+        :param str password: The password to use when connecting to the active directory services
+        :param str,optional ou: The OU path to use when connecting to the active directory services, defaults to None
+        """
         host = self._gateway.host()
         port = 389
         tcp_conn_status = self._gateway.network.tcp_connect(address=domain, port=port)
@@ -36,6 +47,13 @@ class DirectoryService(BaseCommand):
         logging.getLogger().info("Connected to Active Directory.")
 
     def advanced_mapping(self, domain, start, end):
+        """
+        Configure advanced mapping
+
+        :param str domain: The active directory domain
+        :param str start: The minimum id to use for mapping
+        :param str end: The maximum id to use for mapping
+        """
         mappings = self._gateway.get('/config/fileservices/cifs/idMapping/map')
         for mapping in mappings:
             if domain == mapping.domainFlatName:
@@ -48,9 +66,17 @@ class DirectoryService(BaseCommand):
         raise CTERAException('Could not find domain name', None, domain=domain, domains=self.domains())
 
     def domains(self):
+        """
+        Get all domains
+
+        :return list(str): List of names of all configured domains
+        """
         return [domain.flatName for domain in self._gateway.execute('/status/fileservices/cifs', 'enumDiscoveredDomains')]
 
     def disconnect(self):
+        """
+        Disconnect from Active Directory Service
+        """
         logging.getLogger().info("Disconnecting from Active Directory.")
 
         cifs = self._gateway.get('/config/fileservices/cifs')

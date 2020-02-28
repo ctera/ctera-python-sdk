@@ -6,8 +6,15 @@ from .base_command import BaseCommand
 
 
 class Shell(BaseCommand):
+    """ Gateway Shell command """
 
     def run_command(self, shell_command):
+        """
+        Execute a shell command on the gateway
+
+        :param str shell_command: The shell command to execute
+        :return: The command result
+        """
         logging.getLogger().info("Executing shell command. %s", {'shell_command': shell_command})
 
         task = self._gateway.execute("/config/device", "bgshell", shell_command)

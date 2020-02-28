@@ -7,23 +7,57 @@ from . import union
 
 
 class Users(BaseCommand):
+    """
+    Portal User Management APIs
+    """
 
-    default = ['name']
+    _default_fields = ['name']
 
-    def local_users(self, include=None):
-        include = union.union(include or [], Users.default)
+    def list_local_users(self, include=None):
+        """
+        List all local users
+
+        :param list[str] include: List of fields to retrieve, defaults to ['name']
+        :return: Iterator for all local users
+        :rtype: cterasdk.lib.iterator.Iterator
+        """
+        include = union.union(include or [], Users._default_fields)
         param = query.QueryParamBuilder().include(include).build()
         return query.iterator(self._portal, '/users', param)
 
-    def domains(self):
+    def list_domains(self):
+        """
+        List all domains
+
+        :return list: List of all domains
+        """
         return self._portal.get('/domains')
 
-    def domain_users(self, domain, include=None):
-        include = union.union(include or [], Users.default)
+    def list_domain_users(self, domain, include=None):
+        """
+        List all the users in the domain
+
+        :param list[str] include: List of fields to retrieve, defaults to ['name']
+        :return: Iterator for all the domain users
+        :rtype: cterasdk.lib.iterator.Iterator
+        """
+        include = union.union(include or [], Users._default_fields)
         param = query.QueryParamBuilder().include(include).build()
         return query.iterator(self._portal, '/domains/' + domain + '/adUsers', param)
 
     def add(self, name, email, first_name, last_name, password, role, company=None, comment=None):
+        """
+        Add a portal user
+
+        :param str name: User name for the new user
+        :param str email: E-mail address of the new user
+        :param str first_name: The first name of the new user
+        :param str last_name: The last name of the new user
+        :param str password: Password for the new user
+        :param cterasdk.core.enum.Role role: User role of the new user
+        :param str,optional company: The name of the company of the new user, defaults to None
+        :param str,optional comment: Additional comment for the new user, defaults to None
+        """
         param = Object()
         param._classname = "PortalUser"  # pylint: disable=protected-access
         param.name = name
@@ -44,6 +78,11 @@ class Users(BaseCommand):
         return response
 
     def delete(self, name):
+        """
+        Delete an existing user
+
+        :param str name: The user name to delete
+        """
         logging.getLogger().info('Deleting user. %s', {'user': name})
 
         response = self._portal.execute('/users/' + name, 'delete', True)

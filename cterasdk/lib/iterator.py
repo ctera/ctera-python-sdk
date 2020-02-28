@@ -2,28 +2,29 @@ import logging
 
 
 class Iterator:
+    """ Objects Iterator """
 
     def __init__(self, function, param):
-        self.function = function
-        self.param = param
-        self.hasMore = True
-        self.objects = []
+        self._function = function
+        self._param = param
+        self._hasMore = True
+        self._objects = []
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        if not self.objects:
-            if self.hasMore:
-                self.hasMore, self.objects = self.function(self.param)
-                if not self.hasMore and not self.objects:
-                    self.terminate()
-                self.param.increment()
+        if not self._objects:
+            if self._hasMore:
+                self._hasMore, self._objects = self._function(self._param)
+                if not self._hasMore and not self._objects:
+                    self._terminate()
+                self._param.increment()
             else:
-                self.terminate()
-        return self.objects.pop(0)
+                self._terminate()
+        return self._objects.pop(0)
 
     @staticmethod
-    def terminate():
+    def _terminate():
         logging.getLogger().debug('No more objects to return. Stopping iteration.')
         raise StopIteration

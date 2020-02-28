@@ -6,8 +6,10 @@ from .base_command import BaseCommand
 
 
 class Telnet(BaseCommand):
+    """ Gateway Telnet configuration APIs """
 
     def enable(self, code):
+        """ Enable Telnet """
         status = self._gateway.get('/status/device')
         version = status.runningFirmware
         if version.count('.') == 2:
@@ -28,6 +30,7 @@ class Telnet(BaseCommand):
             logging.getLogger().info("Telnet access enabled.")
 
     def disable(self):
+        """ Disable Telnet """
         logging.getLogger().info("Disabling telnet access.")
         self._gateway.execute("/config/device", "stopTelnetd")
         logging.getLogger().info("Telnet access disabled.")

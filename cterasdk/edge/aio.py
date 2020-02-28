@@ -3,13 +3,22 @@ from .base_command import BaseCommand
 
 
 class AIO(BaseCommand):
+    """
+    Gateway AIO APIs
+    """
 
     def enable(self):
+        """
+        Enable AIO
+        """
         logging.getLogger().info('Enabling asynchronous io.')
         self._async_io(True, 1, 1)
         logging.getLogger().info('Asynchronous io enabled.')
 
     def disable(self):
+        """
+        Disable AIO
+        """
         logging.getLogger().info('Disabling asynchronous io.')
         self._async_io(False, 0, 0)
         logging.getLogger().info('Asynchronous io disabled.')

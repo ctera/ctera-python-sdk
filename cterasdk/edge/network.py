@@ -7,18 +7,28 @@ from .base_command import BaseCommand
 
 
 class Network(BaseCommand):
+    """ Gateway Network configuration APIs """
 
-    def set_static_ipaddr(self, address, subnet, gateway, DNSServer1, DNSServer2=None):
+    def set_static_ipaddr(self, address, subnet, gateway, primary_dns_server, secondary_dns_server=None):
+        """
+        Set a Static IP Address
+
+        :param str address: The static address
+        :param str subnet: The subnet for the static address
+        :param str gateway: The default gateway
+        :param str primary_dns_server: The primary DNS server
+        :param str,optinal secondary_dns_server: The secondary DNS server, defaults to None
+        """
         ip = self._gateway.get('/config/network/ports/0/ip')
         ip.DHCPMode = Mode.Disabled
         ip.address = address
         ip.netmask = subnet
         ip.gateway = gateway
         ip.autoObtainDNS = False
-        ip.DNSServer1 = DNSServer1
+        ip.DNSServer1 = primary_dns_server
 
-        if DNSServer2 is not None:
-            ip.DNSServer2 = DNSServer2
+        if secondary_dns_server is not None:
+            ip.DNSServer2 = secondary_dns_server
 
         logging.getLogger().info('Configuring a static ip address.')
 
@@ -26,24 +36,33 @@ class Network(BaseCommand):
 
         logging.getLogger().info(
             'Network settings updated. %s',
-            {'address': address, 'subnet': subnet, 'gateway': gateway, 'DNS1': DNSServer1, 'DNS2': DNSServer2}
+            {'address': address, 'subnet': subnet, 'gateway': gateway, 'DNS1': primary_dns_server, 'DNS2': secondary_dns_server}
         )
 
-    def set_static_nameserver(self, DNSServer1, DNSServer2=None):
+    def set_static_nameserver(self, primary_dns_server, secondary_dns_server=None):
+        """
+        Set the DNS Server addresses statically
+
+        :param str primary_dns_server, The primary DNS server
+        :param str,optinal secondary_dns_server, The secondary DNS server, defaults to None
+        """
         ip = self._gateway.get('/config/network/ports/0/ip')
         ip.autoObtainDNS = False
-        ip.DNSServer1 = DNSServer1
+        ip.DNSServer1 = primary_dns_server
 
-        if DNSServer2 is not None:
-            ip.DNSServer2 = DNSServer2
+        if secondary_dns_server is not None:
+            ip.DNSServer2 = secondary_dns_server
 
         logging.getLogger().info('Configuring nameserver settings.')
 
         self._gateway.put('/config/network/ports/0/ip', ip)
 
-        logging.getLogger().info('Nameserver settings updated. %s', {'DNS1': DNSServer1, 'DNS2': DNSServer2})
+        logging.getLogger().info('Nameserver settings updated. %s', {'DNS1': primary_dns_server, 'DNS2': secondary_dns_server})
 
     def enable_dhcp(self):
+        """
+        Enable DHCP
+        """
         ip = self._gateway.get('/config/network/ports/0/ip')
         ip.DHCPMode = Mode.Enabled
         ip.autoObtainDNS = True
@@ -55,6 +74,12 @@ class Network(BaseCommand):
         logging.getLogger().info('Network settings updated. Enabled DHCP.')
 
     def tcp_connect(self, address, port):
+        """
+        Test a TCP connection between the gateway and the provided address
+
+        :param str address: The address to test the connection to
+        :param int port: The port of the address to test the connection to
+        """
         param = Object()
         param.address = address
         param.port = port

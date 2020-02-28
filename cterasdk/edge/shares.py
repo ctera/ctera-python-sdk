@@ -61,7 +61,7 @@ class Shares(BaseCommand):
         param.indexed = indexed
         param.comment = comment
         param.acl = []
-        
+
         Shares._validate_acl(acl)
         for entry in acl:
             if len(entry) != 3:
@@ -74,18 +74,18 @@ class Shares(BaseCommand):
         except Exception as error:
             logging.getLogger().error("Share creation failed.")
             raise CTERAException('Share creation failed', error)
-            
+
     def set_acl(self, name, acl):
         """
         Set a network share's access control entries.
-        
+
         :param str name: The share name
         :param list[ShareAccessControlEntry] acl: List of access control entries
-        
+
         .. warning: this method will override the existing access control entries
         """
         Shares._validate_acl(acl)
-        
+
         param = []
         for entry in acl:
             if len(entry) != 3:
@@ -96,12 +96,12 @@ class Shares(BaseCommand):
     def add_acl(self, name, acl):
         """
         Add one or more access control entries to an existing share.
-   
+
         :param str name: The share name
         :param list[ShareAccessControlEntry] acl: List of access control entries to add
         """
         Shares._validate_acl(acl)
-        
+
         current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
 
         new_acl_dict = {}
@@ -135,8 +135,9 @@ class Shares(BaseCommand):
         :param str name: The share name
         :param list[RemoveShareAccessControlEntry] acl: List of access control entries to remove
         """
-        if not isinstance(tuples, list): raise InputError('Invalid input', repr(tuples), '[("type", "name"), ...]')
-        
+        if not isinstance(tuples, list):
+            raise InputError('Invalid input', repr(tuples), '[("type", "name"), ...]')
+
         current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
 
         options = {v: k for k, v in enum.PrincipalType.__dict__.items() if not k.startswith('_')}  # reverse
@@ -218,15 +219,16 @@ class Shares(BaseCommand):
         acls.append(ace)
 
         return acls
-    
+
     @staticmethod
     def _validate_acl(acl):
         if not isinstance(acl, list):
             raise InputError('Invalid access control list format', repr(acl), '[("type", "name", "perm"), ...]')
-    
+
     @staticmethod
     def _invalid_ace(entry):
         raise InputError('Invalid input', repr(entry), '[("type", "name", "perm"), ...]')
+
 
 ShareAccessControlEntry = namedtuple('ShareAccessControlEntry', ('type', 'name', 'perm'))
 ShareAccessControlEntry.__doc__ = 'Tuple holding the principal type, name and permission'
