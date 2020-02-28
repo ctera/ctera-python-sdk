@@ -14,6 +14,25 @@ If you don't have `pip` installed, you may use the following alternative:
 
 # Building
 
+## Using Tox
+
+### Prerequisites
+
+#### Install tox
+```bash
+pip install tox
+```
+
+### Run all tests
+Run all test environments
+```bash
+tox
+```
+You can also run specific tox environment, e.g:
+```bash
+tox -e lint
+```
+
 ## Dockerized build using [skipper](https://github.com/Stratoscale/skipper)
 
 Use strato-skipper to isolate the build environment from your working machine
