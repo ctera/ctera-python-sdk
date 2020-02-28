@@ -21,7 +21,6 @@ class Portal(CTERAHost):
     def __init__(self, host, port, https):
         super().__init__(host, port, https)
         session.inactive_session(self)
-        self.login = login.Login(self)
         self.users = users.Users(self)
         self.devices = devices.Devices(self)
         self.directoryservice = directoryservice.DirectoryService(self)
@@ -50,7 +49,6 @@ class Portal(CTERAHost):
     @property
     def _omit_fields(self):
         return super()._omit_fields + [
-            'login',
             'users',
             'devices',
             'directoryservice',
@@ -60,6 +58,10 @@ class Portal(CTERAHost):
             'files',
             'logs',
         ]
+
+    @property
+    def _login_object(self):
+        return login.Login(self)
 
     def _is_authenticated(self, function, *args, **kwargs):
         current_session = self.session()
