@@ -18,6 +18,10 @@ class Agent(CTERAHost):
     def base_file_url(self):
         return self._api()
 
+    @property
+    def _login_object(self):
+        raise NotImplementedError("Currently login is not supported for Agent")
+
     def _is_authenticated(self, function, *args, **kwargs):
         return True
 

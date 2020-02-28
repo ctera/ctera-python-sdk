@@ -82,7 +82,6 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.shell = shell.Shell(self)
         self.cli = cli.CLI(self)
         self.support = support.Support(self)
-        self.login = login.Login(self)
         self.files = files.FileBrowser(self)
 
     @property
@@ -127,9 +126,12 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'shell',
             'cli',
             'support',
-            'login',
             'files'
             ]
+
+    @property
+    def _login_object(self):
+        return login.Login(self)
 
     def _is_authenticated(self, function, *args, **kwargs):
         def is_nosession(path):

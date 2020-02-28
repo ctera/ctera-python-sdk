@@ -73,6 +73,15 @@ class CTERAHost(NetworkHost):
         super().__init__(host, port, https)
         self._ctera_client = CTERAClient()
         self._session = None
+        self.login = self._login_object.login
+        self.logout = self._login_object.logout
+
+    @property
+    def _omit_fields(self):
+        return super()._omit_fields + [
+            'login',
+            'logout'
+        ]
 
     @property
     def base_api_url(self):
@@ -81,6 +90,12 @@ class CTERAHost(NetworkHost):
     @property
     def base_file_url(self):
         raise NotImplementedError("Implementing class must implement the base_api_url property")
+
+    @property
+    def _login_object(self):
+        raise NotImplementedError(
+            "Implementing class must implement the login_object property by returning an object with login and logout methods"
+        )
 
     def _is_authenticated(self, function, *args, **kwargs):
         raise NotImplementedError("Implementing class must implement the _is_authenticated method")
