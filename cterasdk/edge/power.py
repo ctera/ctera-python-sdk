@@ -6,17 +6,29 @@ from .base_command import BaseCommand
 
 
 class Power(BaseCommand):
+    """ Gateway Power APIs """
 
     def reboot(self, wait=False):
+        """
+        Reboot the Gateway
+
+        :param bool,optional wait: Wait got the reboot to complete, defaults to False
+        """
         logging.getLogger().info("Rebooting device. %s", {'host': self._gateway.host()})
         self._gateway.execute("/status/device", "reboot", None)
         if wait:
             Boot(self._gateway).wait()
 
     def shutdown(self):
+        """ Shutdown the Gateway """
         self._gateway.execute("/status/device", "poweroff", None)
 
     def reset(self, wait=False):
+        """
+        Reset the Gateway setting
+
+        :param bool,optional wait: Wait got the reset to complete, defaults to False
+        """
         self._gateway.execute("/status/device", "reset2default", None)
         logging.getLogger().info("Resetting device to default settings. %s", {'host': self._gateway.host()})
         if wait:

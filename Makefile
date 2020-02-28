@@ -1,6 +1,6 @@
 # *** WARNING: Targets are meant to run in a build container - Use skipper make ***
 
-all: pylint flake8
+all: pylint flake8 doc8
 
 flake8:
 	flake8 cterasdk
@@ -8,6 +8,9 @@ flake8:
 pylint:
 	mkdir -p build/
 	PYLINTHOME=reports/ pylint -r n cterasdk
+
+doc8:
+	doc8 docs/source
 
 test:
 	# Run the unittests and create a junit-xml report

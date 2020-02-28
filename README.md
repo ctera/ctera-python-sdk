@@ -1,3 +1,17 @@
+# Installing
+## Using PIP
+The `ctera-python-sdk` package can be installed using the python package installer `pip`
+
+```bash
+   pip install cterasdk-3.1.zip
+```
+## Alternatives
+If you don't have `pip` installed, you may use the following alternative:
+
+```bash
+   python setup.py install
+```
+
 # Building
 
 ## Dockerized build using [skipper](https://github.com/Stratoscale/skipper)

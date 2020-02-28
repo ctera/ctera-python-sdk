@@ -17,8 +17,25 @@ from ..core import files
 
 
 class Portal(CTERAHost):
+    """
+    Parent class for communicating with the Portal through either GlobalAdmin or ServicesPortal
+
+    :ivar cterasdk.core.users.Users users: Object holding the Portal user APIs
+    :ivar cterasdk.core.devices.Devices devices: Object holding the Portal devices APIs
+    :ivar cterasdk.core.directoryservice.DirectoryService directoryservice: Object holding the Portal Active Directory Service APIs
+    :ivar cterasdk.core.zones.Zones zones: Object holding the Portal zones APIs
+    :ivar cterasdk.core.activation.Activation activation: Object holding the Portal activation APIs
+    :ivar cterasdk.core.logs.Logs logs: Object holding the Portal logs APIs
+    :ivar cterasdk.core.cloudfs.CloudFS cloudfs: Object holding the Portal CloudFS APIs
+    :ivar cterasdk.core.files.FileBrowser files: Object holding the Portal File Browsing APIs
+    """
 
     def __init__(self, host, port, https):
+        """
+        :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
+        :param int port: Set a custom port number (0 - 65535)
+        :param bool https: Set to True to require HTTPS
+        """
         super().__init__(host, port, https)
         session.inactive_session(self)
         self.users = users.Users(self)
@@ -68,6 +85,7 @@ class Portal(CTERAHost):
         return current_session.authenticated() or current_session.initializing()
 
     def test(self):
+        """ Verification check to ensure the target host is a Portal. """
         connection.test(self)
         return self.get('/public/publicInfo', params={})
 
@@ -88,8 +106,19 @@ class Portal(CTERAHost):
 
 
 class GlobalAdmin(Portal):
+    """
+    Main class for Global Admin operations on a Portal
+
+    :ivar cterasdk.core.portals.Portals portals: Object holding the Portals Management APIs
+    :ivar cterasdk.core.servers.Servers servers: Object holding the Servers Management APIs
+    """
 
     def __init__(self, host, port=443, https=True):
+        """
+        :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
+        :param int,optional port: Set a custom port number (0 - 65535), defaults to 443
+        :param bool,optional https: Set to True to require HTTPS, defaults to True
+        """
         super().__init__(host, port, https)
         self.portals = portals.Portals(self)
         self.servers = servers.Servers(self)
@@ -116,8 +145,16 @@ class GlobalAdmin(Portal):
 
 
 class ServicesPortal(Portal):
+    """
+    Main class for Service operations on a Portal
+    """
 
     def __init__(self, host, port=443, https=True):
+        """
+        :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
+        :param int,optional port: Set a custom port number (0 - 65535), defaults to 443
+        :param bool,optional https: Set to True to require HTTPS, defaults to True
+        """
         super().__init__(host, port, https)
 
     @property

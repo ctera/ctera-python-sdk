@@ -4,6 +4,11 @@ from .base_command import BaseCommand
 
 
 class Audit(BaseCommand):
+    """
+    Gateway Audit configuration APIs
+
+    :ivar list[cterasdk.edge.enum.AuditEvents] defaultAuditEvents: Default audit events
+    """
 
     defaultAuditEvents = [
         enum.AuditEvents.CreateFilesWriteData,
@@ -25,6 +30,18 @@ class Audit(BaseCommand):
             maxRotateTime=1440,
             includeAuditLogTag=True,
             humanReadableAuditLog=False):
+        """
+        Enable Gateway Audit log
+
+        :param str path: Path to save the audit log
+        :param list[cterasdk.edge.enum.AuditEvents],optional auditEvents:
+         List of audit event types to save, defaults to Audit.defaultAuditEvents
+        :param int,optional logKeepPeriod: Period to key the logs in days, defaults to 30
+        :param int,optional maxLogKBSize: The maximum size of the log file in KB, defailts to 102400 (100 MB)
+        :param int,optional maxRotateTime: The maximal time before rotating the log file in Minutes, defaults to 1440 (24 hours)
+        :param bool,optional includeAuditLogTag: Include audit log tag, defailts to True
+        :param bool,optional humanReadableAuditLog: Human readable audit log, defailts to False
+        """
         settings = Object()
         settings.mode = enum.Mode.Enabled
         settings.path = path
@@ -38,4 +55,7 @@ class Audit(BaseCommand):
         self._gateway.put('/config/logging/files', settings)
 
     def disable(self):
+        """
+        Disable Gateway Audit log
+        """
         self._gateway.put('/config/logging/files/mode', enum.Mode.Disabled)

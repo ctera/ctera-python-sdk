@@ -5,7 +5,20 @@ from ..convert import tojsonstr
 
 
 class Activation(BaseCommand):
+    """ Portal activation """
+
     def generate_code(self, username, tenant):
+        """
+        Generate device activation code
+
+        :param username: User name used for activation
+        :type username: str
+        :param tenant: Tenant name used for activation
+        :type tenant: str
+
+        :return: Portal Activation Code
+        :rtype: str
+        """
         params = {'username': username}
 
         if tenant is not None:

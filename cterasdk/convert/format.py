@@ -8,12 +8,28 @@ from cterasdk.convert.xml_types import XMLTypes
 
 
 def tojsonstr(obj, pretty_print=True):
+    """
+    Convert a Python object to a JSON string.
+
+   :param object obj: the Python object
+   :param bool pretty_print: Whether to format the JSON string, defaults to ``True``
+   :return: JSON string of the object
+   :rtype: str
+    """
     if pretty_print:
         return json.dumps(obj, default=lambda o: o.__dict__, indent=5)
     return json.dumps(obj, default=lambda o: o.__dict__)
 
 
 def toxmlstr(obj, pretty_print=False):
+    """
+    Convert a Python object to an XML string
+
+   :param object obj: the Python object
+   :param bool pretty_print: whether to format the XML string, defaults to ``False``
+   :return: XML string of the object
+   :rtype: str
+    """
     if obj is None:
         return None
     xml = toxml(obj)

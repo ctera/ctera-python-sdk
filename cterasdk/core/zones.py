@@ -1,3 +1,4 @@
+from collections import namedtuple
 import copy
 import logging
 import re
@@ -6,13 +7,23 @@ from .base_command import BaseCommand
 from . import query
 from . import devices
 from . import cloudfs
+from . import enum
 from ..common import Object
 from ..exception import CTERAException
 
 
 class Zones(BaseCommand):
+    """
+    Portal Zones APIs
+    """
 
     def get(self, name):
+        """
+        Get zone by name
+
+        :param str name: The name of the zone to get
+        :return: The requested zone
+        """
         query_filter = query.FilterBuilder('name').eq(name)
         param = query.QueryParamBuilder().include_classname().startFrom(0).countLimit(1).addFilter(query_filter).orFilter(False).build()
 
@@ -29,13 +40,15 @@ class Zones(BaseCommand):
         logging.getLogger().info('Zone found. %s', {'name': name, 'id': zone.zoneId})
         return zone
 
-    def add(self, name, policy_type='Select', description=None):
-        policy_type = {
-            'All': 'allFolders',
-            'Select': 'selectedFolders',
-            'None': 'noFolders'
-        }.get(policy_type)
+    def add(self, name, policy_type=enum.PolicyType.SELECT, description=None):
+        """
+        Add a new zone
 
+        :param str name: The name of the new zone
+        :param cterasdk.core.enum.PolicyType,optional policy_type:
+         Policy type of the new zone, defaults to cterasdk.core.enum.PolicyType.SELECT
+        :param str,optional description: The description of the new zone
+        """
         param = self._zone_param(name, policy_type, description)
 
         logging.getLogger().info('Adding zone. %s', {'name': name})
@@ -49,6 +62,11 @@ class Zones(BaseCommand):
         logging.getLogger().info('Zone added. %s', {'name': name})
 
     def delete(self, name):
+        """
+        Delete a zone
+
+        :param str name: The name of the zone to delete
+        """
         zone = self.get(name)
         logging.getLogger().info('Deleting zone. %s', {'zone': name})
         response = self._portal.execute('', 'deleteZones', [zone.zoneId])
@@ -56,6 +74,12 @@ class Zones(BaseCommand):
             logging.getLogger().info('Zone deleted. %s', {'zone': name})
 
     def add_devices(self, name, device_names):
+        """
+        Add devices to a zone
+
+        :param str name: The name of the zone to add devices to
+        :param list[str] device_names: The names of the devices to add to the zone
+        """
         zone = self.get(name)
         portal_devices = devices.Devices(self._portal).by_name(include=['uid'], names=device_names)
         info = self._zone_info(zone.zoneId)
@@ -73,9 +97,15 @@ class Zones(BaseCommand):
             logging.getLogger().error('Failed adding devices to zone.')
             raise error
 
-    def add_folders(self, name, tuples):
+    def add_folders(self, name, folder_finding_helpers):
+        """
+        Add the folders to the zone
+
+        :param str name: The name of the zone
+        :param list[CloudFSFolderFindingHelper] folder_finding_helpers: List of folder names and owners
+        """
         zone = self.get(name)
-        folders = self._find_folders(tuples)
+        folders = self._find_folders(folder_finding_helpers)
         info = self._zone_info(zone.zoneId)
         description = info.description if hasattr(info, 'description') else None
         param = self._zone_param(info.name, info.policyType, description, info.zoneId)
@@ -104,10 +134,11 @@ class Zones(BaseCommand):
         logging.getLogger().debug('Obtained zone info. %s', {'id': zid})
         return response
 
-    def _find_folders(self, tuples):
+    def _find_folders(self, folder_finding_helpers):
         folders = {}
-        for name, owner in tuples:
-            cloud_folder = cloudfs.CloudFS(self._portal).find(name, owner, include=['uid', 'owner'])
+        for folder_finding_helper in folder_finding_helpers:
+            cloud_folder = cloudfs.CloudFS(self._portal).find(
+                folder_finding_helper.name, folder_finding_helper.owner, include=['uid', 'owner'])
             folder_id = cloud_folder.uid
             owner_id = re.search("[1-9][0-9]*", cloud_folder.owner).group(0)
 
@@ -155,3 +186,9 @@ class Zones(BaseCommand):
         param.delta.devicesDelta.removed = []
 
         return param
+
+
+CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
+CloudFSFolderFindingHelper.__doc__ = 'Tuple holding the name and owner couple to search for folders'
+CloudFSFolderFindingHelper.name.__doc__ = 'The name of the CloudFS folder'
+CloudFSFolderFindingHelper.owner.__doc__ = 'The name of the owner of the CloudFS folder'

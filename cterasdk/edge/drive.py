@@ -5,13 +5,16 @@ from .base_command import BaseCommand
 
 
 class Drive(BaseCommand):
+    """
+    Gateway Drive APIs
+    """
 
     def format(self, name):
-        '''
-        {
-            "desc": "Format a drive"
-        }
-        '''
+        """
+        Format a drive
+
+        :param str name: The name of the drive to format
+        """
         param = Object()
         param.name = name
 
@@ -20,11 +23,7 @@ class Drive(BaseCommand):
         logging.getLogger().info('Formatting drive. %s', {'drive': name})
 
     def format_all(self):
-        '''
-        {
-            "desc": "Format all drives"
-        }
-        '''
+        """ Format all drives """
         drives = self._gateway.get('/status/storage/disks')
 
         for drive in drives:

@@ -7,8 +7,16 @@ from ..exception import CTERAException
 
 
 class CloudFS(BaseCommand):
+    """ CloudFS APIs """
 
     def mkfg(self, name, user=None):
+        """
+        Create a new Folder Group
+
+        :param str name: Name of the new folder group
+        :param str user: User name of the new folder group owner (default to None)
+        """
+
         param = Object()
         param.name = name
         param.disabled = True
@@ -23,11 +31,26 @@ class CloudFS(BaseCommand):
             raise error
 
     def rmfg(self, name):
+        """
+        Remove a Folder Group
+
+        :param str name: Name of the folder group to remove
+        """
+
         logging.getLogger().info('Deleting folder group. %s', {'name': name})
         self._portal.execute('/foldersGroups/' + name, 'deleteGroup', True)
         logging.getLogger().info('Folder group deleted. %s', {'name': name})
 
     def mkdir(self, name, group, owner, winacls=True):
+        """
+        Create a new directory
+
+        :param str name: Name of the new directory
+        :param str group: The Folder Group to which the directory belongs
+        :param str owner: User name of the owner of the new directory
+        :param bool,optional winacls: Use Windows ACLs, defaults to True
+        """
+
         owner = self._portal.get('/users/' + owner + '/baseObjectRef')
         group = self._portal.get('/foldersGroups/' + group + '/baseObjectRef')
 
@@ -52,16 +75,37 @@ class CloudFS(BaseCommand):
             raise error
 
     def delete(self, name, owner):
+        """
+        Delete a Cloud Drive Folder
+
+        :param str name: Name of the Cloud Drive Folder to delete
+        :param str owner: User name of the owner of the Cloud Drive Folder to delete
+        """
+
         path = self._dirpath(name, owner)
         logging.getLogger().info('Deleting cloud drive folder. %s', {'path': path})
         self._portal.files().delete(path)
 
     def undelete(self, name, owner):
+        """
+        Un-Delete a Cloud Drive Folder
+
+        :param str name: Name of the Cloud Drive Folder to un-delete
+        :param str owner: User name of the owner of the Cloud Drive Folder to un-delete
+        """
+
         path = self._dirpath(name, owner)
         logging.getLogger().info('Restoring cloud drive folder. %s', {'path': path})
         self._portal.files().undelete(path)
 
     def find(self, name, owner, include):
+        """
+        Find a  Cloud Drive Folder
+
+        :param str name: Name of the Cloud Drive Folder to find
+        :param str owner: User name of the owner of the directory
+        :param list[str] include: List of metadata fields to include in the response
+        """
         builder = query.QueryParamBuilder().include(include)
         query_filter = query.FilterBuilder('name').eq(name)
         builder.addFilter(query_filter)

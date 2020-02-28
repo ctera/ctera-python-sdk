@@ -1,0 +1,40 @@
+***************
+End User Portal
+***************
+
+.. contents:: Table of Contents
+
+Instantiate a Services Portal object
+------------------------------------
+.. autoclass:: cterasdk.object.Portal.ServicesPortal
+   :special-members: __init__
+   :noindex:
+
+.. code-block:: python
+
+   user = ServicesPortal('chopin.ctera.com') # will use HTTPS over port 443
+
+.. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure `chopin-core` to automatically trust the server's certificate, using: ``config.http['ssl'] = 'Trust'``
+
+Logging in
+==========
+.. autofunction:: cterasdk.object.Portal.ServicesPortal.test
+   :noindex:
+
+.. code-block:: python
+
+   user.test()
+
+.. autofunction:: cterasdk.object.Portal.ServicesPortal.login
+   :noindex:
+
+.. code-block:: python
+
+   user.login('admin', 'G3neralZ0d!')
+
+.. autofunction:: cterasdk.object.Portal.ServicesPortal.logout
+   :noindex:
+
+.. code-block:: python
+
+   user.logout()

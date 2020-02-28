@@ -1,37 +1,28 @@
-.. include:: ./README.rst
+.. CTERA SDK for Python documentation master file, created by
+   sphinx-quickstart on Thu Feb 27 08:50:08 2020.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to CTERA SDK for Python's documentation!
+================================================
 
 .. toctree::
-   :caption: Getting Started
-   :maxdepth: 2
-   
-   docs/General/General
+   :maxdepth: 4
+   :caption: Contents:
 
-.. toctree::
-   :caption: Global File System
-   :maxdepth: 2
-   
-   docs/Portal/GlobalAdmin
-   
-   docs/Portal/EndUser
-   
-   docs/Portal/FileBrowser
+   README
+   user_guides/user_guides
+   api/cterasdk
 
-.. toctree::
-   :caption: Edge Filer
-   :maxdepth: 2
-   
-   docs/Gateway/Gateway
-   
-   docs/Gateway/FileBrowser
-   
-.. toctree::
-   :caption: Drive App
-   :maxdepth: 2
-   
-   docs/Agent/Agent
-   
-.. toctree::
-   :caption: Miscellaneous
-   :maxdepth: 2
-   
-   docs/Misc/Miscellaneous
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+Help Us Improve the Docs <3
+===========================
+If you'd like to contribute an improvement to the site, its source is available on GitHub.
+Simply fork the repository and submit a pull request. Thank you!

@@ -9,8 +9,20 @@ from .base_command import BaseCommand
 
 
 class Volumes(BaseCommand):
+    """ Gateway Volumes configuration APIs """
 
     def add(self, name, size=None, filesystem='xfs', device=None, passphrase=None):
+        """
+        Add a new volume to the gateway
+
+        :param str name: Name of the new volume
+        :param int,optional size: Size of the new volume, defaults to the device's size
+        :param str,optional filesystem: Filesystem to use, defaults to xfs
+        :param str,optional device: Name of the device to use for the new volume, can be left as None if there the gateway has only one
+        :param str,optional passphrase: Passphrase for the volume
+
+        :return: Gateway response
+        """
         storage_devices = self._devices()
         device_name, device_size = Volumes._device_volume(device, storage_devices)
         storage_volume_size = Volumes._volume_size(size, device_name, device_size)
@@ -48,6 +60,11 @@ class Volumes(BaseCommand):
         return response
 
     def delete(self, name):
+        """
+        Delete a volume
+
+        :param str name: Name of the volume to delete
+        """
         self._wait_pending_mount(name)
         try:
             logging.getLogger().info('Deleting volume. %s', {'name': name})
@@ -62,6 +79,7 @@ class Volumes(BaseCommand):
             raise CTERAException('Volume deletion falied', error)
 
     def delete_all(self):
+        """ Delete all volumes """
         self._wait_pending_filesystem_mounts()
 
         volumes = self._gateway.get('/config/storage/volumes')

@@ -2,8 +2,17 @@ from ..client import NetworkHost, CTERAHost
 
 
 class Agent(CTERAHost):
+    """
+    Main class operating on a Agent
+    """
 
     def __init__(self, host, port=80, https=False, Portal=None):
+        """
+        :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
+        :param int,optional port: Set a custom port number (0 - 65535), defaults to 80
+        :param bool,optional https: Set to True to require HTTPS, defaults to False
+        :param cterasdk.object.Portal.Portal,optional Portal: The portal throught which the remote session was created, defaults to None
+        """
         super().__init__(host, port, https)
         self._remote_access = False
         self._Portal = Portal
@@ -26,11 +35,7 @@ class Agent(CTERAHost):
         return True
 
     def test(self):
-        '''
-        {
-            "desc": "Verify the target host is a CTERA Gateway"
-        }
-        '''
+        """ Test connectivity """
         NetworkHost.test_conn(self)
         self.get('/nosession/logininfo')
 

@@ -7,38 +7,53 @@ from .base_command import BaseCommand
 
 
 class EncryptionMode:
+    """
+    Encryption mode types
+
+    :ivar str Recoverable: Recoverable key encryption mode
+    :ivar str Secret: Secret key encryption mode
+    """
     Recoverable = 'RecoverableKeyEncryption'
     Secret = 'SecretKeyEncryption'
 
 
 class NotFound(CTERAException):
-    pass
+    """ Not found exception """
 
 
 class AttachEncrypted(CTERAException):
+    """ Attach Encrypted exception """
 
     def __init__(self, encryptionMode, encryptedFolderKey, passPhraseSalt):
-        super(AttachEncrypted, self).__init__()
+        super().__init__()
         self.encryptionMode = encryptionMode
         self.encryptedFolderKey = encryptedFolderKey
         self.passPhraseSalt = passPhraseSalt
 
 
 class IncorrectPassphrase(CTERAException):
+    """ Incorrect Passphrase exception """
 
     def __init__(self):
-        super(IncorrectPassphrase, self).__init__(self, 'Incorrect passphrase')
+        super().__init__('Incorrect passphrase')
 
 
 class ClockOutOfSync(CTERAException):
+    """ Clock Out of Sync exception """
 
     def __init__(self):
-        super(ClockOutOfSync, self).__init__(self, 'Clocks are out of sync')
+        super().__init__('Clocks are out of sync')
 
 
 class Backup(BaseCommand):
+    """ Gateway backup configuration APIs """
 
     def configure(self, passphrase=None):
+        """
+        Gateway backup configuration
+
+        :param str,optional passphrase: Passphrase for the backup, defaults to None
+        """
         logging.getLogger().info('Configuring cloud backup.')
 
         try:
@@ -51,14 +66,17 @@ class Backup(BaseCommand):
         logging.getLogger().info('Cloud backup configuration completed successfully.')
 
     def start(self):
+        """ Start backup """
         logging.getLogger().info("Starting cloud backup.")
         self._gateway.execute("/status/sync", "start")
 
     def suspend(self):
+        """ Suspend backup """
         logging.getLogger().info("Suspending cloud backup.")
         self._gateway.execute("/status/sync", "pause")
 
     def unsuspend(self):
+        """ Un-suspend backup """
         logging.getLogger().info("Suspending cloud backup.")
         self._gateway.execute("/status/sync", "resume")
 

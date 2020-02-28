@@ -43,8 +43,12 @@ class DebugLevel:
 
 
 class Support(BaseCommand):
+    """ Gateway Support APIs """
 
     def set_debug_level(self, *levels):
+        """
+        Set the debug level
+        """
         options = [v for k, v in DebugLevel.__dict__.items() if not k.startswith('_')]
         cli_command = 'dbg level'
         for level in levels:
@@ -54,6 +58,7 @@ class Support(BaseCommand):
         return self._gateway.cli.run_command(cli_command)
 
     def get_support_report(self):
+        """ Download support report """
         dirpath = config.filesystem['dl']
         filename = 'Support-' + self._gateway.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.zip'
         logging.getLogger().info('Downloading support report. %s', {'host': self._gateway.host()})

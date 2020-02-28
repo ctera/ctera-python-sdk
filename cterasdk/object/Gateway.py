@@ -41,8 +41,50 @@ from ..edge import uri
 
 
 class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
+    """
+    Main class operating on a Gateway
+
+    :ivar cterasdk.edge.config.Config config: Object holding the Gateway Configuration APIs
+    :ivar cterasdk.edge.network.Network network: Object holding the Gateway Network APIs
+    :ivar cterasdk.edge.licenses.Licenses licenses: Object holding the Gateway Licenses APIs
+    :ivar cterasdk.edge.services.Services services: Object holding the Gateway Services APIs
+    :ivar cterasdk.edge.directoryservice.DirectoryService directoryservice: Object holding the Gateway Active Directory APIs
+    :ivar cterasdk.edge.telnet.Telnet telnet: Object holding the Gateway Telnet APIs
+    :ivar cterasdk.edge.syslog.Syslog syslog: Object holding the Gateway Syslog APIs
+    :ivar cterasdk.edge.audit.Audit audit: Object holding the Gateway Audit APIs
+    :ivar cterasdk.edge.mail.Mail mail: Object holding the Gateway Mail APIs
+    :ivar cterasdk.edge.backup.Backup backup: Object holding the Gateway Backup APIs
+    :ivar cterasdk.edge.sync.Sync sync: Object holding the Gateway Sync APIs
+    :ivar cterasdk.edge.cache.Cache cache: Object holding the Gateway Cache APIs
+    :ivar cterasdk.edge.power.Power power: Object holding the Gateway Power APIs
+    :ivar cterasdk.edge.users.Users users: Object holding the Gateway Users APIs
+    :ivar cterasdk.edge.groups.Groups groups: Object holding the Gateway Groups APIs
+    :ivar cterasdk.edge.drive.Drive drive: Object holding the Gateway Drive APIs
+    :ivar cterasdk.edge.volumes.Volumes volumes: Object holding the Gateway Volumes APIs
+    :ivar cterasdk.edge.array.Array array: Object holding the Gateway Array APIs
+    :ivar cterasdk.edge.shares.Shares shares: Object holding the Gateway Shares APIs
+    :ivar cterasdk.edge.smb.SMB smb: Object holding the Gateway SMB APIs
+    :ivar cterasdk.edge.aio.AIO aio: Object holding the Gateway AIO APIs
+    :ivar cterasdk.edge.ftp.FTP ftp: Object holding the Gateway FTP APIs
+    :ivar cterasdk.edge.afp.AFP afp: Object holding the Gateway AFP APIs
+    :ivar cterasdk.edge.nfs.NFS nfs: Object holding the Gateway NFS APIs
+    :ivar cterasdk.edge.rsync.RSync rsync: Object holding the Gateway RSync APIs
+    :ivar cterasdk.edge.timezone.Timezone timezone: Object holding the Gateway Timezone APIs
+    :ivar cterasdk.edge.logs.Logs logs: Object holding the Gateway Logs APIs
+    :ivar cterasdk.edge.ntp.NTP ntp: Object holding the Gateway NTP APIs
+    :ivar cterasdk.edge.shell.Shell shell: Object holding the Gateway Shell APIs
+    :ivar cterasdk.edge.cli.CLI cli: Object holding the Gateway CLI APIs
+    :ivar cterasdk.edge.support.Support support: Object holding the Gateway Support APIs
+    :ivar cterasdk.edge.files.FileBrowser files: Object holding the Gateway File Browsing APIs
+    """
 
     def __init__(self, host, port=80, https=False, Portal=None):
+        """
+        :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
+        :param int,optional port: Set a custom port number (0 - 65535), defaults to 80
+        :param bool,optional https: Set to True to require HTTPS, defaults to False
+        :param cterasdk.object.Portal.Portal,optional Portal: The portal throught which the remote session was created, defaults to None
+        """
         super().__init__(host, port, https)
         self._remote_access = False
         if Portal is not None:
@@ -140,6 +182,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         return current_session.authenticated() or is_nosession(args[0])
 
     def test(self):
+        """ Verification check to ensure the target host is a Gateway. """
         return connection.test(self)
 
     def remote_access(self):
