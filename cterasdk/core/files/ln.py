@@ -9,7 +9,7 @@ def mklink(ctera_host, path, access, expire_in):
     expire_on = datetime.now() + timedelta(days=expire_in)
     expire_on = expire_on.strftime('%Y-%m-%d')
 
-    logging.getLogger().info('Creating public link. %s', {'path': path, 'access': access, 'expire_on': expire_on})
+    logging.getLogger().info('Creating public link. %s', {'path': str(path.relativepath), 'access': access, 'expire_on': expire_on})
 
     param = CreateShareParam.instance(path=path.fullpath(), access=access, expire_on=expire_on)
 
