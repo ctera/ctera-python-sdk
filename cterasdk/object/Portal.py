@@ -1,5 +1,3 @@
-import urllib.parse
-
 from ..client import CTERAHost, authenticated
 from ..core import connection
 from ..core import activation
@@ -34,7 +32,11 @@ class Portal(CTERAHost):
 
     @property
     def base_api_url(self):
-        raise NotImplementedError("Implementing class must implement the base_api_url property")
+        return self.base_portal_url + '/api'
+
+    @property
+    def base_portal_url(self):
+        raise NotImplementedError("Implementing class must implement the base_url property")
 
     @property
     def context(self):
@@ -84,20 +86,14 @@ class GlobalAdmin(Portal):
         super().__init__(host, port, https)
         self.portals = portals.Portals(self)
         self.servers = servers.Servers(self)
-        self._base_api_url = None
-        self._base_file_url = None
 
     @property
-    def base_api_url(self):
-        if self._base_api_url is None:
-            self._base_api_url = urllib.parse.urljoin(self.baseurl(), 'admin/api')
-        return self._base_api_url
+    def base_portal_url(self):
+        return self.baseurl() + '/admin'
 
     @property
     def base_file_url(self):
-        if self._base_file_url is None:
-            pass
-        return self._base_file_url
+        return None
 
     @property
     def _omit_fields(self):
@@ -116,20 +112,14 @@ class ServicesPortal(Portal):
 
     def __init__(self, host, port=443, https=True):
         super().__init__(host, port, https)
-        self._base_api_url = None
-        self._base_file_url = None
 
     @property
-    def base_api_url(self):
-        if self._base_api_url is None:
-            self._base_api_url = urllib.parse.urljoin(self.baseurl(), 'ServicesPortal/api')
-        return self._base_api_url
+    def base_portal_url(self):
+        return self.baseurl() + '/ServicesPortal'
 
     @property
     def base_file_url(self):
-        if self._base_file_url is None:
-            pass
-        return self._base_file_url
+        return None
 
     @property
     def context(self):
