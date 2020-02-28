@@ -1,6 +1,7 @@
 from ..client import CTERAHost, authenticated
 from ..core import connection
 from ..core import activation
+from ..core import decorator
 from ..core import directoryservice
 from ..core import login
 from ..core import query
@@ -67,6 +68,10 @@ class Portal(CTERAHost):
     def test(self):
         connection.test(self)
         return self.get('/public/publicInfo', params={})
+
+    @decorator.update_current_tenant
+    def put(self, path, value, use_file_url=False):
+        return super().put(path, value, use_file_url=use_file_url)
 
     @authenticated
     def query(self, path, param):
