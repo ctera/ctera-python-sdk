@@ -49,7 +49,7 @@ class Shares(BaseCommand):
         param.acl = []
         for entry in acl:
             if len(entry) != 3:
-                raise InputError('Invalid input', repr(entry), '[("type", "name", "perm"), ...]')
+                Shares._invalid_ace(entry)
             Shares._add_share_acl_rule(param.acl, entry[0], entry[1], entry[2])
 
         try:
@@ -58,6 +58,14 @@ class Shares(BaseCommand):
         except Exception as error:
             logging.getLogger().error("Share creation failed.")
             raise CTERAException('Share creation failed', error)
+            
+    def set_acl(self, name, acl):
+        param = []
+        for entry in acl:
+            if len(entry) != 3:
+                Shares._invalid_ace(entry)
+            Shares._add_share_acl_rule(param, entry[0], entry[1], entry[2])
+        self._gateway.put('/config/fileservices/share/' + name + '/acl', param)
 
     def add_acl(self, name, acl):
         current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
@@ -66,7 +74,7 @@ class Shares(BaseCommand):
         for entry in acl:
             temp_acl = []
             if len(entry) != 3:
-                raise InputError('Invalid input', repr(entry), '[("type", "name", "perm"), ...]')
+                Shares._invalid_ace(entry)
             Shares._add_share_acl_rule(temp_acl, entry[0], entry[1], entry[2])
             entry_key = entry[0] + '#' + entry[1]
             new_acl_dict[entry_key] = temp_acl[0]
@@ -163,3 +171,7 @@ class Shares(BaseCommand):
         acls.append(ace)
 
         return acls
+    
+    @staticmethod
+    def _invalid_ace(entry):
+        raise InputError('Invalid input', repr(entry), '[("type", "name", "perm"), ...]')
