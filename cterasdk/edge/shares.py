@@ -60,6 +60,16 @@ class Shares(BaseCommand):
             raise CTERAException('Share creation failed', error)
             
     def set_acl(self, name, acl):
+        """
+        Set a network share's access control entries.
+        
+        :param name: the name of a network share
+        :param acl: a list of 3-tuple access control entries
+        :type name: str
+        :type acl: list[tuple(str, str, str)]
+        
+        .. warning: this method will override the existing access control entries
+        """
         param = []
         for entry in acl:
             if len(entry) != 3:
