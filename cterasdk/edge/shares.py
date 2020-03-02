@@ -1,3 +1,4 @@
+from collections import namedtuple
 import logging
 
 from . import enum
@@ -24,7 +25,21 @@ class Shares(BaseCommand):
             exportToRSync=False,
             indexed=False
             ):  # pylint: disable=too-many-arguments,too-many-locals
+        """
+        Add a network share.
 
+        :param str name: the share name
+        :param str directory: full directory path
+        :param list[ShareAccessControlEntry] acl: a list of 3-tuple access control entries
+        :param str access: the Windows File Sharing authentication mode, defaults to ``winAclMode``
+        :param str csc: the client side caching (offline files) configuration, defaults to ``manual``
+        :param str comment: comment
+        :param bool exportToAFP: whether to enable AFP access, defaults to ``False``
+        :param bool exportToFTP: whether to enable FTP access, defaults to ``False``
+        :param bool exportToNFS: whether to enable NFS access, defaults to ``False``
+        :param bool exportToPCAgent: whether to allow as a destination share for CTERA Backup Agents, defaults to ``False``
+        :param bool exportToRSync: whether to enable access over rsync, defaults to ``False``
+        """
         param = Object()
         param.name = name
 
@@ -45,8 +60,9 @@ class Shares(BaseCommand):
         param.exportToRSync = exportToRSync
         param.indexed = indexed
         param.comment = comment
-
         param.acl = []
+        
+        Shares._validate_acl(acl)
         for entry in acl:
             if len(entry) != 3:
                 Shares._invalid_ace(entry)
@@ -63,13 +79,13 @@ class Shares(BaseCommand):
         """
         Set a network share's access control entries.
         
-        :param name: the name of a network share
-        :param acl: a list of 3-tuple access control entries
-        :type name: str
-        :type acl: list[tuple(str, str, str)]
+        :param str name: The share name
+        :param list[ShareAccessControlEntry] acl: List of access control entries
         
         .. warning: this method will override the existing access control entries
         """
+        Shares._validate_acl(acl)
+        
         param = []
         for entry in acl:
             if len(entry) != 3:
@@ -78,6 +94,14 @@ class Shares(BaseCommand):
         self._gateway.put('/config/fileservices/share/' + name + '/acl', param)
 
     def add_acl(self, name, acl):
+        """
+        Add one or more access control entries to an existing share.
+   
+        :param str name: The share name
+        :param list[ShareAccessControlEntry] acl: List of access control entries to add
+        """
+        Shares._validate_acl(acl)
+        
         current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
 
         new_acl_dict = {}
@@ -105,6 +129,14 @@ class Shares(BaseCommand):
         self._gateway.put('/config/fileservices/share/' + name + '/acl', acl)
 
     def remove_acl(self, name, tuples):
+        """
+        Remove one or more access control entries from an existing share.
+
+        :param str name: The share name
+        :param list[RemoveShareAccessControlEntry] acl: List of access control entries to remove
+        """
+        if not isinstance(tuples, list): raise InputError('Invalid input', repr(tuples), '[("type", "name"), ...]')
+        
         current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
 
         options = {v: k for k, v in enum.PrincipalType.__dict__.items() if not k.startswith('_')}  # reverse
@@ -123,6 +155,11 @@ class Shares(BaseCommand):
         self._gateway.put('/config/fileservices/share/' + name + '/acl', new_acl)
 
     def delete(self, name):
+        """
+        Delete a share.
+
+        :param str name: The share name
+        """
         try:
             self._gateway.delete('/config/fileservices/share/' + name)
             logging.getLogger().info("Share deleted. %s", {'name': name})
@@ -183,5 +220,21 @@ class Shares(BaseCommand):
         return acls
     
     @staticmethod
+    def _validate_acl(acl):
+        if not isinstance(acl, list):
+            raise InputError('Invalid access control list format', repr(acl), '[("type", "name", "perm"), ...]')
+    
+    @staticmethod
     def _invalid_ace(entry):
         raise InputError('Invalid input', repr(entry), '[("type", "name", "perm"), ...]')
+
+ShareAccessControlEntry = namedtuple('ShareAccessControlEntry', ('type', 'name', 'perm'))
+ShareAccessControlEntry.__doc__ = 'Tuple holding the principal type, name and permission'
+ShareAccessControlEntry.type.__doc__ = 'The principal type'
+ShareAccessControlEntry.name.__doc__ = 'The name of the user or group'
+ShareAccessControlEntry.perm.__doc__ = 'The file access permission'
+
+RemoveShareAccessControlEntry = namedtuple('RemoveShareAccessControlEntry', ('type', 'name'))
+RemoveShareAccessControlEntry.__doc__ = 'Tuple holding the principal type and name'
+RemoveShareAccessControlEntry.type.__doc__ = 'The principal type'
+RemoveShareAccessControlEntry.name.__doc__ = 'The name of the user or group'
