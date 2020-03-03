@@ -13,6 +13,10 @@ from .base_command import BaseCommand
 class Services(BaseCommand):
     """ Gateway Cloud Services configuration APIs """
 
+    def __init__(self, gateway):
+        super().__init__(gateway)
+        self._trust_cert = {}
+
     def connect(self, server, user, password, ctera_license=enum.License.EV16):
         """
         Connect to a Portal.\n
@@ -33,6 +37,7 @@ class Services(BaseCommand):
         param.server = server
         param.user = user
         param.password = password
+        param.trustCertificate = self._trust_cert.get(server, False)
         self._connect_to_services(param, ctera_license)
 
     def activate(self, server, user, code, ctera_license=enum.License.EV16):
@@ -51,6 +56,7 @@ class Services(BaseCommand):
         param.server = server
         param.user = user
         param.activationCode = code
+        param.trustCertificate = self._trust_cert.get(server, False)
         self._connect_to_services(param, ctera_license)
 
     def reconnect(self):
@@ -92,14 +98,13 @@ class Services(BaseCommand):
             logging.getLogger().error("Unable to establish connection over port %s", str(port))
             raise CTERAConnectionError('Unable to establish connection', None, host=address, port=port, protocol='CTTP')
 
-    def _check_connection(self, server, trust_cert=None):
+    def _check_connection(self, server):
         param = Object()
         param.server = server
-        param.trustCertificate = trust_cert
+        param.trustCertificate = self._trust_cert.get(server, False)
         obj = self._gateway.execute('/status/services', 'isWebSsoEnabled', param)
-        if Services._check_web_sso(obj):
-            return
-        self._handle_untrusted_cert(server, obj)
+        if not Services._check_web_sso(obj):
+            self._handle_untrusted_cert(server, obj)
 
     @staticmethod
     def _check_web_sso(obj):
@@ -124,7 +129,8 @@ class Services(BaseCommand):
                     logging.getLogger().warning(msg=obj.msg)
                     proceed = ask("Proceed connecting '" + self._gateway.host() + "' to " + server + '?')
                 if config.connect['ssl'] == 'Trust' or proceed:
-                    return self.check_connection(server, trust_cert=True)
+                    self._trust_cert[server] = True
+                    return self._check_connection(server)
         except AttributeError:
             pass
         return False
