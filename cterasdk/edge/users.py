@@ -26,7 +26,7 @@ class Users(BaseCommand):
             logging.getLogger().info('User created. %s', {'user': username})
         else:
             logging.getLogger().info('Skipping. root account already exists.')
-        self._gateway.login.login(username, password)
+        self._gateway.login(username, password)
 
     def add(self, username, password, full_name=None, email=None, uid=None):
         """
