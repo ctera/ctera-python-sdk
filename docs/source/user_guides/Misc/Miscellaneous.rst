@@ -6,6 +6,11 @@ Logging
 
 The library includes a built-in console logger. The logger's configuration is controlled by the ``config.Logging.get()`` class object.
 
+Redirecting the log to a file
+=============================
+You can redirect the cterasdk log to a file by setting the environment variable **CTERASDK_LOG_FILE**
+
+
 Disabling the Logger
 ====================
 
