@@ -1,5 +1,6 @@
 # CTERA for Python
 [![Build Status](https://travis-ci.com/CTERA-Networks/ctera-python-sdk.svg?branch=master)](https://travis-ci.com/CTERA-Networks/ctera-python-sdk)
+[![Documentation Status](https://readthedocs.org/projects/ctera-python-sdk/badge/?version=latest)](https://ctera-python-sdk.readthedocs.io/en/latest/?badge=latest)
 
 ## Installing
 Installing via pip
@@ -11,6 +12,11 @@ If you don't have `pip` installed, you may use the following alternative:
 
 ```bash
    python setup.py install
+```
+## Importing the Library
+
+```python
+from cterasdk import *
 ```
 
 ## Building

@@ -7,7 +7,7 @@ File Browser
 List
 ====
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.ls
+.. automethod:: cterasdk.core.files.browser.FileBrowser.ls
    :noindex:
 
 .. code:: python
@@ -16,7 +16,7 @@ List
 
    file_browser.ls('My Files')
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.walk
+.. automethod:: cterasdk.core.files.browser.FileBrowser.walk
    :noindex:
 
 .. code:: python
@@ -26,7 +26,7 @@ List
 Download
 ========
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.download
+.. automethod:: cterasdk.core.files.browser.FileBrowser.download
    :noindex:
 
 .. code:: python
@@ -36,7 +36,7 @@ Download
 Create Directory
 ================
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.mkdir
+.. automethod:: cterasdk.core.files.browser.FileBrowser.mkdir
    :noindex:
 
 .. code:: python
@@ -48,7 +48,7 @@ Create Directory
 Rename
 ======
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.rename
+.. automethod:: cterasdk.core.files.browser.FileBrowser.rename
    :noindex:
 
 .. code:: python
@@ -57,14 +57,14 @@ Rename
 
 Delete
 ======
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.delete
+.. automethod:: cterasdk.core.files.browser.FileBrowser.delete
    :noindex:
 
 .. code:: python
 
    file_browser.delete('My Files/Documents/Sample.docx')
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.delete_multi
+.. automethod:: cterasdk.core.files.browser.FileBrowser.delete_multi
    :noindex:
 
 .. code:: python
@@ -74,14 +74,14 @@ Delete
 Recover
 =======
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.undelete
+.. automethod:: cterasdk.core.files.browser.FileBrowser.undelete
    :noindex:
 
 .. code:: python
 
    file_browser.undelete('My Files/Documents/Sample.docx')
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.undelete_multi
+.. automethod:: cterasdk.core.files.browser.FileBrowser.undelete_multi
    :noindex:
 
 .. code:: python
@@ -91,14 +91,14 @@ Recover
 Copy
 ====
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.copy
+.. automethod:: cterasdk.core.files.browser.FileBrowser.copy
    :noindex:
 
 .. code:: python
 
    file_browser.copy('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.copy_multi
+.. automethod:: cterasdk.core.files.browser.FileBrowser.copy_multi
    :noindex:
 
 .. code:: python
@@ -108,14 +108,14 @@ Copy
 Move
 ====
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.move
+.. automethod:: cterasdk.core.files.browser.FileBrowser.move
    :noindex:
 
 .. code:: python
 
    file_browser.move('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.move_multi
+.. automethod:: cterasdk.core.files.browser.FileBrowser.move_multi
    :noindex:
 
 .. code:: python
@@ -125,7 +125,7 @@ Move
 Create Public Link
 ==================
 
-.. autofunction:: cterasdk.core.files.browser.FileBrowser.mklink
+.. automethod:: cterasdk.core.files.browser.FileBrowser.mklink
    :noindex:
 
 .. code:: python

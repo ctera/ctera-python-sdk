@@ -18,21 +18,21 @@ Instantiate a Services Portal object
 
 Logging in
 ==========
-.. autofunction:: cterasdk.object.Portal.ServicesPortal.test
+.. automethod:: cterasdk.object.Portal.ServicesPortal.test
    :noindex:
 
 .. code-block:: python
 
    user.test()
 
-.. autofunction:: cterasdk.object.Portal.ServicesPortal.login
+.. automethod:: cterasdk.object.Portal.ServicesPortal.login
    :noindex:
 
 .. code-block:: python
 
    user.login('admin', 'G3neralZ0d!')
 
-.. autofunction:: cterasdk.object.Portal.ServicesPortal.logout
+.. automethod:: cterasdk.object.Portal.ServicesPortal.logout
    :noindex:
 
 .. code-block:: python
