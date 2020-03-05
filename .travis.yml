@@ -1,0 +1,13 @@
+sudo: false
+language: python
+
+branches:
+    only:
+        - master
+
+# commands to install dependencies
+install:
+    - ./.travis/install.sh
+# commands to run
+script:
+    - ./.travis/run.sh
