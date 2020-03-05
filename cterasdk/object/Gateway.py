@@ -177,7 +177,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
 
     def _is_authenticated(self, function, *args, **kwargs):
         def is_nosession(path):
-            return function.__name__ == 'get' and path.startswith('/nosession')
+            return path.startswith('/nosession')
         current_session = self.session()
         return current_session.authenticated() or is_nosession(args[0])
 
