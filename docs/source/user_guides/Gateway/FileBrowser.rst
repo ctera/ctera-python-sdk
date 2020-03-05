@@ -17,12 +17,12 @@ Obtaining Access to the Gateway's File System
 
 List
 ====
-.. autofunction:: cterasdk.edge.files.browser.FileBrowser.ls
+.. automethod:: cterasdk.edge.files.browser.FileBrowser.ls
    :noindex:
 
 Download
 ========
-.. autofunction:: cterasdk.edge.files.browser.FileBrowser.download
+.. automethod:: cterasdk.edge.files.browser.FileBrowser.download
    :noindex:
 
 .. code:: python
@@ -31,7 +31,7 @@ Download
 
 Create Directory
 ================
-.. autofunction:: cterasdk.edge.files.browser.FileBrowser.mkdir
+.. automethod:: cterasdk.edge.files.browser.FileBrowser.mkdir
    :noindex:
 
 .. code:: python
@@ -42,7 +42,7 @@ Create Directory
 
 Delete
 ======
-.. autofunction:: cterasdk.edge.files.browser.FileBrowser.delete
+.. automethod:: cterasdk.edge.files.browser.FileBrowser.delete
    :noindex:
 
 .. code:: python

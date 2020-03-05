@@ -24,28 +24,28 @@ Instantiate a Gateway object
 Logging in
 ==========
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.test
+.. automethod:: cterasdk.object.Gateway.Gateway.test
    :noindex:
 
 .. code-block:: python
 
    filer.test()
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.login
+.. automethod:: cterasdk.object.Gateway.Gateway.login
    :noindex:
 
 .. code-block:: python
 
    filer.login('admin', 'G3neralZ0d!')
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.logout
+.. automethod:: cterasdk.object.Gateway.Gateway.logout
    :noindex:
 
 .. code-block:: python
 
    filer.logout()
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.whoami
+.. automethod:: cterasdk.object.Gateway.Gateway.whoami
    :noindex:
 
 .. code-block:: python
@@ -55,21 +55,21 @@ Logging in
 Core Methods
 ============
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.show
+.. automethod:: cterasdk.object.Gateway.Gateway.show
    :noindex:
 
 .. code:: python
 
    filer.show('/status/storage/volumes')
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.show_multi
+.. automethod:: cterasdk.object.Gateway.Gateway.show_multi
    :noindex:
 
 .. code:: python
 
    filer.show_multi(['/config/storage/volumes', '/status/storage/volumes'])
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.get
+.. automethod:: cterasdk.object.Gateway.Gateway.get
    :noindex:
 
 .. code:: python
@@ -98,7 +98,7 @@ Core Methods
 
    print(network.ports[0].ethernet.mtu) # will print the MTU setting
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.get_multi
+.. automethod:: cterasdk.object.Gateway.Gateway.get_multi
    :noindex:
 
 .. code:: python
@@ -110,7 +110,7 @@ Core Methods
    print(device.config.cloudsync.cloudExtender.operationMode)
    print(device.proc.cloudsync.serviceStatus.uploadingFiles)
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.put
+.. automethod:: cterasdk.object.Gateway.Gateway.put
    :noindex:
 
 .. code:: python
@@ -129,7 +129,7 @@ Core Methods
 
        filer.put('/config/fileservices/share/' + share.name, share)
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.execute
+.. automethod:: cterasdk.object.Gateway.Gateway.execute
    :noindex:
 
 .. code:: python
@@ -156,7 +156,7 @@ Core Methods
 
 .. seealso:: Execute the file-eviction process: :py:func:`Gateway.force_eviction()`, Reboot the Gateway: :py:func:`Gateway.reboot()`, Execute tcp connect: :py:func:`Gateway.tcp_connect()`
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.add
+.. automethod:: cterasdk.object.Gateway.Gateway.add
    :noindex:
 
 .. code:: python
@@ -177,7 +177,7 @@ Core Methods
 
    filer.add('/config/auth/users', user)
 
-.. autofunction:: cterasdk.object.Gateway.Gateway.delete
+.. automethod:: cterasdk.object.Gateway.Gateway.delete
    :noindex:
 
 .. code:: python
@@ -190,28 +190,28 @@ Core Methods
 
 Device Configuration
 ====================
-.. autofunction:: cterasdk.edge.config.Config.get_hostname
+.. automethod:: cterasdk.edge.config.Config.get_hostname
    :noindex:
 
 .. code-block:: python
 
    hostname = filer.config.hostname()
 
-.. autofunction:: cterasdk.edge.config.Config.set_hostname
+.. automethod:: cterasdk.edge.config.Config.set_hostname
    :noindex:
 
 .. code-block:: python
 
    filer.config.set_hostname('Chopin')
 
-.. autofunction:: cterasdk.edge.config.Config.get_location
+.. automethod:: cterasdk.edge.config.Config.get_location
    :noindex:
 
 .. code-block:: python
 
    location = filer.config.location()
 
-.. autofunction:: cterasdk.edge.config.Config.set_location
+.. automethod:: cterasdk.edge.config.Config.set_location
    :noindex:
 
 .. code-block:: python
@@ -224,14 +224,14 @@ Storage
 Format
 ^^^^^^
 
-.. autofunction:: cterasdk.edge.drive.Drive.format
+.. automethod:: cterasdk.edge.drive.Drive.format
    :noindex:
 
 .. code-block:: python
 
    filer.drive.format('SATA1')
 
-.. autofunction:: cterasdk.edge.drive.Drive.format_all
+.. automethod:: cterasdk.edge.drive.Drive.format_all
    :noindex:
 
 .. code-block:: python
@@ -241,21 +241,21 @@ Format
 Volumes
 ^^^^^^^
 
-.. autofunction:: cterasdk.edge.volumes.Volumes.add
+.. automethod:: cterasdk.edge.volumes.Volumes.add
    :noindex:
 
 .. code-block:: python
 
    filer.volumes.add('localcache')
 
-.. autofunction:: cterasdk.edge.volumes.Volumes.delete
+.. automethod:: cterasdk.edge.volumes.Volumes.delete
    :noindex:
 
 .. code-block:: python
 
    filer.volumes.delete('localcache')
 
-.. autofunction:: cterasdk.edge.volumes.Volumes.delete_all
+.. automethod:: cterasdk.edge.volumes.Volumes.delete_all
    :noindex:
 
 .. code-block:: python
@@ -265,7 +265,7 @@ Volumes
 Shares
 ======
 
-.. autofunction:: cterasdk.edge.shares.Shares.add
+.. automethod:: cterasdk.edge.shares.Shares.add
    :noindex:
 
 .. code-block:: python
@@ -303,7 +303,7 @@ Shares
        ('LG', 'Everyone', 'RW')
    ], exportToFTP = True)
 
-.. autofunction:: cterasdk.edge.shares.Shares.add_acl
+.. automethod:: cterasdk.edge.shares.Shares.add_acl
    :noindex:
 
 .. code-block:: python
@@ -315,7 +315,7 @@ Shares
        ('DU', 'clark.kent@ctera.com', 'RO') \
    ])
 
-.. autofunction:: cterasdk.edge.shares.Shares.set_acl
+.. automethod:: cterasdk.edge.shares.Shares.set_acl
    :noindex:
 
 .. code-block:: python
@@ -327,7 +327,7 @@ Shares
        ('DU', 'clark.kent@ctera.com', 'RO') \
    ])
 
-.. autofunction:: cterasdk.edge.shares.Shares.remove_acl
+.. automethod:: cterasdk.edge.shares.Shares.remove_acl
    :noindex:
 
 .. code-block:: python
@@ -336,7 +336,7 @@ Shares
 
    filer.shares.remove_acl('Accounting', [ ('DG', 'CTERA\leadership'), ('DU', 'clark.kent@ctera.com') ])
 
-.. autofunction:: cterasdk.edge.shares.Shares.delete
+.. automethod:: cterasdk.edge.shares.Shares.delete
    :noindex:
 
 .. code-block:: python
@@ -371,7 +371,7 @@ Disable all file-access protocols on all shares
 Users
 =====
 
-.. autofunction:: cterasdk.edge.users.Users.add
+.. automethod:: cterasdk.edge.users.Users.add
    :noindex:
 
 .. code-block:: python
@@ -382,14 +382,14 @@ Users
 
    filer.users.add('Bruce', 'GothamCity1!', 'Bruce Wayne', 'bruce.wayne@we.com', uid = 1940) # all
 
-.. autofunction:: cterasdk.edge.users.Users.delete
+.. automethod:: cterasdk.edge.users.Users.delete
    :noindex:
 
 .. code-block:: python
 
    filer.users.delete('alice')
 
-.. autofunction:: cterasdk.edge.users.Users.add_first_user
+.. automethod:: cterasdk.edge.users.Users.add_first_user
    :noindex:
 
 .. code-block:: python
@@ -399,7 +399,7 @@ Users
 Groups
 ======
 
-.. autofunction:: cterasdk.edge.groups.Groups.add_members
+.. automethod:: cterasdk.edge.groups.Groups.add_members
    :noindex:
 
 .. code-block:: python
@@ -412,7 +412,7 @@ Groups
 
    filer.groups.add_members('Administrators', [('DU', 'bruce.wayne@we.com'), ('DG', 'WE\Domain Admins')])
 
-.. autofunction:: cterasdk.edge.groups.Groups.remove_members
+.. automethod:: cterasdk.edge.groups.Groups.remove_members
    :noindex:
 
 .. code-block:: python
@@ -428,7 +428,7 @@ Groups
 Active Directory
 ================
 
-.. autofunction:: cterasdk.edge.directoryservice.DirectoryService.connect
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.connect
    :noindex:
 
 .. code-block:: python
@@ -441,7 +441,7 @@ Active Directory
 
 .. note:: the `ou` parameter must specify the distinguished name of the organizational unit
 
-.. autofunction:: cterasdk.edge.directoryservice.DirectoryService.advanced_mapping
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.advanced_mapping
    :noindex:
 
 .. code-block:: python
@@ -450,14 +450,14 @@ Active Directory
 
 .. note:: to retrieve a list of domain flat names, use :py:func:`Gateway.domains()`
 
-.. autofunction:: cterasdk.edge.directoryservice.DirectoryService.disconnect
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.disconnect
    :noindex:
 
 .. code-block:: python
 
    filer.directoryservice.disconnect()
 
-.. autofunction:: cterasdk.edge.directoryservice.DirectoryService.domains
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.domains
    :noindex:
 
 .. code-block:: python
@@ -469,7 +469,7 @@ Active Directory
 Cloud Services
 ==============
 
-.. autofunction:: cterasdk.edge.services.Services.connect
+.. automethod:: cterasdk.edge.services.Services.connect
    :noindex:
 
 .. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure `chopin-core` to automatically trust the server's certificate, using: ``config.connect['ssl'] = 'Trust'``
@@ -487,7 +487,7 @@ Cloud Services
 
 ..
 
-.. autofunction:: cterasdk.edge.services.Services.activate
+.. automethod:: cterasdk.edge.services.Services.activate
    :noindex:
 
    This method's behavior is identical to :py:func:`Gateway.connect()`
@@ -496,26 +496,26 @@ Cloud Services
 
    filer.services.activate('chopin.ctera.com', 'svc_account', 'fd3a-301b-88d5-e1a9-cbdb') # activate as an EV16
 
-.. autofunction:: cterasdk.edge.services.Services.reconnect
+.. automethod:: cterasdk.edge.services.Services.reconnect
    :noindex:
 
 .. code-block:: python
 
    filer.services.reconnect()
 
-.. autofunction:: cterasdk.edge.services.Services.disconnect
+.. automethod:: cterasdk.edge.services.Services.disconnect
    :noindex:
 
 .. code-block:: python
 
    filer.services.disconnect()
 
-.. autofunction:: cterasdk.edge.services.Services.enable_sso
+.. automethod:: cterasdk.edge.services.Services.enable_sso
    :noindex:
 
 Applying a License
 ==================
-.. autofunction:: cterasdk.edge.licenses.Licenses.apply
+.. automethod:: cterasdk.edge.licenses.Licenses.apply
    :noindex:
 
 .. code-block:: python
@@ -526,14 +526,14 @@ Applying a License
 
 Caching
 =======
-.. autofunction:: cterasdk.edge.cache.Cache.enable
+.. automethod:: cterasdk.edge.cache.Cache.enable
    :noindex:
 
 .. code-block:: python
 
    filer.cache.enable()
 
-.. autofunction:: cterasdk.edge.cache.Cache.disable
+.. automethod:: cterasdk.edge.cache.Cache.disable
    :noindex:
 
 .. code-block:: python
@@ -542,7 +542,7 @@ Caching
 
 .. warning:: all data synchronized from the cloud will be deleted and all unsynchronized changes will be lost.
 
-.. autofunction:: cterasdk.edge.cache.Cache.force_eviction
+.. automethod:: cterasdk.edge.cache.Cache.force_eviction
    :noindex:
 
 .. code-block:: python
@@ -552,7 +552,7 @@ Caching
 Cloud Backup
 ============
 
-.. autofunction:: cterasdk.edge.backup.Backup.configure
+.. automethod:: cterasdk.edge.backup.Backup.configure
    :noindex:
 
 .. code-block:: python
@@ -561,21 +561,21 @@ Cloud Backup
 
    filer.backup.configure()
 
-.. autofunction:: cterasdk.edge.backup.Backup.start
+.. automethod:: cterasdk.edge.backup.Backup.start
    :noindex:
 
 .. code-block:: python
 
    filer.backup.start()
 
-.. autofunction:: cterasdk.edge.backup.Backup.suspend
+.. automethod:: cterasdk.edge.backup.Backup.suspend
    :noindex:
 
 .. code-block:: python
 
    filer.backup.suspend()
 
-.. autofunction:: cterasdk.edge.backup.Backup.unsuspend
+.. automethod:: cterasdk.edge.backup.Backup.unsuspend
    :noindex:
 
 .. code-block:: python
@@ -584,21 +584,21 @@ Cloud Backup
 
 Cloud Sync
 ==========
-.. autofunction:: cterasdk.edge.sync.Sync.suspend
+.. automethod:: cterasdk.edge.sync.Sync.suspend
    :noindex:
 
 .. code-block:: python
 
    filer.sync.suspend()
 
-.. autofunction:: cterasdk.edge.sync.Sync.unsuspend
+.. automethod:: cterasdk.edge.sync.Sync.unsuspend
    :noindex:
 
 .. code-block:: python
 
    filer.sync.unsuspend()
 
-.. autofunction:: cterasdk.edge.sync.Sync.refresh
+.. automethod:: cterasdk.edge.sync.Sync.refresh
    :noindex:
 
 .. code-block:: python
@@ -607,28 +607,28 @@ Cloud Sync
 
 File Access Protocols
 =====================
-.. autofunction:: cterasdk.edge.ftp.FTP.disable
+.. automethod:: cterasdk.edge.ftp.FTP.disable
    :noindex:
 
 .. code-block:: python
 
    filer.ftp.disable()
 
-.. autofunction:: cterasdk.edge.afp.AFP.disable
+.. automethod:: cterasdk.edge.afp.AFP.disable
    :noindex:
 
 .. code-block:: python
 
    filer.afp.disable()
 
-.. autofunction:: cterasdk.edge.nfs.NFS.disable
+.. automethod:: cterasdk.edge.nfs.NFS.disable
    :noindex:
 
 .. code-block:: python
 
    filer.nfs.disable()
 
-.. autofunction:: cterasdk.edge.rsync.RSync.disable
+.. automethod:: cterasdk.edge.rsync.RSync.disable
    :noindex:
 
 .. code-block:: python
@@ -638,49 +638,49 @@ File Access Protocols
 Windows File Sharing (CIFS/SMB)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: cterasdk.edge.smb.SMB.enable
+.. automethod:: cterasdk.edge.smb.SMB.enable
    :noindex:
 
 .. code-block:: python
 
    filer.smb.enable()
 
-.. autofunction:: cterasdk.edge.smb.SMB.disable
+.. automethod:: cterasdk.edge.smb.SMB.disable
    :noindex:
 
 .. code-block:: python
 
    filer.smb.disable()
 
-.. autofunction:: cterasdk.edge.smb.SMB.set_packet_signing
+.. automethod:: cterasdk.edge.smb.SMB.set_packet_signing
    :noindex:
 
 .. code-block:: python
 
    filer.smb.set_packet_signing('If client agrees')
 
-.. autofunction:: cterasdk.edge.smb.SMB.enable_abe
+.. automethod:: cterasdk.edge.smb.SMB.enable_abe
    :noindex:
 
 .. code-block:: python
 
    filer.smb.enable_abe()
 
-.. autofunction:: cterasdk.edge.smb.SMB.disable_abe
+.. automethod:: cterasdk.edge.smb.SMB.disable_abe
    :noindex:
 
 .. code-block:: python
 
    filer.smb.disable_abe()
 
-.. autofunction:: cterasdk.edge.aio.AIO.enable
+.. automethod:: cterasdk.edge.aio.AIO.enable
    :noindex:
 
 .. code-block:: python
 
    filer.aio.enable()
 
-.. autofunction:: cterasdk.edge.aio.AIO.disable
+.. automethod:: cterasdk.edge.aio.AIO.disable
    :noindex:
 
 .. code-block:: python
@@ -690,7 +690,7 @@ Windows File Sharing (CIFS/SMB)
 
 Network
 =======
-.. autofunction:: cterasdk.edge.network.Network.set_static_ipaddr
+.. automethod:: cterasdk.edge.network.Network.set_static_ipaddr
    :noindex:
 
 .. code-block:: python
@@ -699,7 +699,7 @@ Network
 
    filer.show('/status/network/ports/0/ip') # will print the IP configuration
 
-.. autofunction:: cterasdk.edge.network.Network.set_static_nameserver
+.. automethod:: cterasdk.edge.network.Network.set_static_nameserver
    :noindex:
 
 .. code-block:: python
@@ -708,7 +708,7 @@ Network
 
    filer.network.set_static_nameserver('10.100.102.1', '10.100.102.254') # to set both primary and secondary
 
-.. autofunction:: cterasdk.edge.network.Network.enable_dhcp
+.. automethod:: cterasdk.edge.network.Network.enable_dhcp
    :noindex:
 
 .. code-block:: python
@@ -718,7 +718,7 @@ Network
 Network Diagnostics
 ^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: cterasdk.edge.network.Network.tcp_connect
+.. automethod:: cterasdk.edge.network.Network.tcp_connect
    :noindex:
 
 .. code-block:: python
@@ -730,7 +730,7 @@ Network Diagnostics
 Mail Server
 ===========
 
-.. autofunction:: cterasdk.edge.mail.Mail.enable
+.. automethod:: cterasdk.edge.mail.Mail.enable
    :noindex:
 
 .. code-block:: python
@@ -743,7 +743,7 @@ Mail Server
 
    filer.mail.enable('smtp.ctera.com', username = 'user', password = 'secret', useTLS = True)
 
-.. autofunction:: cterasdk.edge.mail.Mail.disable
+.. automethod:: cterasdk.edge.mail.Mail.disable
    :noindex:
 
 .. code-block:: python
@@ -753,7 +753,7 @@ Mail Server
 Logging
 =======
 
-.. autofunction:: cterasdk.edge.syslog.Syslog.enable
+.. automethod:: cterasdk.edge.syslog.Syslog.enable
    :noindex:
 
 .. code-block:: python
@@ -764,7 +764,7 @@ Logging
 
    filer.syslog.enable('syslog.ctera.com', 614, minSeverity = 'error') # use 614 UDP, severity >= error
 
-.. autofunction:: cterasdk.edge.syslog.Syslog.disable
+.. automethod:: cterasdk.edge.syslog.Syslog.disable
    :noindex:
 
 .. code-block:: python
@@ -774,14 +774,14 @@ Logging
 SMB Audit Logs
 ^^^^^^^^^^^^^^
 
-.. autofunction:: cterasdk.edge.audit.Audit.enable
+.. automethod:: cterasdk.edge.audit.Audit.enable
    :noindex:
 
 .. code-block:: python
 
    filer.audit.enable('/logs')
 
-.. autofunction:: cterasdk.edge.audit.Audit.disable
+.. automethod:: cterasdk.edge.audit.Audit.disable
    :noindex:
 
 .. code-block:: python
@@ -790,7 +790,7 @@ SMB Audit Logs
 
 Reset
 =====
-.. autofunction:: cterasdk.edge.power.Power.reset
+.. automethod:: cterasdk.edge.power.Power.reset
    :noindex:
 
 .. code-block:: python
@@ -804,7 +804,7 @@ Reset
 Power Management
 ================
 
-.. autofunction:: cterasdk.edge.power.Power.reboot
+.. automethod:: cterasdk.edge.power.Power.reboot
    :noindex:
 
 .. code-block:: python
@@ -813,7 +813,7 @@ Power Management
 
    filer.power.reboot(True) # will reboot and wait
 
-.. autofunction:: cterasdk.edge.power.Power.shutdown
+.. automethod:: cterasdk.edge.power.Power.shutdown
    :noindex:
 
 .. code-block:: python
@@ -826,13 +826,13 @@ Support
 Support Report
 ^^^^^^^^^^^^^^
 
-.. autofunction:: cterasdk.edge.support.Support.get_support_report
+.. automethod:: cterasdk.edge.support.Support.get_support_report
    :noindex:
 
 Debug
 ^^^^^
 
-.. autofunction:: cterasdk.edge.support.Support.set_debug_level
+.. automethod:: cterasdk.edge.support.Support.set_debug_level
    :noindex:
 
 .. code-block:: python
@@ -845,14 +845,14 @@ Debug
 
 Telnet Access
 ^^^^^^^^^^^^^
-.. autofunction:: cterasdk.edge.telnet.Telnet.enable
+.. automethod:: cterasdk.edge.telnet.Telnet.enable
    :noindex:
 
 .. code-block:: python
 
    filer.telnet.enable('a7df639a')
 
-.. autofunction:: cterasdk.edge.telnet.Telnet.disable
+.. automethod:: cterasdk.edge.telnet.Telnet.disable
    :noindex:
 
 .. code-block:: python

@@ -20,25 +20,29 @@ Instantiate a Global Admin object
 Logging in
 ----------
 
-.. autofunction:: cterasdk.object.Portal.GlobalAdmin.test
+.. automethod:: cterasdk.object.Portal.GlobalAdmin.test
+   :noindex:
 
 .. code-block:: python
 
    admin.test()
 
-.. autofunction:: cterasdk.object.Portal.GlobalAdmin.login
+.. automethod:: cterasdk.object.Portal.GlobalAdmin.login
+   :noindex:
 
 .. code-block:: python
 
    admin.login('admin', 'G3neralZ0d!')
 
-.. autofunction:: cterasdk.object.Portal.GlobalAdmin.logout
+.. automethod:: cterasdk.object.Portal.GlobalAdmin.logout
+   :noindex:
 
 .. code-block:: python
 
    admin.logout()
 
-.. autofunction:: cterasdk.object.Portal.GlobalAdmin.whoami
+.. automethod:: cterasdk.object.Portal.GlobalAdmin.whoami
+   :noindex:
 
 .. code-block:: python
 
@@ -47,14 +51,14 @@ Logging in
 Navigating
 ----------
 
-.. autofunction:: cterasdk.core.portals.Portals.browse_global_admin
+.. automethod:: cterasdk.core.portals.Portals.browse_global_admin
    :noindex:
 
 .. code-block:: python
 
    admin.portals.browse_global_admin()
 
-.. autofunction:: cterasdk.core.portals.Portals.browse
+.. automethod:: cterasdk.core.portals.Portals.browse
    :noindex:
 
 .. code-block:: python
@@ -64,19 +68,19 @@ Navigating
 Core Methods
 ------------
 
-.. autofunction:: cterasdk.object.Portal.GlobalAdmin.show
+.. automethod:: cterasdk.object.Portal.GlobalAdmin.show
    :noindex:
-.. autofunction:: cterasdk.object.Portal.GlobalAdmin.show_multi
+.. automethod:: cterasdk.object.Portal.GlobalAdmin.show_multi
    :noindex:
-.. autofunction:: cterasdk.object.Portal.GlobalAdmin.get
+.. automethod:: cterasdk.object.Portal.GlobalAdmin.get
    :noindex:
-.. autofunction:: cterasdk.object.Portal.GlobalAdmin.put
+.. automethod:: cterasdk.object.Portal.GlobalAdmin.put
    :noindex:
-.. autofunction:: cterasdk.object.Portal.GlobalAdmin.execute
+.. automethod:: cterasdk.object.Portal.GlobalAdmin.execute
    :noindex:
-.. autofunction:: cterasdk.object.Portal.GlobalAdmin.query
+.. automethod:: cterasdk.object.Portal.GlobalAdmin.query
    :noindex:
-.. autofunction:: cterasdk.object.Portal.GlobalAdmin.show_query
+.. automethod:: cterasdk.object.Portal.GlobalAdmin.show_query
    :noindex:
 
 Portals
@@ -84,7 +88,7 @@ Portals
 
 Retrieve Portals
 ^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.portals.Portals.tenants
+.. automethod:: cterasdk.core.portals.Portals.tenants
    :noindex:
 
 .. code-block:: python
@@ -95,7 +99,7 @@ Retrieve Portals
 
 Create a Team Portal
 ^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.portals.Portals.add
+.. automethod:: cterasdk.core.portals.Portals.add
    :noindex:
 
 .. code-block:: python
@@ -110,7 +114,7 @@ Create a Team Portal
 
 Delete a Team Portal
 ^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.portals.Portals.delete
+.. automethod:: cterasdk.core.portals.Portals.delete
    :noindex:
 
 .. code-block:: python
@@ -119,7 +123,7 @@ Delete a Team Portal
 
 Recover a Team Portal
 ^^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.portals.Portals.undelete
+.. automethod:: cterasdk.core.portals.Portals.undelete
    :noindex:
 
 .. code-block:: python
@@ -128,7 +132,7 @@ Recover a Team Portal
 
 Servers
 -------
-.. autofunction:: cterasdk.core.servers.Servers.list_servers
+.. automethod:: cterasdk.core.servers.Servers.list_servers
    :noindex:
 
 .. code-block:: python
@@ -154,7 +158,7 @@ Users
 
 Local Users
 ^^^^^^^^^^^
-.. autofunction:: cterasdk.core.users.Users.list_local_users
+.. automethod:: cterasdk.core.users.Users.list_local_users
    :noindex:
 
 .. code-block:: python
@@ -171,7 +175,7 @@ Local Users
 
        print(user)
 
-.. autofunction:: cterasdk.core.users.Users.add
+.. automethod:: cterasdk.core.users.Users.add
    :noindex:
 
 .. code-block:: python
@@ -180,7 +184,7 @@ Local Users
 
    admin.users.add('bruce', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'G0th4amCity!')
 
-.. autofunction:: cterasdk.core.users.Users.delete
+.. automethod:: cterasdk.core.users.Users.delete
    :noindex:
 
 .. code-block:: python
@@ -192,9 +196,9 @@ Local Users
 Domain Users
 ^^^^^^^^^^^^
 
-.. autofunction:: cterasdk.core.users.Users.list_domains
+.. automethod:: cterasdk.core.users.Users.list_domains
    :noindex:
-.. autofunction:: cterasdk.core.users.Users.list_domain_users
+.. automethod:: cterasdk.core.users.Users.list_domain_users
    :noindex:
 
 .. code-block:: python
@@ -213,16 +217,16 @@ Domain Users
 
 Fetch Users & Groups
 ^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.directoryservice.DirectoryService.fetch
+.. automethod:: cterasdk.core.directoryservice.DirectoryService.fetch
    :noindex:
 
 
 Devices
 -------
-.. autofunction:: cterasdk.core.devices.Devices.device
+.. automethod:: cterasdk.core.devices.Devices.device
    :noindex:
 
-.. autofunction:: cterasdk.core.devices.Devices.filers
+.. automethod:: cterasdk.core.devices.Devices.filers
    :noindex:
 
 .. code-block:: python
@@ -255,7 +259,7 @@ Devices
 
    filers = admin.devices.filers(allPortals = True, deviceTypes = ['C200', 'C400'])
 
-.. autofunction:: cterasdk.core.devices.Devices.agents
+.. automethod:: cterasdk.core.devices.Devices.agents
    :noindex:
 
 .. code-block:: python
@@ -272,26 +276,26 @@ Devices
 
    agents = admin.devices.agents(['deviceReportedStatus.status.agent.details.osName'])
 
-.. autofunction:: cterasdk.core.devices.Devices.servers
+.. automethod:: cterasdk.core.devices.Devices.servers
    :noindex:
 
 .. code-block:: python
 
    server_agents = admin.devices.server()
 
-.. autofunction:: cterasdk.core.devices.Devices.desktops
+.. automethod:: cterasdk.core.devices.Devices.desktops
    :noindex:
 
 .. code-block:: python
 
    desktop_agents = admin.devices.desktop_agents()
 
-.. autofunction:: cterasdk.core.devices.Devices.by_name
+.. automethod:: cterasdk.core.devices.Devices.by_name
    :noindex:
 
 Generate Activation Codes
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.activation.Activation.generate_code
+.. automethod:: cterasdk.core.activation.Activation.generate_code
    :noindex:
 
 .. code-block:: python
@@ -330,7 +334,7 @@ To manage zones, you must be a Read Write Administrator
 
 Retrieve a Zone
 ^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.zones.Zones.get
+.. automethod:: cterasdk.core.zones.Zones.get
    :noindex:
 
 .. code:: python
@@ -339,7 +343,7 @@ Retrieve a Zone
 
 Create a Zone
 ^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.zones.Zones.add
+.. automethod:: cterasdk.core.zones.Zones.add
    :noindex:
 
 .. code:: python
@@ -365,7 +369,7 @@ Create a Zone
 
 Add Folders to a Zone
 ^^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.zones.Zones.add_folders
+.. automethod:: cterasdk.core.zones.Zones.add_folders
    :noindex:
 
 .. code:: python
@@ -382,7 +386,7 @@ Add Folders to a Zone
 
 Add Devices to a Zone
 ^^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.zones.Zones.add_devices
+.. automethod:: cterasdk.core.zones.Zones.add_devices
    :noindex:
 
 .. code:: python
@@ -391,7 +395,7 @@ Add Devices to a Zone
 
 Delete a Zone
 ^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.zones.Zones.delete
+.. automethod:: cterasdk.core.zones.Zones.delete
    :noindex:
 
 .. code:: python
@@ -406,7 +410,7 @@ you must be a Read Write Administrator
 
 Create a Folder Group
 ^^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.cloudfs.CloudFS.mkfg
+.. automethod:: cterasdk.core.cloudfs.CloudFS.mkfg
    :noindex:
 
 .. code:: python
@@ -417,7 +421,7 @@ Create a Folder Group
 
 Delete a Folder Group
 ^^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.cloudfs.CloudFS.rmfg
+.. automethod:: cterasdk.core.cloudfs.CloudFS.rmfg
    :noindex:
 
 .. code:: python
@@ -426,7 +430,7 @@ Delete a Folder Group
 
 Create a Cloud Drive Folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.cloudfs.CloudFS.mkdir
+.. automethod:: cterasdk.core.cloudfs.CloudFS.mkdir
    :noindex:
 
 .. code:: python
@@ -437,7 +441,7 @@ Create a Cloud Drive Folder
 
 Delete a Cloud Drive Folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.cloudfs.CloudFS.delete
+.. automethod:: cterasdk.core.cloudfs.CloudFS.delete
    :noindex:
 
 .. code:: python
@@ -446,7 +450,7 @@ Delete a Cloud Drive Folder
 
 Recover a Cloud Drive Folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. autofunction:: cterasdk.core.cloudfs.CloudFS.undelete
+.. automethod:: cterasdk.core.cloudfs.CloudFS.undelete
    :noindex:
 
 .. code:: python

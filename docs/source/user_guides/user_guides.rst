@@ -1,12 +1,6 @@
 User Guides
 ===========
 .. toctree::
-   :caption: Getting Started
-   :maxdepth: 2
-
-   General/General
-
-.. toctree::
    :caption: Global File System
    :maxdepth: 2
 
