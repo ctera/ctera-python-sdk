@@ -84,7 +84,7 @@ class CloudFS(BaseCommand):
 
         path = self._dirpath(name, owner)
         logging.getLogger().info('Deleting cloud drive folder. %s', {'path': path})
-        self._portal.files().delete(path)
+        self._portal.files.delete(path)
 
     def undelete(self, name, owner):
         """
@@ -96,7 +96,7 @@ class CloudFS(BaseCommand):
 
         path = self._dirpath(name, owner)
         logging.getLogger().info('Restoring cloud drive folder. %s', {'path': path})
-        self._portal.files().undelete(path)
+        self._portal.files.undelete(path)
 
     def find(self, name, owner, include):
         """
