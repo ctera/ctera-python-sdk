@@ -1,20 +1,19 @@
-# Installing
-## Using PIP
-The `ctera-python-sdk` package can be installed using the python package installer `pip`
+# CTERA for Python
+[![Build Status](https://travis-ci.com/CTERA-Networks/ctera-python-sdk.svg?branch=master)](https://travis-ci.com/CTERA-Networks/ctera-python-sdk)
+
+## Installing
+Installing via pip
 
 ```bash
    pip install cterasdk-3.1.zip
 ```
-## Alternatives
 If you don't have `pip` installed, you may use the following alternative:
 
 ```bash
    python setup.py install
 ```
 
-# Building
-
-## Using Tox
+## Building
 
 ### Prerequisites
 
@@ -33,23 +32,7 @@ You can also run specific tox environment, e.g:
 tox -e lint
 ```
 
-## Dockerized build using [skipper](https://github.com/Stratoscale/skipper)
-
-Use strato-skipper to isolate the build environment from your working machine
-
-> Currently skipper is supported only for Linux
-
-### Prerequisites
-
-#### Install skipper
-```bash
-sudo pip install strato-skipper
-```
-### Run tests and build the package
-```bash
-skipper make
-```
-## Build directly on your working environment
+### Build directly on your working environment
 Create a source distribution
 
 ```bash
