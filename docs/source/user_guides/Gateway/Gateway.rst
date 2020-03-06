@@ -477,13 +477,13 @@ Cloud Services
 
 .. code-block:: python
 
-   filer.servics.connect('chopin.ctera.com', 'svc_account', 'Th3AmazingR4ce!', 'EV32') # activate as an EV32
+   filer.services.connect('chopin.ctera.com', 'svc_account', 'Th3AmazingR4ce!', 'EV32') # activate as an EV32
 
 ..
 
 .. code-block:: python
 
-   filer.servics.connect('52.204.15.122', 'svc_account', 'Th3AmazingR4ce!', 'EV64') # activate as an EV64
+   filer.services.connect('52.204.15.122', 'svc_account', 'Th3AmazingR4ce!', 'EV64') # activate as an EV64
 
 ..
 
