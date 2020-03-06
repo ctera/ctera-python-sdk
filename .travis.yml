@@ -7,6 +7,8 @@ deploy:
   provider: pypi
   on:
     tags: true
+    branch:
+    - master
   server: https://test.pypi.org/simple/
   distributions: "sdist bdist_wheel"
   skip_existing: true
