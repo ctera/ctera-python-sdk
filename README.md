@@ -5,7 +5,7 @@
 Installing via pip
 
 ```bash
-   pip install cterasdk-3.1.zip
+   pip install cterasdk
 ```
 If you don't have `pip` installed, you may use the following alternative:
 
