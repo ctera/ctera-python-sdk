@@ -1,17 +1,27 @@
-sudo: false
 language: python
-
 branches:
-    only:
-        - master
-
-# commands to install dependencies
+  only:
+  - master
 install:
-    - ./.travis/install.sh
-# commands to run
+- "./.travis/install.sh"
 script:
-    - ./.travis/run.sh
-
+- "./.travis/run.sh"
+deploy:
+  provider: pypi
+  on:
+    tags: true
+  server: https://test.pypi.org/simple/
+  distributions: "sdist bdist_wheel"
+  skip_existing: true
+  user: __token__
+  password:
+    secure: ejtooENVA7slvUc2UpADwnnMWaDSUE9Yxlk2MYtmsyWu0lYcopUKQlpuwoHKNupV6N58mV903hw7Ya9mn06fdT2pjx9pphFy95/gvnvYWzNQLYYGCruDA70f6ZP5muSjjQvhPPy2L1c2J74VuRDsakY8gE+cax0hGqqtlfEeYQUK8K8l2qH+OE5vDDMCSahGFKOXkBLKSaqSOyi/yYhoEeu6RwCTqVP+NI6U6YnWckLPfpjTJKhXJBiHyjAoXSsjCepKP+kQ5b9QdTMcc/jLU9VQuYCfDMDvHeGZyDebNzNISQLCcUs6MO/BHjU0R8wij2JSHvHyVhjTNoGCQP7xYb5tAEIEOSvWscTqtOcPH1u8uiwKvz+pFPgP0C2v6VeM1phkEgFRiH0l2aIPFA9CDw+YlBJOpqAR6+09Je1llIqxNrCajLLcZW1l00rAqtf4sSPQd+V3aPHjLTkEThKWZg5jbki+fx6M971nfhJkhbt3gBhTqFWEdLGhIUTDgVAQXAbvHx8vwIZ6QEBwcqM06t1DYx0apEy2ngvVok08Umn3Fz0hfA7MD6MuBbyM/FruAe6GXhjLYd4Bsf0ZnUkF6/rCP0Pq68PGdWSYm8r+/9ZUj3gmWpT3iIv2N6BiPM4ZzMb6Fuy5fZv/kDozjSdSOujCFYtdXNeyMZn3rTCa7aU=
 notifications:
-
-webhooks: https://outlook.office.com/webhook/29ee1687-9c88-4562-98ab-3646bc19dc6f@a73ea017-532f-474b-9c0d-501f28c2f195/TravisCI/64c49d0eceb34b0b84c5b6172d0c6a53/4947dfce-1e6b-4214-a692-f0eee5da19de
+  webhooks:
+    urls:
+    - https://outlook.office.com/webhook/29ee1687-9c88-4562-98ab-3646bc19dc6f@a73ea017-532f-474b-9c0d-501f28c2f195/TravisCI/64c49d0eceb34b0b84c5b6172d0c6a53/4947dfce-1e6b-4214-a692-f0eee5da19de
+    on_success: change
+    on_failure: always
+    on_start: never
+    on_cancel: never
+    on_error: always

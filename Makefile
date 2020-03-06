@@ -36,9 +36,12 @@ pytest:
 	DTT_COMPOSE_PATH=$(DTT_COMPOSE_PATH) \
 	pytest -v tests/integration/
 
-dist/ctera-sdk-*.tar.gz:
+prepare-dist:
 	# Create the source distribution
-	python setup.py sdist
+	python3 setup.py sdist bdist_wheel
+
+upload-test:
+	python3 -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 clean:
 	# Clean any generated files
