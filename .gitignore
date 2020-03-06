@@ -1,3 +1,5 @@
 *.pyc
 reports/
 docs/build/
+*.egg-info/
+dist/
