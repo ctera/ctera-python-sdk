@@ -1,7 +1,4 @@
 language: python
-branches:
-  only:
-  - master
 install:
 - "./.travis/install.sh"
 script:
