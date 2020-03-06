@@ -49,12 +49,12 @@ def toxml(obj):
     q.put(root)
     while not q.empty():
         item = q.get()
-        if isinstance(item.obj, (str, int, float, complex)):
+        if isinstance(item.obj, (str, int, float, complex, bool)):
             item.node = CreateElement(item.parent, XMLTypes.VAL)
-            item.node.text = str(item.obj)
-        elif isinstance(item.obj, bool):
-            item.node = CreateElement(item.parent, XMLTypes.VAL)
-            item.node.text = str(item.obj).lower()
+            if isinstance(item.obj, bool):
+                item.node.text = str(item.obj).lower()
+            else:
+                item.node.text = str(item.obj)
         elif isinstance(item.obj, list):
             item.node = CreateElement(item.parent, XMLTypes.LIST)
             for member in item.obj:
