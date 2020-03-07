@@ -6,6 +6,10 @@ from .base_command import BaseCommand
 
 class FTP(BaseCommand):
     """ Gateway FTP configuration APIs """
+    
+    def is_disabled(self):
+        """ Check if the FTP server is disabled """
+        return (self._gateway.get('/config/fileservices/ftp/mode') == Mode.Disabled)
 
     def disable(self):
         """ Disable FTP """
