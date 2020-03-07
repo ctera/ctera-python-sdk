@@ -8,7 +8,7 @@ from .base_command import BaseCommand
 class Array(BaseCommand):
     """ Gateway Array APIs """
 
-    def get(self, name = None):
+    def get(self, name=None):
         """
         Get Array. If an array name was not passed as an argument, a list of all arrays will be retrieved
         :param str,optional name: Name of the array

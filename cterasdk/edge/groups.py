@@ -8,7 +8,7 @@ from .base_command import BaseCommand
 
 class Groups(BaseCommand):
     
-    def get(self, name = None):
+    def get(self, name=None):
         """
         Get Group. If a group name was not passed as an argument, a list of all local groups will be retrieved
         :param str,optional name: Name of the group

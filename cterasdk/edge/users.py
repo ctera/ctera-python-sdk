@@ -8,7 +8,7 @@ from .base_command import BaseCommand
 class Users(BaseCommand):
     """ Gateway Users configuration APIs """
     
-    def get(self, name = None):
+    def get(self, name=None):
         """
         Get User. If a user name was not passed as an argument, a list of all local users will be retrieved
         :param str,optional name: Name of the user

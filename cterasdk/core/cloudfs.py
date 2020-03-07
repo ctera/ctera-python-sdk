@@ -11,7 +11,7 @@ class CloudFS(BaseCommand):
     
     default = ['name', 'group', 'owner']
     
-    def list_folder_groups(self, include = None):
+    def list_folder_groups(self, include=None):
         """
         List folder groups
         :param str,optional include: List of fields to retrieve, defaults to ['name', 'owner']
@@ -105,12 +105,11 @@ class CloudFS(BaseCommand):
         :param str name: Name of the Cloud Drive Folder to un-delete
         :param str owner: User name of the owner of the Cloud Drive Folder to un-delete
         """
-
         path = self._dirpath(name, owner)
         logging.getLogger().info('Restoring cloud drive folder. %s', {'path': path})
         self._portal.files.undelete(path)
         
-    def list_folders(self, include = None, deleted = False):
+    def list_folders(self, include=None, deleted=False):
         """
         List cloud drive folders
         :param str,optional include: List of fields to retrieve, defaults to ['name', 'group', 'owner']

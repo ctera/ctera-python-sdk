@@ -10,7 +10,7 @@ from .base_command import BaseCommand
 
 class Shares(BaseCommand):
     
-    def get(self, name = None):
+    def get(self, name=None):
         """
         Get Share. If a share name was not passed as an argument, a list of all shares will be retrieved
         :param str,optional name: Name of the share

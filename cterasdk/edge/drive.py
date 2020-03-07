@@ -9,7 +9,7 @@ class Drive(BaseCommand):
     Gateway Drive APIs
     """
     
-    def get(self, name = None):
+    def get(self, name=None):
         """
         Get Drive. If a drive name was not passed as an argument, a list of all drives will be retrieved
         :param str,optional name: Name of the drive
