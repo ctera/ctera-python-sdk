@@ -107,7 +107,7 @@ class Devices(BaseCommand):
         """
         Get Devices
 
-        :param list[str],optional names: List of names of devices
+        :param list[str],optional include: List of fields to retrieve, defaults to ['name', 'portal', 'deviceType']
         :param bool,optional allPortals: Search in all portals, defaults to False
         :param list[],optional filters: List of additional filters, defaults to None
 
