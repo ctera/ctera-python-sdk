@@ -1,13 +1,25 @@
 import logging
 
 from .base_command import BaseCommand
-from . import query
+from . import query, union
 from ..common import Object
 from ..exception import CTERAException
 
 
 class CloudFS(BaseCommand):
     """ CloudFS APIs """
+    
+    default = ['name', 'group', 'owner']
+    
+    def list_folder_groups(self, include = None):
+        """
+        List folder groups
+        :param str,optional include: List of fields to retrieve, defaults to ['name', 'owner']
+        :returns: Iterator for all folder groups
+        """
+        include = union.union(include or [], ['name', 'owner'])
+        param = query.QueryParamBuilder().include(include).build()
+        return query.iterator(self._portal, '/foldersGroups', param)
 
     def mkfg(self, name, user=None):
         """
@@ -97,6 +109,20 @@ class CloudFS(BaseCommand):
         path = self._dirpath(name, owner)
         logging.getLogger().info('Restoring cloud drive folder. %s', {'path': path})
         self._portal.files.undelete(path)
+        
+    def list_folders(self, include = None, deleted = False):
+        """
+        List cloud drive folders
+        :param str,optional include: List of fields to retrieve, defaults to ['name', 'group', 'owner']
+        :param str,optional deleted: Retrieve deleted folders
+        :returns: Iterator for all Cloud Drive folders
+        """
+        include = union.union(include or [], CloudFS.default)
+        builder = query.QueryParamBuilder().include(include)
+        query_filter = query.FilterBuilder('isDeleted').eq(deleted)
+        builder.addFilter(query_filter)
+        param = builder.build()
+        return query.iterator(self._portal, '/cloudDrives', param)
 
     def find(self, name, owner, include):
         """
