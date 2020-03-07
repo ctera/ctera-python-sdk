@@ -7,6 +7,13 @@ from .base_command import BaseCommand
 
 
 class Groups(BaseCommand):
+    
+    def get(self, name = None):
+        """
+        Get Group. If a group name was not passed as an argument, a list of all local groups will be retrieved
+        :param str,optional name: Name of the group
+        """
+        return self._gateway.get('/config/auth/groups' +  ('' if name is None else ('/' + name)))
 
     def add_members(self, group, new_members):
         current_members = self._gateway.get('/config/auth/groups/' + group + '/members')
