@@ -7,19 +7,7 @@ from .base_command import BaseCommand
 
 class Sync(BaseCommand):
     """ Gateway Cloud Sync APIs """
-    
-    def status(self):
-        """ Retrieve the Cloud Sync status """
-        return (self._gateway.get('/proc/cloudsync/serviceStatus'))
-    
-    def is_disabled(self):
-        """ Check if Cloud Sync is disabled """
-        return (self._gateway.get('/config/cloudsync/mode') == Mode.Disabled)
 
-    def is_enabled(self):
-        """ Check if Cloud Sync is enabled """
-        return (self._gateway.get('/config/cloudsync/mode') == Mode.Enabled)
-    
     def suspend(self):
         """ Suspend Cloud Sync """
         logging.getLogger().info("Suspending cloud sync.")
