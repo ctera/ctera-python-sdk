@@ -7,13 +7,13 @@ from .base_command import BaseCommand
 
 class Users(BaseCommand):
     """ Gateway Users configuration APIs """
-    
+
     def get(self, name=None):
         """
         Get User. If a user name was not passed as an argument, a list of all local users will be retrieved
         :param str,optional name: Name of the user
         """
-        return self._gateway.get('/config/auth/users' +  ('' if name is None else ('/' + name)))
+        return self._gateway.get('/config/auth/users' + ('' if name is None else ('/' + name)))
 
     def add_first_user(self, username, password, email=''):
         """

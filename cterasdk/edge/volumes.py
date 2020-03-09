@@ -10,13 +10,13 @@ from .base_command import BaseCommand
 
 class Volumes(BaseCommand):
     """ Gateway Volumes configuration APIs """
-    
+
     def get(self, name=None):
         """
         Get Volume. If a volume name was not passed as an argument, a list of all storage volumes will be retrieved
         :param str,optional name: Name of the volume
         """
-        return self._gateway.get('/config/storage/volumes' +  ('' if name is None else ('/' + name)))
+        return self._gateway.get('/config/storage/volumes' + ('' if name is None else ('/' + name)))
 
     def add(self, name, size=None, filesystem='xfs', device=None, passphrase=None):
         """

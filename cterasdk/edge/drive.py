@@ -8,13 +8,13 @@ class Drive(BaseCommand):
     """
     Gateway Drive APIs
     """
-    
+
     def get(self, name=None):
         """
         Get Drive. If a drive name was not passed as an argument, a list of all drives will be retrieved
         :param str,optional name: Name of the drive
         """
-        return self._gateway.get('/config/storage/disks' +  ('' if name is None else ('/' + name)))
+        return self._gateway.get('/config/storage/disks' + ('' if name is None else ('/' + name)))
 
     def format(self, name):
         """

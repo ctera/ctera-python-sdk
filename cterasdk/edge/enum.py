@@ -290,7 +290,8 @@ class AuditEvents:
     Delete = "DE"
     ChangePermissions = "WDAC"
     ChangeOwner = "WO"
-    
+
+
 class ServicesConnectionState:
     """
     Gateway connection status

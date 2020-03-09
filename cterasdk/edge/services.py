@@ -16,7 +16,7 @@ class Services(BaseCommand):
     def __init__(self, gateway):
         super().__init__(gateway)
         self._trust_cert = {}
-        
+
     def status(self):
         """
         Retrieve the cloud services connection status
@@ -31,12 +31,12 @@ class Services(BaseCommand):
             connection.server_address = status.CTERAPortal.serverList[0].name
             connection.last_connected_at = status.CTERAPortal.establishedTime
         return connection
-        
+
     def connected(self):
         """
         Check if the Edge Filer is connected to CTERA Portal
         """
-        return (self._gateway.get('/status/services/CTERAPortal/connectionState') == enum.ServicesConnectionState.Connected)
+        return self._gateway.get('/status/services/CTERAPortal/connectionState') == enum.ServicesConnectionState.Connected
 
     def connect(self, server, user, password, ctera_license=enum.License.EV16):
         """

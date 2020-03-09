@@ -8,9 +8,9 @@ from ..exception import CTERAException
 
 class CloudFS(BaseCommand):
     """ CloudFS APIs """
-    
+
     default = ['name', 'group', 'owner']
-    
+
     def list_folder_groups(self, include=None):
         """
         List folder groups
@@ -108,7 +108,7 @@ class CloudFS(BaseCommand):
         path = self._dirpath(name, owner)
         logging.getLogger().info('Restoring cloud drive folder. %s', {'path': path})
         self._portal.files.undelete(path)
-        
+
     def list_folders(self, include=None, deleted=False):
         """
         List cloud drive folders

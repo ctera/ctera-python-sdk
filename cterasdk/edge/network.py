@@ -8,19 +8,19 @@ from .base_command import BaseCommand
 
 class Network(BaseCommand):
     """ Gateway Network configuration APIs """
-    
+
     def status(self):
         """
         Retrieve the network interface status
         """
         return self._gateway.get('/status/network/ports/0')
-    
+
     def ifconfig(self):
         """
         Retrieve the ip configuration
         """
         return self.ipconfig()
-        
+
     def ipconfig(self):
         """
         Retrieve the ip configuration

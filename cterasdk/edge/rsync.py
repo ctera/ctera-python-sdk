@@ -9,7 +9,7 @@ class RSync(BaseCommand):
 
     def is_disabled(self):
         """ Check if the Rsync server is disabled """
-        return (self._gateway.get('/config/fileservices/rsync/server') == Mode.Disabled)
+        return self._gateway.get('/config/fileservices/rsync/server') == Mode.Disabled
 
     def disable(self):
         """ Disable RSync """

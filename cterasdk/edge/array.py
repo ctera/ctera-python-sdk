@@ -13,7 +13,7 @@ class Array(BaseCommand):
         Get Array. If an array name was not passed as an argument, a list of all arrays will be retrieved
         :param str,optional name: Name of the array
         """
-        return self._gateway.get('/config/storage/arrays' +  ('' if name is None else ('/' + name)))    
+        return self._gateway.get('/config/storage/arrays' + ('' if name is None else ('/' + name)))
 
     def add(self, array_name, level, members):
         """
