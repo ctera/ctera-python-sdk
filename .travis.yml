@@ -1,4 +1,8 @@
 language: python
+branches:
+  only:
+  - master
+  - ^\d+\.\d+(\.\d+)?(-\S*)?$
 install:
 - "./.travis/install.sh"
 script:
