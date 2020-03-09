@@ -290,3 +290,14 @@ class AuditEvents:
     Delete = "DE"
     ChangePermissions = "WDAC"
     ChangeOwner = "WO"
+
+
+class ServicesConnectionState:
+    """
+    Gateway connection status
+
+    :ivar str Disconnected: The Gateway is disconnected from CTERA Portal
+    :ivar str Connected: The Gateway is connected to CTERA Portal
+    """
+    Disconnected = "Disconnected"
+    Connected = "Connected"

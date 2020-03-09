@@ -7,6 +7,7 @@ from ..core import login
 from ..core import query
 from ..core import logs
 from ..core import portals
+from ..core import reports
 from ..core import servers
 from ..core import devices
 from ..core import session
@@ -21,6 +22,7 @@ class Portal(CTERAHost):
     Parent class for communicating with the Portal through either GlobalAdmin or ServicesPortal
 
     :ivar cterasdk.core.users.Users users: Object holding the Portal user APIs
+    :ivar cterasdk.core.reports.Reports reports: Object holding the Portal reports APIs
     :ivar cterasdk.core.devices.Devices devices: Object holding the Portal devices APIs
     :ivar cterasdk.core.directoryservice.DirectoryService directoryservice: Object holding the Portal Active Directory Service APIs
     :ivar cterasdk.core.zones.Zones zones: Object holding the Portal zones APIs
@@ -39,6 +41,7 @@ class Portal(CTERAHost):
         super().__init__(host, port, https)
         session.inactive_session(self)
         self.users = users.Users(self)
+        self.reports = reports.Reports(self)
         self.devices = devices.Devices(self)
         self.directoryservice = directoryservice.DirectoryService(self)
         self.zones = zones.Zones(self)
@@ -67,6 +70,7 @@ class Portal(CTERAHost):
     def _omit_fields(self):
         return super()._omit_fields + [
             'users',
+            'reports',
             'devices',
             'directoryservice',
             'zones',

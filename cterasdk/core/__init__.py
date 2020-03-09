@@ -10,6 +10,7 @@ __all__ = list(
             'query',
             'logs',
             'portals',
+            'reports',
             'remote',
             'servers',
             'devices',
