@@ -5,6 +5,8 @@ CTERA for Python
    :target: https://travis-ci.com/CTERA-Networks/ctera-python-sdk
 .. image:: https://readthedocs.org/projects/ctera-python-sdk/badge/?version=latest
    :target: https://ctera-python-sdk.readthedocs.io/en/latest/?badge=latest
+.. image:: https://snyk.io/test/github/CTERA-Networks/ctera-python-sdk/badge.svg?targetFile=ut-requirements.txt
+   :target: https://snyk.io/test/github/CTERA-Networks/ctera-python-sdk?targetFile=ut-requirements.txt
 
 A Python SDK for integrating with the CTERA Networks API. Compatible with Python
 3.5+. Documentation is available on `Read the Docs <http://ctera-python-sdk.readthedocs.org/>`_.
