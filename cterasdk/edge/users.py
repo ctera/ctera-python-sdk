@@ -59,6 +59,37 @@ class Users(BaseCommand):
             logging.getLogger().error("User creation failed.")
             raise CTERAException('User creation failed', error)
 
+    def modify(self, username, password=None, full_name=None, email=None, uid=None):
+        """
+        Modify an existing user of the Gateway
+
+        :param str username: User name to modify
+        :param str,optional password: New password, defaults to None
+        :param str,optional full_name: The full name of the user, defaults to None
+        :param str,optional email: E-mail address of the user, defaults to None
+        :param str,optional uid: The uid of the user, defaults to None
+        """
+        try:
+            user = self._gateway.get('/config/auth/users/' + username)
+        except CTERAException as error:
+            raise CTERAException('Failed to get the user', error)
+
+        if password:
+            user.password = password
+        if full_name:
+            user.fullName = full_name
+        if email:
+            user.email = email
+        if uid:
+            user.uid = uid
+        try:
+            response = self._gateway.put('/config/auth/users/' + username, user)
+            logging.getLogger().info("User modified. %s", {'username': user.username})
+            return response
+        except CTERAException as error:
+            logging.getLogger().error("Failed to modify user.")
+            raise CTERAException('Failed to modify user', error)
+
     def delete(self, username):
         """
         Delete an existing user
