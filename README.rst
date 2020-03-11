@@ -9,7 +9,11 @@ CTERA for Python
    :target: https://snyk.io/test/github/CTERA-Networks/ctera-python-sdk?targetFile=ut-requirements.txt
 
 A Python SDK for integrating with the CTERA Networks API. Compatible with Python
-3.5+. Documentation is available on `Read the Docs <http://ctera-python-sdk.readthedocs.org/>`_.
+3.5+. 
+
+Documentation
+-------------
+User documentation is available on `Read the Docs <http://ctera-python-sdk.readthedocs.org/>`_.
 
 Installation
 ------------
@@ -35,11 +39,10 @@ After installation, to get started, open a Python console:
 
     >>> from cterasdk import *
 
-Documentation
--------------
+Building Documentation
+-------------------------
 Documentation can be compiled by running ``make html`` from the ``docs``
-folder. After compilation, open ``docs/build/html/index.html``. Alternatively,
-you can read a hosted version from `Read the Docs`_.
+folder. After compilation, open ``docs/build/html/index.html``. 
 
 Testing
 -------
