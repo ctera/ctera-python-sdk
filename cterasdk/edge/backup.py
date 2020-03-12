@@ -65,6 +65,14 @@ class Backup(BaseCommand):
 
         logging.getLogger().info('Cloud backup configuration completed successfully.')
 
+    def is_configured(self):
+        """
+        Is Backed configured
+
+        :return bool: True if backup is configured, else False
+        """
+        return bool(self._gateway.get('/config/backup'))
+
     def start(self):
         """ Start backup """
         logging.getLogger().info("Starting cloud backup.")

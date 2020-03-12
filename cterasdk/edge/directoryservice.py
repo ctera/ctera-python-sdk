@@ -65,11 +65,24 @@ class DirectoryService(BaseCommand):
         logging.getLogger().error('Could not find domain name. %s', {'domain': domain})
         raise CTERAException('Could not find domain name', None, domain=domain, domains=self.domains())
 
+    def get_connected_domain(self):
+        """
+        Get the connected domain information
+
+        :return cterasdk.common.object.Object:
+        """
+        cifs = self._gateway.get('/config/fileservices/cifs')
+        obj = Object()
+        obj.type = cifs.type
+        obj.domain = cifs.domain
+        obj.workgroup = cifs.workgroup
+        return obj
+
     def domains(self):
         """
         Get all domains
 
-        :return list(str): List of names of all configured domains
+        :return list(str): List of names of all discovered domains
         """
         return [domain.flatName for domain in self._gateway.execute('/status/fileservices/cifs', 'enumDiscoveredDomains')]
 

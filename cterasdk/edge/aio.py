@@ -6,6 +6,15 @@ class AIO(BaseCommand):
     """
     Gateway AIO APIs
     """
+    def is_enabled(self):
+        """
+        Is AIO enabled
+
+        :return: True is AIO is enabled, else False
+        :rtype: bool
+        """
+        cifs = self._gateway.get('/config/fileservices/cifs')
+        return cifs.robustMutexes
 
     def enable(self):
         """

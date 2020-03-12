@@ -5,6 +5,14 @@ from .base_command import BaseCommand
 class Timezone(BaseCommand):
     """ Gateway Timezone configuration """
 
+    def get_timezone(self):
+        """
+        Get the timezone of the gateway
+
+        :return str: The timezone of the gateway
+        """
+        return self._gateway.get('/config/time/TimeZone')
+
     def set_timezone(self, timezone):
         """
         Set Timezone
