@@ -318,3 +318,32 @@ class RAIDLevel:
     RAID_1 = "1"
     RAID_5 = "5"
     RAID_6 = "6"
+
+
+class BackupConfStatusID:
+    """
+    Status of backup configuration
+
+    :ivar str NotInitialized: Backup configuration was not initialized
+    :ivar str Configuring: Backup is being configured
+    :ivar str Attaching: Backup configuration is Attaching
+    :ivar str Attached: Backup configuration is Attached
+    :ivar str NoFolder: No Folder for backup
+    :ivar str WrongPassword: Wrong password used
+    :ivar str Failed: Backup configuration failed
+    :ivar str Unsubscribed: Unsubscribed to backup
+    :ivar str Unlicensed: Unlicensed" to backup
+    :ivar str ClocksOutOfSync: Clocks are out of sync
+    :ivar str GetFoldersList: Get folders list
+    """
+    NotInitialized = "NotInitialized"
+    Configuring = "Configuring"
+    Attaching = "Attaching"
+    Attached = "Attached"
+    NoFolder = "NoFolder"
+    WrongPassword = "WrongPassword"
+    Failed = "Failed"
+    Unsubscribed = "Unsubscribed"
+    Unlicensed = "Unlicensed"
+    ClocksOutOfSync = "ClocksOutOfSync"
+    GetFoldersList = "GetFoldersList"

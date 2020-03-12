@@ -3,6 +3,7 @@ import logging
 from . import taskmgr as TaskManager
 from ..common import Object
 from ..exception import CTERAException
+from .enum import BackupConfStatusID
 from .base_command import BaseCommand
 
 
@@ -64,6 +65,15 @@ class Backup(BaseCommand):
         self._configure_backup_settings(settings)
 
         logging.getLogger().info('Cloud backup configuration completed successfully.')
+
+    def is_configured(self):
+        """
+        Is Backup configured
+
+        :return bool: True if backup is configured, else False
+        """
+        backup_status = self._gateway.get('/proc/backup/backupStatus')
+        return backup_status.serviceStatus.id == BackupConfStatusID.Attached
 
     def start(self):
         """ Start backup """

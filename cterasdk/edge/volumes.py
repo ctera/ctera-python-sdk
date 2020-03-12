@@ -66,6 +66,31 @@ class Volumes(BaseCommand):
 
         return response
 
+    def modify(self, name, size=None):
+        """
+        Modify an existing volume
+
+        :param int,optional size: New size of the volume, if not set, the size will not change
+        :return: Gateway response
+        """
+        if size is None:
+            return Object()
+
+        try:
+            volume = self.get(name)
+        except CTERAException as error:
+            raise CTERAException('Failed to get the volume', error)
+
+        volume.size = size
+        try:
+            response = self._gateway.put('/config/storage/volumes/' + name, volume)
+            logging.getLogger().info("Volume modified. %s", {'volume': volume.name})
+            return response
+        except CTERAException as error:
+            msg = "Failed to modify volume."
+            logging.getLogger().error(msg)
+            raise CTERAException(msg, error)
+
     def delete(self, name):
         """
         Delete a volume

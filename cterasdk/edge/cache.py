@@ -23,6 +23,9 @@ class Cache(BaseCommand):
         self._gateway.execute("/config/cloudsync", "forceExecuteEvictor", None)
         logging.getLogger().info("Eviction started.")
 
+    def is_enabled(self):
+        return self._gateway.get('/config/cloudsync/cloudExtender/operationMode') == OperationMode.CachingGateway
+
     def _set_operation_mode(self, mode):
         self._gateway.put('/config/cloudsync/cloudExtender/operationMode', mode)
         logging.getLogger().info('Device opreation mode changed. %s', {'mode': mode})

@@ -17,7 +17,7 @@ class Services(BaseCommand):
         super().__init__(gateway)
         self._trust_cert = {}
 
-    def status(self):
+    def get_status(self):
         """
         Retrieve the cloud services connection status
         """
@@ -88,11 +88,26 @@ class Services(BaseCommand):
         """ Disconnect from the Portal """
         self._gateway.put('/config/services', None)
 
+    def sso_enabled(self):
+        """
+        Is SSO connection enabled
+
+        :return bool: True if SSO connection is enabled, else False
+        """
+        return self._gateway.get('/config/gui/adminRemoteAccessSSO')
+
     def enable_sso(self):
         """ Enable SSO connection """
-        logging.getLogger().info('Enabling single sign-on from CTERA Portal.')
-        self._gateway.put('/config/gui/adminRemoteAccessSSO', True)
-        logging.getLogger().info('Single sign-on enabled.')
+        self._set_sso(True)
+
+    def disable_sso(self):
+        """ Disable SSO connection """
+        self._set_sso(False)
+
+    def _set_sso(self, sso_state):
+        logging.getLogger().info('%s single sign-on from CTERA Portal.', ('Enabling' if sso_state else 'Disabling'))
+        self._gateway.put('/config/gui/adminRemoteAccessSSO', sso_state)
+        logging.getLogger().info('Single sign-on %s.', ('enabled' if sso_state else 'disabled'))
 
     def _connect_to_services(self, param, ctera_license):
         task = self._attach(param)

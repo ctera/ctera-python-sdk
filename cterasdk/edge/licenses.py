@@ -31,3 +31,14 @@ class Licenses(BaseCommand):
         self._gateway.put('/config/device/activeLicenseType', inferred_license)
 
         logging.getLogger().info('License applied. %s', {'license': ctera_license})
+
+    def get(self):
+        """
+        Get the current Gateway License
+        """
+        inferred_license = self._gateway.get('/config/device/activeLicenseType')
+        if inferred_license == 'NA':
+            return inferred_license
+        if len(inferred_license) == 8:
+            inferred_license = inferred_license + '16'
+        return 'EV' + inferred_license[8:]
