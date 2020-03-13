@@ -11,6 +11,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
     def setUp(self):
         super().setUp()
         self._owner = 'admin'
+        self._local_user_account = cloudfs.UserAccount('local', self._owner)
         self._group = 'admin'
         self._name = 'folderGroup'
 
@@ -60,10 +61,10 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         cloudfs.CloudFS(self._global_admin).rmfg(self._name)
         self._global_admin.execute.assert_called_once_with('/foldersGroups/' + self._name, 'deleteGroup', True)
 
-    def test_mkdir_no_winacls_param(self):
+    def test_mkdir_local_owner_no_winacls_param(self):
         get_response = 'admin'
         self._init_global_admin(get_response=get_response, execute_response='Success')
-        ret = cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._owner)
+        ret = cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._local_user_account)
         self._global_admin.get.assert_has_calls(
             [
                 mock.call(('/users/' + self._owner + '/baseObjectRef')),
@@ -78,10 +79,10 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
         self.assertEqual(ret, 'Success')
 
-    def test_mkdir_winacls_true(self):
+    def test_mkdir_local_owner_winacls_true(self):
         get_response = 'admin'
         self._init_global_admin(get_response=get_response, execute_response='Success')
-        ret = cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._owner, True)
+        ret = cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._local_user_account, True)
         self._global_admin.get.assert_has_calls(
             [
                 mock.call(('/users/' + self._owner + '/baseObjectRef')),
@@ -96,10 +97,10 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
         self.assertEqual(ret, 'Success')
 
-    def test_mkdir_winacls_false(self):
+    def test_mkdir_local_owner_winacls_false(self):
         get_response = 'admin'
         self._init_global_admin(get_response=get_response, execute_response='Success')
-        ret = cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._owner, False)
+        ret = cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._local_user_account, False)
         self._global_admin.get.assert_has_calls(
             [
                 mock.call(('/users/' + self._owner + '/baseObjectRef')),
@@ -114,14 +115,14 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
         self.assertEqual(ret, 'Success')
 
-    def test_mkdir_raise(self):
+    def test_mkdir_local_owner_raise(self):
         get_response = 'admin'
         self._init_global_admin(get_response=get_response, execute_response='Success')
         error_message = "Expected Failure"
         expected_exception = exception.CTERAException(message=error_message)
         self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exception.CTERAException) as error:
-            cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._owner)
+            cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._local_user_account)
         self._global_admin.get.assert_has_calls(
             [
                 mock.call(('/users/' + self._owner + '/baseObjectRef')),

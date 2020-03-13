@@ -435,7 +435,11 @@ Create a Cloud Drive Folder
 
 .. code:: python
 
-   admin.cloudfs.mkdir('DIR-001', 'FG-001', 'svc_account')
+   """Create a Cloud Drive folder, owned by a local user account 'svc_account'"""
+   admin.cloudfs.mkdir('DIR-001', 'FG-001', ('local', 'svc_account'))
+
+   """Create a Cloud Drive folder, owned by a domain user account 'wbruce'"""
+   admin.cloudfs.mkdir('DIR-001', 'FG-001', ('ctera.local', 'wbruce'))
 
    admin.cloudfs.mkdir('DIR-002', 'FG-001', 'svc_account', winacls = False) # disable Windows ACL's
 

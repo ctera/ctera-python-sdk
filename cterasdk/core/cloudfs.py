@@ -1,3 +1,4 @@
+from collections import namedtuple
 import logging
 
 from .base_command import BaseCommand
@@ -59,11 +60,13 @@ class CloudFS(BaseCommand):
 
         :param str name: Name of the new directory
         :param str group: The Folder Group to which the directory belongs
-        :param str owner: User name of the owner of the new directory
+        :param UserAccount owner: User account, the owner of the new directory
         :param bool,optional winacls: Use Windows ACLs, defaults to True
         """
+        directory, user = owner
+        baseurl = ('/users/' + user) if directory == 'local' else '/domains/' + directory + '/adUsers/' + user
 
-        owner = self._portal.get('/users/' + owner + '/baseObjectRef')
+        owner = self._portal.get(baseurl + '/baseObjectRef')
         group = self._portal.get('/foldersGroups/' + group + '/baseObjectRef')
 
         param = Object()
@@ -148,3 +151,11 @@ class CloudFS(BaseCommand):
         owner = self._portal.get('/users/' + owner + '/displayName')
         path = owner + '/' + name
         return path
+
+
+UserAccount = namedtuple('UserAccount', ('directory', 'name'))
+UserAccount.__doc__ += 'Tuple holding user account information'
+UserAccount.directory.__doc__ = 'The directory the user is located in. ' \
+    'For local users, indicate "local" as the directory name. ' \
+    'For domain users, indicate the fully qualified domain name'
+UserAccount.name.__doc__ = 'The name of the user account'
