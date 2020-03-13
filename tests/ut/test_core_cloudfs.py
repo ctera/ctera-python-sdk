@@ -42,6 +42,8 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         actual_param = self._global_admin.execute.call_args[0][2]
         self._assert_equal_objects(expected_param, actual_param)
 
+        self.assertEqual(ret, 'Success')
+
     def test_mkfg_no_owner_raise(self):
         error_message = "Expected Failure"
         expected_exception = exception.CTERAException(message=error_message)
@@ -56,7 +58,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         self._global_admin.execute.assert_called_once_with('/foldersGroups/' + self._name, 'deleteGroup', True)
 
     def test_mkdir_with_local_owner_no_winacls_param(self):
-        self._init_global_admin(get_response = 'admin', execute_response='Success')
+        self._init_global_admin(get_response='admin', execute_response='Success')
         self._mock_get_user_base_object_ref()
 
         ret = cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._local_user_account)
@@ -162,11 +164,11 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         return user_account
 
     def _mock_get_user_base_object_ref(self):
-        user_object = self._get_user_object(baseObjectRef = self._owner)
+        user_object = self._get_user_object(baseObjectRef=self._owner)
         self._mock_get_user(user_object)
 
     def _mock_get_user_display_name(self):
-        user_object = self._get_user_object(displayName = self._owner)
+        user_object = self._get_user_object(displayName=self._owner)
         self._mock_get_user(user_object)
 
     def _mock_get_user(self, return_value):

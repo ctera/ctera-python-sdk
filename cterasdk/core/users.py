@@ -15,7 +15,7 @@ class Users(BaseCommand):
 
     _default_fields = ['name']
 
-    def get(self, user_account, include = None):
+    def get(self, user_account, include=None):
         """
         Get a user account
 
@@ -28,10 +28,10 @@ class Users(BaseCommand):
         include = union.union(include or [], Users._default_fields)
         param = query.QueryParamBuilder().include(include).build()
         try:
-            more, user = query.query(self._portal, baseurl, param)
+            user = query.query(self._portal, baseurl, param)[1]
             return user
         except CTERAException as error:
-            raise CTERAException('Could not find user', error, user_directory = directory, username = user)
+            raise CTERAException('Could not find user', error, user_directory=directory, username=user)
 
     def list_local_users(self, include=None):
         """
