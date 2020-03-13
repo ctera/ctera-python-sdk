@@ -41,7 +41,3 @@ class TestEdgeAIO(base_edge.BaseEdgeTest):
         cifs_param.aioReadThreshold = aio_read_threshold
         cifs_param.aioWriteThreshold = aio_write_threshold
         return cifs_param
-
-    def _assert_equal_objects(self, expected_param, actual_param):
-        for field in [a for a in dir(actual_param) if not a.startswith('__')]:
-            self.assertEqual(getattr(actual_param, field), getattr(expected_param, field))

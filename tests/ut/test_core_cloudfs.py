@@ -151,7 +151,3 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         cloudfs.CloudFS(self._global_admin).undelete(self._name, self._owner)
         self._global_admin.get.assert_called_once_with('/users/' + self._owner + '/displayName')
         self._global_admin.files.undelete.assert_called_once_with(self._owner + '/' + self._name)
-
-    def _assert_equal_objects(self, expected_param, actual_param):
-        for field in [a for a in dir(actual_param) if not a.startswith('__')]:
-            self.assertEqual(getattr(actual_param, field), getattr(expected_param, field))

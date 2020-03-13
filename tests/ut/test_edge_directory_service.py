@@ -131,7 +131,3 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         cifs_param.workgroup = self._workgroup
         cifs_param.domain = None
         return cifs_param
-
-    def _assert_equal_objects(self, expected_param, actual_param):
-        for field in [a for a in dir(actual_param) if not a.startswith('__')]:
-            self.assertEqual(getattr(actual_param, field), getattr(expected_param, field))

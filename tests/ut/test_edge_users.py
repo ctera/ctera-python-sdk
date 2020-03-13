@@ -118,7 +118,3 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         o.password = self._password
         o.email = email
         return o
-
-    def _assert_equal_objects(self, expected_param, actual_param):
-        for field in [a for a in dir(actual_param) if not a.startswith('__')]:
-            self.assertEqual(getattr(actual_param, field), getattr(expected_param, field))
