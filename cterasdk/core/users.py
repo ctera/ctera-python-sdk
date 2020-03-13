@@ -1,6 +1,8 @@
+from collections import namedtuple
 import logging
 
 from .base_command import BaseCommand
+from ..exception import CTERAException
 from ..common import Object
 from . import query
 from . import union
@@ -12,6 +14,24 @@ class Users(BaseCommand):
     """
 
     _default_fields = ['name']
+
+    def get(self, user_account, include = None):
+        """
+        Get a user account
+
+        :patam UserAccount user_account: User account, including the user directory and user name
+        :param list[str] include: List of fields to retrieve, defaults to ['name']
+        :return: The user account, including the requested fields
+        """
+        directory, user = user_account
+        baseurl = ('/users/' + user) if directory == 'local' else '/domains/' + directory + '/adUsers/' + user
+        include = union.union(include or [], Users._default_fields)
+        param = query.QueryParamBuilder().include(include).build()
+        try:
+            more, user = query.query(self._portal, baseurl, param)
+            return user
+        except CTERAException as error:
+            raise CTERAException('Could not find user', error, user_directory = directory, username = user)
 
     def list_local_users(self, include=None):
         """
@@ -90,3 +110,11 @@ class Users(BaseCommand):
         logging.getLogger().info('User deleted. %s', {'user': name})
 
         return response
+
+
+UserAccount = namedtuple('UserAccount', ('directory', 'name'))
+UserAccount.__doc__ += 'Tuple holding user account information'
+UserAccount.directory.__doc__ = 'The directory the user is located in. ' \
+    'For local users, indicate "local" as the directory name. ' \
+    'For domain users, indicate the fully qualified domain name'
+UserAccount.name.__doc__ = 'The name of the user account'

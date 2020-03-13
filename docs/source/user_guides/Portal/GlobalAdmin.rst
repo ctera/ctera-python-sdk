@@ -415,9 +415,13 @@ Create a Folder Group
 
 .. code:: python
 
-   admin.cloudfs.mkfg('FG-001', 'svc_account')
+   """Create a Folder Group, owned by a local user account 'svc_account'"""
+   admin.cloudfs.mkfg('FG-001', ('local', 'svc_account'))
 
-   admin.cloudfs.mkfg('FG-002') # without an owner
+   """Create a Folder Group, owned by the domain user 'ctera.local\wbruce'"""
+   admin.cloudfs.mkfg('FG-002', ('ctera.local', 'wbruce'))
+
+   admin.cloudfs.mkfg('FG-003') # without an owner
 
 Delete a Folder Group
 ^^^^^^^^^^^^^^^^^^^^^
@@ -426,7 +430,7 @@ Delete a Folder Group
 
 .. code:: python
 
-   admin.cloudfs.rmfg('FG-002')
+   admin.cloudfs.rmfg('FG-001')
 
 Create a Cloud Drive Folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -435,9 +439,13 @@ Create a Cloud Drive Folder
 
 .. code:: python
 
-   admin.cloudfs.mkdir('DIR-001', 'FG-001', 'svc_account')
+   """Create a Cloud Drive folder, owned by a local user account 'svc_account'"""
+   admin.cloudfs.mkdir('DIR-001', 'FG-001', ('local', 'svc_account'))
 
-   admin.cloudfs.mkdir('DIR-002', 'FG-001', 'svc_account', winacls = False) # disable Windows ACL's
+   """Create a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
+   admin.cloudfs.mkdir('DIR-002', 'FG-002', ('ctera.local', 'wbruce'))
+
+   admin.cloudfs.mkdir('DIR-003', 'FG-003', 'svc_account', winacls = False) # disable Windows ACL's
 
 Delete a Cloud Drive Folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -446,7 +454,11 @@ Delete a Cloud Drive Folder
 
 .. code:: python
 
-   admin.cloudfs.delete('DIR-001', 'svc_account')
+   """Delete a Cloud Drive folder, owned by the local user account 'svc_account'"""
+   admin.cloudfs.delete('DIR-001', ('local', 'svc_account'))
+
+   """Delete a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
+   admin.cloudfs.delete('DIR-002', ('ctera.local', 'wbruce'))
 
 Recover a Cloud Drive Folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -455,4 +467,8 @@ Recover a Cloud Drive Folder
 
 .. code:: python
 
-   admin.cloudfs.undelete('DIR-001', 'svc_account')
+   """Recover a deleted Cloud Drive folder, owned by the local user account 'svc_account'"""
+   admin.cloudfs.undelete('DIR-001', ('local', 'svc_account'))
+
+   """Recover a deleted Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
+   admin.cloudfs.undelete('DIR-002', ('ctera.local', 'wbruce'))
