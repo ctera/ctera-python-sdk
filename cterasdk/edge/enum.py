@@ -301,3 +301,20 @@ class ServicesConnectionState:
     """
     Disconnected = "Disconnected"
     Connected = "Connected"
+
+
+class RAIDLevel:
+    """
+    RAID Levels
+
+    :ivar str JBOD: Linear concatenation
+    :ivar str RAID_0: Stripe set
+    :ivar str RAID_1: Mirror
+    :ivar str RAID_5: Distributed parity
+    :ivar str RAID_6: Dual parity
+    """
+    JBOD = "linear"
+    RAID_0 = "0"
+    RAID_1 = "1"
+    RAID_5 = "5"
+    RAID_6 = "6"
