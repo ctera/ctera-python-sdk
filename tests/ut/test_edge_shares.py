@@ -20,6 +20,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
                            ('LU', 'admin', 'RW'),
                            ('DG', 'CTERA\\Domain Admins', 'RW'),
                            ('DU', 'walice@ctera.com', 'RW')]
+        self._share_block_files = ['exe', 'cmd', 'bat']
 
     def test_get_all_shares(self):
         get_response = 'Success'
@@ -123,6 +124,30 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._assert_equal_objects(expected_param, actual_param)
 
         self.assertEqual('Invalid root directory.', error.exception.message)
+
+    def test_set_share_winacls(self):
+        put_response = 'Success'
+        self._init_filer(put_response=put_response)
+        shares.Shares(self._filer).set_share_winacls(self._share_name)
+        self._filer.put.assert_called_once_with('/config/fileservices/share/' + self._share_name + '/access', Acl.WindowsNT)
+
+    def test_block_files_success(self):
+        get_response = self._get_share_object()
+        self._init_filer(get_response=get_response)
+        shares.Shares(self._filer).block_files(self._share_name, self._share_block_files)
+        self._filer.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
+        self._filer.put.assert_called_once_with(
+            '/config/fileservices/share/' + self._share_name + '/screenedFileTypes',
+            self._share_block_files
+        )
+
+    def test_block_files_invalid_share_access_type(self):
+        get_response = self._get_share_object(access='Expected Failure')
+        self._init_filer(get_response=get_response)
+        with self.assertRaises(exception.CTERAException) as error:
+            shares.Shares(self._filer).block_files(self._share_name, self._share_block_files)
+        self._filer.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
+        self.assertEqual('Cannot block file types on non Windows-ACL enabled shares', error.exception.message)
 
     def test_delete_share_success(self):
         self._init_filer()

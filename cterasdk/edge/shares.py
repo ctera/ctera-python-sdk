@@ -82,6 +82,29 @@ class Shares(BaseCommand):
             logging.getLogger().error("Share creation failed.")
             raise CTERAException('Share creation failed', error)
 
+    def set_share_winacls(self, name):
+        """
+        Set a network share to use Windows ACL Emulation Mode
+
+        :param str name: The share name
+        """
+        logging.getLogger().error("Updating Windows file sharing access mode. %s", {'share': name, 'access': enum.Acl.WindowsNT})
+        self._gateway.put('/config/fileservices/share/' + name + '/access', enum.Acl.WindowsNT)
+
+    def block_files(self, name, extensions):
+        """
+        Configure a share to block one or more file extensions
+
+        :param str name: The share name
+        :param list[str] extensions: List of file extensions to block
+        """
+        share = self.get(name)
+        if share.access != enum.Acl.WindowsNT:
+            raise CTERAException('Cannot block file types on non Windows-ACL enabled shares', None, share=share.name, access=share.access)
+        logging.getLogger().error("Updating the list of blocked file extensions. %s",
+                                  {'share': name, 'extensions': extensions, 'access': enum.Acl.WindowsNT})
+        self._gateway.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', extensions)
+
     def set_acl(self, name, acl):
         """
         Set a network share's access control entries.

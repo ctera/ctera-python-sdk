@@ -39,3 +39,10 @@ class Config(BaseCommand):
         """
         logging.getLogger().info('Configuring device hostname. %s', {'hostname': hostname})
         return self._gateway.put('/config/device/hostname', hostname)
+
+    def disable_wizard(self):
+        """
+        Disable the first time wizard
+        """
+        logging.getLogger().info('Disabling first time wizard')
+        return self._gateway.put('/config/gui/openFirstTimeWizard', False)

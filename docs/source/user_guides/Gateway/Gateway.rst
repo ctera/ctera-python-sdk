@@ -218,6 +218,13 @@ Device Configuration
 
    filer.config.set_location('Jupiter')
 
+.. automethod:: cterasdk.edge.config.Config.disable_wizard
+   :noindex:
+
+.. code-block:: python
+
+   filer.config.disable_wizard()
+
 Storage
 =======
 
@@ -335,6 +342,20 @@ Shares
    """Remove two access control entries from the 'Accounting' share"""
 
    filer.shares.remove_acl('Accounting', [ ('DG', 'CTERA\leadership'), ('DU', 'clark.kent@ctera.com') ])
+
+.. automethod:: cterasdk.edge.shares.Shares.set_share_winacls
+   :noindex:
+
+.. code-block:: python
+
+   filer.shares.set_share_winacls('cloud')
+
+.. automethod:: cterasdk.edge.shares.Shares.block_files
+   :noindex:
+
+.. code-block:: python
+
+   filer.shares.block_files('Accounting', ['exe', 'cmd', 'bat'])
 
 .. automethod:: cterasdk.edge.shares.Shares.delete
    :noindex:
