@@ -17,12 +17,15 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         self._domain_flat_name = "CTERA"
         self._mapping_min = 2000000
         self._mapping_max = 5000000
-        self._filer.network.tcp_connect = mock.MagicMock()
 
     def test_connect(self):
         get_response = self._get_workgroup_param()
         self._init_filer(get_response=get_response)
+        tcp_connect_return_value = True
+        self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
+
         directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password)
+
         self._filer.network.tcp_connect.assert_called_once_with(address=self._domain, port=389)
         self._filer.get.assert_called_once_with('/config/fileservices/cifs')
         self._filer.put.assert_called_once_with('/config/fileservices/cifs', mock.ANY)
@@ -40,7 +43,11 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         ou_path = "ou=North America,DC=ctera,DC=local"
         get_response = self._get_workgroup_param()
         self._init_filer(get_response=get_response)
+        tcp_connect_return_value = True
+        self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
+
         directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, ou_path)
+
         self._filer.network.tcp_connect.assert_called_once_with(address=self._domain, port=389)
         self._filer.get.assert_called_once_with('/config/fileservices/cifs')
         self._filer.put.assert_called_once_with('/config/fileservices/cifs', mock.ANY)
@@ -62,6 +69,16 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         self._filer.execute = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exception.CTERAException):
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password)
+
+    def test_connect_connection_error(self):
+        tcp_connect_return_value = False
+        self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
+
+        with self.assertRaises(exception.CTERAConnectionError) as error:
+            directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password)
+
+        self._filer.network.tcp_connect.assert_called_once_with(address=self._domain, port=389)
+        self.assertEqual('Unable to establish connection', error.exception.message)
 
     def test_set_advanced_mapping(self):
         get_response = TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, 0, 0)

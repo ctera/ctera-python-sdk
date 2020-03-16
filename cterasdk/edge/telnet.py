@@ -10,11 +10,6 @@ class Telnet(BaseCommand):
 
     def enable(self, code):
         """ Enable Telnet """
-        status = self._gateway.get('/status/device')
-        version = status.runningFirmware
-        if version.count('.') == 2:
-            version = version + '.0'
-
         param = Object()
         param.code = code
 

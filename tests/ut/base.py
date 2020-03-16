@@ -1,4 +1,7 @@
+import queue
 import unittest
+
+from cterasdk.common import Object
 
 
 class BaseTest(unittest.TestCase):
@@ -15,5 +18,13 @@ class BaseTest(unittest.TestCase):
         return self.patch_call(module_path, **patch_kwargs)
 
     def _assert_equal_objects(self, expected_param, actual_param):
-        for field in [a for a in dir(actual_param) if not a.startswith('__')]:
-            self.assertEqual(getattr(actual_param, field), getattr(expected_param, field))
+        q = queue.Queue()
+        q.put((actual_param, expected_param))
+        while not q.empty():
+            actual_param, expected_param = q.get()
+            for field in [a for a in dir(actual_param) if not a.startswith('__')]:
+                actual_param_attr = getattr(actual_param, field)
+                if isinstance(actual_param_attr, Object):
+                    q.put((actual_param_attr, getattr(expected_param, field)))
+                else:
+                    self.assertEqual(actual_param_attr, getattr(expected_param, field))

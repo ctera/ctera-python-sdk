@@ -20,7 +20,7 @@ class Array(BaseCommand):
         Add a new array
 
         :param str array_name: Name for the new array
-        :param str level:
+        :param RAIDLevel level: RAID level
         :param list(str) members: Members of the array
         """
         param = Object()
