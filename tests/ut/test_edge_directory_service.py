@@ -3,6 +3,7 @@ from unittest import mock
 from cterasdk import exception
 from cterasdk.edge import directoryservice
 from cterasdk.common import Object
+from cterasdk.edge import taskmgr
 from tests.ut import base_edge
 
 
@@ -17,6 +18,8 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         self._domain_flat_name = "CTERA"
         self._mapping_min = 2000000
         self._mapping_max = 5000000
+
+        self._task_id = '138'
 
     def test_connect(self):
         get_response = self._get_workgroup_param()
@@ -61,7 +64,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         actual_param = self._filer.execute.call_args[0][2]
         self._assert_equal_objects(expected_param, actual_param)
 
-    def test_connect_raise(self):
+    def test_connect_failure_no_connection_over_port(self):
         get_response = self._get_workgroup_param()
         self._init_filer(get_response=get_response)
 
@@ -69,6 +72,30 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         self._filer.execute = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exception.CTERAException):
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password)
+
+    def test_connect_join_failure(self):
+        get_response = self._get_workgroup_param()
+        self._init_filer(get_response=get_response)
+        tcp_connect_return_value = True
+        self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
+        self._filer.execute = mock.MagicMock(side_effect=taskmgr.TaskError(self._task_id))
+
+        with self.assertRaises(exception.CTERAException):
+            directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password)
+
+        self._filer.network.tcp_connect.assert_called_once_with(address=self._domain, port=389)
+
+        self._filer.get.assert_called_once_with('/config/fileservices/cifs')
+
+        self._filer.put.assert_called_once_with('/config/fileservices/cifs', mock.ANY)
+        expected_param = self._get_domain_param()
+        actual_param = self._filer.put.call_args[0][1]
+        self._assert_equal_objects(expected_param, actual_param)
+
+        self._filer.execute.assert_called_once_with("/status/fileservices/cifs", "joinDomain", mock.ANY)
+        expected_param = self._get_domain_join_param()
+        actual_param = self._filer.execute.call_args[0][2]
+        self._assert_equal_objects(expected_param, actual_param)
 
     def test_connect_connection_error(self):
         tcp_connect_return_value = False

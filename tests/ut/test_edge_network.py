@@ -130,7 +130,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
 
         self.assertEqual(ret, True)
 
-    def tcp_connect_failure(self):
+    def test_tcp_connect_failure(self):
         execute_response = self._task_id
         self._init_filer(execute_response=execute_response)
 
@@ -150,7 +150,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
 
         self.assertEqual(ret, False)
 
-    def tcp_connect_task_error(self):
+    def test_tcp_connect_task_error(self):
         execute_response = self._task_id
         self._init_filer(execute_response=execute_response)
         taskmgr.wait = mock.MagicMock(side_effect=taskmgr.TaskError(self._task_id))
