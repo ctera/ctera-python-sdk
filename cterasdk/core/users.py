@@ -1,4 +1,3 @@
-from collections import namedtuple
 import logging
 
 from .base_command import BaseCommand
@@ -19,19 +18,18 @@ class Users(BaseCommand):
         """
         Get a user account
 
-        :patam UserAccount user_account: User account, including the user directory and user name
+        :param UserAccount user_account: User account, including the user directory and user name
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: The user account, including the requested fields
         """
         directory, user = user_account
         baseurl = ('/users/' + user) if directory == 'local' else '/domains/' + directory + '/adUsers/' + user
         include = union.union(include or [], Users._default_fields)
-        param = query.QueryParamBuilder().include(include).build()
-        try:
-            user = query.query(self._portal, baseurl, param)[1]
-            return user
-        except CTERAException as error:
-            raise CTERAException('Could not find user', error, user_directory=directory, username=user)
+        include = ['/' + attr for attr in include]
+        user_object = self._portal.get_multi(baseurl, include)
+        if user_object.name is None:
+            raise CTERAException('Could not find user', None, user_directory=directory, username=user)
+        return user_object
 
     def list_local_users(self, include=None):
         """
@@ -112,9 +110,19 @@ class Users(BaseCommand):
         return response
 
 
-UserAccount = namedtuple('UserAccount', ('directory', 'name'))
-UserAccount.__doc__ += 'Tuple holding user account information'
-UserAccount.directory.__doc__ = 'The directory the user is located in. ' \
-    'For local users, indicate "local" as the directory name. ' \
-    'For domain users, indicate the fully qualified domain name'
-UserAccount.name.__doc__ = 'The name of the user account'
+class UserAccount:
+    """
+    Portal User Account
+
+    :ivar cterasdk.core.users.UserAccount.name name: The user name
+    :ivar cterasdk.core.users.UserAccount.directory directory: The fully-qualified name of the user directory, defaults to None
+    :ivar cterasdk.core.users.UserAccount.is_local is_local: Boolean property to determine if the user account is local
+    """
+    def __init__(self, name, directory=None):
+        """
+        :param str name: The name of the Portal user
+        :param str directory: The the fully qualified domain name, defaults to None
+        """
+        self.name = name
+        self.directory = directory
+        self.is_local = not directory
