@@ -137,8 +137,9 @@ class Zones(BaseCommand):
     def _find_folders(self, folder_finding_helpers):
         folders = {}
         for folder_finding_helper in folder_finding_helpers:
+            folder_name, folder_owner = folder_finding_helper
             cloud_folder = cloudfs.CloudFS(self._portal).find(
-                folder_finding_helper.name, folder_finding_helper.owner, include=['uid', 'owner'])
+                folder_name, folder_owner, include=['uid', 'owner'])
             folder_id = cloud_folder.uid
             owner_id = re.search("[1-9][0-9]*", cloud_folder.owner).group(0)
 
