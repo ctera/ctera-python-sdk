@@ -32,3 +32,10 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
         ret = config.Config(self._filer).set_location(self._location)
         self._filer.put.assert_called_once_with('/config/device/location', self._location)
         self.assertEqual(ret, self._location)
+
+    def test_disable_first_time_wizard(self):
+        put_response = 'Success'
+        self._init_filer(put_response=put_response)
+        ret = config.Config(self._filer).disable_wizard()
+        self._filer.put.assert_called_once_with('/config/gui/openFirstTimeWizard', False)
+        self.assertEqual(ret, put_response)
