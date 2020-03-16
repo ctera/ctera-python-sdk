@@ -22,7 +22,7 @@ class Users(BaseCommand):
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: The user account, including the requested fields
         """
-        directory, user = user_account
+        directory, user = user_account  # transition this code to use users.UserAccount once exposed to the client
         baseurl = ('/users/' + user) if directory == 'local' else '/domains/' + directory + '/adUsers/' + user
         include = union.union(include or [], Users._default_fields)
         include = ['/' + attr for attr in include]
