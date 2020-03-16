@@ -12,6 +12,8 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         super().setUp()
         self._username = 'alice'
         self._password = 'W!zardOf0z'
+        self._full_name = 'Alice Wonderland'
+        self._uid = 516
         self._email = 'alice.wonderland@microsoft.com'
         self._login_mock = self.patch_call("cterasdk.object.Gateway.login")
 
@@ -86,6 +88,43 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         with self.assertRaises(exception.CTERAException) as error:
             users.Users(self._filer).add(self._username, self._password)
         self.assertEqual('User creation failed', error.exception.message)
+
+    def test_modify_user(self):
+        get_response = Object()
+        get_response.username = self._username
+        put_response = 'Success'
+        self._init_filer(get_response=get_response, put_response=put_response)
+        ret = users.Users(self._filer).modify(self._username, self._password, self._full_name, self._email, self._uid)
+
+        self._filer.get.assert_called_once_with('/config/auth/users/' + self._username)
+        self._filer.put.assert_called_once_with('/config/auth/users/' + self._username, mock.ANY)
+        expected_param = self._get_user_object(self._full_name, self._email, self._uid)
+        actual_param = self._filer.put.call_args[0][1]
+        self._assert_equal_objects(expected_param, actual_param)
+
+        self.assertEqual(ret, put_response)
+
+    def test_modify_user_not_found(self):
+        self._filer.get = mock.MagicMock(side_effect=exception.CTERAException())
+        with self.assertRaises(exception.CTERAException) as error:
+            users.Users(self._filer).modify(self._username)
+        self._filer.get.assert_called_once_with('/config/auth/users/' + self._username)
+        self.assertEqual('Failed to get the user', error.exception.message)
+
+    def test_modify_user_update_failed(self):
+        get_response = Object()
+        get_response.username = self._username
+        self._init_filer(get_response=get_response)
+        self._filer.put = mock.MagicMock(side_effect=exception.CTERAException())
+        with self.assertRaises(exception.CTERAException) as error:
+            users.Users(self._filer).modify(self._username, self._password, self._full_name, self._email, self._uid)
+
+        self._filer.get.assert_called_once_with('/config/auth/users/' + self._username)
+        self._filer.put.assert_called_once_with('/config/auth/users/' + self._username, mock.ANY)
+        expected_param = self._get_user_object(self._full_name, self._email, self._uid)
+        actual_param = self._filer.put.call_args[0][1]
+        self._assert_equal_objects(expected_param, actual_param)
+        self.assertEqual('Failed to modify user', error.exception.message)
 
     def test_delete_user(self):
         user = self._get_user_object()
