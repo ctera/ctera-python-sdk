@@ -1,6 +1,7 @@
 import logging
 
 from .base_command import BaseCommand
+from ..exception import CTERAException
 from ..common import Object
 from . import query
 from . import union
@@ -12,6 +13,23 @@ class Users(BaseCommand):
     """
 
     _default_fields = ['name']
+
+    def get(self, user_account, include=None):
+        """
+        Get a user account
+
+        :param UserAccount user_account: User account, including the user directory and user name
+        :param list[str] include: List of fields to retrieve, defaults to ['name']
+        :return: The user account, including the requested fields
+        """
+        directory, user = user_account  # transition this code to use users.UserAccount once exposed to the client
+        baseurl = ('/users/' + user) if directory == 'local' else '/domains/' + directory + '/adUsers/' + user
+        include = union.union(include or [], Users._default_fields)
+        include = ['/' + attr for attr in include]
+        user_object = self._portal.get_multi(baseurl, include)
+        if user_object.name is None:
+            raise CTERAException('Could not find user', None, user_directory=directory, username=user)
+        return user_object
 
     def list_local_users(self, include=None):
         """
@@ -90,3 +108,21 @@ class Users(BaseCommand):
         logging.getLogger().info('User deleted. %s', {'user': name})
 
         return response
+
+
+class UserAccount:
+    """
+    Portal User Account
+
+    :ivar cterasdk.core.users.UserAccount.name name: The user name
+    :ivar cterasdk.core.users.UserAccount.directory directory: The fully-qualified name of the user directory, defaults to None
+    :ivar cterasdk.core.users.UserAccount.is_local is_local: Boolean property to determine if the user account is local
+    """
+    def __init__(self, name, directory=None):
+        """
+        :param str name: The name of the Portal user
+        :param str directory: The the fully qualified domain name, defaults to None
+        """
+        self.name = name
+        self.directory = directory
+        self.is_local = not directory
