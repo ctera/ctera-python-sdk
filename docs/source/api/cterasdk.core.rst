@@ -29,6 +29,7 @@ Submodules
    cterasdk.core.login
    cterasdk.core.logs
    cterasdk.core.portals
+   cterasdk.core.reports
    cterasdk.core.query
    cterasdk.core.remote
    cterasdk.core.servers
@@ -36,4 +37,3 @@ Submodules
    cterasdk.core.union
    cterasdk.core.users
    cterasdk.core.zones
-

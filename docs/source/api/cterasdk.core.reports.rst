@@ -1,5 +1,5 @@
-cterasdk.core.remote module
-===========================
+cterasdk.core.reports module
+============================
 
 .. automodule:: cterasdk.core.reports
     :members:
