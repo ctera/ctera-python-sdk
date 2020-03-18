@@ -1,12 +1,12 @@
 ****************
 CTERA for Python
 ****************
-.. image:: https://travis-ci.com/CTERA-Networks/ctera-python-sdk.svg?branch=master
-   :target: https://travis-ci.com/CTERA-Networks/ctera-python-sdk
+.. image:: https://travis-ci.com/ctera/ctera-python-sdk.svg?branch=master
+   :target: https://travis-ci.com/ctera/ctera-python-sdk
 .. image:: https://readthedocs.org/projects/ctera-python-sdk/badge/?version=latest
    :target: https://ctera-python-sdk.readthedocs.io/en/latest/?badge=latest
-.. image:: https://snyk.io/test/github/CTERA-Networks/ctera-python-sdk/badge.svg?targetFile=ut-requirements.txt
-   :target: https://snyk.io/test/github/CTERA-Networks/ctera-python-sdk?targetFile=ut-requirements.txt
+.. image:: https://snyk.io/test/github/ctera/ctera-python-sdk/badge.svg?targetFile=ut-requirements.txt
+   :target: https://snyk.io/test/github/ctera/ctera-python-sdk?targetFile=ut-requirements.txt
 
 A Python SDK for integrating with the CTERA Networks API. Compatible with Python
 3.5+. 
@@ -27,7 +27,7 @@ Install from source:
 
 .. code-block:: console
 
-   $ git clone https://github.com/CTERA-Networks/ctera-python-sdk.git
+   $ git clone https://github.com/ctera/ctera-python-sdk.git
    $ cd ctera-python-sdk
    $ python setup.py install
 
