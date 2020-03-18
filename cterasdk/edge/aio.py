@@ -14,7 +14,7 @@ class AIO(BaseCommand):
         :rtype: bool
         """
         cifs = self._gateway.get('/config/fileservices/cifs')
-        return cifs.robustMutexes
+        return cifs.robustMutexes and (cifs.aioReadThreshold > 0) and (cifs.aioWriteThreshold > 0)
 
     def enable(self):
         """
