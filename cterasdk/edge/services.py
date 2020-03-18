@@ -17,7 +17,7 @@ class Services(BaseCommand):
         super().__init__(gateway)
         self._trust_cert = {}
 
-    def status(self):
+    def get_status(self):
         """
         Retrieve the cloud services connection status
         """

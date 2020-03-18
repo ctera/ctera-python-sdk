@@ -3,6 +3,7 @@ import logging
 from . import taskmgr as TaskManager
 from ..common import Object
 from ..exception import CTERAException
+from .enum import BackupConfStatusID
 from .base_command import BaseCommand
 
 
@@ -67,11 +68,12 @@ class Backup(BaseCommand):
 
     def is_configured(self):
         """
-        Is Backed configured
+        Is Backup configured
 
         :return bool: True if backup is configured, else False
         """
-        return bool(self._gateway.get('/config/backup'))
+        backup_status = self._gateway.get('/proc/backup/backupStatus')
+        return backup_status.serviceStatus.id == BackupConfStatusID.Attached
 
     def start(self):
         """ Start backup """

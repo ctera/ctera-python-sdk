@@ -9,7 +9,7 @@ from .base_command import BaseCommand
 class Network(BaseCommand):
     """ Gateway Network configuration APIs """
 
-    def status(self):
+    def get_status(self):
         """
         Retrieve the network interface status
         """

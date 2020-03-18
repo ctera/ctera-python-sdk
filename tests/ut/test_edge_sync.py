@@ -13,7 +13,7 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
     def test_cloudsync_status(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = sync.Sync(self._filer).status()
+        ret = sync.Sync(self._filer).get_status()
         self._filer.get.assert_called_once_with('/proc/cloudsync/serviceStatus')
         self.assertEqual(ret, get_response)
 

@@ -8,7 +8,7 @@ from .base_command import BaseCommand
 class Sync(BaseCommand):
     """ Gateway Cloud Sync APIs """
 
-    def status(self):
+    def get_status(self):
         """ Retrieve the Cloud Sync status """
         return self._gateway.get('/proc/cloudsync/serviceStatus')
 

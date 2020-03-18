@@ -40,10 +40,10 @@ class Syslog(BaseCommand):
         self._gateway.put('/config/logging/syslog/mode', enum.Mode.Disabled)
         logging.getLogger().info("Syslog server disabled.")
 
-    def get_current_config(self):
+    def get_configuration(self):
         return self._gateway.get('/config/logging/syslog')
 
-    def modify_current_config(self, server=None, port=None, proto=None, min_severity=None):
+    def modify(self, server=None, port=None, proto=None, min_severity=None):
         """
         Modify current Syslog configuration. Only configurations that are not None will be changed. Syslog must be enabled
 

@@ -18,8 +18,8 @@ class Config(BaseCommand):
         """
         Set the location of the gateway
 
-        :param str hostname: New location to set
-        :return str: The command response
+        :param str location: New location to set
+        :return str: The new location
         """
         logging.getLogger().info('Configuring device location. %s', {'location': location})
         return self._gateway.put('/config/device/location', location)
@@ -37,7 +37,7 @@ class Config(BaseCommand):
         Set the hostname of the gateway
 
         :param str hostname: New hostname to set
-        :return str: The command response
+        :return str: The new hostname
         """
         logging.getLogger().info('Configuring device hostname. %s', {'hostname': hostname})
         return self._gateway.put('/config/device/hostname', hostname)

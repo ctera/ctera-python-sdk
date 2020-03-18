@@ -36,7 +36,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
     def test_network_status(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = network.Network(self._filer).status()
+        ret = network.Network(self._filer).get_status()
         self._filer.get('/status/network/ports/0')
         self.assertEqual(ret, get_response)
 
