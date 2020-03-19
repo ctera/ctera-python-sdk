@@ -7,7 +7,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="cterasdk",
-    version="3.1.2",
+    version="3.1.3",
     author="CTERA Networks",
     author_email="support@ctera.com",
     description="CTERA Python SDK",
