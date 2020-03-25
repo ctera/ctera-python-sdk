@@ -1,10 +1,9 @@
-from collections import namedtuple
 import logging
 
 from .base_command import BaseCommand
 from ..common import Object
 from ..exception import CTERAException
-from .enum import ActiveDirectoryAccountType, SearchType
+from .enum import PortalAccountType, SearchType
 
 
 class DirectoryService(BaseCommand):
@@ -16,28 +15,28 @@ class DirectoryService(BaseCommand):
         """
         Instruct the Portal to fetch the provided active_directory_accounts
 
-        :param list[ActiveDirectoryAccount] active_directory_accounts: List of Active Directory Accounts to fetch
+        :param list[cterasdk.core.types.PortalAccount] active_directory_accounts: List of Active Directory Accounts to fetch
 
         :return: Response Code
         """
-        domains = self._portal.users.domains()
-        account_types = [v for k, v in ActiveDirectoryAccountType.__dict__.items() if not k.startswith('_')]
+        domains = self._portal.users.list_domains()
+        account_types = [v for k, v in PortalAccountType.__dict__.items() if not k.startswith('_')]
 
         param = []
         for active_directory_account in active_directory_accounts:
-            if active_directory_account.domain not in domains:
-                logging.getLogger().error('Invalid domain name. %s', {'domain': active_directory_account.domain})
-                raise CTERAException('Invalid domain', None, domain=active_directory_account.domain, domains=domains)
+            if active_directory_account.directory not in domains:
+                logging.getLogger().error('Invalid domain name. %s', {'domain': active_directory_account.directory})
+                raise CTERAException('Invalid domain', None, domain=active_directory_account.directory, domains=domains)
 
             if active_directory_account.account_type not in account_types:
                 logging.getLogger().error('Invalid account type. %s', {'type': active_directory_account.account_type})
                 raise CTERAException('Invalid account type', None, type=active_directory_account.account_type, options=account_types)
 
         for active_directory_account in active_directory_accounts:
-            if active_directory_account.account_type == ActiveDirectoryAccountType.User:
-                param.append(self._search_users(active_directory_account.domain, active_directory_account.name))
-            elif active_directory_account.account_type == ActiveDirectoryAccountType.Group:
-                param.append(self._search_groups(active_directory_account.domain, active_directory_account.name))
+            if active_directory_account.account_type == PortalAccountType.User:
+                param.append(self._search_users(active_directory_account.directory, active_directory_account.name))
+            elif active_directory_account.account_type == PortalAccountType.Group:
+                param.append(self._search_groups(active_directory_account.directory, active_directory_account.name))
 
         logging.getLogger().info('Starting to fetch users and groups.')
 
@@ -87,10 +86,3 @@ class DirectoryService(BaseCommand):
             type=search_type,
             account=name
         )
-
-
-ActiveDirectoryAccount = namedtuple('ActiveDirectoryAccount', ('domain', 'account_type', 'name'))
-ActiveDirectoryAccount.__doc__ += 'Tuple holding active directory accound Information'
-ActiveDirectoryAccount.domain.__doc__ = 'The domain of the active directory account'
-ActiveDirectoryAccount.account_type.__doc__ = 'The account type of the active directory account'
-ActiveDirectoryAccount.name.__doc__ = 'The name of the active directory account'

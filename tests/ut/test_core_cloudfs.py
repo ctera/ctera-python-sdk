@@ -1,8 +1,8 @@
 from unittest import mock
 
 from cterasdk import exception
-from cterasdk.core import users
 from cterasdk.core import cloudfs
+from cterasdk.core import types
 from cterasdk.common import Object
 from tests.ut import base_core
 
@@ -12,7 +12,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
     def setUp(self):
         super().setUp()
         self._owner = 'admin'
-        self._local_user_account = users.UserAccount('local', self._owner)
+        self._local_user_account = types.UserAccount(self._owner)
         self._group = 'admin'
         self._name = 'folderGroup'
 

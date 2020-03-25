@@ -297,18 +297,20 @@ Shares
    - NA: No Access
    """
 
+   everyone = gateway_types.ShareAccessControlEntry('LG', 'Everyone', 'RO')
+   local_admin = gateway_types.ShareAccessControlEntry('LU', 'admin', 'RW')
+   domain_admins = gateway_types.ShareAccessControlEntry('DG', 'CTERA\Domain Admins', 'RO')
+   bruce_wayne = gateway_types.ShareAccessControlEntry('DU', 'bruce.wayne@ctera.com', 'RW')
+
    filer.shared.add('Accounting', 'cloud/users/Service Account/Accounting', acl = [ \
-       ('LG', 'Everyone', 'RO'), \
-       ('LU', 'admin', 'RW'), \
-       ('DG', 'CTERA\Domain Admins', 'RO'), \
-       ('DU', 'bruce.wayne@ctera.com', 'RW') \
+       everyone, local_admin, domain_admins, bruce_wayne \
    ])
 
    """Create an 'Only Authenticated Users' cloud share called 'FTP' and enable FTP access to everyone"""
 
-   filer.shared.add('FTP', 'cloud/users/Service Account/FTP', acl = [ \
-       ('LG', 'Everyone', 'RW')
-   ], exportToFTP = True)
+   everyone = gateway_types.ShareAccessControlEntry('LG', 'Everyone', 'RW')
+
+   filer.shared.add('FTP', 'cloud/users/Service Account/FTP', acl = [everyone], exportToFTP = True)
 
 .. automethod:: cterasdk.edge.shares.Shares.add_acl
    :noindex:
@@ -317,31 +319,34 @@ Shares
 
    """Add two access control entries to the 'Accounting' share"""
 
-   filer.shares.add_acl('Accounting', [ \
-       ('DG', 'CTERA\leadership', 'RW'), \
-       ('DU', 'clark.kent@ctera.com', 'RO') \
-   ])
+   domain_group = gateway_types.ShareAccessControlEntry('DG', 'CTERA\leadership', 'RW')
+   domain_user = gateway_types.ShareAccessControlEntry('DU', 'clark.kent@ctera.com', 'RO')
+
+   filer.shares.add_acl('Accounting', [domain_group, domain_user])
 
 .. automethod:: cterasdk.edge.shares.Shares.set_acl
    :noindex:
 
 .. code-block:: python
 
-   """Set two access control entries to the 'Accounting' share"""
+   """Set the access control entries of the 'Accounting' share"""
 
-   filer.shares.set_acl('Accounting', [ \
-       ('DG', 'CTERA\leadership', 'RW'), \
-       ('DU', 'clark.kent@ctera.com', 'RO') \
-   ])
+   domain_group = gateway_types.ShareAccessControlEntry('DG', 'CTERA\leadership', 'RW')
+   domain_user = gateway_types.ShareAccessControlEntry('DU', 'clark.kent@ctera.com', 'RO')
+
+   filer.shares.set_acl('Accounting', [domain_group, domain_user])
 
 .. automethod:: cterasdk.edge.shares.Shares.remove_acl
    :noindex:
 
 .. code-block:: python
 
-   """Remove two access control entries from the 'Accounting' share"""
+   """Remove access control entries from the 'Accounting' share"""
 
-   filer.shares.remove_acl('Accounting', [ ('DG', 'CTERA\leadership'), ('DU', 'clark.kent@ctera.com') ])
+   domain_group = gateway_types.RemoveShareAccessControlEntry('DG', 'CTERA\leadership')
+   domain_user = gateway_types.RemoveShareAccessControlEntry('DU', 'clark.kent@ctera.com')
+
+   filer.shares.remove_acl('Accounting', [domain_group, domain_user])
 
 .. automethod:: cterasdk.edge.shares.Shares.set_share_winacls
    :noindex:

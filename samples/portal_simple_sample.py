@@ -1,4 +1,4 @@
-from cterasdk import config, CTERAException, GlobalAdmin, portal_enum, gateway_enum
+from cterasdk import config, CTERAException, GlobalAdmin, portal_enum, gateway_enum, gateway_types
 
 from sample_base import CTERASDKSampleBase
 
@@ -58,7 +58,10 @@ class PortalSimpleSample(CTERASDKSampleBase):
         device.shares.add(
             directory_name,
             '/'.join(['main', directory_path]),
-            acl=[('LG', 'Everyone', 'RW'), ('LG', 'Administrators', 'RO')],
+            acl=[
+                gateway_types.ShareAccessControlEntry(type='LG', name='Everyone', perm='RW'),
+                gateway_types.ShareAccessControlEntry(type='LG', name='Administrators', perm='RO')
+            ],
             access=gateway_enum.Acl.OnlyAuthenticatedUsers
         )
         print("New Share was created successfully")

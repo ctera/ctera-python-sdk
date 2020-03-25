@@ -56,6 +56,7 @@ Submodules
    cterasdk.edge.taskmgr
    cterasdk.edge.telnet
    cterasdk.edge.timezone
+   cterasdk.edge.types
    cterasdk.edge.uri
    cterasdk.edge.users
    cterasdk.edge.volumes

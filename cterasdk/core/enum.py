@@ -104,9 +104,9 @@ class Severity:
     DEBUG = "debug"
 
 
-class ActiveDirectoryAccountType:
+class PortalAccountType:
     """
-    Active Directory Account Type
+    Portal Account Type
 
     :ivar str User: User account type
     :ivar str Group: Group account type

@@ -220,6 +220,14 @@ Fetch Users & Groups
 .. automethod:: cterasdk.core.directoryservice.DirectoryService.fetch
    :noindex:
 
+.. code-block:: python
+
+   """Fetch domain users"""
+
+   alice = portal_types.UserAccount('alice', 'domain.ctera.local')
+   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
+
+   admin.directoryservice.fetch([alice, bruce])
 
 Devices
 -------
@@ -380,9 +388,10 @@ Add Folders to a Zone
    1) 'Accounting' folder owned by 'Bruce'
    2) 'HR' folder owned by 'Diana'
 
-   """
+   accounting = portal_types.CloudFSFolderFindingHelper('Accounting', 'Bruce')
+   hr = portal_types.CloudFSFolderFindingHelper('HR', 'Diana')
 
-   admin.zones.add_folders('ZN-001', [('Accounting', 'Bruce'), ('HR', 'Diana')])
+   admin.zones.add_folders('ZN-001', [accounting, hr])
 
 Add Devices to a Zone
 ^^^^^^^^^^^^^^^^^^^^^
@@ -416,10 +425,12 @@ Create a Folder Group
 .. code:: python
 
    """Create a Folder Group, owned by a local user account 'svc_account'"""
-   admin.cloudfs.mkfg('FG-001', ('local', 'svc_account'))
+   svc_account = portal_types.UserAccount('svc_account')
+   admin.cloudfs.mkfg('FG-001', svc_account)
 
    """Create a Folder Group, owned by the domain user 'ctera.local\wbruce'"""
-   admin.cloudfs.mkfg('FG-002', ('ctera.local', 'wbruce'))
+   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   admin.cloudfs.mkfg('FG-002', wbruce)
 
    admin.cloudfs.mkfg('FG-003') # without an owner
 
@@ -440,12 +451,13 @@ Create a Cloud Drive Folder
 .. code:: python
 
    """Create a Cloud Drive folder, owned by a local user account 'svc_account'"""
-   admin.cloudfs.mkdir('DIR-001', 'FG-001', ('local', 'svc_account'))
+   svc_account = portal_types.UserAccount('svc_account')
+   admin.cloudfs.mkdir('DIR-001', 'FG-001', svc_account)
+   admin.cloudfs.mkdir('DIR-003', 'FG-003', svc_account, winacls = False) # disable Windows ACL's
 
    """Create a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
-   admin.cloudfs.mkdir('DIR-002', 'FG-002', ('ctera.local', 'wbruce'))
-
-   admin.cloudfs.mkdir('DIR-003', 'FG-003', 'svc_account', winacls = False) # disable Windows ACL's
+   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   admin.cloudfs.mkdir('DIR-002', 'FG-002', wbruce)
 
 Delete a Cloud Drive Folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -455,10 +467,12 @@ Delete a Cloud Drive Folder
 .. code:: python
 
    """Delete a Cloud Drive folder, owned by the local user account 'svc_account'"""
-   admin.cloudfs.delete('DIR-001', ('local', 'svc_account'))
+   svc_account = portal_types.UserAccount('svc_account')
+   admin.cloudfs.delete('DIR-001', svc_account)
 
    """Delete a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
-   admin.cloudfs.delete('DIR-002', ('ctera.local', 'wbruce'))
+   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   admin.cloudfs.delete('DIR-002', wbruce)
 
 Recover a Cloud Drive Folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -468,7 +482,9 @@ Recover a Cloud Drive Folder
 .. code:: python
 
    """Recover a deleted Cloud Drive folder, owned by the local user account 'svc_account'"""
-   admin.cloudfs.undelete('DIR-001', ('local', 'svc_account'))
+   svc_account = portal_types.UserAccount('svc_account')
+   admin.cloudfs.undelete('DIR-001', svc_account)
 
    """Recover a deleted Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
-   admin.cloudfs.undelete('DIR-002', ('ctera.local', 'wbruce'))
+   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   admin.cloudfs.undelete('DIR-002', wbruce)

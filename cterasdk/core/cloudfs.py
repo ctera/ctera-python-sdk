@@ -26,7 +26,8 @@ class CloudFS(BaseCommand):
         Create a new Folder Group
 
         :param str name: Name of the new folder group
-        :param UserAccount user: User account, the user directory and name of the new folder group owner (default to None)
+        :param cterasdk.core.types.UserAccount user:
+         User account, the user directory and name of the new folder group owner (default to None)
         """
 
         param = Object()
@@ -59,7 +60,7 @@ class CloudFS(BaseCommand):
 
         :param str name: Name of the new directory
         :param str group: The Folder Group to which the directory belongs
-        :param UserAccount owner: User account, the owner of the new directory
+        :param cterasdk.core.types.UserAccount owner: User account, the owner of the new directory
         :param bool,optional winacls: Use Windows ACLs, defaults to True
         """
 
@@ -91,7 +92,7 @@ class CloudFS(BaseCommand):
         Delete a Cloud Drive Folder
 
         :param str name: Name of the Cloud Drive Folder to delete
-        :param UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
+        :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
         """
 
         path = self._dirpath(name, owner)
@@ -103,7 +104,7 @@ class CloudFS(BaseCommand):
         Un-Delete a Cloud Drive Folder
 
         :param str name: Name of the Cloud Drive Folder to un-delete
-        :param UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
+        :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
         """
         path = self._dirpath(name, owner)
         logging.getLogger().info('Restoring cloud drive folder. %s', {'path': path})
