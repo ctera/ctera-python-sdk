@@ -25,7 +25,7 @@ class DirectoryService(BaseCommand):
 
         param = []
         for active_directory_account in active_directory_accounts:
-            domain, account_type, name = active_directory_account  # transition this code to use ActiveDirectoryAccount named-tuple once exposed to the client
+            domain, account_type, name = active_directory_account  # transition this code to use ActiveDirectoryAccount named-tuple
             if domain not in domains:
                 logging.getLogger().error('Invalid domain name. %s', {'domain': domain})
                 raise CTERAException('Invalid domain', None, domain=domain, domains=domains)
@@ -35,7 +35,7 @@ class DirectoryService(BaseCommand):
                 raise CTERAException('Invalid account type', None, type=account_type, options=account_types)
 
         for active_directory_account in active_directory_accounts:
-            domain, account_type, name = active_directory_account  # transition this code to use ActiveDirectoryAccount named-tuple once exposed to the client
+            domain, account_type, name = active_directory_account  # transition this code to use ActiveDirectoryAccount named-tuple
             if account_type == ActiveDirectoryAccountType.User:
                 param.append(self._search_users(domain, name))
             elif account_type == ActiveDirectoryAccountType.Group:
