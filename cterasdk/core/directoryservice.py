@@ -20,24 +20,26 @@ class DirectoryService(BaseCommand):
 
         :return: Response Code
         """
-        domains = self._portal.users.domains()
+        domains = self._portal.users.list_domains()
         account_types = [v for k, v in ActiveDirectoryAccountType.__dict__.items() if not k.startswith('_')]
 
         param = []
         for active_directory_account in active_directory_accounts:
-            if active_directory_account.domain not in domains:
-                logging.getLogger().error('Invalid domain name. %s', {'domain': active_directory_account.domain})
-                raise CTERAException('Invalid domain', None, domain=active_directory_account.domain, domains=domains)
+            domain, account_type, name = active_directory_account  # transition this code to use ActiveDirectoryAccount named-tuple once exposed to the client
+            if domain not in domains:
+                logging.getLogger().error('Invalid domain name. %s', {'domain': domain})
+                raise CTERAException('Invalid domain', None, domain=domain, domains=domains)
 
-            if active_directory_account.account_type not in account_types:
-                logging.getLogger().error('Invalid account type. %s', {'type': active_directory_account.account_type})
-                raise CTERAException('Invalid account type', None, type=active_directory_account.account_type, options=account_types)
+            if account_type not in account_types:
+                logging.getLogger().error('Invalid account type. %s', {'type': account_type})
+                raise CTERAException('Invalid account type', None, type=account_type, options=account_types)
 
         for active_directory_account in active_directory_accounts:
-            if active_directory_account.account_type == ActiveDirectoryAccountType.User:
-                param.append(self._search_users(active_directory_account.domain, active_directory_account.name))
-            elif active_directory_account.account_type == ActiveDirectoryAccountType.Group:
-                param.append(self._search_groups(active_directory_account.domain, active_directory_account.name))
+            domain, account_type, name = active_directory_account  # transition this code to use ActiveDirectoryAccount named-tuple once exposed to the client
+            if account_type == ActiveDirectoryAccountType.User:
+                param.append(self._search_users(domain, name))
+            elif account_type == ActiveDirectoryAccountType.Group:
+                param.append(self._search_groups(domain, name))
 
         logging.getLogger().info('Starting to fetch users and groups.')
 
