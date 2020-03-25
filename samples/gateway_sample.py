@@ -49,7 +49,7 @@ class GatewaySample(CTERASDKSampleBase):
         print("Adding a user to the Gateway")
         username = GatewaySample._get_input(GatewaySample._gateway_username_request_string)
         password = GatewaySample._get_password(username)
-        self._device.users.add(username, password, fullName=username, email="{username}@example.com".format(username=username))
+        self._device.users.add(username, password, full_name=username, email="{username}@example.com".format(username=username))
         print("User {username} was added successfully".format(username=username))
 
     def _set_host_name(self):
