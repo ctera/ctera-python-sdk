@@ -3,6 +3,7 @@ from unittest import mock
 from cterasdk import exception
 from cterasdk.edge import shares
 from cterasdk.edge.enum import Acl, ClientSideCaching
+from cterasdk.edge.types import ShareAccessControlEntry
 from cterasdk.common import Object
 from tests.ut import base_edge
 
@@ -16,10 +17,12 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._share_directory = 'users/Service Account/DATA/Accounting'
         self._share_volume = 'cloud'
         self._share_fullpath = '%s/%s' % (self._share_volume, self._share_directory)
-        self._share_acl = [('LG', 'Everyone', 'RO'),
-                           ('LU', 'admin', 'RW'),
-                           ('DG', 'CTERA\\Domain Admins', 'RW'),
-                           ('DU', 'walice@ctera.com', 'RW')]
+        self._share_acl = [
+            ShareAccessControlEntry(type='LG', name='Everyone', perm='RO'),
+            ShareAccessControlEntry(type='LU', name='admin', perm='RW'),
+            ShareAccessControlEntry(type='DG', name='CTERA\\Domain Admins', perm='RW'),
+            ShareAccessControlEntry(type='DU', name='walice@ctera.com', perm='RW')
+        ]
         self._share_block_files = ['exe', 'cmd', 'bat']
 
     def test_get_all_shares(self):
@@ -70,7 +73,13 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._init_filer(execute_response=execute_response)
 
         with self.assertRaises(exception.InputError) as error:
-            shares.Shares(self._filer).add(self._share_name, self._share_fullpath, [('Expected Failure', 'Everyone', 'RO')])
+            shares.Shares(self._filer).add(
+                self._share_name,
+                self._share_fullpath,
+                [
+                    ShareAccessControlEntry(type='Expected Failure', name='Everyone', perm='RO')
+                ]
+            )
 
         self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()
@@ -84,7 +93,13 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._init_filer(execute_response=execute_response)
 
         with self.assertRaises(exception.InputError) as error:
-            shares.Shares(self._filer).add(self._share_name, self._share_fullpath, [('LG', 'Everyone', 'Expected Failure')])
+            shares.Shares(self._filer).add(
+                self._share_name,
+                self._share_fullpath,
+                [
+                    ShareAccessControlEntry(type='LG', name='Everyone', perm='Expected Failure')
+                ]
+            )
 
         self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()

@@ -1,4 +1,3 @@
-from collections import namedtuple
 import copy
 import logging
 import re
@@ -102,7 +101,7 @@ class Zones(BaseCommand):
         Add the folders to the zone
 
         :param str name: The name of the zone
-        :param list[CloudFSFolderFindingHelper] folder_finding_helpers: List of folder names and owners
+        :param list[cterasdk.core.types.CloudFSFolderFindingHelper] folder_finding_helpers: List of folder names and owners
         """
         zone = self.get(name)
         folders = self._find_folders(folder_finding_helpers)
@@ -137,9 +136,11 @@ class Zones(BaseCommand):
     def _find_folders(self, folder_finding_helpers):
         folders = {}
         for folder_finding_helper in folder_finding_helpers:
-            folder_name, folder_owner = folder_finding_helper
             cloud_folder = cloudfs.CloudFS(self._portal).find(
-                folder_name, folder_owner, include=['uid', 'owner'])
+                folder_finding_helper.name,
+                folder_finding_helper.owner,
+                include=['uid', 'owner']
+            )
             folder_id = cloud_folder.uid
             owner_id = re.search("[1-9][0-9]*", cloud_folder.owner).group(0)
 
@@ -187,9 +188,3 @@ class Zones(BaseCommand):
         param.delta.devicesDelta.removed = []
 
         return param
-
-
-CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
-CloudFSFolderFindingHelper.__doc__ = 'Tuple holding the name and owner couple to search for folders'
-CloudFSFolderFindingHelper.name.__doc__ = 'The name of the CloudFS folder'
-CloudFSFolderFindingHelper.owner.__doc__ = 'The name of the owner of the CloudFS folder'

@@ -1,4 +1,3 @@
-from collections import namedtuple
 import logging
 
 from . import enum
@@ -6,6 +5,7 @@ from .files import path
 from ..common import Object
 from ..exception import CTERAException, InputError
 from .base_command import BaseCommand
+from .types import ShareAccessControlEntry, RemoveShareAccessControlEntry
 
 
 class Shares(BaseCommand):
@@ -37,7 +37,7 @@ class Shares(BaseCommand):
 
         :param str name: the share name
         :param str directory: full directory path
-        :param list[ShareAccessControlEntry] acl: a list of 3-tuple access control entries
+        :param list[cterasdk.edge.types.ShareAccessControlEntry] acl: a list of 3-tuple access control entries
         :param str access: the Windows File Sharing authentication mode, defaults to ``winAclMode``
         :param str csc: the client side caching (offline files) configuration, defaults to ``manual``
         :param str comment: comment
@@ -70,10 +70,8 @@ class Shares(BaseCommand):
         param.acl = []
 
         Shares._validate_acl(acl)
-        for entry in acl:
-            if len(entry) != 3:
-                Shares._invalid_ace(entry)
-            Shares._add_share_acl_rule(param.acl, entry[0], entry[1], entry[2])
+        for acl_entry in acl:
+            Shares._add_share_acl_rule(param.acl, acl_entry)
 
         try:
             self._gateway.add('/config/fileservices/share', param)
@@ -110,17 +108,15 @@ class Shares(BaseCommand):
         Set a network share's access control entries.
 
         :param str name: The share name
-        :param list[ShareAccessControlEntry] acl: List of access control entries
+        :param list[cterasdk.edge.types.ShareAccessControlEntry] acl: List of access control entries
 
         .. warning: this method will override the existing access control entries
         """
         Shares._validate_acl(acl)
 
         param = []
-        for entry in acl:
-            if len(entry) != 3:
-                Shares._invalid_ace(entry)
-            Shares._add_share_acl_rule(param, entry[0], entry[1], entry[2])
+        for acl_entry in acl:
+            Shares._add_share_acl_rule(param, acl_entry)
         self._gateway.put('/config/fileservices/share/' + name + '/acl', param)
 
     def add_acl(self, name, acl):
@@ -128,19 +124,17 @@ class Shares(BaseCommand):
         Add one or more access control entries to an existing share.
 
         :param str name: The share name
-        :param list[ShareAccessControlEntry] acl: List of access control entries to add
+        :param list[cterasdk.edge.types.ShareAccessControlEntry] acl: List of access control entries to add
         """
         Shares._validate_acl(acl)
 
         current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
 
         new_acl_dict = {}
-        for entry in acl:
+        for acl_entry in acl:
             temp_acl = []
-            if len(entry) != 3:
-                Shares._invalid_ace(entry)
-            Shares._add_share_acl_rule(temp_acl, entry[0], entry[1], entry[2])
-            entry_key = entry[0] + '#' + entry[1]
+            Shares._add_share_acl_rule(temp_acl, acl_entry)
+            entry_key = acl_entry.type + '#' + acl_entry.name
             new_acl_dict[entry_key] = temp_acl[0]
 
         for entry in current_acl:
@@ -155,18 +149,17 @@ class Shares(BaseCommand):
             if entry_key not in new_acl_dict:
                 new_acl_dict[entry_key] = entry
 
-        acl = [v for k, v in new_acl_dict.items()]
-        self._gateway.put('/config/fileservices/share/' + name + '/acl', acl)
+        acls_array = [v for k, v in new_acl_dict.items()]
+        self._gateway.put('/config/fileservices/share/' + name + '/acl', acls_array)
 
-    def remove_acl(self, name, tuples):
+    def remove_acl(self, name, acl):
         """
         Remove one or more access control entries from an existing share.
 
         :param str name: The share name
-        :param list[RemoveShareAccessControlEntry] acl: List of access control entries to remove
+        :param list[cterasdk.edge.types.RemoveShareAccessControlEntry] acl: List of access control entries to remove
         """
-        if not isinstance(tuples, list):
-            raise InputError('Invalid input', repr(tuples), '[("type", "name"), ...]')
+        Shares._validate_remove_acl(acl)
 
         current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
 
@@ -180,7 +173,7 @@ class Shares(BaseCommand):
             else:
                 ace_name = entry.principal2.name
 
-            if (options.get(ace_type), ace_name) not in tuples:
+            if RemoveShareAccessControlEntry(type=options.get(ace_type), name=ace_name) not in acl:
                 new_acl.append(entry)
 
         self._gateway.put('/config/fileservices/share/' + name + '/acl', new_acl)
@@ -214,37 +207,37 @@ class Shares(BaseCommand):
         raise InputError('Invalid root directory.', name, options)
 
     @staticmethod
-    def _add_share_acl_rule(acls, principal_type_field, name, perm):
+    def _add_share_acl_rule(acls, acl_entry):
         ace = Object()
         ace._classname = "ShareACLRule"  # pylint: disable=protected-access
         ace.principal2 = Object()
 
         options = {k: v for k, v in enum.PrincipalType.__dict__.items() if not k.startswith('_')}
-        principal_type = options.get(principal_type_field)
+        principal_type = options.get(acl_entry.type)
         if principal_type == enum.PrincipalType.LU:
             ace.principal2._classname = enum.PrincipalType.LU  # pylint: disable=protected-access
-            ace.principal2.ref = "#config#auth#users#" + name
+            ace.principal2.ref = "#config#auth#users#" + acl_entry.name
         elif principal_type == enum.PrincipalType.LG:
             ace.principal2._classname = enum.PrincipalType.LG  # pylint: disable=protected-access
-            ace.principal2.ref = "#config#auth#groups#" + name
+            ace.principal2.ref = "#config#auth#groups#" + acl_entry.name
         elif principal_type == enum.PrincipalType.DU:
             ace.principal2._classname = enum.PrincipalType.DU  # pylint: disable=protected-access
-            ace.principal2.name = name
+            ace.principal2.name = acl_entry.name
         elif principal_type == enum.PrincipalType.DG:
             ace.principal2._classname = enum.PrincipalType.DG  # pylint: disable=protected-access
-            ace.principal2.name = name
+            ace.principal2.name = acl_entry.name
         else:
-            raise InputError('Invalid principal type', principal_type_field, list(options.keys()))
+            raise InputError('Invalid principal type', acl_entry.type, list(options.keys()))
 
         ace.permissions = Object()
         ace.permissions._classname = "FileAccessPermissions"  # pylint: disable=protected-access
 
         options = {k: v for k, v in enum.FileAccessMode.__dict__.items() if not k.startswith('_')}
-        permission = options.get(perm)
+        permission = options.get(acl_entry.perm)
         if permission is not None:
             ace.permissions.allowedFileAccess = permission
         else:
-            raise InputError('Invalid permission', perm, list(options.keys()))
+            raise InputError('Invalid permission', acl_entry.perm, list(options.keys()))
 
         acls.append(ace)
 
@@ -254,19 +247,18 @@ class Shares(BaseCommand):
     def _validate_acl(acl):
         if not isinstance(acl, list):
             raise InputError('Invalid access control list format', repr(acl), '[("type", "name", "perm"), ...]')
+        for acl_entry in acl:
+            if not isinstance(acl_entry, ShareAccessControlEntry):
+                raise InputError('Invalid access control entry format', repr(acl_entry), 'cterasdk.edge.types.ShareAccessControlEntry')
 
     @staticmethod
-    def _invalid_ace(entry):
-        raise InputError('Invalid input', repr(entry), '[("type", "name", "perm"), ...]')
-
-
-ShareAccessControlEntry = namedtuple('ShareAccessControlEntry', ('type', 'name', 'perm'))
-ShareAccessControlEntry.__doc__ = 'Tuple holding the principal type, name and permission'
-ShareAccessControlEntry.type.__doc__ = 'The principal type'
-ShareAccessControlEntry.name.__doc__ = 'The name of the user or group'
-ShareAccessControlEntry.perm.__doc__ = 'The file access permission'
-
-RemoveShareAccessControlEntry = namedtuple('RemoveShareAccessControlEntry', ('type', 'name'))
-RemoveShareAccessControlEntry.__doc__ = 'Tuple holding the principal type and name'
-RemoveShareAccessControlEntry.type.__doc__ = 'The principal type'
-RemoveShareAccessControlEntry.name.__doc__ = 'The name of the user or group'
+    def _validate_remove_acl(acl):
+        if not isinstance(acl, list):
+            raise InputError('Invalid access control list format', repr(acl), '[("type", "name", "perm"), ...]')
+        for acl_entry in acl:
+            if not isinstance(acl_entry, RemoveShareAccessControlEntry):
+                raise InputError(
+                    'Invalid access control entry format',
+                    repr(acl_entry),
+                    'cterasdk.edge.types.RemoveShareAccessControlEntry'
+                )
