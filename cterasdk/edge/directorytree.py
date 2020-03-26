@@ -66,7 +66,7 @@ class DirectoryTree:
     def _check_root_dir(self, path):
         parts = path.split('/')
         if self.root.name != parts[0]:
-            raise CTERAException('Invalid root directory', None, input=parts[0], should_start_with=self.root.name)  # noqa
+            raise CTERAException('Invalid root directory', None, input=parts[0], should_start_with=self.root.name)
 
     def _lookup(self, path):
         parts = path.split('/')[1:]
