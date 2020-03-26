@@ -1,5 +1,5 @@
 import setuptools
 
 setuptools.setup(
-    use_scm_version=True,
+    pbr=True,
 )

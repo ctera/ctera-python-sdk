@@ -4,3 +4,5 @@ docs/build/
 *.egg-info/
 dist/
 build/
+AUTHORS
+ChangeLog
