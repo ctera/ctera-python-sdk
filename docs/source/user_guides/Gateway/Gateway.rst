@@ -570,6 +570,54 @@ Caching
 
    filer.cache.force_eviction()
 
+.. automethod:: cterasdk.edge.cache.Cache.get_pinned_folders
+   :noindex:
+
+.. code-block:: python
+
+   """ Get pinned folders """
+   filer.cache.get_pinned_folders()
+
+.. automethod:: cterasdk.edge.cache.Cache.pin
+   :noindex:
+
+.. code-block:: python
+
+   """ Pin a cloud folder named 'data' owned by 'Service Account' """
+   filer.cache.pin('users/Service Account/data')
+
+.. automethod:: cterasdk.edge.cache.Cache.pin_exclude
+   :noindex:
+
+.. code-block:: python
+
+   """ Exclude a subfolder from a pinned cloud folder """
+   filer.cache.pin_exclude('users/Service Account/data/accounting')
+
+.. automethod:: cterasdk.edge.cache.Cache.remove_pin
+   :noindex:
+
+.. code-block:: python
+
+   """ Remove a pin from a previously pinned folder """
+   filer.cache.remove_pin('users/Service Account/data')
+
+.. automethod:: cterasdk.edge.cache.Cache.pin_all
+   :noindex:
+
+.. code-block:: python
+
+   """ Pin all folders """
+   filer.cache.pin_all()
+
+.. automethod:: cterasdk.edge.cache.Cache.unpin_all
+   :noindex:
+
+.. code-block:: python
+
+   """ Remove all folder pins """
+   filer.cache.unpin_all()
+
 Cloud Backup
 ============
 
