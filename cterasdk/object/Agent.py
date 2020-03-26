@@ -1,4 +1,6 @@
 from ..client import NetworkHost, CTERAHost
+from ..edge import session
+from ..edge import uri
 
 
 class Agent(CTERAHost):
@@ -15,17 +17,14 @@ class Agent(CTERAHost):
         """
         super().__init__(host, port, https)
         self._remote_access = False
-        self._Portal = Portal
-        if self._Portal is not None:
+        if Portal is not None:
+            self._Portal = Portal
             self._ctera_client = Portal._ctera_client
+            session.start_remote_session(self, Portal)
 
     @property
     def base_api_url(self):
-        return self._api()
-
-    @property
-    def base_file_url(self):
-        return self._api()
+        return uri.api(self)
 
     @property
     def _login_object(self):
@@ -34,19 +33,8 @@ class Agent(CTERAHost):
     def _is_authenticated(self, function, *args, **kwargs):
         return True
 
-    def test(self):
-        """ Test connectivity """
-        NetworkHost.test_conn(self)
-        self.get('/nosession/logininfo')
-
     def _api(self):
-        if self._remote_access:
-            return self._Portal.baseurl + '/devices/' + self._Portal.device_name + '/admingui/api'
-
-        if self._Portal is not None:
-            return self._Portal.baseurl + '/devicecmdnew/' + self._Portal.tenant_name + '/' + self._Portal.device_name + '/'
-
-        return self._baseurl() + '/admingui/api'
+        return uri.api(self)
 
     def _baseurl(self):
-        return self.baseurl()
+        return NetworkHost.baseurl(self)
