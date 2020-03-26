@@ -14,6 +14,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         self._display_name = None
         self._root = 'users'
         self._pin_valid_folder_path = 'users/Service Account/folder'
+        self._pin_exclude_subfolder_path = 'users/Service Account/folder/excluded_folder'
         self._pin_invalid_folder_path = 'wrongpath/Service Account/folder'
 
     def test_enable_caching(self):
@@ -58,6 +59,30 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
         self.assertEqual('Invalid root directory', error.exception.message)
 
+    def test_pin_all(self):
+        get_response = self._get_dir_entry(self._root, False)
+        self._init_filer(get_response=get_response)
+        cache.Cache(self._filer).pin_all()
+        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
+
+        expected_param = self._get_dir_entry(self._root, True)
+        actual_param = self._filer.put.call_args[0][1]
+        TestEdgeCaching._remove_parent_attrs(actual_param)
+        self._assert_equal_objects(expected_param, actual_param)
+
+    def test_unpin_all(self):
+        get_response = self._get_dir_entry(self._root, True)
+        self._init_filer(get_response=get_response)
+        cache.Cache(self._filer).unpin_all()
+        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
+
+        expected_param = self._get_dir_entry(self._root, False)
+        actual_param = self._filer.put.call_args[0][1]
+        TestEdgeCaching._remove_parent_attrs(actual_param)
+        self._assert_equal_objects(expected_param, actual_param)
+
     def _get_dir_entry(self, name, include):
         param = Object()
         param._classname = 'DirEntry'  # pylint: disable=protected-access
@@ -70,14 +95,16 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
     def _create_dir_tree(self, path, include_descendant):
         parts = path.split('/')
         descendant = self._get_dir_entry(parts.pop(), include_descendant)
-        root_dir_entry = self._get_dir_entry(parts.pop(0), False)
-        parent_dir_entry = root_dir_entry
-        for part in parts:
-            dir_entry = self._get_dir_entry(part, False)
-            TestEdgeCaching._add_child(parent_dir_entry, dir_entry)
-            parent_dir_entry = dir_entry
-        TestEdgeCaching._add_child(parent_dir_entry, descendant)
-        return root_dir_entry
+        if parts:
+            root_dir_entry = self._get_dir_entry(parts.pop(0), False)
+            parent_dir_entry = root_dir_entry
+            for part in parts:
+                dir_entry = self._get_dir_entry(part, False)
+                TestEdgeCaching._add_child(parent_dir_entry, dir_entry)
+                parent_dir_entry = dir_entry
+            TestEdgeCaching._add_child(parent_dir_entry, descendant)
+            return root_dir_entry
+        return descendant
 
     @staticmethod
     def _add_child(parent, child):
