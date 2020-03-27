@@ -1,86 +1,52 @@
-from urllib.request import Request, BaseHandler, HTTPCookieProcessor, HTTPSHandler, build_opener
 import urllib.parse
-from urllib.error import HTTPError, URLError
-from abc import ABC, abstractmethod
-from ssl import SSLError
 import logging
-import socket
 
-from .ssl import CertificateServices
+import requests
+import requests.exceptions as requests_exceptions
+
+# from .ssl import CertificateServices
 from ..convert import fromxmlstr
 from ..common import Object
 from .. import config
 from ..exception import SSLException, HostUnreachable, ExhaustedException
-from ..lib import Version
 from ..lib import ask
 
 
 class HTTPException(Exception):
 
-    def __init__(self, req, code, hdrs, msg, fp):
+    def __init__(self, http_error):
         super().__init__()
         self.response = Object()
-        self.response.code = code
-        self.response.reason = msg.upper()
-        response = fp.read()
-        try:
-            self.response.body = fromxmlstr(response)
-        except:  # pylint: disable=bare-except  # noqa: E722
-            pass
-
+        self.response.code = http_error.response.status_code
+        self.response.reason = http_error.response.reason
+        self.response.body = fromxmlstr(http_error.response.text)
         if config.http['verbose']:
-            self.response.headers = hdrs
-            self.request = parse_request(req)
-
-
-class CTERAClientHandler(BaseHandler):
+            self.response.headers = http_error.response.headers
+            self.request = HTTPException._parse_request(http_error.request)
 
     @staticmethod
-    def http_error_400(req, fp, code, msg, hdrs):
-        raise HTTPException(req, code, hdrs, msg, fp)
-
-    @staticmethod
-    def http_error_401(req, fp, code, msg, hdrs):
-        raise HTTPException(req, code, hdrs, msg, fp)
-
-    @staticmethod
-    def http_error_403(req, fp, code, msg, hdrs):
-        raise HTTPException(req, code, hdrs, msg, fp)
-
-    @staticmethod
-    def http_error_404(req, fp, code, msg, hdrs):
-        raise HTTPException(req, code, hdrs, msg, fp)
-
-    @staticmethod
-    def http_error_405(req, fp, code, msg, hdrs):
-        raise HTTPException(req, code, hdrs, msg, fp)
-
-    @staticmethod
-    def http_error_500(req, fp, code, msg, hdrs):
-        raise HTTPException(req, code, hdrs, msg, fp)
-
-
-class SessionHandler(HTTPCookieProcessor):
-    pass
-
-
-class TLSHandler(HTTPSHandler):
-
-    def __init__(self, hostport=None):
-        context = None
-        if hostport is not None:
-            host, port = hostport
-            context = CertificateServices.add_trusted_cert(host, port)
-        super().__init__(context=context)
+    def _parse_request(request):
+        o = urllib.parse.urlparse(request.url)
+        target = Object()
+        target.host = Object()
+        target.host.scheme = o.scheme
+        target.host.hostname = o.hostname
+        target.host.port = o.port
+        target.method = request.method
+        target.uri = o.path
+        target.headers = request.headers
+        if request.body is not None:
+            target.body = request.body.decode('utf-8')  # decode from 'Bytes' to 'UTF-8'
+        return target
 
 
 class HTTPResponse:
 
     def __init__(self, response):
-        self.url = response.geturl()
-        self.code = response.getcode()
+        self.url = response.url
+        self.code = response.status_code
         self.headers = response.headers
-        self.data = response.read()
+        self.data = response.text
 
     def geturl(self):
         return self.url
@@ -90,26 +56,6 @@ class HTTPResponse:
 
     def read(self):
         return self.data
-
-
-def parse_host(request):
-    o = urllib.parse.urlparse(request.full_url)
-    return o.hostname, o.port
-
-
-def parse_request(request):
-    o = urllib.parse.urlparse(request.full_url)
-    target = Object()
-    target.host = Object()
-    target.host.scheme = o.scheme
-    target.host.hostname = o.hostname
-    target.host.port = o.port
-    target.method = request.get_method()
-    target.uri = request.get_full_url()
-    target.headers = request.header_items()
-    if request.data is not None:
-        target.body = request.data.decode('utf-8')  # decode from 'Bytes' to 'UTF-8'
-    return target
 
 
 def geturi(baseurl, path):
@@ -124,143 +70,119 @@ def geturi(baseurl, path):
     raise ValueError("Invalid baseurl/path combination")
 
 
-class GetRequest(Request):
-    def get_method(self):
-        return 'GET'
-
-
-class PutRequest(Request):
-    def get_method(self):
-        return 'PUT'
-
-
-class PostRequest(Request):
-    def get_method(self):
-        return 'POST'
-
-
-class DeleteRequest(Request):
-    def get_method(self):
-        return 'DELETE'
-
-
-class MkColRequest(Request):
-    def get_method(self):
-        return 'MKCOL'
-
-
 class ContentType:
     urlencoded = {'Content-Type': 'application/x-www-form-urlencoded'}
     textplain = {'Content-Type': 'text/plain'}
 
 
-class AbstractHTTPClient(ABC):
-
+class HttpClientBase():
     def __init__(self):
-        super().__init__()
         self.timeout = config.http['timeout']
         self.retries = config.http['retries']
-        self.ssl_error = config.http['ssl']
-        self.error_handler = CTERAClientHandler
-        self.session_handler = SessionHandler()
-        self.tls_handler = TLSHandler()
-        self.initialize_httpclient()
+        self.ssl_error_handling = config.http['ssl']
+        self.session = requests.Session()
+        self.session.verify = self.ssl_error_handling != 'Trust'
 
-    def initialize_httpclient(self):
-        self.httpclient = build_opener(self.error_handler, self.session_handler, self.tls_handler)
-        self.httpclient.addheaders = [('User-Agent', Version.instance().as_header())]
-
-    @abstractmethod
-    def dispatch_request(self, request):
-        pass
-
-    def _dispatch(self, request):
-        response = self.dispatch_request(request)
-        return (request, response)
-
-    def dispatch(self, request):
+    def dispatch(self, ctera_request):
         attempt = 0
         while attempt < self.retries:
             try:
-                return self._dispatch(request)
-            except HTTPError as error:
-                raise HTTPException(request, error.code, error.hdrs, error.msg, error.fp)
-            except socket.timeout:
+                return self._do_dispatch(ctera_request)
+            except requests_exceptions.HTTPError as error:
+                raise HTTPException(error)
+            except requests_exceptions.Timeout:
                 self.on_timeout(attempt)
-            except URLError as error:
-                if isinstance(error.reason, socket.gaierror):
-                    self.on_unreachable(request, error)
-                elif isinstance(error.reason, SSLError):
-                    self.on_ssl_error(request)
-                    attempt = -1
-                else:
-                    logging.getLogger().warning(error.reason)
+            except requests_exceptions.SSLError as error:
+                self.on_ssl_error(error.request)
+                attempt = -1
+            except requests_exceptions.ConnectionError as error:
+                self._on_unreachable(error)
+            except requests_exceptions.RequestException as error:
+                logging.getLogger().warning(error)
             attempt = attempt + 1
         logging.getLogger().error('Reached maximum number of retries. %s', {'retries': self.retries, 'timeout': self.timeout})
         raise ExhaustedException(self.retries, self.timeout)
 
+    def _do_dispatch(self, ctera_request):
+        response = self.session.request(ctera_request.method, ctera_request.url, **ctera_request.kwargs)
+        response.raise_for_status()
+        return (response.request, response)
+
     @staticmethod
-    def on_unreachable(request, error):
-        target = parse_request(request)
-        scheme, host, port = target.host.scheme, target.host.hostname, target.host.port
-        logging.getLogger().error('Cannot reach target host. %s', {'host': host, 'port': port})
+    def _on_unreachable(error):
+        parsed_url = urllib.parse.urlparse(error.request.url)
+        logging.getLogger().error('Cannot reach target host. %s', {'host': parsed_url.hostname, 'port': parsed_url.port})
         socket_error = Object()
-        socket_error.errno = error.reason.errno
-        socket_error.message = error.reason.strerror
-        raise HostUnreachable(socket_error, host, port, scheme.upper())
+        socket_error.message = str(error.args[0].reason)
+        raise HostUnreachable(socket_error, parsed_url.hostname, parsed_url.port, parsed_url.scheme.upper())
 
     @staticmethod
     def on_timeout(attempt):
         logging.getLogger().warning('Request timed out. %s', {'attempt': (attempt + 1)})
 
     def on_ssl_error(self, request):
-        host, port = parse_host(request)
-        if self.should_trust(host, port):
-            self.trust(host, port)
+        parsed_url = urllib.parse.urlparse(request.url)
+        if self.should_trust(parsed_url.hostname, parsed_url.port):
+            self.trust(parsed_url.hostname, parsed_url.port)
         else:
-            raise SSLException(host, port, 'Cancelled by user')
+            raise SSLException(parsed_url.hostname, parsed_url.port, 'Cancelled by user')
 
     def should_trust(self, host, port):
-        if self.ssl_error == 'Consent':
+        if self.ssl_error_handling == 'Consent':
             return ask('Proceed to ' + host + ':' + str(port) + '?')
-        if self.ssl_error == 'Trust':
-            return True
         raise SSLException(host, port, 'Configuration file requires the use of trusted certificates')
 
-    def trust(self, host, port):
-        self.tls_handler = TLSHandler((host, port))
-        self.initialize_httpclient()
+    def trust(self, _host, _port):
+        self.session.verify = False  # CertificateServices.save_cert_from_server(host, port)
 
 
-class HTTPClient(AbstractHTTPClient):
+class HttpClientRequest():
+    def __init__(self, method, url, **kwargs):
+        self.method = method
+        self.url = url
+        self.kwargs = kwargs
 
-    def __init__(self):
-        AbstractHTTPClient.__init__(self)
 
-    def get(self, uri, params=None, headers=None):
-        if params:
-            params = urllib.parse.urlencode(params)
-            uri = uri + '?' + params
-        request = GetRequest(uri, headers=headers or {})
-        return self.dispatch(request)
+class HttpClientRequestGet(HttpClientRequest):
+    def __init__(self, url, params=None, headers=None, stream=None):
+        super().__init__('GET', url, params=params, headers=headers, stream=stream)
 
-    def post(self, uri, headers=None, data='', urlencode=False):
+
+class HttpClientRequestPost(HttpClientRequest):
+    def __init__(self, url, headers=None, data=None):
+        super().__init__('POST', url, headers=headers, data=data)
+
+
+class HttpClientRequestPut(HttpClientRequest):
+    def __init__(self, url, headers=None, data=None):
+        super().__init__('PUT', url, headers=headers, data=data)
+
+
+class HttpClientRequestDelete(HttpClientRequest):
+    def __init__(self, url, headers=None):
+        super().__init__('DELETE', url, headers=headers)
+
+
+class HttpClientRequestMkcol(HttpClientRequest):
+    def __init__(self, url, headers=None):
+        super().__init__('MKCOL', url, headers=headers)
+
+
+class HTTPClient(HttpClientBase):
+
+    def get(self, url, params=None, headers=None, stream=None):
+        return self.dispatch(HttpClientRequestGet(url, params=params, headers=headers, stream=stream))
+
+    def post(self, url, headers=None, data='', urlencode=False):
         if urlencode:
             data = urllib.parse.urlencode(data).encode('utf-8')
-        request = PostRequest(uri, data, headers or {})
-        return self.dispatch(request)
+        return self.dispatch(HttpClientRequestPost(url, headers=headers, data=data))
 
-    def put(self, uri, headers=None, data=''):
-        request = PutRequest(uri, data, headers or {})
-        return self.dispatch(request)
+    def put(self, url, headers=None, data=''):
+        return self.dispatch(HttpClientRequestPut(url, headers=headers, data=data))
 
-    def delete(self, uri, headers=None):
-        request = DeleteRequest(uri, headers=headers or {})
-        return self.dispatch(request)
+    def delete(self, url, headers=None):
+        return self.dispatch(HttpClientRequestDelete(url, headers=headers))
 
-    def mkcol(self, uri, headers=None):
-        request = MkColRequest(uri, headers=headers or {})
-        return self.dispatch(request)
-
-    def dispatch_request(self, request):
-        return self.httpclient.open(request, timeout=self.timeout)
+    def mkcol(self, url, headers=None):
+        return self.dispatch(HttpClientRequestMkcol(url, headers=headers))

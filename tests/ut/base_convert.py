@@ -28,7 +28,7 @@ class TestXML(base.BaseTest):
 
     @staticmethod
     def _fromxmlstr(value):
-        return fromxmlstr(value.encode('utf-8'))
+        return fromxmlstr(value)
 
     @staticmethod
     def _toxmlstr(value):

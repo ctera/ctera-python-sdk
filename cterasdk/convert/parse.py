@@ -85,8 +85,6 @@ def fromxmlstr(string):  # pylint: disable=too-many-branches,too-many-statements
         logging.getLogger().debug('Skipping.')
         return string
 
-    string = string.decode('utf-8')
-
     # Do not attempt to parse HTML
     if string.startswith('<!DOCTYPE HTML>'):
         logging.getLogger().debug('Skipping. %s', {'type': 'HTML'})

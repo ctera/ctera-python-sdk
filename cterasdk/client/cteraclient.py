@@ -17,7 +17,7 @@ class CTERAClient:
         return self._execute(function)
 
     def download(self, baseurl, path, params):
-        function = Command(HTTPClient.get, self.http_client, geturi(baseurl, path), params)
+        function = Command(HTTPClient.get, self.http_client, geturi(baseurl, path), params, None, True)
         return self._execute(function, return_function=CTERAClient.file_descriptor)
 
     def get_multi(self, baseurl, path, paths):
@@ -62,7 +62,7 @@ class CTERAClient:
         if not config.transcript['disabled']:
             response = HTTPResponse(response)
             transcribe.transcribe(request, response)
-        return fromxmlstr(response.read())
+        return fromxmlstr(response.text)
 
     @staticmethod
     def file_descriptor(request, response):
