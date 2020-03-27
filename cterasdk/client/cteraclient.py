@@ -62,7 +62,7 @@ class CTERAClient:
         if not config.transcript['disabled']:
             response = HTTPResponse(response)
             transcribe.transcribe(request, response)
-        return fromxmlstr(response.read())
+        return fromxmlstr(response.text)
 
     @staticmethod
     def file_descriptor(request, response):
