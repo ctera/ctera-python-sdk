@@ -1,0 +1,21 @@
+<html>
+
+    <head>
+    
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    
+		<style>
+			pre { background-color: #FAFAFA; padding: 20px; margin: 0; border: 1px solid #EBECF0; }
+			th { background-color: #FAFAFA; }
+			div { padding: 20px; }
+		</style>
+	
+    <head>
+    
+    <body style="max-width: 800px; margin: 10px;">
+    
+        <!--TEMPLATE-->
+    
+    </body>
+    
+</html>
