@@ -34,9 +34,9 @@ class DirectoryTree:
         self._check_root_dir(path)
         node, parts = self._lookup(path)
         if not parts:
-            if is_dir and not self._is_dir(node):
+            if is_dir and not DirectoryTree._is_dir(node):
                 raise CTERAException('Expected to find a directory but found file', None, path=path)
-            if self._is_dir(node) and not is_dir:
+            if DirectoryTree._is_dir(node) and not is_dir:
                 raise CTERAException('Expected to find a file but found a directory', None, path=path)
             node.isIncluded = include
             node.children = None
@@ -83,9 +83,9 @@ class DirectoryTree:
                 break
         return (node, parts)
 
-    # pylint: disable=R0201
-    def _is_dir(self, node):
-        return not hasattr(node, '_classname') or node._classname == 'DirEntry'  # pylint: disable=protected-access
+    @staticmethod
+    def _is_dir(node):
+        return getattr(node, '_classname', 'DirEntry') == 'DirEntry'
 
     # pylint: disable=R0201
     def _has_children(self, node):
@@ -111,6 +111,8 @@ class DirectoryTree:
             for i in range(0, len(parent.children)):
                 if parent.children[i].name == child_name:
                     child = parent.children.pop(i)
+                    if not parent.children:
+                        parent.children = None
                     break
         return child
 

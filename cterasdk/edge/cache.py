@@ -29,12 +29,6 @@ class Cache(BaseCommand):
         self._gateway.put('/config/cloudsync/cloudExtender/operationMode', mode)
         logging.getLogger().info('Device opreation mode changed. %s', {'mode': mode})
 
-    def get_pinned_folders(self):
-        """
-        Obtain a file system tree object of pinned folders
-        """
-        return self._fetch_pinning_config()
-
     def pin(self, path):
         """
         Pin a folder

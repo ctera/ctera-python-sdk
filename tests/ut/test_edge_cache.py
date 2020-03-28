@@ -32,13 +32,6 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         cache.Cache(self._filer).force_eviction()
         self._filer.execute.assert_called_once_with('/config/cloudsync', 'forceExecuteEvictor', None)
 
-    def test_get_pinned_folders(self):
-        get_response = self._get_dir_entry(self._root, False)
-        self._init_filer(get_response=get_response)
-        ret = cache.Cache(self._filer).get_pinned_folders()
-        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
-        self._assert_equal_objects(ret.root, get_response)
-
     def test_pin_folder(self):
         get_response = self._get_dir_entry(self._root, False)
         self._init_filer(get_response=get_response)
@@ -58,6 +51,33 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
             cache.Cache(self._filer).pin(self._pin_invalid_folder_path)
         self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
         self.assertEqual('Invalid root directory', error.exception.message)
+
+    def test_pin_exclude_subfolder(self):
+        get_response = self._create_dir_tree(self._pin_valid_folder_path, True)
+        self._init_filer(get_response=get_response)
+        cache.Cache(self._filer).pin_exclude(self._pin_exclude_subfolder_path)
+        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
+
+        expected_param = self._create_dir_tree(self._pin_valid_folder_path, True)
+        descendant = self._get_dir_entry(self._pin_exclude_subfolder_path.split('/')[-1], False)
+        TestEdgeCaching._add_descendant(expected_param, descendant)
+
+        actual_param = self._filer.put.call_args[0][1]
+        TestEdgeCaching._remove_parent_attrs(actual_param)
+        self._assert_equal_objects(expected_param, actual_param)
+
+    def test_remove_pin(self):
+        get_response = self._create_dir_tree(self._pin_exclude_subfolder_path, True)
+        self._init_filer(get_response=get_response)
+        cache.Cache(self._filer).remove_pin(self._pin_exclude_subfolder_path)
+        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
+
+        expected_param = self._create_dir_tree(self._pin_valid_folder_path, False)
+        actual_param = self._filer.put.call_args[0][1]
+        TestEdgeCaching._remove_parent_attrs(actual_param)
+        self._assert_equal_objects(expected_param, actual_param)
 
     def test_pin_all(self):
         get_response = self._get_dir_entry(self._root, False)
@@ -105,6 +125,12 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
             TestEdgeCaching._add_child(parent_dir_entry, descendant)
             return root_dir_entry
         return descendant
+
+    @staticmethod
+    def _add_descendant(node, descendant):
+        while node.children is not None:
+            node = node.children[0]
+        node.children = [descendant]
 
     @staticmethod
     def _add_child(parent, child):
