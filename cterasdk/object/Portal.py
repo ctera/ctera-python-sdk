@@ -52,11 +52,11 @@ class Portal(CTERAHost):
 
     @property
     def base_api_url(self):
-        return self.base_portal_url + '/api'
+        return self.baseurl() + '/' + self.context + '/api'
 
     @property
-    def base_portal_url(self):
-        raise NotImplementedError("Implementing class must implement the base_url property")
+    def base_file_url(self):
+        return self.baseurl()
 
     @property
     def context(self):
@@ -91,7 +91,7 @@ class Portal(CTERAHost):
     def test(self):
         """ Verification check to ensure the target host is a Portal. """
         connection.test(self)
-        return self.get('/public/publicInfo', params={})
+        return self.get('/' + self.context + '/public/publicInfo', params={}, use_file_url=True)
 
     @decorator.update_current_tenant
     def put(self, path, value, use_file_url=False):
@@ -128,14 +128,6 @@ class GlobalAdmin(Portal):
         self.servers = servers.Servers(self)
 
     @property
-    def base_portal_url(self):
-        return self.baseurl() + '/admin'
-
-    @property
-    def base_file_url(self):
-        return None
-
-    @property
     def _omit_fields(self):
         return super()._omit_fields + ['portals', 'servers']
 
@@ -160,14 +152,6 @@ class ServicesPortal(Portal):
         :param bool,optional https: Set to True to require HTTPS, defaults to True
         """
         super().__init__(host, port, https)
-
-    @property
-    def base_portal_url(self):
-        return self.baseurl() + '/ServicesPortal'
-
-    @property
-    def base_file_url(self):
-        return None
 
     @property
     def context(self):
