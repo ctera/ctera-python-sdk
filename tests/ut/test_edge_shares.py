@@ -2,7 +2,7 @@ from unittest import mock
 
 from cterasdk import exception
 from cterasdk.edge import shares
-from cterasdk.edge.enum import Acl, ClientSideCaching
+from cterasdk.edge.enum import Acl, ClientSideCaching, PrincipalType, FileAccessMode
 from cterasdk.edge.types import ShareAccessControlEntry
 from cterasdk.common import Object
 from tests.ut import base_edge
@@ -18,10 +18,10 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._share_volume = 'cloud'
         self._share_fullpath = '%s/%s' % (self._share_volume, self._share_directory)
         self._share_acl = [
-            ShareAccessControlEntry(type='LG', name='Everyone', perm='RO'),
-            ShareAccessControlEntry(type='LU', name='admin', perm='RW'),
-            ShareAccessControlEntry(type='DG', name='CTERA\\Domain Admins', perm='RW'),
-            ShareAccessControlEntry(type='DU', name='walice@ctera.com', perm='RW')
+            ShareAccessControlEntry(principal_type=PrincipalType.LG, name='Everyone', perm=FileAccessMode.RO),
+            ShareAccessControlEntry(principal_type=PrincipalType.LU, name='admin', perm=FileAccessMode.RW),
+            ShareAccessControlEntry(principal_type=PrincipalType.DG, name='CTERA\\Domain Admins', perm=FileAccessMode.RW),
+            ShareAccessControlEntry(principal_type=PrincipalType.DU, name='walice@ctera.com', perm=FileAccessMode.RW)
         ]
         self._share_block_files = ['exe', 'cmd', 'bat']
 
@@ -69,44 +69,14 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._filer.add.assert_called_once_with('/config/fileservices/share', mock.ANY)  # no verification call param _add_share_acl_rule()
 
     def test_add_cifs_share_invalid_principal_type(self):
-        execute_response = self._get_list_physical_folders_response_object()
-        self._init_filer(execute_response=execute_response)
-
         with self.assertRaises(exception.InputError) as error:
-            shares.Shares(self._filer).add(
-                self._share_name,
-                self._share_fullpath,
-                [
-                    ShareAccessControlEntry(type='Expected Failure', name='Everyone', perm='RO')
-                ]
-            )
-
-        self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
-        expected_param = self._get_list_physical_folders_param()
-        actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
-
+            ShareAccessControlEntry(principal_type='Expected Failure', name='Everyone', perm=FileAccessMode.RO)
         self.assertEqual('Invalid principal type', error.exception.message)
 
     def test_add_cifs_share_invalid_permission(self):
-        execute_response = self._get_list_physical_folders_response_object()
-        self._init_filer(execute_response=execute_response)
-
         with self.assertRaises(exception.InputError) as error:
-            shares.Shares(self._filer).add(
-                self._share_name,
-                self._share_fullpath,
-                [
-                    ShareAccessControlEntry(type='LG', name='Everyone', perm='Expected Failure')
-                ]
-            )
-
-        self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
-        expected_param = self._get_list_physical_folders_param()
-        actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
-
-        self.assertEqual('Invalid permission', error.exception.message)
+            ShareAccessControlEntry(principal_type=PrincipalType.LG, name='Everyone', perm='Expected Failure')
+        self.assertEqual('Invalid permissions', error.exception.message)
 
     def test_add_share_failure(self):
         execute_response = self._get_list_physical_folders_response_object()
@@ -174,6 +144,28 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         with self.assertRaises(exception.CTERAException) as error:
             shares.Shares(self._filer).delete(self._share_name)
         self.assertEqual('Share deletion failed', error.exception.message)
+
+    def test_modify(self):
+        updated_comment = 'Test Modify'
+        get_response = self._get_share_object()
+        self._init_filer(get_response=get_response)
+        modify_command_dict = dict(
+            export_to_afp=True,
+            export_to_ftp=True,
+            export_to_nfs=True,
+            export_to_pc_agent=True,
+            export_to_rsync=True,
+            indexed=True,
+            comment=updated_comment,
+            access=Acl.OnlyAuthenticatedUsers,
+            dir_permissions=644,
+        )
+        expected_param = self._get_share_object(**modify_command_dict)
+        shares.Shares(self._filer).modify(self._share_name, **modify_command_dict)
+        self._filer.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
+        self._filer.put.assert_called_once_with('/config/fileservices/share/' + self._share_name, mock.ANY)
+        actual_param = self._filer.put.call_args[0][1]
+        self._assert_equal_objects(expected_param, actual_param)
 
     def _get_share_object(self, directory=None, volume=None, acl=None,  # pylint: disable=too-many-arguments
                           access=None, csc=None, dir_permissions=None,
