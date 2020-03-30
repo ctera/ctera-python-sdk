@@ -24,7 +24,13 @@ class BaseTest(unittest.TestCase):
             actual_param, expected_param = q.get()
             for field in [a for a in dir(actual_param) if not a.startswith('__')]:
                 actual_param_attr = getattr(actual_param, field)
-                if isinstance(actual_param_attr, Object):
-                    q.put((actual_param_attr, getattr(expected_param, field)))
+                expected_param_attr = getattr(expected_param, field)
+                if isinstance(actual_param_attr, list):
+                    self.assertIsInstance(expected_param_attr, list)
+                    self.assertEqual(len(actual_param_attr), len(expected_param_attr))
+                    for index, actual_list_item in enumerate(actual_param_attr):
+                        q.put((actual_list_item, expected_param_attr[index]))
+                elif isinstance(actual_param_attr, Object):
+                    q.put((actual_param_attr, expected_param_attr))
                 else:
-                    self.assertEqual(actual_param_attr, getattr(expected_param, field))
+                    self.assertEqual(actual_param_attr, expected_param_attr)
