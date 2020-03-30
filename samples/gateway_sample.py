@@ -1,6 +1,6 @@
 import logging
 
-from cterasdk import Gateway, gateway_enum, config, CTERAException
+from cterasdk import Gateway, gateway_enum, config, CTERAException, gateway_types
 
 from sample_base import CTERASDKSampleBase
 
@@ -109,8 +109,33 @@ class GatewaySample(CTERASDKSampleBase):
         self._device.shares.add(
             directory_name,
             '/'.join([self._volume_name, directory_path]),
-            acl=[('LG', 'Everyone', 'RW'), ('LG', 'Administrators', 'RO')],
+            acl=[
+                gateway_types.ShareAccessControlEntry(
+                    principal_type=gateway_enum.PrincipalType.LG,
+                    name='Everyone',
+                    perm=gateway_enum.FileAccessMode.RW
+                )
+            ],
             access=gateway_enum.Acl.OnlyAuthenticatedUsers
+        )
+        self._device.shares.add_acl(
+            directory_name,
+            [
+                gateway_types.ShareAccessControlEntry(
+                    principal_type=gateway_enum.PrincipalType.LG,
+                    name='Administrators',
+                    perm=gateway_enum.FileAccessMode.RO
+                )
+            ]
+        )
+        self._device.shares.remove_acl(
+            directory_name,
+            acl=[
+                gateway_types.RemoveShareAccessControlEntry(
+                    principal_type=gateway_enum.PrincipalType.LG,
+                    name='Everyone'
+                )
+            ]
         )
         print("New share was created successfully")
 

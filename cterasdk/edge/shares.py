@@ -23,13 +23,13 @@ class Shares(BaseCommand):
             acl=None,
             access=enum.Acl.WindowsNT,
             csc=enum.ClientSideCaching.Manual,
-            dirPermissions=777,
+            dir_permissions=777,
             comment=None,
-            exportToAFP=False,
-            exportToFTP=False,
-            exportToNFS=False,
-            exportToPCAgent=False,
-            exportToRSync=False,
+            export_to_afp=False,
+            export_to_ftp=False,
+            export_to_nfs=False,
+            export_to_pc_agent=False,
+            export_to_rsync=False,
             indexed=False
             ):  # pylint: disable=too-many-arguments,too-many-locals
         """
@@ -37,16 +37,20 @@ class Shares(BaseCommand):
 
         :param str name: the share name
         :param str directory: full directory path
-        :param list[cterasdk.edge.types.ShareAccessControlEntry] acl: a list of 3-tuple access control entries
-        :param str access: the Windows File Sharing authentication mode, defaults to ``winAclMode``
-        :param str csc: the client side caching (offline files) configuration, defaults to ``manual``
+        :param list[cterasdk.edge.types.ShareAccessControlEntry] acl: List of access control entries
+        :param cterasdk.edge.enum.Acl access: the Windows File Sharing authentication mode, defaults to ``winAclMode``
+        :param cterasdk.edge.enum.ClientSideCaching csc: the client side caching (offline files) configuration, defaults to ``manual``
+        :param int dir_permissions: Directory Permission, defaults to 777
         :param str comment: comment
-        :param bool exportToAFP: whether to enable AFP access, defaults to ``False``
-        :param bool exportToFTP: whether to enable FTP access, defaults to ``False``
-        :param bool exportToNFS: whether to enable NFS access, defaults to ``False``
-        :param bool exportToPCAgent: whether to allow as a destination share for CTERA Backup Agents, defaults to ``False``
-        :param bool exportToRSync: whether to enable access over rsync, defaults to ``False``
+        :param bool export_to_afp: whether to enable AFP access, defaults to ``False``
+        :param bool export_to_ftp: whether to enable FTP access, defaults to ``False``
+        :param bool export_to_nfs: whether to enable NFS access, defaults to ``False``
+        :param bool export_to_pc_agent: whether to allow as a destination share for CTERA Backup Agents, defaults to ``False``
+        :param bool export_to_rsync: whether to enable access over rsync, defaults to ``False``
+        :param bool indexed: whether to enable indexing for search, defaults to ``False``
         """
+        acl = acl or []
+
         param = Object()
         param.name = name
 
@@ -59,19 +63,16 @@ class Shares(BaseCommand):
         param.directory = directory
 
         param.access = access
-        param.dirPermissions = dirPermissions
-        param.exportToAFP = exportToAFP
-        param.exportToFTP = exportToFTP
-        param.exportToNFS = exportToNFS
-        param.exportToPCAgent = exportToPCAgent
-        param.exportToRSync = exportToRSync
+        param.dirPermissions = dir_permissions
+        param.exportToAFP = export_to_afp
+        param.exportToFTP = export_to_ftp
+        param.exportToNFS = export_to_nfs
+        param.exportToPCAgent = export_to_pc_agent
+        param.exportToRSync = export_to_rsync
         param.indexed = indexed
         param.comment = comment
-        param.acl = []
-
         Shares._validate_acl(acl)
-        for acl_entry in acl:
-            Shares._add_share_acl_rule(param.acl, acl_entry)
+        param.acl = [acl_entry.to_server_object() for acl_entry in acl]
 
         try:
             self._gateway.add('/config/fileservices/share', param)
@@ -114,9 +115,7 @@ class Shares(BaseCommand):
         """
         Shares._validate_acl(acl)
 
-        param = []
-        for acl_entry in acl:
-            Shares._add_share_acl_rule(param, acl_entry)
+        param = [acl_entry.to_server_object() for acl_entry in acl]
         self._gateway.put('/config/fileservices/share/' + name + '/acl', param)
 
     def add_acl(self, name, acl):
@@ -130,22 +129,14 @@ class Shares(BaseCommand):
 
         current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
 
-        new_acl_dict = {}
-        for acl_entry in acl:
-            temp_acl = []
-            Shares._add_share_acl_rule(temp_acl, acl_entry)
-            entry_key = acl_entry.type + '#' + acl_entry.name
-            new_acl_dict[entry_key] = temp_acl[0]
+        new_acl_dict = {
+            acl_entry.principal_type + '#' + acl_entry.name: acl_entry.to_server_object()
+            for acl_entry in acl
+        }
 
         for entry in current_acl:
-            ace_type = entry.principal2._classname  # pylint: disable=protected-access
-            if ace_type in [enum.PrincipalType.LU, enum.PrincipalType.LG]:
-                ace_name = entry.principal2.ref
-                ace_name = ace_name[ace_name.rfind('#') + 1:]
-            else:
-                ace_name = entry.principal2.name
-            entry_key = ace_type + '#' + ace_name
-
+            ace = ShareAccessControlEntry.from_server_object(entry)
+            entry_key = ace.principal_type + '#' + ace.name
             if entry_key not in new_acl_dict:
                 new_acl_dict[entry_key] = entry
 
@@ -161,22 +152,91 @@ class Shares(BaseCommand):
         """
         Shares._validate_remove_acl(acl)
 
+        remove_acl_dict = {
+            acl_entry.principal_type + '#' + acl_entry.name: True
+            for acl_entry in acl
+        }
+
         current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
 
-        options = {v: k for k, v in enum.PrincipalType.__dict__.items() if not k.startswith('_')}  # reverse
         new_acl = []
         for entry in current_acl:
-            ace_type = entry.principal2._classname  # pylint: disable=protected-access
-            if ace_type in [enum.PrincipalType.LU, enum.PrincipalType.LG]:
-                ace_name = entry.principal2.ref
-                ace_name = ace_name[ace_name.rfind('#') + 1:]
-            else:
-                ace_name = entry.principal2.name
-
-            if RemoveShareAccessControlEntry(type=options.get(ace_type), name=ace_name) not in acl:
+            ace = ShareAccessControlEntry.from_server_object(entry)
+            if not remove_acl_dict.get(ace.principal_type + '#' + ace.name, False):
                 new_acl.append(entry)
 
         self._gateway.put('/config/fileservices/share/' + name + '/acl', new_acl)
+
+    def modify(
+            self,
+            name,
+            directory=None,
+            acl=None,
+            access=None,
+            csc=None,
+            dir_permissions=None,
+            comment=None,
+            export_to_afp=None,
+            export_to_ftp=None,
+            export_to_nfs=None,
+            export_to_pc_agent=None,
+            export_to_rsync=None,
+            indexed=None
+                ):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches
+        """
+        Modify an existing network share. All parameters but name are optional and default to None
+
+        :param str name: the share name
+        :param str,optional directory: full directory path
+        :param list[cterasdk.edge.types.ShareAccessControlEntry],optional acl: List of access control entries
+        :param cterasdk.edge.enum.Acl,optional access: the Windows File Sharing authentication mode
+        :param cterasdk.edge.enum.ClientSideCaching,optional csc: the client side caching (offline files) configuration
+        :param int,optional dir_permissions: Directory Permission
+        :param str,optional comment: comment
+        :param bool,optional export_to_afp: whether to enable AFP access
+        :param bool,optional export_to_ftp: whether to enable FTP access
+        :param bool,optional export_to_nfs: whether to enable NFS access
+        :param bool,optional export_to_pc_agent: whether to allow as a destination share for CTERA Backup Agents
+        :param bool,optional export_to_rsync: whether to enable access over rsync
+        :param bool,optional indexed: whether to enable indexing for search
+        """
+        share = self.get(name=name)
+        if directory is not None:
+            parts = path.CTERAPath(directory, '/').parts()
+            volume = parts[0]
+            self._validate_root_directory(volume)
+            share.volume = volume
+            directory = '/'.join(parts[1:])
+            share.directory = directory
+        if access is not None:
+            share.access = access
+        if dir_permissions is not None:
+            share.dirPermissions = dir_permissions
+        if export_to_afp is not None:
+            share.exportToAFP = export_to_afp
+        if export_to_ftp is not None:
+            share.exportToFTP = export_to_ftp
+        if export_to_nfs is not None:
+            share.exportToNFS = export_to_nfs
+        if export_to_pc_agent is not None:
+            share.exportToPCAgent = export_to_pc_agent
+        if export_to_rsync is not None:
+            share.exportToRSync = export_to_rsync
+        if indexed is not None:
+            share.indexed = indexed
+        if comment is not None:
+            share.comment = comment
+        if acl is not None:
+            Shares._validate_acl(acl)
+            share.acl = [acl_entry.to_server_object() for acl_entry in acl]
+
+        try:
+            self._gateway.put('/config/fileservices/share/' + name, share)
+            logging.getLogger().info("Share modified. %s", {'name': name})
+        except Exception as error:
+            msg = 'Failed to modify the share %s' % name
+            logging.getLogger().error(msg)
+            raise CTERAException(msg, error)
 
     def delete(self, name):
         """
@@ -207,46 +267,9 @@ class Shares(BaseCommand):
         raise InputError('Invalid root directory.', name, options)
 
     @staticmethod
-    def _add_share_acl_rule(acls, acl_entry):
-        ace = Object()
-        ace._classname = "ShareACLRule"  # pylint: disable=protected-access
-        ace.principal2 = Object()
-
-        options = {k: v for k, v in enum.PrincipalType.__dict__.items() if not k.startswith('_')}
-        principal_type = options.get(acl_entry.type)
-        if principal_type == enum.PrincipalType.LU:
-            ace.principal2._classname = enum.PrincipalType.LU  # pylint: disable=protected-access
-            ace.principal2.ref = "#config#auth#users#" + acl_entry.name
-        elif principal_type == enum.PrincipalType.LG:
-            ace.principal2._classname = enum.PrincipalType.LG  # pylint: disable=protected-access
-            ace.principal2.ref = "#config#auth#groups#" + acl_entry.name
-        elif principal_type == enum.PrincipalType.DU:
-            ace.principal2._classname = enum.PrincipalType.DU  # pylint: disable=protected-access
-            ace.principal2.name = acl_entry.name
-        elif principal_type == enum.PrincipalType.DG:
-            ace.principal2._classname = enum.PrincipalType.DG  # pylint: disable=protected-access
-            ace.principal2.name = acl_entry.name
-        else:
-            raise InputError('Invalid principal type', acl_entry.type, list(options.keys()))
-
-        ace.permissions = Object()
-        ace.permissions._classname = "FileAccessPermissions"  # pylint: disable=protected-access
-
-        options = {k: v for k, v in enum.FileAccessMode.__dict__.items() if not k.startswith('_')}
-        permission = options.get(acl_entry.perm)
-        if permission is not None:
-            ace.permissions.allowedFileAccess = permission
-        else:
-            raise InputError('Invalid permission', acl_entry.perm, list(options.keys()))
-
-        acls.append(ace)
-
-        return acls
-
-    @staticmethod
     def _validate_acl(acl):
         if not isinstance(acl, list):
-            raise InputError('Invalid access control list format', repr(acl), '[("type", "name", "perm"), ...]')
+            raise InputError('Invalid access control list format', repr(acl), '[cterasdk.edge.types.ShareAccessControlEntry, ...]')
         for acl_entry in acl:
             if not isinstance(acl_entry, ShareAccessControlEntry):
                 raise InputError('Invalid access control entry format', repr(acl_entry), 'cterasdk.edge.types.ShareAccessControlEntry')
@@ -254,7 +277,7 @@ class Shares(BaseCommand):
     @staticmethod
     def _validate_remove_acl(acl):
         if not isinstance(acl, list):
-            raise InputError('Invalid access control list format', repr(acl), '[("type", "name", "perm"), ...]')
+            raise InputError('Invalid access control list format', repr(acl), '[cterasdk.edge.types.RemoveShareAccessControlEntry, ...]')
         for acl_entry in acl:
             if not isinstance(acl_entry, RemoveShareAccessControlEntry):
                 raise InputError(

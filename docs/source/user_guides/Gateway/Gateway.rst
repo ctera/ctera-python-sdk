@@ -297,10 +297,10 @@ Shares
    - NA: No Access
    """
 
-   everyone = gateway_types.ShareAccessControlEntry('LG', 'Everyone', 'RO')
-   local_admin = gateway_types.ShareAccessControlEntry('LU', 'admin', 'RW')
-   domain_admins = gateway_types.ShareAccessControlEntry('DG', 'CTERA\Domain Admins', 'RO')
-   bruce_wayne = gateway_types.ShareAccessControlEntry('DU', 'bruce.wayne@ctera.com', 'RW')
+   everyone = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.LG, 'Everyone', gateway_enum.FileAccessMode.RO)
+   local_admin = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.LU, 'admin', gateway_enum.FileAccessMode.RW)
+   domain_admins = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\Domain Admins', gateway_enum.FileAccessMode.RO)
+   bruce_wayne = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'bruce.wayne@ctera.com', gateway_enum.FileAccessMode.RW)
 
    filer.shared.add('Accounting', 'cloud/users/Service Account/Accounting', acl = [ \
        everyone, local_admin, domain_admins, bruce_wayne \
@@ -308,9 +308,9 @@ Shares
 
    """Create an 'Only Authenticated Users' cloud share called 'FTP' and enable FTP access to everyone"""
 
-   everyone = gateway_types.ShareAccessControlEntry('LG', 'Everyone', 'RW')
+   everyone = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.LG, 'Everyone', gateway_enum.FileAccessMode.RW)
 
-   filer.shared.add('FTP', 'cloud/users/Service Account/FTP', acl = [everyone], exportToFTP = True)
+   filer.shared.add('FTP', 'cloud/users/Service Account/FTP', acl = [everyone], export_to_ftp = True)
 
 .. automethod:: cterasdk.edge.shares.Shares.add_acl
    :noindex:
@@ -319,8 +319,8 @@ Shares
 
    """Add two access control entries to the 'Accounting' share"""
 
-   domain_group = gateway_types.ShareAccessControlEntry('DG', 'CTERA\leadership', 'RW')
-   domain_user = gateway_types.ShareAccessControlEntry('DU', 'clark.kent@ctera.com', 'RO')
+   domain_group = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\leadership', gateway_enum.FileAccessMode.RW)
+   domain_user = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'clark.kent@ctera.com', gateway_enum.FileAccessMode.RO)
 
    filer.shares.add_acl('Accounting', [domain_group, domain_user])
 
@@ -331,8 +331,8 @@ Shares
 
    """Set the access control entries of the 'Accounting' share"""
 
-   domain_group = gateway_types.ShareAccessControlEntry('DG', 'CTERA\leadership', 'RW')
-   domain_user = gateway_types.ShareAccessControlEntry('DU', 'clark.kent@ctera.com', 'RO')
+   domain_group = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\leadership', gateway_enum.FileAccessMode.RW)
+   domain_user = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'clark.kent@ctera.com', gateway_enum.FileAccessMode.RO)
 
    filer.shares.set_acl('Accounting', [domain_group, domain_user])
 
@@ -343,8 +343,8 @@ Shares
 
    """Remove access control entries from the 'Accounting' share"""
 
-   domain_group = gateway_types.RemoveShareAccessControlEntry('DG', 'CTERA\leadership')
-   domain_user = gateway_types.RemoveShareAccessControlEntry('DU', 'clark.kent@ctera.com')
+   domain_group = gateway_types.RemoveShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\leadership')
+   domain_user = gateway_types.RemoveShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'clark.kent@ctera.com')
 
    filer.shares.remove_acl('Accounting', [domain_group, domain_user])
 
@@ -362,37 +362,31 @@ Shares
 
    filer.shares.block_files('Accounting', ['exe', 'cmd', 'bat'])
 
+.. automethod:: cterasdk.edge.shares.Shares.modify
+   :noindex:
+
+.. code-block:: python
+
+   """ Disable all file-access protocols on all shares """
+   shares = filer.shares.get() # obtain a list of all shares
+
+   for share in shares:
+      filer.share.modify(
+         share.name,
+         export_to_afp=False,       # Apple File Sharing
+         export_to_ftp=False,       # FTP
+         export_to_nfs=False,       # NFS
+         export_to_pc_agent=False,  # CTERA Agent
+         export_to_rsync=False,     # rsync
+         indexed=False              # Search
+      )
+
 .. automethod:: cterasdk.edge.shares.Shares.delete
    :noindex:
 
 .. code-block:: python
 
    filer.shares.delete('Accounting')
-
-Code Snippets
-^^^^^^^^^^^^^
-
-Disable all file-access protocols on all shares
-
-.. code-block:: python
-
-   shares = filer.get('/config/fileservices/share') # obtain a list of all shares
-
-   for share in shares:
-
-       share.exportToAFP = False            # Apple File Sharing
-
-       share.exportToFTP = False            # FTP
-
-       share.exportToNFS = False            # NFS
-
-       share.exportToRSync = False          # rsync
-
-       share.exportToPCAgent = False        # CTERA Agent
-
-       share.indexed = False                # Search
-
-       filer.put('/config/fileservices/share/' + share.name, share) # apply changes
 
 Users
 =====
