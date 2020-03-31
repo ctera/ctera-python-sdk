@@ -569,14 +569,6 @@ Caching
 
    filer.cache.force_eviction()
 
-.. automethod:: cterasdk.edge.cache.Cache.get_pinned_folders
-   :noindex:
-
-.. code-block:: python
-
-   """ Get pinned folders """
-   filer.cache.get_pinned_folders()
-
 .. automethod:: cterasdk.edge.cache.Cache.pin
    :noindex:
 
