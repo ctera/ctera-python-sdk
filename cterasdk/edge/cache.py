@@ -32,6 +32,7 @@ class Cache(BaseCommand):
     def pin(self, path):
         """
         Pin a folder
+
         :param str path: Directory path
         """
         directory_tree = self._fetch_pinning_config()
@@ -42,6 +43,7 @@ class Cache(BaseCommand):
     def pin_exclude(self, path):
         """
         Exclude a sub-folder from a pinned folder
+
         :param str path: Directory path
         """
         directory_tree = self._fetch_pinning_config()
@@ -52,6 +54,7 @@ class Cache(BaseCommand):
     def remove_pin(self, path):
         """
         Remove a pin from a previously pinned folder
+
         :param str path: Directory path
         """
         directory_tree = self._fetch_pinning_config()
