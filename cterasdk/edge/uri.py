@@ -36,12 +36,11 @@ def remote_access(baseurl, device):
 def files(Gateway):
     session = Gateway.session()
     if session.local():
-        baseurl = Gateway.baseurl()
-        return '%s/localFiles' % (baseurl)
+        return Gateway.baseurl()
 
     if session.remote():
         if session.remote_access():
             baseurl = Gateway._Portal.base_portal_url  # pylint: disable=protected-access
             device = Gateway.host()
-            return '%s/devices/%s/localFiles' % (baseurl, device)
+            return '%s/devices/%s' % (baseurl, device)
     raise CTERAException('Invalid connection type', session)

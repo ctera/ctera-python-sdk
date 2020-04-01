@@ -86,7 +86,7 @@ def fromxmlstr(string):  # pylint: disable=too-many-branches,too-many-statements
         return string
 
     # Do not attempt to parse HTML
-    if string.startswith('<!DOCTYPE HTML>'):
+    if string[:15].upper() == '<!DOCTYPE HTML>':
         logging.getLogger().debug('Skipping. %s', {'type': 'HTML'})
         return string
 

@@ -14,10 +14,10 @@ Submodules
    cterasdk.lib.cmd
    cterasdk.lib.consent
    cterasdk.lib.filesystem
+   cterasdk.lib.file_access
    cterasdk.lib.iterator
    cterasdk.lib.platform
    cterasdk.lib.registry
    cterasdk.lib.tempfile
    cterasdk.lib.tracker
    cterasdk.lib.version
-

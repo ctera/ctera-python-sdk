@@ -12,9 +12,8 @@ Submodules
 .. toctree::
 
    cterasdk.edge.files.browser
-   cterasdk.edge.files.dl
+   cterasdk.edge.files.file_access
    cterasdk.edge.files.mkdir
-   cterasdk.edge.files.open
    cterasdk.edge.files.path
    cterasdk.edge.files.rm
 

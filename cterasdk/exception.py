@@ -94,3 +94,19 @@ class LocalDirectoryNotFound(FileSystemException):
 
     def __init__(self, path):
         FileSystemException.__init__(self, 'Could not find local directory', None, path=path)
+
+
+class LocalFileNotFound(FileSystemException):
+
+    def __init__(self, path):
+        FileSystemException.__init__(self, 'Could not find local file', None, path=path)
+
+
+class RemoteFileSystemException(CTERAException):
+    pass
+
+
+class RemoteDirectoryNotFound(RemoteFileSystemException):
+
+    def __init__(self, path):
+        super().__init__('Could not find remote directory', None, path=path)
