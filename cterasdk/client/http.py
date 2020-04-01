@@ -3,6 +3,7 @@ import logging
 
 import requests
 import requests.exceptions as requests_exceptions
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 # from .ssl import CertificateServices
 from ..convert import fromxmlstr
@@ -186,3 +187,20 @@ class HTTPClient(HttpClientBase):
 
     def mkcol(self, url, headers=None):
         return self.dispatch(HttpClientRequestMkcol(url, headers=headers))
+
+    def upload(self, url, form_data):
+        def upload_monitor_generator(total_length):
+            def upload_monitor(encoder):
+                logging.getLogger().debug(
+                    'Uploaded %(percent)s - (%(uploaded)s out of %(size)s)',
+                    dict(
+                        percent=str(round(encoder.bytes_read/total_length*100))+'%',
+                        uploaded=encoder.bytes_read,
+                        size=total_length
+                    )
+                )
+            return upload_monitor
+
+        encoder = MultipartEncoder(form_data)
+        monitor = MultipartEncoderMonitor(encoder, callback=upload_monitor_generator(encoder.len))
+        return self.dispatch(HttpClientRequestPost(url, headers={'Content-Type': monitor.content_type}, data=monitor))

@@ -49,6 +49,10 @@ class CTERAClient:
     def db(self, baseurl, path, name, param):
         return self._ctera_exec(baseurl, path, 'db', name, param)
 
+    def upload(self, baseurl, path, form_data):
+        function = Command(HTTPClient.upload, self.http_client, geturi(baseurl, path), form_data)
+        return self._execute(function)
+
     def _ctera_exec(self, baseurl, path, exec_type, name, param):
         obj = Object()
         obj.type = exec_type

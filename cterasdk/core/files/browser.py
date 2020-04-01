@@ -1,7 +1,7 @@
 from .path import CTERAPath
 
 from ..base_command import BaseCommand
-from . import ls, dl, directory, rename, rm, recover, mv, cp, ln
+from . import ls, dl, directory, rename, rm, recover, mv, cp, ln, upload
 
 
 class FileBrowser(BaseCommand):
@@ -45,6 +45,15 @@ class FileBrowser(BaseCommand):
         """
         path = self.mkpath(path)
         dl.download(self._portal, path, path.name())
+
+    def upload(self, file_path, server_path):
+        """
+        Upload a file
+
+        :param str file_path: Path to the local file to upload
+        :param str server_path: Path to the directory to upload the file to
+        """
+        return upload.upload(self._portal, file_path, self.mkpath(server_path))
 
     def mkdir(self, path, recurse=False):
         """
