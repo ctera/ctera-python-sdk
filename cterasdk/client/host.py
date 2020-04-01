@@ -67,7 +67,7 @@ class NetworkHost:
         return tojsonstr(x)
 
 
-class CTERAHost(NetworkHost):
+class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
 
     def __init__(self, host, port, https):
         super().__init__(host, port, https)
@@ -125,6 +125,10 @@ class CTERAHost(NetworkHost):
     @authenticated
     def openfile(self, path, params=None, use_file_url=False):
         return self._ctera_client.download(self.base_file_url if use_file_url else self.base_api_url, path, params or {})
+
+    @authenticated
+    def download_zip(self, path, form_data, use_file_url=False):
+        return self._ctera_client.download_zip(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
 
     @authenticated
     def show(self, path, use_file_url=False):
@@ -185,6 +189,10 @@ class CTERAHost(NetworkHost):
     @authenticated
     def mkcol(self, path, use_file_url=False):
         return self._ctera_client.mkcol(self.base_file_url if use_file_url else self.base_api_url, path)
+
+    @authenticated
+    def upload(self, path, form_data, use_file_url=False):
+        return self._ctera_client.upload(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
 
     def whoami(self):
         """

@@ -1,7 +1,7 @@
 from .path import CTERAPath
 
 from ..base_command import BaseCommand
-from . import ls, dl, directory, rename, rm, recover, mv, cp, ln
+from . import ls, directory, rename, rm, recover, mv, cp, ln, file_access
 
 
 class FileBrowser(BaseCommand):
@@ -12,6 +12,7 @@ class FileBrowser(BaseCommand):
     def __init__(self, portal, base_path):
         super().__init__(portal)
         self._base_path = base_path
+        self._file_access = file_access.FileAccess(portal)
 
     def ls(self, path):
         """
@@ -44,7 +45,27 @@ class FileBrowser(BaseCommand):
         :param str path: Path of the file to download
         """
         path = self.mkpath(path)
-        dl.download(self._portal, path, path.name())
+        self._file_access.download(path)
+
+    def download_as_zip(self, cloud_directory, files):
+        """
+        Download a list of files and/or directories from a cloud folder as a ZIP file
+
+        .. warning:: The list of files is not validated. The ZIP file will include only the existing  files and directories
+
+        :param str cloud_directory: Path to the cloud directory
+        :param list[str] files: List of files and/or directories in the cloud folder to download
+        """
+        self._file_access.download_as_zip(self.mkpath(cloud_directory), files)
+
+    def upload(self, file_path, server_path):
+        """
+        Upload a file
+
+        :param str file_path: Path to the local file to upload
+        :param str server_path: Path to the directory to upload the file to
+        """
+        self._file_access.upload(file_path, self.mkpath(server_path))
 
     def mkdir(self, path, recurse=False):
         """

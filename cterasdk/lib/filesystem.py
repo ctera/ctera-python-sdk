@@ -1,7 +1,10 @@
 import logging
+import mimetypes
 import os
+from pathlib import Path
 
-from ..exception import RenameException, LocalDirectoryNotFound
+from .. import config
+from ..exception import RenameException, LocalDirectoryNotFound, LocalFileNotFound
 
 
 class FileSystem:
@@ -35,6 +38,11 @@ class FileSystem:
             return (dirpath, dst)
         logging.getLogger().error('Could not rename temporary file. File not found. %s', {'path': dirpath, 'temp': src})
         raise RenameException(dirpath, src, dst)
+
+    def validate_directory(self, dirpath):
+        dirpath = os.path.expanduser(dirpath)
+        if not self.exists(dirpath):
+            raise LocalDirectoryNotFound(dirpath)
 
     def save(self, dirpath, filename, handle):
         dirpath = os.path.expanduser(dirpath)
@@ -77,3 +85,37 @@ class FileSystem:
             for chunk in handle.iter_content(chunk_size=8192):
                 fd.write(chunk)
         logging.getLogger().debug('Saved temporary file. %s', {'path': filepath})
+
+    @staticmethod
+    def get_local_file_info(local_file):
+        path = Path(local_file)
+        if not path.exists():
+            logging.getLogger().error('The path %(local_file)s was not found', dict(local_file=local_file))
+            raise LocalFileNotFound(local_file)
+        if not path.is_file():
+            logging.getLogger().error('The path %(local_file)s is not not file', dict(local_file=local_file))
+            raise LocalFileNotFound(local_file)
+
+        return dict(
+            name=path.name,
+            size=str(path.stat().st_size),
+            mimetype=mimetypes.guess_type(local_file)
+        )
+
+    @staticmethod
+    def compute_zip_file_name(cloud_directory, files):
+        if len(files) > 1:
+            path = Path(cloud_directory)
+        else:
+            path = Path(files[0])
+        return path.stem + '.zip'
+
+    def get_dirpath(self):
+        dirpath = config.filesystem['dl']
+        try:
+            self.validate_directory(dirpath)
+        except LocalDirectoryNotFound as error:
+            dirpath = self.expanduser(dirpath)
+            logging.getLogger().error('Download failed. Check the following directory exists. %s', {'path': dirpath})
+            raise error
+        return dirpath

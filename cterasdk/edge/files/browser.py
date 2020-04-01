@@ -1,5 +1,5 @@
 from .path import CTERAPath
-from . import dl, mkdir, rm
+from . import mkdir, rm, file_access
 
 
 class FileBrowser:
@@ -7,6 +7,7 @@ class FileBrowser:
 
     def __init__(self, Gateway):
         self._CTERAHost = Gateway
+        self._file_access = file_access.FileAccess(Gateway)
 
     @staticmethod
     def ls(_path):
@@ -18,7 +19,27 @@ class FileBrowser:
 
         :param str path: The file's path on the gateway
         """
-        return dl.download(self._CTERAHost, self.mkpath(path))
+        return self._file_access.download(self.mkpath(path))
+
+    def download_as_zip(self, cloud_directory, files):
+        """
+        Download a list of files and/or directories from a cloud folder as a ZIP file
+
+        .. warning:: The list of files is not validated. The ZIP file will include only the existing  files and directories
+
+        :param str cloud_directory: Path to the cloud directory
+        :param list[str] files: List of files and/or directories in the cloud folder to download
+        """
+        self._file_access.download_as_zip(self.mkpath(cloud_directory), files)
+
+    def upload(self, file_path, server_path):
+        """
+        Upload a file
+
+        :param str file_path: Path to the local file to upload
+        :param str server_path: Path to the directory to upload the file to
+        """
+        self._file_access.upload(file_path, self.mkpath(server_path))
 
     def mkdir(self, path, recurse=False):
         """

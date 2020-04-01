@@ -1,7 +1,7 @@
-cterasdk.edge.files.open module
+cterasdk.lib.file_access module
 ===============================
 
-.. automodule:: cterasdk.edge.files.open
+.. automodule:: cterasdk.lib.file_access
     :members:
     :undoc-members:
     :show-inheritance:
