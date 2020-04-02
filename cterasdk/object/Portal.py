@@ -29,7 +29,7 @@ class Portal(CTERAHost):
     :ivar cterasdk.core.activation.Activation activation: Object holding the Portal activation APIs
     :ivar cterasdk.core.logs.Logs logs: Object holding the Portal logs APIs
     :ivar cterasdk.core.cloudfs.CloudFS cloudfs: Object holding the Portal CloudFS APIs
-    :ivar cterasdk.core.files.FileBrowser files: Object holding the Portal File Browsing APIs
+    :ivar cterasdk.core.files.browser.FileBrowser files: Object holding the Portal File Browsing APIs
     """
 
     def __init__(self, host, port, https):
