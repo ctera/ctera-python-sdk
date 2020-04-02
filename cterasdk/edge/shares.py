@@ -111,7 +111,7 @@ class Shares(BaseCommand):
         :param str name: The share name
         :param list[cterasdk.edge.types.ShareAccessControlEntry] acl: List of access control entries
 
-        .. warning: this method will override the existing access control entries
+        .. warning:: this method will override the existing access control entries
         """
         Shares._validate_acl(acl)
 
