@@ -17,7 +17,7 @@ class CTERAClient:
         return self._execute(function)
 
     def download(self, baseurl, path, params):
-        function = Command(HTTPClient.get, self.http_client, geturi(baseurl, path), params)
+        function = Command(HTTPClient.get, self.http_client, geturi(baseurl, path), params, None, True)
         return self._execute(function, return_function=CTERAClient.file_descriptor)
 
     def get_multi(self, baseurl, path, paths):

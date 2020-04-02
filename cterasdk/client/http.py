@@ -144,8 +144,8 @@ class HttpClientRequest():
 
 
 class HttpClientRequestGet(HttpClientRequest):
-    def __init__(self, url, params=None, headers=None):
-        super().__init__('GET', url, params=params, headers=headers)
+    def __init__(self, url, params=None, headers=None, stream=None):
+        super().__init__('GET', url, params=params, headers=headers, stream=stream)
 
 
 class HttpClientRequestPost(HttpClientRequest):
@@ -170,8 +170,8 @@ class HttpClientRequestMkcol(HttpClientRequest):
 
 class HTTPClient(HttpClientBase):
 
-    def get(self, url, params=None, headers=None):
-        return self.dispatch(HttpClientRequestGet(url, params=params, headers=headers))
+    def get(self, url, params=None, headers=None, stream=None):
+        return self.dispatch(HttpClientRequestGet(url, params=params, headers=headers, stream=stream))
 
     def post(self, url, headers=None, data='', urlencode=False):
         if urlencode:

@@ -73,21 +73,7 @@ class FileSystem:
 
     @staticmethod
     def write(filepath, handle):
-        sizeof = 8192
-        f = None
-        try:
-            f = open(filepath, 'w+b')
-            while True:
-                buffer = handle.read(sizeof)
-                if not buffer:
-                    break
-                f.write(buffer)
-        except OSError:
-            # TODO pylint: disable=fixme
-            pass
-        finally:
-            if f is not None:
-                f.close()
-                logging.getLogger().debug('Saved temporary file. %s', {'path': filepath})
-            if handle is not None:
-                handle.close()
+        with open(filepath, 'w+b') as fd:
+            for chunk in handle.iter_content(chunk_size=8192):
+                fd.write(chunk)
+        logging.getLogger().debug('Saved temporary file. %s', {'path': filepath})
