@@ -127,6 +127,10 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
         return self._ctera_client.download(self.base_file_url if use_file_url else self.base_api_url, path, params or {})
 
     @authenticated
+    def download_zip(self, path, form_data, use_file_url=False):
+        return self._ctera_client.download_zip(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
+
+    @authenticated
     def show(self, path, use_file_url=False):
         """ Print a schema object as a JSON string. """
         print(tojsonstr(self.get(path, params={}, use_file_url=use_file_url)))

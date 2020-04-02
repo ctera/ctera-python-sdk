@@ -20,6 +20,10 @@ class CTERAClient:
         function = Command(HTTPClient.get, self.http_client, geturi(baseurl, path), params, None, True)
         return self._execute(function, return_function=CTERAClient.file_descriptor)
 
+    def download_zip(self, baseurl, path, form_data):
+        function = Command(HTTPClient.post, self.http_client, geturi(baseurl, path), ContentType.urlencoded, form_data, True)
+        return self._execute(function, return_function=CTERAClient.file_descriptor)
+
     def get_multi(self, baseurl, path, paths):
         return self.db(baseurl, path, "get-multi", paths)
 
