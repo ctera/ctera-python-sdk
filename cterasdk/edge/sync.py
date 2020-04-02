@@ -27,7 +27,7 @@ class Sync(BaseCommand):
         logging.getLogger().info("Cloud sync suspended.")
 
     def unsuspend(self):
-        """ UnSuspend Cloud Sync """
+        """ Unsuspend Cloud Sync """
         logging.getLogger().info("Unsuspending cloud sync.")
         self._gateway.put('/config/cloudsync/mode', Mode.Enabled)
         try:

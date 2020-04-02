@@ -13,7 +13,7 @@ class DirectoryService(BaseCommand):
 
     def fetch(self, active_directory_accounts):
         """
-        Instruct the Portal to fetch the provided active_directory_accounts
+        Instruct the Portal to fetch the provided Active Directory Accounts
 
         :param list[cterasdk.core.types.PortalAccount] active_directory_accounts: List of Active Directory Accounts to fetch
 

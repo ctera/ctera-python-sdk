@@ -35,19 +35,19 @@ class Shares(BaseCommand):
         """
         Add a network share.
 
-        :param str name: the share name
-        :param str directory: full directory path
+        :param str name: The share name
+        :param str directory: Full directory path
         :param list[cterasdk.edge.types.ShareAccessControlEntry] acl: List of access control entries
-        :param cterasdk.edge.enum.Acl access: the Windows File Sharing authentication mode, defaults to ``winAclMode``
-        :param cterasdk.edge.enum.ClientSideCaching csc: the client side caching (offline files) configuration, defaults to ``manual``
+        :param cterasdk.edge.enum.Acl access: The Windows File Sharing authentication mode, defaults to ``winAclMode``
+        :param cterasdk.edge.enum.ClientSideCaching csc: The client side caching (offline files) configuration, defaults to ``manual``
         :param int dir_permissions: Directory Permission, defaults to 777
-        :param str comment: comment
-        :param bool export_to_afp: whether to enable AFP access, defaults to ``False``
-        :param bool export_to_ftp: whether to enable FTP access, defaults to ``False``
-        :param bool export_to_nfs: whether to enable NFS access, defaults to ``False``
-        :param bool export_to_pc_agent: whether to allow as a destination share for CTERA Backup Agents, defaults to ``False``
-        :param bool export_to_rsync: whether to enable access over rsync, defaults to ``False``
-        :param bool indexed: whether to enable indexing for search, defaults to ``False``
+        :param str comment: Comment
+        :param bool export_to_afp: Whether to enable AFP access, defaults to ``False``
+        :param bool export_to_ftp: Whether to enable FTP access, defaults to ``False``
+        :param bool export_to_nfs: Whether to enable NFS access, defaults to ``False``
+        :param bool export_to_pc_agent: Whether to allow as a destination share for CTERA Backup Agents, defaults to ``False``
+        :param bool export_to_rsync: Whether to enable access over rsync, defaults to ``False``
+        :param bool indexed: Whether to enable indexing for search, defaults to ``False``
         """
         acl = acl or []
 
@@ -186,19 +186,19 @@ class Shares(BaseCommand):
         """
         Modify an existing network share. All parameters but name are optional and default to None
 
-        :param str name: the share name
-        :param str,optional directory: full directory path
+        :param str name: The share name
+        :param str,optional directory: Full directory path
         :param list[cterasdk.edge.types.ShareAccessControlEntry],optional acl: List of access control entries
-        :param cterasdk.edge.enum.Acl,optional access: the Windows File Sharing authentication mode
-        :param cterasdk.edge.enum.ClientSideCaching,optional csc: the client side caching (offline files) configuration
+        :param cterasdk.edge.enum.Acl,optional access: The Windows File Sharing authentication mode
+        :param cterasdk.edge.enum.ClientSideCaching,optional csc: The client side caching (offline files) configuration
         :param int,optional dir_permissions: Directory Permission
-        :param str,optional comment: comment
-        :param bool,optional export_to_afp: whether to enable AFP access
-        :param bool,optional export_to_ftp: whether to enable FTP access
-        :param bool,optional export_to_nfs: whether to enable NFS access
-        :param bool,optional export_to_pc_agent: whether to allow as a destination share for CTERA Backup Agents
-        :param bool,optional export_to_rsync: whether to enable access over rsync
-        :param bool,optional indexed: whether to enable indexing for search
+        :param str,optional comment: Comment
+        :param bool,optional export_to_afp: Whether to enable AFP access
+        :param bool,optional export_to_ftp: Whether to enable FTP access
+        :param bool,optional export_to_nfs: Whether to enable NFS access
+        :param bool,optional export_to_pc_agent: Whether to allow as a destination share for CTERA Backup Agents
+        :param bool,optional export_to_rsync: Whether to enable access over rsync
+        :param bool,optional indexed: Whether to enable indexing for search
         """
         share = self.get(name=name)
         if directory is not None:

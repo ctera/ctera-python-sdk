@@ -119,7 +119,7 @@ class GlobalAdmin(Portal):
 
     def __init__(self, host, port=443, https=True):
         """
-        :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
+        :param str host: The fully qualified domain name, hostname or an IPv4 address of the Portal
         :param int,optional port: Set a custom port number (0 - 65535), defaults to 443
         :param bool,optional https: Set to True to require HTTPS, defaults to True
         """
@@ -147,7 +147,7 @@ class ServicesPortal(Portal):
 
     def __init__(self, host, port=443, https=True):
         """
-        :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
+        :param str host: The fully qualified domain name, hostname or an IPv4 address of the Portal
         :param int,optional port: Set a custom port number (0 - 65535), defaults to 443
         :param bool,optional https: Set to True to require HTTPS, defaults to True
         """

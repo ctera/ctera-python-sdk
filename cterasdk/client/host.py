@@ -119,7 +119,7 @@ class CTERAHost(NetworkHost):
 
     @authenticated
     def get(self, path, params=None, use_file_url=False):
-        """ Retrieve a Portal schema object as a Python object. """
+        """ Retrieve a schema object as a Python object. """
         return self._ctera_client.get(self.base_file_url if use_file_url else self.base_api_url, path, params or {})
 
     @authenticated
@@ -128,22 +128,22 @@ class CTERAHost(NetworkHost):
 
     @authenticated
     def show(self, path, use_file_url=False):
-        """ Print a Portal schema object as a JSON string. """
+        """ Print a schema object as a JSON string. """
         print(tojsonstr(self.get(path, params={}, use_file_url=use_file_url)))
 
     @authenticated
     def get_multi(self, path, paths, use_file_url=False):
-        """ Retrieve one or more Portal schema objects as a Python object. """
+        """ Retrieve one or more schema objects as a Python object. """
         return self._ctera_client.get_multi(self.base_file_url if use_file_url else self.base_api_url, path, paths)
 
     @authenticated
     def show_multi(self, path, paths, use_file_url=False):
-        """ Print one or more Portal schema objects as a JSON string. """
+        """ Print one or more schema objects as a JSON string. """
         print(tojsonstr(self.get_multi(path, paths, use_file_url=use_file_url)))
 
     @authenticated
     def put(self, path, value, use_file_url=False):
-        """ Update a Portal schema object or attribute. """
+        """ Update a schema object or attribute. """
         response = self._ctera_client.put(self.base_file_url if use_file_url else self.base_api_url, path, value)
         logging.getLogger().debug('Configuration changed. %s', {'url': path, 'value': value})
         return response
@@ -165,19 +165,19 @@ class CTERAHost(NetworkHost):
 
     @authenticated
     def execute(self, path, name, param=None, use_file_url=False):
-        """ Execute a Portal schema object method. """
+        """ Execute a schema object method. """
         response = self._ctera_client.execute(self.base_file_url if use_file_url else self.base_api_url, path, name, param)
         logging.getLogger().debug('User-defined method executed. %s', {'url': path, 'name': name, 'param': param})
         return response
 
     @authenticated
     def add(self, path, param, use_file_url=False):
-        """ Add a Gateway schema object. """
+        """ Add a schema object. """
         return self.db(path, 'add', param, use_file_url=use_file_url)
 
     @authenticated
     def delete(self, path, use_file_url=False):
-        """ Delete a Gateway schema object. """
+        """ Delete a schema object. """
         response = self._ctera_client.delete(self.base_file_url if use_file_url else self.base_api_url, path)
         logging.getLogger().debug('Deleted. %s', {'url': path})
         return response
@@ -190,6 +190,6 @@ class CTERAHost(NetworkHost):
         """
         Return the name of the logged in user.
 
-        :return str: the name of the logged in user
+        :return str: The name of the logged in user
         """
         return self._session.whoami()

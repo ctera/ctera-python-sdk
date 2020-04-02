@@ -12,7 +12,7 @@ class DirectoryService(BaseCommand):
 
     def connect(self, domain, username, password, ou=None):
         """
-        Connect the gateway to an Active Directory
+        Connect the Gateway to an Active Directory
 
         :param str domain: The active directory domain to connect to
         :param str username: The user name to use when connecting to the active directory services

@@ -38,7 +38,7 @@ class Devices(BaseCommand):
 
         :param list[str],optional include: List of fields to retrieve, defaults to ['name', 'portal', 'deviceType']
         :param bool,optional allPortals: Search in all portals, defaults to False
-        :param list[cterasdk.core.enum.DeviceType.Gateways] deviceTypes: Types of Filers, defaults to all Filers types
+        :param list[cterasdk.core.enum.DeviceType.Gateways] deviceTypes: Types of Filers, defaults to all Filer types
 
         :return: Iterator for all matching Filers
         :rtype: cterasdk.lib.iterator.Iterator[cterasdk.object.Gateway.Gateway]

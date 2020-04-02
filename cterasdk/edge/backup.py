@@ -86,7 +86,7 @@ class Backup(BaseCommand):
         self._gateway.execute("/status/sync", "pause")
 
     def unsuspend(self):
-        """ Un-suspend backup """
+        """ Unsuspend backup """
         logging.getLogger().info("Suspending cloud backup.")
         self._gateway.execute("/status/sync", "resume")
 

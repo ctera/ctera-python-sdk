@@ -92,7 +92,7 @@ class FileBrowser(BaseCommand):
         """
         Restore previously deleted multiple files and/or directories
 
-        :param `*args`: Variable lengthed list of paths of files and/or directories to restore
+        :param `*args`: Variable length list of paths of files and/or directories to restore
         """
         return recover.undelete_multi(self._portal, *self.mkpath(list(args)))
 

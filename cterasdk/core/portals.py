@@ -66,9 +66,9 @@ class Portals(BaseCommand):
 
     def undelete(self, name):
         """
-        Un-Delete a previously deleted tenant
+        Undelete a previously deleted tenant
 
-        :param str name: Name of the tenant to un-delete
+        :param str name: Name of the tenant to undelete
         """
         logging.getLogger().info('Recovering Portal. %s', {'name': name})
 
