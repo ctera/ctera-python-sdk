@@ -42,7 +42,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         expected_param = self._create_dir_tree(self._pin_valid_folder_path, True)
         actual_param = self._filer.put.call_args[0][1]
         TestEdgeCaching._remove_parent_attrs(actual_param)
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_pin_invalid_root_directory(self):
         get_response = self._get_dir_entry(self._root, False)
@@ -65,7 +65,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
 
         actual_param = self._filer.put.call_args[0][1]
         TestEdgeCaching._remove_parent_attrs(actual_param)
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_remove_pin(self):
         get_response = self._create_dir_tree(self._pin_exclude_subfolder_path, True)
@@ -77,7 +77,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         expected_param = self._create_dir_tree(self._pin_valid_folder_path, False)
         actual_param = self._filer.put.call_args[0][1]
         TestEdgeCaching._remove_parent_attrs(actual_param)
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_pin_all(self):
         get_response = self._get_dir_entry(self._root, False)
@@ -89,7 +89,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         expected_param = self._get_dir_entry(self._root, True)
         actual_param = self._filer.put.call_args[0][1]
         TestEdgeCaching._remove_parent_attrs(actual_param)
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_unpin_all(self):
         get_response = self._get_dir_entry(self._root, True)
@@ -101,7 +101,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         expected_param = self._get_dir_entry(self._root, False)
         actual_param = self._filer.put.call_args[0][1]
         TestEdgeCaching._remove_parent_attrs(actual_param)
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def _get_dir_entry(self, name, include):
         param = Object()

@@ -42,7 +42,7 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
 
         expected_param = self._get_first_user_object('')
         actual_param = self._filer.post.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
         self._login_mock.assert_called_once_with(self._username, self._password)
 
     def test_add_first_user_with_email(self):
@@ -56,7 +56,7 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
 
         expected_param = self._get_first_user_object(self._email)
         actual_param = self._filer.post.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
         self._login_mock.assert_called_once_with(self._username, self._password)
 
     def test_first_user_already_exists(self):
@@ -78,7 +78,7 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
 
         expected_param = self._get_user_object()
         actual_param = self._filer.add.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, add_response)
 
@@ -100,7 +100,7 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._filer.put.assert_called_once_with('/config/auth/users/' + self._username, mock.ANY)
         expected_param = self._get_user_object(self._full_name, self._email, self._uid)
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, put_response)
 
@@ -123,7 +123,7 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._filer.put.assert_called_once_with('/config/auth/users/' + self._username, mock.ANY)
         expected_param = self._get_user_object(self._full_name, self._email, self._uid)
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual('Failed to modify user', error.exception.message)
 
     def test_delete_user(self):

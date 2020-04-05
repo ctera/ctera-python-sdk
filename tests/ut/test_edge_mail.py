@@ -25,7 +25,7 @@ class TestEdgeMailServer(base_edge.BaseEdgeTest):
 
         expected_param = self._get_mail_server_config()
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_mail_server_custom_port_no_auth_with_tls(self):
         get_response = self._get_default_mail_server_config()
@@ -36,7 +36,7 @@ class TestEdgeMailServer(base_edge.BaseEdgeTest):
 
         expected_param = self._get_mail_server_config(self._custom_port)
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_mail_server_default_port_with_auth_with_tls(self):
         get_response = self._get_default_mail_server_config()
@@ -47,7 +47,7 @@ class TestEdgeMailServer(base_edge.BaseEdgeTest):
 
         expected_param = self._get_mail_server_config(self._default_port, self._username, self._password, self._use_tls)
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_mail_server_default_port_no_auth_no_tls(self):
         get_response = self._get_default_mail_server_config()
@@ -58,7 +58,7 @@ class TestEdgeMailServer(base_edge.BaseEdgeTest):
 
         expected_param = self._get_mail_server_config(self._default_port, self._username, self._password, False)
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_disable_mail_server(self):
         self._init_filer()

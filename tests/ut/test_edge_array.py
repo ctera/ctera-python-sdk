@@ -37,7 +37,7 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
 
         expected_param = self._get_array_object()
         actual_param = self._filer.add.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, add_response)
 

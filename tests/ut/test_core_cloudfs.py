@@ -25,7 +25,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
         expected_param = self._get_mkfg_object()
         actual_param = self._global_admin.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, 'Success')
 
@@ -40,7 +40,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
         expected_param = self._get_mkfg_object(with_owner=True)
         actual_param = self._global_admin.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, 'Success')
 
@@ -69,7 +69,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
         expected_param = self._get_mkdir_object()
         actual_param = self._global_admin.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, 'Success')
 
@@ -86,7 +86,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
         expected_param = self._get_mkdir_object()
         actual_param = self._global_admin.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, 'Success')
 
@@ -103,7 +103,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
         expected_param = self._get_mkdir_object(winacls=False)
         actual_param = self._global_admin.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, 'Success')
 

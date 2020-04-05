@@ -48,12 +48,12 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self._filer.add.assert_called_once_with('/config/fileservices/share', mock.ANY)
         expected_param = self._get_share_object(acl=[])
         actual_param = self._filer.add.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_add_cifs_share_default_config_with_acls(self):
         execute_response = self._get_list_physical_folders_response_object()
@@ -64,7 +64,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self._filer.add.assert_called_once_with('/config/fileservices/share', mock.ANY)  # no verification call param _add_share_acl_rule()
 
@@ -88,12 +88,12 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self._filer.add.assert_called_once_with('/config/fileservices/share', mock.ANY)
         expected_param = self._get_share_object(acl=[])
         actual_param = self._filer.add.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual('Share creation failed', error.exception.message)
 
@@ -106,7 +106,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual('Invalid root directory.', error.exception.message)
 
@@ -165,7 +165,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._filer.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
         self._filer.put.assert_called_once_with('/config/fileservices/share/' + self._share_name, mock.ANY)
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def _get_share_object(self, directory=None, volume=None, acl=None,  # pylint: disable=too-many-arguments
                           access=None, csc=None, dir_permissions=None,
