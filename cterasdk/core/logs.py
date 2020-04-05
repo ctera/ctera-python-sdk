@@ -11,19 +11,21 @@ class Logs(BaseCommand):
     Portal Logs APIs
     """
 
-    def get(self, topic=enum.LogTopic.System, minSeverity=enum.Severity.INFO, _originType=enum.OriginType.Portal, before=None, after=None):
+    def get(self, topic=enum.LogTopic.System, minSeverity=enum.Severity.INFO, originType=enum.OriginType.Portal, before=None, after=None):
         """
         Get logs from the Portal
 
         :param cterasdk.core.enum.LogTopic,optional topic: Log topic to get, defaults to cterasdk.core.enum.LogTopic.System
         :param cterasdk.core.enum.Severity,optional minSeverity:
          Minimun severity of logs to get, defaults to cterasdk.core.enum.Severity.INFO
-        :param cterasdk.core.enum.OriginType,optional _originType:
+        :param cterasdk.core.enum.OriginType,optional originType:
          Origin type of the logs to get, defaults to cterasdk.core.enum.OriginType.Portal
         :param str,optional before: Get logs before this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
         :param str,optional after: Get logs after this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
         """
         builder = query.QueryParamBuilder().put('topic', topic).put('minSeverity', minSeverity)
+
+        builder.addFilter(query.FilterBuilder('originType').eq(originType))
 
         if before is not None:
             builder.addFilter(query.FilterBuilder('time').before(self._strptime(before)))
