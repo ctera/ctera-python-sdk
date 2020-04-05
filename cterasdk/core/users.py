@@ -12,7 +12,7 @@ class Users(BaseCommand):
     Portal User Management APIs
     """
 
-    _default_fields = ['name']
+    default = ['name']
 
     def get(self, user_account, include=None):
         """
@@ -24,7 +24,7 @@ class Users(BaseCommand):
         """
         baseurl = '/users/%s' % user_account.name if user_account.is_local \
             else '/domains/%s/adUsers/%s' % (user_account.directory, user_account.name)
-        include = union.union(include or [], Users._default_fields)
+        include = union.union(include or [], Users.default)
         include = ['/' + attr for attr in include]
         user_object = self._portal.get_multi(baseurl, include)
         if user_object.name is None:
@@ -39,7 +39,7 @@ class Users(BaseCommand):
         :return: Iterator for all local users
         :rtype: cterasdk.lib.iterator.Iterator
         """
-        include = union.union(include or [], Users._default_fields)
+        include = union.union(include or [], Users.default)
         param = query.QueryParamBuilder().include(include).build()
         return query.iterator(self._portal, '/users', param)
 
@@ -59,7 +59,7 @@ class Users(BaseCommand):
         :return: Iterator for all the domain users
         :rtype: cterasdk.lib.iterator.Iterator
         """
-        include = union.union(include or [], Users._default_fields)
+        include = union.union(include or [], Users.default)
         param = query.QueryParamBuilder().include(include).build()
         return query.iterator(self._portal, '/domains/' + domain + '/adUsers', param)
 
