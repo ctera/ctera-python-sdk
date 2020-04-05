@@ -1,8 +1,6 @@
 import queue
 import unittest
 
-from cterasdk.common import Object
-
 
 class BaseTest(unittest.TestCase):
 
@@ -17,20 +15,20 @@ class BaseTest(unittest.TestCase):
         patch_kwargs.update({'new_callable': unittest.mock.PropertyMock})
         return self.patch_call(module_path, **patch_kwargs)
 
-    def _assert_equal_objects(self, expected_param, actual_param):
+    def _assert_equal_objects(self, actual_param, expected_param):
         q = queue.Queue()
         q.put((actual_param, expected_param))
         while not q.empty():
             actual_param, expected_param = q.get()
-            for field in [a for a in dir(actual_param) if not a.startswith('__')]:
-                actual_param_attr = getattr(actual_param, field)
-                expected_param_attr = getattr(expected_param, field)
-                if isinstance(actual_param_attr, list):
-                    self.assertIsInstance(expected_param_attr, list)
-                    self.assertEqual(len(actual_param_attr), len(expected_param_attr))
-                    for index, actual_list_item in enumerate(actual_param_attr):
-                        q.put((actual_list_item, expected_param_attr[index]))
-                elif isinstance(actual_param_attr, Object):
-                    q.put((actual_param_attr, expected_param_attr))
-                else:
-                    self.assertEqual(actual_param_attr, expected_param_attr)
+            if isinstance(actual_param, (int, float, bool, str, type(None))):
+                self.assertEqual(actual_param, expected_param)
+            elif isinstance(actual_param, list):
+                self.assertIsInstance(expected_param, list)
+                self.assertEqual(len(actual_param), len(expected_param))
+                for index, actual_param_list_item in enumerate(actual_param):
+                    q.put((actual_param_list_item, expected_param[index]))
+            else:
+                for k in actual_param.__dict__.keys():
+                    self.assertIn(k, expected_param.__dict__)
+                    if not k.startswith('__'):
+                        q.put((getattr(actual_param, k), getattr(expected_param, k)))
