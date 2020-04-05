@@ -34,16 +34,21 @@ class Restriction:
 
 class FilterType:
 
+    DateTime = 'DateTimeFilter'
+    Boolean = 'BooleanFilter'
+    Integer = 'IntFilter'
+    String = 'StringFilter'
+
     @staticmethod
     def fromValue(value):
         if isinstance(value, datetime):
-            return 'DateTimeFilter'
+            return FilterType.DateTime
         if isinstance(value, bool):
-            return 'BooleanFilter'
+            return FilterType.Boolean
         if isinstance(value, int):
-            return 'IntFilter'
+            return FilterType.Integer
         if isinstance(value, str):
-            return 'StringFilter'
+            return FilterType.String
         raise TypeError("value must be of one of the following types: datetime, bool, int or str")
 
 
