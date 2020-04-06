@@ -3,10 +3,26 @@ CTERA for Python
 ****************
 .. image:: https://travis-ci.com/ctera/ctera-python-sdk.svg?branch=master
    :target: https://travis-ci.com/ctera/ctera-python-sdk
-.. image:: https://readthedocs.org/projects/ctera-python-sdk/badge/?version=latest
-   :target: https://ctera-python-sdk.readthedocs.io/en/latest/?badge=latest
-.. image:: https://snyk.io/test/github/ctera/ctera-python-sdk/badge.svg?targetFile=ut-requirements.txt
-   :target: https://snyk.io/test/github/ctera/ctera-python-sdk?targetFile=ut-requirements.txt
+.. image:: https://readthedocs.org/projects/ctera-python-sdk/badge/?version=stable
+   :target: https://ctera-python-sdk.readthedocs.io/en/stable
+   :alt: [Latest Release Documentation]
+.. image:: https://snyk.io/test/github/ctera/ctera-python-sdk/badge.svg
+   :target: https://snyk.io/test/github/ctera/ctera-python-sdk
+.. image:: https://img.shields.io/pypi/v/cterasdk
+   :target: https://pypi.org/pypi/cterasdk
+   :alt: [Latest Release Version]
+.. image:: https://img.shields.io/pypi/wheel/cterasdk
+   :target: https://pypi.org/pypi/cterasdk
+   :alt: PyPI - Wheel
+.. image:: https://img.shields.io/pypi/l/cterasdk
+   :target: https://opensource.org/licenses/Apache-2.0
+   :alt: [Latest Release License]
+.. image:: https://img.shields.io/pypi/pyversions/cterasdk
+    :target: https://pypi.org/pypi/cterasdk
+    :alt: [Latest Release Supported Python Versions]
+.. image:: https://img.shields.io/pypi/status/cterasdk
+    :target: https://pypi.org/pypi/cterasdk
+    :alt: [Latest Release Development Stage]
 
 A Python SDK for integrating with the CTERA Global File System API. Compatible with Python
 3.5+. 
