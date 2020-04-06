@@ -1,9 +1,8 @@
 import logging
 
-from ..common import Object
 from ..exception import InputError
-from .enum import PrincipalType
 from .base_command import BaseCommand
+from .types import UserGroupEntry
 
 
 class Groups(BaseCommand):
@@ -11,34 +10,30 @@ class Groups(BaseCommand):
     def get(self, name=None):
         """
         Get Group. If a group name was not passed as an argument, a list of all local groups will be retrieved
+
         :param str,optional name: Name of the group
         """
         return self._gateway.get('/config/auth/groups' + ('' if name is None else ('/' + name)))
 
-    def add_members(self, group, new_members):
+    def add_members(self, group, members):
+        """
+        Add members to a group
+
+        :param str group: Name of the group
+        :param list[cterasdk.edge.types.UserGroupEntry] members: List of users and groups to add to the group
+        """
+        Groups._validate_members(members)
+        new_member_dict = {
+            member.principal_type + '#' + member.name: member.to_server_object()
+            for member in members
+        }
+
         current_members = self._gateway.get('/config/auth/groups/' + group + '/members')
-
-        new_member_dict = {}
-        for new_member in new_members:
-            if len(new_member) != 2:
-                raise InputError('Invalid input', repr(new_member), '[("type", "name"), ...]')
-            new_member_type, new_member_name = new_member
-            new_member_type, new_member = Groups._member(new_member_type, new_member_name)
-            new_member_dict[new_member_type + '#' + new_member_name] = new_member
-
         for current_member in current_members:
-            current_member_type = current_member._classname  # pylint: disable=protected-access
-
-            if current_member_type in [PrincipalType.LU, PrincipalType.LG]:
-                current_member_name = current_member.ref
-                current_member_name = current_member_name[current_member_name.rfind('#') + 1:]
-            else:
-                current_member_name = current_member.name
-
-            current_member_key = current_member_type + '#' + current_member_name
-
-            if current_member_key not in new_member_dict:
-                new_member_dict[current_member_key] = current_member
+            user_group_entry = UserGroupEntry.from_server_object(current_member)
+            user_group_entry_key = user_group_entry.principal_type + '#' + user_group_entry.name
+            if user_group_entry_key not in new_member_dict:
+                new_member_dict[user_group_entry_key] = current_member
 
         members = [v for k, v in new_member_dict.items()]
 
@@ -48,22 +43,25 @@ class Groups(BaseCommand):
 
         logging.getLogger().info('Group members added. %s', {'group': group})
 
-    def remove_members(self, group, tuples):
+    def remove_members(self, group, members):
+        """
+        Remove members from a group
+
+        :param str group: Name of the group
+        :param list[cterasdk.edge.types.UserGroupEntry] members: List of users and groups to remove from the group
+        """
+        Groups._validate_members(members)
+        remove_members_dict = {
+            member.principal_type + '#' + member.name: True
+            for member in members
+        }
+
         current_members = self._gateway.get('/config/auth/groups/' + group + '/members')
-        options = {v: k for k, v in PrincipalType.__dict__.items() if not k.startswith('_')}  # reverse
-
         members = []
-        for current_member in current_members:
-            current_member_type = current_member._classname  # pylint: disable=protected-access
-
-            if current_member_type in [PrincipalType.LU, PrincipalType.LG]:
-                current_member_name = current_member.ref
-                current_member_name = current_member_name[current_member_name.rfind('#') + 1:]
-            else:
-                current_member_name = current_member.name
-
-            if not (options.get(current_member_type), current_member_name) in tuples:
-                members.append(current_member)
+        for member in current_members:
+            user_group_entry = UserGroupEntry.from_server_object(member)
+            if not remove_members_dict.get(user_group_entry.principal_type + '#' + user_group_entry.name, False):
+                members.append(member)
 
         logging.getLogger().info('Removing group members. %s', {'group': group})
 
@@ -72,25 +70,9 @@ class Groups(BaseCommand):
         logging.getLogger().info('Group members removed. %s', {'group': group})
 
     @staticmethod
-    def _member(member_type, name):
-        options = {k: v for k, v in PrincipalType.__dict__.items() if not k.startswith('_')}
-
-        member = Object()
-        member_type = options.get(member_type)
-
-        if member_type == PrincipalType.LU:
-            member._classname = PrincipalType.LU  # pylint: disable=protected-access
-            member.ref = "#config#auth#users#" + name
-        elif member_type == PrincipalType.LG:
-            member._classname = PrincipalType.LG  # pylint: disable=protected-access
-            member.ref = "#config#auth#groups#" + name
-        elif member_type == PrincipalType.DU:
-            member._classname = PrincipalType.DU  # pylint: disable=protected-access
-            member.name = name
-        elif member_type == PrincipalType.DG:
-            member._classname = PrincipalType.DG  # pylint: disable=protected-access
-            member.name = name
-        else:
-            raise InputError('Invalid principal type', member_type, list(options.keys()))
-
-        return member_type, member
+    def _validate_members(members):
+        if not isinstance(members, list):
+            raise InputError('Invalid members list format', repr(members), '[cterasdk.edge.types.UserGroupEntry, ...]')
+        for member in members:
+            if not isinstance(member, UserGroupEntry):
+                raise InputError('Invalid access control entry format', repr(member), 'cterasdk.edge.types.UserGroupEntry')
