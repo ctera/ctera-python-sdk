@@ -52,7 +52,11 @@ class Portal(CTERAHost):
 
     @property
     def base_api_url(self):
-        return self.baseurl() + '/' + self.context + '/api'
+        return self.base_portal_url + '/api'
+
+    @property
+    def base_portal_url(self):
+        return self.baseurl() + '/' + self.context
 
     @property
     def base_file_url(self):
