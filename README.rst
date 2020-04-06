@@ -8,7 +8,7 @@ CTERA for Python
 .. image:: https://snyk.io/test/github/ctera/ctera-python-sdk/badge.svg?targetFile=ut-requirements.txt
    :target: https://snyk.io/test/github/ctera/ctera-python-sdk?targetFile=ut-requirements.txt
 
-A Python SDK for integrating with the CTERA Networks API. Compatible with Python
+A Python SDK for integrating with the CTERA Global File System API. Compatible with Python
 3.5+. 
 
 Documentation
