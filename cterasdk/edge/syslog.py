@@ -52,7 +52,7 @@ class Syslog(BaseCommand):
         :param cterasdk.edge.enum.IPProtocol,optional proto: Syslog server communication protocol
         :param cterasdk.edge.enum.Severity,optional min_severity: Minimal log severity to fetch
         """
-        current_config = self.get_current_config()
+        current_config = self.get_configuration()
         if current_config.mode == enum.Mode.Disabled:
             raise CTERAException("Syslog configuration cannot be modified when disabled")
         if server:
