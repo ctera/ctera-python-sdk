@@ -32,6 +32,20 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         cache.Cache(self._filer).force_eviction()
         self._filer.execute.assert_called_once_with('/config/cloudsync', 'forceExecuteEvictor', None)
 
+    def test_is_enabled_true(self):
+        get_response = OperationMode.CachingGateway
+        self._init_filer(get_response=get_response)
+        ret = cache.Cache(self._filer).is_enabled()
+        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/operationMode')
+        self.assertEqual(ret, True)
+
+    def test_is_enabled_false(self):
+        get_response = OperationMode.Disabled
+        self._init_filer(get_response=get_response)
+        ret = cache.Cache(self._filer).is_enabled()
+        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/operationMode')
+        self.assertEqual(ret, False)
+
     def test_pin_folder(self):
         get_response = self._get_dir_entry(self._root, False)
         self._init_filer(get_response=get_response)
