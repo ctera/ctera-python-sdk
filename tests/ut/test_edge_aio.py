@@ -21,7 +21,7 @@ class TestEdgeAIO(base_edge.BaseEdgeTest):
 
         expected_param = self._get_cifs_object(enable_aio=False)
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_aio(self):
         get_response = self._get_cifs_object(enable_aio=False)
@@ -32,7 +32,7 @@ class TestEdgeAIO(base_edge.BaseEdgeTest):
 
         expected_param = self._get_cifs_object(enable_aio=True)
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def _get_cifs_object(self, enable_aio):
         robust_mutexes, aio_read_threshold, aio_write_threshold = self._enable_aio if enable_aio else self._disable_aio

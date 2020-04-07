@@ -7,6 +7,23 @@ from .enum import BackupConfStatusID
 from .base_command import BaseCommand
 
 
+class AttachRC:
+    OK = 'OK'
+    NotFound = 'NotFound'
+    IsEncrypted = 'IsEncrypted'
+    CheckCodeInCorrect = 'CheckCodeInCorrect'
+    ClockOutOfSync = 'ClockOutOfSync'
+    InternalServerError = 'InternalServerError'
+    PermissionDenied = 'PermissionDenied'
+
+
+class CreateFolderRC:
+    OK = 'OK'
+    InternalServerError = 'InternalServerError'
+    PermissionDenied = 'PermissionDenied'
+    FolderAlreadyExists = 'FolderAlreadyExists'
+
+
 class EncryptionMode:
     """
     Encryption mode types
@@ -123,7 +140,7 @@ class Backup(BaseCommand):
     def _process_attach_response(response):
         rc = response.attachFolderRC
 
-        if rc == 'OK':
+        if rc == AttachRC.OK:
             param = Object()
             if hasattr(response, 'encryptionMode'):
                 param.encryptionMode = response.encryptionMode
@@ -131,28 +148,28 @@ class Backup(BaseCommand):
             param.passPhraseSalt = response.passPhraseSalt
             return param
 
-        if rc == 'NotFound':
+        if rc == AttachRC.NotFound:
             logging.getLogger().debug('Could not find an existing backup folder.')
             raise NotFound()
 
-        if rc == 'IsEncrypted':
+        if rc == AttachRC.IsEncrypted:
             raise AttachEncrypted(response.encryptionMode, response.encryptedFolderKey, response.passPhraseSalt)
 
-        if rc == 'CheckCodeInCorrect':
+        if rc == AttachRC.CheckCodeInCorrect:
             logging.getLogger().error('Incorrect passphrase.')
             raise IncorrectPassphrase()
 
-        if rc == 'ClocksOutOfSync':
+        if rc == AttachRC.ClocksOutOfSync:
             logging.getLogger().error('Intializing backup failed. Clocks are out of sync. %s', {'rc': rc})
             raise ClockOutOfSync()
 
-        if rc == 'InternalServerError':
+        if rc == AttachRC.InternalServerError:
             logging.getLogger().error('Attach failed. %s', {'rc': rc})
-        elif rc == 'PermissionDenied':
+        elif rc == AttachRC.PermissionDenied:
             logging.getLogger().error('Attach failed. %s', {'rc': rc})
         else:
             logging.getLogger().error('Unknow error, %s', {'rc': rc})
-        raise CTERAException(message="Failed to Attach")
+        raise CTERAException('Failed to attach to backup folder', None, rc=rc)
 
     def _create_folder(self, passphrase):
         param = Object()
@@ -178,20 +195,20 @@ class Backup(BaseCommand):
     def _process_create_response(response):
         rc = response.createFolderRC
 
-        if rc == 'OK':
+        if rc == CreateFolderRC.OK:
             logging.getLogger().debug('Backup folder created successfully.')
             param = Object()
             param.sharedSecret = response.sharedSecret
             param.passPhraseSalt = response.passPhraseSalt
             return param
 
-        if rc == 'InternalServerError':
+        if rc == CreateFolderRC.InternalServerError:
             logging.getLogger().error('Backup folder creation failed. %s', {'rc': rc})
-        elif rc == 'PermissionDenied':
+        elif rc == CreateFolderRC.PermissionDenied:
             logging.getLogger().error('Backup folder creation failed. %s', {'rc': rc})
-        elif rc == 'FolderAlreadyExists':
+        elif rc == CreateFolderRC.FolderAlreadyExists:
             return None
-        raise CTERAException(message="Failed to Create")
+        raise CTERAException('Failed to create backup folder', None, rc=rc)
 
     def _wait(self, task):
         try:

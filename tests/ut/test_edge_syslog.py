@@ -25,7 +25,7 @@ class TestEdgeSyslog(base_edge.BaseEdgeTest):
 
         expected_param = self._get_syslog_object()
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_syslog_custom_port(self):
         self._init_filer()
@@ -34,7 +34,7 @@ class TestEdgeSyslog(base_edge.BaseEdgeTest):
 
         expected_param = self._get_syslog_object(self._custom_syslog_port)
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_syslog_custom_port_use_tcp_default_severity(self):
         self._init_filer()
@@ -43,7 +43,7 @@ class TestEdgeSyslog(base_edge.BaseEdgeTest):
 
         expected_param = self._get_syslog_object(self._custom_syslog_port, self._tcp)
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_syslog_custom_port_use_tcp_severity_error(self):
         self._init_filer()
@@ -52,7 +52,7 @@ class TestEdgeSyslog(base_edge.BaseEdgeTest):
 
         expected_param = self._get_syslog_object(self._custom_syslog_port, self._tcp, self._min_severity)
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_disable_syslog(self):
         self._init_filer()

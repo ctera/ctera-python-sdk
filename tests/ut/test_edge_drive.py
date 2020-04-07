@@ -33,7 +33,7 @@ class TestEdgeDrive(base_edge.BaseEdgeTest):
         expected_param = Object()
         expected_param.name = self._drive_name
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_format_all_drives(self):
         self._init_filer(get_response=self._get_drives_param())
@@ -43,7 +43,7 @@ class TestEdgeDrive(base_edge.BaseEdgeTest):
         expected_param = Object()
         expected_param.name = self._drive_name
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def _get_drives_param(self):
         drive_param = Object()

@@ -35,12 +35,12 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
 
         expected_param = self._get_domain_param()
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self._filer.execute.assert_called_once_with("/status/fileservices/cifs", "joinDomain", mock.ANY)
         expected_param = self._get_domain_join_param()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_connect_with_ou_path(self):
         ou_path = "ou=North America,DC=ctera,DC=local"
@@ -57,12 +57,12 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
 
         expected_param = self._get_domain_param()
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self._filer.execute.assert_called_once_with("/status/fileservices/cifs", "joinDomain", mock.ANY)
         expected_param = self._get_domain_join_param(ou_path)
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_connect_failure_no_connection_over_port(self):
         get_response = self._get_workgroup_param()
@@ -90,12 +90,12 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         self._filer.put.assert_called_once_with('/config/fileservices/cifs', mock.ANY)
         expected_param = self._get_domain_param()
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self._filer.execute.assert_called_once_with("/status/fileservices/cifs", "joinDomain", mock.ANY)
         expected_param = self._get_domain_join_param()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_connect_connection_error(self):
         tcp_connect_return_value = False
@@ -144,7 +144,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
 
         expected_param = self._get_workgroup_param()
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     @staticmethod
     def _get_advanced_mapping_object(domain_flat_name, min_id, max_id):

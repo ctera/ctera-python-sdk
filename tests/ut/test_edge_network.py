@@ -69,7 +69,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
 
         expected_param = self._static_ip
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_dhcp(self):
         get_response = self._static_ip
@@ -82,7 +82,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         self._static_ip.autoObtainDNS = False
         expected_param = self._static_ip
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_set_static_primary_dns_server(self):
         self._dhcp_ip.secondary_dns_server = None
@@ -95,7 +95,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         self._dhcp_ip.DNSServer1 = self._static_ip.DNSServer1
         expected_param = self._dhcp_ip
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_set_static_primary_and_secondary_dns_servers(self):
         get_response = self._dhcp_ip
@@ -108,7 +108,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         self._dhcp_ip.DNSServer2 = self._static_ip.DNSServer2
         expected_param = self._dhcp_ip
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_tcp_connect_success(self):
         execute_response = self._task_id
@@ -126,7 +126,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
 
         expected_param = self._get_tcp_connect_object()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, True)
 
@@ -146,7 +146,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
 
         expected_param = self._get_tcp_connect_object()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, False)
 
@@ -162,7 +162,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
 
         expected_param = self._get_tcp_connect_object()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, False)
 

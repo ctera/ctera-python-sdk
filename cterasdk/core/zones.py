@@ -66,7 +66,7 @@ class Zones(BaseCommand):
 
         :param str name: The name of the zone to delete
         """
-        zone = self.get(name)
+        zone = self._portal.zones.get(name)
         logging.getLogger().info('Deleting zone. %s', {'zone': name})
         response = self._portal.execute('', 'deleteZones', [zone.zoneId])
         if response == 'ok':
@@ -79,7 +79,7 @@ class Zones(BaseCommand):
         :param str name: The name of the zone to add devices to
         :param list[str] device_names: The names of the devices to add to the zone
         """
-        zone = self.get(name)
+        zone = self._portal.zones.get(name)
         portal_devices = devices.Devices(self._portal).by_name(include=['uid'], names=device_names)
         info = self._zone_info(zone.zoneId)
         description = (info.description if hasattr(info, 'description') else None)
@@ -94,7 +94,7 @@ class Zones(BaseCommand):
             self._save(param)
         except CTERAException as error:
             logging.getLogger().error('Failed adding devices to zone.')
-            raise error
+            raise CTERAException('Failed adding devices to zone', error, zone=name, devices=device_names)
 
     def add_folders(self, name, folder_finding_helpers):
         """
@@ -103,7 +103,7 @@ class Zones(BaseCommand):
         :param str name: The name of the zone
         :param list[cterasdk.core.types.CloudFSFolderFindingHelper] folder_finding_helpers: List of folder names and owners
         """
-        zone = self.get(name)
+        zone = self._portal.zones.get(name)
         folders = self._find_folders(folder_finding_helpers)
         info = self._zone_info(zone.zoneId)
         description = info.description if hasattr(info, 'description') else None
@@ -125,7 +125,7 @@ class Zones(BaseCommand):
             self._save(param)
         except CTERAException as error:
             logging.getLogger().error('Failed adding folders to zone.')
-            raise error
+            raise CTERAException('Failed adding folders to zone', error, zone=name)
 
     def _zone_info(self, zid):
         logging.getLogger().debug('Obtaining zone info. %s', {'id': zid})

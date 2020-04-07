@@ -20,7 +20,7 @@ class TestEdgeTelnet(base_edge.BaseEdgeTest):
 
         expected_param = self._get_telnet_object()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_telnet_already_running(self):
         execute_response = 'telnetd already running'
@@ -30,7 +30,7 @@ class TestEdgeTelnet(base_edge.BaseEdgeTest):
 
         expected_param = self._get_telnet_object()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_telnet_raise(self):
         execute_response = 'Expected Failure'
@@ -41,7 +41,7 @@ class TestEdgeTelnet(base_edge.BaseEdgeTest):
         self._filer.execute.assert_called_once_with('/config/device', 'startTelnetd', mock.ANY)
         expected_param = self._get_telnet_object()
         actual_param = self._filer.execute.call_args[0][2]
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual('Failed enabling telnet access', error.exception.message)
 
