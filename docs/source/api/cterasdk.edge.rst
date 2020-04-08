@@ -33,6 +33,7 @@ Submodules
    cterasdk.edge.drive
    cterasdk.edge.enum
    cterasdk.edge.ftp
+   cterasdk.edge.firmware
    cterasdk.edge.groups
    cterasdk.edge.licenses
    cterasdk.edge.login
