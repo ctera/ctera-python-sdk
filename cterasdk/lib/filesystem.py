@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 from .. import config
-from ..exception import RenameException, LocalDirectoryNotFound, LocalFileNotFound
+from ..exception import RenameException, LocalDirectoryNotFound, LocalFileNotFound, LocalPathNotFound
 
 
 class FileSystem:
@@ -119,3 +119,23 @@ class FileSystem:
             logging.getLogger().error('Download failed. Check the following directory exists. %s', {'path': dirpath})
             raise error
         return dirpath
+
+    @staticmethod
+    def split_file_directory(path):
+        # Exists and file -> directory=parent, filename=name
+        # Exists and dir -> directory=current filename=None
+        # Not Exists and parent Exists -> directory=parent filename=name
+        # Not Exists and parent not Exists -> Error
+        p = Path(path)
+        if p.exists():
+            if p.is_dir():
+                filename = None
+            else:
+                filename = p.name
+                p = p.parent
+        elif p.parent.exists():
+            filename = p.name
+            p = p.parent
+        else:
+            raise LocalPathNotFound(path)
+        return str(p.resolve()), filename

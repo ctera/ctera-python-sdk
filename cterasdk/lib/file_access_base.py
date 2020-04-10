@@ -9,17 +9,21 @@ class FileAccessBase(ABC):
         self._ctera_host = ctera_host
         self._filesystem = FileSystem.instance()
 
-    def download(self, path):
-        dirpath = self._filesystem.get_dirpath()
+    def download(self, path, destination=None):
+        directory, filename = self._split_destination(destination, path.name)
         handle = self._openfile(path)
-        self._filesystem.save(dirpath, path.name(), handle)
+        self._filesystem.save(directory, filename, handle)
 
-    def download_as_zip(self, cloud_directory, files):
+    def download_as_zip(self, cloud_directory, files, destination=None):
         files = files if isinstance(files, list) else [files]
-        save_as = self._filesystem.compute_zip_file_name(cloud_directory.fullpath(), files)
-        dirpath = self._filesystem.get_dirpath()
+        directory, filename = self._split_destination(
+            destination,
+            self._filesystem.compute_zip_file_name,
+            cloud_directory=cloud_directory.fullpath(),
+            files=files
+        )
         handle = self._get_zip_file_handle(cloud_directory, files)
-        self._filesystem.save(dirpath, save_as, handle)
+        self._filesystem.save(directory, filename, handle)
 
     def upload(self, local_file, dest_path):
         local_file_info = self._filesystem.get_local_file_info(local_file)
@@ -68,3 +72,13 @@ class FileAccessBase(ABC):
     @abstractmethod
     def _get_multi_file_object(self, cloud_directory, files):
         raise NotImplementedError("Subclass must implement _get_multi_file_object")
+
+    def _split_destination(self, destination, filename_resolver, **filename_resolver_kwargs):
+        directory = filename = None
+        if destination:
+            directory, filename = self._filesystem.split_file_directory(destination)
+        else:
+            directory = self._filesystem.get_dirpath()
+        if filename is None:
+            filename = filename_resolver(**filename_resolver_kwargs)
+        return directory, filename

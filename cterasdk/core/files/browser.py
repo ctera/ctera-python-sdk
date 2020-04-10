@@ -38,16 +38,18 @@ class FileBrowser(BaseCommand):
                     paths.append(self.mkpath(item))
                 yield item
 
-    def download(self, path):
+    def download(self, path, destination=None):
         """
         Download a file
 
         :param str path: Path of the file to download
+        :param str,optional destination:
+         File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
         path = self.mkpath(path)
-        self._file_access.download(path)
+        self._file_access.download(path, destination=destination)
 
-    def download_as_zip(self, cloud_directory, files):
+    def download_as_zip(self, cloud_directory, files, destination=None):
         """
         Download a list of files and/or directories from a cloud folder as a ZIP file
 
@@ -55,8 +57,10 @@ class FileBrowser(BaseCommand):
 
         :param str cloud_directory: Path to the cloud directory
         :param list[str] files: List of files and/or directories in the cloud folder to download
+        :param str,optional destination:
+         File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
-        self._file_access.download_as_zip(self.mkpath(cloud_directory), files)
+        self._file_access.download_as_zip(self.mkpath(cloud_directory), files, destination=destination)
 
     def upload(self, file_path, server_path):
         """
