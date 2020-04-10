@@ -102,6 +102,12 @@ class LocalFileNotFound(FileSystemException):
         FileSystemException.__init__(self, 'Could not find local file', None, path=path)
 
 
+class LocalPathNotFound(FileSystemException):
+
+    def __init__(self, path):
+        FileSystemException.__init__(self, 'Path does not exist', None, path=path)
+
+
 class RemoteFileSystemException(CTERAException):
     pass
 
