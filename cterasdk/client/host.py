@@ -1,6 +1,8 @@
 import functools
+import ipaddress
 import logging
 import socket
+from fqdn import FQDN
 
 from ..common import Object
 from ..convert import tojsonstr
@@ -22,7 +24,7 @@ def authenticated(function):
 
 class NetworkHost:
     def __init__(self, host, port, https):
-        self._host = host
+        self._host = self._validate_host_address(host)
         self._port = port
         self._https = https
 
@@ -65,6 +67,20 @@ class NetworkHost:
         x = Object()
         x.__dict__ = {k: v for k, v in self.__dict__.items() if not (k.startswith('_') or k in self._omit_fields)}
         return tojsonstr(x)
+
+    @staticmethod
+    def _validate_host_address(host):
+        if not isinstance(host, str):
+            raise CTERAException(message='Host must be a string', host=host)
+        if not host:
+            raise CTERAException(message='Passing an empty host is not supported', host=host)
+        fqdn = FQDN(host)
+        if not fqdn.is_valid:
+            try:
+                ipaddress.ip_address(host)
+            except ValueError:
+                raise CTERAException(message='Host is not a valid FQDN or IP Address', host=host)
+        return host
 
 
 class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods

@@ -9,7 +9,7 @@ class BaseCoreTest(base.BaseTest):
 
     def setUp(self):
         super().setUp()
-        self._global_admin = GlobalAdmin("")
+        self._global_admin = GlobalAdmin("127.0.0.1")
 
     def _init_global_admin(self, get_response=None, get_multi_response=None, put_response=None,
                            execute_response=None, form_data_response=None, add_response=None,

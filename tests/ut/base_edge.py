@@ -8,7 +8,7 @@ class BaseEdgeTest(base.BaseTest):
 
     def setUp(self):
         super().setUp()
-        self._filer = Gateway("")
+        self._filer = Gateway("127.0.0.1")
 
     def _init_filer(self, get_response=None, put_response=None, post_response=None,
                     form_data_response=None, add_response=None, execute_response=None,
