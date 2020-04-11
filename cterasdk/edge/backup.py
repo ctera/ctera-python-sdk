@@ -12,7 +12,7 @@ class AttachRC:
     NotFound = 'NotFound'
     IsEncrypted = 'IsEncrypted'
     CheckCodeInCorrect = 'CheckCodeInCorrect'
-    ClockOutOfSync = 'ClockOutOfSync'
+    ClocksOutOfSync = 'ClocksOutOfSync'
     InternalServerError = 'InternalServerError'
     PermissionDenied = 'PermissionDenied'
 
@@ -56,8 +56,8 @@ class IncorrectPassphrase(CTERAException):
         super().__init__('Incorrect passphrase')
 
 
-class ClockOutOfSync(CTERAException):
-    """ Clock Out of Sync exception """
+class ClocksOutOfSync(CTERAException):
+    """ Clocks Out of Sync exception """
 
     def __init__(self):
         super().__init__('Clocks are out of sync')
@@ -161,14 +161,14 @@ class Backup(BaseCommand):
 
         if rc == AttachRC.ClocksOutOfSync:
             logging.getLogger().error('Intializing backup failed. Clocks are out of sync. %s', {'rc': rc})
-            raise ClockOutOfSync()
+            raise ClocksOutOfSync()
 
         if rc == AttachRC.InternalServerError:
             logging.getLogger().error('Attach failed. %s', {'rc': rc})
         elif rc == AttachRC.PermissionDenied:
             logging.getLogger().error('Attach failed. %s', {'rc': rc})
         else:
-            logging.getLogger().error('Unknow error, %s', {'rc': rc})
+            logging.getLogger().error('Unknown error, %s', {'rc': rc})
         raise CTERAException('Failed to attach to backup folder', None, rc=rc)
 
     def _create_folder(self, passphrase):
