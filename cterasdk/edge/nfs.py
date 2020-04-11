@@ -40,8 +40,8 @@ class NFS(BaseCommand):
         """
         Modify the FTP Configuration. Parameters that are not passed will not be affected
 
-        :param bool,optional async_write: If Ture, use asynchronous writes
-        :param bool,optional aggregate_writes: If Ture, aggregate write requests
+        :param bool,optional async_write: If True, use asynchronous writes
+        :param bool,optional aggregate_writes: If True, aggregate write requests
         """
         config = self.get_configuration()
         if config.mode != Mode.Enabled:
