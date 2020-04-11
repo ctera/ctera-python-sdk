@@ -8,6 +8,15 @@ from tests.ut import base_edge
 
 class TestEdgeLicenses(base_edge.BaseEdgeTest):
 
+    def test_edge_get_active_licenses(self):
+        actual_licenses = ['NA', 'vGateway8', 'vGateway', 'vGateway32', 'vGateway64', 'vGateway128']
+        expected_licenses = ['NA', 'EV8', 'EV16', 'EV32', 'EV64', 'EV128']
+        for index, actual_license in enumerate(actual_licenses):
+            self._filer.get = mock.MagicMock(return_value=actual_license)
+            ret = licenses.Licenses(self._filer).get()
+            self._filer.get.assert_called_once_with('/config/device/activeLicenseType')
+            self.assertEqual(ret, expected_licenses[index])
+
     def test_apply_license(self):
         self._init_filer()
         ctera_licenses = ['vGateway8', 'vGateway', 'vGateway32', 'vGateway64', 'vGateway128']
