@@ -12,6 +12,20 @@ class TestEdgeAIO(base_edge.BaseEdgeTest):
         self._disable_aio = (False, 0, 0)
         self._enable_aio = (True, 1, 1)
 
+    def test_is_enabled_true(self):
+        get_response = self._get_cifs_object(True)
+        self._init_filer(get_response=get_response)
+        ret = aio.AIO(self._filer).is_enabled()
+        self._filer.get.assert_called_once_with('/config/fileservices/cifs')
+        self.assertEqual(ret, True)
+
+    def test_is_enabled_false(self):
+        get_response = self._get_cifs_object(False)
+        self._init_filer(get_response=get_response)
+        ret = aio.AIO(self._filer).is_enabled()
+        self._filer.get.assert_called_once_with('/config/fileservices/cifs')
+        self.assertEqual(ret, False)
+
     def test_disable_aio(self):
         get_response = self._get_cifs_object(enable_aio=True)
         self._init_filer(get_response=get_response)

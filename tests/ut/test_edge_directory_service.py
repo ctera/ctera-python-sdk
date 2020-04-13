@@ -146,6 +146,16 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         actual_param = self._filer.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
+    def test_get_connected_domain(self):
+        obj = Object()
+        obj.type = 'domain'
+        obj.domain = self._domain
+        obj.workgroup = None
+        self._init_filer(get_response=obj)
+        ret = directoryservice.DirectoryService(self._filer).get_connected_domain()
+        self._filer.get.assert_called_once_with('/config/fileservices/cifs')
+        self._assert_equal_objects(ret, obj)
+
     @staticmethod
     def _get_advanced_mapping_object(domain_flat_name, min_id, max_id):
         mapping = Object()

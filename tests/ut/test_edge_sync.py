@@ -1,5 +1,8 @@
+from unittest import mock
+
 from cterasdk.edge import sync
-from cterasdk.edge.enum import Mode
+from cterasdk.edge.enum import Mode, SyncStatus, Acl
+from cterasdk.lib import ErrorStatus
 from tests.ut import base_edge
 
 
@@ -53,6 +56,25 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
     def test_unsuspend_cloudsync(self):
         self._init_filer()
         self.patch_call("cterasdk.edge.sync.track")
+        sync.Sync(self._filer).unsuspend()
+        self._filer.put.assert_called_once_with('/config/cloudsync/mode', Mode.Enabled)
+
+    def test_unsuspend_cloudsync_should_support_winacls(self):
+        self._init_filer()
+        sync_status_tracker_mock = self.patch_call("cterasdk.edge.sync.track")
+        sync_status_tracker_mock.side_effect = ErrorStatus(SyncStatus.ShouldSupportWinNtAcl)
+        sync.Sync(self._filer).unsuspend()
+        self._filer.put.assert_has_calls(
+            [
+                mock.call('/config/cloudsync/mode', Mode.Enabled),
+                mock.call('/config/fileservices/share/cloud/access', Acl.WindowsNT)
+            ]
+        )
+
+    def test_unsuspend_cloudsync_error(self):
+        self._init_filer()
+        sync_status_tracker_mock = self.patch_call("cterasdk.edge.sync.track")
+        sync_status_tracker_mock.side_effect = ErrorStatus(SyncStatus.InternalError)
         sync.Sync(self._filer).unsuspend()
         self._filer.put.assert_called_once_with('/config/cloudsync/mode', Mode.Enabled)
 

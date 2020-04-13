@@ -83,6 +83,13 @@ class TestCoreUsers(base_core.BaseCoreTest):
             self.assertIn(attr, actual_include)
         self.assertEqual('Could not find user', error.exception.message)
 
+    def test_delete_user(self):
+        execute_response = 'Success'
+        self._init_global_admin(execute_response=execute_response)
+        ret = users.Users(self._global_admin).delete(self._username)
+        self._global_admin.execute.assert_called_once_with('/users/' + self._username, 'delete', True)
+        self.assertEqual(ret, execute_response)
+
     def _get_user_object(self, **kwargs):
         user_object = Object()
         user_object._classname = self._user_class_name  # pylint: disable=protected-access
