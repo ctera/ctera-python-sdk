@@ -3,6 +3,8 @@ CTERA for Python
 ****************
 .. image:: https://travis-ci.com/ctera/ctera-python-sdk.svg?branch=master
    :target: https://travis-ci.com/ctera/ctera-python-sdk
+.. image:: https://github.com/ctera/ctera-python-sdk/workflows/CI/badge.svg
+   :target: https://github.com/ctera/ctera-python-sdk/actions?query=workflow%3ACI
 .. image:: https://readthedocs.org/projects/ctera-python-sdk/badge/?version=stable
    :target: https://ctera-python-sdk.readthedocs.io/en/stable
    :alt: [Latest Release Documentation]
