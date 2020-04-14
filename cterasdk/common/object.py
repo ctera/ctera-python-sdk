@@ -22,6 +22,6 @@ class Object:
             ret = copy.deepcopy(o.__dict__)
             for key in o._sdk_hidden:  # pylint: disable=protected-access
                 if key in ret:
-                    ret[key] = '*** The Value if Hidden by the SDK ***'
+                    ret[key] = '*** The Value is Hidden by the SDK ***'
             return ret
         return json.dumps(self, default=to_protected_dict, indent=5)
