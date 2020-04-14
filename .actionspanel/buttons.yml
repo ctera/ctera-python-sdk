@@ -1,0 +1,4 @@
+buttons:
+  - title: Test action
+    action: "test_action"
+    description: Trigger action for testing
