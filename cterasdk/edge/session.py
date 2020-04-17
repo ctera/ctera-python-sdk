@@ -1,44 +1,7 @@
 import logging
 
 from ..common import Object
-
-
-def inactive_session(Gateway):
-    session = InactiveSession(Gateway.host())
-    Gateway.register_session(session)
-
-
-def start_local_session(Gateway, host, user):
-    session = LocalSession(host, user)
-    Gateway.register_session(session)
-
-
-def start_remote_session(Gateway, Portal):
-    host = Gateway.host()
-    remote_session = Portal.session()
-    user = remote_session.user.name
-    remote_from = remote_session.host
-    tenant = remote_session.current_tenant
-    session = RemoteSession(host, user, remote_from, tenant)
-    Gateway.register_session(session)
-
-
-def terminate(Gateway):
-    session = Gateway.session()
-    if session.local():
-        logging.getLogger().debug('Terminating local session. %s', {'host': session.target_host(), 'user': session.username()})
-        inactive_session(Gateway)
-    elif session.remote():
-        logging.getLogger().debug(
-            'Terminating remote session. %s',
-            {'host': session.target_host(), 'tenant': session.tenant(), 'user': session.username()}
-        )
-        session.disable_remote_access()
-
-
-class SessionStatus:
-    Inactive = 'Inactive'
-    Active = 'Active'
+from ..lib.session_base import SessionBase, SessionUser, SessionStatus
 
 
 class SessionType:
@@ -46,57 +9,47 @@ class SessionType:
     Remote = 'remote'
 
 
-class Session(Object):
+class SessionConnection(Object):
+    def __init__(self, session_type, remote_from=None):
+        self.type = session_type
+        if session_type == SessionType.Remote:
+            self.remote_from = remote_from
+            self.remote_access = False
+        else:
+            self.remote_from = None
+            self.remote_access = None
 
-    def __init__(self, host, session_type, status):
-        self.host = host
-        self.connection = Object()
-        self.connection.type = session_type
-        self.status = status
 
-    def target_host(self):
-        return self.host
+class Session(SessionBase):
+
+    def __init__(self, host):
+        super().__init__(host)
+        self.connection = SessionConnection(SessionType.Local)
+
+    def _do_start_local_session(self, ctera_host):
+        user = ctera_host.get('currentuser')
+        self._activate(SessionType.Local, user)
+
+    def start_remote_session(self, remote_session):
+        self._activate(SessionType.Remote, remote_session.user.name, tenant=remote_session.user.tenant, remote_from=remote_session.host)
+        self.status = SessionStatus.Active
+
+    def _do_terminate(self):
+        if self.local():
+            logging.getLogger().debug('Terminating local session. %s', {'host': self.host, 'user': self.user.name})
+            self.connection = SessionConnection(SessionType.Local)
+        elif self.remote():
+            logging.getLogger().debug(
+                'Terminating remote session. %s',
+                {'host': self.host, 'tenant': self.user.tenant, 'user': self.user.name}
+            )
+            self.disable_remote_access()
 
     def local(self):
         return self.connection.type == SessionType.Local
 
     def remote(self):
         return self.connection.type == SessionType.Remote
-
-    def authenticated(self):
-        return self.status == SessionStatus.Active
-
-
-class InactiveSession(Session):
-
-    def __init__(self, host):
-        super().__init__(host, SessionType.Local, SessionStatus.Inactive)
-
-
-class ActiveSession(Session):
-
-    def __init__(self, host, session_type, user):
-        super().__init__(host, session_type, SessionStatus.Active)
-        self.user = Object()
-        self.user.name = user
-
-    def username(self):
-        return self.user.name
-
-
-class LocalSession(ActiveSession):
-
-    def __init__(self, host, user):
-        super().__init__(host, SessionType.Local, user)
-
-
-class RemoteSession(ActiveSession):
-
-    def __init__(self, host, user, remote_from, tenant):
-        super().__init__(host, SessionType.Remote, user)
-        self.connection.remote_from = remote_from
-        self.connection.remote_access = False
-        self.user.tenant = tenant
 
     def enable_remote_access(self):
         self.connection.remote_access = True
@@ -110,5 +63,6 @@ class RemoteSession(ActiveSession):
     def remote_from(self):  # pylint: disable=method-hidden
         return self.connection.remote_from
 
-    def tenant(self):  # pylint: disable=method-hidden
-        return self.user.tenant
+    def _activate(self, session_type, user, tenant=None, remote_from=None):
+        self.user = SessionUser(user, tenant=tenant)
+        self.connection = SessionConnection(session_type, remote_from=remote_from)

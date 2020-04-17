@@ -17,10 +17,11 @@ class Agent(CTERAHost):
         """
         super().__init__(host, port, https)
         self._remote_access = False
+        self._session = session.Session(self.host())
         if Portal is not None:
             self._Portal = Portal
             self._ctera_client = Portal._ctera_client
-            session.start_remote_session(self, Portal)
+            self._session.start_remote_session(self._Portal.session())
 
     @property
     def base_api_url(self):
@@ -29,6 +30,10 @@ class Agent(CTERAHost):
     @property
     def _login_object(self):
         raise NotImplementedError("Currently login is not supported for Agent")
+
+    @property
+    def _session_id_key(self):
+        return ''
 
     def _is_authenticated(self, function, *args, **kwargs):
         return True

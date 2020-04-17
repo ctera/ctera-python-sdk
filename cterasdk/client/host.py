@@ -71,7 +71,7 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
 
     def __init__(self, host, port, https):
         super().__init__(host, port, https)
-        self._ctera_client = CTERAClient()
+        self._ctera_client = CTERAClient(self._session_id_key)
         self._session = None
 
     @property
@@ -95,6 +95,10 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
             "Implementing class must implement the login_object property by returning an object with login and logout methods"
         )
 
+    @property
+    def _session_id_key(self):
+        raise NotImplementedError("Implementing class must implement the _session_id_key property")
+
     def _is_authenticated(self, function, *args, **kwargs):
         raise NotImplementedError("Implementing class must implement the _is_authenticated method")
 
@@ -106,10 +110,12 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
         :param str password: User password
         """
         self._login_object.login(username, password)
+        self._session.start_local_session(self)
 
     def logout(self):
         """ Log out """
         self._login_object.logout()
+        self._session.terminate()
 
     def session(self):
         return self._session
@@ -193,6 +199,24 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
     @authenticated
     def upload(self, path, form_data, use_file_url=False):
         return self._ctera_client.upload(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
+
+    @authenticated
+    def get_session_id(self):
+        """
+        Get the id of the current session
+
+        :return str: Current session id
+        """
+        return self._ctera_client.get_session_id()
+
+    def set_session_id(self, session_id):
+        """
+        Start a session with the session id instead of logging in
+
+        :param str session_id: Session id for the new session
+        """
+        self._ctera_client.set_session_id(session_id)
+        self._session.start_local_session(self)
 
     def whoami(self):
         """

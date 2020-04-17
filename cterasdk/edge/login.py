@@ -1,6 +1,5 @@
 import logging
 
-from . import session
 from ..exception import CTERAException
 from .base_command import BaseCommand
 
@@ -12,7 +11,6 @@ class Login(BaseCommand):
         try:
             self._gateway.form_data('/login', {'username': username, 'password': password})
             logging.getLogger().info("User logged in. %s", {'host': host, 'user': username})
-            session.start_local_session(self._gateway, host, username)
         except CTERAException as error:
             logging.getLogger().error("Login failed. %s", {'host': host, 'user': username})
             raise error
@@ -20,7 +18,6 @@ class Login(BaseCommand):
     def logout(self):
         try:
             self._gateway.form_data('/logout', {'foo': 'bar'})
-            session.terminate(self._gateway)
             logging.getLogger().info("User logged out. %s", {'host': self._gateway.host()})
         except CTERAException as error:
             raise error

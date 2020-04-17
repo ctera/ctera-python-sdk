@@ -39,7 +39,7 @@ class Portal(CTERAHost):
         :param bool https: Set to True to require HTTPS
         """
         super().__init__(host, port, https)
-        session.inactive_session(self)
+        self._session = session.Session(self.host(), self.context)
         self.users = users.Users(self)
         self.reports = reports.Reports(self)
         self.devices = devices.Devices(self)
@@ -61,6 +61,10 @@ class Portal(CTERAHost):
     @property
     def base_file_url(self):
         return self.baseurl()
+
+    @property
+    def _session_id_key(self):
+        return 'JSESSIONID'
 
     @property
     def context(self):
