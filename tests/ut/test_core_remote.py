@@ -50,7 +50,8 @@ class TestCoreRemote(base_core.BaseCoreTest):
         self.assertIsInstance(portal_device, instance_type)
 
     def _activate_portal_session(self):
-        self._global_admin.session().activate(self._device_portal, self._user_name, self._user_role)
+        self._global_admin.get = mock.MagicMock(side_effect=['team-portal-name', TestCoreRemote._create_current_session_object()])
+        self._global_admin.session().start_local_session(self._global_admin)
 
     @staticmethod
     def _create_device_param(name, portal, device_type):
@@ -59,3 +60,10 @@ class TestCoreRemote(base_core.BaseCoreTest):
         param.portal = portal
         param.deviceType = device_type
         return param
+
+    @staticmethod
+    def _create_current_session_object():
+        session = Object()
+        session.username = 'admin'
+        session.role = 'admin'
+        return session

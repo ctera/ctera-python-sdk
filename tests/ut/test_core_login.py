@@ -35,12 +35,6 @@ class TestCoreLogin(base_core.BaseCoreTest):
         self._global_admin.get = mock.MagicMock(side_effect=TestCoreLogin._obtain_session_info)
         login.Login(self._global_admin).login(self._username, self._password)
         self._global_admin.form_data.assert_called_once_with('/login', {'j_username': self._username, 'j_password': self._password})
-        self._global_admin.get.assert_has_calls(
-            [
-                mock.call('/currentPortal'),
-                mock.call('/currentSession')
-            ]
-        )
 
     def test_logout_success(self):
         self._init_global_admin()

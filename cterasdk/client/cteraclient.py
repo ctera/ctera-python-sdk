@@ -9,8 +9,8 @@ from .. import config
 
 class CTERAClient:
 
-    def __init__(self):
-        self.http_client = HTTPClient()
+    def __init__(self, session_id_key):
+        self.http_client = HTTPClient(session_id_key)
 
     def get(self, baseurl, path, params=None):
         function = Command(HTTPClient.get, self.http_client, geturi(baseurl, path), params if params else {})
@@ -64,6 +64,12 @@ class CTERAClient:
         obj.param = param
         function = Command(HTTPClient.post, self.http_client, geturi(baseurl, path), ContentType.textplain, toxmlstr(obj))
         return self._execute(function)
+
+    def get_session_id(self):
+        return self.http_client.get_session_id()
+
+    def set_session_id(self, session_id):
+        return self.http_client.set_session_id(session_id)
 
     @staticmethod
     def fromxmlstr(request, response):

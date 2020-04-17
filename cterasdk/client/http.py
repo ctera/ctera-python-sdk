@@ -77,12 +77,13 @@ class ContentType:
 
 
 class HttpClientBase():
-    def __init__(self):
+    def __init__(self, session_id_key):
         self.timeout = config.http['timeout']
         self.retries = config.http['retries']
         self.ssl_error_handling = config.http['ssl']
         self.session = requests.Session()
         self.session.verify = self.ssl_error_handling != 'Trust'
+        self._session_id_key = session_id_key
 
     def dispatch(self, ctera_request):
         attempt = 0
@@ -135,6 +136,12 @@ class HttpClientBase():
 
     def trust(self, _host, _port):
         self.session.verify = False  # CertificateServices.save_cert_from_server(host, port)
+
+    def get_session_id(self):
+        return self.session.cookies.get(self._session_id_key)
+
+    def set_session_id(self, session_id):
+        self.session.cookies.set(self._session_id_key, session_id)
 
 
 class HttpClientRequest():

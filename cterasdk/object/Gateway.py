@@ -89,12 +89,11 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         """
         super().__init__(host, port, https)
         self._remote_access = False
+        self._session = session.Session(self.host())
         if Portal is not None:
             self._Portal = Portal
             self._ctera_client = Portal._ctera_client
-            session.start_remote_session(self, Portal)
-        else:
-            session.inactive_session(self)
+            self._session.start_remote_session(self._Portal.session())
         self.config = config.Config(self)
         self.network = network.Network(self)
         self.licenses = licenses.Licenses(self)
@@ -136,6 +135,10 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     @property
     def base_file_url(self):
         return uri.files(self)
+
+    @property
+    def _session_id_key(self):
+        return '_cteraSessionId_'
 
     @staticmethod
     def make_local_files_dir(full_path):
@@ -187,7 +190,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         def is_nosession(path):
             return path.startswith('/nosession')
         current_session = self.session()
-        return current_session.authenticated() or is_nosession(args[0])
+        return current_session.authenticated() or current_session.initializing or is_nosession(args[0])
 
     def test(self):
         """ Verification check to ensure the target host is a Gateway. """
