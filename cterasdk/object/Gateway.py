@@ -175,7 +175,8 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'shell',
             'cli',
             'support',
-            'files'
+            'files',
+            'firmware'
             ]
 
     @property
