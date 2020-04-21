@@ -861,6 +861,37 @@ Reset
 
 .. seealso:: create the first admin account after resetting the Gateway to its default settings: :py:func:`cterasdk.edge.users.Users.add_first_user()`
 
+SSL
+================
+
+.. automethod:: cterasdk.edge.ssl.SSL.disable_http
+   :noindex:
+
+.. code-block:: python
+
+   filer.ssl.disable_http()
+
+.. automethod:: cterasdk.edge.ssl.SSL.enable_http
+   :noindex:
+
+.. code-block:: python
+
+   filer.ssl.enable_http()
+
+.. automethod:: cterasdk.edge.ssl.SSL.upload_cert
+   :noindex:
+
+.. code-block:: python
+
+   """
+   certificate = '/home/alice/certs/certificate.crt'
+   private_key = '/home/alice/certs/private.key'
+   """
+
+   filer.ssl.upload_cert(certificate, private_key)
+
+.. danger: Proceed with caution. The integrity of the PEM encoded certificate and private key is not validated. Supplying an invalid certificate or private key may disable all administrative access to the system and would require to engage with CTERA Support professionals to re-enable access. Test your code and certificates before implementing this in production.
+
 Power Management
 ================
 
