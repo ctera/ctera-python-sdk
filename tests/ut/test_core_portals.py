@@ -13,6 +13,8 @@ class TestCorePortals(base_core.BaseCoreTest):
     def setUp(self):
         super().setUp()
         self._name = 'acme'
+        self._plan_name = 'plan name'
+        self._plan_ref = 'plan ref'
         self._display_name = 'Acme Corp.'
         self._billing_id = 'billing-id'
         self._company = 'The Acme Corporation'
@@ -72,6 +74,31 @@ class TestCorePortals(base_core.BaseCoreTest):
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
+    def test_add_tenant_with_plan(self):
+        add_response = 'Success'
+        get_multi_response = TestCorePortals._get_plan_object(self._plan_name, self._plan_ref)
+        self._init_global_admin(get_multi_response=get_multi_response, add_response=add_response)
+        ret = portals.Portals(self._global_admin).add(self._name, plan=self._plan_name)
+        self._global_admin.add.assert_called_once_with('/teamPortals', mock.ANY)
+        expected_param = self._get_portal_param(plan=self._plan_ref)
+        actual_param = self._global_admin.add.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, add_response)
+
+    @staticmethod
+    def _get_plan_object(plan_name, plan_ref):
+        param = Object()
+        param.name = plan_name
+        param.baseObjectRef = plan_ref
+        return param
+
+    def test_subscribe(self):
+        execute_response = 'Success'
+        self._init_global_admin(execute_response=execute_response)
+        ret = portals.Portals(self._global_admin).subscribe(self._name, self._plan_name)
+        self._global_admin.execute.assert_called_once_with('/portals/' + self._name, 'subscribe', self._plan_name)
+        self.assertEqual(ret, execute_response)
+
     def test_delete_portal(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
@@ -96,11 +123,14 @@ class TestCorePortals(base_core.BaseCoreTest):
         portals.Portals(self._global_admin).browse_global_admin()
         self._global_admin.put.assert_called_once_with('/currentPortal', '')
 
-    def _get_portal_param(self, display_name=None, billing_id=None, company=None):
+    def _get_portal_param(self, display_name=None, billing_id=None, company=None, comment=None, plan=None):
         param = Object()
         param._classname = 'TeamPortal'  # pylint: disable=protected-access
         param.name = self._name
         param.displayName = display_name
         param.externalPortalId = billing_id
         param.companyName = company
+        param.comment = comment
+        if plan:
+            param.plan = plan
         return param

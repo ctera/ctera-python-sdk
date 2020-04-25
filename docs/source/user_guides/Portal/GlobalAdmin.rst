@@ -112,6 +112,19 @@ Create a Team Portal
 
    admin.portals.add('ctera', 'CTERA', 'Tz9YRDSd8LNfaouzr3Db', 'CTERA Networks')
 
+   """Create a Team Portal and assign it to a pre-configured subscription plan"""
+   admin.portals.add('ctera', plan = 'Default')
+
+Subscribe a Team Portal to a Plan
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.core.portals.Portals.subscribe
+   :noindex:
+
+.. code-block:: python
+
+   admin.portals.subscribe('ctera', '10tb')
+
 Delete a Team Portal
 ^^^^^^^^^^^^^^^^^^^^
 .. automethod:: cterasdk.core.portals.Portals.delete
