@@ -20,9 +20,15 @@ class SSL(BaseCommand):
         self._set_force_https(True)
 
     def is_http_disabled(self):
+        """
+        Check if HTTP access is disabled
+        """
         return self._get_force_https()
 
     def is_http_enabled(self):
+        """
+        Check if HTTP access is enabled
+        """
         return not self._get_force_https()
 
     def _get_force_https(self):

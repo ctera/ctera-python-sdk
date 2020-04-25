@@ -878,6 +878,20 @@ SSL
 
    filer.ssl.enable_http()
 
+.. automethod:: cterasdk.edge.ssl.SSL.is_http_disabled
+   :noindex:
+
+.. code-block:: python
+
+   filer.ssl.is_http_disabled()
+
+.. automethod:: cterasdk.edge.ssl.SSL.is_http_enabled
+   :noindex:
+
+.. code-block:: python
+
+   filer.ssl.is_http_enabled()
+
 .. automethod:: cterasdk.edge.ssl.SSL.upload_cert
    :noindex:
 
