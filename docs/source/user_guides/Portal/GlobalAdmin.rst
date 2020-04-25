@@ -116,7 +116,7 @@ Create a Team Portal
    admin.portals.add('ctera', plan = 'Default')
 
 Subscribe a Team Portal to a Plan
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automethod:: cterasdk.core.portals.Portals.subscribe
    :noindex:
