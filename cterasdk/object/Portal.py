@@ -18,7 +18,7 @@ from ..core import zones
 from ..core import files
 
 
-class Portal(CTERAHost):
+class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     """
     Parent class for communicating with the Portal through either GlobalAdmin or ServicesPortal
 
