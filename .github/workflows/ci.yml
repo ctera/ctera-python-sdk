@@ -33,13 +33,6 @@ jobs:
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: coveralls
-    - name: Notify Teams
-      uses: aliencube/microsoft-teams-actions@v0.8.0
-      with:
-        webhook_uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
-        title: CTERA Python SDK - Test Notification
-        summary: Python SDK Notification Test
-        actions: '[{ "@type": "OpenUri", "name": "See PyPi", "targets": [{ "os": "default", "uri": "https://pypi.org/project/cterasdk/"}] }]'
   deploy:
     needs: build
     if: github.event_name == 'release'
