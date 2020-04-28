@@ -31,7 +31,7 @@ class Shares(BaseCommand):
             export_to_pc_agent=False,
             export_to_rsync=False,
             indexed=False
-            ):  # pylint: disable=too-many-arguments,too-many-locals
+            ):  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
         """
         Add a network share.
 
@@ -182,7 +182,7 @@ class Shares(BaseCommand):
             export_to_pc_agent=None,
             export_to_rsync=None,
             indexed=None
-                ):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches
+                ):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
         """
         Modify an existing network share. All parameters but name are optional and default to None
 
