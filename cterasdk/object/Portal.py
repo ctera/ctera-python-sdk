@@ -7,6 +7,7 @@ from ..core import login
 from ..core import query
 from ..core import logs
 from ..core import portals
+from ..core import plans
 from ..core import reports
 from ..core import servers
 from ..core import devices
@@ -17,11 +18,12 @@ from ..core import zones
 from ..core import files
 
 
-class Portal(CTERAHost):
+class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     """
     Parent class for communicating with the Portal through either GlobalAdmin or ServicesPortal
 
     :ivar cterasdk.core.users.Users users: Object holding the Portal user APIs
+    :ivar cterasdk.core.plans.Plans plans: Object holding the Plan APIs
     :ivar cterasdk.core.reports.Reports reports: Object holding the Portal reports APIs
     :ivar cterasdk.core.devices.Devices devices: Object holding the Portal devices APIs
     :ivar cterasdk.core.directoryservice.DirectoryService directoryservice: Object holding the Portal Active Directory Service APIs
@@ -42,6 +44,7 @@ class Portal(CTERAHost):
         self._session = session.Session(self.host(), self.context)
         self.users = users.Users(self)
         self.reports = reports.Reports(self)
+        self.plans = plans.Plans(self)
         self.devices = devices.Devices(self)
         self.directoryservice = directoryservice.DirectoryService(self)
         self.zones = zones.Zones(self)
@@ -79,6 +82,7 @@ class Portal(CTERAHost):
         return super()._omit_fields + [
             'users',
             'reports',
+            'plans',
             'devices',
             'directoryservice',
             'zones',

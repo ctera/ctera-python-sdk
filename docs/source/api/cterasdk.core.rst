@@ -29,8 +29,9 @@ Submodules
    cterasdk.core.login
    cterasdk.core.logs
    cterasdk.core.portals
-   cterasdk.core.reports
    cterasdk.core.query
+   cterasdk.core.reports
+   cterasdk.core.plans
    cterasdk.core.remote
    cterasdk.core.servers
    cterasdk.core.session

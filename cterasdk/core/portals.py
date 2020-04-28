@@ -25,7 +25,7 @@ class Portals(BaseCommand):
         function = Command(self._query_portals)
         return Iterator(function, param)
 
-    def add(self, name, display_name=None, billing_id=None, company=None):
+    def add(self, name, display_name=None, billing_id=None, company=None, plan=None, comment=None):
         """
         Add a new tenant
 
@@ -33,14 +33,20 @@ class Portals(BaseCommand):
         :param str,optional display_name: Display Name of the new tenant, defaults to None
         :param str,optional billing_id: Billing ID of the new tenant, defaults to None
         :param str,optional company: Company Name of the new tenant, defaults to None
+        :param str,optional plan: Subscription plan name to assign to the new tenant, defaults to None
+        :param str,optional comment: Assign a comment to the new tenant, defaults to None
         :return str: A relative url path to the Team Portal
         """
+
         param = Object()
+        if plan:
+            param.plan = self._portal.plans.get(plan, include=['baseObjectRef']).baseObjectRef
         param._classname = 'TeamPortal'  # pylint: disable=protected-access
         param.name = name
         param.displayName = display_name
         param.externalPortalId = billing_id
         param.companyName = company
+        param.comment = comment
 
         logging.getLogger().info('Creating Team Portal. %s', {'name': name})
 
@@ -49,6 +55,15 @@ class Portals(BaseCommand):
         logging.getLogger().info('Team Portal created. %s', {'name': name})
 
         return response
+
+    def subscribe(self, tenant, plan):
+        """
+        Subscribe a tenant to a plan
+
+        :param str name: Name of the tenant
+        :param str,plan: Name of the subscription plan
+        """
+        return self._portal.execute('/portals/' + tenant, 'subscribe', plan)
 
     def delete(self, name):
         """
