@@ -1,3 +1,4 @@
+import datetime
 from unittest import mock
 
 from cterasdk import exception
@@ -43,6 +44,40 @@ class TestCoreUsers(base_core.BaseCoreTest):
         expected_param = self._get_user_object(name=self._username, email=self._email, firstName=self._first_name,
                                                lastName=self._last_name, password=self._password,
                                                role=self._role, company=None, comment=None)
+        actual_param = self._global_admin.add.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, add_response)
+
+    def test_add_user_with_password_change(self):
+        self._test_add_user_with_password_change(True)
+        self._test_add_user_with_password_change(30)
+        self._test_add_user_with_password_change(datetime.date.today() + datetime.timedelta(days=365))
+
+    def _test_add_user_with_password_change(self, password_change):
+        add_response = 'Success'
+        self._init_global_admin(add_response=add_response)
+        ret = users.Users(self._global_admin).add(self._username, self._email, self._first_name,
+                                                  self._last_name, self._password, self._role, password_change=password_change)
+        self._global_admin.add.assert_called_once_with('/users', mock.ANY)
+        if password_change:
+            if isinstance(password_change, bool):
+                expiration_date = datetime.date.today() - datetime.timedelta(days=1)
+            elif isinstance(password_change, int):
+                expiration_date = datetime.date.today() + datetime.timedelta(days=password_change)
+            elif isinstance(password_change, datetime.date):
+                expiration_date = password_change
+            expected_requirePasswordChangeOn = expiration_date.strftime('%Y-%m-%d')
+        expected_param = self._get_user_object(
+            name=self._username,
+            email=self._email,
+            firstName=self._first_name,
+            lastName=self._last_name,
+            password=self._password,
+            role=self._role,
+            company=None,
+            comment=None,
+            requirePasswordChangeOn=expected_requirePasswordChangeOn
+        )
         actual_param = self._global_admin.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)

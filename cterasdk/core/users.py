@@ -2,7 +2,7 @@ import logging
 
 from .base_command import BaseCommand
 from ..exception import CTERAException
-from ..common import Object
+from ..common import Object, DateTimeUtils
 from . import query
 from . import union
 
@@ -63,7 +63,7 @@ class Users(BaseCommand):
         param = query.QueryParamBuilder().include(include).build()
         return query.iterator(self._portal, '/domains/' + domain + '/adUsers', param)
 
-    def add(self, name, email, first_name, last_name, password, role, company=None, comment=None):
+    def add(self, name, email, first_name, last_name, password, role, company=None, comment=None, password_change=False):
         """
         Add a portal user
 
@@ -75,6 +75,9 @@ class Users(BaseCommand):
         :param cterasdk.core.enum.Role role: User role of the new user
         :param str,optional company: The name of the company of the new user, defaults to None
         :param str,optional comment: Additional comment for the new user, defaults to None
+        :param variable,optional password_change:
+            Require the user to change the password on the first login.
+            Pass datetime.date for a specific date, integer for days from creation, or True for immediate , defaults to False
         """
         param = Object()
         param._classname = "PortalUser"  # pylint: disable=protected-access
@@ -86,6 +89,8 @@ class Users(BaseCommand):
         param.role = role
         param.company = company
         param.comment = comment
+        if password_change:
+            param.requirePasswordChangeOn = DateTimeUtils.get_expiration_date(password_change).strftime('%Y-%m-%d')
 
         logging.getLogger().info('Creating user. %s', {'user': name})
 
