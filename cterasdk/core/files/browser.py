@@ -160,10 +160,12 @@ class FileBrowser(BaseCommand):
         Share a file or a folder
 
         :param str path: The path of the file to create a link to
-        :param ShareRecipient recipients: The path of the file to create a link to
+        :param list[cterasdk.core.types.ShareRecipient] recipients: A list of share recipients
         :param bool,optional as_project: Share as a team project, defaults to True when the item is a cloud folder else False
         :param bool,optional allow_reshare: Allow recipients to re-share this item, defaults to True
         :param bool,optional allow_sync: Allow recipients to sync this item, defaults to True when the item is a cloud folder else False
+        :return: A list of all recipients added to the collaboration share
+        :rtype: list[cterasdk.core.types.ShareRecipient]
         """
         return collaboration.share(self._portal, self.mkpath(path), recipients, as_project, allow_reshare, allow_sync)
 
