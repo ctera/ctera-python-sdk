@@ -1,6 +1,6 @@
 from abc import ABC
 from collections import namedtuple
-from datetime import datetime, timedelta
+from ..common import DateTimeUtils
 
 from .enum import PortalAccountType, CollaboratorType, FileAccessMode
 
@@ -156,8 +156,7 @@ class ShareRecipient:
 
         :param int days: The number of days the share will remain accessible
         """
-        expiration_date = datetime.now() + timedelta(days=days)
-        expiration_date = expiration_date.strftime('%Y-%m-%d')
+        expiration_date = DateTimeUtils.get_expiration_date(days).strftime('%Y-%m-%d')
         return self.expire_on(expiration_date)
 
     def expire_on(self, expiration_date):
