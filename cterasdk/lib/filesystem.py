@@ -93,7 +93,7 @@ class FileSystem:
             logging.getLogger().error('The path %(local_file)s was not found', dict(local_file=local_file))
             raise LocalFileNotFound(local_file)
         if not path.is_file():
-            logging.getLogger().error('The path %(local_file)s is not not file', dict(local_file=local_file))
+            logging.getLogger().error('The path %(local_file)s is not a file', dict(local_file=local_file))
             raise LocalFileNotFound(local_file)
 
         return dict(
