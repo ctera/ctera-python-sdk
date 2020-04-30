@@ -1,4 +1,6 @@
 from ...common import Object
+from . import ls
+from ...exception import RemoteDirectoryNotFound
 
 
 class SrcDstParam(Object):
@@ -56,3 +58,10 @@ class CreateShareParam(Object):
         self.share.invitee._classname = 'Collaborator'
         self.share.invitee.type = 'external'
         CreateShareParam.__instance = self
+
+
+def get_resource_info(ctera_host, path):
+    response = ls.ls(ctera_host, path, depth=0)
+    if response.root is None:
+        raise RemoteDirectoryNotFound(path.fullpath())
+    return response.root
