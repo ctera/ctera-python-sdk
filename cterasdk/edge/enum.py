@@ -198,7 +198,7 @@ class FileAccessMode:
     File Access Mode
 
     :ivar str RW: Read Write
-    :ivar str RO: ReadOnly
+    :ivar str RO: Read Only
     :ivar str NA: None
     """
     RW = "ReadWrite"

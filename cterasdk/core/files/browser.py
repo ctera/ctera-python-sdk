@@ -1,7 +1,7 @@
 from .path import CTERAPath
 
 from ..base_command import BaseCommand
-from . import ls, directory, rename, rm, recover, mv, cp, ln, file_access
+from . import ls, directory, rename, rm, recover, mv, cp, ln, collaboration, file_access
 
 
 class FileBrowser(BaseCommand):
@@ -154,6 +154,24 @@ class FileBrowser(BaseCommand):
         :param int,optional expire_in: Number of days until the link expires, defaults to 30
         """
         return ln.mklink(self._portal, self.mkpath(path), access, expire_in)
+
+    def share(self, path, recipients, as_project=True, allow_reshare=True, allow_sync=True):
+        """
+        Share a file or a folder
+
+        :param str path: The path of the file to create a link to
+        :param ShareRecipient recipients: The path of the file to create a link to
+        :param bool,optional as_project: Share as a team project, defaults to True when the item is a cloud folder else False
+        :param bool,optional allow_reshare: Allow recipients to re-share this item, defaults to True
+        :param bool,optional allow_sync: Allow recipients to sync this item, defaults to True when the item is a cloud folder else False
+        """
+        return collaboration.share(self._portal, self.mkpath(path), recipients, as_project, allow_reshare, allow_sync)
+
+    def unshare(self, path):
+        """
+        Unshare a file or a folder
+        """
+        return collaboration.unshare(self._portal, self.mkpath(path))
 
     def mkpath(self, array):
         if isinstance(array, list):

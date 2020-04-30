@@ -23,3 +23,4 @@ Submodules
    cterasdk.core.files.recover
    cterasdk.core.files.rename
    cterasdk.core.files.rm
+   cterasdk.core.files.collaboration
