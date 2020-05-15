@@ -166,8 +166,8 @@ Collaboration Shares
 
    recipients = []
 
-   alice_rcpt = portal_types.ShareRecipient().local_user(alice).expire_in(30).read_only()
-   engineers_rcpt = portal_types.ShareRecipient().local_group(engineering).read_write()
+   alice_rcpt = portal_types.ShareRecipient.local_user(alice).expire_in(30).read_only()
+   engineers_rcpt = portal_types.ShareRecipient.local_group(engineering).read_write()
 
    file_browser.share('Codebase', [alice_rcpt, engineers_rcpt])
 
@@ -179,14 +179,14 @@ Collaboration Shares
    Share with an external recipient
    - Grant the external user with preview only access for 10 days
    """
-   jsmith = portal_types.ShareRecipient().external('jsmith@hotmail.com').expire_in(10).preview_only())
+   jsmith = portal_types.ShareRecipient.external('jsmith@hotmail.com').expire_in(10).preview_only())
    file_browser.share('My Files/Projects/2020/ProjectX', [jsmith])
 
    """
    Share with an external recipient, and require 2 factor authentication
    - Grant the external user with read only access for 5 days, and require 2 factor authentication over e-mail
    """
-   jsmith = portal_types.ShareRecipient().external('jsmith@hotmail.com', True).expire_in(5).read_only())
+   jsmith = portal_types.ShareRecipient.external('jsmith@hotmail.com', True).expire_in(5).read_only())
    file_browser.share('My Files/Projects/2020/ProjectX', [jsmith])
 
 ..
@@ -201,10 +201,20 @@ Collaboration Shares
    albany_group = portal_types.GroupAccount('Albany', 'ctera.com')
    cleveland_group = portal_types.GroupAccount('Cleveland', 'ctera.com')
 
-   albany_rcpt = portal_types.ShareRecipient().domain_group(albany_group).read_write()
-   cleveland_rcpt = portal_types.ShareRecipient().domain_group(cleveland_group).read_only()
+   albany_rcpt = portal_types.ShareRecipient.domain_group(albany_group).read_write()
+   cleveland_rcpt = portal_types.ShareRecipient.domain_group(cleveland_group).read_only()
 
    file_browser.share('Cloud/Albany', [albany_rcpt, cleveland_rcpt])
+
+.. automethod:: cterasdk.core.files.browser.FileBrowser.add_share_recipients
+   :noindex:
+
+.. note:: if the share recipients provided as an argument already exist, they will be skipped and not updated
+
+.. automethod:: cterasdk.core.files.browser.FileBrowser.remove_share_recipients
+   :noindex:
+
+..
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.unshare
    :noindex:

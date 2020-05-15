@@ -44,6 +44,24 @@ class PortalAccount(ABC):
         """
         raise NotImplementedError('Implementing class much implement the account_type property')
 
+    @staticmethod
+    def from_collaborator(collaborator):
+        if collaborator.type == CollaboratorType.LU:
+            return UserAccount(collaborator.name)
+        if collaborator.type == CollaboratorType.DU:
+            return UserAccount(collaborator.name, collaborator.domain)
+        if collaborator.type == CollaboratorType.LG:
+            return GroupAccount(collaborator.name)
+        if collaborator.type == CollaboratorType.DG:
+            return GroupAccount(collaborator.name, collaborator.domain)
+        return None
+
+    def __eq__(self, other):
+        if type(self) is type(other):
+            if self.account_type == other.account_type and self.name == other.name and self.directory == other.directory:
+                return True
+        return False
+
     def __str__(self):
         return (self.directory if self.directory else '') + '\\' + self.name
 
@@ -71,56 +89,59 @@ class ShareRecipient:
         self.access = None
         self.expiration_date = None
 
-    def external(self, email, two_factor=False):
+    @staticmethod
+    def external(email, two_factor=False):
         """
         Share with an external user
 
         :param str email: The email address of the recipient
         :param bool two_factor: Require two factor authentication over e-mail
         """
-        self.type = CollaboratorType.EXT
-        return self._recipient(email, two_factor)
+        return ShareRecipient._create_recipient(email, CollaboratorType.EXT, two_factor)
 
-    def local_user(self, user_account):
+    @staticmethod
+    def local_user(user_account):
         """
         Share with a local user
 
         :param UserAccount user_account: A local user account
         """
-        self.type = CollaboratorType.LU
-        return self._recipient(user_account)
+        return ShareRecipient._create_recipient(user_account, CollaboratorType.LU)
 
-    def domain_user(self, user_account):
+    @staticmethod
+    def domain_user(user_account):
         """
         Share with a domain user
 
         :param UserAccount user_account: A domain user account
         """
-        self.type = CollaboratorType.DU
-        return self._recipient(user_account)
+        return ShareRecipient._create_recipient(user_account, CollaboratorType.DU)
 
-    def local_group(self, group_account):
+    @staticmethod
+    def local_group(group_account):
         """
         Share with a local group
 
         :param GroupAccount group_account: A local group account
         """
-        self.type = CollaboratorType.LG
-        return self._recipient(group_account)
+        return ShareRecipient._create_recipient(group_account, CollaboratorType.LG)
 
-    def domain_group(self, group_account):
+    @staticmethod
+    def domain_group(group_account):
         """
         Share with a domain group
 
         :param GroupAccount group_account: A domain group account
         """
-        self.type = CollaboratorType.DG
-        return self._recipient(group_account)
+        return ShareRecipient._create_recipient(group_account, CollaboratorType.DG)
 
-    def _recipient(self, account, two_factor=False):
-        self.account = account
-        self.two_factor = two_factor
-        return self
+    @staticmethod
+    def _create_recipient(account, account_type, two_factor=False):
+        recipient = ShareRecipient()
+        recipient.account = account
+        recipient.type = account_type
+        recipient.two_factor = two_factor
+        return recipient
 
     def read_write(self):
         """
