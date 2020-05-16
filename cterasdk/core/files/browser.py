@@ -194,7 +194,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: The path of the file or folder
         :param list[cterasdk.core.types.PortalAccount] accounts: A list of portal user or group accounts
-        :return: A list of all share recipients
+        :return: A list of all share recipients removed
         :rtype: list[cterasdk.core.types.PortalAccount]
         """
         return collaboration.remove_share_recipients(self._portal, self.mkpath(path), accounts)

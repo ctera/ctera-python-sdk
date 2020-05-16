@@ -9,7 +9,7 @@ class BaseCoreServicesFilesUndelete(base_core_services.BaseCoreServicesTest):
         super().setUp()
         self._path = 'My Files/Documents'
 
-    def test_delete(self):
+    def test_undelete(self):
         execute_response = 'Success'
         self._init_services(execute_response=execute_response)
         ret = self._services.files.undelete(self._path)

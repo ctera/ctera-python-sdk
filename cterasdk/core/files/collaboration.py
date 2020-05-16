@@ -56,7 +56,7 @@ def remove_share_recipients(ctera_host, path, accounts):
             else:
                 logging.getLogger().debug('Found recipient to remove. %s', {'account': str(current_account)})
                 accounts_to_remove.append(current_account)
-        if len(current_accounts) == len(accounts_to_keep):
+        if not accounts_to_remove:
             logging.getLogger().info(
                 'Could not find share recipients to remove. %s',
                 {
@@ -74,7 +74,7 @@ def remove_share_recipients(ctera_host, path, accounts):
             ctera_host.execute('', 'shareResource', share_param)
     else:
         logging.getLogger().info('Share has no recipients. %s', {'path': str(path.relativepath)})
-    return accounts_to_keep
+    return accounts_to_remove
 
 
 def get_share_info(ctera_host, path):
@@ -107,6 +107,7 @@ def add_share_recipients(ctera_host, path, recipients):
     current_accounts = _obtain_current_accounts(share_info)
     valid_recipients = _obtain_valid_recipients(ctera_host, path, recipients)
     share_param = _create_share_param(path.fullpath(), share_info.teamProject, share_info.allowReshare, share_info.shouldSync)
+    _update_share_param(share_param, share_info.shares)
     accounts_added = []
     if valid_recipients:
         for recipient in valid_recipients:
@@ -116,7 +117,7 @@ def add_share_recipients(ctera_host, path, recipients):
                 accounts_added.append(recipient)
             else:
                 logging.getLogger().debug('Share recipient already exists. %s', {'recipient': str(recipient.account)})
-        if len(accounts_added) > 0:
+        if accounts_added:
             logging.getLogger().info(
                 'Adding share recipients. %s',
                 {'path': str(path.relativepath), 'recipients': [str(recipient.account) for recipient in accounts_added]}
@@ -162,7 +163,7 @@ def unshare(ctera_host, path):
 
     logging.getLogger().info(
         'Unsharing %s. %s',
-        ('folder' if resource_info.isFolder else 'file') + ' %s', {'path': str(path.relativepath)}
+        ('folder' if resource_info.isFolder else 'file'), {'path': str(path.relativepath)}
     )
     share_param = _create_share_param(path.fullpath(), as_project, allow_reshare, allow_sync)
     return ctera_host.execute('', 'shareResource', share_param)
