@@ -82,13 +82,15 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.edge.firmware.Fireware firmware: Object holding the Gateway Firmware APIs
     """
 
-    def __init__(self, host, port=80, https=False, Portal=None):
+    def __init__(self, host, port=None, https=False, Portal=None):
         """
         :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
-        :param int,optional port: Set a custom port number (0 - 65535), defaults to 80
+        :param int,optional port: Set a custom port number (0 - 65535), If not set defaults to 80 for http and 443 for https
         :param bool,optional https: Set to True to require HTTPS, defaults to False
         :param cterasdk.object.Portal.Portal,optional Portal: The portal throught which the remote session was created, defaults to None
         """
+        if port is None:
+            port = 443 if https else 80
         super().__init__(host, port, https)
         self._remote_access = False
         self._session = session.Session(self.host())
