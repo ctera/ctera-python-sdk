@@ -123,10 +123,10 @@ def add_share_recipients(ctera_host, path, recipients):
                 {'path': str(path.relativepath), 'recipients': [str(recipient.account) for recipient in accounts_added]}
             )
             ctera_host.execute('', 'shareResource', share_param)
-            return accounts_added
-        logging.getLogger().warning('Could not find new share recipients. %s', {'path': str(path.relativepath)})
+        else:
+            logging.getLogger().warning('Could not find new share recipients. %s', {'path': str(path.relativepath)})
         return accounts_added
-    logging.getLogger().warning('Resource was not shared. Could not find valid recipients. %s', {'path': str(path.relativepath)})
+    logging.getLogger().warning('Share recipients were not added. Could not find valid recipients. %s', {'path': str(path.relativepath)})
     return valid_recipients
 
 
@@ -150,7 +150,9 @@ def _obtain_valid_recipients(ctera_host, path, recipients):
                 collaborator = _search_collaboration_member(ctera_host, recipient.account, cloud_folder_uid)
                 if collaborator:
                     recipient.collaborator = collaborator
-            valid_recipients.append(recipient)
+                    valid_recipients.append(recipient)
+            else:
+                valid_recipients.append(recipient)
     return valid_recipients
 
 

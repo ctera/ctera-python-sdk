@@ -82,10 +82,10 @@ class ShareRecipient:
     """
     Class Representing a Collboration Share Recipient
     """
-    def __init__(self):
-        self.account = None
-        self.type = None
-        self.two_factor = False
+    def __init__(self, account, account_type, two_factor=False):
+        self.account = account
+        self.type = account_type
+        self.two_factor = two_factor
         self.access = None
         self.expiration_date = None
 
@@ -97,7 +97,7 @@ class ShareRecipient:
         :param str email: The email address of the recipient
         :param bool two_factor: Require two factor authentication over e-mail
         """
-        return ShareRecipient._create_recipient(email, CollaboratorType.EXT, two_factor)
+        return ShareRecipient(email, CollaboratorType.EXT, two_factor)
 
     @staticmethod
     def local_user(user_account):
@@ -106,7 +106,7 @@ class ShareRecipient:
 
         :param UserAccount user_account: A local user account
         """
-        return ShareRecipient._create_recipient(user_account, CollaboratorType.LU)
+        return ShareRecipient(user_account, CollaboratorType.LU)
 
     @staticmethod
     def domain_user(user_account):
@@ -115,7 +115,7 @@ class ShareRecipient:
 
         :param UserAccount user_account: A domain user account
         """
-        return ShareRecipient._create_recipient(user_account, CollaboratorType.DU)
+        return ShareRecipient(user_account, CollaboratorType.DU)
 
     @staticmethod
     def local_group(group_account):
@@ -124,7 +124,7 @@ class ShareRecipient:
 
         :param GroupAccount group_account: A local group account
         """
-        return ShareRecipient._create_recipient(group_account, CollaboratorType.LG)
+        return ShareRecipient(group_account, CollaboratorType.LG)
 
     @staticmethod
     def domain_group(group_account):
@@ -133,15 +133,7 @@ class ShareRecipient:
 
         :param GroupAccount group_account: A domain group account
         """
-        return ShareRecipient._create_recipient(group_account, CollaboratorType.DG)
-
-    @staticmethod
-    def _create_recipient(account, account_type, two_factor=False):
-        recipient = ShareRecipient()
-        recipient.account = account
-        recipient.type = account_type
-        recipient.two_factor = two_factor
-        return recipient
+        return ShareRecipient(group_account, CollaboratorType.DG)
 
     def read_write(self):
         """
