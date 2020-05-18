@@ -1,10 +1,10 @@
 from urllib.parse import urljoin
 
-from ...exception import RemoteDirectoryNotFound, RemoteFileSystemException
-from .fetch_resources_param import FetchResourcesParamBuilder
 from .path import CTERAPath
+from . import common
 from ...common import Object
 from ...lib import FileAccessBase
+from ...exception import RemoteFileSystemException
 
 
 class FileAccess(FileAccessBase):
@@ -13,7 +13,7 @@ class FileAccess(FileAccessBase):
         return path.fullpath()
 
     def _get_multi_file_url(self, cloud_directory, files):
-        folder_uid = self._get_folder_uid(cloud_directory)
+        folder_uid = self._get_cloud_folder_uid(cloud_directory)
         return '%s/folders/folders/%s' % (self._ctera_host.context, folder_uid)
 
     @property
@@ -30,7 +30,7 @@ class FileAccess(FileAccessBase):
         return files_obj
 
     def _get_upload_url(self, dest_path):
-        folder_uid = self._get_folder_uid(dest_path)
+        folder_uid = self._get_cloud_folder_uid(dest_path)
         return '%s/upload/folders/%s' % (self._ctera_host.context, folder_uid)
 
     def _get_upload_form(self, local_file_info, fd, dest_path):
@@ -45,11 +45,8 @@ class FileAccess(FileAccessBase):
             file=(local_file_info['name'], fd, local_file_info['mimetype'][0])
         )
 
-    def _get_folder_uid(self, path):
-        param = FetchResourcesParamBuilder().root(path.encoded_fullpath()).depth(0).build()
-        response = self._ctera_host.execute('', 'fetchResources', param)
-        if response.root is None:
-            raise RemoteDirectoryNotFound(path.fullpath())
-        if not response.root.isFolder:
+    def _get_cloud_folder_uid(self, path):
+        resource_info = common.get_resource_info(self._ctera_host, path)
+        if not resource_info.isFolder:
             raise RemoteFileSystemException('The destination path is not a directory', None, path=path.fullpath())
-        return response.root.cloudFolderInfo.uid
+        return resource_info.cloudFolderInfo.uid

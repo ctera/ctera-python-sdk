@@ -12,6 +12,7 @@ Submodules
 .. toctree::
 
    cterasdk.core.files.browser
+   cterasdk.core.files.collaboration
    cterasdk.core.files.common
    cterasdk.core.files.cp
    cterasdk.core.files.directory

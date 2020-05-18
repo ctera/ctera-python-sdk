@@ -137,3 +137,46 @@ class PolicyType:
     ALL = 'allFolders'
     SELECT = 'selectedFolders'
     NONE = 'noFolders'
+
+
+class ProtectionLevel:
+    """
+    External Share Protection Level
+
+    :ivar str publicLink: No authentication
+    :ivar str email: 2FA via email
+    """
+    Public = 'publicLink'
+    Email = 'email'
+
+
+class FileAccessMode:
+    """
+    Share Access Mode
+
+    :ivar str RW: Read Write
+    :ivar str RO: Read Only
+    :ivar str PO: Preview Only
+    :ivar str NA: None
+    """
+    RW = "ReadWrite"
+    RO = "ReadOnly"
+    PO = "PreviewOnly"
+    NA = "None"
+
+
+class CollaboratorType:
+    """
+    Collaborator Type
+
+    :ivar str LU: Local User
+    :ivar str DU: Domain User
+    :ivar str LG: Local Group
+    :ivar str DG: Domain Group
+    :ivar str EXT: External
+    """
+    LU = "localUser"
+    LG = "localGroup"
+    DU = "adUser"
+    DG = "adGroup"
+    EXT = "external"
