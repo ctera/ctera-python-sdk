@@ -53,13 +53,15 @@ jobs:
       run: |
         python setup.py sdist bdist_wheel
     - name: Deploy to Test PyPi
-      uses: casperdcl/deploy-pypi@v1
+      uses: pypa/gh-action-pypi-publish@master
       with:
+        user: __token__
         password: ${{ secrets.TEST_PYPI_TOKEN }}
-        url: https://test.pypi.org/legacy/
+        repository_url: https://test.pypi.org/legacy/
     - name: Deploy to PyPi
-      uses: casperdcl/deploy-pypi@v1
+      uses: pypa/gh-action-pypi-publish@master
       with:
+        user: __token__
         password: ${{ secrets.PYPI_TOKEN }}
       if: github.event.action == 'published'
     - id: tagName
