@@ -93,23 +93,20 @@ class Users(BaseCommand):
             param.requirePasswordChangeOn = DateTimeUtils.get_expiration_date(password_change).strftime('%Y-%m-%d')
 
         logging.getLogger().info('Creating user. %s', {'user': name})
-
         response = self._portal.add('/users', param)
-
         logging.getLogger().info('User created. %s', {'user': name, 'email': email, 'role': role})
 
         return response
 
-    def delete(self, name):
+    def delete(self, user):
         """
-        Delete an existing user
+        Delete a user
 
-        :param str name: The user name to delete
+        :param cterasdk.core.types.UserAccount user: the user account
         """
-        logging.getLogger().info('Deleting user. %s', {'user': name})
-
-        response = self._portal.execute('/users/' + name, 'delete', True)
-
-        logging.getLogger().info('User deleted. %s', {'user': name})
+        logging.getLogger().info('Deleting user. %s', {'user': str(user)})
+        baseurl = '/users/%s' % user.name if user.is_local else '/domains/%s/adUsers/%s' % (user.directory, user.name)
+        response = self._portal.execute(baseurl, 'delete', True)
+        logging.getLogger().info('User deleted. %s', {'user': str(user)})
 
         return response

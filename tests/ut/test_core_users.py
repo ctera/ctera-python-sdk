@@ -10,30 +10,32 @@ from tests.ut import base_core
 
 class TestCoreUsers(base_core.BaseCoreTest):
 
+    # pylint: disable=too-many-instance-attributes
     def setUp(self):
         super().setUp()
         self._user_class_name = 'PortalUser'
         self._username = 'alice'
-        self._user_account = UserAccount(self._username)
+        self._local_user_account = UserAccount(self._username)
         self._email = 'alice@wonderland.com'
         self._first_name = 'Alice'
         self._last_name = 'Wonderland'
         self._password = 'password'
         self._role = 'EndUser'
         self._domain = 'ctera.local'
+        self._domain_user_account = UserAccount(self._username, self._domain)
         self._domains = ['na.ctera.local', 'eu.ctera.local']
 
     def test_get_user_default_attrs(self):
-        get_multi_response = self._get_user_object(name=self._user_account.name)
+        get_multi_response = self._get_user_object(name=self._local_user_account.name)
         self._init_global_admin(get_multi_response=get_multi_response)
-        ret = users.Users(self._global_admin).get(self._user_account)
-        self._global_admin.get_multi.assert_called_once_with('/users/' + self._user_account.name, mock.ANY)
+        ret = users.Users(self._global_admin).get(self._local_user_account)
+        self._global_admin.get_multi.assert_called_once_with('/users/' + self._local_user_account.name, mock.ANY)
         expected_include = ['/' + attr for attr in users.Users.default]
         actual_include = self._global_admin.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
-        self.assertEqual(ret.name, self._user_account.name)
+        self.assertEqual(ret.name, self._local_user_account.name)
 
     def test_add_user_required_args(self):
         add_response = 'Success'
@@ -109,8 +111,8 @@ class TestCoreUsers(base_core.BaseCoreTest):
         get_multi_response = self._get_user_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exception.CTERAException) as error:
-            users.Users(self._global_admin).get(self._user_account)
-        self._global_admin.get_multi.assert_called_once_with('/users/' + self._user_account.name, mock.ANY)
+            users.Users(self._global_admin).get(self._local_user_account)
+        self._global_admin.get_multi.assert_called_once_with('/users/' + self._local_user_account.name, mock.ANY)
         expected_include = ['/' + attr for attr in users.Users.default]
         actual_include = self._global_admin.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
@@ -118,11 +120,19 @@ class TestCoreUsers(base_core.BaseCoreTest):
             self.assertIn(attr, actual_include)
         self.assertEqual('Could not find user', error.exception.message)
 
-    def test_delete_user(self):
+    def test_delete_local_user(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
-        ret = users.Users(self._global_admin).delete(self._username)
-        self._global_admin.execute.assert_called_once_with('/users/' + self._username, 'delete', True)
+        ret = users.Users(self._global_admin).delete(self._local_user_account)
+        self._global_admin.execute.assert_called_once_with('/users/' + self._local_user_account.name, 'delete', True)
+        self.assertEqual(ret, execute_response)
+
+    def test_delete_domain_user(self):
+        execute_response = 'Success'
+        self._init_global_admin(execute_response=execute_response)
+        ret = users.Users(self._global_admin).delete(self._domain_user_account)
+        baseurl = '/domains/%s/adUsers/%s' % (self._domain_user_account.directory, self._domain_user_account.name)
+        self._global_admin.execute.assert_called_once_with(baseurl, 'delete', True)
         self.assertEqual(ret, execute_response)
 
     def _get_user_object(self, **kwargs):

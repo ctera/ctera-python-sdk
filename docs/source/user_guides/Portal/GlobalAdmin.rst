@@ -169,6 +169,21 @@ Servers
 Users
 -----
 
+.. automethod:: cterasdk.core.users.Users.delete
+   :noindex:
+
+.. code-block:: python
+
+   """Delete a local user"""
+
+   alice = portal_types.UserAccount('alice')
+   admin.users.delete(alice)
+
+   """Delete a domain user"""
+
+   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
+   admin.users.delete(bruce)
+
 Local Users
 ^^^^^^^^^^^
 .. automethod:: cterasdk.core.users.Users.list_local_users
@@ -196,15 +211,6 @@ Local Users
    """Create an end user"""
 
    admin.users.add('bruce', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'G0th4amCity!')
-
-.. automethod:: cterasdk.core.users.Users.delete
-   :noindex:
-
-.. code-block:: python
-
-   """Delete a local user"""
-
-   admin.users.delete('bruce')
 
 Domain Users
 ^^^^^^^^^^^^
