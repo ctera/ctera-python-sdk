@@ -1,7 +1,9 @@
 from unittest import mock
 
 from cterasdk.common import Object
+from cterasdk.core.enum import PortalType
 from cterasdk.core import portals
+from cterasdk.core import query
 from tests.ut import base_core
 
 
@@ -36,6 +38,35 @@ class TestCorePortals(base_core.BaseCoreTest):
             tenant_param.name = tenant
             query_response.objects.append(tenant_param)
         return query_response
+
+    def test_list_team_portals(self):
+        self._test_list_tenants(PortalType.Team)
+
+    def test_list_reseller_portals(self):
+        self._test_list_tenants(PortalType.Reseller)
+
+    def _test_list_tenants(self, portal_type=None):
+        with mock.patch("cterasdk.core.devices.query.iterator") as query_iterator_mock:
+            portals.Portals(self._global_admin).list_tenants(portal_type=portal_type)
+            path = TestCorePortals._get_list_tenants_urlpath(portal_type)
+            query_iterator_mock.assert_called_once_with(self._global_admin, path, mock.ANY)
+            expected_param = self._get_expected_list_portals_params()
+            actual_param = query_iterator_mock.call_args[0][2]
+            self._assert_equal_objects(actual_param, expected_param)
+
+    @staticmethod
+    def _get_list_tenants_urlpath(portal_type):
+        path = '/portals'
+        if portal_type == PortalType.Team:
+            path = '/teamPortals'
+        elif portal_type == PortalType.Reseller:
+            path = '/resellerPortals'
+        return path
+
+    @staticmethod
+    def _get_expected_list_portals_params():
+        builder = query.QueryParamBuilder().include(portals.Portals.default)
+        return builder.build()
 
     def test_get_active_tenants(self):
         self._global_admin.execute = mock.MagicMock(side_effect=TestCorePortals._get_query_portals_response)
