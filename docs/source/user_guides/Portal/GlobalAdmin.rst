@@ -430,8 +430,22 @@ CloudFS
 To manage the Cloud File System, folder groups, backup and cloud drive folders,
 you must be a Read Write Administrator
 
-Create a Folder Group
-^^^^^^^^^^^^^^^^^^^^^
+Folder Groups
+^^^^^^^^^^^^^
+.. automethod:: cterasdk.core.cloudfs.CloudFS.list_folder_groups
+   :noindex:
+
+.. code:: python
+
+   """List all folder groups"""
+   folder_groups = admin.cloudfs.list_folder_groups()
+   for folder_group in folder_groups:
+       print(folder_group.name, folder_group.owner)
+
+   """List folder groups owned by a domain user"""
+   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
+   folder_groups = admin.cloudfs.list_folder_groups(user=bruce)
+
 .. automethod:: cterasdk.core.cloudfs.CloudFS.mkfg
    :noindex:
 
@@ -447,8 +461,6 @@ Create a Folder Group
 
    admin.cloudfs.mkfg('FG-003') # without an owner
 
-Delete a Folder Group
-^^^^^^^^^^^^^^^^^^^^^
 .. automethod:: cterasdk.core.cloudfs.CloudFS.rmfg
    :noindex:
 
@@ -456,8 +468,22 @@ Delete a Folder Group
 
    admin.cloudfs.rmfg('FG-001')
 
-Create a Cloud Drive Folder
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Cloud Drive Folders
+^^^^^^^^^^^^^^^^^^^
+.. automethod:: cterasdk.core.cloudfs.CloudFS.list_folders
+   :noindex:
+
+.. code:: python
+
+   """List all cloud drive folders"""
+   cloud_drive_folders = admin.cloudfs.list_folders()
+   for cloud_drive_folder in cloud_drive_folders:
+       print(cloud_drive_folder)
+
+   """List cloud drive folders owned by a domain user"""
+   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
+   cloud_drive_folders = admin.cloudfs.list_folders(user=bruce)
+
 .. automethod:: cterasdk.core.cloudfs.CloudFS.mkdir
    :noindex:
 
@@ -472,8 +498,6 @@ Create a Cloud Drive Folder
    wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.mkdir('DIR-002', 'FG-002', wbruce)
 
-Delete a Cloud Drive Folder
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automethod:: cterasdk.core.cloudfs.CloudFS.delete
    :noindex:
 
@@ -487,8 +511,6 @@ Delete a Cloud Drive Folder
    wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.delete('DIR-002', wbruce)
 
-Recover a Cloud Drive Folder
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automethod:: cterasdk.core.cloudfs.CloudFS.undelete
    :noindex:
 

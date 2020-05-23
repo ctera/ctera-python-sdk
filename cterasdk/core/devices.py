@@ -103,13 +103,14 @@ class Devices(BaseCommand):
         filters = [query.FilterBuilder('name').eq(name) for name in names]
         return self.devices(include, False, filters)
 
-    def devices(self, include=None, allPortals=False, filters=None):
+    def devices(self, include=None, allPortals=False, filters=None, user=None):
         """
         Get Devices
 
         :param list[str],optional include: List of fields to retrieve, defaults to ['name', 'portal', 'deviceType']
         :param bool,optional allPortals: Search in all portals, defaults to False
         :param list[],optional filters: List of additional filters, defaults to None
+        :param cterasdk.core.types.UserAccount user: User account of the device owner
 
         :return: Iterator for all matching Devices
         :rtype: cterasdk.lib.iterator.Iterator
@@ -119,9 +120,11 @@ class Devices(BaseCommand):
         filters = filters or []
         for query_filter in filters:
             builder.addFilter(query_filter)
+        if user:
+            uid = self._portal.users.get(user, ['uid']).uid
+            builder.ownedBy(uid)
         builder.orFilter((len(filters) > 1))
         param = builder.build()
-
         # Check if the _all attribute conflicts with the current tenant
         iterator = query.iterator(self._portal, '/devices', param)
         for dev in iterator:

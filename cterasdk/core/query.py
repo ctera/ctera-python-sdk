@@ -164,6 +164,10 @@ class QueryParamBuilder:
         self.param.allPortals = allPortals  # pylint: disable=attribute-defined-outside-init
         return self
 
+    def ownedBy(self, ownedBy):
+        self.param.ownedBy = ownedBy  # pylint: disable=attribute-defined-outside-init
+        return self
+
     def put(self, key, value):
         setattr(self.param, key, value)
         return self

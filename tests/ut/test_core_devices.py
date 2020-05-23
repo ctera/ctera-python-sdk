@@ -4,7 +4,8 @@ import munch
 
 from cterasdk import exception
 from cterasdk.common import Object
-from cterasdk.core import enum, query
+from cterasdk.core.types import UserAccount
+from cterasdk.core import enum, query, union
 from cterasdk.core import devices
 from tests.ut import base_core
 
@@ -18,6 +19,9 @@ class TestCoreDevices(base_core.BaseCoreTest):
         self._username = 'admin'
         self._portal = 'portal'
         self._remote_command_mock = self.patch_call("cterasdk.core.devices.remote.remote_command")
+        self._user_account = UserAccount('user')
+        self._user_uid = 1337
+        self._get_user_mock = self.patch_call("cterasdk.core.users.Users.get")
 
     def test_device_ok(self):
         o = Object()
@@ -107,30 +111,37 @@ class TestCoreDevices(base_core.BaseCoreTest):
     def test_devices_with_filters(self):
         self._test_devices([query.FilterBuilder('name').eq('test')])
 
-    def _test_devices(self, filters=None):
+    def test_devices_owned_by_user(self):
+        self._mock_get_user()
+        self._test_devices(user=self._user_account)
+
+    def _test_devices(self, filters=None, user=None):
         with mock.patch("cterasdk.core.devices.query.iterator") as query_iterator_mock:
             o = Object()
             o.name = "unit-test"
             query_iterator_mock.return_value = [o]
-            list(devices.Devices(self._global_admin).devices(filters=filters))
-            expected_query_params = self._get_expected_devices_params(filters=filters)
+            list(devices.Devices(self._global_admin).devices(filters=filters, user=user))
+            if user:
+                self._get_user_mock.assert_called_once_with(self._user_account, ['uid'])
             query_iterator_mock.assert_called_once_with(self._global_admin, '/devices', mock.ANY)
-            self._compare_devices_query_params(expected_query_params, query_iterator_mock.call_args[0][2])
+            expected_param = TestCoreDevices._get_expected_devices_params(filters=filters, user_uid=(self._user_uid if user else None))
+            actual_param = query_iterator_mock.call_args[0][2]
+            self._assert_equal_objects(actual_param, expected_param)
             self._remote_command_mock.assert_called_once_with(self._global_admin, o)
 
     @staticmethod
-    def _get_expected_devices_params(include=None, all_portals=False, filters=None):
-        builder = query.QueryParamBuilder().include(include or devices.Devices.default).allPortals(all_portals)
+    def _get_expected_devices_params(include=None, all_portals=False, filters=None, user_uid=None):
+        include = union.union(include or [], devices.Devices.default)
+        builder = query.QueryParamBuilder().include(include).allPortals(all_portals)
         filters = filters or []
         for query_filter in filters:
             builder.addFilter(query_filter)
         builder.orFilter((len(filters) > 1))
+        if user_uid:
+            builder.ownedBy(user_uid)
         return builder.build()
 
-    def _compare_devices_query_params(self, expected_query_params, actual_query_params):
-        self.assertEqual(expected_query_params.startFrom, actual_query_params.startFrom)
-        self.assertEqual(expected_query_params.countLimit, actual_query_params.countLimit)
-        self.assertEqual(expected_query_params.allPortals, actual_query_params.allPortals)
-        self.assertEqual(expected_query_params.orFilter, actual_query_params.orFilter)
-        for attr in expected_query_params.include:
-            self.assertIn(attr, actual_query_params.include)
+    def _mock_get_user(self):
+        param = Object()
+        param.uid = self._user_uid
+        self._get_user_mock.return_value = param
