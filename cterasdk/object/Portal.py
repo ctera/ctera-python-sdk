@@ -105,6 +105,9 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     def test(self):
         """ Verification check to ensure the target host is a Portal. """
         connection.test(self)
+        return self.public_info()
+
+    def public_info(self):
         return self.get('/' + self.context + '/public/publicInfo', params={}, use_file_url=True)
 
     @decorator.update_current_tenant
