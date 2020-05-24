@@ -1,5 +1,6 @@
 import queue
 import json
+import copy
 from xml.etree.ElementTree import Element, SubElement, tostring
 from xml.dom import minidom
 
@@ -7,28 +8,52 @@ from cterasdk.common import Item, Object
 from cterasdk.convert.xml_types import XMLTypes
 
 
-def tojsonstr(obj, pretty_print=True):
+_sdk_hidden = [
+    'password',
+    'awsSecretKey',
+    'sharedSecret',
+    'passPhraseSalt',
+    'encPassphrase',
+    'encryptedFolderKey',
+    'oldPassword',
+    'newPassword',
+    'secretkey',
+    'activationCode'
+]
+
+
+def _to_protected_dict(o):
+    ret = copy.deepcopy(o.__dict__)
+    for key in _sdk_hidden:
+        if key in ret:
+            ret[key] = '*** The Value is Hidden by the SDK ***'
+    return ret
+
+
+def tojsonstr(obj, pretty_print=True, no_log=False):
     """
     Convert a Python object to a JSON string.
 
-   :param object obj: the Python object
-   :param bool pretty_print: Whether to format the JSON string, defaults to ``True``
-   :return: JSON string of the object
-   :rtype: str
+    :param object obj: the Python object
+    :param bool pretty_print: Whether to format the JSON string, defaults to ``True``
+    :param book no_log: Hide sensitive values in the log messages
+    :return: JSON string of the object
+    :rtype: str
     """
-    if pretty_print:
-        return json.dumps(obj, default=lambda o: o.__dict__, indent=5)
-    return json.dumps(obj, default=lambda o: o.__dict__)
+    indent = 5 if pretty_print else None
+    if no_log:
+        return json.dumps(obj, default=_to_protected_dict, indent=indent)
+    return json.dumps(obj, default=lambda o: o.__dict__, indent=indent)
 
 
 def toxmlstr(obj, pretty_print=False):
     """
     Convert a Python object to an XML string
 
-   :param object obj: the Python object
-   :param bool pretty_print: whether to format the XML string, defaults to ``False``
-   :return: XML string of the object
-   :rtype: str
+    :param object obj: the Python object
+    :param bool pretty_print: whether to format the XML string, defaults to ``False``
+    :return: XML string of the object
+    :rtype: str
     """
     if obj is None:
         return None
