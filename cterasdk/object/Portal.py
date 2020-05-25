@@ -108,6 +108,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         return self.public_info()
 
     def public_info(self):
+        """ Obtain the Portal's public info. """
         return self.get('/' + self.context + '/public/publicInfo', params={}, use_file_url=True)
 
     @decorator.update_current_tenant
