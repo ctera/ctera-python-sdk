@@ -97,12 +97,18 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         return login.Login(self)
 
     def _is_authenticated(self, function, *args, **kwargs):
+        def is_publicinfo(path):
+            return path.startswith('/%s/public/publicInfo' % self.context)
         current_session = self.session()
-        return current_session.authenticated() or current_session.initializing()
+        return current_session.authenticated() or current_session.initializing() or is_publicinfo(args[0])
 
     def test(self):
         """ Verification check to ensure the target host is a Portal. """
         connection.test(self)
+        return self.public_info()
+
+    def public_info(self):
+        """ Obtain the Portal's public info. """
         return self.get('/' + self.context + '/public/publicInfo', params={}, use_file_url=True)
 
     @decorator.update_current_tenant
