@@ -2,7 +2,8 @@ from unittest import mock
 
 from cterasdk import exception
 from cterasdk.core import cloudfs
-from cterasdk.core import types
+from cterasdk.core.types import UserAccount
+from cterasdk.core import query, union
 from cterasdk.common import Object
 from tests.ut import base_core
 
@@ -12,9 +13,35 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
     def setUp(self):
         super().setUp()
         self._owner = 'admin'
-        self._local_user_account = types.UserAccount(self._owner)
+        self._local_user_account = UserAccount(self._owner)
         self._group = 'admin'
         self._name = 'folderGroup'
+        self._user_uid = 1337
+
+    def test_list_folder_groups_owned_by(self):
+        get_user_uid_mock = self._mock_get_user_uid()
+        with mock.patch("cterasdk.core.devices.query.iterator") as query_iterator_mock:
+            cloudfs.CloudFS(self._global_admin).list_folder_groups(user=self._local_user_account)
+            get_user_uid_mock.assert_called_once_with(self._local_user_account, ['uid'])
+            query_iterator_mock.assert_called_once_with(self._global_admin, '/foldersGroups', mock.ANY)
+            expected_param = TestCoreCloudFS._get_list_folder_groups_param(user_uid=self._user_uid)
+            actual_param = query_iterator_mock.call_args[0][2]
+            self._assert_equal_objects(actual_param, expected_param)
+
+    @staticmethod
+    def _get_list_folder_groups_param(include=None, user_uid=None):
+        include = union.union(include or [], ['name', 'owner'])
+        builder = query.QueryParamBuilder().include(include)
+        if user_uid:
+            builder.ownedBy(user_uid)
+        return builder.build()
+
+    def _mock_get_user_uid(self):
+        param = Object()
+        param.uid = self._user_uid
+        get_user_uid_mock = self.patch_call("cterasdk.core.users.Users.get")
+        get_user_uid_mock.return_value = param
+        return get_user_uid_mock
 
     def test_mkfg_no_owner(self):
         self._init_global_admin(execute_response='Success')
@@ -56,6 +83,26 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         self._init_global_admin(execute_response='Success')
         cloudfs.CloudFS(self._global_admin).rmfg(self._name)
         self._global_admin.execute.assert_called_once_with('/foldersGroups/' + self._name, 'deleteGroup', True)
+
+    def test_list_folders_owned_by(self):
+        get_user_uid_mock = self._mock_get_user_uid()
+        with mock.patch("cterasdk.core.devices.query.iterator") as query_iterator_mock:
+            cloudfs.CloudFS(self._global_admin).list_folders(user=self._local_user_account)
+            get_user_uid_mock.assert_called_once_with(self._local_user_account, ['uid'])
+            query_iterator_mock.assert_called_once_with(self._global_admin, '/cloudDrives', mock.ANY)
+            expected_param = TestCoreCloudFS._get_list_folders_param(user_uid=self._user_uid)
+            actual_param = query_iterator_mock.call_args[0][2]
+            self._assert_equal_objects(actual_param, expected_param)
+
+    @staticmethod
+    def _get_list_folders_param(include=None, deleted=False, user_uid=None):
+        include = union.union(include or [], cloudfs.CloudFS.default)
+        builder = query.QueryParamBuilder().include(include)
+        query_filter = query.FilterBuilder('isDeleted').eq(deleted)
+        builder.addFilter(query_filter)
+        if user_uid:
+            builder.ownedBy(user_uid)
+        return builder.build()
 
     def test_mkdir_with_local_owner_no_winacls_param(self):
         self._init_global_admin(get_response='admin', execute_response='Success')
