@@ -139,7 +139,7 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
     @authenticated
     def show(self, path, use_file_url=False):
         """ Print a schema object as a JSON string. """
-        print(tojsonstr(self.get(path, params={}, use_file_url=use_file_url)))
+        print(tojsonstr(self.get(path, params={}, use_file_url=use_file_url), no_log=False))
 
     @authenticated
     def get_multi(self, path, paths, use_file_url=False):
@@ -149,7 +149,7 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
     @authenticated
     def show_multi(self, path, paths, use_file_url=False):
         """ Print one or more schema objects as a JSON string. """
-        print(tojsonstr(self.get_multi(path, paths, use_file_url=use_file_url)))
+        print(tojsonstr(self.get_multi(path, paths, use_file_url=use_file_url), no_log=False))
 
     @authenticated
     def put(self, path, value, use_file_url=False):
