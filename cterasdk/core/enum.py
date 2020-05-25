@@ -180,3 +180,14 @@ class CollaboratorType:
     DU = "adUser"
     DG = "adGroup"
     EXT = "external"
+
+
+class PortalType:
+    """
+    Portal Type
+
+    :ivar str Team: Team Portal
+    :ivar str Reseller: Reseller Portal
+    """
+    Team = 'team'
+    Reseller = 'reseller'

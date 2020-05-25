@@ -3,6 +3,8 @@ import logging
 from .base_command import BaseCommand
 from ..lib import Iterator, Command
 from ..common import Object
+from . import union
+from . import enum
 from . import query
 
 
@@ -10,6 +12,27 @@ class Portals(BaseCommand):
     """
     Global Admin Portals APIs
     """
+
+    default = ['name']
+
+    def list_tenants(self, include=None, portal_type=None):
+        """
+        List tenants.\n
+        To retrieve tenants, you must first browse the Global Administration Portal, using: `GlobalAdmin.portals.browse_global_admin()`
+
+        :param list[str],optional include: List of fields to retrieve, defaults to ['name']
+        :param cterasdk.core.enum.PortalType portal_type: The Portal type
+        """
+        # browse administration
+        include = union.union(include or [], Portals.default)
+        param = query.QueryParamBuilder().include(include).build()
+        baseurl = '/portals'
+        if portal_type == enum.PortalType.Team:
+            baseurl = '/teamPortals'
+        elif portal_type == enum.PortalType.Reseller:
+            baseurl = '/resellerPortals'
+        return query.iterator(self._portal, baseurl, param)
+
     def _query_portals(self, param):
         response = self._portal.execute('', 'getPortalsDisplayInfo', param)
         return (response.hasMore, response.objects)

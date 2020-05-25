@@ -88,13 +88,25 @@ Portals
 
 Retrieve Portals
 ^^^^^^^^^^^^^^^^
+.. automethod:: cterasdk.core.portals.Portals.list_tenants
+   :noindex:
+
+.. code-block:: python
+
+   """List all tenants"""
+   for tenant in admin.portals.list_tenants():
+       print(tenant)
+
+   """List Team Portals. For each tenant, retrieve its creation date, subscription plan and activation status"""
+   for tenant in admin.portals.list_tenants(include=['createDate', 'plan', 'activationStatus'], portal_type=portal_enum.PortalType.Team):
+       print(tenant)
+
 .. automethod:: cterasdk.core.portals.Portals.tenants
    :noindex:
 
 .. code-block:: python
 
    for tenant in admin.portals.tenants():
-
        print(tenant.name, tenant.usedStorageQuota, tenant.totalStorageQuota)
 
 Create a Team Portal
