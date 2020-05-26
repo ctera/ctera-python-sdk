@@ -1,7 +1,6 @@
 import logging
 
 from .base_command import BaseCommand
-from ..convert import tojsonstr
 
 
 class Activation(BaseCommand):
@@ -28,6 +27,6 @@ class Activation(BaseCommand):
 
         response = self._portal.get('/ssoActivation', params)
 
-        logging.getLogger().info('Generated device activation code. %s', tojsonstr(response, False))
+        logging.getLogger().info('Generated device activation code. %s', {'user': username, 'portal': tenant})
 
         return response.code

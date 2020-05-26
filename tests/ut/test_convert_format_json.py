@@ -1,3 +1,5 @@
+import json
+
 from cterasdk import Object
 from tests.ut import base_convert
 
@@ -47,3 +49,9 @@ class TestFormatObjectJSON(base_convert.TestJSON):
             '}' \
             '}'
         self.assertEqual(base_convert.TestJSON._tojsonstr(o), device_config)
+
+    def test_sensitive_object(self):
+        o = Object()
+        o.password = 'secret'
+        object_str_json = json.loads(base_convert.TestJSON._tojsonstr(o, False, True))
+        self.assertEqual(object_str_json['password'], "*** The Value is Hidden by the SDK ***")

@@ -5,8 +5,8 @@ from tests.ut import base
 class TestJSON(base.BaseTest):
 
     @staticmethod
-    def _tojsonstr(value):
-        return tojsonstr(value, False)
+    def _tojsonstr(value, pretty_print=False, no_log=False):
+        return tojsonstr(value, pretty_print, no_log)
 
 
 class TestXML(base.BaseTest):

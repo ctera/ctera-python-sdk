@@ -139,7 +139,7 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
     @authenticated
     def show(self, path, use_file_url=False):
         """ Print a schema object as a JSON string. """
-        print(tojsonstr(self.get(path, params={}, use_file_url=use_file_url)))
+        print(tojsonstr(self.get(path, params={}, use_file_url=use_file_url), no_log=False))
 
     @authenticated
     def get_multi(self, path, paths, use_file_url=False):
@@ -149,19 +149,19 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
     @authenticated
     def show_multi(self, path, paths, use_file_url=False):
         """ Print one or more schema objects as a JSON string. """
-        print(tojsonstr(self.get_multi(path, paths, use_file_url=use_file_url)))
+        print(tojsonstr(self.get_multi(path, paths, use_file_url=use_file_url), no_log=False))
 
     @authenticated
     def put(self, path, value, use_file_url=False):
         """ Update a schema object or attribute. """
         response = self._ctera_client.put(self.base_file_url if use_file_url else self.base_api_url, path, value)
-        logging.getLogger().debug('Configuration changed. %s', {'url': path, 'value': str(value)})
+        logging.getLogger().debug('Configuration changed. %s', {'url': path, 'value': tojsonstr(value, pretty_print=False)})
         return response
 
     @authenticated
     def post(self, path, value, use_file_url=False):
         response = self._ctera_client.post(self.base_file_url if use_file_url else self.base_api_url, path, value)
-        logging.getLogger().debug('Added. %s', {'url': path, 'value': str(value)})
+        logging.getLogger().debug('Added. %s', {'url': path, 'value': tojsonstr(value, pretty_print=False)})
         return response
 
     def form_data(self, path, form_data, use_file_url=False):
@@ -170,14 +170,20 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
     @authenticated
     def db(self, path, name, param, use_file_url=False):
         response = self._ctera_client.db(self.base_file_url if use_file_url else self.base_api_url, path, name, param)
-        logging.getLogger().debug('Database method executed. %s', {'url': path, 'name': name, 'param': str(param)})
+        logging.getLogger().debug(
+            'Database method executed. %s',
+            {'url': path, 'name': name, 'param': tojsonstr(param, pretty_print=False)}
+        )
         return response
 
     @authenticated
     def execute(self, path, name, param=None, use_file_url=False):
         """ Execute a schema object method. """
         response = self._ctera_client.execute(self.base_file_url if use_file_url else self.base_api_url, path, name, param)
-        logging.getLogger().debug('User-defined method executed. %s', {'url': path, 'name': name, 'param': str(param)})
+        logging.getLogger().debug(
+            'User-defined method executed. %s',
+            {'url': path, 'name': name, 'param': tojsonstr(param, pretty_print=False)}
+        )
         return response
 
     @authenticated

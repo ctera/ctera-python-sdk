@@ -10,7 +10,7 @@ def query(CTERAHost, path, key, value):
 
 
 def show(CTERAHost, path, key, value):
-    print(tojsonstr(query(CTERAHost, path, key, value)))
+    print(tojsonstr(query(CTERAHost, path, key, value), no_log=False))
 
 
 class QueryParam(Object):
@@ -31,10 +31,6 @@ class QueryParamBuilder:
     def __init__(self):
         self.param = QueryParam()
 
-    def include_classname(self):
-        self.param.include_classname()
-        return self
-
     def startFrom(self, startFrom):
         self.param.startFrom = startFrom
         return self
@@ -45,13 +41,6 @@ class QueryParamBuilder:
 
     def include(self, include):
         self.param.include = include  # pylint: disable=attribute-defined-outside-init
-        return self
-
-    def sortBy(self, sortBy):
-        self.param.sortBy = sortBy  # pylint: disable=attribute-defined-outside-init
-
-    def allPortals(self, allPortals):
-        self.param.allPortals = allPortals  # pylint: disable=attribute-defined-outside-init
         return self
 
     def put(self, key, value):

@@ -12,7 +12,7 @@ def query(CTERAHost, path, param):
 
 def show(CTERAHost, path, param):
     hasMore, objects = query(CTERAHost, path, param)
-    print(tojsonstr(objects))
+    print(tojsonstr(objects, no_log=False))
     return hasMore
 
 
