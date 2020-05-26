@@ -170,14 +170,20 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
     @authenticated
     def db(self, path, name, param, use_file_url=False):
         response = self._ctera_client.db(self.base_file_url if use_file_url else self.base_api_url, path, name, param)
-        logging.getLogger().debug('Database method executed. %s', {'url': path, 'name': name, 'param': tojsonstr(param, pretty_print=False)})
+        logging.getLogger().debug(
+            'Database method executed. %s',
+            {'url': path, 'name': name, 'param': tojsonstr(param, pretty_print=False)}
+        )
         return response
 
     @authenticated
     def execute(self, path, name, param=None, use_file_url=False):
         """ Execute a schema object method. """
         response = self._ctera_client.execute(self.base_file_url if use_file_url else self.base_api_url, path, name, param)
-        logging.getLogger().debug('User-defined method executed. %s', {'url': path, 'name': name, 'param': tojsonstr(param, pretty_print=False)})
+        logging.getLogger().debug(
+            'User-defined method executed. %s',
+            {'url': path, 'name': name, 'param': tojsonstr(param, pretty_print=False)}
+        )
         return response
 
     @authenticated
