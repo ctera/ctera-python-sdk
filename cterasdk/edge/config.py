@@ -1,5 +1,8 @@
+from datetime import datetime
 import logging
 
+from .. import config
+from ..lib import FileSystem
 from .base_command import BaseCommand
 
 
@@ -41,6 +44,15 @@ class Config(BaseCommand):
         """
         logging.getLogger().info('Configuring device hostname. %s', {'hostname': hostname})
         return self._gateway.put('/config/device/hostname', hostname)
+
+    def export(self):
+        """ Export the Gateway configuration """
+        dirpath = config.filesystem['dl']
+        filename = self._gateway.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.xml'
+        logging.getLogger().info('Exporting configuration. %s', {'host': self._gateway.host()})
+        handle = self._gateway.openfile('/export')
+        filepath = FileSystem.instance().save(dirpath, filename, handle)
+        logging.getLogger().info('Exported configuration. %s', {'filepath': filepath})
 
     def is_wizard_enabled(self):
         """
