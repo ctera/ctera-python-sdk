@@ -341,9 +341,11 @@ Generate Activation Codes
 
    """Generate a device activation code"""
 
-   code = admin.activation.generate_code('bruce') # will look for 'bruce' in the current tenant
+   code = admin.activation.generate_code() # will generate a code for the current, logged on, user
 
-   code = admin.activation.generate_code('batman', 'gotham') # will look for 'bruce' in the gotham tenant
+   code = admin.activation.generate_code('bruce') # will generate a code for 'bruce' in the current tenant
+
+   code = admin.activation.generate_code('batman', 'gotham') # will generate a code for 'bruce' in the 'gotham' tenant
 
 .. note:: Read Write Administrator, granted with the "Super User" role permission, can generate 200 codes every 5 minutes
 
