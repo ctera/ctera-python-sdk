@@ -58,10 +58,10 @@ class Config(BaseCommand):
         directory = filename = None
         if destination:
             directory, filename = self._filesystem.split_file_directory(destination)
+            if not filename:
+                filename = default_filename
         else:
             directory = self._filesystem.get_dirpath()
-            filename = default_filename
-        if not filename:
             filename = default_filename
         logging.getLogger().info('Exporting configuration. %s', {'host': self._gateway.host()})
         handle = self._gateway.openfile('/export')
