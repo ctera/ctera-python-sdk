@@ -1,10 +1,16 @@
+from datetime import datetime
 import logging
 
+from ..lib import FileSystem
 from .base_command import BaseCommand
 
 
 class Config(BaseCommand):
     """ General gateway configuraion """
+
+    def __init__(self, gateway):
+        super().__init__(gateway)
+        self._filesystem = FileSystem.instance()
 
     def get_location(self):
         """
@@ -41,6 +47,26 @@ class Config(BaseCommand):
         """
         logging.getLogger().info('Configuring device hostname. %s', {'hostname': hostname})
         return self._gateway.put('/config/device/hostname', hostname)
+
+    def export(self, destination=None):
+        """ Export the Gateway configuration
+
+        :param str,optional destination:
+         File destination, defaults to the default directory
+        """
+        default_filename = self._gateway.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.xml'
+        directory = filename = None
+        if destination:
+            directory, filename = self._filesystem.split_file_directory(destination)
+            if not filename:
+                filename = default_filename
+        else:
+            directory = self._filesystem.get_dirpath()
+            filename = default_filename
+        logging.getLogger().info('Exporting configuration. %s', {'host': self._gateway.host()})
+        handle = self._gateway.openfile('/export')
+        filepath = FileSystem.instance().save(directory, filename, handle)
+        logging.getLogger().info('Exported configuration. %s', {'filepath': filepath})
 
     def is_wizard_enabled(self):
         """

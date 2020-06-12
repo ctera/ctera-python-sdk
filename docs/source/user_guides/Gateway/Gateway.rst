@@ -225,6 +225,13 @@ Device Configuration
 
    filer.config.disable_wizard()
 
+.. automethod:: cterasdk.edge.config.Config.export
+   :noindex:
+
+.. code-block:: python
+
+   filer.config.export()
+
 Storage
 =======
 
