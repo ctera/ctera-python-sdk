@@ -47,7 +47,7 @@ class HTTPResponse:
         self.url = response.url
         self.code = response.status_code
         self.headers = response.headers
-        self.data = response.text
+        self.text = response.text
 
     def geturl(self):
         return self.url
@@ -56,7 +56,7 @@ class HTTPResponse:
         return self.code
 
     def read(self):
-        return self.data
+        return self.text
 
 
 def geturi(baseurl, path):
