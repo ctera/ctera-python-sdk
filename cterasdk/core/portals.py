@@ -63,7 +63,7 @@ class Portals(BaseCommand):
 
         param = Object()
         if plan:
-            param.plan = self._portal.plans.get(plan, include=['baseObjectRef']).baseObjectRef
+            param.plan = self._portal.plans.get_multi(plan, include=['baseObjectRef']).baseObjectRef
         param._classname = 'TeamPortal'  # pylint: disable=protected-access
         param.name = name
         param.displayName = display_name
