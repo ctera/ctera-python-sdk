@@ -309,7 +309,7 @@ Shares
    domain_admins = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\Domain Admins', gateway_enum.FileAccessMode.RO)
    bruce_wayne = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'bruce.wayne@ctera.com', gateway_enum.FileAccessMode.RW)
 
-   filer.shared.add('Accounting', 'cloud/users/Service Account/Accounting', acl = [ \
+   filer.shares.add('Accounting', 'cloud/users/Service Account/Accounting', acl = [ \
        everyone, local_admin, domain_admins, bruce_wayne \
    ])
 
@@ -317,7 +317,7 @@ Shares
 
    everyone = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.LG, 'Everyone', gateway_enum.FileAccessMode.RW)
 
-   filer.shared.add('FTP', 'cloud/users/Service Account/FTP', acl = [everyone], export_to_ftp = True)
+   filer.shares.add('FTP', 'cloud/users/Service Account/FTP', acl = [everyone], export_to_ftp = True)
 
 .. automethod:: cterasdk.edge.shares.Shares.add_acl
    :noindex:
