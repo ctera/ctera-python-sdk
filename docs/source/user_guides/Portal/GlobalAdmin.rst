@@ -17,6 +17,34 @@ Instantiate a Global Admin object
 
 .. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure `chopin-core` to automatically trust the server's certificate, using: ``config.http['ssl'] = 'Trust'``
 
+Setup
+-----
+
+.. automethod:: cterasdk.core.setup.Setup.init_master
+   :noindex:
+
+.. code-block:: python
+
+   admin.init_master('admin', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'password1!', 'ctera.me')
+
+.. automethod:: cterasdk.core.setup.Setup.init_application_server
+   :noindex:
+
+.. code-block:: python
+
+   """Connect a secondary Portal server using a password"""
+   master_ipaddr = '172.31.53.246'
+   master_password = 'secret'
+   admin.init_application_server(master_ipaddr, master_password)
+
+   """Connect a secondary Portal server using a private key"""
+   master_ipaddr = '172.31.53.246'
+   master_pk = """...PEM-encoded private key..."""
+   admin.init_application_server(master_ipaddr, master_pk)
+
+.. automethod:: cterasdk.core.setup.Setup.init_replication_server
+   :noindex:
+
 Logging in
 ----------
 
@@ -154,6 +182,29 @@ Recover a Team Portal
 .. code-block:: python
 
    admin.portals.undelete_tenant('acme')
+
+Plans
+-----
+.. automethod:: cterasdk.core.plans.Plans.get
+   :noindex:
+
+.. automethod:: cterasdk.core.plans.Plans.get_multi
+   :noindex:
+
+.. automethod:: cterasdk.core.plans.Plans.add
+   :noindex:
+
+.. automethod:: cterasdk.core.plans.Plans.modify
+   :noindex:
+
+.. automethod:: cterasdk.core.plans.Plans.delete
+   :noindex:
+
+.. code-block:: python
+
+   retention = {'daily': 7, 'monthly': 12}
+   quotas = {'EV16': 10, 'EV32': 5, 'Share': 100}
+   admin.plans.modify('Default', retention, quotas)
 
 Servers
 -------
