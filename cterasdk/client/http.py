@@ -195,10 +195,16 @@ class HTTPClient(HttpClientBase):
     def mkcol(self, url, headers=None):
         return self.dispatch(HttpClientRequestMkcol(url, headers=headers))
 
+    def multipart(self, url, form_data, monitor_function_generator=None):
+        encoder = MultipartEncoder(form_data)
+        if monitor_function_generator:
+            encoder = MultipartEncoderMonitor(encoder, callback=monitor_function_generator(encoder.len))
+        return self.dispatch(HttpClientRequestPost(url, headers={'Content-Type': encoder.content_type}, data=encoder))
+
     def upload(self, url, form_data):
         def upload_monitor_generator(total_length):
             def upload_monitor(encoder):
-                logging.getLogger().debug(
+                logging.getLogger().info(
                     'Uploaded %(percent)s - (%(uploaded)s out of %(size)s)',
                     dict(
                         percent=str(round(encoder.bytes_read/total_length*100))+'%',
@@ -207,7 +213,4 @@ class HTTPClient(HttpClientBase):
                     )
                 )
             return upload_monitor
-
-        encoder = MultipartEncoder(form_data)
-        monitor = MultipartEncoderMonitor(encoder, callback=upload_monitor_generator(encoder.len))
-        return self.dispatch(HttpClientRequestPost(url, headers={'Content-Type': monitor.content_type}, data=monitor))
+        return self.multipart(url, form_data, upload_monitor_generator)

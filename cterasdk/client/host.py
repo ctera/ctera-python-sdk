@@ -203,6 +203,10 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
         return self._ctera_client.mkcol(self.base_file_url if use_file_url else self.base_api_url, path)
 
     @authenticated
+    def multipart(self, path, form_data, use_file_url=False):
+        return self._ctera_client.multipart(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
+
+    @authenticated
     def upload(self, path, form_data, use_file_url=False):
         return self._ctera_client.upload(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
 
