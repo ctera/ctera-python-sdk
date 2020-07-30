@@ -191,3 +191,107 @@ class PortalType:
     """
     Team = 'team'
     Reseller = 'reseller'
+
+
+class ServerMode:
+    """
+    Portal Server Mode
+
+    :ivar str Master: Master
+    :ivar str Slave: Slave
+    """
+    Master = 'master'
+    Slave = 'slave'
+
+
+class SetupWizardStatus:
+    """
+    Portal Setup Wizard Status
+
+    :ivar str NA: Not Relevant
+    :ivar str Running: In Progress
+    :ivar str Failed: Failed
+    :ivar str Completed: Completed
+    """
+    NA = "notRelevant"
+    Running = "inProgress"
+    Failed = "failed"
+    Completed = "completed"
+
+
+class SetupWizardStage:
+    """
+    Portal Setup Wizard Stage
+
+    :ivar str Server: Initializing Server
+    :ivar str Portal: Initializing Portal
+    :ivar str Replication: Setting Database Replication
+    :ivar str Restart: Restarting Server
+    :ivar str Finish: Finished
+    """
+    Server = "initServer"
+    Portal = "initPortal"
+    Replication = "setReplication"
+    Restart = "restartingServer"
+    Finish = "finish"
+
+
+class SlaveAuthenticaionMethod:
+    """
+    Secondary Portal server authentication mode
+
+    :ivar str Password: Password
+    :ivar str PrivateKey: Private Key
+    """
+    Password = 'Password'
+    PrivateKey = 'Key'
+
+
+class PlanRetention:
+    """
+    Portal plan retention policy
+
+    :ivar str All: All versions
+    :ivar str Hourly: Hourly versions
+    :ivar str Daily: Daily versions
+    :ivar str Weekly: Weekly versions
+    :ivar str Monthly: Monthly versions
+    :ivar str Quarterly: Quarterly versions
+    :ivar str Yearly: Yearly versions
+    :ivar str Deleted: Recycle bin
+    """
+    All = 'retainAll'
+    Hourly = 'hourly'
+    Daily = 'daily'
+    Weekly = 'weekly'
+    Monthly = 'monthly'
+    Quarterly = 'quarterly'
+    Yearly = 'yearly'
+    Deleted = 'retainDeleted'
+
+
+class PlanItem:
+    """
+    Portal plan item
+
+    :ivar str EV4: EV4
+    :ivar str EV8: EV8
+    :ivar str EV16: EV16
+    :ivar str EV32: EV32
+    :ivar str EV64: EV64
+    :ivar str EV128: EV128
+    :ivar str WA: Workstation Agent
+    :ivar str SA: Server Agent
+    :ivar str Share: Cloud Drive
+    :ivar str Connect: Cloud Drive Connect
+    """
+    EV4 = 'EV4'
+    EV8 = 'EV8'
+    EV16 = 'EV16'
+    EV32 = 'EV32'
+    EV64 = 'EV64'
+    EV128 = 'EV128'
+    WA = 'WA'
+    SA = 'SA'
+    Share = 'Share'
+    Connect = 'Connect'

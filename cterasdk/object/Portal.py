@@ -15,6 +15,8 @@ from ..core import session
 from ..core import users
 from ..core import cloudfs
 from ..core import zones
+from ..core import setup
+from ..core import startup
 from ..core import files
 
 
@@ -97,10 +99,17 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         return login.Login(self)
 
     def _is_authenticated(self, function, *args, **kwargs):
-        def is_publicinfo(path):
-            return path.startswith('/%s/public/publicInfo' % self.context)
+        def is_public(path):
+            return path.startswith('/%s/public' % self.context)
+
+        def is_setup(path):
+            return path.startswith('/%s/setup' % self.context)
+
+        def is_startup(path):
+            return path.startswith('/%s/startup' % self.context)
         current_session = self.session()
-        return current_session.authenticated() or current_session.initializing() or is_publicinfo(args[0])
+        return current_session.authenticated() or current_session.initializing() or \
+            is_public(args[0]) or is_setup(args[0]) or is_startup(args[0])
 
     def test(self):
         """ Verification check to ensure the target host is a Portal. """
@@ -133,6 +142,8 @@ class GlobalAdmin(Portal):
 
     :ivar cterasdk.core.portals.Portals portals: Object holding the Portals Management APIs
     :ivar cterasdk.core.servers.Servers servers: Object holding the Servers Management APIs
+    :ivar cterasdk.core.setup.Setup setup: Object holding the Portal setup APIs
+    :ivar cterasdk.core.startup.Startup startup: Object holding the Portal startup APIs
     """
 
     def __init__(self, host, port=None, https=True):
@@ -144,10 +155,12 @@ class GlobalAdmin(Portal):
         super().__init__(host, port, https)
         self.portals = portals.Portals(self)
         self.servers = servers.Servers(self)
+        self.setup = setup.Setup(self)
+        self.startup = startup.Startup(self)
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['portals', 'servers']
+        return super()._omit_fields + ['portals', 'servers', 'setup', 'startup']
 
     @property
     def context(self):

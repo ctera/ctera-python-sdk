@@ -35,6 +35,8 @@ Submodules
    cterasdk.core.remote
    cterasdk.core.servers
    cterasdk.core.session
+   cterasdk.core.setup
+   cterasdk.core.startup
    cterasdk.core.types
    cterasdk.core.union
    cterasdk.core.users
