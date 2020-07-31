@@ -11,7 +11,7 @@ class Plans(BaseCommand):
     """
     default = ['name']
 
-    def get(self, name):
+    def _get_entire_object(self, name):
         """
         Get a subscription plan
 
@@ -22,7 +22,7 @@ class Plans(BaseCommand):
         except CTERAException as error:
             raise CTERAException('Could not find subscription plan', error)
 
-    def get_multi(self, name, include=None):
+    def get(self, name, include=None):
         """
         Retrieve subscription plan properties
 
@@ -63,7 +63,7 @@ class Plans(BaseCommand):
         :param dict,optional retention: The data retention policy
         :param dict,optional quotas: The items included in the plan and their respective quota
         """
-        plan = self.get(name)
+        plan = self._get_entire_object(name)
         Plans._assign_retention(plan, retention)
         Plans._assign_quotas(plan, quotas)
         try:
@@ -76,7 +76,7 @@ class Plans(BaseCommand):
 
     @staticmethod
     def _assign_retention(plan, retention):
-        if isinstance(retention, dict):
+        if retention is not None:
             plan.retentionPolicy.retainAll = retention.get(PlanRetention.All, plan.retentionPolicy.retainAll)
             plan.retentionPolicy.hourly = retention.get(PlanRetention.Hourly, plan.retentionPolicy.hourly)
             plan.retentionPolicy.daily = retention.get(PlanRetention.Daily, plan.retentionPolicy.daily)
@@ -88,7 +88,7 @@ class Plans(BaseCommand):
 
     @staticmethod
     def _assign_quotas(plan, quotas):
-        if isinstance(quotas, dict):
+        if quotas is not None:
             plan.vGateways4.amount = quotas.get(PlanItem.EV4, plan.vGateways4.amount)
             plan.vGateways8.amount = quotas.get(PlanItem.EV8, plan.vGateways8.amount)
             plan.appliances.amount = quotas.get(PlanItem.EV16, plan.appliances.amount)  # EV16
