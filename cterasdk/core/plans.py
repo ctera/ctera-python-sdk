@@ -1,6 +1,5 @@
 import logging
 from .base_command import BaseCommand
-from ..common import defaults
 from ..exception import CTERAException
 from .enum import PlanItem, PlanRetention
 from . import union
@@ -42,10 +41,10 @@ class Plans(BaseCommand):
         """
         Add a subscription plan
 
-        :param dict,optional quotas: The data retention policy
+        :param dict,optional retention: The data retention policy
         :param dict,optional quotas: The items included in the plan and their respective quota
         """
-        plan = defaults.default_class(self._portal, 'Plan')
+        plan = self._portal.default_class('Plan')
         plan.name = name
         Plans._assign_retention(plan, retention)
         Plans._assign_quotas(plan, quotas)
@@ -61,14 +60,12 @@ class Plans(BaseCommand):
         """
         Modify a subscription plan
 
-        :param dict,optional quotas: The data retention policy
+        :param dict,optional retention: The data retention policy
         :param dict,optional quotas: The items included in the plan and their respective quota
         """
         plan = self.get(name)
         Plans._assign_retention(plan, retention)
         Plans._assign_quotas(plan, quotas)
-        print(plan)
-        input()
         try:
             response = self._portal.put('/plans/' + name, plan)
             logging.getLogger().info("Plan modified. %s", {'plan': name})
