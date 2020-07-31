@@ -123,6 +123,9 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
     def register_session(self, session):
         self._session = session
 
+    def default_class(self, name):
+        return self.get('/defaults/' + name)
+
     @authenticated
     def get(self, path, params=None, use_file_url=False):
         """ Retrieve a schema object as a Python object. """

@@ -18,7 +18,7 @@ class Setup(BaseCommand):
         super().__init__(portal)
         self.stage = None
 
-    def _current_stage(self):
+    def _get_current_stage(self):
         status = self.get_setup_status()
         self.stage = status.wizard
         return self.stage
@@ -34,7 +34,7 @@ class Setup(BaseCommand):
         :param str password: Password for the new user
         :param str domain: The domain suffix for CTERA Portal
         """
-        self._current_stage()
+        self._get_current_stage()
 
         params = Setup._init_server_params(ServerMode.Master)
         self._init_server(params, True)
@@ -62,7 +62,7 @@ class Setup(BaseCommand):
         self._portal.startup.wait()
 
     def _init_slave(self, ipaddr, secret):
-        self._current_stage()
+        self._get_current_stage()
 
         response = self._portal.execute('/%s/setup/authenticaionMethod' % (self._portal.context),
                                         'askMasterForSlaveAuthenticaionMethod', ipaddr, use_file_url=True)
