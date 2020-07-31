@@ -128,9 +128,9 @@ class Users(BaseCommand):
         if email:
             user.email = email
         if first_name:
-            user.first_name = first_name
+            user.firstName = first_name
         if last_name:
-            user.last_name = last_name
+            user.lastName = last_name
         if password:
             user.password = password
         if role:
