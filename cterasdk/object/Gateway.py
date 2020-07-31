@@ -89,8 +89,6 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         :param bool,optional https: Set to True to require HTTPS, defaults to False
         :param cterasdk.object.Portal.Portal,optional Portal: The portal throught which the remote session was created, defaults to None
         """
-        if port is None:
-            port = 443 if https else 80
         super().__init__(host, port, https)
         self._remote_access = False
         self._session = session.Session(self.host())
