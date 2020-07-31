@@ -23,7 +23,7 @@ def authenticated(function):
 class NetworkHost:
     def __init__(self, host, port, https):
         self._host = host
-        self._port = port
+        self._port = port or 443 if https else 80
         self._https = https
 
     @property

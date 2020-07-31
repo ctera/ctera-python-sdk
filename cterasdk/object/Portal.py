@@ -135,10 +135,10 @@ class GlobalAdmin(Portal):
     :ivar cterasdk.core.servers.Servers servers: Object holding the Servers Management APIs
     """
 
-    def __init__(self, host, port=443, https=True):
+    def __init__(self, host, port=None, https=True):
         """
         :param str host: The fully qualified domain name, hostname or an IPv4 address of the Portal
-        :param int,optional port: Set a custom port number (0 - 65535), defaults to 443
+        :param int,optional port: Set a custom port number (0 - 65535), If not set defaults to 80 for http and 443 for https
         :param bool,optional https: Set to True to require HTTPS, defaults to True
         """
         super().__init__(host, port, https)
@@ -163,10 +163,10 @@ class ServicesPortal(Portal):
     Main class for Service operations on a Portal
     """
 
-    def __init__(self, host, port=443, https=True):
+    def __init__(self, host, port=None, https=True):
         """
         :param str host: The fully qualified domain name, hostname or an IPv4 address of the Portal
-        :param int,optional port: Set a custom port number (0 - 65535), defaults to 443
+        :param int,optional port: Set a custom port number (0 - 65535), If not set defaults to 80 for http and 443 for https
         :param bool,optional https: Set to True to require HTTPS, defaults to True
         """
         super().__init__(host, port, https)
