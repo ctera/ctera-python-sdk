@@ -188,23 +188,71 @@ Plans
 .. automethod:: cterasdk.core.plans.Plans.get
    :noindex:
 
-.. automethod:: cterasdk.core.plans.Plans.get_multi
-   :noindex:
+.. code-block:: python
+
+   plan = admin.plans.get('good_plan', ['createDate', 'modifiedDate'])
 
 .. automethod:: cterasdk.core.plans.Plans.add
    :noindex:
 
+.. code-block:: python
+
+   """
+   Retention Policy (portal_enum.PlanRetention):
+   - All: All Versions
+   - Hourly: Hourly Versions
+   - Daily: Daily Versions
+   - Weekly: Weekly Versions
+   - Monthly: Monthly Versions
+   - Quarterly: Quarterly Versions
+   - Yearly: Yearly Versions
+   - Deleted: Recycle Bin
+
+   Quotas (portal_enum.PlanItem):
+   - EV4: CTERA Edge Filer, Up to 4 TB of Local Cache
+   - EV8: CTERA Edge Filer, Up to 8 TB of Local Cache
+   - EV16: CTERA Edge Filer, Up to 16 TB of Local Cache
+   - EV32: CTERA Edge Filer, Up to 32 TB of Local Cache
+   - EV64: CTERA Edge Filer, Up to 64 TB of Local Cache
+   - EV128: CTERA Edge Filer, Up to 128 TB of Local Cache
+   - WA: Workstation Backup Agent
+   - SA: Server Agent
+   - Share: CTERA Drive Share
+   - Connect: CTERA Drive Connect
+   """
+
+   """
+   Create the 'good_plan' subscription plan:
+   1) Retention: 7 daily versions, 12 monthly versions
+   2) Quotas: 10 x EV16, 5 x EV32, 100 x Cloud Drive (Share)
+   """
+
+   name = 'good_plan'
+   retention = {portal_enum.PlanRetention.Daily: 7, portal_enum.PlanRetention.Monthly: 12}
+   quotas = {portal_enum.PlanItem.EV16: 10, portal_enum.PlanItem.EV32: 5, portal_enum.PlanItem.Share: 100}
+   admin.plans.add(name, retention, quotas)
+
 .. automethod:: cterasdk.core.plans.Plans.modify
    :noindex:
+
+   """
+   Modify 'good_plan' subscription plan:
+   1) Retention: 30 daily versions, 36 monthly versions
+   2) Quotas: 20 x EV16, 10 x EV32, 200 x Cloud Drive (Share)
+   """
+
+   name = 'good_plan'
+   retention = {portal_enum.PlanRetention.Daily: 30, portal_enum.PlanRetention.Monthly: 36}
+   quotas = {portal_enum.PlanItem.EV16: 20, portal_enum.PlanItem.EV32: 10, portal_enum.PlanItem.Share: 200}
+   admin.plans.modify(name, retention, quotas)
 
 .. automethod:: cterasdk.core.plans.Plans.delete
    :noindex:
 
 .. code-block:: python
 
-   retention = {'daily': 7, 'monthly': 12}
-   quotas = {'EV16': 10, 'EV32': 5, 'Share': 100}
-   admin.plans.modify('Default', retention, quotas)
+   name = 'good_plan'
+   admin.plan.delete(name)
 
 Servers
 -------
@@ -271,9 +319,16 @@ Local Users
 
 .. code-block:: python
 
-   """Create an end user"""
-
+   """Create a local user"""
    admin.users.add('bruce', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'G0th4amCity!')
+
+.. automethod:: cterasdk.core.users.Users.modify
+   :noindex:
+
+.. code-block:: python
+
+   """Modify a local user"""
+   admin.users.modify('bruce', 'bwayne@we.com', 'Bruce', 'Wayne', 'Str0ngP@ssword!', 'Wayne Enterprises')
 
 Domain Users
 ^^^^^^^^^^^^

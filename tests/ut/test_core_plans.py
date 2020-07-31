@@ -16,7 +16,7 @@ class TestCorePlans(base_core.BaseCoreTest):
     def test_get_plan_default_attrs(self):
         get_multi_response = self._get_plan_object(name=self._plan_name)
         self._init_global_admin(get_multi_response=get_multi_response)
-        ret = plans.Plans(self._global_admin).get_multi(self._plan_name)
+        ret = plans.Plans(self._global_admin).get(self._plan_name)
         self._global_admin.get_multi.assert_called_once_with('/plans/' + self._plan_name, mock.ANY)
         expected_include = ['/' + attr for attr in plans.Plans.default]
         actual_include = self._global_admin.get_multi.call_args[0][1]
@@ -29,7 +29,7 @@ class TestCorePlans(base_core.BaseCoreTest):
         get_multi_response = self._get_plan_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exception.CTERAException) as error:
-            plans.Plans(self._global_admin).get_multi(self._plan_name)
+            plans.Plans(self._global_admin).get(self._plan_name)
         self._global_admin.get_multi.assert_called_once_with('/plans/' + self._plan_name, mock.ANY)
         expected_include = ['/' + attr for attr in plans.Plans.default]
         actual_include = self._global_admin.get_multi.call_args[0][1]

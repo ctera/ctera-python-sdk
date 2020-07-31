@@ -1,6 +1,7 @@
 import logging
 
 from .base_command import BaseCommand
+from .types import UserAccount
 from ..exception import CTERAException
 from ..common import Object, DateTimeUtils
 from . import query
@@ -13,6 +14,14 @@ class Users(BaseCommand):
     """
 
     default = ['name']
+
+    def _get_entire_object(self, user_account):
+        ref = '/users/%s' % user_account.name if user_account.is_local \
+            else '/domains/%s/adUsers/%s' % (user_account.directory, user_account.name)
+        try:
+            return self._portal.get(ref)
+        except CTERAException as error:
+            raise CTERAException('Failed to get the user', error)
 
     def get(self, user_account, include=None):
         """
@@ -65,7 +74,7 @@ class Users(BaseCommand):
 
     def add(self, name, email, first_name, last_name, password, role, company=None, comment=None, password_change=False):
         """
-        Add a portal user
+        Create a local user account
 
         :param str name: User name for the new user
         :param str email: E-mail address of the new user
@@ -97,6 +106,47 @@ class Users(BaseCommand):
         logging.getLogger().info('User created. %s', {'user': name, 'email': email, 'role': role})
 
         return response
+
+    def modify(self, name, email=None, first_name=None,
+               last_name=None, password=None, role=None, company=None, comment=None):
+        """
+        Modify a local user account
+
+        :param str name: User name for the new user
+        :param str,optional email: E-mail address of the new user
+        :param str,optional first_name: The first name of the new user
+        :param str,optional last_name: The last name of the new user
+        :param str,optional password: Password for the new user
+        :param cterasdk.core.enum.Role,optional role: User role of the new user
+        :param str,optional company: The name of the company of the new user, defaults to None
+        :param str,optional comment: Additional comment for the new user, defaults to None
+        """
+        user_account = UserAccount(name)
+        user = self._get_entire_object(user_account)
+        if name:
+            user.name = name
+        if email:
+            user.email = email
+        if first_name:
+            user.first_name = first_name
+        if last_name:
+            user.last_name = last_name
+        if password:
+            user.password = password
+        if role:
+            user.role = role
+        if company is not None:
+            user.company = company
+        if comment is not None:
+            user.comment = comment
+
+        try:
+            response = self._portal.put('/users/' + name, user)
+            logging.getLogger().info("User modified. %s", {'username': user.name})
+            return response
+        except CTERAException as error:
+            logging.getLogger().error("Failed to modify user.")
+            raise CTERAException('Failed to modify user', error)
 
     def delete(self, user):
         """
