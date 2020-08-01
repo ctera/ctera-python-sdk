@@ -18,7 +18,9 @@ _sdk_hidden = [
     'oldPassword',
     'newPassword',
     'secretkey',
-    'activationCode'
+    'activationCode',
+    'masterPassword',
+    'masterKey'
 ]
 
 
