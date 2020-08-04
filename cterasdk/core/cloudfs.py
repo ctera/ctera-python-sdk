@@ -11,6 +11,20 @@ class CloudFS(BaseCommand):
 
     default = ['name', 'group', 'owner']
 
+    def get(self, name, include=None):
+        """
+        Get folder group
+
+        :param str name: Name of the Folder Group to find
+        :param str,optional include: List of fields to retrieve, defaults to ['name', 'owner']
+        """
+        include = union.union(include or [], ['name', 'owner'])
+        include = ['/' + attr for attr in include]
+        folder_group = self._portal.get_multi('/foldersGroups/' + name, include)
+        if folder_group.name is None:
+            raise CTERAException('Could not find folder group', None, name=name)
+        return folder_group
+
     def list_folder_groups(self, include=None, user=None):
         """
         List folder groups
