@@ -107,21 +107,22 @@ class Users(BaseCommand):
 
         return response
 
-    def modify(self, name, email=None, first_name=None,
+    def modify(self, username, name=None, email=None, first_name=None,
                last_name=None, password=None, role=None, company=None, comment=None):
         """
         Modify a local user account
 
-        :param str name: User name for the new user
-        :param str,optional email: E-mail address of the new user
-        :param str,optional first_name: The first name of the new user
-        :param str,optional last_name: The last name of the new user
-        :param str,optional password: Password for the new user
-        :param cterasdk.core.enum.Role,optional role: User role of the new user
-        :param str,optional company: The name of the company of the new user, defaults to None
-        :param str,optional comment: Additional comment for the new user, defaults to None
+        :param str username: The current user name
+        :param str,optional name: New name
+        :param str,optional email: E-mail address
+        :param str,optional first_name: First name
+        :param str,optional last_name: Last name
+        :param str,optional password: Password
+        :param cterasdk.core.enum.Role,optional role: User role
+        :param str,optional company: Company name
+        :param str,optional comment: Comment
         """
-        user_account = UserAccount(name)
+        user_account = UserAccount(username)
         user = self._get_entire_object(user_account)
         if name:
             user.name = name
@@ -141,7 +142,7 @@ class Users(BaseCommand):
             user.comment = comment
 
         try:
-            response = self._portal.put('/users/' + name, user)
+            response = self._portal.put('/users/' + username, user)
             logging.getLogger().info("User modified. %s", {'username': user.name})
             return response
         except CTERAException as error:

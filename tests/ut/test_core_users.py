@@ -120,6 +120,36 @@ class TestCoreUsers(base_core.BaseCoreTest):
             self.assertIn(attr, actual_include)
         self.assertEqual('Could not find user', error.exception.message)
 
+    def test_modify_local_user(self):
+        current_user_object = self._get_user_object(
+            name=self._username,
+            email=self._email,
+            firstName=self._first_name,
+            lastName=self._last_name,
+            password=self._password,
+            role=self._role,
+            company=None,
+            comment=None
+        )
+        new_user_object = self._get_user_object(
+            name='bruce',
+            email='b.wayne@gotham.com',
+            firstName='Bruce',
+            lastName='Wayne',
+            password='BatmanFTW1!',
+            role='ReadWriteAdmin',
+            company='FreedomFigthers',
+            comment='No comment'
+        )
+        self._init_global_admin(get_response=current_user_object)
+        users.Users(self._global_admin).modify(self._username, new_user_object.name, new_user_object.email,
+                                               new_user_object.firstName, new_user_object.lastName, new_user_object.password,
+                                               new_user_object.role, new_user_object.company, new_user_object.comment)
+        self._global_admin.get.assert_called_once_with('/users/' + self._username)
+        self._global_admin.put.assert_called_once_with('/users/' + self._username, mock.ANY)
+        actual_param = self._global_admin.put.call_args[0][1]
+        self._assert_equal_objects(actual_param, new_user_object)
+
     def test_delete_local_user(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)

@@ -25,7 +25,7 @@ class TestCorePlans(base_core.BaseCoreTest):
             self.assertIn(attr, actual_include)
         self.assertEqual(ret.name, self._plan_name)
 
-    def test_get_user_not_found(self):
+    def test_get_plan_not_found(self):
         get_multi_response = self._get_plan_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exception.CTERAException) as error:
