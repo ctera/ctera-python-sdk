@@ -10,7 +10,7 @@ from ..convert import fromxmlstr
 from ..common import Object
 from .. import config
 from ..exception import SSLException, HostUnreachable, ExhaustedException
-from ..lib import ask
+from ..lib import ask, utils
 
 
 class HTTPException(Exception):
@@ -57,6 +57,10 @@ class HTTPResponse:
 
     def read(self):
         return self.text
+
+
+def getheaders(headers=None, more_headers=None):
+    return utils.merge(headers, more_headers)
 
 
 def geturi(baseurl, path):
@@ -195,13 +199,14 @@ class HTTPClient(HttpClientBase):
     def mkcol(self, url, headers=None):
         return self.dispatch(HttpClientRequestMkcol(url, headers=headers))
 
-    def multipart(self, url, form_data, monitor_function_generator=None):
+    def multipart(self, url, form_data, monitor_function_generator=None, headers=None):
         encoder = MultipartEncoder(form_data)
         if monitor_function_generator:
             encoder = MultipartEncoderMonitor(encoder, callback=monitor_function_generator(encoder.len))
-        return self.dispatch(HttpClientRequestPost(url, headers={'Content-Type': encoder.content_type}, data=encoder))
+        headers = getheaders(headers, {'Content-Type': encoder.content_type})
+        return self.dispatch(HttpClientRequestPost(url, headers=headers, data=encoder))
 
-    def upload(self, url, form_data):
+    def upload(self, url, form_data, headers=None):
         def upload_monitor_generator(total_length):
             def upload_monitor(encoder):
                 logging.getLogger().info(
@@ -213,4 +218,4 @@ class HTTPClient(HttpClientBase):
                     )
                 )
             return upload_monitor
-        return self.multipart(url, form_data, upload_monitor_generator)
+        return self.multipart(url, form_data, upload_monitor_generator, headers)

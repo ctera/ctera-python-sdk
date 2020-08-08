@@ -109,7 +109,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
             return path.startswith('/%s/startup' % self.context)
         current_session = self.session()
         return current_session.authenticated() or current_session.initializing() or \
-            is_public(args[0]) or is_setup(args[0]) or is_startup(args[0])
+            is_public(args[0]) or is_setup(args[0]) or is_startup(args[0]) or hasattr(self, 'authorization_headers')
 
     def test(self):
         """ Verification check to ensure the target host is a Portal. """
@@ -121,8 +121,8 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         return self.get('/' + self.context + '/public/publicInfo', params={}, use_file_url=True)
 
     @decorator.update_current_tenant
-    def put(self, path, value, use_file_url=False):
-        return super().put(path, value, use_file_url=use_file_url)
+    def put(self, path, value, use_file_url=False, headers=None):
+        return super().put(path, value, use_file_url=use_file_url, headers=headers)
 
     @authenticated
     def query(self, path, param):
@@ -157,10 +157,11 @@ class GlobalAdmin(Portal):
         self.servers = servers.Servers(self)
         self.setup = setup.Setup(self)
         self.startup = startup.Startup(self)
+        self.authorization_headers = None
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['portals', 'servers', 'setup', 'startup']
+        return super()._omit_fields + ['portals', 'servers', 'setup', 'startup', 'authorization_headers']
 
     @property
     def context(self):
@@ -169,6 +170,12 @@ class GlobalAdmin(Portal):
     @property
     def file_browser_base_path(self):
         return '/admin/webdav/Users'
+
+    def set_authorization_headers(self, authorization_headers):
+        self.authorization_headers = authorization_headers
+
+    def _get_authorization_headers(self):
+        return self.authorization_headers
 
 
 class ServicesPortal(Portal):

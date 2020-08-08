@@ -7,6 +7,7 @@ from ..convert import tojsonstr
 from ..exception import HostUnreachable
 from .cteraclient import CTERAClient
 from ..exception import CTERAException
+from ..lib import utils
 
 
 def authenticated(function):
@@ -95,6 +96,13 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
             "Implementing class must implement the login_object property by returning an object with login and logout methods"
         )
 
+    def _add_authorization_headers(self, custom_headers):
+        return utils.merge(custom_headers, self._get_authorization_headers())
+
+    # pylint: disable=R0201
+    def _get_authorization_headers(self):  # Override in any class supporting authorization headers
+        return {}
+
     @property
     def _session_id_key(self):
         raise NotImplementedError("Implementing class must implement the _session_id_key property")
@@ -127,52 +135,62 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
         return self.get('/defaults/' + name)
 
     @authenticated
-    def get(self, path, params=None, use_file_url=False):
+    def get(self, path, params=None, use_file_url=False, headers=None):
         """ Retrieve a schema object as a Python object. """
-        return self._ctera_client.get(self.base_file_url if use_file_url else self.base_api_url, path, params or {})
+        return self._ctera_client.get(self.base_file_url if use_file_url else self.base_api_url, path,
+                                      params or {}, self._add_authorization_headers(headers))
 
     @authenticated
-    def openfile(self, path, params=None, use_file_url=False):
-        return self._ctera_client.download(self.base_file_url if use_file_url else self.base_api_url, path, params or {})
+    def openfile(self, path, params=None, use_file_url=False, headers=None):
+        return self._ctera_client.download(self.base_file_url if use_file_url else self.base_api_url, path,
+                                           params or {}, self._add_authorization_headers(headers))
 
     @authenticated
-    def download_zip(self, path, form_data, use_file_url=False):
-        return self._ctera_client.download_zip(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
+    def download_zip(self, path, form_data, use_file_url=False, headers=None):
+        return self._ctera_client.download_zip(self.base_file_url if use_file_url else self.base_api_url, path,
+                                               form_data, self._add_authorization_headers(headers))
 
     @authenticated
-    def show(self, path, use_file_url=False):
+    def show(self, path, use_file_url=False, headers=None):
         """ Print a schema object as a JSON string. """
-        print(tojsonstr(self.get(path, params={}, use_file_url=use_file_url), no_log=False))
+        print(tojsonstr(self.get(path, params={}, use_file_url=use_file_url,
+                                 headers=self._add_authorization_headers(headers)), no_log=False))
 
     @authenticated
-    def get_multi(self, path, paths, use_file_url=False):
+    def get_multi(self, path, paths, use_file_url=False, headers=None):
         """ Retrieve one or more schema objects as a Python object. """
-        return self._ctera_client.get_multi(self.base_file_url if use_file_url else self.base_api_url, path, paths)
+        return self._ctera_client.get_multi(self.base_file_url if use_file_url else self.base_api_url, path,
+                                            paths, self._add_authorization_headers(headers))
 
     @authenticated
-    def show_multi(self, path, paths, use_file_url=False):
+    def show_multi(self, path, paths, use_file_url=False, headers=None):
         """ Print one or more schema objects as a JSON string. """
-        print(tojsonstr(self.get_multi(path, paths, use_file_url=use_file_url), no_log=False))
+        print(tojsonstr(self.get_multi(path, paths, use_file_url=use_file_url,
+                                       headers=self._add_authorization_headers(headers)), no_log=False))
 
     @authenticated
-    def put(self, path, value, use_file_url=False):
+    def put(self, path, value, use_file_url=False, headers=None):
         """ Update a schema object or attribute. """
-        response = self._ctera_client.put(self.base_file_url if use_file_url else self.base_api_url, path, value)
+        response = self._ctera_client.put(self.base_file_url if use_file_url else self.base_api_url, path,
+                                          value, self._add_authorization_headers(headers))
         logging.getLogger().debug('Configuration changed. %s', {'url': path, 'value': tojsonstr(value, pretty_print=False)})
         return response
 
     @authenticated
-    def post(self, path, value, use_file_url=False):
-        response = self._ctera_client.post(self.base_file_url if use_file_url else self.base_api_url, path, value)
+    def post(self, path, value, use_file_url=False, headers=None):
+        response = self._ctera_client.post(self.base_file_url if use_file_url else self.base_api_url, path,
+                                           value, self._add_authorization_headers(headers))
         logging.getLogger().debug('Added. %s', {'url': path, 'value': tojsonstr(value, pretty_print=False)})
         return response
 
-    def form_data(self, path, form_data, use_file_url=False):
-        return self._ctera_client.form_data(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
+    def form_data(self, path, form_data, use_file_url=False, headers=None):
+        return self._ctera_client.form_data(self.base_file_url if use_file_url else self.base_api_url, path,
+                                            form_data, self._add_authorization_headers(headers))
 
     @authenticated
-    def db(self, path, name, param, use_file_url=False):
-        response = self._ctera_client.db(self.base_file_url if use_file_url else self.base_api_url, path, name, param)
+    def db(self, path, name, param, use_file_url=False, headers=None):
+        response = self._ctera_client.db(self.base_file_url if use_file_url else self.base_api_url, path, name,
+                                         param, self._add_authorization_headers(headers))
         logging.getLogger().debug(
             'Database method executed. %s',
             {'url': path, 'name': name, 'param': tojsonstr(param, pretty_print=False)}
@@ -180,9 +198,10 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
         return response
 
     @authenticated
-    def execute(self, path, name, param=None, use_file_url=False):
+    def execute(self, path, name, param=None, use_file_url=False, headers=None):
         """ Execute a schema object method. """
-        response = self._ctera_client.execute(self.base_file_url if use_file_url else self.base_api_url, path, name, param)
+        response = self._ctera_client.execute(self.base_file_url if use_file_url else self.base_api_url, path, name,
+                                              param, self._add_authorization_headers(headers))
         logging.getLogger().debug(
             'User-defined method executed. %s',
             {'url': path, 'name': name, 'param': tojsonstr(param, pretty_print=False)}
@@ -190,28 +209,32 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
         return response
 
     @authenticated
-    def add(self, path, param, use_file_url=False):
+    def add(self, path, param, use_file_url=False, headers=None):
         """ Add a schema object. """
-        return self.db(path, 'add', param, use_file_url=use_file_url)
+        return self.db(path, 'add', param, use_file_url=use_file_url, headers=self._add_authorization_headers(headers))
 
     @authenticated
-    def delete(self, path, use_file_url=False):
+    def delete(self, path, use_file_url=False, headers=None):
         """ Delete a schema object. """
-        response = self._ctera_client.delete(self.base_file_url if use_file_url else self.base_api_url, path)
+        response = self._ctera_client.delete(self.base_file_url if use_file_url else self.base_api_url, path,
+                                             self._add_authorization_headers(headers))
         logging.getLogger().debug('Deleted. %s', {'url': path})
         return response
 
     @authenticated
-    def mkcol(self, path, use_file_url=False):
-        return self._ctera_client.mkcol(self.base_file_url if use_file_url else self.base_api_url, path)
+    def mkcol(self, path, use_file_url=False, headers=None):
+        return self._ctera_client.mkcol(self.base_file_url if use_file_url else self.base_api_url, path,
+                                        self._add_authorization_headers(headers))
 
     @authenticated
-    def multipart(self, path, form_data, use_file_url=False):
-        return self._ctera_client.multipart(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
+    def multipart(self, path, form_data, use_file_url=False, headers=None):
+        return self._ctera_client.multipart(self.base_file_url if use_file_url else self.base_api_url, path,
+                                            form_data, self._add_authorization_headers(headers))
 
     @authenticated
-    def upload(self, path, form_data, use_file_url=False):
-        return self._ctera_client.upload(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
+    def upload(self, path, form_data, use_file_url=False, headers=None):
+        return self._ctera_client.upload(self.base_file_url if use_file_url else self.base_api_url, path,
+                                         form_data, self._add_authorization_headers(headers))
 
     @authenticated
     def get_session_id(self):
