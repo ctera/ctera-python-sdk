@@ -1,5 +1,6 @@
 import logging
 
+from ..lib.task_manager_base import TaskError
 from . import taskmgr as TaskManager
 from .enum import VolumeStatus
 from ..common import Object
@@ -202,5 +203,5 @@ class Volumes(BaseCommand):
     def _wait_mount(self, tid):
         try:
             TaskManager.wait(self._gateway, tid)
-        except TaskManager.TaskError:
+        except TaskError:
             logging.getLogger().debug('Failed mounting volume. %s', {'tid': tid})

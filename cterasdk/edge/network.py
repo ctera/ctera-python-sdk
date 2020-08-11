@@ -1,6 +1,7 @@
 import logging
 
 from .enum import Mode
+from ..lib.task_manager_base import TaskError
 from . import taskmgr as TaskManager
 from ..common import Object
 from .base_command import BaseCommand
@@ -110,7 +111,7 @@ class Network(BaseCommand):
             logging.getLogger().debug("Obtained connection status. %s", {'status': task.result.rc})
             if task.result.rc == "Open":
                 return True
-        except TaskManager.TaskError:
+        except TaskError:
             pass
 
         logging.getLogger().warning("Couldn't establish TCP connection. %s", {'address': address, 'port': port})

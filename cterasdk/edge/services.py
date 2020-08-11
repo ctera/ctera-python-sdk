@@ -1,5 +1,6 @@
 import logging
 
+from ..lib.task_manager_base import TaskError
 from .licenses import Licenses
 from . import taskmgr as TaskManager
 from ..lib import ask
@@ -114,7 +115,7 @@ class Services(BaseCommand):
         try:
             TaskManager.wait(self._gateway, task)
             logging.getLogger().info("Connected to Portal.")
-        except TaskManager.TaskError as error:
+        except TaskError as error:
             description = error.task.description
             logging.getLogger().error("Connection failed. Reason: %s", description)
             raise CTERAException("Connection failed", None, reason=description)

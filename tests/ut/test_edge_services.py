@@ -1,6 +1,7 @@
 from unittest import mock
 
 from cterasdk import exception
+from cterasdk.lib import task_manager_base
 from cterasdk.edge import taskmgr
 from cterasdk.edge import services
 from cterasdk.edge.enum import ServicesConnectionState
@@ -171,7 +172,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):
 
     @staticmethod
     def _get_task_error():
-        error = taskmgr.TaskError(TestEdgeServices._background_task_id)
+        error = task_manager_base.TaskError(TestEdgeServices._background_task_id)
         error.task = Object()
         error.task.description = 'Reason for Failure'
         return error

@@ -1,5 +1,6 @@
 import logging
 
+from ..lib.task_manager_base import TaskError
 from . import taskmgr as TaskManager
 from ..exception import CTERAException
 from .base_command import BaseCommand
@@ -22,5 +23,5 @@ class Shell(BaseCommand):
             task = TaskManager.wait(self._gateway, task)
             logging.getLogger().info("Shell command executed. %s", {'shell_command': shell_command})
             return task.result.result
-        except TaskManager.TaskError as error:
+        except TaskError as error:
             raise CTERAException('An error occurred while executing task', error)
