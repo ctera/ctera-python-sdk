@@ -74,7 +74,7 @@ class Task:
         match = re.search('servers/[^/]*/bgTasks/[1-9][0-9]*$', ref)
         if not match:
             logging.getLogger().error('Invalid task id. %s', {'ref': ref})
-            raise InputError('Invalid task id', ref, [64, '/proc/bgtasks/64'])
+            raise InputError('Invalid task id', ref, ['servers/server/bgTasks/107781'])
         return '/' + match.group(0)
 
 
