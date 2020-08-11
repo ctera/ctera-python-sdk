@@ -107,13 +107,13 @@ class Users(BaseCommand):
 
         return response
 
-    def modify(self, username, name=None, email=None, first_name=None,
+    def modify(self, current_username, new_username=None, email=None, first_name=None,
                last_name=None, password=None, role=None, company=None, comment=None):
         """
         Modify a local user account
 
-        :param str username: The current user name
-        :param str,optional name: New name
+        :param str current_username: The current user name
+        :param str,optional new_username: New name
         :param str,optional email: E-mail address
         :param str,optional first_name: First name
         :param str,optional last_name: Last name
@@ -122,10 +122,10 @@ class Users(BaseCommand):
         :param str,optional company: Company name
         :param str,optional comment: Comment
         """
-        user_account = UserAccount(username)
+        user_account = UserAccount(current_username)
         user = self._get_entire_object(user_account)
-        if name:
-            user.name = name
+        if new_username:
+            user.name = new_username
         if email:
             user.email = email
         if first_name:
@@ -142,7 +142,7 @@ class Users(BaseCommand):
             user.comment = comment
 
         try:
-            response = self._portal.put('/users/' + username, user)
+            response = self._portal.put('/users/' + current_username, user)
             logging.getLogger().info("User modified. %s", {'username': user.name})
             return response
         except CTERAException as error:
