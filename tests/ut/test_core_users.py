@@ -135,6 +135,23 @@ class TestCoreUsers(base_core.BaseCoreTest):
         self._global_admin.execute.assert_called_once_with(baseurl, 'delete', True)
         self.assertEqual(ret, execute_response)
 
+    def test_apply_changes(self):
+        execute_response = 'Success'
+        self._init_global_admin(execute_response=execute_response)
+        ret = users.Users(self._global_admin).apply_changes()
+        self._global_admin.execute.assert_called_once_with('', 'updateAccounts', mock.ANY)
+        expected_param = TestCoreUsers._get_apply_changes_param()
+        actual_param = self._global_admin.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, execute_response)
+
+    @staticmethod
+    def _get_apply_changes_param():
+        param = Object()
+        param.objectId = None
+        param.type = 'users'
+        return param
+
     def _get_user_object(self, **kwargs):
         user_object = Object()
         user_object._classname = self._user_class_name  # pylint: disable=protected-access
