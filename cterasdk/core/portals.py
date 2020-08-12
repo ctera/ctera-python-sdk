@@ -155,6 +155,7 @@ class Portals(BaseCommand):
         param = Object()
         param.objectId = None
         param.type = 'portals'
+        logging.getLogger().info('Applying provisioning changes.')
         task = self._portal.execute('', 'updatePortals', param)
         if wait:
             task = TaskManager.wait(self._portal, task)
