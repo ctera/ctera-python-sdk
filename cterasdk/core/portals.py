@@ -1,11 +1,13 @@
 import logging
 
+from ..exception import CTERAException
 from .base_command import BaseCommand
 from ..lib import Iterator, Command
 from ..common import Object
 from . import union
 from . import enum
 from . import query
+from . import taskmgr as TaskManager
 
 
 class Portals(BaseCommand):
@@ -14,6 +16,20 @@ class Portals(BaseCommand):
     """
 
     default = ['name']
+
+    def get(self, name, include=None):
+        """
+        Get a tenant
+
+        :param str name: Name of the tenant
+        :param list[str] include: List of fields to retrieve, defaults to ['name']
+        """
+        include = union.union(include or [], Portals.default)
+        include = ['/' + attr for attr in include]
+        tenant = self._portal.get_multi('/portals/' + name, include)
+        if tenant.name is None:
+            raise CTERAException('Could not find tenant', None, name=name)
+        return tenant
 
     def list_tenants(self, include=None, portal_type=None):
         """
@@ -129,3 +145,18 @@ class Portals(BaseCommand):
         Browse the Global Admin
         """
         self.browse('')
+
+    def apply_changes(self, wait=False):
+        """
+        Apply provisioning changes.\n
+
+        :param bool,optional wait: Wait for all changes to apply
+        """
+        param = Object()
+        param.objectId = None
+        param.type = 'portals'
+        logging.getLogger().info('Applying provisioning changes.')
+        task = self._portal.execute('', 'updatePortals', param)
+        if wait:
+            task = TaskManager.wait(self._portal, task)
+        return task

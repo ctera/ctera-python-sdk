@@ -6,6 +6,7 @@ from ..exception import CTERAException
 from ..common import Object, DateTimeUtils
 from . import query
 from . import union
+from . import taskmgr as TaskManager
 
 
 class Users(BaseCommand):
@@ -148,6 +149,21 @@ class Users(BaseCommand):
         except CTERAException as error:
             logging.getLogger().error("Failed to modify user.")
             raise CTERAException('Failed to modify user', error)
+
+    def apply_changes(self, wait=False):
+        """
+        Apply provisioning changes.\n
+
+        :param bool,optional wait: Wait for all changes to apply
+        """
+        param = Object()
+        param.objectId = None
+        param.type = 'users'
+        logging.getLogger().info('Applying provisioning changes.')
+        task = self._portal.execute('', 'updateAccounts', param)
+        if wait:
+            task = TaskManager.wait(self._portal, task)
+        return task
 
     def delete(self, user):
         """

@@ -1,6 +1,7 @@
 from unittest import mock
 
 from cterasdk.edge import network
+from cterasdk.lib import task_manager_base
 from cterasdk.edge import taskmgr
 from cterasdk.edge.enum import Mode
 from cterasdk.common import Object
@@ -153,7 +154,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
     def test_tcp_connect_task_error(self):
         execute_response = self._task_id
         self._init_filer(execute_response=execute_response)
-        taskmgr.wait = mock.MagicMock(side_effect=taskmgr.TaskError(self._task_id))
+        taskmgr.wait = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
 
         ret = network.Network(self._filer).tcp_connect(self._tcp_connect_address, self._tcp_connect_port)
 

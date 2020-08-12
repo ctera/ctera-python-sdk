@@ -165,6 +165,17 @@ Subscribe a Team Portal to a Plan
 
    admin.portals.subscribe('ctera', '10tb')
 
+Apply Provisioning Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.core.portals.Portals.apply_changes
+   :noindex:
+
+.. code-block:: python
+
+   admin.portals.apply_changes()
+   admin.portals.apply_changes(wait=True)  # wait for all changes to apply
+
 Delete a Team Portal
 ^^^^^^^^^^^^^^^^^^^^
 .. automethod:: cterasdk.core.portals.Portals.delete

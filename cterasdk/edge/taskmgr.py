@@ -1,62 +1,13 @@
-import logging
-import time
 import re
+import logging
 
-from ..exception import CTERAException, InputError
-
-
-class TaskStatusEnum:
-    Running = "running"
-    Failed = "failed"
-    Completed = "completed"
+from ..lib.task_manager_base import TaskBase
+from ..exception import InputError
 
 
-class TaskError(CTERAException):
+class Task(TaskBase):
 
-    def __init__(self, task):
-        super().__init__()
-        self.task = task
-
-
-class Task:
-
-    def __init__(self, CTERAHost, ref, retries=10, seconds=1):
-        self.CTERAHost = CTERAHost
-        self.path = self.tid(ref)
-        self.attempt = 0
-        self.retries = retries
-        self.seconds = seconds
-        self.running = True
-
-    def wait(self):
-        task = None
-        while self.running:
-            logging.getLogger().debug('Obtaining task status. %s', {'path': self.path, 'attempt': (self.attempt + 1)})
-            task = self.CTERAHost.get(self.path)
-            self.increment()
-            self.running = task.status == TaskStatusEnum.Running
-        return self.resolve(task)
-
-    @staticmethod
-    def resolve(task):
-        if task.status != TaskStatusEnum.Completed:
-            logging.getLogger().error('Task did not complete successfully. %s', {'id': task.id, 'status': task.status})
-            raise TaskError(task)
-
-        logging.getLogger().debug('Task completed successfully. %s', {'id': task.id})
-        return task
-
-    def increment(self):
-        if self.attempt >= self.retries:
-            duration = time.strftime("%H:%M:%S", time.gmtime(self.retries * self.seconds))
-            logging.getLogger().error('Could not obtain task status in a timely manner. %s', {'duration': duration})
-            raise CTERAException('Timed out. Could not obtain task status in a timely manner', None, duration=duration)
-        self.attempt = self.attempt + 1
-        logging.getLogger().debug('Sleep. %s', {'seconds': self.seconds})
-        time.sleep(self.seconds)
-
-    @staticmethod
-    def tid(ref):
+    def _get_task_id(self, ref):
         uid = None
         if isinstance(ref, int):
             uid = str(ref)

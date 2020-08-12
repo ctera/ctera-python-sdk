@@ -1,5 +1,6 @@
 from unittest import mock
 
+from cterasdk import exception
 from cterasdk.common import Object
 from cterasdk.core.enum import PortalType
 from cterasdk.core import portals
@@ -14,12 +15,31 @@ class TestCorePortals(base_core.BaseCoreTest):
 
     def setUp(self):
         super().setUp()
+        self._portal_class_name = 'TeamPortal'
         self._name = 'acme'
         self._plan_name = 'plan name'
         self._plan_ref = 'plan ref'
         self._display_name = 'Acme Corp.'
         self._billing_id = 'billing-id'
         self._company = 'The Acme Corporation'
+        self._tenant_attrs = ['externalPortalId', 'companyName']
+
+    def test_get_tenant(self):
+        get_multi_response = self._get_portal_object(name=self._name, externalPortalId=self._billing_id, companyName=self._company)
+        self._init_global_admin(get_multi_response=get_multi_response)
+        ret = portals.Portals(self._global_admin).get(self._name, self._tenant_attrs)
+        self._global_admin.get_multi.assert_called_once_with('/portals/' + self._name, mock.ANY)
+        attrs = self._tenant_attrs + portals.Portals.default
+        expected_include = ['/' + attr for attr in attrs]
+        actual_include = self._global_admin.get_multi.call_args[0][1]
+        self._assert_equal_objects(actual_include, expected_include)
+        self.assertEqual(ret.name, self._name)
+
+    def test_get_tenant_not_found(self):
+        self._init_global_admin(get_multi_response=self._get_portal_object(name=None))
+        with self.assertRaises(exception.CTERAException) as error:
+            portals.Portals(self._global_admin).get(self._name)
+        self.assertEqual('Could not find tenant', error.exception.message)
 
     @staticmethod
     def _get_query_portals_response(execute_path, execute_name, execute_param):
@@ -90,7 +110,8 @@ class TestCorePortals(base_core.BaseCoreTest):
         self._init_global_admin(add_response=add_response)
         ret = portals.Portals(self._global_admin).add(self._name)
         self._global_admin.add.assert_called_once_with('/teamPortals', mock.ANY)
-        expected_param = self._get_portal_param()
+        expected_param = self._get_portal_object(name=self._name, displayName=None, externalPortalId=None,
+                                                 companyName=None, comment=None)
         actual_param = self._global_admin.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
@@ -100,7 +121,8 @@ class TestCorePortals(base_core.BaseCoreTest):
         self._init_global_admin(add_response=add_response)
         ret = portals.Portals(self._global_admin).add(self._name, self._display_name, self._billing_id, self._company)
         self._global_admin.add.assert_called_once_with('/teamPortals', mock.ANY)
-        expected_param = self._get_portal_param(self._display_name, self._billing_id, self._company)
+        expected_param = self._get_portal_object(name=self._name, displayName=self._display_name,
+                                                 externalPortalId=self._billing_id, companyName=self._company, comment=None)
         actual_param = self._global_admin.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
@@ -111,7 +133,8 @@ class TestCorePortals(base_core.BaseCoreTest):
         self._init_global_admin(get_multi_response=get_multi_response, add_response=add_response)
         ret = portals.Portals(self._global_admin).add(self._name, plan=self._plan_name)
         self._global_admin.add.assert_called_once_with('/teamPortals', mock.ANY)
-        expected_param = self._get_portal_param(plan=self._plan_ref)
+        expected_param = self._get_portal_object(name=self._name, plan=self._plan_ref, displayName=None,
+                                                 externalPortalId=None, companyName=None, comment=None)
         actual_param = self._global_admin.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
@@ -154,14 +177,26 @@ class TestCorePortals(base_core.BaseCoreTest):
         portals.Portals(self._global_admin).browse_global_admin()
         self._global_admin.put.assert_called_once_with('/currentPortal', '')
 
-    def _get_portal_param(self, display_name=None, billing_id=None, company=None, comment=None, plan=None):
+    def test_apply_changes(self):
+        execute_response = 'Success'
+        self._init_global_admin(execute_response=execute_response)
+        ret = portals.Portals(self._global_admin).apply_changes()
+        self._global_admin.execute.assert_called_once_with('', 'updatePortals', mock.ANY)
+        expected_param = TestCorePortals._get_apply_changes_param()
+        actual_param = self._global_admin.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, execute_response)
+
+    @staticmethod
+    def _get_apply_changes_param():
         param = Object()
-        param._classname = 'TeamPortal'  # pylint: disable=protected-access
-        param.name = self._name
-        param.displayName = display_name
-        param.externalPortalId = billing_id
-        param.companyName = company
-        param.comment = comment
-        if plan:
-            param.plan = plan
+        param.objectId = None
+        param.type = 'portals'
         return param
+
+    def _get_portal_object(self, **kwargs):
+        portal_object = Object()
+        portal_object._classname = self._portal_class_name  # pylint: disable=protected-access
+        for key, value in kwargs.items():
+            setattr(portal_object, key, value)
+        return portal_object

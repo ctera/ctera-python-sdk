@@ -1,6 +1,7 @@
 import logging
 
 from . import taskmgr as TaskManager
+from ..lib.task_manager_base import TaskError
 from ..common import Object
 from ..exception import CTERAException
 from .enum import BackupConfStatusID
@@ -214,7 +215,7 @@ class Backup(BaseCommand):
         try:
             task = TaskManager.wait(self._gateway, task)
             return task.result
-        except TaskManager.TaskError:
+        except TaskError:
             pass
 
     def _configure_backup_settings(self, param):

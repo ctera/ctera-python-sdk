@@ -56,12 +56,13 @@ class Plans(BaseCommand):
             logging.getLogger().error("Plan creation failed.")
             raise CTERAException('Plan creation failed', error)
 
-    def modify(self, name, retention=None, quotas=None):
+    def modify(self, name, retention=None, quotas=None, apply_changes=True):
         """
         Modify a subscription plan
 
         :param dict,optional retention: The data retention policy
         :param dict,optional quotas: The items included in the plan and their respective quota
+        :param bool,optional apply_changes: Apply provisioning changes immediately
         """
         plan = self._get_entire_object(name)
         Plans._assign_retention(plan, retention)
@@ -69,6 +70,11 @@ class Plans(BaseCommand):
         try:
             response = self._portal.put('/plans/' + name, plan)
             logging.getLogger().info("Plan modified. %s", {'plan': name})
+            if apply_changes:
+                if self._portal.session().global_admin():
+                    self._portal.portals.apply_changes(True)
+                else:
+                    self._portal.users.apply_changes(True)
             return response
         except CTERAException as error:
             logging.getLogger().error("Could not modify subscription plan.")
