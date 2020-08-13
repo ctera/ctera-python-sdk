@@ -621,6 +621,12 @@ Cloud Drive Folders
    bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
    cloud_drive_folders = admin.cloudfs.list_folders(user=bruce)
 
+   """List both deleted and non-deleted cloud drive folders"""
+   cloud_drive_folders = admin.cloudfs.list_folders(include_deleted=True)
+
+   """List deleted cloud drive folders"""
+   cloud_drive_folders = admin.cloudfs.list_folders(include_deleted=True, filter_deleted=True)
+
 .. automethod:: cterasdk.core.cloudfs.CloudFS.mkdir
    :noindex:
 
