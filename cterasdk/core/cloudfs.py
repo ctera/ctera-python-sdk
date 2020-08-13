@@ -130,19 +130,23 @@ class CloudFS(BaseCommand):
         logging.getLogger().info('Restoring cloud drive folder. %s', {'path': path})
         self._portal.files.undelete(path)
 
-    def list_folders(self, include=None, deleted=False, user=None):
+    def list_folders(self, include=None, include_deleted=False, filter_deleted=False, user=None):
         """
-        List cloud drive folders
+        List all Cloud Drive folders.\n
 
         :param str,optional include: List of fields to retrieve, defaults to ['name', 'group', 'owner']
-        :param str,optional deleted: Retrieve deleted folders
+        :param bool,optional include_deleted: Include deleted files and folders
+        :param bool,optional filter_deleted: Filter deleted files and folders
         :param cterasdk.core.types.UserAccount user: User account of the cloud folder owner
         :returns: Iterator for all Cloud Drive folders
         """
         include = union.union(include or [], CloudFS.default)
         builder = query.QueryParamBuilder().include(include)
-        query_filter = query.FilterBuilder('isDeleted').eq(deleted)
-        builder.addFilter(query_filter)
+        if include_deleted:
+            builder.put('includeDeleted', True)
+        if filter_deleted:
+            query_filter = query.FilterBuilder('isDeleted').eq(True)
+            builder.addFilter(query_filter)
         if user:
             uid = self._portal.users.get(user, ['uid']).uid
             builder.ownedBy(uid)

@@ -95,11 +95,14 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
             self._assert_equal_objects(actual_param, expected_param)
 
     @staticmethod
-    def _get_list_folders_param(include=None, deleted=False, user_uid=None):
+    def _get_list_folders_param(include=None, include_deleted=False, filter_deleted=False, user_uid=None):
         include = union.union(include or [], cloudfs.CloudFS.default)
         builder = query.QueryParamBuilder().include(include)
-        query_filter = query.FilterBuilder('isDeleted').eq(deleted)
-        builder.addFilter(query_filter)
+        if include_deleted:
+            builder.put('includeDeleted', True)
+        if filter_deleted:
+            query_filter = query.FilterBuilder('isDeleted').eq(True)
+            builder.addFilter(query_filter)
         if user_uid:
             builder.ownedBy(user_uid)
         return builder.build()

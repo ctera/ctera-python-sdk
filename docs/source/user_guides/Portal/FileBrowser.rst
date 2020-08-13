@@ -12,9 +12,13 @@ List
 
 .. code:: python
 
-   file_browser.ls('')
+   file_browser.ls('')  # List the contents of the Cloud Drive
 
-   file_browser.ls('My Files')
+   file_browser.ls('My Files')  # List the contents of the 'My Files' folder
+
+   flie_browser.ls('My Files', True)  # Include both deleted and non-deleted files
+
+   flie_browser.ls('My Files', True, True)  # Filter only deleted files
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.walk
    :noindex:

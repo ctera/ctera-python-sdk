@@ -25,5 +25,8 @@ class FetchResourcesParamBuilder:
         self.param.depth = depth  # pylint: disable=attribute-defined-outside-init
         return self
 
+    def include_deleted(self):
+        self.param.includeDeleted = True  # pylint: disable=attribute-defined-outside-init
+
     def build(self):
         return self.param

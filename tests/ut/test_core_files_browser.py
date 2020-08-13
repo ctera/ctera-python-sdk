@@ -16,7 +16,15 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         path = 'cloud/Users'
         ls_mock = self.patch_call('cterasdk.core.files.browser.ls')
         self.files.ls(path)
-        ls_mock.ls.assert_called_once_with(self._global_admin, mock.ANY)
+        ls_mock.ls.assert_called_once_with(self._global_admin, mock.ANY, include_deleted=False)
+        actual_ctera_path = ls_mock.ls.call_args[0][1]
+        self.assertEqual(actual_ctera_path.fullpath(), os.path.join(TestCoreFilesBrowser._base_path, path))
+
+    def test_ls_deleted_files(self):
+        path = 'cloud/Users'
+        ls_mock = self.patch_call('cterasdk.core.files.browser.ls')
+        self.files.ls(path, True)
+        ls_mock.ls.assert_called_once_with(self._global_admin, mock.ANY, include_deleted=True)
         actual_ctera_path = ls_mock.ls.call_args[0][1]
         self.assertEqual(actual_ctera_path.fullpath(), os.path.join(TestCoreFilesBrowser._base_path, path))
 
