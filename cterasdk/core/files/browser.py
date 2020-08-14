@@ -16,25 +16,27 @@ class FileBrowser(BaseCommand):
         self._base_path = base_path
         self._file_access = file_access.FileAccess(portal)
 
-    def ls(self, path):
+    def ls(self, path, include_deleted=False):
         """
         Execute ls on the provided path
 
-        :param str path: Path to execute ls on
+        :param str path: Path to list
+        :param bool,optional include_deleted: Include deleted files, defaults to False
         """
-        return ls.ls(self._portal, self.mkpath(path))
+        return ls.ls(self._portal, self.mkpath(path), include_deleted=include_deleted)
 
-    def walk(self, path):
+    def walk(self, path, include_deleted=False):
         """
         Perform walk on the provided path
 
         :param str path: Path to perform walk on
+        :param bool,optional include_deleted: Include deleted files, defaults to False
         """
         paths = [self.mkpath(path)]
 
         while len(paths) > 0:
             path = paths.pop(0)
-            items = ls.ls(self._portal, path)
+            items = ls.ls(self._portal, path, include_deleted)
             for item in items:
                 if item.isFolder:
                     paths.append(self.mkpath(item))

@@ -295,3 +295,16 @@ class PlanItem:
     SA = 'SA'
     Share = 'Share'
     Connect = 'Connect'
+
+
+class ListFilter:
+    """
+    Cloud Drive Folder List Filter
+
+    :ivar str All: All
+    :ivar str Deleted: Deleted
+    :ivar str NonDeleted: NonDeleted
+    """
+    All = 'All'
+    Deleted = 'Deleted'
+    NonDeleted = 'NonDeleted'
