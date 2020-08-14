@@ -133,7 +133,7 @@ class CloudFS(BaseCommand):
 
     def list_folders(self, include=None, list_filter=ListFilter.NonDeleted, user=None):
         """
-        List all Cloud Drive folders.\n
+        List Cloud Drive folders.
 
         :param str,optional include: List of fields to retrieve, defaults to ['name', 'group', 'owner']
         :param cterasdk.core.enum.ListFilter filter: Filter the list of Cloud Drive folders, defaults to non-deleted folders
