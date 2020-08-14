@@ -2,6 +2,7 @@ import logging
 
 from .base_command import BaseCommand
 from . import query, union
+from .enum import ListFilter
 from ..common import Object
 from ..exception import CTERAException
 
@@ -130,23 +131,22 @@ class CloudFS(BaseCommand):
         logging.getLogger().info('Restoring cloud drive folder. %s', {'path': path})
         self._portal.files.undelete(path)
 
-    def list_folders(self, include=None, include_deleted=False, filter_deleted=False, user=None):
+    def list_folders(self, include=None, list_filter=ListFilter.NonDeleted, user=None):
         """
         List all Cloud Drive folders.\n
 
         :param str,optional include: List of fields to retrieve, defaults to ['name', 'group', 'owner']
-        :param bool,optional include_deleted: Include deleted files and folders
-        :param bool,optional filter_deleted: Filter deleted files and folders
+        :param cterasdk.core.enum.ListFilter filter: Filter the list of Cloud Drive folders, defaults to non-deleted folders
         :param cterasdk.core.types.UserAccount user: User account of the cloud folder owner
         :returns: Iterator for all Cloud Drive folders
         """
         include = union.union(include or [], CloudFS.default)
         builder = query.QueryParamBuilder().include(include)
-        if include_deleted:
+        if list_filter != ListFilter.NonDeleted:
             builder.put('includeDeleted', True)
-        if filter_deleted:
-            query_filter = query.FilterBuilder('isDeleted').eq(True)
-            builder.addFilter(query_filter)
+            if list_filter == ListFilter.Deleted:
+                query_filter = query.FilterBuilder('isDeleted').eq(True)
+                builder.addFilter(query_filter)
         if user:
             uid = self._portal.users.get(user, ['uid']).uid
             builder.ownedBy(uid)
