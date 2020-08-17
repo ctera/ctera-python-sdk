@@ -622,10 +622,10 @@ Cloud Drive Folders
    cloud_drive_folders = admin.cloudfs.list_folders(user=bruce)
 
    """List both deleted and non-deleted cloud drive folders"""
-   cloud_drive_folders = admin.cloudfs.list_folders(list_filter=portal_enum.ListFolder.All)
+   cloud_drive_folders = admin.cloudfs.list_folders(list_filter=portal_enum.ListFilter.All)
 
    """List deleted cloud drive folders"""
-   cloud_drive_folders = admin.cloudfs.list_folders(list_filter=portal_enum.ListFolder.Deleted)
+   cloud_drive_folders = admin.cloudfs.list_folders(list_filter=portal_enum.ListFilter.Deleted)
 
 .. automethod:: cterasdk.core.cloudfs.CloudFS.mkdir
    :noindex:
