@@ -36,7 +36,7 @@ class FileBrowser(BaseCommand):
 
         while len(paths) > 0:
             path = paths.pop(0)
-            items = ls.ls(self._portal, path, include_deleted)
+            items = ls.ls(self._portal, path, include_deleted=include_deleted)
             for item in items:
                 if item.isFolder:
                     paths.append(self.mkpath(item))
