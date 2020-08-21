@@ -136,7 +136,7 @@ class CloudFS(BaseCommand):
         List Cloud Drive folders.
 
         :param str,optional include: List of fields to retrieve, defaults to ['name', 'group', 'owner']
-        :param cterasdk.core.enum.ListFilter filter: Filter the list of Cloud Drive folders, defaults to non-deleted folders
+        :param cterasdk.core.enum.ListFilter list_filter: Filter the list of Cloud Drive folders, defaults to non-deleted folders
         :param cterasdk.core.types.UserAccount user: User account of the cloud folder owner
         :returns: Iterator for all Cloud Drive folders
         """
