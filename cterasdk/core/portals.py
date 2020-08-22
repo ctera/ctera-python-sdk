@@ -4,7 +4,7 @@ from ..exception import CTERAException
 from .base_command import BaseCommand
 from ..lib import Iterator, Command
 from ..common import Object
-from . import union
+from ..common import union
 from . import enum
 from . import query
 from . import taskmgr as TaskManager
@@ -24,7 +24,7 @@ class Portals(BaseCommand):
         :param str name: Name of the tenant
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         """
-        include = union.union(include or [], Portals.default)
+        include = union(include or [], Portals.default)
         include = ['/' + attr for attr in include]
         tenant = self._portal.get_multi('/portals/' + name, include)
         if tenant.name is None:
@@ -40,7 +40,7 @@ class Portals(BaseCommand):
         :param cterasdk.core.enum.PortalType portal_type: The Portal type
         """
         # browse administration
-        include = union.union(include or [], Portals.default)
+        include = union(include or [], Portals.default)
         param = query.QueryParamBuilder().include(include).build()
         baseurl = '/portals'
         if portal_type == enum.PortalType.Team:

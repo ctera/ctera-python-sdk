@@ -1,6 +1,7 @@
 from .base_command import BaseCommand
 from .enum import DeviceType
-from . import remote, query, union
+from . import remote, query
+from ..common import union
 from ..exception import CTERAException
 
 
@@ -21,7 +22,7 @@ class Devices(BaseCommand):
         :return: Managed Device
         :rtype: ctera.object.Gateway.Gateway or ctera.object.Agent.Agent
         """
-        include = union.union(include or [], Devices.default)
+        include = union(include or [], Devices.default)
         include = ['/' + attr for attr in include]
         tenant = self._portal.session().tenant()
         url = '/portals/%s/devices/%s' % (tenant, device_name)
@@ -115,7 +116,7 @@ class Devices(BaseCommand):
         :return: Iterator for all matching Devices
         :rtype: cterasdk.lib.iterator.Iterator
         """
-        include = union.union(include or [], Devices.default)
+        include = union(include or [], Devices.default)
         builder = query.QueryParamBuilder().include(include).allPortals(allPortals)
         filters = filters or []
         for query_filter in filters:

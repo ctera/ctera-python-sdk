@@ -1,9 +1,10 @@
 import logging
 
 from .base_command import BaseCommand
-from . import query, union
+from . import query
 from .enum import ListFilter
 from ..common import Object
+from ..common import union
 from ..exception import CTERAException
 
 
@@ -19,7 +20,7 @@ class CloudFS(BaseCommand):
         :param str name: Name of the Folder Group to find
         :param str,optional include: List of fields to retrieve, defaults to ['name', 'owner']
         """
-        include = union.union(include or [], ['name', 'owner'])
+        include = union(include or [], ['name', 'owner'])
         include = ['/' + attr for attr in include]
         folder_group = self._portal.get_multi('/foldersGroups/' + name, include)
         if folder_group.name is None:
@@ -34,7 +35,7 @@ class CloudFS(BaseCommand):
         :param cterasdk.core.types.UserAccount user: User account of the folder group owner
         :returns: Iterator for all folder groups
         """
-        include = union.union(include or [], ['name', 'owner'])
+        include = union(include or [], ['name', 'owner'])
         builder = query.QueryParamBuilder().include(include)
         if user:
             uid = self._portal.users.get(user, ['uid']).uid
@@ -140,7 +141,7 @@ class CloudFS(BaseCommand):
         :param cterasdk.core.types.UserAccount user: User account of the cloud folder owner
         :returns: Iterator for all Cloud Drive folders
         """
-        include = union.union(include or [], CloudFS.default)
+        include = union(include or [], CloudFS.default)
         builder = query.QueryParamBuilder().include(include)
         if list_filter != ListFilter.NonDeleted:
             builder.put('includeDeleted', True)

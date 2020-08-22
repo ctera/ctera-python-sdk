@@ -1,6 +1,6 @@
+from ..common import union
 from .base_command import BaseCommand
 from . import query
-from . import union
 
 
 class Servers(BaseCommand):
@@ -18,6 +18,6 @@ class Servers(BaseCommand):
         :param list[str],optional include: List of fields to retrieve, defaults to ['name']
         """
         # browse administration
-        include = union.union(include or [], Servers.default)
+        include = union(include or [], Servers.default)
         param = query.QueryParamBuilder().include(include).build()
         return query.iterator(self._portal, '/servers', param)
