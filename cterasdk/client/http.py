@@ -143,6 +143,14 @@ class HttpClientBase():
     def set_session_id(self, session_id):
         self.session.cookies.set(self._session_id_key, session_id)
 
+    def set_custom_headers(self, headers):
+        """
+        Add custom headers that will be included in every http request.
+
+        :param dict headers: the headers, represented as a key-value str dict
+        """
+        self.session.headers.update(headers)
+
 
 class HttpClientRequest():
     def __init__(self, method, url, **kwargs):

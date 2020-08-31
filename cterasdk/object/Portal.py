@@ -17,6 +17,7 @@ from ..core import cloudfs
 from ..core import zones
 from ..core import setup
 from ..core import startup
+from ..core import uri
 from ..core import files
 
 
@@ -57,7 +58,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
 
     @property
     def base_api_url(self):
-        return self.base_portal_url + '/api'
+        return uri.api(self)
 
     @property
     def base_portal_url(self):
@@ -109,7 +110,8 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
             return path.startswith('/%s/startup' % self.context)
         current_session = self.session()
         return current_session.authenticated() or current_session.initializing() or \
-            is_public(args[0]) or is_setup(args[0]) or is_startup(args[0])
+            is_public(args[0]) or is_setup(args[0]) or is_startup(args[0]) or \
+            current_session.is_local_auth()
 
     def test(self):
         """ Verification check to ensure the target host is a Portal. """

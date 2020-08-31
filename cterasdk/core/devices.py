@@ -11,11 +11,12 @@ class Devices(BaseCommand):
     type_attr = 'deviceType'
     default = ['name', 'portal', 'deviceType']
 
-    def device(self, device_name, include=None):
+    def device(self, device_name, tenant=None, include=None):
         """
         Get a Device by its name
 
         :param str device_name: Name of the device to retrieve
+        :param str,optional tenant: Tenant of the device, defaults to the tenant in the current session
         :param list[str],optional include: List of fields to retrieve, defaults to ['name', 'portal', 'deviceType']
 
         :return: Managed Device
@@ -23,8 +24,16 @@ class Devices(BaseCommand):
         """
         include = union.union(include or [], Devices.default)
         include = ['/' + attr for attr in include]
-        tenant = self._portal.session().tenant()
-        url = '/portals/%s/devices/%s' % (tenant, device_name)
+
+        session = self._portal.session()
+        if not tenant:
+            if not session.in_tenant_context():
+                raise CTERAException('You must specify a tenant name or browse the tenant first.')
+            tenant = self._portal.session().tenant()
+        if session.is_local_auth():
+            url = '/devices/' + device_name  # local auth: auto appends /portals/{tenant_name}
+        else:
+            url = '/portals/%s/devices/%s' % (tenant, device_name)  # regular auth: support both tenant and Administration context
 
         dev = self._portal.get_multi(url, include)
         if dev.name is None:

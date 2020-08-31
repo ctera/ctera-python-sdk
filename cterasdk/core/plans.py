@@ -71,10 +71,10 @@ class Plans(BaseCommand):
             response = self._portal.put('/plans/' + name, plan)
             logging.getLogger().info("Plan modified. %s", {'plan': name})
             if apply_changes:
-                if self._portal.session().global_admin():
-                    self._portal.portals.apply_changes(True)
-                else:
+                if self._portal.session().in_tenant_context():
                     self._portal.users.apply_changes(True)
+                else:
+                    self._portal.portals.apply_changes(True)
             return response
         except CTERAException as error:
             logging.getLogger().error("Could not modify subscription plan.")

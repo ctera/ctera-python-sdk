@@ -231,6 +231,16 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
         self._ctera_client.set_session_id(session_id)
         self._session.start_local_session(self)
 
+    def set_authorization_headers(self, headers):
+        """
+        Start a session using authorization headers id instead of logging in
+
+        :param dict headers: the authorization headers, represented as a key-value str dict
+        """
+        self._ctera_client.set_authorization_headers(headers)
+        self._session.local_auth = True  # pylint: disable=protected-access
+        self._session.start_local_session(self)
+
     def whoami(self):
         """
         Return the name of the logged in user.

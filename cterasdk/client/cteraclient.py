@@ -73,7 +73,10 @@ class CTERAClient:
         return self.http_client.get_session_id()
 
     def set_session_id(self, session_id):
-        return self.http_client.set_session_id(session_id)
+        self.http_client.set_session_id(session_id)
+
+    def set_authorization_headers(self, headers):
+        self.http_client.set_custom_headers(headers)
 
     @staticmethod
     def fromxmlstr(request, response):

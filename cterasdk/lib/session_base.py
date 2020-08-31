@@ -20,6 +20,7 @@ class SessionBase(Object):
         self.host = host
         self.status = SessionStatus.Inactive
         self.user = None
+        self.local_auth = False
 
     def start_local_session(self, ctera_host):
         self.status = SessionStatus.Initializing
@@ -45,6 +46,9 @@ class SessionBase(Object):
 
     def authenticated(self):
         return self.status == SessionStatus.Active
+
+    def is_local_auth(self):
+        return self.local_auth
 
     def whoami(self):
         print(self)

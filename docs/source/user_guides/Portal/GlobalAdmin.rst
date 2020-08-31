@@ -173,8 +173,13 @@ Apply Provisioning Changes
 
 .. code-block:: python
 
+   """Apply Portal Provisioning Changes"""
    admin.portals.apply_changes()
    admin.portals.apply_changes(wait=True)  # wait for all changes to apply
+
+   """Apply User Provisioning Changes"""
+   admin.users.apply_changes()
+   admin.users.apply_changes(wait=True)  # wait for all changes to apply
 
 Delete a Team Portal
 ^^^^^^^^^^^^^^^^^^^^
@@ -245,6 +250,8 @@ Plans
 
 .. automethod:: cterasdk.core.plans.Plans.modify
    :noindex:
+
+.. code-block:: python
 
    """
    Modify 'good_plan' subscription plan:
