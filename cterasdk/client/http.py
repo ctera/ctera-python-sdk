@@ -145,7 +145,7 @@ class HttpClientBase():
 
     def set_custom_headers(self, headers):
         """
-        Set custom headers that will be added to every http request.
+        Add custom headers that will be included in every http request.
 
         :param dict headers: the headers, represented as a key-value str dict
         """
