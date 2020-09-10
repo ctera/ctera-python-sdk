@@ -18,6 +18,8 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         self._domain_flat_name = "CTERA"
         self._mapping_min = 2000000
         self._mapping_max = 5000000
+        self._dc = '192.168.0.1'
+        self._ports = [389, 3268, 445]
 
         self._task_id = '138'
 
@@ -155,6 +157,32 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         ret = directoryservice.DirectoryService(self._filer).get_connected_domain()
         self._filer.get.assert_called_once_with('/config/fileservices/cifs')
         self._assert_equal_objects(ret, obj)
+
+    def test_get_static_domain_controller(self, dc):
+        self._init_filer(get_response=self._dc)
+        ret = directoryservice.DirectoryService(self._filer).get_static_domain_controller()
+        ret = self._filer.get.assert_called_once_with('/config/fileservices/cifs/passwordServer')
+        self.assertEqual(ret, self._dc)
+
+    def test_set_static_domain_controller(self, dc):
+        self._init_filer(put_response=self._dc)
+        ret = directoryservice.DirectoryService(self._filer).set_static_domain_controller(self._dc)
+        self._filer.put.assert_called_once_with('/config/fileservices/cifs/passwordServer', self._dc)
+        self.assertEqual(ret, self._dc)
+
+    def test_remove_static_domain_controller(self, dc):
+        self._init_filer()
+        directoryservice.DirectoryService(self._filer).remove_static_domain_controller(self._dc)
+        self._filer.put.assert_called_once_with('/config/fileservices/cifs/passwordServer', None)
+
+    def test_network_diagnostics(self):
+        network_diagnostics_response = 'Success'
+        mock_diagnose = self.patch_call("cterasdk.edge.network.Network.diagnose")
+        mock_diagnose.return_value = network_diagnostics_response
+        self._init_filer()
+        ret = directoryservice.DirectoryService(self._filer).network_diagnostics(self._dc)
+        mock_diagnose.assert_called_once_with([(self._dc, port) for port in self._ports])
+        self.assertEqual(ret, network_diagnostics_response)
 
     @staticmethod
     def _get_advanced_mapping_object(domain_flat_name, min_id, max_id):

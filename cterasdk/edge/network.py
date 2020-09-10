@@ -92,9 +92,23 @@ class Network(BaseCommand):
 
         logging.getLogger().info('Network settings updated. Enabled DHCP.')
 
+    def diagnose(self, array):
+        """
+        Test a TCP connection to a host over a designated port
+
+        :param list[tuple(str, int)] array: A list of tuples specifying a host and a port
+        :returns: A list of tuples specifying the host, port and a boolean indicating if a TCP connection was successfully established
+        :rtype: list[tuple[str, int, bool]]
+        """
+        diagnostics = []
+        for host, port in array:
+            status = self.tcp_connect(host, port)
+            diagnostics.append((host, port, status))
+        return diagnostics
+
     def tcp_connect(self, address, port):
         """
-        Test a TCP connection between the gateway and the provided address
+        Test a TCP connection between the Gateway and the provided host address
 
         :param str address: The address to test the connection to
         :param int port: The port of the address to test the connection to

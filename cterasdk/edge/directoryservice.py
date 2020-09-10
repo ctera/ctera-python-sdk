@@ -46,6 +46,37 @@ class DirectoryService(BaseCommand):
             raise error
         logging.getLogger().info("Connected to Active Directory.")
 
+    def get_static_domain_controller(self):
+        """
+        Retrieve the static domain controller configuration
+
+        :return: A FQDN, hostname or ip address of the domain controller
+        :rtype: str
+        """
+        return self._gateway.get('/config/fileservices/cifs/passwordServer')
+
+    def set_static_domain_controller(self, dc):
+        """
+        Configure the Gateway to use a static domain controller
+
+        :param str dc: The FQDN, hostname or ip address of the domain controller
+        :return: The FQDN, hostname or ip address of the domain controller
+        :rtype: str
+        """
+        return self._gateway.put('/config/fileservices/cifs/passwordServer', dc)
+
+    def remove_static_domain_controller(self):
+        """
+        Delete the static domain controller configuration
+        """
+        self._gateway.put('/config/fileservices/cifs/passwordServer', None)
+
+    def network_diagnostics(self, host):
+        ports = [389, 3268, 445]
+        logging.getLogger().info("Verifying TCP connectivity to '%(host)s' over ports: %(ports)s.",
+                                 dict(host=host, ports=', '.join(str(port) for port in ports)))
+        return self._gateway.network.diagnose([(host, port) for port in ports])
+
     def advanced_mapping(self, domain, start, end):
         """
         Configure advanced mapping
