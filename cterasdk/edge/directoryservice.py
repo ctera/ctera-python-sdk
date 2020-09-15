@@ -20,7 +20,6 @@ class DirectoryService(BaseCommand):
         :param str password: The password to use when connecting to the active directory services
         :param str,optional ou: The OU path to use when connecting to the active directory services, defaults to None
         """
-        host = self._gateway.host()
         port = 389
         tcp_connect_result = self._gateway.network.tcp_connect(TCPService(domain, port))
         if not tcp_connect_result.is_open:
@@ -72,12 +71,6 @@ class DirectoryService(BaseCommand):
         Delete the static domain controller configuration
         """
         self._gateway.put('/config/fileservices/cifs/passwordServer', None)
-
-    def network_diagnostics(self, host):
-        ports = [389, 3268, 445]
-        logging.getLogger().info("Verifying TCP connectivity to '%(host)s' over ports: %(ports)s.",
-                                 dict(host=host, ports=', '.join(str(port) for port in ports)))
-        return self._gateway.network.diagnose([(host, port) for port in ports])
 
     def advanced_mapping(self, domain, start, end):
         """
