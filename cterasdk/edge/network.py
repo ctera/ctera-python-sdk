@@ -98,7 +98,7 @@ class Network(BaseCommand):
         Test a TCP connection to a host over a designated port
 
         :param list[cterasdk.core.types.TCPService] services: List of services, identified by a host and a port
-        :returns: A list of named-tuples including the host, port and a boolean attribute indicating whether TCP connection can be established
+        :returns: A list of named-tuples including the host, port and a boolean value indicating whether TCP connection can be established
         :rtype: list[cterasdk.core.types.TCPConnectResult]
         """
         results = []
@@ -111,7 +111,7 @@ class Network(BaseCommand):
         Test a TCP connection between the Gateway and the provided host address
 
         :param cterasdk.core.types.TCPService service: A service, identified by a host and a port
-        :returns: A named-tuple including the host, port and a boolean attribute indicating whether TCP connection can be established
+        :returns: A named-tuple including the host, port and a boolean value indicating whether TCP connection can be established
         :rtype: cterasdk.core.types.TCPConnectResult
         """
         param = Object()

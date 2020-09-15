@@ -25,7 +25,7 @@ class DirectoryService(BaseCommand):
         tcp_connect_result = self._gateway.network.tcp_connect(TCPService(domain, port))
         if not tcp_connect_result.is_open:
             logging.getLogger().error("Connection failed. No traffic allowed over port %(port)s", dict(port=tcp_connect_result.port))
-            raise CTERAConnectionError('Unable to establish connection', None, source=host, target=tcp_connect_result.host,
+            raise CTERAConnectionError('Unable to establish connection', None, host=tcp_connect_result.host,
                                        port=tcp_connect_result.port, protocol='LDAP')
 
         cifs = self._gateway.get('/config/fileservices/cifs')

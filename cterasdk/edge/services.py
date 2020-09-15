@@ -134,7 +134,7 @@ class Services(BaseCommand):
         tcp_connect_result = self._gateway.network.tcp_connect(TCPService(address, port))
         if not tcp_connect_result.is_open:
             logging.getLogger().error("Unable to establish connection over port %s", str(tcp_connect_result.port))
-            raise CTERAConnectionError('Unable to establish connection', None, source=self._gateway.host(), target=tcp_connect_result.host,
+            raise CTERAConnectionError('Unable to establish connection', None, host=tcp_connect_result.host,
                                        port=tcp_connect_result.port, protocol='CTTP')
 
     def _check_connection(self, server):

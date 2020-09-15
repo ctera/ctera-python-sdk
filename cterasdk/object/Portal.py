@@ -100,8 +100,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         return login.Login(self)
 
     def _is_authenticated(self, function, *args, **kwargs):
-        return True
-        """
         def is_public(path):
             return path.startswith('/%s/public' % self.context)
 
@@ -114,7 +112,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         return current_session.authenticated() or current_session.initializing() or \
             is_public(args[0]) or is_setup(args[0]) or is_startup(args[0]) or \
             current_session.is_local_auth()
-            """
 
     def test(self):
         """ Verification check to ensure the target host is a Portal. """

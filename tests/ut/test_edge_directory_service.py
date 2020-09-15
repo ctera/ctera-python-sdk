@@ -158,19 +158,19 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         self._filer.get.assert_called_once_with('/config/fileservices/cifs')
         self._assert_equal_objects(ret, obj)
 
-    def test_get_static_domain_controller(self, dc):
+    def test_get_static_domain_controller(self):
         self._init_filer(get_response=self._dc)
         ret = directoryservice.DirectoryService(self._filer).get_static_domain_controller()
         ret = self._filer.get.assert_called_once_with('/config/fileservices/cifs/passwordServer')
         self.assertEqual(ret, self._dc)
 
-    def test_set_static_domain_controller(self, dc):
+    def test_set_static_domain_controller(self):
         self._init_filer(put_response=self._dc)
         ret = directoryservice.DirectoryService(self._filer).set_static_domain_controller(self._dc)
         self._filer.put.assert_called_once_with('/config/fileservices/cifs/passwordServer', self._dc)
         self.assertEqual(ret, self._dc)
 
-    def test_remove_static_domain_controller(self, dc):
+    def test_remove_static_domain_controller(self):
         self._init_filer()
         directoryservice.DirectoryService(self._filer).remove_static_domain_controller(self._dc)
         self._filer.put.assert_called_once_with('/config/fileservices/cifs/passwordServer', None)
