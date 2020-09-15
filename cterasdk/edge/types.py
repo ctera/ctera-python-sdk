@@ -1,6 +1,21 @@
+from collections import namedtuple
 from . import enum
 from ..common import Object
 from ..exception import InputError
+
+
+TCPService = namedtuple('TCPService', ('host', 'port'))
+TCPService.__doc__ = 'Tuple holding the host and port to connect over TCP'
+TCPService.host.__doc__ = 'The ip address, hostname or fully qualified domain name of the host'
+TCPService.port.__doc__ = 'The port number'
+
+
+TCPConnectResult = namedtuple('TCPConnectResult', ('host', 'port', 'is_open'))
+TCPConnectResult.__doc__ = 'Tuple holding the host and port to connect over TCP'
+TCPConnectResult.host.__doc__ = 'The ip address, hostname or fully qualified domain name of the host'
+TCPConnectResult.port.__doc__ = 'The port number'
+TCPConnectResult.is_open.__doc__ = 'Boolean, indicating whether a TCP connection can be successfully ' \
+'established to the target host over the specified port'
 
 
 class UserGroupEntry():

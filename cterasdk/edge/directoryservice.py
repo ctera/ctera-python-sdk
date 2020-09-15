@@ -3,6 +3,7 @@ import logging
 from ..common import Object
 from ..exception import CTERAException, CTERAConnectionError
 from .base_command import BaseCommand
+from .types import TCPService
 
 
 class DirectoryService(BaseCommand):
@@ -21,10 +22,11 @@ class DirectoryService(BaseCommand):
         """
         host = self._gateway.host()
         port = 389
-        tcp_conn_status = self._gateway.network.tcp_connect(address=domain, port=port)
-        if not tcp_conn_status:
-            logging.getLogger().error("Connection failed. No traffic allowed over port %(port)s", dict(port=port))
-            raise CTERAConnectionError('Unable to establish connection', None, host=host, port=port, protocol='LDAP')
+        tcp_connect_result = self._gateway.network.tcp_connect(TCPService(domain, port))
+        if not tcp_connect_result.is_open:
+            logging.getLogger().error("Connection failed. No traffic allowed over port %(port)s", dict(port=tcp_connect_result.port))
+            raise CTERAConnectionError('Unable to establish connection', None, source=host, target=tcp_connect_result.host,
+                                       port=tcp_connect_result.port, protocol='LDAP')
 
         cifs = self._gateway.get('/config/fileservices/cifs')
         cifs.type = "domain"

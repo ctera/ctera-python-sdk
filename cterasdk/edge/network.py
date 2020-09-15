@@ -1,6 +1,7 @@
 import logging
 
 from .enum import Mode
+from .types import TCPConnectResult
 from ..lib.task_manager_base import TaskError
 from . import taskmgr as TaskManager
 from ..common import Object
@@ -92,42 +93,42 @@ class Network(BaseCommand):
 
         logging.getLogger().info('Network settings updated. Enabled DHCP.')
 
-    def diagnose(self, array):
+    def diagnose(self, services):
         """
         Test a TCP connection to a host over a designated port
 
-        :param list[tuple(str, int)] array: A list of tuples specifying a host and a port
-        :returns: A list of tuples specifying the host, port and a boolean indicating if a TCP connection was successfully established
-        :rtype: list[tuple[str, int, bool]]
+        :param list[cterasdk.core.types.TCPService] services: List of services, identified by a host and a port
+        :returns: A list of named-tuples including the host, port and a boolean attribute indicating whether TCP connection can be established
+        :rtype: list[cterasdk.core.types.TCPConnectResult]
         """
-        diagnostics = []
-        for host, port in array:
-            status = self.tcp_connect(host, port)
-            diagnostics.append((host, port, status))
-        return diagnostics
+        results = []
+        for service in services:
+            results.append(self.tcp_connect(service))
+        return results
 
-    def tcp_connect(self, address, port):
+    def tcp_connect(self, service):
         """
         Test a TCP connection between the Gateway and the provided host address
 
-        :param str address: The address to test the connection to
-        :param int port: The port of the address to test the connection to
+        :param cterasdk.core.types.TCPService service: A service, identified by a host and a port
+        :returns: A named-tuple including the host, port and a boolean attribute indicating whether TCP connection can be established
+        :rtype: cterasdk.core.types.TCPConnectResult
         """
         param = Object()
-        param.address = address
-        param.port = port
+        param.address = service.host
+        param.port = service.port
 
-        logging.getLogger().info("Testing connection. %s", {'address': address, 'port': port})
+        logging.getLogger().info("Testing connection. %s", {'host': service.host, 'port': service.port})
 
         task = self._gateway.execute("/status/network", "tcpconnect", param)
         try:
             task = TaskManager.wait(self._gateway, task)
             logging.getLogger().debug("Obtained connection status. %s", {'status': task.result.rc})
             if task.result.rc == "Open":
-                return True
+                return TCPConnectResult(service.host, service.port, True)
         except TaskError:
             pass
 
-        logging.getLogger().warning("Couldn't establish TCP connection. %s", {'address': address, 'port': port})
+        logging.getLogger().warning("Couldn't establish TCP connection. %s", {'address': service.host, 'port': service.port})
 
-        return False
+        return TCPConnectResult(service.host, service.port, False)
