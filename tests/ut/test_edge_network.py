@@ -1,6 +1,7 @@
 from unittest import mock
 
 from cterasdk.edge import network
+from cterasdk.edge.types import TCPService, TCPConnectResult
 from cterasdk.lib import task_manager_base
 from cterasdk.edge import taskmgr
 from cterasdk.edge.enum import Mode
@@ -129,7 +130,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         actual_param = self._filer.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        TestEdgeNetwork._verify_tcp_connect_return_value(ret, self._tcp_connect_address, self._tcp_connect_port, True)
+        self.assertEqual(ret, TCPConnectResult(self._tcp_connect_address, self._tcp_connect_port, True))
 
     def test_tcp_connect_failure(self):
         execute_response = self._task_id
@@ -149,7 +150,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         actual_param = self._filer.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        TestEdgeNetwork._verify_tcp_connect_return_value(ret, self._tcp_connect_address, self._tcp_connect_port, False)
+        self.assertEqual(ret, TCPConnectResult(self._tcp_connect_address, self._tcp_connect_port, False))
 
     def test_tcp_connect_task_error(self):
         execute_response = self._task_id
@@ -165,12 +166,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         actual_param = self._filer.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        TestEdgeNetwork._verify_tcp_connect_return_value(ret, self._tcp_connect_address, self._tcp_connect_port, False)
-
-    def _verify_tcp_connect_return_value(ret, host, port, is_open):
-        self.assertEqual(ret.host, self._tcp_connect_address)
-        self.assertEqual(ret.port, self._tcp_connect_port)
-        self.assertEqual(ret.is_open, False)
+        self.assertEqual(ret, TCPConnectResult(self._tcp_connect_address, self._tcp_connect_port, False))
 
     def _get_tcp_connect_object(self):
         tcp_connect_param = Object()

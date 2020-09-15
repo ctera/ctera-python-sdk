@@ -2,6 +2,7 @@ from unittest import mock
 
 from cterasdk import exception
 from cterasdk.edge import directoryservice
+from cterasdk.edge.types import TCPService, TCPConnectResult
 from cterasdk.common import Object
 from cterasdk.lib import task_manager_base
 from tests.ut import base_edge
@@ -22,16 +23,18 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         self._ports = [389, 3268, 445]
 
         self._task_id = '138'
+        self._ldap_port = 389
+        self._ldap_service = TCPService(self._domain, self._ldap_port)
 
     def test_connect(self):
         get_response = self._get_workgroup_param()
         self._init_filer(get_response=get_response)
-        tcp_connect_return_value = True
+        tcp_connect_return_value = TCPConnectResult(self._domain, self._ldap_port, True)
         self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
 
         directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password)
 
-        self._filer.network.tcp_connect.assert_called_once_with(address=self._domain, port=389)
+        self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
         self._filer.get.assert_called_once_with('/config/fileservices/cifs')
         self._filer.put.assert_called_once_with('/config/fileservices/cifs', mock.ANY)
 
@@ -48,12 +51,12 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         ou_path = "ou=North America,DC=ctera,DC=local"
         get_response = self._get_workgroup_param()
         self._init_filer(get_response=get_response)
-        tcp_connect_return_value = True
+        tcp_connect_return_value = TCPConnectResult(self._domain, self._ldap_port, True)
         self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
 
         directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, ou_path)
 
-        self._filer.network.tcp_connect.assert_called_once_with(address=self._domain, port=389)
+        self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
         self._filer.get.assert_called_once_with('/config/fileservices/cifs')
         self._filer.put.assert_called_once_with('/config/fileservices/cifs', mock.ANY)
 
@@ -78,14 +81,14 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
     def test_connect_join_failure(self):
         get_response = self._get_workgroup_param()
         self._init_filer(get_response=get_response)
-        tcp_connect_return_value = True
+        tcp_connect_return_value = TCPConnectResult(self._domain, self._ldap_port, True)
         self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
         self._filer.execute = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
 
         with self.assertRaises(exception.CTERAException):
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password)
 
-        self._filer.network.tcp_connect.assert_called_once_with(address=self._domain, port=389)
+        self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
 
         self._filer.get.assert_called_once_with('/config/fileservices/cifs')
 
@@ -100,13 +103,13 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_connect_connection_error(self):
-        tcp_connect_return_value = False
+        tcp_connect_return_value = TCPConnectResult(self._domain, self._ldap_port, False)
         self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
 
         with self.assertRaises(exception.CTERAConnectionError) as error:
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password)
 
-        self._filer.network.tcp_connect.assert_called_once_with(address=self._domain, port=389)
+        self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
         self.assertEqual('Unable to establish connection', error.exception.message)
 
     def test_set_advanced_mapping(self):
@@ -174,15 +177,6 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
         self._init_filer()
         directoryservice.DirectoryService(self._filer).remove_static_domain_controller(self._dc)
         self._filer.put.assert_called_once_with('/config/fileservices/cifs/passwordServer', None)
-
-    def test_network_diagnostics(self):
-        network_diagnostics_response = 'Success'
-        mock_diagnose = self.patch_call("cterasdk.edge.network.Network.diagnose")
-        mock_diagnose.return_value = network_diagnostics_response
-        self._init_filer()
-        ret = directoryservice.DirectoryService(self._filer).network_diagnostics(self._dc)
-        mock_diagnose.assert_called_once_with([(self._dc, port) for port in self._ports])
-        self.assertEqual(ret, network_diagnostics_response)
 
     @staticmethod
     def _get_advanced_mapping_object(domain_flat_name, min_id, max_id):
