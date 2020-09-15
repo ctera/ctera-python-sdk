@@ -1,6 +1,7 @@
-from ..common import Object
 import re
 import logging
+
+from .object import Object
 
 
 def union(g1, g2):
@@ -58,6 +59,5 @@ def parse_base_object_ref(base_object_ref):
         logging.getLogger().debug('Found match. %s', {'ref': base_object_ref})
         _, uid, tenant, classname, name = match.group(0).split('/')
         return BaseObjectRef(classname, uid, tenant, name)
-    else:
-        logging.getLogger().debug('No match found. %s', {'ref': base_object_ref})
+    logging.getLogger().debug('No match found. %s', {'ref': base_object_ref})
     return None
