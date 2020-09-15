@@ -120,7 +120,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         task.result.rc = 'Open'
         taskmgr.wait = mock.MagicMock(return_value=task)
 
-        ret = network.Network(self._filer).tcp_connect(self._tcp_connect_address, self._tcp_connect_port)
+        ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
         self._filer.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
         taskmgr.wait.assert_called_once_with(self._filer, self._task_id)
@@ -129,7 +129,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         actual_param = self._filer.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self.assertEqual(ret, True)
+        TestEdgeNetwork._verify_tcp_connect_return_value(ret, self._tcp_connect_address, self._tcp_connect_port, True)
 
     def test_tcp_connect_failure(self):
         execute_response = self._task_id
@@ -140,7 +140,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         task.result.rc = 'BadAddress'
         taskmgr.wait = mock.MagicMock(return_value=task)
 
-        ret = network.Network(self._filer).tcp_connect(self._tcp_connect_address, self._tcp_connect_port)
+        ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
         self._filer.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
         taskmgr.wait.assert_called_once_with(self._filer, self._task_id)
@@ -149,14 +149,14 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         actual_param = self._filer.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self.assertEqual(ret, False)
+        TestEdgeNetwork._verify_tcp_connect_return_value(ret, self._tcp_connect_address, self._tcp_connect_port, False)
 
     def test_tcp_connect_task_error(self):
         execute_response = self._task_id
         self._init_filer(execute_response=execute_response)
         taskmgr.wait = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
 
-        ret = network.Network(self._filer).tcp_connect(self._tcp_connect_address, self._tcp_connect_port)
+        ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
         self._filer.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
         taskmgr.wait.assert_called_once_with(self._filer, self._task_id)
@@ -165,7 +165,12 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         actual_param = self._filer.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self.assertEqual(ret, False)
+        TestEdgeNetwork._verify_tcp_connect_return_value(ret, self._tcp_connect_address, self._tcp_connect_port, False)
+
+    def _verify_tcp_connect_return_value(ret, host, port, is_open):
+        self.assertEqual(ret.host, self._tcp_connect_address)
+        self.assertEqual(ret.port, self._tcp_connect_port)
+        self.assertEqual(ret.is_open, False)
 
     def _get_tcp_connect_object(self):
         tcp_connect_param = Object()
