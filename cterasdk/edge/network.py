@@ -63,8 +63,8 @@ class Network(BaseCommand):
         """
         Set the DNS Server addresses statically
 
-        :param str primary_dns_server, The primary DNS server
-        :param str,optinal secondary_dns_server, The secondary DNS server, defaults to None
+        :param str primary_dns_server: The primary DNS server
+        :param str,optinal secondary_dns_server: The secondary DNS server, defaults to None
         """
         ip = self._gateway.get('/config/network/ports/0/ip')
         ip.autoObtainDNS = False
@@ -97,9 +97,9 @@ class Network(BaseCommand):
         """
         Test a TCP connection to a host over a designated port
 
-        :param list[cterasdk.core.types.TCPService] services: List of services, identified by a host and a port
+        :param list[cterasdk.edge.types.TCPService] services: List of services, identified by a host and a port
         :returns: A list of named-tuples including the host, port and a boolean value indicating whether TCP connection can be established
-        :rtype: list[cterasdk.core.types.TCPConnectResult]
+        :rtype: list[cterasdk.edge.types.TCPConnectResult]
         """
         results = []
         for service in services:
@@ -110,9 +110,9 @@ class Network(BaseCommand):
         """
         Test a TCP connection between the Gateway and the provided host address
 
-        :param cterasdk.core.types.TCPService service: A service, identified by a host and a port
+        :param cterasdk.edge.types.TCPService service: A service, identified by a host and a port
         :returns: A named-tuple including the host, port and a boolean value indicating whether TCP connection can be established
-        :rtype: cterasdk.core.types.TCPConnectResult
+        :rtype: cterasdk.edge.types.TCPConnectResult
         """
         param = Object()
         param.address = service.host
