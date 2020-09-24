@@ -29,8 +29,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
     def test_connect(self):
         get_response = self._get_workgroup_param()
         self._init_filer(get_response=get_response)
-        tcp_connect_return_value = TCPConnectResult(self._domain, self._ldap_port, True)
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
+        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
 
         directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password)
 
@@ -51,8 +50,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         ou_path = "ou=North America,DC=ctera,DC=local"
         get_response = self._get_workgroup_param()
         self._init_filer(get_response=get_response)
-        tcp_connect_return_value = TCPConnectResult(self._domain, self._ldap_port, True)
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
+        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
 
         directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, ou_path)
 
@@ -81,8 +79,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
     def test_connect_join_failure(self):
         get_response = self._get_workgroup_param()
         self._init_filer(get_response=get_response)
-        tcp_connect_return_value = TCPConnectResult(self._domain, self._ldap_port, True)
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
+        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
         self._filer.execute = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
 
         with self.assertRaises(exception.CTERAException):
@@ -103,8 +100,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_connect_connection_error(self):
-        tcp_connect_return_value = TCPConnectResult(self._domain, self._ldap_port, False)
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=tcp_connect_return_value)
+        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, False))
 
         with self.assertRaises(exception.CTERAConnectionError) as error:
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password)
