@@ -1,5 +1,6 @@
 import logging
 
+from ..common import parse_base_object_ref
 from ..exception import CTERAException
 
 
@@ -14,8 +15,8 @@ def api(Gateway):
         if session.remote_access():
             return remote_access(baseurl, device)   # remote: Gateway.remote_access()
 
-        tenant = session.tenant()
-        return remote(baseurl, tenant, device)  # remote, without a Gateway session
+        base_object_ref = parse_base_object_ref(Gateway.portal)
+        return remote(baseurl, base_object_ref.name, device)  # remote, without a Gateway session
 
     logging.getLogger().error('Invalid connection type.')
     raise CTERAException('Invalid connection type', session)

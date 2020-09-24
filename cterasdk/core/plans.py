@@ -2,7 +2,7 @@ import logging
 from .base_command import BaseCommand
 from ..exception import CTERAException
 from .enum import PlanItem, PlanRetention
-from . import union
+from ..common import union
 
 
 class Plans(BaseCommand):
@@ -30,7 +30,7 @@ class Plans(BaseCommand):
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: The subscription plan, including the requested fields
         """
-        include = union.union(include or [], Plans.default)
+        include = union(include or [], Plans.default)
         include = ['/' + attr for attr in include]
         plan = self._portal.get_multi('/plans/' + name, include)
         if plan.name is None:

@@ -3,9 +3,9 @@ import uuid
 import munch
 
 from cterasdk import exception
-from cterasdk.common import Object
+from cterasdk.common import Object, union
 from cterasdk.core.types import UserAccount
-from cterasdk.core import enum, query, union
+from cterasdk.core import enum, query
 from cterasdk.core import devices
 from tests.ut import base_core
 
@@ -131,7 +131,7 @@ class TestCoreDevices(base_core.BaseCoreTest):
 
     @staticmethod
     def _get_expected_devices_params(include=None, all_portals=False, filters=None, user_uid=None):
-        include = union.union(include or [], devices.Devices.default)
+        include = union(include or [], devices.Devices.default)
         builder = query.QueryParamBuilder().include(include).allPortals(all_portals)
         filters = filters or []
         for query_filter in filters:

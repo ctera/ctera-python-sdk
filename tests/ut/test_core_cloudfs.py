@@ -3,8 +3,8 @@ from unittest import mock
 from cterasdk import exception
 from cterasdk.core import cloudfs
 from cterasdk.core.types import UserAccount
-from cterasdk.core import query, union
-from cterasdk.common import Object
+from cterasdk.core import query
+from cterasdk.common import Object, union
 from tests.ut import base_core
 
 
@@ -30,7 +30,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
     @staticmethod
     def _get_list_folder_groups_param(include=None, user_uid=None):
-        include = union.union(include or [], ['name', 'owner'])
+        include = union(include or [], ['name', 'owner'])
         builder = query.QueryParamBuilder().include(include)
         if user_uid:
             builder.ownedBy(user_uid)
@@ -96,7 +96,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
     @staticmethod
     def _get_list_folders_param(include=None, include_deleted=False, filter_deleted=False, user_uid=None):
-        include = union.union(include or [], cloudfs.CloudFS.default)
+        include = union(include or [], cloudfs.CloudFS.default)
         builder = query.QueryParamBuilder().include(include)
         if include_deleted:
             builder.put('includeDeleted', True)
