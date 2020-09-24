@@ -51,7 +51,8 @@ def parse_base_object_ref(base_object_ref):
     """
     Parse a base object reference.
 
-    :return cterasdk.common.utils.BaseObjectRef param: Object holding the classname, uid, tenant and object name
+    :param str base_object_ref: Base object reference
+    :return cterasdk.common.utils.BaseObjectRef: Object holding the classname, uid, tenant and object name
     """
     regex = '^objs/[1-9][0-9]+/[^/]*/[A-Za-z]+/.*$'
     match = re.search(regex, base_object_ref)
