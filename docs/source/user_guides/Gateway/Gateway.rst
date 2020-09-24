@@ -812,7 +812,7 @@ Network Diagnostics
 
 .. code-block:: python
 
-   cttp_service = TCPService('chopin.ctera.com', 995)
+   cttp_service = gateway_types.TCPService('chopin.ctera.com', 995)
    result = filer.network.tcp_connect(cttp_service)
    if result.is_open:
        print('Success')
@@ -820,18 +820,18 @@ Network Diagnostics
    else:
        print('Failure')
 
-   ldap_service = TCPService('dc.ctera.com', 389)
+   ldap_service = gateway_types.TCPService('dc.ctera.com', 389)
    filer.network.tcp_connect(ldap_service)
 
 .. automethod:: cterasdk.edge.network.Network.diagnose
    :noindex:
 
-   .. code-block:: python
+.. code-block:: python
 
    services = []
-   services.append(TCPService('192.168.90.1', 389))  # LDAP
-   services.append(TCPService('ctera.portal.com', 995))  # CTTP
-   services.append(TCPService('ctera.portal.com', 443))  # HTTPS
+   services.append(gateway_types.TCPService('192.168.90.1', 389))  # LDAP
+   services.append(gateway_types.TCPService('ctera.portal.com', 995))  # CTTP
+   services.append(gateway_types.TCPService('ctera.portal.com', 443))  # HTTPS
    result = filer.network.diagnose(services)
    for result in results:
        print(result.host, result.port, result.is_open)
