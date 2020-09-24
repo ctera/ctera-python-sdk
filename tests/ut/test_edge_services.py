@@ -5,6 +5,7 @@ from cterasdk.lib import task_manager_base
 from cterasdk.edge import taskmgr
 from cterasdk.edge import services
 from cterasdk.edge.enum import ServicesConnectionState
+from cterasdk.edge.types import TCPService, TCPConnectResult
 from cterasdk.common import Object
 from tests.ut import base_edge
 

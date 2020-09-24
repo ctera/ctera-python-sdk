@@ -8,7 +8,7 @@ from cterasdk.lib import task_manager_base
 from tests.ut import base_edge
 
 
-class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
+class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-many-instance-attributes
 
     def setUp(self):
         super().setUp()
@@ -164,7 +164,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
     def test_get_static_domain_controller(self):
         self._init_filer(get_response=self._dc)
         ret = directoryservice.DirectoryService(self._filer).get_static_domain_controller()
-        ret = self._filer.get.assert_called_once_with('/config/fileservices/cifs/passwordServer')
+        self._filer.get.assert_called_once_with('/config/fileservices/cifs/passwordServer')
         self.assertEqual(ret, self._dc)
 
     def test_set_static_domain_controller(self):
@@ -175,7 +175,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):
 
     def test_remove_static_domain_controller(self):
         self._init_filer()
-        directoryservice.DirectoryService(self._filer).remove_static_domain_controller(self._dc)
+        directoryservice.DirectoryService(self._filer).remove_static_domain_controller()
         self._filer.put.assert_called_once_with('/config/fileservices/cifs/passwordServer', None)
 
     @staticmethod
