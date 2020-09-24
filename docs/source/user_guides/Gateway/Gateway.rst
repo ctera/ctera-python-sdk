@@ -493,6 +493,28 @@ Active Directory
 
    print(domains)
 
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.set_static_domain_controller
+   :noindex:
+
+.. code-block:: python
+
+   filer.directoryservice.set_static_domain_controller('192.168.90.1')
+
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.get_static_domain_controller
+   :noindex:
+
+.. code-block:: python
+
+   domain_controller = filer.directoryservice.get_static_domain_controller()
+   print(domain_controller)
+
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.remove_static_domain_controller
+   :noindex:
+
+.. code-block:: python
+
+   filer.directoryservice.remove_static_domain_controller()
+
 Cloud Services
 ==============
 
