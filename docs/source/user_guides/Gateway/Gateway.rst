@@ -790,9 +790,29 @@ Network Diagnostics
 
 .. code-block:: python
 
-   filer.network.tcp_connect('chopin.ctera.com', 995) # CTTP
+   cttp_service = TCPService('chopin.ctera.com', 995)
+   result = filer.network.tcp_connect(cttp_service)
+   if result.is_open:
+       print('Success')
+       # do something...
+   else:
+       print('Failure')
 
-   filer.network.tcp_connect('dc.ctera.com', 389) # LDAP
+   ldap_service = TCPService('dc.ctera.com', 389)
+   filer.network.tcp_connect(ldap_service)
+
+.. automethod:: cterasdk.edge.network.Network.diagnose
+   :noindex:
+
+   .. code-block:: python
+
+   services = []
+   services.append(TCPService('192.168.90.1', 389))  # LDAP
+   services.append(TCPService('ctera.portal.com', 995))  # CTTP
+   services.append(TCPService('ctera.portal.com', 443))  # HTTPS
+   result = filer.network.diagnose(services)
+   for result in results:
+       print(result.host, result.port, result.is_open)
 
 Mail Server
 ===========
