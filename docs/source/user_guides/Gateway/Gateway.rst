@@ -493,6 +493,28 @@ Active Directory
 
    print(domains)
 
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.set_static_domain_controller
+   :noindex:
+
+.. code-block:: python
+
+   filer.directoryservice.set_static_domain_controller('192.168.90.1')
+
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.get_static_domain_controller
+   :noindex:
+
+.. code-block:: python
+
+   domain_controller = filer.directoryservice.get_static_domain_controller()
+   print(domain_controller)
+
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.remove_static_domain_controller
+   :noindex:
+
+.. code-block:: python
+
+   filer.directoryservice.remove_static_domain_controller()
+
 Cloud Services
 ==============
 
@@ -790,9 +812,29 @@ Network Diagnostics
 
 .. code-block:: python
 
-   filer.network.tcp_connect('chopin.ctera.com', 995) # CTTP
+   cttp_service = gateway_types.TCPService('chopin.ctera.com', 995)
+   result = filer.network.tcp_connect(cttp_service)
+   if result.is_open:
+       print('Success')
+       # do something...
+   else:
+       print('Failure')
 
-   filer.network.tcp_connect('dc.ctera.com', 389) # LDAP
+   ldap_service = gateway_types.TCPService('dc.ctera.com', 389)
+   filer.network.tcp_connect(ldap_service)
+
+.. automethod:: cterasdk.edge.network.Network.diagnose
+   :noindex:
+
+.. code-block:: python
+
+   services = []
+   services.append(gateway_types.TCPService('192.168.90.1', 389))  # LDAP
+   services.append(gateway_types.TCPService('ctera.portal.com', 995))  # CTTP
+   services.append(gateway_types.TCPService('ctera.portal.com', 443))  # HTTPS
+   result = filer.network.diagnose(services)
+   for result in results:
+       print(result.host, result.port, result.is_open)
 
 Mail Server
 ===========

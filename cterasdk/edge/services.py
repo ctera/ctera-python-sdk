@@ -9,6 +9,7 @@ from ..exception import CTERAException, InputError, CTERAConnectionError
 from .. import config
 from . import enum
 from .base_command import BaseCommand
+from .types import TCPService
 
 
 class Services(BaseCommand):
@@ -130,10 +131,11 @@ class Services(BaseCommand):
             raise error
 
     def _check_cttp_traffic(self, address, port=995):
-        tcp_conn_status = self._gateway.network.tcp_connect(address=address, port=port)
-        if not tcp_conn_status:
-            logging.getLogger().error("Unable to establish connection over port %s", str(port))
-            raise CTERAConnectionError('Unable to establish connection', None, host=address, port=port, protocol='CTTP')
+        tcp_connect_result = self._gateway.network.tcp_connect(TCPService(address, port))
+        if not tcp_connect_result.is_open:
+            logging.getLogger().error("Unable to establish connection over port %s", str(tcp_connect_result.port))
+            raise CTERAConnectionError('Unable to establish connection', None, host=tcp_connect_result.host,
+                                       port=tcp_connect_result.port, protocol='CTTP')
 
     def _check_connection(self, server):
         param = Object()

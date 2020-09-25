@@ -3,6 +3,7 @@ import logging
 from ..common import Object
 from ..exception import CTERAException, CTERAConnectionError
 from .base_command import BaseCommand
+from .types import TCPService
 
 
 class DirectoryService(BaseCommand):
@@ -19,12 +20,12 @@ class DirectoryService(BaseCommand):
         :param str password: The password to use when connecting to the active directory services
         :param str,optional ou: The OU path to use when connecting to the active directory services, defaults to None
         """
-        host = self._gateway.host()
         port = 389
-        tcp_conn_status = self._gateway.network.tcp_connect(address=domain, port=port)
-        if not tcp_conn_status:
-            logging.getLogger().error("Connection failed. No traffic allowed over port %(port)s", dict(port=port))
-            raise CTERAConnectionError('Unable to establish connection', None, host=host, port=port, protocol='LDAP')
+        tcp_connect_result = self._gateway.network.tcp_connect(TCPService(domain, port))
+        if not tcp_connect_result.is_open:
+            logging.getLogger().error("Connection failed. No traffic allowed over port %(port)s", dict(port=tcp_connect_result.port))
+            raise CTERAConnectionError('Unable to establish connection', None, host=tcp_connect_result.host,
+                                       port=tcp_connect_result.port, protocol='LDAP')
 
         cifs = self._gateway.get('/config/fileservices/cifs')
         cifs.type = "domain"
@@ -45,6 +46,31 @@ class DirectoryService(BaseCommand):
             logging.getLogger().error("Failed connecting to Active Directory.")
             raise error
         logging.getLogger().info("Connected to Active Directory.")
+
+    def get_static_domain_controller(self):
+        """
+        Retrieve the static domain controller configuration
+
+        :return: A FQDN, hostname or ip address of the domain controller
+        :rtype: str
+        """
+        return self._gateway.get('/config/fileservices/cifs/passwordServer')
+
+    def set_static_domain_controller(self, dc):
+        """
+        Configure the Gateway to use a static domain controller
+
+        :param str dc: The FQDN, hostname or ip address of the domain controller
+        :return: The FQDN, hostname or ip address of the domain controller
+        :rtype: str
+        """
+        return self._gateway.put('/config/fileservices/cifs/passwordServer', dc)
+
+    def remove_static_domain_controller(self):
+        """
+        Delete the static domain controller configuration
+        """
+        self._gateway.put('/config/fileservices/cifs/passwordServer', None)
 
     def advanced_mapping(self, domain, start, end):
         """

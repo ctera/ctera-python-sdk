@@ -1,6 +1,7 @@
 import logging
 
 from .enum import Mode
+from .types import TCPConnectResult
 from ..lib.task_manager_base import TaskError
 from . import taskmgr as TaskManager
 from ..common import Object
@@ -62,8 +63,8 @@ class Network(BaseCommand):
         """
         Set the DNS Server addresses statically
 
-        :param str primary_dns_server, The primary DNS server
-        :param str,optinal secondary_dns_server, The secondary DNS server, defaults to None
+        :param str primary_dns_server: The primary DNS server
+        :param str,optinal secondary_dns_server: The secondary DNS server, defaults to None
         """
         ip = self._gateway.get('/config/network/ports/0/ip')
         ip.autoObtainDNS = False
@@ -92,28 +93,39 @@ class Network(BaseCommand):
 
         logging.getLogger().info('Network settings updated. Enabled DHCP.')
 
-    def tcp_connect(self, address, port):
+    def diagnose(self, services):
         """
-        Test a TCP connection between the gateway and the provided address
+        Test a TCP connection to a host over a designated port
 
-        :param str address: The address to test the connection to
-        :param int port: The port of the address to test the connection to
+        :param list[cterasdk.edge.types.TCPService] services: List of services, identified by a host and a port
+        :returns: A list of named-tuples including the host, port and a boolean value indicating whether TCP connection can be established
+        :rtype: list[cterasdk.edge.types.TCPConnectResult]
+        """
+        return [self.tcp_connect(service) for service in services]
+
+    def tcp_connect(self, service):
+        """
+        Test a TCP connection between the Gateway and the provided host address
+
+        :param cterasdk.edge.types.TCPService service: A service, identified by a host and a port
+        :returns: A named-tuple including the host, port and a boolean value indicating whether TCP connection can be established
+        :rtype: cterasdk.edge.types.TCPConnectResult
         """
         param = Object()
-        param.address = address
-        param.port = port
+        param.address = service.host
+        param.port = service.port
 
-        logging.getLogger().info("Testing connection. %s", {'address': address, 'port': port})
+        logging.getLogger().info("Testing connection. %s", {'host': service.host, 'port': service.port})
 
         task = self._gateway.execute("/status/network", "tcpconnect", param)
         try:
             task = TaskManager.wait(self._gateway, task)
             logging.getLogger().debug("Obtained connection status. %s", {'status': task.result.rc})
             if task.result.rc == "Open":
-                return True
+                return TCPConnectResult(service.host, service.port, True)
         except TaskError:
             pass
 
-        logging.getLogger().warning("Couldn't establish TCP connection. %s", {'address': address, 'port': port})
+        logging.getLogger().warning("Couldn't establish TCP connection. %s", {'address': service.host, 'port': service.port})
 
-        return False
+        return TCPConnectResult(service.host, service.port, False)
