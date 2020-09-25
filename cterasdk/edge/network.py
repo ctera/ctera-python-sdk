@@ -101,10 +101,7 @@ class Network(BaseCommand):
         :returns: A list of named-tuples including the host, port and a boolean value indicating whether TCP connection can be established
         :rtype: list[cterasdk.edge.types.TCPConnectResult]
         """
-        results = []
-        for service in services:
-            results.append(self.tcp_connect(service))
-        return results
+        return [self.tcp_connect(service) for service in services]
 
     def tcp_connect(self, service):
         """
