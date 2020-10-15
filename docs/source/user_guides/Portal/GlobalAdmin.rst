@@ -544,6 +544,7 @@ Add Folders to a Zone
 
    1) 'Accounting' folder owned by 'Bruce'
    2) 'HR' folder owned by 'Diana'
+   """
 
    accounting = portal_types.CloudFSFolderFindingHelper('Accounting', 'Bruce')
    hr = portal_types.CloudFSFolderFindingHelper('HR', 'Diana')

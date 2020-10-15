@@ -206,6 +206,14 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
         return self._ctera_client.mkcol(self.base_file_url if use_file_url else self.base_api_url, path)
 
     @authenticated
+    def copy(self, src, dest, overwrite, use_file_url=False):
+        return self._ctera_client.copy(self.base_file_url if use_file_url else self.base_api_url, src, dest, overwrite)
+
+    @authenticated
+    def move(self, src, dest, overwrite, use_file_url=False):
+        return self._ctera_client.move(self.base_file_url if use_file_url else self.base_api_url, src, dest, overwrite)
+
+    @authenticated
     def multipart(self, path, form_data, use_file_url=False):
         return self._ctera_client.multipart(self.base_file_url if use_file_url else self.base_api_url, path, form_data)
 

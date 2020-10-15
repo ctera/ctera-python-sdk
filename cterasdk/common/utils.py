@@ -8,9 +8,23 @@ def union(g1, g2):
     """
     Create a union of two lists, without duplicates.
 
-    :return list: the merged dictionary
+    :return list: the union of the two lists
     """
     return g1 + list(set(g2) - set(g1))
+
+
+def merge(d1, d2):
+    """
+    Merge two dictionaries.
+
+    :return dict: the merged dictionary
+    """
+    d3 = dict()
+    if d1:
+        d3.update(d1)
+    if d2:
+        d3.update(d2)
+    return d3
 
 
 class BaseObjectRef(Object):

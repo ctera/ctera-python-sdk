@@ -40,6 +40,40 @@ Create Directory
 
    file_browser.mkdir('cloud/users/Service Account/My Files/The/quick/brown/fox', recurse = True)
 
+
+Copy
+====
+.. automethod:: cterasdk.edge.files.browser.FileBrowser.copy
+   :noindex:
+
+.. code:: python
+
+   """
+   Copy the 'Documents' folder from Bruce Wayne to Alice Wonderland
+   The full path of the documents folder after the copy: 'cloud/users/Alice Wonderland/My Files/Documents'
+   """
+   file_browser.copy('cloud/users/Bruce Wayne/My Files/Documents', 'cloud/users/Alice Wonderland/My Files')
+
+   """Copy the file Summary.xlsx to another directory, and overwrite on conflict"""
+   file_browser.copy('cloud/users/Bruce Wayne/My Files/Summary.xlsx', 'cloud/users/Bruce Wayne/Spreadsheets', True)
+
+
+Move
+====
+.. automethod:: cterasdk.edge.files.browser.FileBrowser.move
+   :noindex:
+
+.. code:: python
+
+   """
+   Move the 'Documents' folder from Bruce Wayne to Alice Wonderland
+   The full path of the documents folder after the move: 'cloud/users/Alice Wonderland/My Files/Documents'
+   """
+   file_browser.move('cloud/users/Bruce Wayne/My Files/Documents', 'cloud/users/Alice Wonderland/My Files')
+
+   """Move the file Summary.xlsx to another directory, and overwrite on conflict"""
+   file_browser.move('cloud/users/Bruce Wayne/My Files/Summary.xlsx', 'cloud/users/Bruce Wayne/Spreadsheets', True)
+
 Delete
 ======
 .. automethod:: cterasdk.edge.files.browser.FileBrowser.delete
