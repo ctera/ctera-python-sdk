@@ -7,7 +7,7 @@ from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 # from .ssl import CertificateServices
 from ..convert import fromxmlstr
-from ..common import Object
+from ..common import Object, merge
 from .. import config
 from ..exception import SSLException, HostUnreachable, ExhaustedException
 from ..lib import ask
@@ -184,6 +184,25 @@ class HttpClientRequestMkcol(HttpClientRequest):
         super().__init__('MKCOL', url, headers=headers)
 
 
+class HttpClientRequestCopyMove(HttpClientRequest):
+    def __init__(self, method, src, dest, overwrite, headers=None):
+        headers = merge({
+            'Destination': dest,
+            'Overwrite': 'T' if overwrite else 'F'
+        }, headers)
+        super().__init__(method, src, headers=headers)
+
+
+class HttpClientRequestCopy(HttpClientRequestCopyMove):
+    def __init__(self, src, dest, overwrite, headers=None):
+        super().__init__('COPY', src, dest, overwrite, headers=headers)
+
+
+class HttpClientRequestMove(HttpClientRequestCopyMove):
+    def __init__(self, src, dest, overwrite, headers=None):
+        super().__init__('MOVE', src, dest, overwrite, headers=headers)
+
+
 class HTTPClient(HttpClientBase):
 
     def get(self, url, params=None, headers=None, stream=None):
@@ -202,6 +221,12 @@ class HTTPClient(HttpClientBase):
 
     def mkcol(self, url, headers=None):
         return self.dispatch(HttpClientRequestMkcol(url, headers=headers))
+
+    def copy(self, src, dest, overwrite, headers=None):
+        return self.dispatch(HttpClientRequestCopy(src, dest, overwrite, headers=headers))
+
+    def move(self, src, dest, overwrite, headers=None):
+        return self.dispatch(HttpClientRequestMove(src, dest, overwrite, headers=headers))
 
     def multipart(self, url, form_data, monitor_function_generator=None):
         encoder = MultipartEncoder(form_data)

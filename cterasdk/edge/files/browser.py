@@ -1,5 +1,5 @@
 from .path import CTERAPath
-from . import mkdir, rm, file_access
+from . import copy, move, mkdir, rm, file_access
 
 
 class FileBrowser:
@@ -53,6 +53,26 @@ class FileBrowser:
         :param bool,optional recurse: Create subdirectories if missing, defaults to False
         """
         return mkdir.mkdir(self._CTERAHost, self.mkpath(path), recurse)
+
+    def copy(self, src, dest, overwrite=False):
+        """
+        Copy a file or a folder
+
+        :param str src: Source file or folder path
+        :param str dest: Destination folder path
+        :param bool,optional overwrite: Overwrite on conflict, defaults to False
+        """
+        return copy.copy(self._CTERAHost, self.mkpath(src), self.mkpath(dest), overwrite)
+
+    def move(self, src, dest, overwrite=False):
+        """
+        Move a file or a folder
+
+        :param str src: Source file or folder path
+        :param str dest: Destination folder path
+        :param bool,optional overwrite: Overwrite on conflict, defaults to False
+        """
+        return move.move(self._CTERAHost, self.mkpath(src), self.mkpath(dest), overwrite)
 
     def delete(self, path):
         """

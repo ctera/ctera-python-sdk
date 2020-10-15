@@ -50,6 +50,14 @@ class CTERAClient:
         function = Command(HTTPClient.mkcol, self.http_client, geturi(baseurl, path))
         return self._execute(function)
 
+    def copy(self, baseurl, src, dest, overwrite):
+        function = Command(HTTPClient.copy, self.http_client, geturi(baseurl, src), geturi(baseurl, dest), overwrite)
+        return self._execute(function)
+
+    def move(self, baseurl, src, dest, overwrite):
+        function = Command(HTTPClient.move, self.http_client, geturi(baseurl, src), geturi(baseurl, dest), overwrite)
+        return self._execute(function)
+
     def db(self, baseurl, path, name, param):
         return self._ctera_exec(baseurl, path, 'db', name, param)
 
