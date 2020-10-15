@@ -15,7 +15,7 @@ def union(g1, g2):
 
 def merge(d1, d2):
     """
-    Merge two dictionaries.
+    Merge two dictionaries. In case of duplicate keys, this function will return values from the 2nd dictionary
 
     :return dict: the merged dictionary
     """
