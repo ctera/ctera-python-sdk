@@ -14,6 +14,13 @@ from .types import TCPService
 
 class Services(BaseCommand):
     """ Gateway Cloud Services configuration APIs """
+    _UNTRUSTED_CERTIFICATE_ERRORS = [
+        'UntrustedCert',
+        'UntrustedCA',
+        'UntrustedCertExpired',
+        'UntrustedCertSelfSigned',
+        'UntrustedCertDNS'
+    ]
 
     def __init__(self, gateway):
         super().__init__(gateway)
@@ -163,7 +170,8 @@ class Services(BaseCommand):
 
     def _handle_untrusted_cert(self, server, obj):
         try:
-            if obj.rc in ['UntrustedCert', 'UntrustedCA']:
+            if obj.rc in Services._UNTRUSTED_CERTIFICATE_ERRORS:
+                proceed = False
                 if config.connect['ssl'] == 'Consent':
                     logging.getLogger().warning(msg=obj.msg)
                     proceed = ask("Proceed connecting '" + self._gateway.host() + "' to " + server + '?')
