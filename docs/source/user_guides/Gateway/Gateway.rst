@@ -432,12 +432,14 @@ Groups
 .. code-block:: python
 
    """Add Bruce Wayne to the local Administrators group"""
-
-   filer.groups.add_members('Administrators', [('DU', 'bruce.wayne@we.com')])
+   member = gateway_types.UserGroupEntry(gateway_enum.PrincipalType.DU, 'bruce.wayne@we.com')
+   filer.groups.add_members('Administrators', [member])
 
    """Add Bruce Wayne and Domain Admins to the local Administrators group"""
 
-   filer.groups.add_members('Administrators', [('DU', 'bruce.wayne@we.com'), ('DG', 'WE\Domain Admins')])
+   domain_user = gateway_types.UserGroupEntry(gateway_enum.PrincipalType.DU, 'bruce.wayne@we.com')
+   domain_group = gateway_types.UserGroupEntry(gateway_enum.PrincipalType.DG, 'WE\Domain Admins')
+   filer.groups.add_members('Administrators', [domain_user, domain_group])
 
 .. automethod:: cterasdk.edge.groups.Groups.remove_members
    :noindex:
