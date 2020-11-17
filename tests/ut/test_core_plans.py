@@ -1,5 +1,7 @@
 from unittest import mock
 
+from cterasdk.exception import InputError
+
 from cterasdk import exception
 from cterasdk.common import Object
 from cterasdk.core import plans
@@ -44,3 +46,24 @@ class TestCorePlans(base_core.BaseCoreTest):
         for key, value in kwargs.items():
             setattr(param, key, value)
         return param
+
+    def _test__get_storage_amount(self, new, existing, expected):
+        self.assertEqual(plans.Plans._get_storage_amount(new, existing), expected)  # pylint: disable=protected-access
+
+    def test__get_storage_amount_no_value(self):
+        self._test__get_storage_amount(None, 100, 100)
+
+    def test__get_storage_amount_int(self):
+        self._test__get_storage_amount(50, 100, 50*2**30)
+
+    def test__get_storage_amount_gb(self):
+        self._test__get_storage_amount("50GB", 100, 50*2**30)
+
+    def test__get_storage_amount_tb(self):
+        self._test__get_storage_amount("50TB", 100, 50*2**40)
+
+    def test__get_storage_amount_pb(self):
+        self._test__get_storage_amount("50PB", 100, 50*2**50)
+
+    def test__get_storage_amount_b(self):
+        self.assertRaises(InputError, plans.Plans._get_storage_amount, "50B", 100)  # pylint: disable=protected-access

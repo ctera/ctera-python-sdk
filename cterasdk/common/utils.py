@@ -27,6 +27,43 @@ def merge(d1, d2):
     return d3
 
 
+class DataUnit:
+    """
+    Data Unit
+
+    :ivar str PB: Petabytes
+    :ivar str TB: Terabytes
+    :ivar str GB: Gigabytes
+    :ivar str MB: Megabytes
+    :ivar str KB: Kilobytes
+    :ivar str B: Bytes
+    """
+    PB = 'PB'
+    TB = 'TB'
+    GB = 'GB'
+    MB = 'MB'
+    KB = 'KB'
+    B = 'B'
+
+
+def convert_size(numeric, u1, u2):
+    """
+    :param str u1: Convert from data unit
+    :param str u2: Convert to data unit
+    """
+    data_units = [DataUnit.B, DataUnit.KB, DataUnit.MB, DataUnit.GB, DataUnit.TB, DataUnit.PB]
+    if u1 not in data_units:
+        raise ValueError("Invalid current unit type %s" % u1)
+    if u2 not in data_units:
+        raise ValueError("Invalid target unit type %s" % u2)
+    offset = (data_units.index(u1) - data_units.index(u2)) * 10
+    if offset > 0:
+        return numeric * (1 << offset)
+    if offset < 0:
+        return numeric / (1 << abs(offset))
+    return numeric
+
+
 class BaseObjectRef(Object):
     """
     Class Representing a Portal Base Object Reference

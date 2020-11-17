@@ -1,8 +1,8 @@
 import logging
 from .base_command import BaseCommand
-from ..exception import CTERAException
+from ..exception import CTERAException, InputError
 from .enum import PlanItem, PlanRetention
-from ..common import union
+from ..common import union, convert_size, DataUnit
 
 
 class Plans(BaseCommand):
@@ -10,6 +10,7 @@ class Plans(BaseCommand):
     Global Admin Plan APIs
     """
     default = ['name']
+    _allowed_storage_size_units = [DataUnit.GB, DataUnit.TB, DataUnit.PB]
 
     def _get_entire_object(self, name):
         """
@@ -105,6 +106,29 @@ class Plans(BaseCommand):
             plan.serverAgents.amount = quotas.get(PlanItem.SA, plan.serverAgents.amount)
             plan.cloudDrives.amount = quotas.get(PlanItem.Share, plan.cloudDrives.amount)
             plan.cloudDrivesLite.amount = quotas.get(PlanItem.Connect, plan.cloudDrivesLite.amount)
+            plan.storage.amount = Plans._get_storage_amount(quotas.get(PlanItem.Storage), plan.storage.amount)
+
+    @staticmethod
+    def _get_storage_amount(new_amount, existing_amount):
+        if new_amount is None:
+            return existing_amount
+
+        unit = DataUnit.GB
+        if isinstance(new_amount, int):
+            value = new_amount
+        elif isinstance(new_amount, str):
+            try:
+                value = int(new_amount)
+            except ValueError:
+                value = int(new_amount[:-2])
+                unit = new_amount[-2:]
+        else:
+            raise InputError("Invalid storage amount type", new_amount, ['int', 'str'])
+
+        if unit not in Plans._allowed_storage_size_units:
+            raise InputError("Invalid unit type", unit, Plans._allowed_storage_size_units)
+
+        return convert_size(value, unit, DataUnit.B)
 
     def delete(self, name):
         """
