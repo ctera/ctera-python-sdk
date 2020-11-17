@@ -295,6 +295,7 @@ class PlanItem:
     SA = 'SA'
     Share = 'Share'
     Connect = 'Connect'
+    Storage = 'Storage'
 
 
 class ListFilter:
