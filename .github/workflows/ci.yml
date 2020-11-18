@@ -65,7 +65,7 @@ jobs:
         password: ${{ secrets.PYPI_TOKEN }}
       if: github.event.action == 'published'
     - id: tagName
-      uses: olegtarasov/get-tag@v2
+      uses: little-core-labs/get-git-tag@v3.0.1
     - name: Notify Teams
       uses: aliencube/microsoft-teams-actions@v0.8.0
       with:
