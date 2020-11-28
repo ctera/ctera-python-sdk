@@ -2,7 +2,8 @@ import logging
 from .base_command import BaseCommand
 from ..exception import CTERAException, InputError
 from .enum import PlanItem, PlanRetention
-from ..common import union, convert_size, DataUnit
+from ..common import union, convert_size, DataUnit, PolicyRuleCoverter
+from . import query
 
 
 class Plans(BaseCommand):
@@ -11,6 +12,10 @@ class Plans(BaseCommand):
     """
     default = ['name']
     _allowed_storage_size_units = [DataUnit.GB, DataUnit.TB, DataUnit.PB]
+
+    def __init__(self, portal):
+        super().__init__(portal)
+        self.auto_assign = PlanAutoAssignPolicy(self._portal)
 
     def _get_entire_object(self, name):
         """
@@ -22,6 +27,40 @@ class Plans(BaseCommand):
             return self._portal.get('/plans/' + name)
         except CTERAException as error:
             raise CTERAException('Could not find subscription plan', error)
+
+    def by_name(self, names, include=None):
+        """
+        Get Plans by their names
+
+        :param list[str],optional names: List of names of plans
+        :param list[str],optional include: List of fields to retrieve, defaults to ['name']
+
+        :return: Iterator for all matching Plans
+        :rtype: cterasdk.lib.iterator.Iterator
+        """
+        filters = [query.FilterBuilder('name').eq(name) for name in names]
+        return self.list_plans(include, filters)
+
+    def list_plans(self, include=None, filters=None):
+        """
+        List Plans
+
+        :param list[str],optional include: List of fields to retrieve, defaults to ['name']
+        :param list[],optional filters: List of additional filters, defaults to None
+
+        :return: Iterator for all matching Plans
+        :rtype: cterasdk.lib.iterator.Iterator
+        """
+        include = union(include or [], Plans.default)
+        builder = query.QueryParamBuilder().include(include)
+        filters = filters or []
+        for query_filter in filters:
+            builder.addFilter(query_filter)
+        builder.orFilter((len(filters) > 1))
+        param = builder.build()
+        iterator = query.iterator(self._portal, '/plans', param)
+        for plan in iterator:
+            yield plan
 
     def get(self, name, include=None):
         """
@@ -143,3 +182,51 @@ class Plans(BaseCommand):
         except CTERAException as error:
             logging.getLogger().error("Plan deletion failed.")
             raise CTERAException('Plan deletion failed', error)
+
+
+class PlanAutoAssignPolicy(BaseCommand):
+
+    def get_policy(self):
+        """
+        Get plans auto assignment policy
+        """
+        return self._portal.execute('', 'getPlanAutoAssignmentRules')
+
+    def set_policy(self, rules, apply_default=None, default=None, apply_changes=True):
+        """
+        Set plans auto assignment policy
+
+        :param list[cterasdk.common.types.PolicyRule] rules: List of policy rules
+        :param bool,optional apply_default: If no match found, apply default plan. If not passed, the current config will be kept
+        :param str,optional default: Name of a plan to assign if no match found. Ignored unless the ``apply_default`` is set to ``True``
+        """
+        plans = [rule.value for rule in rules]
+        portal_plans = {plan.name: plan for plan in self._portal.plans.by_name(plans, ['baseObjectRef'])}
+
+        not_found = [plan for plan in plans if plan not in portal_plans.keys()]
+        if not_found:
+            logging.getLogger().error('Could not find one or more plans. %s', {'plans': not_found})
+            raise CTERAException('Could not find one or more plans', None, plans=not_found)
+
+        policy = self.get_policy()
+
+        if apply_default is False:
+            policy.defaultPlan = None
+        elif apply_default is True and default:
+            policy.defaultPlan = self._portal.plans.get(default, ['baseObjectRef']).baseObjectRef
+
+        policy_rules = []
+        for rule in rules:
+            policy_rule = PolicyRuleCoverter.convert(rule, 'PlanAutoAssignmentRule', 'plan')
+            policy_rule.plan = portal_plans.get(rule.value).baseObjectRef
+            policy_rules.append(policy_rule)
+
+        policy.planAutoAssignmentRules = policy_rules
+
+        response = self._portal.execute('', 'setPlanAutoAssignmentRules', policy)
+        logging.getLogger().info('Set plans auto assignment rules.')
+
+        if apply_changes:
+            self._portal.users.apply_changes(True)
+
+        return response

@@ -21,6 +21,9 @@ class Task(TaskBase):
         logging.getLogger().error('Could not parse task id. %s', {'ref': ref})
         raise InputError('Invalid task id', ref, [64, '/proc/bgtasks/64'])
 
+    def _get_task_status(self):
+        return self.CTERAHost.get(self.path)
+
 
 def running(CTERAHost):
     return CTERAHost.query('/proc/bgtasks', 'status', 'running')

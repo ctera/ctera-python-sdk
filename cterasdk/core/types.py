@@ -1,6 +1,6 @@
 from abc import ABC
 from collections import namedtuple
-from ..common import DateTimeUtils
+from ..common import DateTimeUtils, StringCriteriaBuilder, ListCriteriaBuilder
 
 from .enum import PortalAccountType, CollaboratorType, FileAccessMode
 
@@ -185,3 +185,59 @@ class ShareRecipient:
         if self.type == CollaboratorType.EXT:
             return self.account
         return str(self.account)
+
+
+class Role:
+    Disabled = 'Disabled'
+    EndUser = 'EndUser'
+    ReadWriteAdmin = 'ReadWriteAdmin'
+    ReadOnlyAdmin = 'ReadOnlyAdmin'
+    Support = 'Support'
+
+
+class PlanCriteria:
+    Username = 'username'
+    Groups = 'userGroups'
+    Role = 'role'
+    First = 'firstName'
+    Last = 'lastName'
+    Company = 'company'
+    BillingId = 'billingId'
+    Comment = 'comment'
+
+
+class PlanCriteriaBuilder:
+
+    Type = 'PlanCriteria'
+
+    @staticmethod
+    def username():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Username)
+
+    @staticmethod
+    def user_groups():
+        return ListCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Groups)
+
+    @staticmethod
+    def role():
+        return ListCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Role)
+
+    @staticmethod
+    def first_name():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.First)
+
+    @staticmethod
+    def last_name():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Last)
+
+    @staticmethod
+    def company():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Company)
+
+    @staticmethod
+    def billing_id():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.BillingId)
+
+    @staticmethod
+    def comment():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Comment)
