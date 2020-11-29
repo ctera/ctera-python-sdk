@@ -3,7 +3,7 @@ import logging
 from ..lib.task_manager_base import TaskError
 from .licenses import Licenses
 from . import taskmgr as TaskManager
-from ..lib import ask
+from ..lib import ask, track
 from ..common import Object
 from ..exception import CTERAException, InputError, CTERAConnectionError
 from .. import config
@@ -122,6 +122,7 @@ class Services(BaseCommand):
         task = self._attach(param)
         try:
             TaskManager.wait(self._gateway, task)
+            track(self._gateway, '/status/services/CTERAPortal/connectionState', [enum.ServicesConnectionState.Connected], [], [enum.ServicesConnectionState.Connected], [], 5, 1)
             logging.getLogger().info("Connected to Portal.")
         except TaskError as error:
             description = error.task.description
