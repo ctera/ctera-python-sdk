@@ -319,7 +319,7 @@ Plan Auto Assignment Rules
    r4 = PolicyRule('ABC', c4)
 
    """Apply the '10TB' plan to read write, read only and support administrators"""
-   roles = [portal_types.Role.ReadWriteAdmin, portal_types.Role.ReadOnlyAdmin, portal_types.Role.Support]
+   roles = [portal_enum.Role.ReadWriteAdmin, portal_enum.Role.ReadOnlyAdmin, portal_enum.Role.Support]
    c5 = portal_types.PlanCriteriaBuilder.role().include(roles).build()
    r5 = PolicyRule('10TB', c5)
 

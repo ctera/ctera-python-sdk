@@ -2,7 +2,7 @@ from abc import ABC
 from collections import namedtuple
 from ..common import DateTimeUtils, StringCriteriaBuilder, ListCriteriaBuilder
 
-from .enum import PortalAccountType, CollaboratorType, FileAccessMode
+from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
@@ -185,25 +185,6 @@ class ShareRecipient:
         if self.type == CollaboratorType.EXT:
             return self.account
         return str(self.account)
-
-
-class Role:
-    Disabled = 'Disabled'
-    EndUser = 'EndUser'
-    ReadWriteAdmin = 'ReadWriteAdmin'
-    ReadOnlyAdmin = 'ReadOnlyAdmin'
-    Support = 'Support'
-
-
-class PlanCriteria:
-    Username = 'username'
-    Groups = 'userGroups'
-    Role = 'role'
-    First = 'firstName'
-    Last = 'lastName'
-    Company = 'company'
-    BillingId = 'billingId'
-    Comment = 'comment'
 
 
 class PlanCriteriaBuilder:
