@@ -208,6 +208,24 @@ Plans
 
    plan = admin.plans.get('good_plan', ['createDate', 'modifiedDate'])
 
+.. automethod:: cterasdk.core.plans.Plans.list_plans
+   :noindex:
+
+.. code-block:: python
+
+   """List plans and include their creation date"""
+   for plan in admin.plans.list_plans(['createDate']):
+       print(plan)
+
+.. automethod:: cterasdk.core.plans.Plans.by_name
+   :noindex:
+
+.. code-block:: python
+
+   """List plans 'PlanOne' and 'PlanTwo'; and retrieve the 'modifiedDate', 'uid' and 'isDefault' properties"""
+   for plan in admin.plans.list_plans(['PlanOne', 'PlanTwo'], ['modifiedDate', 'uid', 'isDefault']):
+       print(plan)
+
 .. automethod:: cterasdk.core.plans.Plans.add
    :noindex:
 
