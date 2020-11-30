@@ -55,11 +55,11 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
             self._filer,
             '/status/services/CTERAPortal/connectionState',
             [ServicesConnectionState.Connected],
-            [],
             [ServicesConnectionState.ResolvingServers, ServicesConnectionState.Connecting,
              ServicesConnectionState.Attaching, ServicesConnectionState.Authenticating],
             [ServicesConnectionState.Disconnected],
-            5,
+            [],
+            20,
             1)
 
     def test_connect_default_args_success(self):
@@ -89,11 +89,11 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
             self._filer,
             '/status/services/CTERAPortal/connectionState',
             [ServicesConnectionState.Connected],
-            [],
             [ServicesConnectionState.ResolvingServers, ServicesConnectionState.Connecting,
              ServicesConnectionState.Attaching, ServicesConnectionState.Authenticating],
             [ServicesConnectionState.Disconnected],
-            5,
+            [],
+            20,
             1)
 
     def test_connect_tcp_connect_error(self):
