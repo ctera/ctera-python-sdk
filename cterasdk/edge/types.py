@@ -73,6 +73,9 @@ class UserGroupEntry():
         if principal_type not in UserGroupEntry._valid_principal_types:
             raise InputError('Invalid principal type', principal_type, UserGroupEntry._valid_principal_types)
 
+    def __str__(self):
+        return ('\\' + self.name) if self.principal_type in [enum.PrincipalType.LG, enum.PrincipalType.LU] else self.name
+
 
 class ShareAccessControlEntry():
     """

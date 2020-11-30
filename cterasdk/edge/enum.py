@@ -296,9 +296,17 @@ class ServicesConnectionState:
     """
     Gateway connection status
 
-    :ivar str Disconnected: The Gateway is disconnected from CTERA Portal
-    :ivar str Connected: The Gateway is connected to CTERA Portal
+    :ivar str ResolvingServers: The Edge Filer is resolving CTERA Portal servers
+    :ivar str Connecting: The Edge Filer is in connecting to CTERA Portal
+    :ivar str Attaching: The Edge Filer is attaching to CTERA Portal
+    :ivar str Authenticating: The Edge Filer is authenticating to CTERA Portal
+    :ivar str Disconnected: The Edge Filer is disconnected from CTERA Portal
+    :ivar str Connected: The Edge Filer is connected to CTERA Portal
     """
+    ResolvingServers = "ResolvingServers"
+    Connecting = "Connecting"
+    Attaching = "Attaching"
+    Authenticating = "Authenticating"
     Disconnected = "Disconnected"
     Connected = "Connected"
 
