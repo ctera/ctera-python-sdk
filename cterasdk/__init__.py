@@ -3,7 +3,7 @@ from . import config
 
 config.Logging.get()
 
-from .common import Object  # noqa: E402, F401
+from .common import Object, PolicyRule  # noqa: E402, F401
 from .convert import fromjsonstr, tojsonstr, fromxmlstr, toxmlstr  # noqa: E402, F401
 from .exception import CTERAException  # noqa: E402, F401
 from .object import GlobalAdmin, ServicesPortal, Gateway, Agent  # noqa: E402, F401

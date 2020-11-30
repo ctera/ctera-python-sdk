@@ -12,7 +12,12 @@ class Task(TaskBase):
         if not match:
             logging.getLogger().error('Invalid task id. %s', {'ref': ref})
             raise InputError('Invalid task id', ref, ['servers/server/bgTasks/107781'])
-        return '/' + match.group(0)
+        return match.group(0)
+
+    def _get_task_status(self):
+        if self.CTERAHost.session().in_tenant_context():
+            return self.CTERAHost.execute('', 'getTaskStatus', self.path)
+        return self.CTERAHost.get('/' + self.path)
 
 
 def wait(CTERAHost, ref):

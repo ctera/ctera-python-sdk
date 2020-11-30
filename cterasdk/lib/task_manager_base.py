@@ -33,11 +33,15 @@ class TaskBase(ABC):
     def _get_task_id(self, ref):
         raise NotImplementedError("Subclass must implement _get_task_id")
 
+    @abstractmethod
+    def _get_task_status(self):
+        raise NotImplementedError("Subclass must implement _get_task_status")
+
     def wait(self):
         task = None
         while self.running:
             logging.getLogger().debug('Obtaining task status. %s', {'path': self.path, 'attempt': (self.attempt + 1)})
-            task = self.CTERAHost.get(self.path)
+            task = self._get_task_status()
             logging.getLogger().debug('Task status. %s', tojsonstr(task, False))
             self.increment()
             self.running = task.status == TaskRunningStatus.Running

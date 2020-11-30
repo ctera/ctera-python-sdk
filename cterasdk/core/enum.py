@@ -309,3 +309,26 @@ class ListFilter:
     All = 'All'
     Deleted = 'Deleted'
     NonDeleted = 'NonDeleted'
+
+
+class PlanCriteria:
+    """
+    Subscription Plan Auto Assignment Rule Builder Criterias
+
+    :ivar str Username: Username
+    :ivar str Groups: User groups
+    :ivar str Role: User role
+    :ivar str First: User first name
+    :ivar str Last: User last name
+    :ivar str Company: User company
+    :ivar str BillingId: User billing id
+    :ivar str Comment: User comment
+    """
+    Username = 'username'
+    Groups = 'userGroups'
+    Role = 'role'
+    First = 'firstName'
+    Last = 'lastName'
+    Company = 'company'
+    BillingId = 'billingId'
+    Comment = 'comment'

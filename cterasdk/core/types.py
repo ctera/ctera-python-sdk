@@ -1,8 +1,8 @@
 from abc import ABC
 from collections import namedtuple
-from ..common import DateTimeUtils
+from ..common import DateTimeUtils, StringCriteriaBuilder, ListCriteriaBuilder
 
-from .enum import PortalAccountType, CollaboratorType, FileAccessMode
+from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
@@ -185,3 +185,40 @@ class ShareRecipient:
         if self.type == CollaboratorType.EXT:
             return self.account
         return str(self.account)
+
+
+class PlanCriteriaBuilder:
+
+    Type = 'PlanCriteria'
+
+    @staticmethod
+    def username():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Username)
+
+    @staticmethod
+    def user_groups():
+        return ListCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Groups)
+
+    @staticmethod
+    def role():
+        return ListCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Role)
+
+    @staticmethod
+    def first_name():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.First)
+
+    @staticmethod
+    def last_name():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Last)
+
+    @staticmethod
+    def company():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Company)
+
+    @staticmethod
+    def billing_id():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.BillingId)
+
+    @staticmethod
+    def comment():
+        return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Comment)

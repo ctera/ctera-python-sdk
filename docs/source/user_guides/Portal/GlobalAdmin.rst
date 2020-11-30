@@ -208,6 +208,24 @@ Plans
 
    plan = admin.plans.get('good_plan', ['createDate', 'modifiedDate'])
 
+.. automethod:: cterasdk.core.plans.Plans.list_plans
+   :noindex:
+
+.. code-block:: python
+
+   """List plans and include their creation date"""
+   for plan in admin.plans.list_plans(['createDate']):
+       print(plan)
+
+.. automethod:: cterasdk.core.plans.Plans.by_name
+   :noindex:
+
+.. code-block:: python
+
+   """List plans 'PlanOne' and 'PlanTwo'; and retrieve the 'modifiedDate', 'uid' and 'isDefault' properties"""
+   for plan in admin.plans.by_name(['PlanOne', 'PlanTwo'], ['modifiedDate', 'uid', 'isDefault']):
+       print(plan)
+
 .. automethod:: cterasdk.core.plans.Plans.add
    :noindex:
 
@@ -225,6 +243,7 @@ Plans
    - Deleted: Recycle Bin
 
    Quotas (portal_enum.PlanItem):
+   - Storage: Storage Quota, in Gigabytes
    - EV4: CTERA Edge Filer, Up to 4 TB of Local Cache
    - EV8: CTERA Edge Filer, Up to 8 TB of Local Cache
    - EV16: CTERA Edge Filer, Up to 16 TB of Local Cache
@@ -271,6 +290,53 @@ Plans
 
    name = 'good_plan'
    admin.plan.delete(name)
+
+Plan Auto Assignment Rules
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.core.plans.PlanAutoAssignPolicy.get_policy
+   :noindex:
+
+.. automethod:: cterasdk.core.plans.PlanAutoAssignPolicy.set_policy
+   :noindex:
+
+.. code-block:: python
+
+   """Apply the '100GB' plan to all user names that start with 'adm'"""
+   c1 = portal_types.PlanCriteriaBuilder.username().startswith('adm').build()
+   r1 = PolicyRule('100GB', c1)
+
+   """Apply the '200GB' plan to all user names that end with 'inc'"""
+   c2 = portal_types.PlanCriteriaBuilder.username().endswith('inc').build()
+   r2 = PolicyRule('200GB', c2)
+
+   """Apply the 'Bingo' plan to all user names that contain 'bing'"""
+   c3 = portal_types.PlanCriteriaBuilder.username().contains('bing').build()
+   r3 = PolicyRule('Bingo', c3)
+
+   """Apply the 'ABC' plan to 'alice', 'bob' and 'charlie'"""
+   c4 = portal_types.PlanCriteriaBuilder.username().isoneof(['alice', 'bob', 'charlie']).build()
+   r4 = PolicyRule('ABC', c4)
+
+   """Apply the '10TB' plan to read write, read only and support administrators"""
+   roles = [portal_enum.Role.ReadWriteAdmin, portal_enum.Role.ReadOnlyAdmin, portal_enum.Role.Support]
+   c5 = portal_types.PlanCriteriaBuilder.role().include(roles).build()
+   r5 = PolicyRule('10TB', c5)
+
+   """Apply the 'TechStaff' plan to the 'Product' and 'Support' groups"""
+   c6 = portal_types.PlanCriteriaBuilder.user_groups().include(['Product', 'Support']).build()
+   r6 = PolicyRule('TechStaff', c6)
+
+   admin.plans.auto_assign.set_policy([r1, r2, r3, r4, r5, r6])
+
+   """Remove all policy rules"""
+   admin.plans.auto_assign.set_policy([])
+
+   """Do not assign a default plan if no match applies"""
+   admin.plans.auto_assign.set_policy([], False)
+
+   """Assign 'Default' if no match applies"""
+   admin.plans.auto_assign.set_policy([], True, 'Default')
 
 Servers
 -------
