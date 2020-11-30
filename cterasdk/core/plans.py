@@ -34,6 +34,7 @@ class Plans(BaseCommand):
 
         :param list[str],optional names: List of names of plans
         :param list[str],optional include: List of fields to retrieve, defaults to ['name']
+        :param list[cterasdk.core.query.FilterBuilder],optional filters: List of additional filters, defaults to None
 
         :return: Iterator for all matching Plans
         :rtype: cterasdk.lib.iterator.Iterator
@@ -219,12 +220,8 @@ class PlanAutoAssignPolicy(BaseCommand):
         elif apply_default is True and default:
             policy.defaultPlan = portal_plans.get(default).baseObjectRef
 
-        policy_rules = []
-        for rule in rules:
-            policy_rule = PolicyRuleCoverter.convert(rule, 'PlanAutoAssignmentRule', 'plan',
-                                                     portal_plans.get(rule.assignment).baseObjectRef)
-            policy_rules.append(policy_rule)
-
+        policy_rules = [PolicyRuleCoverter.convert(rule, 'PlanAutoAssignmentRule', 'plan',
+                        portal_plans.get(rule.assignment).baseObjectRef) for rule in rules]
         policy.planAutoAssignmentRules = policy_rules
 
         response = self._portal.execute('', 'setPlanAutoAssignmentRules', policy)
