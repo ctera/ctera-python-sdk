@@ -122,7 +122,10 @@ class Services(BaseCommand):
         task = self._attach(param)
         try:
             TaskManager.wait(self._gateway, task)
-            track(self._gateway, '/status/services/CTERAPortal/connectionState', [enum.ServicesConnectionState.Connected], [], [enum.ServicesConnectionState.Connected], [], 5, 1)
+            track(self._gateway, '/status/services/CTERAPortal/connectionState', [enum.ServicesConnectionState.Connected], [],
+                  [enum.ServicesConnectionState.ResolvingServers, enum.ServicesConnectionState.Connecting,
+                   enum.ServicesConnectionState.Attaching, enum.ServicesConnectionState.Authenticating],
+                  [enum.ServicesConnectionState.Disconnected], 5, 1)
             logging.getLogger().info("Connected to Portal.")
         except TaskError as error:
             description = error.task.description

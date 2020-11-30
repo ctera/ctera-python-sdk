@@ -51,7 +51,16 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         expected_param = self._get_attach_and_save_param(False, use_activation_code=True)
         actual_param = self._filer.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self._tracker_mock.assert_called_once_with(self._filer, '/status/services/CTERAPortal/connectionState', [ServicesConnectionState.Connected], [], [ServicesConnectionState.Connected], [], 5, 1)
+        self._tracker_mock.assert_called_once_with(
+            self._filer,
+            '/status/services/CTERAPortal/connectionState',
+            [ServicesConnectionState.Connected],
+            [],
+            [ServicesConnectionState.ResolvingServers, ServicesConnectionState.Connecting,
+             ServicesConnectionState.Attaching, ServicesConnectionState.Authenticating],
+            [ServicesConnectionState.Disconnected],
+            5,
+            1)
 
     def test_connect_default_args_success(self):
         self._init_filer()
@@ -76,7 +85,16 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         expected_param = self._get_attach_and_save_param(False, use_activation_code=False)
         actual_param = self._filer.execute.call_args_list[1][0][2]  # Access attachAndSave call param
         self._assert_equal_objects(actual_param, expected_param)
-        self._tracker_mock.assert_called_once_with(self._filer, '/status/services/CTERAPortal/connectionState', [ServicesConnectionState.Connected], [], [ServicesConnectionState.Connected], [], 5, 1)
+        self._tracker_mock.assert_called_once_with(
+            self._filer,
+            '/status/services/CTERAPortal/connectionState',
+            [ServicesConnectionState.Connected],
+            [],
+            [ServicesConnectionState.ResolvingServers, ServicesConnectionState.Connecting,
+             ServicesConnectionState.Attaching, ServicesConnectionState.Authenticating],
+            [ServicesConnectionState.Disconnected],
+            5,
+            1)
 
     def test_connect_tcp_connect_error(self):
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, False))
