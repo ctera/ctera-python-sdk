@@ -57,8 +57,8 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
             [ServicesConnectionState.Connected],
             [ServicesConnectionState.ResolvingServers, ServicesConnectionState.Connecting,
              ServicesConnectionState.Attaching, ServicesConnectionState.Authenticating],
-            [ServicesConnectionState.Disconnected],
             [],
+            [ServicesConnectionState.Disconnected],
             20,
             1)
 
@@ -91,8 +91,8 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
             [ServicesConnectionState.Connected],
             [ServicesConnectionState.ResolvingServers, ServicesConnectionState.Connecting,
              ServicesConnectionState.Attaching, ServicesConnectionState.Authenticating],
-            [ServicesConnectionState.Disconnected],
             [],
+            [ServicesConnectionState.Disconnected],
             20,
             1)
 
