@@ -3,18 +3,18 @@ from .object import Object
 
 class PolicyRule:
 
-    def __init__(self, value, criteria):
-        self.value = value
+    def __init__(self, assignment, criteria):
+        self.assignment = assignment
         self.criteria = criteria
 
 
 class PolicyRuleCoverter:
 
     @staticmethod
-    def convert(rule, classname, property_name):
+    def convert(rule, classname, property_name, assignment=None):
         param = Object()
         param._classname = classname  # pylint: disable=protected-access
-        setattr(param, property_name, rule.value)
+        setattr(param, property_name, assignment if assignment else rule.assignment)
         param.filterRule = rule.criteria
         return param
 

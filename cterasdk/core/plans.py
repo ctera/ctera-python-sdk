@@ -199,8 +199,12 @@ class PlanAutoAssignPolicy(BaseCommand):
         :param list[cterasdk.common.types.PolicyRule] rules: List of policy rules
         :param bool,optional apply_default: If no match found, apply default plan. If not passed, the current config will be kept
         :param str,optional default: Name of a plan to assign if no match found. Ignored unless the ``apply_default`` is set to ``True``
+        :param bool,optional apply_changes: Apply provisioning changes upon update, defaults to ``True``
         """
-        plans = [rule.value for rule in rules]
+        plans = {rule.assignment for rule in rules}
+        if default:
+            plans.add(default)
+        plans = list(plans)
         portal_plans = {plan.name: plan for plan in self._portal.plans.by_name(plans, ['baseObjectRef'])}
 
         not_found = [plan for plan in plans if plan not in portal_plans.keys()]
@@ -213,12 +217,12 @@ class PlanAutoAssignPolicy(BaseCommand):
         if apply_default is False:
             policy.defaultPlan = None
         elif apply_default is True and default:
-            policy.defaultPlan = self._portal.plans.get(default, ['baseObjectRef']).baseObjectRef
+            policy.defaultPlan = portal_plans.get(default).baseObjectRef
 
         policy_rules = []
         for rule in rules:
-            policy_rule = PolicyRuleCoverter.convert(rule, 'PlanAutoAssignmentRule', 'plan')
-            policy_rule.plan = portal_plans.get(rule.value).baseObjectRef
+            policy_rule = PolicyRuleCoverter.convert(rule, 'PlanAutoAssignmentRule', 'plan',
+                                                     portal_plans.get(rule.assignment).baseObjectRef)
             policy_rules.append(policy_rule)
 
         policy.planAutoAssignmentRules = policy_rules
