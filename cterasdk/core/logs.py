@@ -28,6 +28,9 @@ class Logs(BaseCommand):
         :param str,optional before: Get logs before this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
         :param str,optional after: Get logs after this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
         :param list[cterasdk.core.query.FilterBuilder],optional filters: List of additional filters, defaults to None
+
+        :return: Iterator for all matching logs
+        :rtype: cterasdk.lib.iterator.Iterator[cterasdk.object.Object]
         """
         return self.logs(topic, min_severity, enum.OriginType.Device, name, before, after, filters)
 
@@ -51,6 +54,9 @@ class Logs(BaseCommand):
         :param str,optional before: Get logs before this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
         :param str,optional after: Get logs after this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
         :param list[cterasdk.core.query.FilterBuilder],optional filters: List of additional filters, defaults to None
+
+        :return: Iterator for all matching logs
+        :rtype: cterasdk.lib.iterator.Iterator[cterasdk.object.Object]
         """
         builder = query.QueryParamBuilder().put('topic', topic).put('minSeverity', min_severity)
 
