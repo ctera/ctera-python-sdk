@@ -745,7 +745,7 @@ Cloud Drive Folders
 Logs
 -------
 
-.. automethod:: cterasdk.core.logs.logs
+.. automethod:: cterasdk.core.logs.get
    :noindex:
 
 .. automethod:: cterasdk.core.logs.device

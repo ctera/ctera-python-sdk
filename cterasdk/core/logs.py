@@ -32,16 +32,10 @@ class Logs(BaseCommand):
         :return: Iterator for all matching logs
         :rtype: cterasdk.lib.iterator.Iterator[cterasdk.object.Object]
         """
-        return self.logs(topic, min_severity, enum.OriginType.Device, name, before, after, filters)
+        return self.get(topic, min_severity, enum.OriginType.Device, name, before, after, filters)
 
-    def logs(self,
-             topic=enum.LogTopic.System,
-             min_severity=enum.Severity.INFO,
-             origin_type=enum.OriginType.Portal,
-             origin=None,
-             before=None,
-             after=None,
-             filters=None):
+    def get(self, topic=enum.LogTopic.System, min_severity=enum.Severity.INFO, origin_type=enum.OriginType.Portal, origin=None,
+            before=None, after=None, filters=None):
         """
         Get logs from the Portal
 
