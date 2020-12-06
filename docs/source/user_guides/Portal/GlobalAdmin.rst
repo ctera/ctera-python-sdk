@@ -740,3 +740,18 @@ Cloud Drive Folders
    """Recover a deleted Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
    wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.undelete('DIR-002', wbruce)
+
+
+Logs
+-------
+
+.. automethod:: cterasdk.core.logs.get
+   :noindex:
+
+.. automethod:: cterasdk.core.logs.device
+   :noindex:
+
+.. code:: python
+
+   """Retrieve all cloud backup logs for device 'WIN-SRV2019'"""
+   admin.logs.device('WIN-SRV2019', topic='backup')

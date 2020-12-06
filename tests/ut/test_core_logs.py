@@ -27,7 +27,7 @@ class TestCoreLogs(base_core.BaseCoreTest):
         yesterday = date.today() - timedelta(days=1)
         before = TestCoreLogs.format_input_date(yesterday, '23:59:59')
         after = TestCoreLogs.format_input_date(yesterday, '00:00:00')
-        logs_iterator = logs.Logs(self._global_admin).get(minSeverity=Severity.ERROR, before=before, after=after)
+        logs_iterator = logs.Logs(self._global_admin).get(min_severity=Severity.ERROR, before=before, after=after)
         for log in logs_iterator:
             print(log)
         origin_type_filter = base_core.BaseCoreTest._create_filter(query.FilterType.String, 'originType',

@@ -38,17 +38,20 @@ class FilterType:
     Boolean = 'BooleanFilter'
     Integer = 'IntFilter'
     String = 'StringFilter'
+    RefFilter = 'RefFilter'
+    IntRefFilter = 'IntRefFilter'
+    BooleanRefFilter = 'BooleanRefFilter'
 
     @staticmethod
-    def fromValue(value):
+    def fromValue(value, ref):
         if isinstance(value, datetime):
             return FilterType.DateTime
         if isinstance(value, bool):
-            return FilterType.Boolean
+            return FilterType.BooleanRefFilter if ref else FilterType.Boolean
         if isinstance(value, int):
-            return FilterType.Integer
+            return FilterType.IntRefFilter if ref else FilterType.Integer
         if isinstance(value, str):
-            return FilterType.String
+            return FilterType.RefFilter if ref else FilterType.String
         raise TypeError("value must be of one of the following types: datetime, bool, int or str")
 
 
@@ -60,8 +63,13 @@ class Filter(Object):
 
 class FilterBuilder(Object):
 
-    def __init__(self, name):
+    def __init__(self, name, reference=False):
         self.filter = Filter(name)
+        self.reference = reference
+
+    @staticmethod
+    def ref(name):
+        return FilterBuilder(name, True)
 
     def like(self, value):
         self.filter.restriction = Restriction.LIKE  # pylint: disable=attribute-defined-outside-init
@@ -104,7 +112,7 @@ class FilterBuilder(Object):
         return self.setValue(value)
 
     def setValue(self, value):
-        self.filter._classname = FilterType.fromValue(value)  # pylint: disable=protected-access,attribute-defined-outside-init
+        self.filter._classname = FilterType.fromValue(value, self.reference)  # pylint: disable=protected-access,W0201
         if isinstance(value, datetime):
             value = value.strftime('%Y-%m-%dT%H:%M:%S')
         self.filter.value = value  # pylint: disable=attribute-defined-outside-init
