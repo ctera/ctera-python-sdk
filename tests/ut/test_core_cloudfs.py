@@ -16,6 +16,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         self._local_user_account = UserAccount(self._owner)
         self._group = 'admin'
         self._name = 'folderGroup'
+        self._description = 'description'
         self._user_uid = 1337
 
     def test_list_folder_groups_owned_by(self):
@@ -123,6 +124,22 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
         self.assertEqual(ret, 'Success')
 
+    def test_mkdir_with_local_owner_no_winacls_param_with_description(self):
+        self._init_global_admin(get_response='admin', execute_response='Success')
+        self._mock_get_user_base_object_ref()
+
+        ret = cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._local_user_account, description=self._description)
+
+        self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
+        self._global_admin.get.assert_called_once_with('/foldersGroups/' + self._group + '/baseObjectRef')
+        self._global_admin.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
+
+        expected_param = self._get_mkdir_object(description=self._description)
+        actual_param = self._global_admin.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+
+        self.assertEqual(ret, 'Success')
+
     def test_mkdir_with_local_owner_winacls_true(self):
         get_response = 'admin'
         self._init_global_admin(get_response=get_response, execute_response='Success')
@@ -198,12 +215,14 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         mkfg_param_object.owner = self._owner if with_owner else None
         return mkfg_param_object
 
-    def _get_mkdir_object(self, winacls=True):
+    def _get_mkdir_object(self, winacls=True, description=None):
         mkdir_param_object = Object()
         mkdir_param_object.name = self._name
         mkdir_param_object.owner = self._owner
         mkdir_param_object.group = self._group
         mkdir_param_object.enableSyncWinNtExtendedAttributes = winacls
+        if description:
+            mkdir_param_object.description = description
         return mkdir_param_object
 
     def _get_user_object(self, **kwargs):
