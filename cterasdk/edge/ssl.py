@@ -2,10 +2,13 @@ import logging
 
 from .base_command import BaseCommand
 from ..lib import FileSystem
+from ..common import Object
 
 
 class SSL(BaseCommand):
     """ Gateway SSL APIs """
+
+    BEGIN_PEM = '-----BEGIN'
 
     def enable_http(self):
         """
@@ -37,31 +40,56 @@ class SSL(BaseCommand):
     def _set_force_https(self, force):
         self._gateway.put('/config/fileservices/webdav/forceHttps', force)
 
-    def _load_cert(self, certificate, private_key, reboot=True, wait_for_reboot=False):
-        logging.getLogger().info("Uploading server certificate and private key")
-        server_certificate = '\n' + private_key + certificate
+    def remove_storage_ca(self):
+        """
+        Remove object storage trusted CA certificate
+        """
+        self._gateway.put('/config/extStorageTrustedCA', None)
+
+    def get_storage_ca(self):
+        """
+        Get object storage trusted CA certificate
+        """
+        return self._gateway.get('/status/extStorageTrustedCA')
+
+    def set_storage_ca(self, certificate):
+        """
+        Set object storage trusted CA certificate
+
+        :param str certificate: The PEM-encoded certificate or a path to the PEM-encoded server certificate file
+        """
+        logging.getLogger().info('Setting trusted object storage CA certificate')
+        param = Object()
+        param._classname = 'ExtTrustedCA'  # pylint: disable=protected-access
+        param.certificate = SSL._obtain_secret(certificate)
+        return self._gateway.put('/config/extStorageTrustedCA', param)
+
+    def set_certificate(self, private_key, *certificates):
+        """
+        Set the Edge Filer's web server's certificate.
+
+        :param str private_key: The PEM-encoded private key or a path to the PEM-encoded private key file
+        :param list[str] certificates: The PEM-encoded certificates or a path to the PEM-encoded certificates
+        """
+        logging.getLogger().debug('Loading private key')
+        certificate_chain = [SSL._obtain_secret(private_key)]
+        logging.getLogger().debug('Loading certificates')
+        certificate_chain = certificate_chain + [SSL._obtain_secret(certificate) for certificate in certificates]
+
+        logging.getLogger().info("Uploading certificate chain")
+        server_certificate = '\n' + '\n'.join(certificate_chain).replace('\n\n', '\n')
         response = self._gateway.put('/config/certificate', server_certificate)
-        logging.getLogger().info("Uploaded server certificate and private key.")
-        if reboot:
-            self._gateway.power.reboot(wait_for_reboot)
+        logging.getLogger().info("Uploaded certificate chain")
         return response
 
-    def upload_cert(self, certificate, private_key, reboot=True, wait_for_reboot=False):
-        """
-        Upload a server certificate
-
-        :param str certificate: A path to the PEM-encoded server certificate file
-        :param str private_key: A path to the PEM-encoded private key
-        """
-        file_info, cert = SSL._file_contents(certificate)
-        logging.getLogger().debug(
-            {'name': file_info['name'], 'size': file_info['size'], 'type': file_info['mimetype']}
-        )
-        file_info, pk = SSL._file_contents(private_key)
-        logging.getLogger().debug(
-            "Read private key file. %s", {'name': file_info['name'], 'size': file_info['size'], 'type': file_info['mimetype']}
-        )
-        return self._load_cert(cert, pk, reboot, wait_for_reboot)
+    @staticmethod
+    def _obtain_secret(secret):
+        if not secret.startswith(SSL.BEGIN_PEM):
+            file_info, secret = SSL._file_contents(secret)
+            logging.getLogger().debug(
+                "Reading file. %s", {'name': file_info['name'], 'size': file_info['size'], 'type': file_info['mimetype']}
+            )
+        return secret
 
     @staticmethod
     def _file_contents(filepath):

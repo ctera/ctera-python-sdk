@@ -943,19 +943,42 @@ SSL
 
    filer.ssl.is_http_enabled()
 
-.. automethod:: cterasdk.edge.ssl.SSL.upload_cert
+.. automethod:: cterasdk.edge.ssl.SSL.set_storage_ca
    :noindex:
 
 .. code-block:: python
 
    """
-   certificate = '/home/alice/certs/certificate.crt'
-   private_key = '/home/alice/certs/private.key'
+   ca_certificate = './certs/certificate.crt'
    """
 
-   filer.ssl.upload_cert(certificate, private_key)
+   filer.ssl.set_trusted_ca(ca_certificate)
 
-.. danger: Proceed with caution. The integrity of the PEM encoded certificate and private key is not validated. Supplying an invalid certificate or private key may disable all administrative access to the system and would require to engage with CTERA Support professionals to re-enable access. Test your code and certificates before implementing this in production.
+.. automethod:: cterasdk.edge.ssl.SSL.get_storage_ca
+   :noindex:
+
+.. automethod:: cterasdk.edge.ssl.SSL.remove_storage_ca
+   :noindex:
+
+.. automethod:: cterasdk.edge.ssl.SSL.set_certificate
+   :noindex:
+
+.. code-block:: python
+
+   """
+   certificate = './certs/certificate.crt'
+   intermediate_cert = './certs/certificate1.crt'
+   ca_certificate = './certs/certificate2.crt'
+   private_key = './certs/private.key'
+   """
+
+   """
+   Specify certificates in the following order: domain cert, intermediary certs, CA cert
+   You may include as many intermediate certificates as needed
+   """
+   filer.ssl.set_certificate(private_key, certificate, intermediate_cert, ca_certificate)
+
+.. danger: Exercise caution. Test thoroughly prior to implementing in production. Ensure the integrity of the PEM encoded private key and certificates. Supplying an invalid private key or certificate will disable administrative access to the filer and would require CTERA Support to re-enable it.
 
 Power Management
 ================
