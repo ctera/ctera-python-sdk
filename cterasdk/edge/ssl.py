@@ -71,9 +71,8 @@ class SSL(BaseCommand):
         :param str private_key: The PEM-encoded private key or a path to the PEM-encoded private key file
         :param list[str] certificates: The PEM-encoded certificates or a path to the PEM-encoded certificates
         """
-        certificate_chain = []
         logging.getLogger().debug('Loading private key')
-        certificate_chain.append(SSL._obtain_secret(private_key))
+        certificate_chain = [SSL._obtain_secret(private_key)]
         logging.getLogger().debug('Loading certificates')
         certificate_chain = certificate_chain + [SSL._obtain_secret(certificate) for certificate in certificates]
 
