@@ -1,4 +1,8 @@
+import re
+from datetime import datetime
+
 from .object import Object
+from .utils import df_military_time, day_of_week
 
 
 class PolicyRule:
@@ -94,3 +98,123 @@ class StringCriteriaBuilder(CriteriaBuilder):
     def isoneof(self, values):
         self.operator = IsOneOfOperator(values)
         return self
+
+
+class ThrottlingRule:
+    """
+    Throttling Rule
+
+    :ivar int upload: Throttling rate upstream (Kilobits)
+    :ivar int download: Throttling rate downstream (Kilobits)
+    :ivar str start: Start time
+    :ivar str end: End time
+    :ivar list[str] days: Days
+    """
+
+    def __init__(self):
+        self.upload = None
+        self.download = None
+        self.start = None
+        self.end = None
+        self.days = None
+
+    def to_server_object(self):
+        param = Object()
+        param._classname = 'SyncThrottlingSettings'  # pylint: disable=protected-access
+        param.inKbitsPerSecond = self.download
+        param.outKbitsPerSecond = self.upload
+        param.schedule = Object()
+        param.schedule._classname = 'TimeRange'  # pylint: disable=protected-access
+        param.schedule.start = self.start
+        param.schedule.end = self.end
+        param.schedule.days = self.days
+        param.termOnEnd = False
+        return param
+
+    @staticmethod
+    def from_server_object(param):
+        r = ThrottlingRule()
+        r.download = param.inKbitsPerSecond
+        r.upload = param.outKbitsPerSecond
+        r.start = param.schedule.start
+        r.end = param.schedule.end
+        r.days = param.schedule.days
+        return r
+
+    def __str__(self):
+        return str(dict(upload_kbps=self.upload, download_kbps=self.download,
+                        start=self.start, end=self.end, days=[day_of_week(day) for day in self.days]))
+
+
+class ThrottlingRuleBuilder:
+    """
+    Bandwidth Throttling Rule Builder
+    """
+
+    def __init__(self):
+        self.param = ThrottlingRule()
+
+    def upload(self, kbps):
+        """
+        Throttle bandwidth upstream
+
+        :param int kbps: Kilobits per second
+        """
+        self.param.upload = kbps
+        return self
+
+    def download(self, kbps):
+        """
+        Throttle bandwidth downstream
+
+        :param int kbps: Kilobits per second
+        """
+        self.param.download = kbps
+        return self
+
+    def start(self, start):
+        """
+        Start throttling
+
+        :param str start: A military time string 'hh:mm:ss' or a datetime object
+        """
+        self.param.start = ThrottlingRuleBuilder._infer_time(start)
+        return self
+
+    def end(self, end):
+        """
+        End throttling
+
+        :param str end: A military time string 'hh:mm:ss' or a datetime object
+        """
+        self.param.end = ThrottlingRuleBuilder._infer_time(end)
+        return self
+
+    @staticmethod
+    def _infer_time(time):
+        if isinstance(time, datetime):
+            return df_military_time(time)
+        if isinstance(time, str):
+            match = re.search('^[012][0-9]:[0-5][0-9]:[0-5][0-9]$', time)
+            if match:
+                return match.group(0)
+            raise ValueError("Invalid time format. Expected 'hh:mm:ss'")
+        raise ValueError("Invalid format. Expected 'datetime' or 'str'")
+
+    def days(self, days):
+        """
+        Throttle on days
+
+        :param list[cterasdk.common.enum.DayOfWeek] days: A list of days
+        """
+        self.param.days = days
+        return self
+
+    def build(self):
+        """
+        Build the throttling rule
+        """
+        errors = [k for k, v in self.param.__dict__.items() if v is None]
+        if errors:
+            raise ValueError('No value for required field: %s' % errors)
+        return self.param

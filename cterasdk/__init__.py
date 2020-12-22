@@ -12,3 +12,5 @@ from .edge import types as gateway_types  # noqa: E402, F401
 from .edge import enum as gateway_enum  # noqa: E402, F401
 from .core import types as portal_types  # noqa: E402, F401
 from .core import enum as portal_enum  # noqa: E402, F401
+from .common import types as common_types  # noqa: E402, F401
+from .common import enum as common_enum  # noqa: E402, F401

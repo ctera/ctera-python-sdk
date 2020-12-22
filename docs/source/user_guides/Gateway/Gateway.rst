@@ -696,6 +696,29 @@ Cloud Sync
 
    filer.sync.refresh()
 
+Cloud Sync Bandwidth Throttling
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.edge.sync.CloudSyncBandwidthThrottling.get_policy
+   :noindex:
+
+.. automethod:: cterasdk.edge.sync.CloudSyncBandwidthThrottling.set_policy
+   :noindex:
+
+.. code-block:: python
+
+   """Throttle bandwidth during business hours on week days: Monday - Friday"""
+   rule1 = common_types.ThrottlingRuleBuilder().upload(50).download(50).start('07:00:00').end('19:00:00').days(common_enum.DayOfWeek.Weekdays).build()
+
+   """Throttle bandwidth off business hours on week days: Monday - Friday"""
+   rule2 = common_types.ThrottlingRuleBuilder().upload(100).download(100).start('19:00:00').end('07:00:00').days(common_enum.DayOfWeek.Weekdays).build()
+
+   """Throttle bandwidth during weekends: Saturday, Sunday"""
+   rule3 = common_types.ThrottlingRuleBuilder().upload(500).download(500).start('00:00:00').end('23:59:00').days(common_enum.DayOfWeek.Weekend).build()
+
+   filer.sync.throttling.set_policy([rule1, rule2, rule3])
+
+
 File Access Protocols
 =====================
 .. automethod:: cterasdk.edge.ftp.FTP.disable

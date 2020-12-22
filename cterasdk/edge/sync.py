@@ -3,10 +3,15 @@ import logging
 from ..lib import track, ErrorStatus
 from .enum import Mode, SyncStatus, Acl
 from .base_command import BaseCommand
+from ..common import ThrottlingRule
 
 
 class Sync(BaseCommand):
     """ Gateway Cloud Sync APIs """
+
+    def __init__(self, portal):
+        super().__init__(portal)
+        self.throttling = CloudSyncBandwidthThrottling(self._gateway)
 
     def get_status(self):
         """ Retrieve the Cloud Sync status """
@@ -72,3 +77,14 @@ class Sync(BaseCommand):
         logging.getLogger().info("Refreshing cloud folders.")
         self._gateway.execute("/config/cloudsync/cloudExtender", "refreshPaths", None)
         logging.getLogger().info("Completed refreshing cloud folders.")
+
+
+class CloudSyncBandwidthThrottling(BaseCommand):
+    """ Edge Filer Cloud Sync Bandwidth Throttling APIs """
+
+    def get_policy(self):
+        rules = self._gateway.get('/config/cloudsync/syncThrottlingTopic/multiThrottling')
+        return [ThrottlingRule.from_server_object(rule) for rule in rules]
+
+    def set_policy(self, rules):
+        return self._gateway.put('/config/cloudsync/syncThrottlingTopic/multiThrottling', [rule.to_server_object() for rule in rules])

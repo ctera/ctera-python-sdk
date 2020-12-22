@@ -1,7 +1,9 @@
 import re
 import logging
+from datetime import datetime
 
 from .object import Object
+from .enum import DayOfWeek
 
 
 def union(g1, g2):
@@ -48,6 +50,8 @@ class DataUnit:
 
 def convert_size(numeric, u1, u2):
     """
+    Convert size between data units
+
     :param str u1: Convert from data unit
     :param str u2: Convert to data unit
     """
@@ -62,6 +66,33 @@ def convert_size(numeric, u1, u2):
     if offset < 0:
         return numeric / (1 << abs(offset))
     return numeric
+
+
+def df_military_time(time):
+    """
+    Format datetime object to military time
+
+    :param datetime.datetime datetime: Datetime object to convert
+    :returns: Military time formatted string
+    :rtype: str
+    """
+    if not isinstance(time, datetime):
+        raise ValueError("Invalid type '%s', expected 'datetime'" % type(time))
+    return time.strftime('%H:%M:%S')
+
+
+def day_of_week(day):
+    """
+    Interpret the day of week from numeric to str
+
+    :param int day: A numeric integer representing the day of week
+    :returns: Name of the day
+    :rtype: str
+    """
+    name = {v: k for k, v in DayOfWeek.__dict__.items() if isinstance(v, int)}.get(day)
+    if not name:
+        raise ValueError('Invalid day of week: %s' % day)
+    return name
 
 
 class BaseObjectRef(Object):
