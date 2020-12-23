@@ -11,6 +11,12 @@ class DirectoryService(BaseCommand):
     Gateway Active Directory configuration APIs
     """
 
+    def connected(self):
+        """
+        Get the Active Directory join status
+        """
+        return self.filer.get('/status/fileservices/cifs/joinStatus') == 0
+
     def connect(self, domain, username, password, ou=None):
         """
         Connect the Gateway to an Active Directory
