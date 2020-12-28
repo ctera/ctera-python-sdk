@@ -83,8 +83,19 @@ class CloudSyncBandwidthThrottling(BaseCommand):
     """ Edge Filer Cloud Sync Bandwidth Throttling APIs """
 
     def get_policy(self):
+        """
+        Get the bandwidth throttling policy
+
+        :returns: a list of bandwidth throttling rules
+        :rtype: list[cterasdk.common.types.ThrottlingRule]
+        """
         rules = self._gateway.get('/config/cloudsync/syncThrottlingTopic/multiThrottling')
         return [ThrottlingRule.from_server_object(rule) for rule in rules]
 
     def set_policy(self, rules):
+        """
+        Set the bandwidth throttling policy
+
+        :param list[cterasdk.common.types.ThrottlingRule] rules: List of bandwidth throttling rules
+        """
         return self._gateway.put('/config/cloudsync/syncThrottlingTopic/multiThrottling', [rule.to_server_object() for rule in rules])

@@ -14,6 +14,19 @@ class Logs(BaseCommand):
 
     default_include = ['severity', 'time', 'msg', 'more']
 
+    def settings(self, retention, min_severity=None):
+        """
+        Configure log settings
+
+        :param int retention: Log retention period in days
+        :param cterasdk.edge.enum.Severity,optional min_severity: Minimal log severity
+        """
+        log_config = self._gateway.get('/config/logging/general')
+        log_config.LogKeepPeriod = retention
+        if min_severity:
+            log_config.minSeverity = min_severity
+        self._gateway.put('/config/logging/general', log_config)
+
     def logs(self, topic, include=None, minSeverity=enum.Severity.INFO):
         """
         Fetch Gateway logs

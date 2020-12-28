@@ -190,6 +190,10 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     def _login_object(self):
         return login.Login(self)
 
+    @property
+    def initialized(self):
+        return not login.Login(self).info().isfirstlogin
+
     def _is_authenticated(self, function, *args, **kwargs):
         def is_nosession(path):
             return path.startswith('/nosession')

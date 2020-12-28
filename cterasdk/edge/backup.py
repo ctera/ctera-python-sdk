@@ -6,6 +6,7 @@ from ..common import Object
 from ..exception import CTERAException
 from .enum import BackupConfStatusID
 from .base_command import BaseCommand
+from .directorytree import DirectoryTree
 
 
 class AttachRC:
@@ -66,6 +67,10 @@ class ClocksOutOfSync(CTERAException):
 
 class Backup(BaseCommand):
     """ Gateway backup configuration APIs """
+
+    def __init__(self, gateway):
+        super().__init__(gateway)
+        self.files = BackupFiles(self._gateway)
 
     def configure(self, passphrase=None):
         """
@@ -230,3 +235,31 @@ class Backup(BaseCommand):
         logging.getLogger().debug('Configuring backup settings.')
 
         self._gateway.put('/config/backup', backup_settings)
+
+
+class BackupFiles(BaseCommand):
+
+    ALL_FILES = 'All File Types'
+
+    def unselect_all(self):
+        """ Unselect all files from backup """
+        backup_config = self._fetch_backup_config(BackupFiles.ALL_FILES)
+        logging.getLogger().info('Unselecting all files from backup.')
+        directory_tree = DirectoryTree(backup_config.directoryTree)
+        directory_tree.unselect_all()
+        backup_config.directoryTree = directory_tree.root
+        return self._update_backup_config(backup_config)
+
+    def _fetch_backup_config(self, name=None):
+        backup_configs = self._gateway.get('/config/backup/backupPolicy/includeSets')
+        if name:
+            for backup_config in backup_configs:
+                if backup_config.name == name:
+                    logging.getLogger().info('Found backup config. %s', {'name': name})
+                    return backup_config
+            logging.getLogger().error('Could not find backup config. %s', {'name': name})
+            raise CTERAException('Could not find backup config', None, name=name)
+        return backup_configs
+
+    def _update_backup_config(self, backup_config):
+        return self._gateway.put('/config/backup/backupPolicy/includeSets/%s' % backup_config._uuid, backup_config)  # pylint: disable=W0212

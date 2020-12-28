@@ -6,6 +6,12 @@ from .base_command import BaseCommand
 
 class Login(BaseCommand):
 
+    def info(self):
+        """
+        Get login info
+        """
+        return self._gateway.get('/nosession/logininfo')
+
     def login(self, username, password):
         host = self._gateway.host()
         try:

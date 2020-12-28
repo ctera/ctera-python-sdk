@@ -79,6 +79,26 @@ class Network(BaseCommand):
 
         logging.getLogger().info('Nameserver settings updated. %s', {'DNS1': primary_dns_server, 'DNS2': secondary_dns_server})
 
+    def reset_mtu(self):
+        """
+        Set the default maximum transmission unit (MTU) settings
+        """
+        self._set_mtu(False, 1500)
+
+    def set_mtu(self, mtu):
+        """
+        Set a custom network maximum transmission unit (MTU)
+
+        :param int mtu: Maximum transmission unit
+        """
+        self._set_mtu(True, mtu)
+
+    def _set_mtu(self, jumbo, mtu):
+        settings = self._gateway.get('/config/network/ports/0/ethernet')
+        settings.jumbo = jumbo
+        settings.mtu = mtu
+        return self._gateway.put('/config/network/ports/0/ethernet', settings)
+
     def enable_dhcp(self):
         """
         Enable DHCP

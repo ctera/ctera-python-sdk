@@ -673,6 +673,16 @@ Cloud Backup
 
    filer.backup.unsuspend()
 
+Cloud Backup Files
+^^^^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.edge.backup.BackupFiles.unselect_all
+   :noindex:
+
+.. code-block:: python
+
+   filer.backup.files.unselect_all()
+
 Cloud Sync
 ==========
 .. automethod:: cterasdk.edge.sync.Sync.suspend
@@ -829,6 +839,22 @@ Network
 
    filer.network.enable_dhcp()
 
+.. automethod:: cterasdk.edge.network.Network.set_mtu
+   :noindex:
+
+.. code-block:: python
+
+   filer.network.set_mtu(1320)  # set the maximum transmission unit (MTU) to 1320
+
+   filer.network.set_mtu(9000)  # configure 'jumbo' frames (MTU: 9000)
+
+.. automethod:: cterasdk.edge.network.Network.reset_mtu
+   :noindex:
+
+.. code-block:: python
+
+   filer.network.reset_mtu()  # disable custom mtu configuration and restore default setting (1500)
+
 Network Diagnostics
 ^^^^^^^^^^^^^^^^^^^
 
@@ -886,6 +912,12 @@ Mail Server
 
 Logging
 =======
+
+.. automethod:: cterasdk.edge.logs.Logs.settings
+   :noindex:
+
+.. automethod:: cterasdk.edge.logs.Logs.logs
+   :noindex:
 
 .. automethod:: cterasdk.edge.syslog.Syslog.enable
    :noindex:
