@@ -198,7 +198,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         def is_nosession(path):
             return path.startswith('/nosession')
         current_session = self.session()
-        return current_session.authenticated() or current_session.initializing or is_nosession(args[0])
+        return current_session.authenticated() or current_session.initializing() or is_nosession(args[0])
 
     def test(self):
         """ Verification check to ensure the target host is a Gateway. """
