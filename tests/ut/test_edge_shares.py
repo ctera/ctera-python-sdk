@@ -159,6 +159,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
             comment=updated_comment,
             access=Acl.OnlyAuthenticatedUsers,
             dir_permissions=644,
+            csc=ClientSideCaching.Disabled
         )
         expected_param = self._get_share_object(**modify_command_dict)
         shares.Shares(self._filer).modify(self._share_name, **modify_command_dict)

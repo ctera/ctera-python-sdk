@@ -26,6 +26,16 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self._ldap_port = 389
         self._ldap_service = TCPService(self._domain, self._ldap_port)
 
+    def test_connected(self):
+        self._init_filer(get_response=0)
+        ret = directoryservice.DirectoryService(self._filer).connected()
+        self.assertTrue(ret)
+
+    def test_connected(self):
+        self._init_filer(get_response=-1)
+        ret = directoryservice.DirectoryService(self._filer).connected()
+        self.assertFalse(ret)
+
     def test_connect(self):
         get_response = self._get_workgroup_param()
         self._init_filer(get_response=get_response)

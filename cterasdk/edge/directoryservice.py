@@ -15,7 +15,7 @@ class DirectoryService(BaseCommand):
         """
         Get the Active Directory join status
         """
-        return self.filer.get('/status/fileservices/cifs/joinStatus') == 0
+        return self._gateway.get('/status/fileservices/cifs/joinStatus') == 0
 
     def connect(self, domain, username, password, ou=None):
         """
