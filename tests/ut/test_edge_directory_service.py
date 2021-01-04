@@ -31,7 +31,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         ret = directoryservice.DirectoryService(self._filer).connected()
         self.assertTrue(ret)
 
-    def test_connected(self):
+    def test_disconnected(self):
         self._init_filer(get_response=-1)
         ret = directoryservice.DirectoryService(self._filer).connected()
         self.assertFalse(ret)
