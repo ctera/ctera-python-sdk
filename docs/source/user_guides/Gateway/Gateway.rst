@@ -232,6 +232,17 @@ Device Configuration
 
    filer.config.export()
 
+Code Snippets
+=============
+
+.. code-block:: python
+
+   filer.get('/status/device/runningFirmware')  # Get firmware version
+
+   """Get the entire device status object"""
+   status = filer.get('/status/device')
+   print(status.runningFirmware, status.MacAddress)
+
 Storage
 =======
 
@@ -408,6 +419,14 @@ Users
    filer.users.add('alice', 'W!z4rd0fOz!', 'Alice Wonderland') # including a full name
 
    filer.users.add('Bruce', 'GothamCity1!', 'Bruce Wayne', 'bruce.wayne@we.com', uid = 1940) # all
+
+.. automethod:: cterasdk.edge.users.Users.modify
+   :noindex:
+
+.. code-block:: python
+
+   filer.users.modify('Clark', 'Passw0rd1!') # Change a user's password
+   filer.users.modify('Clark', email='clark.kent@krypton.com') # Change a user's email
 
 .. automethod:: cterasdk.edge.users.Users.delete
    :noindex:

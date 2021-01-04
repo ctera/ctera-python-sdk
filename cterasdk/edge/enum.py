@@ -161,7 +161,7 @@ class ClientSideCaching:
     """
     Manual = "manual"
     Documents = "documents"
-    Disabled = "disabled"
+    Disabled = "disable"
 
 
 class PrincipalType:

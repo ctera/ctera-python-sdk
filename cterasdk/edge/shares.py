@@ -63,6 +63,7 @@ class Shares(BaseCommand):
         param.directory = directory
 
         param.access = access
+        param.clientSideCaching = csc
         param.dirPermissions = dir_permissions
         param.exportToAFP = export_to_afp
         param.exportToFTP = export_to_ftp
@@ -210,6 +211,8 @@ class Shares(BaseCommand):
             share.directory = directory
         if access is not None:
             share.access = access
+        if csc is not None:
+            share.clientSideCaching = csc
         if dir_permissions is not None:
             share.dirPermissions = dir_permissions
         if export_to_afp is not None:

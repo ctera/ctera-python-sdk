@@ -159,6 +159,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
             comment=updated_comment,
             access=Acl.OnlyAuthenticatedUsers,
             dir_permissions=644,
+            csc=ClientSideCaching.Disabled
         )
         expected_param = self._get_share_object(**modify_command_dict)
         shares.Shares(self._filer).modify(self._share_name, **modify_command_dict)
@@ -178,7 +179,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         share_param.volume = self._share_volume if volume is None else volume
         share_param.acl = None if acl is None else acl
         share_param.access = Acl.WindowsNT if access is None else access
-        share_param.csc = ClientSideCaching.Manual if csc is None else csc
+        share_param.clientSideCaching = ClientSideCaching.Manual if csc is None else csc
         share_param.dirPermissions = 777 if dir_permissions is None else dir_permissions
         share_param.comment = None if comment is None else comment
         share_param.exportToAFP = False if export_to_afp is None else export_to_afp
