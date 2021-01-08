@@ -30,15 +30,33 @@ class Tasks(BaseCommand):
     """ Gateway Background Task APIs """
 
     def status(self, ref):
+        """
+        Get background task status
+
+        :param str ref: Task reference
+        """
         task = Task(self._gateway, ref)
         return task.status()
 
     def running(self):
+        """
+        Get all running background tasks
+        """
         return self._gateway.query('/proc/bgtasks', 'status', 'running')
 
     def by_name(self, name):
+        """
+        Get background tasks by name
+
+        :param str name: Task name
+        """
         return self._gateway.query('/proc/bgtasks', 'name', name)
 
     def wait(self, ref):
+        """
+        Wait for background task to complete
+
+        :param str ref: Task reference
+        """
         task = Task(self._gateway, ref)
         return task.wait()
