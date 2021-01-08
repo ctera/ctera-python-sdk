@@ -32,6 +32,7 @@ from ..edge import smb
 from ..edge import support
 from ..edge import sync
 from ..edge import syslog
+from ..edge import taskmgr
 from ..edge import telnet
 from ..edge import timezone
 from ..edge import users
@@ -53,6 +54,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.edge.directoryservice.DirectoryService directoryservice: Object holding the Gateway Active Directory APIs
     :ivar cterasdk.edge.telnet.Telnet telnet: Object holding the Gateway Telnet APIs
     :ivar cterasdk.edge.syslog.Syslog syslog: Object holding the Gateway Syslog APIs
+    :ivar cterasdk.edge.taskmgr.Tasks tasks: Object holding the Gateway Background Tasks APIs
     :ivar cterasdk.edge.audit.Audit audit: Object holding the Gateway Audit APIs
     :ivar cterasdk.edge.mail.Mail mail: Object holding the Gateway Mail APIs
     :ivar cterasdk.edge.backup.Backup backup: Object holding the Gateway Backup APIs
@@ -130,6 +132,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.support = support.Support(self)
         self.files = files.FileBrowser(self)
         self.firmware = firmware.Firmware(self)
+        self.tasks = taskmgr.Tasks(self)
 
     @property
     def base_api_url(self):
@@ -183,7 +186,8 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'cli',
             'support',
             'files',
-            'firmware'
+            'firmware',
+            'tasks'
             ]
 
     @property

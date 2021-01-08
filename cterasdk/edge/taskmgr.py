@@ -3,6 +3,7 @@ import logging
 
 from ..lib.task_manager_base import TaskBase
 from ..exception import InputError
+from .base_command import BaseCommand
 
 
 class Task(TaskBase):
@@ -19,20 +20,25 @@ class Task(TaskBase):
         if uid is not None:
             return '/proc/bgtasks/' + uid
         logging.getLogger().error('Could not parse task id. %s', {'ref': ref})
-        raise InputError('Invalid task id', ref, [64, '/proc/bgtasks/64'])
+        raise InputError('Invalid task id', ref, [64, '64', '/proc/bgtasks/64'])
 
-    def _get_task_status(self):
+    def get_task_status(self):
         return self.CTERAHost.get(self.path)
 
 
-def running(CTERAHost):
-    return CTERAHost.query('/proc/bgtasks', 'status', 'running')
+class Tasks(BaseCommand):
+    """ Gateway Background Task APIs """
 
+    def status(self, ref):
+        task = Task(self._gateway, ref)
+        return task.status()
 
-def by_name(CTERAHost, name):
-    return CTERAHost.query('/proc/bgtasks', 'name', name)
+    def running(self):
+        return self._gateway.query('/proc/bgtasks', 'status', 'running')
 
+    def by_name(self, name):
+        return self._gateway.query('/proc/bgtasks', 'name', name)
 
-def wait(CTERAHost, ref):
-    task = Task(CTERAHost, ref)
-    return task.wait()
+    def wait(self, ref):
+        task = Task(self._gateway, ref)
+        return task.wait()

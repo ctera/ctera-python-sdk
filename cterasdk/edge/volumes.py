@@ -1,7 +1,6 @@
 import logging
 
 from ..lib.task_manager_base import TaskError
-from . import taskmgr as TaskManager
 from .enum import VolumeStatus
 from ..common import Object
 from ..exception import CTERAException, InputError
@@ -188,7 +187,7 @@ class Volumes(BaseCommand):
     def _wait_pending_filesystem_mounts(self):
         logging.getLogger().debug('Checking for pending mount tasks.')
 
-        tasks = TaskManager.running(self._gateway)
+        tasks = self._gateway.tasks.running()
         for mount in tasks:
             if mount.name.startswith('Mounting'):
                 self._wait_mount(mount.id)
@@ -196,12 +195,12 @@ class Volumes(BaseCommand):
     def _wait_pending_mount(self, volume):
         logging.getLogger().debug('Checking for pending mount tasks. %s', {'volume': volume})
 
-        tasks = TaskManager.by_name(self._gateway, ' '.join(['Mounting', volume, 'file system']))
+        tasks = self._gateway.tasks.by_name(' '.join(['Mounting', volume, 'file system']))
         for mount in tasks:
             self._wait_mount(mount.id)
 
     def _wait_mount(self, tid):
         try:
-            TaskManager.wait(self._gateway, tid)
+            self._gateway.tasks.wait(tid)
         except TaskError:
             logging.getLogger().debug('Failed mounting volume. %s', {'tid': tid})

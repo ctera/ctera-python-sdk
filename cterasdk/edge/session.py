@@ -28,7 +28,7 @@ class Session(SessionBase):
 
     def _do_start_local_session(self, ctera_host):
         user = ctera_host.get('currentuser')
-        self._activate(SessionType.Local, user)
+        self._activate(SessionType.Local, user.username)
 
     def start_remote_session(self, remote_session):
         self._activate(SessionType.Remote, remote_session.user.name, tenant=remote_session.user.tenant, remote_from=remote_session.host)
