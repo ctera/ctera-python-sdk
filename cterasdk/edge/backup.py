@@ -1,6 +1,5 @@
 import logging
 
-from . import taskmgr as TaskManager
 from ..lib.task_manager_base import TaskError
 from ..common import Object
 from ..exception import CTERAException
@@ -218,7 +217,7 @@ class Backup(BaseCommand):
 
     def _wait(self, task):
         try:
-            task = TaskManager.wait(self._gateway, task)
+            task = self._gateway.tasks.wait(task)
             return task.result
         except TaskError:
             pass

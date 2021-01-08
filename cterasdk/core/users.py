@@ -6,7 +6,6 @@ from ..exception import CTERAException
 from ..common import Object, DateTimeUtils
 from ..common import union
 from . import query
-from . import taskmgr as TaskManager
 
 
 class Users(BaseCommand):
@@ -162,7 +161,7 @@ class Users(BaseCommand):
         logging.getLogger().info('Applying provisioning changes.')
         task = self._portal.execute('', 'updateAccounts', param)
         if wait:
-            task = TaskManager.wait(self._portal, task)
+            task = self._portal.tasks.wait(task)
         return task
 
     def delete(self, user):

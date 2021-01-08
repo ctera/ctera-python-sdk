@@ -7,7 +7,6 @@ from ..common import Object
 from ..common import union
 from . import enum
 from . import query
-from . import taskmgr as TaskManager
 
 
 class Portals(BaseCommand):
@@ -158,5 +157,5 @@ class Portals(BaseCommand):
         logging.getLogger().info('Applying provisioning changes.')
         task = self._portal.execute('', 'updatePortals', param)
         if wait:
-            task = TaskManager.wait(self._portal, task)
+            task = self._portal.tasks.wait(task)
         return task

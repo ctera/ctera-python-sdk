@@ -1,3 +1,5 @@
+import logging
+
 from . import enum
 from ..common import Object
 from .base_command import BaseCommand
@@ -52,10 +54,14 @@ class Audit(BaseCommand):
         settings.includeAuditLogTag = includeAuditLogTag
         settings.humanReadableAuditLog = humanReadableAuditLog
 
+        logging.getLogger().info('Enabling SMB audit logs')
         self._gateway.put('/config/logging/files', settings)
+        logging.getLogger().info('Audit logs enabled')
 
     def disable(self):
         """
         Disable Gateway Audit log
         """
+        logging.getLogger().info('Disabling SMB audit logs')
         self._gateway.put('/config/logging/files/mode', enum.Mode.Disabled)
+        logging.getLogger().info('Audit logs disabled')
