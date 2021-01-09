@@ -3,7 +3,7 @@ from unittest import mock
 from cterasdk import exception
 from cterasdk.edge import shares
 from cterasdk.edge.enum import Acl, ClientSideCaching, PrincipalType, FileAccessMode
-from cterasdk.edge.types import ShareAccessControlEntry
+from cterasdk.edge.types import ShareAccessControlEntry, NFSv3AccessControlEntry
 from cterasdk.common import Object
 from tests.ut import base_edge
 
@@ -22,6 +22,11 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
             ShareAccessControlEntry(principal_type=PrincipalType.LU, name='admin', perm=FileAccessMode.RW),
             ShareAccessControlEntry(principal_type=PrincipalType.DG, name='CTERA\\Domain Admins', perm=FileAccessMode.RW),
             ShareAccessControlEntry(principal_type=PrincipalType.DU, name='walice@ctera.com', perm=FileAccessMode.RW)
+        ]
+        self._trusted_nfs_clients = [
+            NFSv3AccessControlEntry(address='192.168.0.1', netmask='255.255.240.0', perm=FileAccessMode.RW),
+            NFSv3AccessControlEntry(address='10.0.0.1', netmask='255.255.0.0', perm=FileAccessMode.RO),
+            NFSv3AccessControlEntry(address='172.0.17.3', netmask='0.0.0.0', perm=FileAccessMode.NA)
         ]
         self._share_block_files = ['exe', 'cmd', 'bat']
 
@@ -67,6 +72,38 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         self._assert_equal_objects(actual_param, expected_param)
 
         self._filer.add.assert_called_once_with('/config/fileservices/share', mock.ANY)  # no verification call param _add_share_acl_rule()
+
+    def test_add_nfs_v3_share_success(self):
+        execute_response = self._get_list_physical_folders_response_object()
+        self._init_filer(execute_response=execute_response)
+
+        shares.Shares(self._filer).add(self._share_name, self._share_fullpath, export_to_nfs=True,
+                                       trusted_nfs_clients=self._trusted_nfs_clients)
+
+        self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
+        expected_param = self._get_list_physical_folders_param()
+        actual_param = self._filer.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+        self._filer.add.assert_called_once_with('/config/fileservices/share', mock.ANY)
+
+        expected_param = self._get_share_object(acl=[], export_to_nfs=True,
+                                                trusted_nfs_clients=[client.to_server_object() for client in self._trusted_nfs_clients])
+        actual_param = self._filer.add.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def test_modify_nfs_v3_share_success(self):
+        get_response = self._get_share_object(export_to_nfs=False)
+        self._init_filer(get_response=get_response)
+
+        shares.Shares(self._filer).modify(self._share_name, export_to_nfs=True, trusted_nfs_clients=self._trusted_nfs_clients)
+
+        self._filer.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
+        self._filer.put.assert_called_once_with('/config/fileservices/share/' + self._share_name, mock.ANY)
+
+        expected_param = self._get_share_object(export_to_nfs=True,
+                                                trusted_nfs_clients=[client.to_server_object() for client in self._trusted_nfs_clients])
+        actual_param = self._filer.put.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_add_cifs_share_invalid_principal_type(self):
         with self.assertRaises(exception.InputError) as error:
@@ -168,11 +205,11 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         actual_param = self._filer.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
-    def _get_share_object(self, directory=None, volume=None, acl=None,  # pylint: disable=too-many-arguments
+    def _get_share_object(self, directory=None, volume=None, acl=None,  # pylint: disable=too-many-arguments,too-many-locals
                           access=None, csc=None, dir_permissions=None,
                           comment=None, export_to_afp=False, export_to_ftp=False,
                           export_to_nfs=False, export_to_pc_agent=False,
-                          export_to_rsync=False, indexed=False):
+                          export_to_rsync=False, indexed=False, trusted_nfs_clients=None):
         share_param = Object()
         share_param.name = self._share_name
         share_param.directory = self._share_directory if directory is None else directory
@@ -188,6 +225,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         share_param.exportToPCAgent = False if export_to_pc_agent is None else export_to_pc_agent
         share_param.exportToRSync = False if export_to_rsync is None else export_to_rsync
         share_param.indexed = False if indexed is None else indexed
+        share_param.trustedNFSClients = [] if trusted_nfs_clients is None else trusted_nfs_clients
         return share_param
 
     def _get_list_physical_folders_param(self):

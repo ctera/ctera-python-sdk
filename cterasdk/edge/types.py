@@ -77,6 +77,72 @@ class UserGroupEntry():
         return ('\\' + self.name) if self.principal_type in [enum.PrincipalType.LG, enum.PrincipalType.LU] else self.name
 
 
+class AccessControlEntryValidator:
+
+    _valid_permissions = list({k: v for k, v in enum.FileAccessMode.__dict__.items() if not k.startswith('_')}.values())
+
+    @staticmethod
+    def validate_permission(permission):
+        if permission not in AccessControlEntryValidator._valid_permissions:
+            raise InputError('Invalid permissions', permission, AccessControlEntryValidator._valid_permissions)
+
+
+class NFSv3AccessControlEntry():
+    """
+    NFS v3 export access control entry
+    :ivar str address: IP address, hostname or fully qualified domain name of client machine
+    :ivar str netmask: Subnet mask
+    :ivar cterasdk.edge.enum.FileAccessMode perm: File access permission
+    """
+
+    def __init__(self, address, netmask, perm):
+        AccessControlEntryValidator.validate_permission(perm)
+        self._address = address
+        self._netmask = netmask
+        self._perm = perm
+        self._noRootSquash = False
+
+    @property
+    def address(self):
+        return self._address
+
+    @address.setter
+    def address(self, address):
+        self._address = address
+
+    @property
+    def netmask(self):
+        return self._netmask
+
+    @netmask.setter
+    def netmask(self, netmask):
+        self._netmask = netmask
+
+    @property
+    def perm(self):
+        return self._perm
+
+    @perm.setter
+    def perm(self, perm):
+        AccessControlEntryValidator.validate_permission(perm)
+        self._perm = perm
+
+    @staticmethod
+    def from_server_object(server_object):
+        return NFSv3AccessControlEntry(server_object.address, server_object.netmask, server_object.accessLevel)
+
+    def to_server_object(self):
+        param = Object()
+        param.address = self._address
+        param.netmask = self._netmask
+        param.accessLevel = self._perm
+        param.noRootSquash = self._noRootSquash
+        return param
+
+    def __str__(self):
+        return str(dict(address=self.address, netmask=self.netmask, permission=self.perm))
+
+
 class ShareAccessControlEntry():
     """
     Share access control entry for filer shares
@@ -89,7 +155,7 @@ class ShareAccessControlEntry():
     _valid_permissions = list({k: v for k, v in enum.FileAccessMode.__dict__.items() if not k.startswith('_')}.values())
 
     def __init__(self, principal_type, name, perm):
-        ShareAccessControlEntry._validate_permission(perm)
+        AccessControlEntryValidator.validate_permission(perm)
         self._user_group_entry = UserGroupEntry(principal_type, name)
         self._perm = perm
 
@@ -115,7 +181,7 @@ class ShareAccessControlEntry():
 
     @perm.setter
     def perm(self, perm):
-        ShareAccessControlEntry._validate_permission(perm)
+        AccessControlEntryValidator.validate_permission(perm)
         self._perm = perm
 
     def to_server_object(self):
@@ -136,11 +202,6 @@ class ShareAccessControlEntry():
         user_group_entry = UserGroupEntry.from_server_object(server_object.principal2)
         perm = server_object.permissions.allowedFileAccess
         return ShareAccessControlEntry(user_group_entry.principal_type, user_group_entry.name, perm)
-
-    @staticmethod
-    def _validate_permission(permission):
-        if permission not in ShareAccessControlEntry._valid_permissions:
-            raise InputError('Invalid permissions', permission, ShareAccessControlEntry._valid_permissions)
 
 
 class RemoveShareAccessControlEntry(UserGroupEntry):

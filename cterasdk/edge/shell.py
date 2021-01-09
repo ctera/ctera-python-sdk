@@ -13,8 +13,8 @@ class Shell(BaseCommand):
         Execute a shell command on the gateway
 
         :param str shell_command: The shell command to execute
-        :param bool,optional wait: Wait for the command to execute, defaults to `True`
-        :return: The command result, or the task url path when wait equals `False`
+        :param bool,optional wait: Wait for the command to execute, defaults to ``True``
+        :return: The command result, or the task url path when wait equals ``False``
         """
         logging.getLogger().info("Executing shell command. %s", {'shell_command': shell_command})
 
