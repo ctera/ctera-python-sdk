@@ -34,6 +34,8 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         self._tcp_connect_address = 'address'
         self._tcp_connect_port = 995
 
+        self._mtu = 1320
+
     def test_network_status(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
@@ -166,6 +168,31 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, TCPConnectResult(self._tcp_connect_address, self._tcp_connect_port, False))
+
+    def test_edge_set_mtu(self):
+        get_response = TestEdgeNetwork._get_ethernet_object()
+        self._init_filer(get_response=get_response)
+        network.Network(self._filer).set_mtu(self._mtu)
+        self._filer.put.assert_called_once_with('/config/network/ports/0/ethernet', mock.ANY)
+        expected_param = TestEdgeNetwork._get_ethernet_object(jumbo=True, mtu=self._mtu)
+        actual_param = self._filer.put.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def test_edge_reset_mtu(self):
+        get_response = TestEdgeNetwork._get_ethernet_object(jumbo=True, mtu=1320)
+        self._init_filer(get_response=get_response)
+        network.Network(self._filer).reset_mtu()
+        self._filer.put.assert_called_once_with('/config/network/ports/0/ethernet', mock.ANY)
+        expected_param = TestEdgeNetwork._get_ethernet_object()
+        actual_param = self._filer.put.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    @staticmethod
+    def _get_ethernet_object(jumbo=False, mtu=1500):
+        param = Object()
+        param.jumbo = jumbo
+        param.mtu = mtu
+        return param
 
     def _get_tcp_connect_object(self):
         tcp_connect_param = Object()
