@@ -255,3 +255,28 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
         self._init_filer()
         backup.Backup(self._filer).unsuspend()
         self._filer.execute.assert_called_once_with('/status/sync', 'resume')
+
+    def test_unselect_all_files_from_backup(self):
+        uuid = 'test'
+        all_files = 'All File Types'
+        get_response = [TestEdgeBackup._create_backup_set(uuid, all_files, True)]
+        self._init_filer(get_response=get_response)
+        backup.Backup(self._filer).files.unselect_all()
+        self._filer.get.assert_called_once_with('/config/backup/backupPolicy/includeSets')
+        self._filer.put.assert_called_once_with('/config/backup/backupPolicy/includeSets/%s' % uuid, mock.ANY)
+        expected_param = TestEdgeBackup._create_backup_set(uuid, all_files, False)
+        actual_param = self._filer.put.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    @staticmethod
+    def _create_backup_set(uuid, name, include_root):
+        param = Object()
+        param._uuid = uuid  # pylint: disable=protected-access
+        param.name = name
+        param.directoryTree = Object()
+        param.directoryTree._parent = None  # pylint: disable=protected-access
+        param.directoryTree.name = 'root'
+        param.directoryTree.isIncluded = include_root
+        param.directoryTree.children = None
+        param.directoryTree.displayName = None
+        return param
