@@ -19,11 +19,11 @@ class Shell(BaseCommand):
         logging.getLogger().info("Executing shell command. %s", {'shell_command': shell_command})
 
         task = self._gateway.execute("/config/device", "bgshell", shell_command)
-        if wait:
-            try:
-                task = self._gateway.tasks.wait(task)
-                logging.getLogger().info("Shell command executed. %s", {'shell_command': shell_command})
-                return task.result.result
-            except TaskError as error:
-                raise CTERAException('An error occurred while executing task', error)
-        return task
+        if not wait:
+            return task
+        try:
+            task = self._gateway.tasks.wait(task)
+            logging.getLogger().info("Shell command executed. %s", {'shell_command': shell_command})
+            return task.result.result
+        except TaskError as error:
+            raise CTERAException('An error occurred while executing task', error)
