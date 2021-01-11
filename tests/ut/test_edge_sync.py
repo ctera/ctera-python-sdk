@@ -3,6 +3,7 @@ from unittest import mock
 from cterasdk.edge import sync
 from cterasdk.edge.enum import Mode, SyncStatus, Acl
 from cterasdk.lib import ErrorStatus
+from cterasdk.common.types import ThrottlingRuleBuilder
 from tests.ut import base_edge
 
 
@@ -12,6 +13,7 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
         super().setUp()
         self._disable_aio = (False, 0, 0)
         self._enable_aio = (True, 1, 1)
+        self._throttling_rule = TestEdgeSync._create_bandwidth_rule(100, 100, '00:00:00', '23:59:59', [0, 1, 2, 3, 4, 5, 6])
 
     def test_cloudsync_status(self):
         get_response = 'Success'
@@ -82,3 +84,28 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
         self._init_filer()
         sync.Sync(self._filer).refresh()
         self._filer.execute.assert_called_once_with('/config/cloudsync/cloudExtender', 'refreshPaths', None)
+
+    def test_get_bandwidth_throttling(self):
+        get_response = [
+            self._throttling_rule.to_server_object()
+        ]
+        self._init_filer(get_response=get_response)
+        ret = sync.CloudSyncBandwidthThrottling(self._filer).get_policy()
+        self._filer.get.assert_called_once_with('/config/cloudsync/syncThrottlingTopic/multiThrottling')
+        self._assert_equal_objects(ret, [self._throttling_rule])
+
+    def test_set_bandwidth_throttling(self):
+        put_response = 'Success'
+        self._init_filer(put_response=put_response)
+        ret = sync.CloudSyncBandwidthThrottling(self._filer).set_policy([self._throttling_rule])
+        self._filer.put.assert_called_once_with('/config/cloudsync/syncThrottlingTopic/multiThrottling', mock.ANY)
+        actual_param = self._filer.put.call_args[0][1]
+        self._assert_equal_objects(actual_param, [self._throttling_rule.to_server_object()])
+        self.assertEqual(ret, put_response)
+
+    def test_print_bandwidth_throttling_rule(self):
+        print(self._throttling_rule)
+
+    @staticmethod
+    def _create_bandwidth_rule(upload, download, start, end, days):
+        return ThrottlingRuleBuilder().upload(upload).download(download).start(start).end(end).days(days).build()

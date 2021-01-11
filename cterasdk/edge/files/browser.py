@@ -1,5 +1,6 @@
 from .path import CTERAPath
 from . import copy, move, mkdir, rm, file_access
+from . import open as openfile
 
 
 class FileBrowser:
@@ -13,11 +14,19 @@ class FileBrowser:
     def ls(_path):
         return
 
+    def openfile(self, path):
+        """
+        Obtain a file handle
+
+        :param str path: The file path on the Edge Filer
+        """
+        return openfile.openfile(self._CTERAHost, self.mkpath(path))
+
     def download(self, path, destination=None):
         """
         Download a file
 
-        :param str path: The file's path on the gateway
+        :param str path: The file path on the Edge Filer
         :param str,optional destination:
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """

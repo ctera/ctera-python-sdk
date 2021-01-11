@@ -25,6 +25,11 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
             login.Login(self._filer).login(self._username, self._password)
         self.assertEqual(error_message, error.exception.message)
 
+    def test_login_required(self):
+        with self.assertRaises(exception.CTERAException) as error:
+            self._filer.get('/config/device')
+        self.assertEqual('Not logged in', error.exception.message)
+
     def test_logout_success_after_login_success(self):
         self._init_filer()
         login.Login(self._filer).login(self._username, self._password)
