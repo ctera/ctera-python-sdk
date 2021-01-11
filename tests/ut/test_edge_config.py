@@ -1,3 +1,7 @@
+import datetime
+from unittest import mock
+
+from cterasdk import config as sdkconfig
 from cterasdk.edge import config
 from tests.ut import base_edge
 
@@ -8,6 +12,10 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
         super().setUp()
         self._hostname = 'vGateway-01dc'
         self._location = '205 E. 42nd St. New York, NY. 10017'
+        self._filename = 'file.xml'
+        self._target_directory = '/path/to/folder'
+        self._default_download_directory = sdkconfig.filesystem['dl']
+        self._current_datetime = datetime.datetime.now()
 
     def test_get_hostname(self):
         self._init_filer(get_response=self._hostname)
@@ -53,3 +61,31 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
         ret = config.Config(self._filer).disable_wizard()
         self._filer.put.assert_called_once_with('/config/gui/openFirstTimeWizard', False)
         self.assertEqual(ret, put_response)
+
+    def test_edge_config_export_default_dest(self):
+        openfile_response = 'Stream'
+        self._init_filer(openfile_response=openfile_response)
+        mock_get_dirpath = self.patch_call("cterasdk.lib.filesystem.FileSystem.get_dirpath",
+                                           return_value=self._default_download_directory)
+        mock_save_file = self.patch_call("cterasdk.lib.filesystem.FileSystem.save")
+        with mock.patch.object(datetime, 'datetime', mock.Mock(wraps=datetime.datetime)) as patched:
+            patched.now.return_value = self._current_datetime
+            config.Config(self._filer).export()
+            self._filer.openfile.assert_called_once_with('/export')
+            mock_get_dirpath.assert_called_once()
+            mock_save_file.assert_called_once_with(self._default_download_directory,
+                                                   self._current_datetime.strftime('_%Y-%m-%dT%H_%M_%S.xml'), openfile_response)
+
+    def test_edge_config_export_target_directory_default_filename(self):
+        openfile_response = 'Stream'
+        self._init_filer(openfile_response=openfile_response)
+        mock_get_dirpath = self.patch_call("cterasdk.lib.filesystem.FileSystem.split_file_directory",
+                                           return_value=(self._target_directory, None))
+        mock_save_file = self.patch_call("cterasdk.lib.filesystem.FileSystem.save")
+        with mock.patch.object(datetime, 'datetime', mock.Mock(wraps=datetime.datetime)) as patched:
+            patched.now.return_value = self._current_datetime
+            config.Config(self._filer).export(self._target_directory)
+            self._filer.openfile.assert_called_once_with('/export')
+            mock_get_dirpath.assert_called_once()
+            mock_save_file.assert_called_once_with(self._target_directory,
+                                                   self._current_datetime.strftime('_%Y-%m-%dT%H_%M_%S.xml'), openfile_response)

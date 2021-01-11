@@ -2,7 +2,6 @@ import logging
 
 from ..lib.task_manager_base import TaskError
 from .licenses import Licenses
-from . import taskmgr as TaskManager
 from ..lib import ask, track
 from ..common import Object
 from ..exception import CTERAException, InputError, CTERAConnectionError
@@ -121,7 +120,7 @@ class Services(BaseCommand):
     def _connect_to_services(self, param, ctera_license):
         task = self._attach(param)
         try:
-            TaskManager.wait(self._gateway, task)
+            self._gateway.tasks.wait(task)
             track(self._gateway, '/status/services/CTERAPortal/connectionState', [enum.ServicesConnectionState.Connected],
                   [enum.ServicesConnectionState.ResolvingServers, enum.ServicesConnectionState.Connecting,
                    enum.ServicesConnectionState.Attaching, enum.ServicesConnectionState.Authenticating],

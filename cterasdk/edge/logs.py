@@ -1,4 +1,6 @@
 # pylint: disable=line-too-long
+import logging
+
 from ..lib import Command, Iterator
 from . import query
 from . import enum
@@ -25,7 +27,9 @@ class Logs(BaseCommand):
         log_config.LogKeepPeriod = retention
         if min_severity:
             log_config.minSeverity = min_severity
+        logging.getLogger().info('Updating log settings. %s', {'retention': retention, 'min_severity': log_config.minSeverity})
         self._gateway.put('/config/logging/general', log_config)
+        logging.getLogger().info('Log settings updated. %s', {'retention': retention, 'min_severity': log_config.minSeverity})
 
     def logs(self, topic, include=None, minSeverity=enum.Severity.INFO):
         """

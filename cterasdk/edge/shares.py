@@ -30,7 +30,8 @@ class Shares(BaseCommand):
             export_to_nfs=False,
             export_to_pc_agent=False,
             export_to_rsync=False,
-            indexed=False
+            indexed=False,
+            trusted_nfs_clients=None
             ):  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
         """
         Add a network share.
@@ -48,6 +49,7 @@ class Shares(BaseCommand):
         :param bool export_to_pc_agent: Whether to allow as a destination share for CTERA Backup Agents, defaults to ``False``
         :param bool export_to_rsync: Whether to enable access over rsync, defaults to ``False``
         :param bool indexed: Whether to enable indexing for search, defaults to ``False``
+        :param list[cterasdk.edge.types.NFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients, defaults to ``None``
         """
         acl = acl or []
 
@@ -74,6 +76,7 @@ class Shares(BaseCommand):
         param.comment = comment
         Shares._validate_acl(acl)
         param.acl = [acl_entry.to_server_object() for acl_entry in acl]
+        param.trustedNFSClients = [client.to_server_object() for client in (trusted_nfs_clients or [])]
 
         try:
             self._gateway.add('/config/fileservices/share', param)
@@ -182,7 +185,8 @@ class Shares(BaseCommand):
             export_to_nfs=None,
             export_to_pc_agent=None,
             export_to_rsync=None,
-            indexed=None
+            indexed=None,
+            trusted_nfs_clients=None
                 ):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
         """
         Modify an existing network share. All parameters but name are optional and default to None
@@ -200,6 +204,7 @@ class Shares(BaseCommand):
         :param bool,optional export_to_pc_agent: Whether to allow as a destination share for CTERA Backup Agents
         :param bool,optional export_to_rsync: Whether to enable access over rsync
         :param bool,optional indexed: Whether to enable indexing for search
+        :param list[cterasdk.edge.types.NFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients, defaults to ``None``
         """
         share = self.get(name=name)
         if directory is not None:
@@ -232,6 +237,8 @@ class Shares(BaseCommand):
         if acl is not None:
             Shares._validate_acl(acl)
             share.acl = [acl_entry.to_server_object() for acl_entry in acl]
+        if trusted_nfs_clients is not None:
+            share.trustedNFSClients = [client.to_server_object() for client in trusted_nfs_clients]
 
         try:
             self._gateway.put('/config/fileservices/share/' + name, share)

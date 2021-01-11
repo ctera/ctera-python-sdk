@@ -3,7 +3,6 @@ from unittest import mock
 from cterasdk.edge import network
 from cterasdk.edge.types import TCPService, TCPConnectResult
 from cterasdk.lib import task_manager_base
-from cterasdk.edge import taskmgr
 from cterasdk.edge.enum import Mode
 from cterasdk.common import Object
 from tests.ut import base_edge
@@ -34,6 +33,8 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         self._task_id = '138'
         self._tcp_connect_address = 'address'
         self._tcp_connect_port = 995
+
+        self._mtu = 1320
 
     def test_network_status(self):
         get_response = 'Success'
@@ -119,12 +120,12 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         task = Object()
         task.result = Object()
         task.result.rc = 'Open'
-        taskmgr.wait = mock.MagicMock(return_value=task)
+        self._filer.tasks.wait = mock.MagicMock(return_value=task)
 
         ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
         self._filer.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
-        taskmgr.wait.assert_called_once_with(self._filer, self._task_id)
+        self._filer.tasks.wait.assert_called_once_with(self._task_id)
 
         expected_param = self._get_tcp_connect_object()
         actual_param = self._filer.execute.call_args[0][2]
@@ -139,12 +140,12 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         task = Object()
         task.result = Object()
         task.result.rc = 'BadAddress'
-        taskmgr.wait = mock.MagicMock(return_value=task)
+        self._filer.tasks.wait = mock.MagicMock(return_value=task)
 
         ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
         self._filer.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
-        taskmgr.wait.assert_called_once_with(self._filer, self._task_id)
+        self._filer.tasks.wait.assert_called_once_with(self._task_id)
 
         expected_param = self._get_tcp_connect_object()
         actual_param = self._filer.execute.call_args[0][2]
@@ -155,18 +156,43 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
     def test_tcp_connect_task_error(self):
         execute_response = self._task_id
         self._init_filer(execute_response=execute_response)
-        taskmgr.wait = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
+        self._filer.tasks.wait = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
 
         ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
         self._filer.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
-        taskmgr.wait.assert_called_once_with(self._filer, self._task_id)
+        self._filer.tasks.wait.assert_called_once_with(self._task_id)
 
         expected_param = self._get_tcp_connect_object()
         actual_param = self._filer.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, TCPConnectResult(self._tcp_connect_address, self._tcp_connect_port, False))
+
+    def test_edge_set_mtu(self):
+        get_response = TestEdgeNetwork._get_ethernet_object()
+        self._init_filer(get_response=get_response)
+        network.Network(self._filer).set_mtu(self._mtu)
+        self._filer.put.assert_called_once_with('/config/network/ports/0/ethernet', mock.ANY)
+        expected_param = TestEdgeNetwork._get_ethernet_object(jumbo=True, mtu=self._mtu)
+        actual_param = self._filer.put.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def test_edge_reset_mtu(self):
+        get_response = TestEdgeNetwork._get_ethernet_object(jumbo=True, mtu=1320)
+        self._init_filer(get_response=get_response)
+        network.Network(self._filer).reset_mtu()
+        self._filer.put.assert_called_once_with('/config/network/ports/0/ethernet', mock.ANY)
+        expected_param = TestEdgeNetwork._get_ethernet_object()
+        actual_param = self._filer.put.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    @staticmethod
+    def _get_ethernet_object(jumbo=False, mtu=1500):
+        param = Object()
+        param.jumbo = jumbo
+        param.mtu = mtu
+        return param
 
     def _get_tcp_connect_object(self):
         tcp_connect_param = Object()

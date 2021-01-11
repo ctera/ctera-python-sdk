@@ -2,7 +2,6 @@ from unittest import mock
 
 from cterasdk import exception
 from cterasdk.edge import backup
-from cterasdk.edge import taskmgr
 from cterasdk.edge.enum import BackupConfStatusID
 from cterasdk.common import Object
 from tests.ut import base_edge
@@ -22,12 +21,12 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
         self._init_filer()
         self._filer.get = mock.MagicMock(side_effect=TestEdgeBackup._mock_get_no_backup_settings)
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
-        taskmgr.wait = mock.MagicMock(side_effect=TestEdgeBackup._mock_recoverable_encryption_attach_folder_not_found_create_folder_ok)
+        self._filer.tasks.wait = mock.MagicMock(side_effect=TestEdgeBackup._mock_recoverable_enc_attach_folder_not_found_create_folder_ok)
         backup.Backup(self._filer).configure()
-        taskmgr.wait.assert_has_calls(
+        self._filer.tasks.wait.assert_has_calls(
             [
-                mock.call(self._filer, TestEdgeBackup._task_attach_folder),
-                mock.call(self._filer, TestEdgeBackup._task_create_folder)
+                mock.call(TestEdgeBackup._task_attach_folder),
+                mock.call(TestEdgeBackup._task_create_folder)
             ]
         )
         self._filer.execute.assert_has_calls(
@@ -55,7 +54,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
     def test_attach_incorrect_passphrase(self):
         self._init_filer()
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
-        taskmgr.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.CheckCodeInCorrect))
+        self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.CheckCodeInCorrect))
         with self.assertRaises(backup.IncorrectPassphrase) as error:
             backup.Backup(self._filer).configure()
         self.assertEqual('Incorrect passphrase', error.exception.message)
@@ -63,7 +62,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
     def test_attach_clocks_out_of_sync(self):
         self._init_filer()
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
-        taskmgr.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.ClocksOutOfSync))
+        self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.ClocksOutOfSync))
         with self.assertRaises(backup.ClocksOutOfSync) as error:
             backup.Backup(self._filer).configure()
         self.assertEqual('Clocks are out of sync', error.exception.message)
@@ -71,7 +70,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
     def test_attach_internal_server_error(self):
         self._init_filer()
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
-        taskmgr.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.InternalServerError))
+        self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.InternalServerError))
         with self.assertRaises(exception.CTERAException) as error:
             backup.Backup(self._filer).configure()
         self.assertEqual('Failed to attach to backup folder', error.exception.message)
@@ -79,7 +78,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
     def test_attach_permission_denied(self):
         self._init_filer()
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
-        taskmgr.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.PermissionDenied))
+        self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.PermissionDenied))
         with self.assertRaises(exception.CTERAException) as error:
             backup.Backup(self._filer).configure()
         self.assertEqual('Failed to attach to backup folder', error.exception.message)
@@ -87,7 +86,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
     def test_attach_unknown_error(self):
         self._init_filer()
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
-        taskmgr.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response('Unknown attach rc'))
+        self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response('Unknown attach rc'))
         with self.assertRaises(exception.CTERAException) as error:
             backup.Backup(self._filer).configure()
         self.assertEqual('Failed to attach to backup folder', error.exception.message)
@@ -120,7 +119,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
         return None
 
     @staticmethod
-    def _mock_recoverable_encryption_attach_folder_not_found_create_folder_ok(filer, task):
+    def _mock_recoverable_enc_attach_folder_not_found_create_folder_ok(task):
         # pylint: disable=unused-argument
         if task == TestEdgeBackup._task_attach_folder:
             return TestEdgeBackup._get_attach_response(backup.AttachRC.NotFound)
@@ -134,13 +133,13 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
         self._init_filer()
         self._filer.get = mock.MagicMock(side_effect=TestEdgeBackup._mock_get_no_backup_settings)
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
-        taskmgr.wait = mock.MagicMock(side_effect=TestEdgeBackup._mock_secret_encryption_attach_encrypted_folder_not_found_create_folder_ok)
+        self._filer.tasks.wait = mock.MagicMock(side_effect=TestEdgeBackup._mock_secret_enc_attach_enc_folder_not_found_create_folder_ok)
         backup.Backup(self._filer).configure(TestEdgeBackup._passphrase)
-        taskmgr.wait.assert_has_calls(
+        self._filer.tasks.wait.assert_has_calls(
             [
-                mock.call(self._filer, TestEdgeBackup._task_attach_folder),
-                mock.call(self._filer, TestEdgeBackup._task_attach_encrypted_folder),
-                mock.call(self._filer, TestEdgeBackup._task_create_folder)
+                mock.call(TestEdgeBackup._task_attach_folder),
+                mock.call(TestEdgeBackup._task_attach_encrypted_folder),
+                mock.call(TestEdgeBackup._task_create_folder)
             ]
         )
         self._filer.execute.assert_has_calls(
@@ -171,7 +170,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
         self._assert_equal_objects(actual_param, expected_param)
 
     @staticmethod
-    def _mock_secret_encryption_attach_encrypted_folder_not_found_create_folder_ok(filer, task):
+    def _mock_secret_enc_attach_enc_folder_not_found_create_folder_ok(task):
         # pylint: disable=unused-argument
         if task == TestEdgeBackup._task_attach_folder:
             return TestEdgeBackup._get_attach_response(backup.AttachRC.IsEncrypted,

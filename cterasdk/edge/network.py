@@ -3,7 +3,6 @@ import logging
 from .enum import Mode
 from .types import TCPConnectResult
 from ..lib.task_manager_base import TaskError
-from . import taskmgr as TaskManager
 from ..common import Object
 from .base_command import BaseCommand
 
@@ -139,7 +138,7 @@ class Network(BaseCommand):
 
         task = self._gateway.execute("/status/network", "tcpconnect", param)
         try:
-            task = TaskManager.wait(self._gateway, task)
+            task = self._gateway.tasks.wait(task)
             logging.getLogger().debug("Obtained connection status. %s", {'status': task.result.rc})
             if task.result.rc == "Open":
                 return TCPConnectResult(service.host, service.port, True)

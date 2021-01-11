@@ -3,7 +3,6 @@ from unittest import mock
 from cterasdk import exception
 from cterasdk.common import Object
 from cterasdk.edge.enum import VolumeStatus
-from cterasdk.edge import taskmgr
 from cterasdk.edge import volumes
 from tests.ut import base_edge
 
@@ -167,33 +166,33 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
     def test_delete_volume_success(self):
         delete_response = 'Success'
         self._init_filer(delete_response=delete_response)
-        taskmgr.by_name = mock.MagicMock(return_value=[TestEdgeVolumes._get_pending_mount_task(self._mount_id)])
-        taskmgr.wait = mock.MagicMock()
+        self._filer.tasks.by_name = mock.MagicMock(return_value=[TestEdgeVolumes._get_pending_mount_task(self._mount_id)])
+        self._filer.tasks.wait = mock.MagicMock()
         ret = volumes.Volumes(self._filer).delete(self._volume_1_name)
-        taskmgr.by_name.assert_called_once_with(self._filer, ' '.join(['Mounting', self._volume_1_name, 'file system']))
-        taskmgr.wait.assert_called_once_with(self._filer, self._mount_id)
+        self._filer.tasks.by_name.assert_called_once_with(' '.join(['Mounting', self._volume_1_name, 'file system']))
+        self._filer.tasks.wait.assert_called_once_with(self._mount_id)
         self._filer.delete.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
         self.assertEqual(ret, delete_response)
 
     def test_delete_volume_raise(self):
         self._init_filer()
         self._filer.delete = mock.MagicMock(side_effect=exception.CTERAException())
-        taskmgr.by_name = mock.MagicMock(return_value=[])
+        self._filer.tasks.by_name = mock.MagicMock(return_value=[])
         with self.assertRaises(exception.CTERAException) as error:
             volumes.Volumes(self._filer).delete(self._volume_1_name)
-        taskmgr.by_name.assert_called_once_with(self._filer, ' '.join(['Mounting', self._volume_1_name, 'file system']))
+        self._filer.tasks.by_name.assert_called_once_with(' '.join(['Mounting', self._volume_1_name, 'file system']))
         self._filer.delete.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
         self.assertEqual('Volume deletion falied', error.exception.message)
 
     def test_delete_all_volume_success(self):
         delete_response = 'Success'
         self._init_filer(get_response=self._get_volumes_response_param(), delete_response=delete_response)
-        taskmgr.running = mock.MagicMock(return_value=TestEdgeVolumes._get_pending_mount_tasks())
-        taskmgr.by_name = mock.MagicMock()
-        taskmgr.wait = mock.MagicMock()
+        self._filer.tasks.running = mock.MagicMock(return_value=TestEdgeVolumes._get_pending_mount_tasks())
+        self._filer.tasks.by_name = mock.MagicMock()
+        self._filer.tasks.wait = mock.MagicMock()
         volumes.Volumes(self._filer).delete_all()
         self._filer.get.assert_called_once_with('/config/storage/volumes')
-        taskmgr.running.assert_called_once_with(self._filer)
+        self._filer.tasks.running.assert_called_once()
         self._filer.delete.assert_has_calls(
             [
                 mock.call('/config/storage/volumes/' + self._volume_1_name),
@@ -240,7 +239,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
 
     def test_delete_no_volumes_found(self):
         self._init_filer(get_response=[])
-        taskmgr.running = mock.MagicMock(return_value=[])
+        self._filer.tasks.running = mock.MagicMock(return_value=[])
         volumes.Volumes(self._filer).delete_all()
         self._filer.get.assert_called_once_with('/config/storage/volumes')
 

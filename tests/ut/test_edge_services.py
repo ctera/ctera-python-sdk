@@ -2,7 +2,6 @@ from unittest import mock
 
 from cterasdk import exception
 from cterasdk.lib import task_manager_base
-from cterasdk.edge import taskmgr
 from cterasdk.edge import services
 from cterasdk.edge.enum import ServicesConnectionState
 from cterasdk.edge.types import TCPService, TCPConnectResult
@@ -40,14 +39,13 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
     def test_activate_default_args_success(self):
         self._init_filer()
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
-        taskmgr.wait = mock.MagicMock()
+        self._filer.tasks.wait = mock.MagicMock()
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
-
         services.Services(self._filer).activate(self._server, self._user, self._code)
 
         self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
         self._filer.execute.assert_called_once_with('/status/services', 'attachAndSave', mock.ANY)
-        taskmgr.wait.assert_called_once_with(self._filer, TestEdgeServices._background_task_id)
+        self._filer.tasks.wait.assert_called_once_with(TestEdgeServices._background_task_id)
         expected_param = self._get_attach_and_save_param(False, use_activation_code=True)
         actual_param = self._filer.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
@@ -65,7 +63,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
     def test_connect_default_args_success(self):
         self._init_filer()
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
-        taskmgr.wait = mock.MagicMock()
+        self._filer.tasks.wait = mock.MagicMock()
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
 
         services.Services(self._filer).connect(self._server, self._user, self._password)
@@ -77,7 +75,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
                 mock.call('/status/services', 'attachAndSave', mock.ANY)
             ]
         )
-        taskmgr.wait.assert_called_once_with(self._filer, TestEdgeServices._background_task_id)
+        self._filer.tasks.wait.assert_called_once_with(TestEdgeServices._background_task_id)
         expected_param = self._get_is_web_sso_param(trust_certificate=False)
         actual_param = self._filer.execute.call_args_list[0][0][2]  # Access isWebSSOEnabled call param
 
@@ -120,7 +118,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
     def test_connect_default_args_task_failure(self):
         self._init_filer()
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
-        taskmgr.wait = mock.MagicMock(side_effect=TestEdgeServices._get_task_error())
+        self._filer.tasks.wait = mock.MagicMock(side_effect=TestEdgeServices._get_task_error())
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
 
         with self.assertRaises(exception.CTERAException) as error:
@@ -133,7 +131,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
                 mock.call('/status/services', 'attachAndSave', mock.ANY)
             ]
         )
-        taskmgr.wait.assert_called_once_with(self._filer, TestEdgeServices._background_task_id)
+        self._filer.tasks.wait.assert_called_once_with(TestEdgeServices._background_task_id)
 
         expected_param = self._get_is_web_sso_param(trust_certificate=False)
         actual_param = self._filer.execute.call_args_list[0][0][2]  # Access isWebSSOEnabled call param
