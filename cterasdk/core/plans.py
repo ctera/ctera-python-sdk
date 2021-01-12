@@ -2,7 +2,7 @@ import logging
 from .base_command import BaseCommand
 from ..exception import CTERAException, InputError
 from .enum import PlanItem, PlanRetention
-from ..common import union, convert_size, DataUnit, PolicyRuleCoverter
+from ..common import union, convert_size, DataUnit, PolicyRuleConverter
 from . import query
 
 
@@ -220,7 +220,7 @@ class PlanAutoAssignPolicy(BaseCommand):
         elif apply_default is True and default:
             policy.defaultPlan = portal_plans.get(default).baseObjectRef
 
-        policy_rules = [PolicyRuleCoverter.convert(rule, 'PlanAutoAssignmentRule', 'plan',
+        policy_rules = [PolicyRuleConverter.convert(rule, 'PlanAutoAssignmentRule', 'plan',
                         portal_plans.get(rule.assignment).baseObjectRef) for rule in rules]
         policy.planAutoAssignmentRules = policy_rules
 

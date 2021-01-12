@@ -12,7 +12,7 @@ class PolicyRule:
         self.criteria = criteria
 
 
-class PolicyRuleCoverter:
+class PolicyRuleConverter:
 
     @staticmethod
     def convert(rule, classname, property_name, assignment=None):
