@@ -332,3 +332,33 @@ class PlanCriteria:
     Company = 'company'
     BillingId = 'billingId'
     Comment = 'comment'
+
+
+class AntivirusType:
+    """
+    Antivirus Type
+
+    :ivar str McAfeeWG: McAfee Web Gateway
+    :ivar str Symantec: Symantec Protection Engine
+    :ivar str ESET: ESET Gateway Security
+    :ivar str Sophos: Sophos AV
+    :ivar str McAfeeVSES: McAfee VirusScan Enterprise for Storage
+    :ivar str TrendMicro: Trend Micro InterScan
+    """
+    McAfeeWG = 'McAfee'
+    Symantec = 'Symantec'
+    ESET = 'Eset'
+    Sophos = 'Sophos'
+    McAfeeVSES = 'McAfeeVSES'
+    TrendMicro = 'TrendMicro'
+
+
+class ICAPServices:
+    """
+    ICAP Services
+
+    :ivar str Antivirus: Antivirus
+    :ivar str DLP: Data Loss Prevention
+    """
+    Antivirus = "Antivirus"
+    DLP = "DLP"

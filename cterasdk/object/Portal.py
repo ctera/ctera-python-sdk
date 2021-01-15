@@ -1,6 +1,7 @@
 from ..client import CTERAHost, authenticated
 from ..core import connection
 from ..core import activation
+from ..core import antivirus
 from ..core import decorator
 from ..core import directoryservice
 from ..core import login
@@ -33,6 +34,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.directoryservice.DirectoryService directoryservice: Object holding the Portal Active Directory Service APIs
     :ivar cterasdk.core.zones.Zones zones: Object holding the Portal zones APIs
     :ivar cterasdk.core.activation.Activation activation: Object holding the Portal activation APIs
+    :ivar cterasdk.core.antivirus.Antivirus antivirus: Object holding the Portal Antivirus APIs
     :ivar cterasdk.core.logs.Logs logs: Object holding the Portal logs APIs
     :ivar cterasdk.core.cloudfs.CloudFS cloudfs: Object holding the Portal CloudFS APIs
     :ivar cterasdk.core.taskmgr.Tasks tasks: Object holding the Portal Background Tasks APIs
@@ -55,6 +57,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.zones = zones.Zones(self)
         self.cloudfs = cloudfs.CloudFS(self)
         self.activation = activation.Activation(self)
+        self.antivirus = antivirus.Antivirus(self)
         self.files = files.FileBrowser(self, self.file_browser_base_path)
         self.logs = logs.Logs(self)
         self.tasks = taskmgr.Tasks(self)
@@ -94,6 +97,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'zones',
             'cloudfs',
             'activation',
+            'antivirus',
             'files',
             'logs',
             'tasks'

@@ -361,6 +361,42 @@ Servers
 
        print(server)
 
+Antivirus
+---------
+
+.. automethod:: cterasdk.core.antivirus.Antivirus.list_servers
+   :noindex:
+
+.. automethod:: cterasdk.core.antivirus.Antivirus.status
+   :noindex:
+
+.. automethod:: cterasdk.core.antivirus.Antivirus.rescan
+   :noindex:
+
+.. automethod:: cterasdk.core.antivirus.Antivirus.suspend
+   :noindex:
+
+.. automethod:: cterasdk.core.antivirus.Antivirus.unsuspend
+   :noindex:
+
+Antivirus Servers
+^^^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.core.antivirus.AntivirusServers.get
+   :noindex:
+
+.. automethod:: cterasdk.core.plans.AntivirusServers.add
+   :noindex:
+
+.. automethod:: cterasdk.core.antivirus.AntivirusServers.delete
+   :noindex:
+
+.. automethod:: cterasdk.core.plans.AntivirusServers.suspend
+   :noindex:
+
+.. automethod:: cterasdk.core.plans.AntivirusServers.unsuspend
+   :noindex:
+
 Users
 -----
 
