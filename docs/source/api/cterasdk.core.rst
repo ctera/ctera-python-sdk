@@ -19,6 +19,7 @@ Submodules
 .. toctree::
 
    cterasdk.core.activation
+   cterasdk.core.antivirus
    cterasdk.core.base_command
    cterasdk.core.cloudfs
    cterasdk.core.connection
