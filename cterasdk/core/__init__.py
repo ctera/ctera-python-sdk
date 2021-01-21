@@ -4,6 +4,8 @@ __all__ = list(
         [
             'connection',
             'activation',
+            'antivirus',
+            'buckets',
             'directoryservice',
             'enum',
             'login',

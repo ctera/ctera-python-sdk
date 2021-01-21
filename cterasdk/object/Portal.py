@@ -2,6 +2,7 @@ from ..client import CTERAHost, authenticated
 from ..core import connection
 from ..core import activation
 from ..core import antivirus
+from ..core import buckets
 from ..core import decorator
 from ..core import directoryservice
 from ..core import login
@@ -34,7 +35,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.directoryservice.DirectoryService directoryservice: Object holding the Portal Active Directory Service APIs
     :ivar cterasdk.core.zones.Zones zones: Object holding the Portal zones APIs
     :ivar cterasdk.core.activation.Activation activation: Object holding the Portal activation APIs
-    :ivar cterasdk.core.antivirus.Antivirus antivirus: Object holding the Portal Antivirus APIs
     :ivar cterasdk.core.logs.Logs logs: Object holding the Portal logs APIs
     :ivar cterasdk.core.cloudfs.CloudFS cloudfs: Object holding the Portal CloudFS APIs
     :ivar cterasdk.core.taskmgr.Tasks tasks: Object holding the Portal Background Tasks APIs
@@ -57,7 +57,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.zones = zones.Zones(self)
         self.cloudfs = cloudfs.CloudFS(self)
         self.activation = activation.Activation(self)
-        self.antivirus = antivirus.Antivirus(self)
         self.files = files.FileBrowser(self, self.file_browser_base_path)
         self.logs = logs.Logs(self)
         self.tasks = taskmgr.Tasks(self)
@@ -97,7 +96,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'zones',
             'cloudfs',
             'activation',
-            'antivirus',
             'files',
             'logs',
             'tasks'
@@ -154,6 +152,8 @@ class GlobalAdmin(Portal):
     :ivar cterasdk.core.servers.Servers servers: Object holding the Servers Management APIs
     :ivar cterasdk.core.setup.Setup setup: Object holding the Portal setup APIs
     :ivar cterasdk.core.startup.Startup startup: Object holding the Portal startup APIs
+    :ivar cterasdk.core.antivirus.Antivirus antivirus: Object holding the Portal Antivirus APIs
+    :ivar cterasdk.core.buckets.Buckets buckets: Object holding the Portal Storage Node APIs
     """
 
     def __init__(self, host, port=None, https=True):
@@ -167,10 +167,12 @@ class GlobalAdmin(Portal):
         self.servers = servers.Servers(self)
         self.setup = setup.Setup(self)
         self.startup = startup.Startup(self)
+        self.antivirus = antivirus.Antivirus(self)
+        self.buckets = buckets.Buckets(self)
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['portals', 'servers', 'setup', 'startup']
+        return super()._omit_fields + ['portals', 'servers', 'setup', 'startup', 'antivirus', 'buckets']
 
     @property
     def context(self):

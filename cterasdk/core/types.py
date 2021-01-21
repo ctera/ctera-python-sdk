@@ -1,8 +1,8 @@
 from abc import ABC
 from collections import namedtuple
-from ..common import DateTimeUtils, StringCriteriaBuilder, ListCriteriaBuilder
+from ..common import DateTimeUtils, StringCriteriaBuilder, ListCriteriaBuilder, Object
 
-from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria
+from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, BucketType, LocationType
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
@@ -222,3 +222,118 @@ class PlanCriteriaBuilder:
     @staticmethod
     def comment():
         return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Comment)
+
+
+class Bucket:
+
+    def __init__(self, bucket, driver):
+        self.bucket = bucket
+        self.driver = driver
+
+    def to_server_object(self):
+        param = Object()
+        param.bucket = self.bucket
+        param.storage = self.driver
+        return param
+
+
+class HTTPBucket(Bucket):
+
+    def __init__(self, bucket, driver, access_key, secret_key, endpoint, https, direct=False):
+        super().__init__(bucket, driver)
+        self.access_key = access_key
+        self.secret_key = secret_key
+        self.endpoint = endpoint
+        self.https = https
+        self.direct = direct
+
+
+class AzureBlob(HTTPBucket):
+
+    def __init__(self, bucket, access_key, secret_key, endpoint='core.windows.net', https=True, direct=True):
+        super().__init__(bucket, BucketType.Azure, access_key, secret_key, endpoint, https, direct)
+
+    def to_server_object(self):
+        param = super().to_server_object()
+        param._classname = LocationType.Azure  # pylint: disable=protected-access
+        param.endPoint = self.endpoint
+        param.accountName = self.access_key
+        param.secretAccess = self.secret_key
+        param.useHttps = self.https
+        param.directUpload = self.direct
+        return param
+
+
+class S3Compatible(HTTPBucket):
+
+    def __init__(self, bucket, driver, access_key, secret_key,
+                 endpoint, https, direct):
+        super().__init__(bucket, driver, access_key, secret_key, endpoint, https, direct)
+
+    def to_server_object(self):
+        param = super().to_server_object()
+        param._classname = LocationType.S3Compatible  # pylint: disable=protected-access
+        param.endPoint = self.endpoint
+        param.awsAccessKey = self.access_key
+        param.awsSecretKey = self.secret_key
+        param.useHttps = self.https
+        param.directUpload = self.direct
+        return param
+
+
+class Scality(S3Compatible):
+
+    def __init__(self, bucket, access_key, secret_key,
+                 endpoint, https=False, direct=False):
+        super().__init__(bucket, BucketType.Scality, access_key, secret_key, endpoint, https, direct)
+
+
+class ICOS(S3Compatible):
+
+    def __init__(self, bucket, access_key, secret_key,
+                 endpoint, https=False, direct=False):
+        super().__init__(bucket, BucketType.ICOS, access_key, secret_key, endpoint, https, direct)
+
+
+class Nutanix(S3Compatible):
+
+    def __init__(self, bucket, access_key, secret_key,
+                 endpoint, https=False, direct=False):
+        super().__init__(bucket, BucketType.Nutanix, access_key, secret_key, endpoint, https, direct)
+
+
+class Wasabi(S3Compatible):
+
+    def __init__(self, bucket, access_key, secret_key,
+                 endpoint, https=False, direct=False):
+        super().__init__(bucket, BucketType.Wasabi, access_key, secret_key, endpoint, https, direct)
+
+
+class Google(S3Compatible):
+
+    def __init__(self, bucket, access_key, secret_key,
+                 endpoint, https=False, direct=False):
+        super().__init__(bucket, BucketType.Google, access_key, secret_key, endpoint, https, direct)
+
+
+class GenericS3(S3Compatible):
+
+    def __init__(self, bucket, access_key, secret_key,
+                 endpoint, https=False, direct=False):
+        super().__init__(bucket, BucketType.S3Compatible, access_key, secret_key, endpoint, https, direct)
+
+
+class AmazonS3(HTTPBucket):
+
+    def __init__(self, bucket, access_key, secret_key, endpoint='s3.amazonaws.com', https=True, direct=True):
+        super().__init__(bucket, BucketType.AWS, access_key, secret_key, endpoint, https, direct)
+
+    def to_server_object(self):
+        param = super().to_server_object()
+        param._classname = LocationType.S3  # pylint: disable=protected-access
+        param.s3Endpoint = self.endpoint
+        param.awsAccessKey = self.access_key
+        param.awsSecretKey = self.secret_key
+        param.httpsOnly = self.https
+        param.directUpload = self.direct
+        return param

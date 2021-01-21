@@ -21,6 +21,7 @@ Submodules
    cterasdk.core.activation
    cterasdk.core.antivirus
    cterasdk.core.base_command
+   cterasdk.core.buckets
    cterasdk.core.cloudfs
    cterasdk.core.connection
    cterasdk.core.decorator
