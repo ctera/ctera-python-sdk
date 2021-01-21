@@ -20,7 +20,8 @@ _sdk_hidden = [
     'secretkey',
     'activationCode',
     'masterPassword',
-    'masterKey'
+    'masterKey',
+    'secretAccess'
 ]
 
 
