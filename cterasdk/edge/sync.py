@@ -2,6 +2,7 @@ import logging
 
 from ..lib import track, ErrorStatus
 from .enum import Mode, SyncStatus, Acl
+from .types import FilterBackupSet, FileExclusionBuilder
 from .base_command import BaseCommand
 from ..common import ThrottlingRule
 
@@ -77,6 +78,45 @@ class Sync(BaseCommand):
         logging.getLogger().info("Refreshing cloud folders.")
         self._gateway.execute("/config/cloudsync/cloudExtender", "refreshPaths", None)
         logging.getLogger().info("Completed refreshing cloud folders.")
+
+    def exclude_files(self, extensions=None, filenames=None, paths=None, custom_exclusion_rules=None):
+        """
+        Exclude files from Cloud Sync. This method will override any existing file exclusion rules
+        Use :func:`cterasdk.edge.types.FileExclusionBuilder` to build custom file exclusion rules`
+
+        :param list[str] extensions: List of file extensions
+        :param list[str] filenames: List of file names
+        :param list[str] paths: List of file paths
+        :param list[cterasdk.common.types.FilterBackupSet] rules: Set of custom exclusion rules
+        """
+        rules = list()
+        if extensions:
+            param = FilterBackupSet('List of file extensions to exclude from sync',
+                                    filter_rules=[FileExclusionBuilder.extensions().include(extensions).build()])
+            rules.append(param)
+        if filenames:
+            param = FilterBackupSet('List of file names to exclude from sync',
+                                    filter_rules=[FileExclusionBuilder.names().include(filenames).build()])
+            rules.append(param)
+        if paths:
+            param = FilterBackupSet('List of file paths to exclude from sync',
+                                    filter_rules=[FileExclusionBuilder.paths().include(filenames).build()])
+            rules.append(param)
+        if custom_exclusion_rules:
+            rules.append(custom_exclusion_rules)
+
+        if rules:
+            logging.getLogger().info('Setting sync exclusion rules')
+            self._gateway.put('/config/cloudsync/excludeFiles', rules)
+            logging.getLogger().info('Sync exclusion rules set')
+
+    def remove_file_exclusion_rules(self):
+        """
+        Remove previously configured sync exclusion rules
+        """
+        logging.getLogger().info('Removing sync exclusion rules')
+        self._gateway.put('/config/cloudsync/excludeFiles', None)
+        logging.getLogger().info('Sync exclusion rules removed')
 
 
 class CloudSyncBandwidthThrottling(BaseCommand):

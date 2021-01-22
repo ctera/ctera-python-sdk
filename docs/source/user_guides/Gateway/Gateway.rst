@@ -330,6 +330,12 @@ Shares
 
    filer.shares.add('FTP', 'cloud/users/Service Account/FTP', acl = [everyone], export_to_ftp = True)
 
+   """Add an NFS share and enable access to two hosts"""
+   nfs_client_1 = gateway_types.NFSv3AccessControlEntry('192.168.0.1', '255.255.255.0', gateway_enum.FileAccessMode.RW)  # read write
+   nfs_client_2 = gateway_types.NFSv3AccessControlEntry('192.168.0.2', '255.255.255.0', gateway_enum.FileAccessMode.RO)  # read only
+   filer.shares.add('NFS', 'cloud/users/Service Account/NFS', export_to_nfs=True, trusted_nfs_clients=[nfs_client_1, nfs_client_2])
+
+
 .. automethod:: cterasdk.edge.shares.Shares.add_acl
    :noindex:
 
@@ -718,12 +724,24 @@ Cloud Sync
 
    filer.sync.unsuspend()
 
-.. automethod:: cterasdk.edge.sync.Sync.refresh
+.. automethod:: cterasdk.edge.sync.Sync.exclude_files
    :noindex:
 
 .. code-block:: python
 
-   filer.sync.refresh()
+   filer.sync.exclude_files(['exe', 'cmd', 'bat'])  # exclude file extensions
+
+   filer.sync.exclude_files(filenames=['Cloud Sync.lnk', 'The quick brown fox.docx'])  # exclude file names
+
+   """Exclude file extensions and file names"""
+   filer.sync.exclude_files(['exe', 'cmd'], ['Cloud Sync.lnk'])
+
+.. automethod:: cterasdk.edge.sync.Sync.remove_file_exclusion_rules
+    :noindex:
+
+.. code-block:: python
+
+   filer.sync.remove_file_exclusion_rules()
 
 Cloud Sync Bandwidth Throttling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
