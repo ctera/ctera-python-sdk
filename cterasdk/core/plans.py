@@ -8,7 +8,9 @@ from . import query
 
 class Plans(BaseCommand):
     """
-    Global Admin Plan APIs
+    Portal Plan APIs
+
+    :ivar cterasdk.core.plans.PlanAutoAssignPolicy auto_assign: Object holding the Portal subscription plan auto assignment rules APIs
     """
     default = ['name']
     _allowed_storage_size_units = [DataUnit.GB, DataUnit.TB, DataUnit.PB]
