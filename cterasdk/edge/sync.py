@@ -107,7 +107,7 @@ class Sync(BaseCommand):
                                     filter_rules=[FileExclusionBuilder.paths().include(filenames).build()])
             rules.append(param)
         if custom_exclusion_rules:
-            rules = rules + custom_exclusion_rules
+            rules.extend(custom_exclusion_rules)
 
         if rules:
             logging.getLogger().info('Setting sync exclusion rules')
