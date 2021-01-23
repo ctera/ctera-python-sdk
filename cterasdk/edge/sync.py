@@ -8,7 +8,11 @@ from ..common import ThrottlingRule
 
 
 class Sync(BaseCommand):
-    """ Gateway Cloud Sync APIs """
+    """
+    Edge Filer Cloud Sync APIs
+
+    :ivar cterasdk.edge.sync.CloudSyncBandwidthThrottling throttling: Object holding the Edge Filer's bandwidth throttling APIs
+    """
 
     def __init__(self, portal):
         super().__init__(portal)
@@ -103,7 +107,7 @@ class Sync(BaseCommand):
                                     filter_rules=[FileExclusionBuilder.paths().include(filenames).build()])
             rules.append(param)
         if custom_exclusion_rules:
-            rules.append(custom_exclusion_rules)
+            rules = rules + custom_exclusion_rules
 
         if rules:
             logging.getLogger().info('Setting sync exclusion rules')

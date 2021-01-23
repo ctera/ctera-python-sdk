@@ -736,6 +736,17 @@ Cloud Sync
    """Exclude file extensions and file names"""
    filer.sync.exclude_files(['exe', 'cmd'], ['Cloud Sync.lnk'])
 
+   """
+   Create a custom exclusion rule
+
+   Exclude files that their name starts with 'tmp' and smaller than 1 MB (1,048,576 bytes)
+   """
+   name_filter_rule = gateway_types.FileExclusionBuilder.name().startswith('tmp')
+   size_filter_rule = gateway_types.FileExclusionBuilder.size().less_than(1048576)
+   exclusion_rule = gateway_types.FilterBackupSet('Custom exclusion rule', filter_rules=[name_filter_rule, size_filter_rule])
+
+   filer.sync.exclude_files(custom_exclusion_rules=[exclusion_rule])
+
 .. automethod:: cterasdk.edge.sync.Sync.remove_file_exclusion_rules
     :noindex:
 
