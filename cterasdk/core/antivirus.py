@@ -9,6 +9,8 @@ from .base_command import BaseCommand
 class Antivirus(BaseCommand):
     """
     Portal Antivirus APIs
+
+    :ivar cterasdk.core.antivirus.AntivirusServers servers: Object holding the Portal antivirus server APIs
     """
 
     default = ['name', 'type']
