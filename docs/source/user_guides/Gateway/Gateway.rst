@@ -330,6 +330,12 @@ Shares
 
    filer.shares.add('FTP', 'cloud/users/Service Account/FTP', acl = [everyone], export_to_ftp = True)
 
+   """Add an NFS share and enable access to two hosts"""
+   nfs_client_1 = gateway_types.NFSv3AccessControlEntry('192.168.0.1', '255.255.255.0', gateway_enum.FileAccessMode.RW)  # read write
+   nfs_client_2 = gateway_types.NFSv3AccessControlEntry('192.168.0.2', '255.255.255.0', gateway_enum.FileAccessMode.RO)  # read only
+   filer.shares.add('NFS', 'cloud/users/Service Account/NFS', export_to_nfs=True, trusted_nfs_clients=[nfs_client_1, nfs_client_2])
+
+
 .. automethod:: cterasdk.edge.shares.Shares.add_acl
    :noindex:
 
@@ -718,12 +724,35 @@ Cloud Sync
 
    filer.sync.unsuspend()
 
-.. automethod:: cterasdk.edge.sync.Sync.refresh
+.. automethod:: cterasdk.edge.sync.Sync.exclude_files
    :noindex:
 
 .. code-block:: python
 
-   filer.sync.refresh()
+   filer.sync.exclude_files(['exe', 'cmd', 'bat'])  # exclude file extensions
+
+   filer.sync.exclude_files(filenames=['Cloud Sync.lnk', 'The quick brown fox.docx'])  # exclude file names
+
+   """Exclude file extensions and file names"""
+   filer.sync.exclude_files(['exe', 'cmd'], ['Cloud Sync.lnk'])
+
+   """
+   Create a custom exclusion rule
+
+   Exclude files that their name starts with 'tmp' and smaller than 1 MB (1,048,576 bytes)
+   """
+   name_filter_rule = gateway_types.FileExclusionBuilder.name().startswith('tmp')
+   size_filter_rule = gateway_types.FileExclusionBuilder.size().less_than(1048576)
+   exclusion_rule = gateway_types.FilterBackupSet('Custom exclusion rule', filter_rules=[name_filter_rule, size_filter_rule])
+
+   filer.sync.exclude_files(custom_exclusion_rules=[exclusion_rule])
+
+.. automethod:: cterasdk.edge.sync.Sync.remove_file_exclusion_rules
+    :noindex:
+
+.. code-block:: python
+
+   filer.sync.remove_file_exclusion_rules()
 
 Cloud Sync Bandwidth Throttling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

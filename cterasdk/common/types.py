@@ -50,6 +50,22 @@ class IsOneOfOperator(Operator):
     pass
 
 
+class LessThanOperator(Operator):
+    pass
+
+
+class MoreThanOperator(Operator):
+    pass
+
+
+class BeforeOperator(Operator):
+    pass
+
+
+class AfterOperator(Operator):
+    pass
+
+
 class AdvancedFilterRule(Object):
 
     def __init__(self, classname, field, operator):
@@ -74,6 +90,28 @@ class ListCriteriaBuilder(CriteriaBuilder):
 
     def include(self, values):
         self.operator = IsOneOfOperator(values)
+        return self
+
+
+class IntegerCriteriaBuilder(CriteriaBuilder):
+
+    def less_than(self, value):
+        self.operator = LessThanOperator(value)
+        return self
+
+    def more_than(self, value):
+        self.operator = MoreThanOperator(value)
+        return self
+
+
+class DateTimeCriteriaBuilder(CriteriaBuilder):
+
+    def before(self, value):
+        self.operator = BeforeOperator(value)
+        return self
+
+    def after(self, value):
+        self.operator = AfterOperator(value)
         return self
 
 

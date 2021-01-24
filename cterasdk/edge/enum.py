@@ -355,3 +355,31 @@ class BackupConfStatusID:
     Unlicensed = "Unlicensed"
     ClocksOutOfSync = "ClocksOutOfSync"
     GetFoldersList = "GetFoldersList"
+
+
+class FileCriteria:
+    """
+    Cloud Sync Exclusion Builder File Criteria
+
+    :ivar str Name: File name
+    :ivar str Path: File path
+    :ivar str Type: File type
+    :ivar str Size: File size
+    :ivar str Modified: Last modified
+    """
+    Name = 'FileName'
+    Path = 'PathName'
+    Type = 'FileType'
+    Size = 'FileSize'
+    Modified = 'LastModified'
+
+
+class BooleanFunction:
+    """
+    Boolean function
+
+    :ivar str AND: AND
+    :ivar str AND: OR
+    """
+    AND = 'AND'
+    OR = 'OR'
