@@ -157,14 +157,15 @@ class CloudFS(BaseCommand):
         param = builder.build()
         return query.iterator(self._portal, '/cloudDrives', param)
 
-    def find(self, name, owner, include):
+    def find(self, name, owner, include=None):
         """
-        Find a  Cloud Drive Folder
+        Find a Cloud Drive Folder
 
         :param str name: Name of the Cloud Drive Folder to find
         :param cterasdk.core.types.UserAccount owner: User account of the folder group owner
         :param list[str] include: List of metadata fields to include in the response
         """
+        include = union(include or [], CloudFS.default)
         builder = query.QueryParamBuilder().include(include)
         query_filter = query.FilterBuilder('name').eq(name)
         builder.addFilter(query_filter)
