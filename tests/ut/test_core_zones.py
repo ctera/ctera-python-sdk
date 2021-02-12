@@ -4,7 +4,7 @@ from unittest import mock
 from cterasdk import exception
 from cterasdk.common import Object
 from cterasdk.core.enum import PolicyType
-from cterasdk.core.types import CloudFSFolderFindingHelper
+from cterasdk.core.types import CloudFSFolderFindingHelper, UserAccount
 from cterasdk.core import query
 from cterasdk.core import zones
 from tests.ut import base_core
@@ -29,9 +29,9 @@ class TestCoreZones(base_core.BaseCoreTest):
     def setUp(self):
         super().setUp()
         self._find_folder_helpers = [
-            CloudFSFolderFindingHelper('docs', 'alice'),
-            CloudFSFolderFindingHelper('music', 'alice'),
-            CloudFSFolderFindingHelper('docs', 'bruce')
+            CloudFSFolderFindingHelper('docs', UserAccount('alice')),
+            CloudFSFolderFindingHelper('music', UserAccount('alice')),
+            CloudFSFolderFindingHelper('docs', UserAccount('bruce'))
         ]
         self._zone_name = TestCoreZones._zone_name
         self._zone_id = TestCoreZones._zone_id
@@ -219,7 +219,7 @@ class TestCoreZones(base_core.BaseCoreTest):
     @staticmethod
     def _find_cloud_folder(folder_name, folder_owner, include):
         # pylint: disable=unused-argument
-        folder_info = TestCoreZones._cloud_folders[folder_owner][folder_name]
+        folder_info = TestCoreZones._cloud_folders[folder_owner.name][folder_name]
         param = Object()
         param.uid = folder_info['uid']
         param.owner = folder_info['owner']
