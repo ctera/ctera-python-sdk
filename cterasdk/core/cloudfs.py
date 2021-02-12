@@ -178,7 +178,7 @@ class CloudFS(BaseCommand):
             if cloud_folder.owner.endswith(owner_ref):
                 return cloud_folder
 
-        logging.getLogger().info('Could not find cloud folder. %s', {'folder': name, 'owner': owner})
+        logging.getLogger().info('Could not find cloud folder. %s', {'folder': name, 'owner': str(owner)})
         raise CTERAException('Could not find cloud folder', None, folder=name, owner=owner)
 
     def _dirpath(self, name, owner):
