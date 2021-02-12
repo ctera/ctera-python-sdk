@@ -162,7 +162,7 @@ class CloudFS(BaseCommand):
         Find a  Cloud Drive Folder
 
         :param str name: Name of the Cloud Drive Folder to find
-        :param str owner: User name of the owner of the directory
+        :param cterasdk.core.types.UserAccount owner: User account of the folder group owner
         :param list[str] include: List of metadata fields to include in the response
         """
         builder = query.QueryParamBuilder().include(include)
@@ -171,8 +171,10 @@ class CloudFS(BaseCommand):
         param = builder.build()
 
         iterator = query.iterator(self._portal, '/cloudDrives', param)
+
+        owner_ref = '/PortalUser/%s' % (owner.name) if owner.is_local else '/ADUser/%s/%s' % (owner.name, owner.directory)
         for cloud_folder in iterator:
-            if cloud_folder.owner.endswith(owner):
+            if cloud_folder.owner.endswith(owner_ref):
                 return cloud_folder
 
         logging.getLogger().info('Could not find cloud folder. %s', {'folder': name, 'owner': owner})
