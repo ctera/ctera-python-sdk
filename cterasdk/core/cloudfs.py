@@ -175,11 +175,17 @@ class CloudFS(BaseCommand):
         param = builder.build()
 
         folders = list(query.iterator(self._portal, '/cloudDrives', param))
-        if not folders:
-            logging.getLogger().info('Could not find cloud folder. %s', {'folder': name, 'owner': str(owner)})
-            raise CTERAException('Could not find cloud folder', None, folder=name, owner=str(owner))
 
-        return folders[0]
+        if len(folders) > 1:
+            format = '/PortalUser/%s' % (owner.name) if owner.is_local else '/ADUser/%s/%s' % (owner.name, owner.directory)
+            for folder in folders:
+                if folder.owner.endswith(format):
+                    return folder
+        elif len(folders) == 1:
+            return folders[0]
+
+        logging.getLogger().info('Could not find cloud folder. %s', {'folder': name, 'owner': str(owner)})
+        raise CTERAException('Could not find cloud folder', None, folder=name, owner=str(owner))
 
     def _dirpath(self, name, owner):
         owner = self._portal.users.get(owner, ['displayName']).displayName
