@@ -177,9 +177,9 @@ class CloudFS(BaseCommand):
         folders = list(query.iterator(self._portal, '/cloudDrives', param))
 
         if len(folders) > 1:
-            format = '/PortalUser/%s' % (owner.name) if owner.is_local else '/ADUser/%s/%s' % (owner.name, owner.directory)
+            owner_ref = '/PortalUser/%s' % (owner.name) if owner.is_local else '/ADUser/%s/%s' % (owner.name, owner.directory)
             for folder in folders:
-                if folder.owner.endswith(format):
+                if folder.owner.endswith(owner_ref):
                     return folder
         elif len(folders) == 1:
             return folders[0]
