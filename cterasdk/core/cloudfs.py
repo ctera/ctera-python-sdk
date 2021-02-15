@@ -167,25 +167,19 @@ class CloudFS(BaseCommand):
 
         :returns: A Cloud Drive Folder
         """
+
+        uid = self._portal.users.get(owner, ['uid']).uid
         include = union(include or [], CloudFS.default)
-        builder = query.QueryParamBuilder().include(include)
-        name_filter = query.FilterBuilder('name').eq(name)
-        owner_filter = query.FilterBuilder('owner', True).eq(owner.name)
-        builder.addFilter(name_filter).addFilter(owner_filter)
+        builder = query.QueryParamBuilder().include(include).ownedBy(uid)
+        builder.addFilter(query.FilterBuilder('name').eq(name))
         param = builder.build()
 
-        folders = list(query.iterator(self._portal, '/cloudDrives', param))
-
-        if len(folders) > 1:
-            owner_ref = '/PortalUser/%s' % (owner.name) if owner.is_local else '/ADUser/%s/%s' % (owner.name, owner.directory)
-            for folder in folders:
-                if folder.owner.endswith(owner_ref):
-                    return folder
-        elif len(folders) == 1:
-            return folders[0]
-
-        logging.getLogger().info('Could not find cloud folder. %s', {'folder': name, 'owner': str(owner)})
-        raise CTERAException('Could not find cloud folder', None, folder=name, owner=str(owner))
+        iterator = query.iterator(self._portal, '/cloudDrives', param)
+        try:
+            return next(iterator)
+        except StopIteration:
+            logging.getLogger().info('Could not find cloud folder. %s', {'folder': name, 'owner': str(owner)})
+            raise CTERAException('Could not find cloud folder', None, folder=name, owner=str(owner))
 
     def _dirpath(self, name, owner):
         owner = self._portal.users.get(owner, ['displayName']).displayName
