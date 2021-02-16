@@ -131,7 +131,7 @@ class Shares(BaseCommand):
         """
         Shares._validate_acl(acl)
 
-        current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
+        current_acl = self.get_acl(name)
 
         new_acl_dict = {
             acl_entry.principal_type + '#' + acl_entry.name: acl_entry.to_server_object()
@@ -161,7 +161,7 @@ class Shares(BaseCommand):
             for acl_entry in acl
         }
 
-        current_acl = self._gateway.get('/config/fileservices/share/' + name + '/acl')
+        current_acl = self.get_acl(name)
 
         new_acl = []
         for entry in current_acl:
@@ -170,6 +170,14 @@ class Shares(BaseCommand):
                 new_acl.append(entry)
 
         self._gateway.put('/config/fileservices/share/' + name + '/acl', new_acl)
+
+    def get_acl(self, name):
+        """
+        Get the current access control entries from an existing share.
+
+        :param str name: The share name
+        """
+        return self._gateway.get('/config/fileservices/share/' + name + '/acl')
 
     def modify(
             self,

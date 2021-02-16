@@ -239,3 +239,15 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
         list_physical_folders_response.type = 'some type'
         list_physical_folders_response.fullpath = (self._root + self._share_volume) if fullpath is None else fullpath
         return [list_physical_folders_response]
+
+    def test_get_acl(self):
+        share_name = 'share'
+        get_response = self._get_acl_object()
+        self._init_filer(get_response=[get_response.to_server_object()])
+        acl = shares.Shares(self._filer).get_acl(share_name)
+        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/acl')
+        self._assert_equal_objects(ShareAccessControlEntry.from_server_object(acl[0]), get_response)
+
+    @staticmethod
+    def _get_acl_object():
+        return ShareAccessControlEntry(principal_type=PrincipalType.LG, name='Everyone', perm=FileAccessMode.RO)
