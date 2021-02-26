@@ -3,7 +3,7 @@ from unittest import mock
 from cterasdk.edge import network
 from cterasdk.edge.types import TCPService, TCPConnectResult
 from cterasdk.lib import task_manager_base
-from cterasdk.edge.enum import Mode
+from cterasdk.edge.enum import Mode, IPProtocol, Traffic
 from cterasdk.common import Object
 from tests.ut import base_edge
 
@@ -152,6 +152,33 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, TCPConnectResult(self._tcp_connect_address, self._tcp_connect_port, False))
+
+    def test_iperf_success(self):
+        execute_response = self._task_id
+        self._init_filer(execute_response=execute_response)
+
+        task = Object()
+        task.result = Object()
+        task.result.res = 'Success'
+
+        self._filer.tasks.wait = mock.MagicMock(return_value=task)
+        ret = network.Network(self._filer).iperf(self._static_ip.address)
+
+        expected_param = self._get_iperf_param()
+        actual_param = self._filer.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+
+        self.assertEqual(ret, task.result.res)
+
+    def _get_iperf_param(self, port=5201, threads=1, protocol=IPProtocol.TCP, direction=Traffic.Upload):
+        param = Object()
+        param._classname = 'IperfParam'  # pylint: disable=protected-access
+        param.address = self._static_ip.address
+        param.port = port
+        param.threads = threads
+        param.reverse = (direction == Traffic.Download)
+        param.protocol = None if protocol == IPProtocol.TCP else IPProtocol.UDP
+        return param
 
     def test_tcp_connect_task_error(self):
         execute_response = self._task_id

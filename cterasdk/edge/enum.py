@@ -383,3 +383,14 @@ class BooleanFunction:
     """
     AND = 'AND'
     OR = 'OR'
+
+
+class Traffic:
+    """
+    Traffic type
+
+    :ivar str Upload: Upload
+    :ivar str Download: Download
+    """
+    Upload = 'Upload'
+    Download = 'Download'
