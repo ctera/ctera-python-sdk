@@ -30,10 +30,40 @@ class Sync(BaseCommand):
         """ Check if Cloud Sync is enabled """
         return self._gateway.get('/config/cloudsync/mode') == Mode.Enabled
 
-    def suspend(self):
-        """ Suspend Cloud Sync """
+    def suspend(self, wait=True):
+        """
+        Suspend Cloud Sync
+
+        :param bool wait: Wait for synchronization to stop
+        """
         logging.getLogger().info("Suspending cloud sync.")
         self._gateway.put('/config/cloudsync/mode', Mode.Disabled)
+        if wait:
+            self._track_status(
+                [
+                    SyncStatus.Off
+                ],
+                [
+                    SyncStatus.Synced,
+                    SyncStatus.Syncing,
+                    SyncStatus.Scanning,
+                    SyncStatus.ConnectingFolders,
+                    SyncStatus.InitializingConnection
+                ],
+                [
+                    # No Transient Status
+                ],
+                [
+                    SyncStatus.DisconnectedPortal,
+                    SyncStatus.Unlicensed,
+                    SyncStatus.ServiceUnavailable,
+                    SyncStatus.VolumeUnavailable,
+                    SyncStatus.ShouldSupportWinNtAcl,
+                    SyncStatus.InternalError,
+                    SyncStatus.ClocksOutOfSync,
+                    SyncStatus.NoFolder
+                ]
+            )
         logging.getLogger().info("Cloud sync suspended.")
 
     def unsuspend(self):
@@ -41,10 +71,7 @@ class Sync(BaseCommand):
         logging.getLogger().info("Unsuspending cloud sync.")
         self._gateway.put('/config/cloudsync/mode', Mode.Enabled)
         try:
-            ref = '/proc/cloudsync/serviceStatus/id'
-            track(
-                self._gateway,
-                ref,
+            self._track_status(
                 [
                     SyncStatus.Synced,
                     SyncStatus.Syncing,
@@ -76,6 +103,9 @@ class Sync(BaseCommand):
                 logging.getLogger().info('Updated network share access. %s', {'share': 'cloud', 'access': Acl.WindowsNT})
             else:
                 logging.getLogger().error("An error occurred while unsuspendeding sync. %s", {'status': error.status})
+
+    def _track_status(self, success, progress, transient, failure):
+        track(self._gateway, '/proc/cloudsync/serviceStatus/id', success, progress, transient, failure)
 
     def refresh(self):
         """ Refresh Cloud Folders """

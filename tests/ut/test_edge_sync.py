@@ -52,7 +52,7 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
 
     def test_suspend_cloudsync(self):
         self._init_filer()
-        sync.Sync(self._filer).suspend()
+        sync.Sync(self._filer).suspend(wait=False)
         self._filer.put.assert_called_once_with('/config/cloudsync/mode', Mode.Disabled)
 
     def test_unsuspend_cloudsync(self):
