@@ -158,8 +158,8 @@ class Network(BaseCommand):
         :param int,optional threads: The number of threads, defaults to 1
         :param cterasdk.edge.enum.IPProtocol,optional protocol: IP protocol, defaults to `'TCP'`
         :param cterasdk.edge.enum.Traffic,optional direction: Traffic direction, defaults to `'Upload'`
-        :param int,optional retries: Number of retries when sampling the iperf task status, defaults to 20
-        :param int,optional seconds: Number of seconds to wait between retries, defaults to 6
+        :param int,optional retries: Number of retries when sampling the iperf task status, defaults to 120
+        :param int,optional seconds: Number of seconds to wait between retries, defaults to 1
         :returns: A string containing the iperf output
         :rtype: str
         """
