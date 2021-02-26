@@ -935,6 +935,20 @@ Network Diagnostics
    for result in results:
        print(result.host, result.port, result.is_open)
 
+
+.. automethod:: cterasdk.edge.network.Network.iperf
+   :noindex:
+
+.. code-block:: python
+
+   filer.network.iperf('192.168.1.145')  # iperf server: 192.168.1.145, threads: 1, measure upload over TCP port 5201
+
+   filer.network.iperf('192.168.1.145', port=85201, threads=5)  # Customized port and number of threads
+
+   filer.network.iperf('192.168.1.145', direction=gateway_enum.Traffic.Download)  # Measure download speed
+
+   filer.network.iperf('192.168.1.145', protocol=gateway_enum.IPProtocol.UDP)  # Use UDP
+
 Mail Server
 ===========
 

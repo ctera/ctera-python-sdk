@@ -1,6 +1,6 @@
 import logging
 
-from .enum import Mode
+from .enum import Mode, IPProtocol, Traffic
 from .types import TCPConnectResult
 from ..lib.task_manager_base import TaskError
 from ..common import Object
@@ -148,3 +148,31 @@ class Network(BaseCommand):
         logging.getLogger().warning("Couldn't establish TCP connection. %s", {'address': service.host, 'port': service.port})
 
         return TCPConnectResult(service.host, service.port, False)
+
+    def iperf(self, address, port=5201, threads=1, protocol=IPProtocol.TCP, direction=Traffic.Upload, retries=120, seconds=1):
+        """
+        Invoke a network throughput test
+
+        :param str address: The host running the iperf server
+        :param int,optional port: The iperf server port, defaults to 5201
+        :param int,optional threads: The number of threads, defaults to 1
+        :param cterasdk.edge.enum.IPProtocol,optional protocol: IP protocol, defaults to `'TCP'`
+        :param cterasdk.edge.enum.Traffic,optional direction: Traffic direction, defaults to `'Upload'`
+        :param int,optional retries: Number of retries when sampling the iperf task status, defaults to 20
+        :param int,optional seconds: Number of seconds to wait between retries, defaults to 6
+        :returns: A string containing the iperf output
+        :rtype: str
+        """
+        param = Object()
+        param._classname = 'IperfParam'  # pylint: disable=protected-access
+        param.address = address
+        param.port = port
+        param.threads = threads
+        param.reverse = (direction == Traffic.Download)
+        param.protocol = None if protocol == IPProtocol.TCP else IPProtocol.UDP
+        task = self._gateway.execute("/status/network", "iperf", param)
+        try:
+            task = self._gateway.tasks.wait(task, retries, seconds)
+            return task.result.res
+        except TaskError as error:
+            return error.task.result.res

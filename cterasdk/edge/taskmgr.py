@@ -52,11 +52,13 @@ class Tasks(BaseCommand):
         """
         return self._gateway.query('/proc/bgtasks', 'name', name)
 
-    def wait(self, ref):
+    def wait(self, ref, retries=100, seconds=1):
         """
         Wait for background task to complete
 
         :param str ref: Task reference
+        :param int,optional retries: Number of retries when sampling the task status, defaults to 100
+        :param int,optional seconds: Number of seconds to wait between retries, defaults to 1
         """
-        task = Task(self._gateway, ref)
+        task = Task(self._gateway, ref, retries, seconds)
         return task.wait()
