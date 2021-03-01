@@ -154,7 +154,7 @@ Core Methods
 
    print(bgTask)
 
-.. seealso:: Execute the file-eviction process: :py:func:`Gateway.force_eviction()`, Reboot the Gateway: :py:func:`Gateway.reboot()`, Execute tcp connect: :py:func:`Gateway.tcp_connect()`
+.. seealso:: Execute the file-eviction process: :py:func:`cterasdk.edge.cache.Cache.force_eviction()`, Reboot the Gateway: :py:func:`cterasdk.edge.power.reboot()`, Execute tcp connect: :py:func:`Gateway.tcp_connect()`
 
 .. automethod:: cterasdk.object.Gateway.Gateway.add
    :noindex:
@@ -502,7 +502,7 @@ Active Directory
 
    filer.directoryservice.advanced_mapping('CTERA', 200001, 5000001)
 
-.. note:: to retrieve a list of domain flat names, use :py:func:`Gateway.domains()`
+.. note:: to retrieve a list of domain flat names, use :py:func:`cterasdk.edge.directoryservice.domains()`
 
 .. automethod:: cterasdk.edge.directoryservice.DirectoryService.disconnect
    :noindex:
@@ -566,7 +566,7 @@ Cloud Services
 .. automethod:: cterasdk.edge.services.Services.activate
    :noindex:
 
-   This method's behavior is identical to :py:func:`Gateway.connect()`
+   This method's behavior is identical to :py:func:`cterasdk.edge.services.Services.connect()`
 
 .. code-block:: python
 
@@ -598,7 +598,7 @@ Applying a License
 
    filer.license.apply('EV32')
 
-.. note:: you can specify a license upon connecting the Gateway to CTERA Portal. See :py:func:`Gateway.connect()`
+.. note:: you can specify a license upon connecting the Gateway to CTERA Portal. See :py:func:`cterasdk.edge.services.Services.connect()`
 
 Caching
 =======
@@ -1154,3 +1154,37 @@ Telnet Access
 .. code-block:: python
 
    filer.telnet.disable()
+
+
+SSH Access
+^^^^^^^^^^
+.. automethod:: cterasdk.edge.ssh.SSH.enable
+   :noindex:
+
+.. code-block:: python
+
+   """Enable SSH access"""
+   filer.ssh.enable()
+
+   """Generate an RSA key pair and enable SSH access"""
+
+   from cryptography.hazmat.primitives.asymmetric import rsa
+   from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, PublicFormat, NoEncryption
+
+   private_key = rsa.generate_private_key(public_exponent=exponent, key_size=key_size)
+   public_key = private_key.public_key().public_bytes(Encoding.OpenSSH, PublicFormat.OpenSSH).decode('utf-8')
+
+   filer.ssh.enable(public_key)
+
+   """Print PEM-encoded RSA private key"""
+   print(private_key.private_bytes(Encoding.PEM, PrivateFormat.OpenSSH, NoEncryption()).decode('utf-8'))
+
+   """Print OpenSSH formatted RSA public key"""
+   print(public_key)
+
+.. automethod:: cterasdk.edge.ssh.SSH.disable
+   :noindex:
+
+.. code-block:: python
+
+   filer.ssh.disable()

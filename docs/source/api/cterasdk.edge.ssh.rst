@@ -1,7 +1,7 @@
-cterasdk.edge.ssl module
+cterasdk.edge.ssh module
 ========================
 
-.. automodule:: cterasdk.edge.ssl
+.. automodule:: cterasdk.edge.ssh
     :members:
     :undoc-members:
     :show-inheritance:

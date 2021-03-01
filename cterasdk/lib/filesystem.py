@@ -82,8 +82,11 @@ class FileSystem:
     @staticmethod
     def write(filepath, handle):
         with open(filepath, 'w+b') as fd:
-            for chunk in handle.iter_content(chunk_size=8192):
-                fd.write(chunk)
+            if isinstance(handle, bytes):
+                fd.write(handle)
+            else:
+                for chunk in handle.iter_content(chunk_size=8192):
+                    fd.write(chunk)
         logging.getLogger().debug('Saved temporary file. %s', {'path': filepath})
 
     @staticmethod
