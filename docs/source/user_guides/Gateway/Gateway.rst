@@ -1166,6 +1166,10 @@ SSH Access
    """Enable SSH access"""
    filer.ssh.enable()
 
+   """Enable SSH access using a public key file"""
+   filer.ssh.enable(public_key_file='./public_key.pub')  # relative to the current directory
+   filer.ssh.enable(public_key_file='C:\\Users\\jsmith\\Desktop\\public_key.pub')  # full path
+
    """Generate an RSA key pair and enable SSH access"""
 
    from cryptography.hazmat.primitives.asymmetric import rsa
