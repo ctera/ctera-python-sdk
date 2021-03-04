@@ -1,4 +1,5 @@
 import logging
+import os
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, PublicFormat, NoEncryption
 
@@ -25,6 +26,7 @@ class RSAKeyPair:
 
         logging.getLogger().info('Saving private key.')
         path = filesystem.save(dirpath, '{}.pem'.format(key_filename), self.private_key)
+        os.chmod(path, 0o600)
         logging.getLogger().info('Saved private key. %s', {'filepath': path, 'format': 'PEM'})
 
         logging.getLogger().info('Saving public key.')
