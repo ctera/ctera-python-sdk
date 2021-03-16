@@ -38,7 +38,7 @@ class Buckets(BaseCommand):
 
     def add(self, name, bucket, read_only=False, dedicated_to=None):
         """
-        Get a Bucket
+        Add a Bucket
 
         :param str name: Name of the bucket
         :param cterasdk.core.types.Bucket bucket: Storage bucket to add

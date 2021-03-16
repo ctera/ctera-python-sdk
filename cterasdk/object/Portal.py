@@ -20,6 +20,7 @@ from ..core import zones
 from ..core import setup
 from ..core import startup
 from ..core import taskmgr
+from ..core import templates
 from ..core import uri
 from ..core import files
 
@@ -38,6 +39,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.logs.Logs logs: Object holding the Portal logs APIs
     :ivar cterasdk.core.cloudfs.CloudFS cloudfs: Object holding the Portal CloudFS APIs
     :ivar cterasdk.core.taskmgr.Tasks tasks: Object holding the Portal Background Tasks APIs
+    :ivar cterasdk.core.templates.Templates templates: Object holding the Portal Configuration Templates APIs
     :ivar cterasdk.core.files.browser.FileBrowser files: Object holding the Portal File Browsing APIs
     """
 
@@ -60,6 +62,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.files = files.FileBrowser(self, self.file_browser_base_path)
         self.logs = logs.Logs(self)
         self.tasks = taskmgr.Tasks(self)
+        self.templates = templates.Templates(self)
 
     @property
     def base_api_url(self):
@@ -98,7 +101,8 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'activation',
             'files',
             'logs',
-            'tasks'
+            'tasks',
+            'templates'
         ]
 
     @property

@@ -40,6 +40,7 @@ Submodules
    cterasdk.core.setup
    cterasdk.core.startup
    cterasdk.core.taskmgr
+   cterasdk.core.templates
    cterasdk.core.types
    cterasdk.core.union
    cterasdk.core.users

@@ -3,6 +3,7 @@ from datetime import datetime
 
 from .object import Object
 from .utils import df_military_time, day_of_week
+from .enum import FileCriteria, BooleanFunction
 
 
 class PolicyRule:
@@ -256,3 +257,77 @@ class ThrottlingRuleBuilder:
         if errors:
             raise ValueError('No value for required field: %s' % errors)
         return self.param
+
+
+class FileFilterBuilder:
+
+    Type = 'File'
+
+    @staticmethod
+    def extensions():
+        return ListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Type)
+
+    @staticmethod
+    def names():
+        return ListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Name)
+
+    @staticmethod
+    def name():
+        return StringCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Name)
+
+    @staticmethod
+    def paths():
+        return ListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Path)
+
+    @staticmethod
+    def path():
+        return StringCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Path)
+
+    @staticmethod
+    def size():
+        return IntegerCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Size)
+
+    @staticmethod
+    def last_modified():
+        return DateTimeCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Modified)
+
+
+class DirectoryEntryFactory:
+
+    @staticmethod
+    def root(included):
+        return DirEntry('root', included=included)
+
+
+class FileEntry(Object):
+
+    def __init__(self, name, display_name=None, included=None):
+        self.name = name
+        self.displayName = display_name
+        self.isIncluded = included
+
+
+class DirEntry(FileEntry):
+
+    def __init__(self, name, display_name=None, included=None, children=None):
+        super().__init__(name, display_name, included)
+        self.children = children
+
+
+class BackupSet(Object):
+
+    def __init__(self, name, directory_tree=None, filter_rules=None, defaults_dirs=None,
+                 template_dirs=None, enabled=True, boolean_function=None, comment=None):
+        self._classname = self.__class__.__name__  # pylint: disable=protected-access
+        self.name = name
+        self.isEnabled = enabled
+        self.directoryTree = directory_tree if directory_tree else DirectoryEntryFactory.root(True)
+        self.booleanFunction = boolean_function if boolean_function else BooleanFunction.AND
+        self.templateDirectories = template_dirs
+        self.defaultDirs = defaults_dirs
+        self.comment = comment
+        self.filterRules = filter_rules
+
+
+class FilterBackupSet(BackupSet):
+    pass
