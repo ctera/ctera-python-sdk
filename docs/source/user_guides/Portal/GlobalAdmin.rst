@@ -404,6 +404,68 @@ Plan Auto Assignment Rules
    """Assign 'Default' if no match applies"""
    admin.plans.auto_assign.set_policy([], True, 'Default')
 
+Configuration Templates
+-----------------------
+
+.. automethod:: cterasdk.core.templates.Templates.get
+   :noindex:
+
+.. code-block:: python
+
+   admin.templates.get('MyTemplate')
+
+.. automethod:: cterasdk.core.templates.Templates.list_templates
+   :noindex:
+
+.. code-block:: python
+
+   for template in admin.templates.list_templates(include=['name', 'description', 'modifiedDate']):
+       print(template.name, template.description, template.modifiedDate)
+
+.. automethod:: cterasdk.core.templates.Templates.add
+   :noindex:
+
+.. code-block:: python
+
+   """Include all 'pptx', 'xlsx' and 'docx' file types for all users"""
+   docs = common_types.FileFilterBuilder.extensions().include(['pptx', 'xlsx', 'docx']).build()
+   include_sets = common_types.FilterBackupSet('Documents', filter_rules=[docs],
+                                                         template_dirs=[portal_enum.EnvironmentVariables.ALLUSERSPROFILE])
+
+   """Exclude all 'cmd', 'exe' and 'bat' file types for all users"""
+   programs = common_types.FileFilterBuilder.extensions().include(['cmd', 'exe', 'bat']).build()
+   exclude_sets = common_types.FilterBackupSet('Programs', filter_rules=[programs],
+                                                           template_dirs=[portal_enum.EnvironmentVariables.ALLUSERSPROFILE])
+
+   admin.templates.add('MyTemplate', 'woohoo', include_sets=[include_sets], exclude_sets=[exclude_sets])
+
+.. automethod:: cterasdk.core.templates.Templates.set_default
+   :noindex:
+
+.. code-block:: python
+
+   admin.templates.set_default('MyTemplate')
+
+   admin.templates.set_default('MyTemplate', wait=True)  # wait for template changes to apply
+
+.. automethod:: cterasdk.core.templates.Templates.remove_default
+   :noindex:
+
+.. code-block:: python
+
+   admin.templates.remove_default('MyTemplate')
+
+   admin.templates.remove_default('MyTemplate', wait=True)  # wait for template changes to apply
+
+.. automethod:: cterasdk.core.templates.TemplateAssignPolicy.apply_changes
+   :noindex:
+
+.. code-block:: python
+
+   admin.templates.auto_assign.apply_changes()
+
+   admin.templates.auto_assign.apply_changes(wait=True)  # wait for template changes to apply
+
 Servers
 -------
 .. automethod:: cterasdk.core.servers.Servers.list_servers

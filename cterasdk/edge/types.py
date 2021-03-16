@@ -1,6 +1,6 @@
 from collections import namedtuple
 from . import enum
-from ..common import StringCriteriaBuilder, IntegerCriteriaBuilder, ListCriteriaBuilder, DateTimeCriteriaBuilder, Object
+from ..common import Object
 from ..exception import InputError
 
 
@@ -211,77 +211,3 @@ class RemoveShareAccessControlEntry(UserGroupEntry):
     :ivar cterasdk.edge.enum.PrincipalType principal_type: Principal type of the ACL
     :ivar str name: The name of the user or group
     """
-
-
-class FileExclusionBuilder:
-
-    Type = 'File'
-
-    @staticmethod
-    def extensions():
-        return ListCriteriaBuilder(FileExclusionBuilder.Type, enum.FileCriteria.Type)
-
-    @staticmethod
-    def names():
-        return ListCriteriaBuilder(FileExclusionBuilder.Type, enum.FileCriteria.Name)
-
-    @staticmethod
-    def name():
-        return StringCriteriaBuilder(FileExclusionBuilder.Type, enum.FileCriteria.Name)
-
-    @staticmethod
-    def paths():
-        return ListCriteriaBuilder(FileExclusionBuilder.Type, enum.FileCriteria.Path)
-
-    @staticmethod
-    def path():
-        return StringCriteriaBuilder(FileExclusionBuilder.Type, enum.FileCriteria.Path)
-
-    @staticmethod
-    def size():
-        return IntegerCriteriaBuilder(FileExclusionBuilder.Type, enum.FileCriteria.Size)
-
-    @staticmethod
-    def last_modified():
-        return DateTimeCriteriaBuilder(FileExclusionBuilder.Type, enum.FileCriteria.Modified)
-
-
-class DirectoryEntryFactory:
-
-    @staticmethod
-    def root(included):
-        return DirEntry('root', included=included)
-
-
-class FileEntry(Object):
-
-    def __init__(self, name, display_name=None, included=None):
-        self.name = name
-        self.displayName = display_name
-        self.isIncluded = included
-
-
-class DirEntry(FileEntry):
-
-    def __init__(self, name, display_name=None, included=None, children=None):
-        super().__init__(name, display_name, included)
-        self.children = children
-
-
-class BackupSet(Object):
-
-    def __init__(self, name, directory_tree=None, filter_rules=None, defaults_dirs=None,
-                 template_dirs=None, enabled=True, boolean_function=None, comment=None):
-        self._classname = self.__class__.__name__  # pylint: disable=protected-access
-        self.name = name
-        self.isEnabled = enabled
-        self.directoryTree = directory_tree if directory_tree else DirectoryEntryFactory.root(True)
-        self.booleanFunction = boolean_function if boolean_function else enum.BooleanFunction.AND
-        self.templateDirectories = template_dirs
-        self.defaultDirs = defaults_dirs
-        self.comment = comment
-        self.filterRules = filter_rules
-
-
-class FilterBackupSet(BackupSet):
-    pass

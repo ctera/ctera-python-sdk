@@ -2,9 +2,8 @@ import logging
 
 from ..lib import track, ErrorStatus
 from .enum import Mode, SyncStatus, Acl
-from .types import FilterBackupSet, FileExclusionBuilder
 from .base_command import BaseCommand
-from ..common import ThrottlingRule
+from ..common import ThrottlingRule, FilterBackupSet, FileFilterBuilder
 
 
 class Sync(BaseCommand):
@@ -116,7 +115,7 @@ class Sync(BaseCommand):
     def exclude_files(self, extensions=None, filenames=None, paths=None, custom_exclusion_rules=None):
         """
         Exclude files from Cloud Sync. This method will override any existing file exclusion rules
-        Use :func:`cterasdk.edge.types.FileExclusionBuilder` to build custom file exclusion rules`
+        Use :func:`cterasdk.common.types.FileFilterBuilder` to build custom file exclusion rules`
 
         :param list[str] extensions: List of file extensions
         :param list[str] filenames: List of file names
@@ -126,15 +125,15 @@ class Sync(BaseCommand):
         rules = list()
         if extensions:
             param = FilterBackupSet('List of file extensions to exclude from sync',
-                                    filter_rules=[FileExclusionBuilder.extensions().include(extensions).build()])
+                                    filter_rules=[FileFilterBuilder.extensions().include(extensions).build()])
             rules.append(param)
         if filenames:
             param = FilterBackupSet('List of file names to exclude from sync',
-                                    filter_rules=[FileExclusionBuilder.names().include(filenames).build()])
+                                    filter_rules=[FileFilterBuilder.names().include(filenames).build()])
             rules.append(param)
         if paths:
             param = FilterBackupSet('List of file paths to exclude from sync',
-                                    filter_rules=[FileExclusionBuilder.paths().include(filenames).build()])
+                                    filter_rules=[FileFilterBuilder.paths().include(filenames).build()])
             rules.append(param)
         if custom_exclusion_rules:
             rules.extend(custom_exclusion_rules)

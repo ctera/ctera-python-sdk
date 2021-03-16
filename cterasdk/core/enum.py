@@ -398,3 +398,35 @@ class BucketType:
     Nutanix = 'Nutanix'
     Wasabi = 'WasabiS3'
     Google = 'GoogleS3'
+
+
+class EnvironmentVariables:
+    """
+    Environment Variables.\n
+    Some environment variables are applicable across platforms (i.e. Windows, Linux), while others are limited to a designated platform
+
+    :ivar str ALLUSERSPROFILE: All users profile
+    :ivar str WINDIR: Windows directory
+    :ivar str TEMP: Temp directory
+    :ivar str SYSTEMDRIVE: System drive
+    :ivar str PROGRAMFILES: Program files
+    :ivar str APPDATA: Application data
+    :ivar str USERPROFILE: Current user profile
+    :ivar str PRIMARYUSER: Primary user
+    :ivar str USERS: Users directory (CTERA Edge Filer)
+    :ivar str AGENTS: Agents directory (CTERA Edge Filer)
+    :ivar str SYNCS: Syncs directory (CTERA Edge Filer)
+    :ivar str PROJECTS: Projects directory (CTERA Edge Filer)
+    """
+    ALLUSERSPROFILE = '$ALLUSERSPROFILE'
+    WINDIR = '$WINDIR'
+    TEMP = '$TEMP'
+    SYSTEMDRIVE = '$SYSTEMDRIVE'
+    PROGRAMFILES = '$PROGRAMFILES'
+    APPDATA = '$APPDATA'
+    USERPROFILE = '$USERPROFILE'
+    USERS = '$USERS'
+    AGENTS = '$AGENTS'
+    SYNCS = '$SYNCS'
+    PROJECTS = '$PROJECTS'
+    PRIMARYUSER = '$PRIMARYUSER'
