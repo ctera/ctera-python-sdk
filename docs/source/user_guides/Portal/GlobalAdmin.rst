@@ -457,7 +457,7 @@ Configuration Templates
 
    admin.templates.remove_default('MyTemplate', wait=True)  # wait for template changes to apply
 
-.. automethod:: cterasdk.core.templates.TemplateAssignPolicy.apply_changes
+.. automethod:: cterasdk.core.templates.TemplateAutoAssignPolicy.apply_changes
    :noindex:
 
 .. code-block:: python

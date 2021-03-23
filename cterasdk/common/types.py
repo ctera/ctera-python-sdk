@@ -3,7 +3,7 @@ from datetime import datetime
 
 from .object import Object
 from .utils import df_military_time, day_of_week
-from .enum import FileCriteria, BooleanFunction
+from .enum import FileCriteria, BooleanFunction, Application
 
 
 class PolicyRule:
@@ -331,3 +331,19 @@ class BackupSet(Object):
 
 class FilterBackupSet(BackupSet):
     pass
+
+
+class ApplicationBackupSet(BackupSet):
+
+    def __init__(self, apps):
+
+        comment = 'Backup all the specified applications'
+        name = 'Applications'
+
+        if apps == Application.All:
+            super().__init__(name=name, directory_tree=DirEntry(name, included=True), comment=comment)
+        else:
+            directory_tree = DirEntry(name, included=True, children=[DirEntry(app, included=True) for app in apps])
+            super().__init__(name=name, directory_tree=directory_tree, comment=comment)
+
+        self._classname = None

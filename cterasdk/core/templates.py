@@ -1,8 +1,9 @@
 import logging
 
-from ..common import union, Object
+from ..common import union, parse_base_object_ref, ApplicationBackupSet, Object
 from ..exception import CTERAException
 from .base_command import BaseCommand
+from .types import PlatformVersion
 from . import query
 
 
@@ -37,11 +38,17 @@ class Templates(BaseCommand):
             raise CTERAException('Could not find template', None, name=name)
         return template
 
-    def add(self, name, description=None, include_sets=None, exclude_sets=None):
+    def add(self, name, description=None, include_sets=None, exclude_sets=None, apps=None, versions=None):
         """
         Add a Configuration Template
 
         :param str name: Name of the template
+        :param str description: Template description
+        :param list[cterasdk.common.types.FilterBackupSet] include_sets: List of backup sets to include
+        :param list[cterasdk.common.types.FilterBackupSet] exclude_sets: List of backup sets to exclude
+        :param list[cterasdk.core.enum.Application] apps: List of applications to back up
+        :param list[cterasdk.core.types.PlatformVersion]: List of platforms and their associated versions.
+        Pass `None` to inehrit the default settings from the Global Administration Portal
         """
         param = Object()
         param._classname = 'DeviceTemplate'  # pylint: disable=protected-access
@@ -51,7 +58,7 @@ class Templates(BaseCommand):
         param.deviceSettings = Object()
         param.deviceSettings._classname = 'DeviceTemplateSettings'  # pylint: disable=protected-access
 
-        if include_sets or exclude_sets:
+        if include_sets or exclude_sets or apps:
             param.deviceSettings.backup = Object()
             param.deviceSettings.backup._classname = 'BackupTemplate'  # pylint: disable=protected-access
             param.deviceSettings.backup.backupPolicy = Object()
@@ -60,11 +67,45 @@ class Templates(BaseCommand):
                 param.deviceSettings.backup.backupPolicy.includeSets = include_sets
             if exclude_sets:
                 param.deviceSettings.backup.backupPolicy.excludeSets = exclude_sets
+            if apps:
+                param.deviceSettings.backup.applicationsTopic = Object()
+                param.deviceSettings.backup.applicationsTopic._classname = 'ApplicationsTopic'
+                param.deviceSettings.backup.applicationsTopic.overrideTemplate = True
+                param.deviceSettings.backup.applicationsTopic.includeApps = ApplicationBackupSet(apps)
+
+        param.firmwaresSettings = Object()
+        param.firmwaresSettings._classname = 'FirmwaresSettings'
+
+        if versions:
+            param.firmwaresSettings.useGlobal = False
+            param.firmwaresSettings.firmwares = self._convert_to_template_firmwares(versions)
+        else:
+            param.firmwaresSettings.useGlobal = True
+            param.firmwaresSettings.firmwares = None
 
         logging.getLogger().info('Adding template. %s', {'name': name})
         response = self._portal.add('/deviceTemplates', param)
         logging.getLogger().info('Template added. %s', {'name': name})
         return response
+
+    def _convert_to_template_firmwares(self, versions):
+        firmwares = {image.name: parse_base_object_ref(image.baseObjectRef) for image in self._portal.firmwares.list_images()}
+
+        template_firmwares = []
+        for platform, version in versions:
+            base_object_ref = firmwares.get('%s-%s' % (platform, version))
+            if base_object_ref is None:
+                raise CTERAException('Could not find firmware version', None, platform=platform, version=version)
+            template_firmwares.append(self._create_template_firmware(platform, str(base_object_ref)))
+
+        return template_firmwares
+
+    def _create_template_firmware(self, platform, base_object_ref):
+        param = Object()
+        param._classname = 'TemplateFirmware'  # pylint: disable=protected-access
+        param.type = platform
+        param.firmware = base_object_ref
+        return param
 
     def list_templates(self, include=None):
         """

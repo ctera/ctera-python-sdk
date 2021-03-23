@@ -11,6 +11,7 @@ class Users(BaseCommand):
     def get(self, name=None):
         """
         Get User. If a user name was not passed as an argument, a list of all local users will be retrieved
+
         :param str,optional name: Name of the user
         """
         return self._gateway.get('/config/auth/users' + ('' if name is None else ('/' + name)))
