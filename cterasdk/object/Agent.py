@@ -54,6 +54,17 @@ class Agent(CTERAHost):
     def _session_id_key(self):
         return ''
 
+    @property
+    def _omit_fields(self):
+        return super()._omit_fields + [
+            'backup',
+            'cli',
+            'logs',
+            'services',
+            'support',
+            'sync'
+        ]
+
     def _is_authenticated(self, function, *args, **kwargs):
         return True
 
