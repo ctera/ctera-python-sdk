@@ -52,7 +52,7 @@ class SessionBase(Object):
 
     @property
     def active(self):
-        return (self.status == SessionStatus.Active)
+        return self.status == SessionStatus.Active
 
     def whoami(self):
         print(self)
