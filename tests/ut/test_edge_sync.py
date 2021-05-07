@@ -3,7 +3,7 @@ from unittest import mock
 from cterasdk.edge import sync
 from cterasdk.edge.enum import Mode, SyncStatus, Acl
 from cterasdk.lib import ErrorStatus
-from cterasdk.common.types import ThrottlingRuleBuilder
+from cterasdk.common.types import ThrottlingRuleBuilder, TimeRange
 from tests.ut import base_edge
 
 
@@ -108,4 +108,5 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
 
     @staticmethod
     def _create_bandwidth_rule(upload, download, start, end, days):
-        return ThrottlingRuleBuilder().upload(upload).download(download).start(start).end(end).days(days).build()
+        schedule = TimeRange().start(start).end(end).days(days).build()
+        return ThrottlingRuleBuilder().upload(upload).download(download).schedule(schedule).build()
