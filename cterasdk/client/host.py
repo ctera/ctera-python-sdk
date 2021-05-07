@@ -114,8 +114,9 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
 
     def logout(self):
         """ Log out """
-        self._login_object.logout()
-        self._session.terminate()
+        if self._session.active:
+            self._login_object.logout()
+            self._session.terminate()
 
     def session(self):
         return self._session

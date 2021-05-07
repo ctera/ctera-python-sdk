@@ -50,5 +50,9 @@ class SessionBase(Object):
     def is_local_auth(self):
         return self.local_auth
 
+    @property
+    def active(self):
+        return (self.status == SessionStatus.Active)
+
     def whoami(self):
         print(self)
