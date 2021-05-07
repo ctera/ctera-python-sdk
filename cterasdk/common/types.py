@@ -3,7 +3,7 @@ from datetime import datetime
 
 from .object import Object
 from .utils import df_military_time, day_of_week
-from .enum import FileCriteria, BooleanFunction, Application
+from .enum import FileCriteria, BooleanFunction, Application, ScheduleType
 
 
 class PolicyRule:
@@ -153,21 +153,14 @@ class ThrottlingRule:
     def __init__(self):
         self.upload = None
         self.download = None
-        self.start = None
-        self.end = None
-        self.days = None
+        self.schedule = None
 
     def to_server_object(self):
         param = Object()
         param._classname = 'SyncThrottlingSettings'  # pylint: disable=protected-access
         param.inKbitsPerSecond = self.download
         param.outKbitsPerSecond = self.upload
-        param.schedule = Object()
-        param.schedule._classname = 'TimeRange'  # pylint: disable=protected-access
-        param.schedule.start = self.start
-        param.schedule.end = self.end
-        param.schedule.days = self.days
-        param.termOnEnd = False
+        param.schedule = self.schedule
         return param
 
     @staticmethod
@@ -175,14 +168,12 @@ class ThrottlingRule:
         r = ThrottlingRule()
         r.download = param.inKbitsPerSecond
         r.upload = param.outKbitsPerSecond
-        r.start = param.schedule.start
-        r.end = param.schedule.end
-        r.days = param.schedule.days
+        r.schedule = param.schedule
         return r
 
     def __str__(self):
         return str(dict(upload_kbps=self.upload, download_kbps=self.download,
-                        start=self.start, end=self.end, days=[day_of_week(day) for day in self.days]))
+                        start=self.schedule.start, end=self.schedule.end, days=[day_of_week(day) for day in self.schedule.days]))
 
 
 class ThrottlingRuleBuilder:
@@ -211,42 +202,13 @@ class ThrottlingRuleBuilder:
         self.param.download = kbps
         return self
 
-    def start(self, start):
+    def schedule(self, schedule):
         """
-        Start throttling
+        Set the throttling rule schedule
 
-        :param str start: A military time string 'hh:mm:ss' or a datetime object
+        :param cterasdk.common.types.TimeRange schedule: Schedule
         """
-        self.param.start = ThrottlingRuleBuilder._infer_time(start)
-        return self
-
-    def end(self, end):
-        """
-        End throttling
-
-        :param str end: A military time string 'hh:mm:ss' or a datetime object
-        """
-        self.param.end = ThrottlingRuleBuilder._infer_time(end)
-        return self
-
-    @staticmethod
-    def _infer_time(time):
-        if isinstance(time, datetime):
-            return df_military_time(time)
-        if isinstance(time, str):
-            match = re.search('^[012][0-9]:[0-5][0-9]:[0-5][0-9]$', time)
-            if match:
-                return match.group(0)
-            raise ValueError("Invalid time format. Expected 'hh:mm:ss'")
-        raise ValueError("Invalid format. Expected 'datetime' or 'str'")
-
-    def days(self, days):
-        """
-        Throttle on days
-
-        :param list[cterasdk.common.enum.DayOfWeek] days: A list of days
-        """
-        self.param.days = days
+        self.param.schedule = schedule
         return self
 
     def build(self):
@@ -347,3 +309,98 @@ class ApplicationBackupSet(BackupSet):
             super().__init__(name=name, directory_tree=directory_tree, comment=comment)
 
         self._classname = None
+
+
+class TaskSchedule(Object):
+
+    def __init__(self):
+        self._classname = 'TaskSchedule'  # pylint: disable=protected-access
+
+
+class BackupScheduleBuilder:
+
+    @staticmethod
+    def interval(hours=None, minutes=None):
+        param = TaskSchedule()
+        param.mode = ScheduleType.Interval
+        param.interval = Object()
+        param.interval.hours = hours if hours is not None else 24
+        param.interval.minutes = minutes if minutes is not None else 0
+        return param
+
+    @staticmethod
+    def window(time_range):
+        param = TaskSchedule()
+        param.mode = ScheduleType.Window
+        param.window = time_range
+        return param
+
+
+class TimeRange:
+    """ Class representing a task schedule """
+
+    def __init__(self):
+        self.param = Object()
+        self.param._classname = 'TimeRange'  # pylint: disable=protected-access
+        self.param.start = None
+        self.param.end = None
+        self.param.days = None
+        self.param.termOnEnd = False
+
+    def start(self, start):
+        """
+        Start time
+
+        :param str start: A military time string 'hh:mm:ss' or a datetime object
+        """
+        self.param.start = TimeRange._infer_time_range(start)
+        return self
+
+    def end(self, end):
+        """
+        End time
+
+        :param str end: A military time string 'hh:mm:ss' or a datetime object
+        """
+        self.param.end = TimeRange._infer_time_range(end)
+        return self
+
+    def days(self, days):
+        """
+        Set days
+
+        :param list[cterasdk.common.enum.DayOfWeek] days: A list of days
+        """
+        self.param.days = days
+        return self
+
+    def terminate_at_endtime(self):
+        """
+        Terminate at end time, defaults to teminate on completion.
+        """
+        self.param.termOnEnd = True
+        return self
+
+    def build(self):
+        """
+        Build the time range
+        """
+        if self.param.termOnEnd and self.param.end is None:
+            raise ValueError('End time required')
+        if self.param.start is None:
+            raise ValueError('Start time required')
+        return self.param
+
+    @staticmethod
+    def _infer_time_range(time):
+        if isinstance(time, datetime):
+            return df_military_time(time)
+        if isinstance(time, str):
+            match = re.search('^[012][0-9]:[0-5][0-9]:[0-5][0-9]$', time)
+            if match:
+                return match.group(0)
+            raise ValueError("Invalid time format. Expected 'hh:mm:ss'")
+        raise ValueError("Invalid format. Expected 'datetime' or 'str'")
+
+    def __str__(self):
+        return str(self.param)

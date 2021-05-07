@@ -75,3 +75,24 @@ class Application:
     SharePoint_07 = '{c2f52614-5e53-4858-a589-38eeb25c6184}'
     SharePoint = '{da452614-4858-5e53-a512-38aab25c61ad}'
     All = [Exchange, SQL, NTDS, DFS, FRS, System, HyperV, SharePoint_07, SharePoint]
+
+
+class ScheduleType:
+    """
+    Schedule Type
+
+    :ivar str Manual: Manual
+    :ivar str Hourly: Hourly
+    :ivar str Daily: Daily
+    :ivar str Weekly: Weekly
+    :ivar str Monthly: Monthly
+    :ivar str Interval: Interval
+    :ivar str Window: Window
+    """
+    Manual = 'manual'
+    Hourly = 'hourly'
+    Daily = 'daily'
+    Weekly = 'weekly'
+    Monthly = 'monthly'
+    Interval = 'interval'
+    Window = 'window'

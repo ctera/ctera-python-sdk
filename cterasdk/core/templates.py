@@ -38,7 +38,7 @@ class Templates(BaseCommand):
             raise CTERAException('Could not find template', None, name=name)
         return template
 
-    def add(self, name, description=None, include_sets=None, exclude_sets=None, apps=None, versions=None):
+    def add(self, name, description=None, include_sets=None, exclude_sets=None, apps=None, backup_schedule=None, versions=None):
         """
         Add a Configuration Template
 
@@ -47,7 +47,8 @@ class Templates(BaseCommand):
         :param list[cterasdk.common.types.FilterBackupSet] include_sets: List of backup sets to include
         :param list[cterasdk.common.types.FilterBackupSet] exclude_sets: List of backup sets to exclude
         :param list[cterasdk.core.enum.Application] apps: List of applications to back up
-        :param list[cterasdk.core.types.PlatformVersion]: List of platforms and their associated versions.
+        :param cterasdk.common.types.TaskSchedule backup_schedule: Backup schedule
+        :param list[cterasdk.core.types.PlatformVersion] versions: List of platforms and their associated versions.
         Pass `None` to inehrit the default settings from the Global Administration Portal
         """
         param = Object()
@@ -58,7 +59,7 @@ class Templates(BaseCommand):
         param.deviceSettings = Object()
         param.deviceSettings._classname = 'DeviceTemplateSettings'  # pylint: disable=protected-access
 
-        if include_sets or exclude_sets or apps:
+        if include_sets or exclude_sets or backup_schedule or apps:
             param.deviceSettings.backup = Object()
             param.deviceSettings.backup._classname = 'BackupTemplate'  # pylint: disable=protected-access
             param.deviceSettings.backup.backupPolicy = Object()
@@ -67,6 +68,11 @@ class Templates(BaseCommand):
                 param.deviceSettings.backup.backupPolicy.includeSets = include_sets
             if exclude_sets:
                 param.deviceSettings.backup.backupPolicy.excludeSets = exclude_sets
+            if backup_schedule:
+                param.deviceSettings.backup.scheduleTopic = Object()
+                param.deviceSettings.backup.scheduleTopic._classname = 'ScheduleTopic'  # pylint: disable=protected-access
+                param.deviceSettings.backup.scheduleTopic.overrideTemplate = True
+                param.deviceSettings.backup.scheduleTopic.schedule = backup_schedule
             if apps:
                 param.deviceSettings.backup.applicationsTopic = Object()
                 param.deviceSettings.backup.applicationsTopic._classname = 'ApplicationsTopic'
