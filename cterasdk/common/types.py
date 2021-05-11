@@ -227,30 +227,37 @@ class FileFilterBuilder:
 
     @staticmethod
     def extensions():
+        """Filter files by extension"""
         return ListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Type)
 
     @staticmethod
     def names():
+        """Filter files by names"""
         return ListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Name)
 
     @staticmethod
     def name():
+        """Filter files by name pattern"""
         return StringCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Name)
 
     @staticmethod
     def paths():
+        """Filter files by path"""
         return ListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Path)
 
     @staticmethod
     def path():
+        """Filter files by path pattern"""
         return StringCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Path)
 
     @staticmethod
     def size():
+        """Filter files by size"""
         return IntegerCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Size)
 
     @staticmethod
     def last_modified():
+        """Filter files by last modification date"""
         return DateTimeCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Modified)
 
 
@@ -264,6 +271,7 @@ class DirectoryEntryFactory:
 class FileEntry(Object):
 
     def __init__(self, name, display_name=None, included=None):
+        self._classname = self.__class__.__name__  # pylint: disable=protected-access
         self.name = name
         self.displayName = display_name
         self.isIncluded = included
@@ -305,7 +313,7 @@ class ApplicationBackupSet(BackupSet):
         if apps == Application.All:
             super().__init__(name=name, directory_tree=DirEntry(name, included=True), comment=comment)
         else:
-            directory_tree = DirEntry(name, included=True, children=[DirEntry(app, included=True) for app in apps])
+            directory_tree = DirEntry(name, included=False, children=[DirEntry(app, included=True) for app in apps])
             super().__init__(name=name, directory_tree=directory_tree, comment=comment)
 
         self._classname = None
@@ -321,6 +329,12 @@ class BackupScheduleBuilder:
 
     @staticmethod
     def interval(hours=None, minutes=None):
+        """
+        Schedule backup to periodically, defaults to 24 hours
+
+        :param int hours: Hours
+        :param int minutes: Minutes
+        """
         param = TaskSchedule()
         param.mode = ScheduleType.Interval
         param.interval = Object()
@@ -330,6 +344,11 @@ class BackupScheduleBuilder:
 
     @staticmethod
     def window(time_range):
+        """
+        Schedule backup to run at a specific time
+
+        :param cterasdk.common.types.TimeRange time_range: Time range
+        """
         param = TaskSchedule()
         param.mode = ScheduleType.Window
         param.window = time_range
