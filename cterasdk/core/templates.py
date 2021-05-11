@@ -55,6 +55,16 @@ class Templates(BaseCommand):
         param.name = name
         param.description = description
 
+        param.firmwaresSettings = Object()
+        param.firmwaresSettings._classname = 'FirmwaresSettings'  # pylint: disable=protected-access
+
+        if versions:
+            param.firmwaresSettings.useGlobal = False
+            param.firmwaresSettings.firmwares = self._convert_to_template_firmwares(versions)
+        else:
+            param.firmwaresSettings.useGlobal = True
+            param.firmwaresSettings.firmwares = None
+
         param.deviceSettings = Object()
         param.deviceSettings._classname = 'DeviceTemplateSettings'  # pylint: disable=protected-access
 
@@ -77,16 +87,6 @@ class Templates(BaseCommand):
                 param.deviceSettings.backup.applicationsTopic._classname = 'ApplicationsTopic'  # pylint: disable=protected-access
                 param.deviceSettings.backup.applicationsTopic.overrideTemplate = True
                 param.deviceSettings.backup.applicationsTopic.includeApps = ApplicationBackupSet(apps)
-
-        param.firmwaresSettings = Object()
-        param.firmwaresSettings._classname = 'FirmwaresSettings'  # pylint: disable=protected-access
-
-        if versions:
-            param.firmwaresSettings.useGlobal = False
-            param.firmwaresSettings.firmwares = self._convert_to_template_firmwares(versions)
-        else:
-            param.firmwaresSettings.useGlobal = True
-            param.firmwaresSettings.firmwares = None
 
         logging.getLogger().info('Adding template. %s', {'name': name})
         response = self._portal.add('/deviceTemplates', param)
