@@ -15,7 +15,7 @@ Instantiate a Global Admin object
 
    admin = GlobalAdmin('chopin.ctera.com') # will use HTTPS over port 443
 
-.. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure `chopin-core` to automatically trust the server's certificate, using: ``config.http['ssl'] = 'Trust'``
+.. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure this library to automatically trust the server's certificate, using: ``config.http['ssl'] = 'Trust'``
 
 Setup
 -----
@@ -425,6 +425,15 @@ Configuration Templates
 .. automethod:: cterasdk.core.templates.Templates.add
    :noindex:
 
+   This library provides several classes, methods and enumerators to assist in creating configuration templates:
+   #. Builder class for filtered backup sets. :py:class:`cterasdk.common.types.FileFilterBuilder
+   #. A class representing a backup include or exclude set. :py:class:`cterasdk.common.types.FilterBackupSet
+   #. Builder class for defining backup schedule. :py:class:`cterasdk.common.types.BackupScheduleBuilder
+   #. A time-range class, used to configure backups to run at a specific time. :py:class:`cterasdk.common.types.TimeRange
+   #. Enumerator containing applications supported for backup. :py:class:`cterasdk.common.enum.Application
+   #. A named tuple defining a platform and a software version. :py:class:`cterasdk.core.types.PlatformVersion
+   #. Enumerator containing a list of platforms. c:py:class:`cterasdk.core.enum.Platform
+
 .. code-block:: python
 
    """Include all 'pptx', 'xlsx' and 'docx' file types for all users"""
@@ -437,7 +446,23 @@ Configuration Templates
    exclude_sets = common_types.FilterBackupSet('Programs', filter_rules=[programs],
                                                            template_dirs=[portal_enum.EnvironmentVariables.ALLUSERSPROFILE])
 
-   admin.templates.add('MyTemplate', 'woohoo', include_sets=[include_sets], exclude_sets=[exclude_sets])
+   """Schedule backup to run periodically"""
+   backup_schedule = common_types.BackupScheduleBuilder.interval(hours=6)  # periodically, every 6 hours
+   backup_schedule = common_types.BackupScheduleBuilder.interval(hours=0, minutes=30)  # periodically, every 30 minutes
+
+   """Schedule backup for a specific time"""
+   time_range = common_types.TimeRange().start('07:00:00').days(common_enum.DayOfWeek.Weekdays).build()  # 7am, on weekdays
+   backup_schedule = common_types.BackupScheduleBuilder.window(time_range)
+
+   """Backup applications"""
+   apps = [common_enum.Application.NTDS, common_enum.Application.HyperV]  # back up Active Directory and Hyper-V
+   apps = common_enum.Application.All  # back up all applications
+
+   """Configure software versions"""
+   versions = [portal_types.PlatformVersion(portal_enum.Platform.Edge_7, '7.0.981.7')]  # use 7.0.981.7 for v7 Edge Filers
+
+   admin.templates.add('MyTemplate', 'woohoo', include_sets=[include_sets], exclude_sets=[exclude_sets],
+                       backup_schedule=backup_schedule, apps=apps, versions=versions)
 
 .. automethod:: cterasdk.core.templates.Templates.set_default
    :noindex:
@@ -457,7 +482,7 @@ Configuration Templates
 
    admin.templates.remove_default('MyTemplate', wait=True)  # wait for template changes to apply
 
-.. automethod:: cterasdk.core.templates.TemplateAssignPolicy.apply_changes
+.. automethod:: cterasdk.core.templates.TemplateAutoAssignPolicy.apply_changes
    :noindex:
 
 .. code-block:: python

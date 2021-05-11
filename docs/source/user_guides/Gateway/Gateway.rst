@@ -766,13 +766,16 @@ Cloud Sync Bandwidth Throttling
 .. code-block:: python
 
    """Throttle bandwidth during business hours on week days: Monday - Friday"""
-   rule1 = common_types.ThrottlingRuleBuilder().upload(50).download(50).start('07:00:00').end('19:00:00').days(common_enum.DayOfWeek.Weekdays).build()
+   schedule1 = common_types.TimeRange().start('07:00:00').end('19:00:00').days(common_enum.DayOfWeek.Weekdays).build()
+   rule1 = common_types.ThrottlingRuleBuilder().upload(50).download(50).schedule(schedule1).build()
 
    """Throttle bandwidth off business hours on week days: Monday - Friday"""
-   rule2 = common_types.ThrottlingRuleBuilder().upload(100).download(100).start('19:00:00').end('07:00:00').days(common_enum.DayOfWeek.Weekdays).build()
+   schedule2 = common_types.TimeRange().start('19:00:00').end('07:00:00').days(common_enum.DayOfWeek.Weekdays).build()
+   rule2 = common_types.ThrottlingRuleBuilder().upload(100).download(100).schedule(schedule2).build()
 
    """Throttle bandwidth during weekends: Saturday, Sunday"""
-   rule3 = common_types.ThrottlingRuleBuilder().upload(500).download(500).start('00:00:00').end('23:59:00').days(common_enum.DayOfWeek.Weekend).build()
+   schedule3 = common_types.TimeRange().start('00:00:00').end('23:59:00').days(common_enum.DayOfWeek.Weekend).build()
+   rule3 = common_types.ThrottlingRuleBuilder().upload(500).download(500).schedule(schedule3).build()
 
    filer.sync.throttling.set_policy([rule1, rule2, rule3])
 

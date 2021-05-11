@@ -11,6 +11,12 @@ CloudFSFolderFindingHelper.name.__doc__ = 'The name of the CloudFS folder'
 CloudFSFolderFindingHelper.owner.__doc__ = 'The name of the owner of the CloudFS folder'
 
 
+PlatformVersion = namedtuple('PlatformVersion', ('name', 'version'))
+PlatformVersion.__doc__ = 'Tuple holding the platform name and version'
+PlatformVersion.name.__doc__ = 'The name of the platform'
+PlatformVersion.version.__doc__ = 'The version identifier'
+
+
 class PortalAccount(ABC):
     """
     Base Class for Portal Account

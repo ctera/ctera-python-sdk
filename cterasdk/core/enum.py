@@ -430,3 +430,28 @@ class EnvironmentVariables:
     SYNCS = '$SYNCS'
     PROJECTS = '$PROJECTS'
     PRIMARYUSER = '$PRIMARYUSER'
+
+
+class Platform:
+    """
+    CTERA Edge Platform Type.\n
+
+    :ivar str C200_Orion: All users profile
+    :ivar str C200_ARM: Windows directory
+    :ivar str C200_Kirkwood: Temp directory
+    :ivar str C400_C800: System drive
+    :ivar str Edge_6: CTERA 6.0 Edge Filer
+    :ivar str Edge_7: CTERA 7.0 Edge Filer
+    :ivar str Windows: Windows Agent (Drive App)
+    :ivar str Linux: Linux Agent (Drive App)
+    :ivar str OSX: Mac Agent (Drive App)
+    """
+    C200_Orion = 'Orion'
+    C200_ARM = 'ARM'
+    C200_Kirkwood = 'Kirkwood'
+    C400_C800 = 'X86'
+    Edge_6 = 'VBox'
+    Edge_7 = 'Genesis'
+    Linux = 'LinuxX86'
+    Windows = 'WindowsX86'
+    OSX = 'OSxX86'
