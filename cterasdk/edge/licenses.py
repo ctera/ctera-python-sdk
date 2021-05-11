@@ -6,7 +6,11 @@ from .base_command import BaseCommand
 
 
 class Licenses(BaseCommand):
-    """ Gateway License configuration APIs """
+    """ Edge Filer License Configuration APIs """
+
+    def __init__(self, gateway):
+        super().__init__(gateway)
+        self.local = LocalLicenses(self._gateway)
 
     @staticmethod
     def infer(ctera_license):
@@ -22,7 +26,7 @@ class Licenses(BaseCommand):
         """
         Apply a license
 
-        :param str ctera_license
+        :param cterasdk.edge.enum.License ctera_license: License type
         """
         inferred_license = Licenses.infer(ctera_license)
 
@@ -42,3 +46,30 @@ class Licenses(BaseCommand):
         if len(inferred_license) == 8:
             inferred_license = inferred_license + '16'
         return 'EV' + inferred_license[8:]
+
+
+class LocalLicenses(BaseCommand):
+    """ Edge Filer Local License Configuration APIs """
+
+    def get(self):
+        """
+        Retrieve a list of local licenses installed
+        """
+        return self._gateway.get('/config/device/licenses')
+
+    def add(self, code):
+        """
+        Install a local license. Use this option when running the Edge Filer as a standalone appliance.
+
+        :param str code: License code
+        """
+        logging.getLogger().info('Installing license. %s', {'code': code})
+        response = self._gateway.add('/config/device/licenses', code)
+        logging.getLogger().info("License added. %s", {'code': code})
+        return response
+
+    def clear(self):
+        """
+        Remove all local licenses
+        """
+        self._gateway.put('/config/device/licenses', [])

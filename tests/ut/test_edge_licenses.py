@@ -8,6 +8,10 @@ from tests.ut import base_edge
 
 class TestEdgeLicenses(base_edge.BaseEdgeTest):
 
+    def setUp(self):
+        super().setUp()
+        self._local_license = 'MA645-83CDC-50127-CE61B-V64'
+
     def test_edge_get_active_licenses(self):
         actual_licenses = ['NA', 'vGateway8', 'vGateway', 'vGateway32', 'vGateway64', 'vGateway128']
         expected_licenses = ['NA', 'EV8', 'EV16', 'EV32', 'EV64', 'EV128']
@@ -32,3 +36,22 @@ class TestEdgeLicenses(base_edge.BaseEdgeTest):
         with self.assertRaises(exception.InputError) as error:
             licenses.Licenses(self._filer).apply('Expected Failure')
         self.assertEqual('Invalid license type', error.exception.message)
+
+    def test_get_local_license(self):
+        get_response = [self._local_license]
+        self._init_filer(get_response=get_response)
+        ret = licenses.Licenses(self._filer).local.get()
+        self._filer.get.assert_called_once_with('/config/device/licenses')
+        self.assertEqual(ret, get_response)
+
+    def test_apply_local_license(self):
+        add_response = 'Success'
+        self._init_filer(add_response=add_response)
+        ret = licenses.Licenses(self._filer).local.add(self._local_license)
+        self._filer.add.assert_called_once_with('/config/device/licenses', self._local_license)
+        self.assertEqual(ret, add_response)
+
+    def test_clear_local_license(self):
+        self._init_filer()
+        licenses.Licenses(self._filer).local.clear()
+        self._filer.put.assert_called_once_with('/config/device/licenses', [])
