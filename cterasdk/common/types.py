@@ -323,6 +323,7 @@ class TaskSchedule(Object):
 
     def __init__(self):
         self._classname = 'TaskSchedule'  # pylint: disable=protected-access
+        self.mode = None
 
 
 class BackupScheduleBuilder:
@@ -337,7 +338,7 @@ class BackupScheduleBuilder:
         """
         param = TaskSchedule()
         param.mode = ScheduleType.Interval
-        param.interval = Object()
+        param.interval = Object()  # pylint: disable=attribute-defined-outside-init
         param.interval.hours = hours if hours is not None else 24
         param.interval.minutes = minutes if minutes is not None else 0
         return param
@@ -351,7 +352,7 @@ class BackupScheduleBuilder:
         """
         param = TaskSchedule()
         param.mode = ScheduleType.Window
-        param.window = time_range
+        param.window = time_range  # pylint: disable=attribute-defined-outside-init
         return param
 
 

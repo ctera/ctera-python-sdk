@@ -3,7 +3,6 @@ import logging
 from ..common import union, parse_base_object_ref, ApplicationBackupSet, Object
 from ..exception import CTERAException
 from .base_command import BaseCommand
-from .types import PlatformVersion
 from . import query
 
 
@@ -75,12 +74,12 @@ class Templates(BaseCommand):
                 param.deviceSettings.backup.scheduleTopic.schedule = backup_schedule
             if apps:
                 param.deviceSettings.backup.applicationsTopic = Object()
-                param.deviceSettings.backup.applicationsTopic._classname = 'ApplicationsTopic'
+                param.deviceSettings.backup.applicationsTopic._classname = 'ApplicationsTopic'  # pylint: disable=protected-access
                 param.deviceSettings.backup.applicationsTopic.overrideTemplate = True
                 param.deviceSettings.backup.applicationsTopic.includeApps = ApplicationBackupSet(apps)
 
         param.firmwaresSettings = Object()
-        param.firmwaresSettings._classname = 'FirmwaresSettings'
+        param.firmwaresSettings._classname = 'FirmwaresSettings'  # pylint: disable=protected-access
 
         if versions:
             param.firmwaresSettings.useGlobal = False
@@ -102,11 +101,12 @@ class Templates(BaseCommand):
             base_object_ref = firmwares.get('%s-%s' % (platform, version))
             if base_object_ref is None:
                 raise CTERAException('Could not find firmware version', None, platform=platform, version=version)
-            template_firmwares.append(self._create_template_firmware(platform, str(base_object_ref)))
+            template_firmwares.append(Templates._create_template_firmware(platform, str(base_object_ref)))
 
         return template_firmwares
 
-    def _create_template_firmware(self, platform, base_object_ref):
+    @staticmethod
+    def _create_template_firmware(platform, base_object_ref):
         param = Object()
         param._classname = 'TemplateFirmware'  # pylint: disable=protected-access
         param.type = platform
