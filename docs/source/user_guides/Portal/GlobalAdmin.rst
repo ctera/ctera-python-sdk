@@ -426,13 +426,13 @@ Configuration Templates
    :noindex:
 
    This library provides several classes, methods and enumerators to assist in creating configuration templates:
-   #. Builder class for filtered backup sets. :py:class:`cterasdk.common.types.FileFilterBuilder
-   #. A class representing a backup include or exclude set. :py:class:`cterasdk.common.types.FilterBackupSet
-   #. Builder class for defining backup schedule. :py:class:`cterasdk.common.types.BackupScheduleBuilder
-   #. A time-range class, used to configure backups to run at a specific time. :py:class:`cterasdk.common.types.TimeRange
-   #. Enumerator containing applications supported for backup. :py:class:`cterasdk.common.enum.Application
-   #. A named tuple defining a platform and a software version. :py:class:`cterasdk.core.types.PlatformVersion
-   #. Enumerator containing a list of platforms. c:py:class:`cterasdk.core.enum.Platform
+   #. Builder class for filtered backup sets. :py:class:`cterasdk.common.types.FileFilterBuilder`
+   #. A class representing a backup include or exclude set. :py:class:`cterasdk.common.types.FilterBackupSet`
+   #. Builder class for defining backup schedule. :py:class:`cterasdk.common.types.BackupScheduleBuilder`
+   #. A time-range class, used to configure backups to run at a specific time. :py:class:`cterasdk.common.types.TimeRange`
+   #. Enumerator containing applications supported for backup. :py:class:`cterasdk.common.enum.Application`
+   #. A named tuple defining a platform and a software version. :py:class:`cterasdk.core.types.PlatformVersion`
+   #. Enumerator containing a list of platforms. c:py:class:`cterasdk.core.enum.Platform`
 
 .. code-block:: python
 
