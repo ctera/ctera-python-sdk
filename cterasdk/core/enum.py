@@ -371,10 +371,12 @@ class LocationType:
     :ivar str Azure: Azure Blob Storage
     :ivar str S3: Amazon Web Services S3
     :ivar str S3Compatible: S3 Compatible
+    :ivar str NetAppStorageGRID: NetApp StorageGRID WebScale (S3)
     """
     Azure = 'AzureLocation'
     S3 = 'S3Location'
     S3Compatible = 'S3Compatible'
+    NetAppStorageGRID = 'NetAppLocation'
 
 
 class BucketType:
@@ -389,6 +391,7 @@ class BucketType:
     :ivar str Nutanix: Nutanix S3
     :ivar str Wasabi: Wasabi S3
     :ivar str Google: Google S3
+    :ivar str NetAppStorageGRID: NetApp StorageGRID WebScale (S3)
     """
     Azure = 'Azure'
     Scality = 'ScalityS3'
@@ -398,6 +401,7 @@ class BucketType:
     Nutanix = 'Nutanix'
     Wasabi = 'WasabiS3'
     Google = 'GoogleS3'
+    NetAppStorageGRID = 'NTAP'
 
 
 class EnvironmentVariables:
