@@ -329,6 +329,19 @@ class GenericS3(S3Compatible):
         super().__init__(bucket, BucketType.S3Compatible, access_key, secret_key, endpoint, https, direct)
 
 
+class NetAppStorageGRID(S3Compatible):
+
+    def __init__(self, bucket, access_key, secret_key,
+                 endpoint, https=False, direct=False, tags=False):
+        super().__init__(bucket, BucketType.NetAppStorageGRID, access_key, secret_key, endpoint, https, direct)
+        self.tagBlocks = tags
+
+    def to_server_object(self):
+        param = super().to_server_object()
+        param._classname = LocationType.NetAppStorageGRID  # pylint: disable=protected-access
+        return param
+
+
 class AmazonS3(HTTPBucket):
 
     def __init__(self, bucket, access_key, secret_key, endpoint='s3.amazonaws.com', https=True, direct=True):
