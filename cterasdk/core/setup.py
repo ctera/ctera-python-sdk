@@ -123,10 +123,10 @@ class Setup(BaseCommand):
             logging.getLogger().debug('Retrieving database replication candidates.')
             replication_candidates = {re.search('([^/]+$)', k).group(0): k for k in self.get_replication_candidates()}
             if replication_candidates:
-                if len(replication_candidates) > 1 and replicate_from is not None:
-                    server = replication_candidates.get(replicate_from)
-                else:
+                if replicate_from is None and len(replication_candidates) == 1:
                     server = next(iter(replication_candidates.values()))
+                else:
+                    server = replication_candidates.get(replicate_from)
                 if server:
                     logging.getLogger().debug('Found server in replication candidates. %s', {'server': replicate_from})
                     params = Setup._init_replication_param(server)
