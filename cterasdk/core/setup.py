@@ -109,13 +109,13 @@ class Setup(BaseCommand):
             self._init_role(params)
         self._portal.startup.wait()
 
-    def init_replication_server(self, ipaddr, secret, replicate_from):
+    def init_replication_server(self, ipaddr, secret, replicate_from=None):
         """
         Initialize a CTERA Portal Database Replication Server.
 
         :param str ipaddr: The CTERA Portal master server IP address
         :param str secret: A password or a PEM-encoded private key
-        :param str replicate_from: The name of a CTERA Portal server replication source
+        :param str replicate_from: The name of a CTERA Portal server to replicate from
         """
         self._init_slave(ipaddr, secret)
         if self.stage == SetupWizardStage.Replication:
@@ -123,7 +123,10 @@ class Setup(BaseCommand):
             logging.getLogger().debug('Retrieving database replication candidates.')
             replication_candidates = {re.search('([^/]+$)', k).group(0): k for k in self.get_replication_candidates()}
             if replication_candidates:
-                server = replication_candidates.get(replicate_from)
+                if replicate_from is None and len(replication_candidates) == 1:
+                    server = next(iter(replication_candidates.values()))
+                else:
+                    server = replication_candidates.get(replicate_from)
                 if server:
                     logging.getLogger().debug('Found server in replication candidates. %s', {'server': replicate_from})
                     params = Setup._init_replication_param(server)
