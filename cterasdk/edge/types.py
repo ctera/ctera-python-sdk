@@ -143,6 +143,26 @@ class NFSv3AccessControlEntry():
         return str(dict(address=self.address, netmask=self.netmask, permission=self.perm))
 
 
+class RemoveNFSv3AccessControlEntry():
+    """
+    Object holding address and netmasak for NFS v3 export access control entry
+    :ivar str address: IP address, hostname or fully qualified domain name of client machine
+    :ivar str netmask: Subnet mask
+    """
+
+    def __init__(self, address, netmask):
+        self._address = address
+        self._netmask = netmask
+
+    @property
+    def address(self):
+        return self._address
+
+    @property
+    def netmask(self):
+        return self._netmask
+
+
 class ShareAccessControlEntry():
     """
     Share access control entry for filer shares

@@ -3,12 +3,12 @@ from unittest import mock
 from cterasdk import exception
 from cterasdk.edge import shares
 from cterasdk.edge.enum import Acl, ClientSideCaching, PrincipalType, FileAccessMode
-from cterasdk.edge.types import ShareAccessControlEntry, NFSv3AccessControlEntry
+from cterasdk.edge.types import ShareAccessControlEntry, NFSv3AccessControlEntry, RemoveNFSv3AccessControlEntry
 from cterasdk.common import Object
 from tests.ut import base_edge
 
 
-class TestEdgeShares(base_edge.BaseEdgeTest):
+class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public-methods
 
     def setUp(self):
         super().setUp()
@@ -251,3 +251,66 @@ class TestEdgeShares(base_edge.BaseEdgeTest):
     @staticmethod
     def _get_acl_object():
         return ShareAccessControlEntry(principal_type=PrincipalType.LG, name='Everyone', perm=FileAccessMode.RO)
+
+    def test_get_trusted_nfs_clients(self):
+        share_name = 'share'
+        get_response = self._get_get_trusted_nfs_client_object()
+        self._init_filer(get_response=[get_response.to_server_object()])
+        trusted_nfs_clients = shares.Shares(self._filer).get_trusted_nfs_clients(share_name)
+        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients')
+        self._assert_equal_objects(NFSv3AccessControlEntry.from_server_object(trusted_nfs_clients[0]), get_response)
+
+    def test_set_trusted_nfs_clients(self):
+        share_name = 'share'
+        new_trusted_nfs_clients = self._get_get_trusted_nfs_client_object()
+        self._init_filer()
+        shares.Shares(self._filer).set_trusted_nfs_clients(share_name, [new_trusted_nfs_clients])
+        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients', mock.ANY)
+        expected_param = new_trusted_nfs_clients.to_server_object()
+        actual_param = self._filer.put.call_args[0][1][0]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def test_add_trusted_nfs_clients(self):
+        share_name = 'share'
+        current_trusted_nfs_clients = self._get_get_trusted_nfs_client_object()
+        self._init_filer(get_response=[current_trusted_nfs_clients.to_server_object()])
+
+        new_trusted_nfs_clients = self._get_get_trusted_nfs_client_object(address="192.168.0.0")
+        shares.Shares(self._filer).add_trusted_nfs_clients(share_name, [new_trusted_nfs_clients])
+        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients', mock.ANY)
+
+        def get_address(elem):
+            return elem.address
+
+        actual_param = self._filer.put.call_args[0][1]
+        actual_param.sort(key=get_address)
+
+        expected_param = [current_trusted_nfs_clients.to_server_object(), new_trusted_nfs_clients.to_server_object()]
+        expected_param.sort(key=get_address)
+
+        self.assertEqual(len(expected_param), len(actual_param))
+
+        for i in range(len(actual_param)):  # pylint: disable=consider-using-enumerate
+            self._assert_equal_objects(actual_param[i], expected_param[i])
+
+    def test_remove_trusted_nfs_clients(self):
+        share_name = 'share'
+        trusted_nfs_client_to_keep = self._get_get_trusted_nfs_client_object(address="192.168.0.0")
+        trusted_nfs_client_to_remove = self._get_get_trusted_nfs_client_object(address="192.168.1.0")
+        self._init_filer(get_response=[trusted_nfs_client_to_keep.to_server_object(), trusted_nfs_client_to_remove.to_server_object()])
+
+        shares.Shares(self._filer).remove_trusted_nfs_clients(
+            share_name,
+            [
+                RemoveNFSv3AccessControlEntry(trusted_nfs_client_to_remove.address, trusted_nfs_client_to_remove.netmask)
+            ]
+        )
+        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients', mock.ANY)
+
+        expected_param = trusted_nfs_client_to_keep.to_server_object()
+        actual_param = self._filer.put.call_args[0][1][0]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    @staticmethod
+    def _get_get_trusted_nfs_client_object(address=None):
+        return NFSv3AccessControlEntry(address=address or '192.168.68.0', netmask='255.255.255.0', perm=FileAccessMode.RO)
