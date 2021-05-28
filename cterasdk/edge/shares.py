@@ -5,7 +5,7 @@ from .files import path
 from ..common import Object
 from ..exception import CTERAException, InputError
 from .base_command import BaseCommand
-from .types import ShareAccessControlEntry, RemoveShareAccessControlEntry
+from .types import NFSv3AccessControlEntry, RemoveNFSv3AccessControlEntry, ShareAccessControlEntry, RemoveShareAccessControlEntry
 
 
 class Shares(BaseCommand):
@@ -269,6 +269,73 @@ class Shares(BaseCommand):
             logging.getLogger().error("Share deletion failed.")
             raise CTERAException('Share deletion failed', error)
 
+    def get_trusted_nfs_clients(self, name):
+        """
+        Get the current trusted NFS client entries from an existing share.
+
+        :param str name: The share name
+        """
+        return self._gateway.get('/config/fileservices/share/' + name + '/trustedNFSClients')
+
+    def set_trusted_nfs_clients(self, name, trusted_nfs_clients):
+        """
+        Set a network share's trusted NFS client entries.
+
+        :param str name: The share name
+        :param list[cterasdk.edge.types.NFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients
+
+        .. warning:: this method will override the existing access control entries
+        """
+        Shares._validate_trusted_nfs_clients(trusted_nfs_clients)
+
+        param = [client.to_server_object() for client in (trusted_nfs_clients or [])]
+        self._gateway.put('/config/fileservices/share/' + name + '/trustedNFSClients', param)
+
+    def add_trusted_nfs_clients(self, name, trusted_nfs_clients):
+        """
+        Add one or more trusted NFS client entries to an existing share.
+
+        :param str name: The share name
+        :param list[cterasdk.edge.types.NFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients
+        """
+        Shares._validate_trusted_nfs_clients(trusted_nfs_clients)
+
+        new_trusted_nfs_clients_dict = {
+            trusted_nfs_client.address + '#' + trusted_nfs_client.netmask: trusted_nfs_client.to_server_object()
+            for trusted_nfs_client in trusted_nfs_clients
+        }
+
+        def entry_not_in_new(entry):
+            trusted_nfs_client = NFSv3AccessControlEntry.from_server_object(entry)
+            entry_key = trusted_nfs_client.address + '#' + trusted_nfs_client.netmask
+            return entry_key not in new_trusted_nfs_clients_dict
+
+        param = list(new_trusted_nfs_clients_dict.values()) + list(filter(entry_not_in_new, self.get_trusted_nfs_clients(name)))
+
+        self._gateway.put('/config/fileservices/share/' + name + '/trustedNFSClients', param)
+
+    def remove_trusted_nfs_clients(self, name, trusted_nfs_clients):
+        """
+        Remove one or more trusted NFS client entries from an existing share.
+
+        :param str name: The share name
+        :param list[cterasdk.edge.types.RemoveNFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients
+        """
+        Shares._validate_remove_trusted_nfs_clients(trusted_nfs_clients)
+
+        remove_trusted_nfs_clients_dict = {
+            trusted_nfs_client.address + '#' + trusted_nfs_client.netmask
+            for trusted_nfs_client in trusted_nfs_clients
+        }
+
+        def entry_not_removed(entry):
+            trusted_nfs_client = NFSv3AccessControlEntry.from_server_object(entry)
+            entry_key = trusted_nfs_client.address + '#' + trusted_nfs_client.netmask
+            return entry_key not in remove_trusted_nfs_clients_dict
+
+        param = list(filter(entry_not_removed, self.get_trusted_nfs_clients(name)))
+        self._gateway.put('/config/fileservices/share/' + name + '/trustedNFSClients', param)
+
     def _validate_root_directory(self, name):
         param = Object()
         param.path = '/'
@@ -302,4 +369,32 @@ class Shares(BaseCommand):
                     'Invalid access control entry format',
                     repr(acl_entry),
                     'cterasdk.edge.types.RemoveShareAccessControlEntry'
+                )
+
+    @staticmethod
+    def _validate_trusted_nfs_clients(trusted_nfs_clients):
+        if not isinstance(trusted_nfs_clients, list):
+            raise InputError(
+                'Invalid Trusted NFS Clients list format',
+                repr(trusted_nfs_clients),
+                '[cterasdk.edge.types.NFSv3AccessControlEntry, ...]'
+            )
+        for entry in trusted_nfs_clients:
+            if not isinstance(entry, NFSv3AccessControlEntry):
+                raise InputError('Invalid Trusted NFS Clients entry format', repr(entry), 'cterasdk.edge.types.NFSv3AccessControlEntry')
+
+    @staticmethod
+    def _validate_remove_trusted_nfs_clients(trusted_nfs_clients):
+        if not isinstance(trusted_nfs_clients, list):
+            raise InputError(
+                'Invalid Trusted NFS Clients list format',
+                repr(trusted_nfs_clients),
+                '[cterasdk.edge.types.RemoveNFSv3AccessControlEntry, ...]'
+            )
+        for entry in trusted_nfs_clients:
+            if not isinstance(entry, RemoveNFSv3AccessControlEntry):
+                raise InputError(
+                    'Invalid Trusted NFS Clients entry format',
+                    repr(entry),
+                    'cterasdk.edge.types.RemoveNFSv3AccessControlEntry'
                 )
