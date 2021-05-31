@@ -314,3 +314,106 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
     @staticmethod
     def _get_get_trusted_nfs_client_object(address=None):
         return NFSv3AccessControlEntry(address=address or '192.168.68.0', netmask='255.255.255.0', perm=FileAccessMode.RO)
+
+    def _test_get_access_type(self, expected_access):
+        share_name = 'share'
+        self._init_filer(get_response=expected_access)
+        actual_access = shares.Shares(self._filer).get_access_type(share_name)
+        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/access')
+        self.assertEqual(actual_access, expected_access)
+
+    def test_get_access_type(self):
+        for access in [k for k in Acl.__dict__ if not k.startswith('_')]:
+            self._test_get_access_type(access)
+
+    def _test_set_access_type(self, access):
+        share_name = 'share'
+        self._init_filer()
+        shares.Shares(self._filer).set_access_type(share_name, access)
+        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/access', access)
+
+    def test_set_access_type(self):
+        for access in [k for k in Acl.__dict__ if not k.startswith('_')]:
+            self._test_set_access_type(access)
+
+    def test_get_screened_file_types(self):
+        share_name = 'share'
+        get_response = ['exe', 'sh']
+        self._init_filer(get_response=get_response)
+        screened_file_types = shares.Shares(self._filer).get_screened_file_types(share_name)
+        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes')
+        self.assertListEqual(get_response, screened_file_types)
+
+    def test_set_screened_file_types(self):
+        share_name = 'share'
+        current_screened_file_type = 'old'
+        current_share = self._test_screened_file_types_get_current_share(share_name, Acl.WindowsNT, [current_screened_file_type])
+        self._init_filer(get_response=current_share)
+        new_screened_file_type = ['new']
+        shares.Shares(self._filer).set_screened_file_types(share_name, new_screened_file_type)
+        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name)
+        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes', mock.ANY)
+        self.assertListEqual(new_screened_file_type, self._filer.put.call_args[0][1])
+
+    def test_set_screened_file_types_invalid_access(self):
+        share_name = 'share'
+        current_share = self._test_screened_file_types_get_current_share(
+            share_name,
+            Acl.OnlyAuthenticatedUsers,
+            ['old']
+        )
+        self._init_filer(get_response=current_share)
+        with self.assertRaises(exception.CTERAException):
+            shares.Shares(self._filer).set_screened_file_types(share_name, ['new'])
+
+    def test_add_screened_file_types(self):
+        share_name = 'share'
+        current_screened_file_type = ['old']
+        current_share = self._test_screened_file_types_get_current_share(share_name, Acl.WindowsNT, current_screened_file_type)
+        self._init_filer(get_response=current_share)
+        new_screened_file_type = ['new']
+        shares.Shares(self._filer).add_screened_file_types(share_name, new_screened_file_type)
+        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name)
+        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes', mock.ANY)
+        self.assertListEqual(sorted(current_screened_file_type + new_screened_file_type), sorted(self._filer.put.call_args[0][1]))
+
+    def test_add_screened_file_types_invalid_access(self):
+        share_name = 'share'
+        current_share = self._test_screened_file_types_get_current_share(
+            share_name,
+            Acl.OnlyAuthenticatedUsers,
+            ['old']
+        )
+        self._init_filer(get_response=current_share)
+        with self.assertRaises(exception.CTERAException):
+            shares.Shares(self._filer).add_screened_file_types(share_name, ['new'])
+
+    def test_remove_screened_file_types(self):
+        share_name = 'share'
+        current_screened_file_types = ['old', 'new']
+        current_share = self._test_screened_file_types_get_current_share(share_name, Acl.WindowsNT, current_screened_file_types)
+        self._init_filer(get_response=current_share)
+        removed_screened_file_type = 'new'
+        shares.Shares(self._filer).remove_screened_file_types(share_name, [removed_screened_file_type])
+        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name)
+        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes', mock.ANY)
+        self.assertListEqual(['old'], sorted(self._filer.put.call_args[0][1]))
+
+    def test_remove_screened_file_types_invalid_access(self):
+        share_name = 'share'
+        current_share = self._test_screened_file_types_get_current_share(
+            share_name,
+            Acl.OnlyAuthenticatedUsers,
+            ['old']
+        )
+        self._init_filer(get_response=current_share)
+        with self.assertRaises(exception.CTERAException):
+            shares.Shares(self._filer).remove_screened_file_types(share_name, ['new'])
+
+    @staticmethod
+    def _test_screened_file_types_get_current_share(name, access, current_list):
+        share = Object()
+        share.name = name
+        share.access = access
+        share.screenedFileTypes = current_list
+        return share
