@@ -94,6 +94,24 @@ class Shares(BaseCommand):
         logging.getLogger().error("Updating Windows file sharing access mode. %s", {'share': name, 'access': enum.Acl.WindowsNT})
         self._gateway.put('/config/fileservices/share/' + name + '/access', enum.Acl.WindowsNT)
 
+    def get_access_type(self, name):
+        """
+        Get the network share Windows File Sharing authentication mode
+
+        :param str name: The share name
+        """
+        return self._gateway.get('/config/fileservices/share/' + name + '/access')
+
+    def set_access_type(self, name, access):
+        """
+        Set the network share Windows File Sharing authentication mode
+
+        :param str name: The share name
+        :param cterasdk.edge.enum.Acl access: The Windows File Sharing authentication mode
+        """
+        logging.getLogger().info("Updating Windows file sharing access mode. %s", {'share': name, 'access': access})
+        self._gateway.put('/config/fileservices/share/' + name + '/access', access)
+
     def block_files(self, name, extensions):
         """
         Configure a share to block one or more file extensions
@@ -335,6 +353,68 @@ class Shares(BaseCommand):
 
         param = list(filter(entry_not_removed, self.get_trusted_nfs_clients(name)))
         self._gateway.put('/config/fileservices/share/' + name + '/trustedNFSClients', param)
+
+    def get_screened_file_types(self, name):
+        """
+        Get the share's current list of blocked file extensions
+
+        :param str name: The share name
+        """
+        return self._gateway.get('/config/fileservices/share/' + name + '/screenedFileTypes')
+
+    def set_screened_file_types(self, name, extensions):
+        """
+        Set the share's current list of blocked file extensions (override the current list)
+
+        :param str name: The share name
+        :param list[str] extensions: List of file extensions to block
+        """
+        share = self.get(name)
+        if share.access != enum.Acl.WindowsNT:
+            raise CTERAException('Cannot block file types on non Windows-ACL enabled shares', None, share=share.name, access=share.access)
+        logging.getLogger().info(
+            "Updating the list of blocked file extensions. %s",
+            {'share': name, 'extensions': extensions, 'access': enum.Acl.WindowsNT}
+        )
+        self._gateway.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', extensions)
+
+    def add_screened_file_types(self, name, extensions):
+        """
+        Add extensions to the share's current list of blocked file extensions
+
+        :param str name: The share name
+        :param list[str] extensions: List of file extensions to add
+        """
+        share = self.get(name)
+        if share.access != enum.Acl.WindowsNT:
+            raise CTERAException('Cannot block file types on non Windows-ACL enabled shares', None, share=share.name, access=share.access)
+
+        new_list = list(set(share.screenedFileTypes + extensions))
+
+        logging.getLogger().info(
+            "Updating the list of blocked file extensions. %s",
+            {'share': name, 'extensions': new_list, 'access': enum.Acl.WindowsNT}
+        )
+        self._gateway.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', new_list)
+
+    def remove_screened_file_types(self, name, extensions):
+        """
+        Remove extensions from the share's current list of blocked file extensions
+
+        :param str name: The share name
+        :param list[str] extensions: List of file extensions to remove
+        """
+        share = self.get(name)
+        if share.access != enum.Acl.WindowsNT:
+            raise CTERAException('Cannot block file types on non Windows-ACL enabled shares', None, share=share.name, access=share.access)
+
+        new_list = list(set(share.screenedFileTypes) - set(extensions))
+
+        logging.getLogger().info(
+            "Updating the list of blocked file extensions. %s",
+            {'share': name, 'extensions': new_list, 'access': enum.Acl.WindowsNT}
+        )
+        self._gateway.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', new_list)
 
     def _validate_root_directory(self, name):
         param = Object()
