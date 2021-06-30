@@ -42,7 +42,7 @@ class SSL(BaseCommand):
         directory, filename = self._filesystem.split_file_directory_with_defaults(destination, 'certificate.zip')
         logging.getLogger().info('Exporting SSL certificate.')
         handle = self._portal.openfile('/admin/preview/exportCertificate', use_file_url=True)
-        filepath = FileSystem.instance().save(directory, filename, handle)
+        filepath = self._filesystem.save(directory, filename, handle)
         logging.getLogger().info('Exported SSL certificate. %s', {'filepath': filepath})
         return filepath
 
@@ -62,6 +62,7 @@ class SSL(BaseCommand):
         certificates = [X509Certificate.from_file(certificate) for certificate in certificates]
         certificate_chain = create_certificate_chain(*certificates)
 
+        certificate_chain_zip_archive = None
         if certificate_chain:
             certificate_chain_zip_archive = FileSystem.join(tempdir, '{}.zip'.format(cert_basename))
             with ZipFile(certificate_chain_zip_archive, 'w') as zip_archive:

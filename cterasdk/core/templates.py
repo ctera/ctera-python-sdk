@@ -137,7 +137,6 @@ class Templates(BaseCommand):
         """
         include = union(include or [], Templates.default)
         builder = query.QueryParamBuilder().include(include)
-        filters = filters or []
         if filters:
             for query_filter in filters:
                 builder.addFilter(query_filter)
