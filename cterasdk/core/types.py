@@ -2,7 +2,7 @@ from abc import ABC
 from collections import namedtuple
 from ..common import DateTimeUtils, StringCriteriaBuilder, ListCriteriaBuilder, Object
 
-from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, BucketType, LocationType
+from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, BucketType, LocationType
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
@@ -228,6 +228,43 @@ class PlanCriteriaBuilder:
     @staticmethod
     def comment():
         return StringCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Comment)
+
+
+class TemplateCriteriaBuilder:
+
+    Type = 'DeviceCriteria'
+
+    @staticmethod
+    def type():
+        return ListCriteriaBuilder(TemplateCriteriaBuilder.Type, TemplateCriteria.Type)
+
+    @staticmethod
+    def os():
+        return StringCriteriaBuilder(TemplateCriteriaBuilder.Type, TemplateCriteria.OperatingSystem)
+
+    @staticmethod
+    def version():
+        return StringCriteriaBuilder(TemplateCriteriaBuilder.Type, TemplateCriteria.Version)
+
+    @staticmethod
+    def hostname():
+        return StringCriteriaBuilder(TemplateCriteriaBuilder.Type, TemplateCriteria.Hostname)
+
+    @staticmethod
+    def name():
+        return StringCriteriaBuilder(TemplateCriteriaBuilder.Type, TemplateCriteria.Name)
+
+    @staticmethod
+    def owner():
+        return StringCriteriaBuilder(TemplateCriteriaBuilder.Type, TemplateCriteria.Owner)
+
+    @staticmethod
+    def plan():
+        return StringCriteriaBuilder(TemplateCriteriaBuilder.Type, TemplateCriteria.Plan)
+
+    @staticmethod
+    def groups():
+        return StringCriteriaBuilder(TemplateCriteriaBuilder.Type, TemplateCriteria.Groups)
 
 
 class Bucket:

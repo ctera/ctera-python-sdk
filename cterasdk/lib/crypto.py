@@ -1,5 +1,10 @@
+import functools
 import logging
 import os
+import re
+
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, PublicFormat, NoEncryption
 
@@ -49,3 +54,67 @@ class CryptoServices:
             dirpath = config.filesystem['dl']
         key_pair.save(dirpath, key_filename)
         return key_pair.public_key.decode('utf-8')
+
+
+def create_certificate_chain(*certificates):
+    return sorted(certificates, key=functools.cmp_to_key(compare_certificates))
+
+
+def compare_certificates(a, b):
+    if a.subject == b.issuer:
+        return 1
+    if b.subject == a.issuer:
+        return -1
+    return 0
+
+
+class X509Certificate:
+
+    def __init__(self, certificate):
+        self.certificate = certificate
+
+    @property
+    def sha1_fingerprint(self):
+        return self.certificate.fingerprint(hashes.SHA1()).hex(':', 1)
+
+    @property
+    def issuer(self):
+        return X509Certificate._parse_common_name(self.certificate.issuer.rdns[-1].rfc4514_string())
+
+    @property
+    def subject(self):
+        return X509Certificate._parse_common_name(self.certificate.subject.rdns[-1].rfc4514_string())
+
+    @property
+    def is_root(self):
+        return self.issuer == self.subject
+
+    @property
+    def pem_data(self):
+        return self.certificate.public_bytes(Encoding.PEM)
+
+    @staticmethod
+    def _parse_common_name(common_name):
+        match = re.search(r'(?<=CN=).+$', common_name)
+        return match.group(0) if match else None
+
+    @staticmethod
+    def from_file(path):
+        data = open(path, 'r').read()
+        return X509Certificate.from_string(data)
+
+    @staticmethod
+    def from_string(data):
+        return X509Certificate.from_bytes(data.encode('utf-8'))
+
+    @staticmethod
+    def from_bytes(data):
+        return X509Certificate(x509.load_pem_x509_certificate(data))
+
+    def __str__(self):
+        return str(
+            dict(
+                issued_to=self.subject,
+                issued_by=self.issuer
+            )
+        )

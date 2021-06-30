@@ -6,4 +6,4 @@ from .iterator import Iterator  # noqa: E402, F401
 from .file_access_base import FileAccessBase  # noqa: E402, F401
 from .filesystem import FileSystem  # noqa: E402, F401
 from .tracker import track, ErrorStatus  # noqa: E402, F401
-from .crypto import CryptoServices  # noqa: E402, F401
+from .crypto import CryptoServices, X509Certificate, create_certificate_chain  # noqa: E402, F401

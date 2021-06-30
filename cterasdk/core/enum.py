@@ -459,3 +459,26 @@ class Platform:
     Linux = 'LinuxX86'
     Windows = 'WindowsX86'
     OSX = 'OSxX86'
+
+
+class TemplateCriteria:
+    """
+    Configuration Template Auto Assignment Rule Builder Criterias
+
+    :ivar str Type: Device type
+    :ivar str OperatingSystem: Operating system
+    :ivar str Version: Installed software version
+    :ivar str Hostname: Hostname
+    :ivar str Name: Device name
+    :ivar str Owner: Device owner username
+    :ivar str Plan: Plan name
+    :ivar str Groups: Device owner local or domain groups
+    """
+    Type = 'DeviceType'
+    OperatingSystem = 'OperatingSystem'
+    Version = 'InstalledSoftwareVersion'
+    Hostname = 'Hostname'
+    Name = 'DeviceName'
+    Owner = 'OwnerUsername'
+    Plan = 'Plan'
+    Groups = 'ownerGroups'
