@@ -94,5 +94,6 @@ class SSL(BaseCommand):
     @staticmethod
     def _file_contents(filepath):
         file_info = FileSystem.instance().get_local_file_info(filepath)
-        file_content = open(filepath, 'r').read()
+        with open(filepath, 'r') as f:
+            file_content = f.read()
         return (file_info, file_content)

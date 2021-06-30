@@ -1,5 +1,5 @@
 import datetime
-import unittest.mock as mock
+from unittest import mock
 
 from cterasdk.core.enum import FileAccessMode
 from cterasdk.common import Object
