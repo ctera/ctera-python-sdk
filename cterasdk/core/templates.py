@@ -48,7 +48,7 @@ class Templates(BaseCommand):
         :param list[cterasdk.core.enum.Application] apps: List of applications to back up
         :param cterasdk.common.types.TaskSchedule backup_schedule: Backup schedule
         :param list[cterasdk.core.types.PlatformVersion] versions: List of platforms and their associated versions.
-        Pass `None` to inehrit the default settings from the Global Administration Portal
+         Pass `None` to inehrit the default settings from the Global Administration Portal
         """
         param = Object()
         param._classname = 'DeviceTemplate'  # pylint: disable=protected-access
