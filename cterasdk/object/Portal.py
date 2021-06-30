@@ -18,7 +18,9 @@ from ..core import session
 from ..core import users
 from ..core import cloudfs
 from ..core import zones
+from ..core import settings
 from ..core import setup
+from ..core import ssl
 from ..core import startup
 from ..core import taskmgr
 from ..core import templates
@@ -39,6 +41,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.activation.Activation activation: Object holding the Portal activation APIs
     :ivar cterasdk.core.logs.Logs logs: Object holding the Portal logs APIs
     :ivar cterasdk.core.cloudfs.CloudFS cloudfs: Object holding the Portal CloudFS APIs
+    :ivar cterasdk.core.settings.Settings settings: Object holding the Portal Settings APIs
     :ivar cterasdk.core.taskmgr.Tasks tasks: Object holding the Portal Background Tasks APIs
     :ivar cterasdk.core.templates.Templates templates: Object holding the Portal Configuration Templates APIs
     :ivar cterasdk.core.firmwares.Firmwares firmwares: Object holding the Portal Firmware Repository APIs
@@ -63,6 +66,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.activation = activation.Activation(self)
         self.files = files.FileBrowser(self, self.file_browser_base_path)
         self.logs = logs.Logs(self)
+        self.settings = settings.Settings(self)
         self.tasks = taskmgr.Tasks(self)
         self.templates = templates.Templates(self)
         self.firmwares = firmwares.Firmwares(self)
@@ -104,6 +108,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'activation',
             'files',
             'logs',
+            'settings',
             'tasks',
             'templates',
             'firmwares'
@@ -159,6 +164,7 @@ class GlobalAdmin(Portal):
     :ivar cterasdk.core.portals.Portals portals: Object holding the Portals Management APIs
     :ivar cterasdk.core.servers.Servers servers: Object holding the Servers Management APIs
     :ivar cterasdk.core.setup.Setup setup: Object holding the Portal setup APIs
+    :ivar cterasdk.core.ssl.SSL ssl: Object holding the Portal SSL Certificate APIs
     :ivar cterasdk.core.startup.Startup startup: Object holding the Portal startup APIs
     :ivar cterasdk.core.antivirus.Antivirus antivirus: Object holding the Portal Antivirus APIs
     :ivar cterasdk.core.buckets.Buckets buckets: Object holding the Portal Storage Node APIs
@@ -174,13 +180,14 @@ class GlobalAdmin(Portal):
         self.portals = portals.Portals(self)
         self.servers = servers.Servers(self)
         self.setup = setup.Setup(self)
+        self.ssl = ssl.SSL(self)
         self.startup = startup.Startup(self)
         self.antivirus = antivirus.Antivirus(self)
         self.buckets = buckets.Buckets(self)
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['portals', 'servers', 'setup', 'startup', 'antivirus', 'buckets']
+        return super()._omit_fields + ['portals', 'servers', 'setup', 'ssl', 'startup', 'antivirus', 'buckets']
 
     @property
     def context(self):
