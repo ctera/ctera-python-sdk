@@ -581,16 +581,16 @@ Antivirus Servers
 .. automethod:: cterasdk.core.antivirus.AntivirusServers.get
    :noindex:
 
-.. automethod:: cterasdk.core.plans.AntivirusServers.add
+.. automethod:: cterasdk.core.antivirus.AntivirusServers.add
    :noindex:
 
 .. automethod:: cterasdk.core.antivirus.AntivirusServers.delete
    :noindex:
 
-.. automethod:: cterasdk.core.plans.AntivirusServers.suspend
+.. automethod:: cterasdk.core.antivirus.AntivirusServers.suspend
    :noindex:
 
-.. automethod:: cterasdk.core.plans.AntivirusServers.unsuspend
+.. automethod:: cterasdk.core.antivirus.AntivirusServers.unsuspend
    :noindex:
 
 Users
@@ -1039,10 +1039,10 @@ SSL Certificate
 Logs
 ----
 
-.. automethod:: cterasdk.core.logs.get
+.. automethod:: cterasdk.core.logs.Logs.get
    :noindex:
 
-.. automethod:: cterasdk.core.logs.device
+.. automethod:: cterasdk.core.logs.Logs.device
    :noindex:
 
 .. code:: python
