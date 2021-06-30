@@ -26,6 +26,8 @@ class GlobalSettings(BaseCommand):
     def set_timezone(self, timezone):
         """
         Set timezone
+
+        :param str timezone: Timezone
         """
         logging.getLogger().info('Updating timezone. %s', {'timezone': timezone})
         response = self._portal.put('/settings/timezone', timezone)
