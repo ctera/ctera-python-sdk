@@ -21,6 +21,7 @@ from ..edge import mail
 from ..edge import network
 from ..edge import nfs
 from ..edge import ntp
+from ..edge import snmp
 from ..edge import ssl
 from ..edge import ssh
 from ..edge import power
@@ -61,6 +62,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.edge.backup.Backup backup: Object holding the Gateway Backup APIs
     :ivar cterasdk.edge.sync.Sync sync: Object holding the Gateway Sync APIs
     :ivar cterasdk.edge.cache.Cache cache: Object holding the Gateway Cache APIs
+    :ivar cterasdk.edge.snmp.SNMP snmp: Object holding the Gateway SNMP APIs
     :ivar cterasdk.edge.ssl.SSL ssl: Object holding the Gateway SSL APIs
     :ivar cterasdk.edge.ssl.SSH ssh: Object holding the Gateway SSH APIs
     :ivar cterasdk.edge.power.Power power: Object holding the Gateway Power APIs
@@ -112,6 +114,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.backup = backup.Backup(self)
         self.sync = sync.Sync(self)
         self.cache = cache.Cache(self)
+        self.snmp = snmp.SNMP(self)
         self.ssl = ssl.SSL(self)
         self.ssh = ssh.SSH(self)
         self.power = power.Power(self)
@@ -168,6 +171,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'backup',
             'sync',
             'cache',
+            'snmp',
             'ssl',
             'ssh',
             'power',
