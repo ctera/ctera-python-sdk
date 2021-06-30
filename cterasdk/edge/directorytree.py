@@ -93,9 +93,9 @@ class DirectoryTree:
 
     def _get_child(self, node, child_name):
         if self._has_children(node):
-            for i in range(0, len(node.children)):
-                if node.children[i].name == child_name:
-                    return node.children[i]
+            for child in node.children:
+                if child.name == child_name:
+                    return child
         return None
 
     # pylint: disable=R0201
@@ -106,15 +106,15 @@ class DirectoryTree:
         parent.children.append(node)
 
     def _remove_child(self, parent, child_name):
-        child = None
+        ret = None
         if self._has_children(parent):
-            for i in range(0, len(parent.children)):
-                if parent.children[i].name == child_name:
-                    child = parent.children.pop(i)
+            for i, child in enumerate(parent.children):
+                if child.name == child_name:
+                    ret = parent.children.pop(i)
                     if not parent.children:
                         parent.children = None
                     break
-        return child
+        return ret
 
     def _populate_selection(self, parent, parts, is_dir, include):
         descendant_name = parts.pop()

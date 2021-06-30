@@ -11,7 +11,7 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
         super().setUp()
         self._files = FileBrowser(self._filer)
         self._path = 'the/quick/brown/fox'
-        self._filename = self._path.split('/')[-1]
+        self._filename = self._path.rsplit('/', maxsplit=1)[-1]
         self._fullpath = '/' + self._path
         self._target = 'target/folder'
         self._target_fullpath = '/%s/%s' % (self._target, self._filename)

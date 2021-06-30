@@ -1,5 +1,5 @@
 from pathlib import Path
-import unittest.mock as mock
+from unittest import mock
 
 from cterasdk.exception import CTERAException
 from cterasdk.common import Object

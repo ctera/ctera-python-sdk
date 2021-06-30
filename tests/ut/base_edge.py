@@ -1,4 +1,4 @@
-import unittest.mock as mock
+from unittest import mock
 
 from cterasdk.object import Gateway
 from tests.ut import base

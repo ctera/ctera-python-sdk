@@ -1,4 +1,4 @@
-import unittest.mock as mock
+from unittest import mock
 
 from cterasdk.common import Object
 from cterasdk.object import GlobalAdmin

@@ -1,4 +1,4 @@
-import unittest.mock as mock
+from unittest import mock
 
 from tests.ut import base_core_services
 
