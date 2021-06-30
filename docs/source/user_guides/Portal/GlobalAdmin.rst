@@ -491,6 +491,49 @@ Configuration Templates
 
    admin.templates.auto_assign.apply_changes(wait=True)  # wait for template changes to apply
 
+Template Auto Assignment Rules
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.core.templates.TemplateAutoAssignPolicy.get_policy
+   :noindex:
+
+.. automethod:: cterasdk.core.templates.TemplateAutoAssignPolicy.set_policy
+   :noindex:
+
+.. code-block:: python
+
+   """Apply the 'ESeries' template to devices of type: C200, C400, C800, C800P"""
+   device_types = [portal_enum.DeviceType.C200, portal_enum.DeviceType.C400, portal_enum.DeviceType.C800, portal_enum.DeviceType.C800P]
+   c1 = portal_types.TemplateCriteriaBuilder.type().include(device_types).build()
+   r1 = PolicyRule('ESeries', c1)
+
+   """Apply the 'Windows' template to devices that use a 'Windows' operating system"""
+   c2 = portal_types.TemplateCriteriaBuilder.os().contains('Windows').build()
+   r2 = PolicyRule('Windows', c2)
+
+   """Apply the 'CTERA7' template to devices running version 7"""
+   c3 = portal_types.TemplateCriteriaBuilder.version().startswith('7.0').build()
+   r3 = PolicyRule('CTERA7', c3)
+
+   """Apply the 'WD5' template to devices that their hostname ends with 'WD5'"""
+   c4 = portal_types.TemplateCriteriaBuilder.hostname().endswith('WD5').build()
+   r4 = PolicyRule('WD5', c4)
+
+   """Apply the 'Beta' template to devices that their name is one of"""
+   c5 = portal_types.TemplateCriteriaBuilder.name().isoneof(['DEV1', 'DEV2', 'DEV3']).build()
+   r5 = PolicyRule('Beta', c5)
+
+   admin.templates.auto_assign.set_policy([r1, r2, r3, r4, r5])
+
+   """Remove all policy rules"""
+   admin.templates.auto_assign.set_policy([])
+
+   """Do not assign a default template if no match applies"""
+   admin.templates.auto_assign.set_policy([], False)
+
+   """Assign 'Default' if no match applies"""
+   admin.templates.auto_assign.set_policy([], True, 'Default')
+
 Servers
 -------
 .. automethod:: cterasdk.core.servers.Servers.list_servers
@@ -930,9 +973,73 @@ Cloud Drive Folders
    wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.undelete('DIR-002', wbruce)
 
+Timezone
+--------
+
+.. automethod:: cterasdk.core.settings.GlobalSettings.get_timezone
+   :noindex:
+
+.. code:: python
+
+   admin.settings.global_settings.get_timezone()
+
+.. automethod:: cterasdk.core.settings.GlobalSettings.set_timezone
+   :noindex:
+
+.. code:: python
+
+   admin.settings.global_settings.set_timzeone('(GMT-05:00) Eastern Time (US , Canada)')
+
+SSL Certificate
+---------------
+
+.. automethod:: cterasdk.core.ssl.SSL.get
+   :noindex:
+
+.. code:: python
+
+   certificate = admin.ssl.get()
+   print(certificate)
+
+.. automethod:: cterasdk.core.ssl.SSL.thumbprint
+   :noindex:
+
+.. code:: python
+
+   print(admin.ssl.thumbprint)
+
+.. automethod:: cterasdk.core.ssl.SSL.export
+   :noindex:
+
+.. code:: python
+
+   admin.ssl.export()
+
+   admin.ssl.export(r'C:\Temp')  # export to an alternate location
+
+.. automethod:: cterasdk.core.ssl.SSL.import_from_zip
+   :noindex:
+
+.. code:: python
+
+   admin.ssl.import_from_zip(r'C:\Users\jsmith\Downloads\certificate.zip')
+
+.. automethod:: cterasdk.core.ssl.SSL.import_from_chain
+   :noindex:
+
+.. code:: python
+
+   admin.ssl.import_from_chain(
+       r'C:\Users\jsmith\Downloads\private.key',
+       r'C:\Users\jsmith\Downloads\domain.crt',
+       r'C:\Users\jsmith\Downloads\intermediate.crt',
+       r'C:\Users\jsmith\Downloads\root.crt'
+   )
+
+.. code:: python
 
 Logs
--------
+----
 
 .. automethod:: cterasdk.core.logs.get
    :noindex:
