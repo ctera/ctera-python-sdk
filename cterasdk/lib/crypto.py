@@ -100,7 +100,8 @@ class X509Certificate:
 
     @staticmethod
     def from_file(path):
-        data = open(path, 'r').read()
+        with open(path, 'r') as f:
+            data = f.read()
         return X509Certificate.from_string(data)
 
     @staticmethod
