@@ -74,7 +74,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
 
         expected_param = self._create_dir_tree(self._pin_valid_folder_path, True)
-        descendant = self._get_dir_entry(self._pin_exclude_subfolder_path.split('/')[-1], False)
+        descendant = self._get_dir_entry(self._pin_exclude_subfolder_path.rsplit('/', maxsplit=1)[-1], False)
         TestEdgeCaching._add_descendant(expected_param, descendant)
 
         actual_param = self._filer.put.call_args[0][1]
