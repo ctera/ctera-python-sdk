@@ -8,7 +8,7 @@ from .registry import Registry
 
 class TempfileServices:
 
-    __tempdir_prefix = 'chopin_core-'
+    __tempdir_prefix = 'cterasdk-'
 
     @staticmethod
     def mkdir():

@@ -11,22 +11,23 @@ class Array(BaseCommand):
     def get(self, name=None):
         """
         Get Array. If an array name was not passed as an argument, a list of all arrays will be retrieved
+
         :param str,optional name: Name of the array
         """
         return self._gateway.get('/config/storage/arrays' + ('' if name is None else ('/' + name)))
 
-    def add(self, array_name, level, members):
+    def add(self, array_name, level, members=None):
         """
         Add a new array
 
         :param str array_name: Name for the new array
         :param RAIDLevel level: RAID level
-        :param list(str) members: Members of the array
+        :param list(str) members: Members of the array. If not specified, the system will try to create an array using all available drives
         """
         param = Object()
         param.name = array_name
         param.level = level
-        param.members = members
+        param.members = [drive.name for drive in self._gateway.drive.get_status()] if members is None else members
 
         try:
             logging.getLogger().info("Creating a storage array.")

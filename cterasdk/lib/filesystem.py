@@ -1,5 +1,6 @@
 import logging
 import mimetypes
+import shutil
 import os
 from pathlib import Path
 
@@ -43,6 +44,10 @@ class FileSystem:
         dirpath = os.path.expanduser(dirpath)
         if not self.exists(dirpath):
             raise LocalDirectoryNotFound(dirpath)
+
+    def copyfile(self, src, dst):
+        self.get_local_file_info(src)
+        return shutil.copyfile(src, dst)
 
     def save(self, dirpath, filename, handle):
         dirpath = os.path.expanduser(dirpath)
@@ -124,6 +129,10 @@ class FileSystem:
         return dirpath
 
     @staticmethod
+    def join(*paths):
+        return os.path.join(*paths)
+
+    @staticmethod
     def split_file_directory(path):
         # Exists and file -> directory=parent, filename=name
         # Exists and dir -> directory=current filename=None
@@ -142,3 +151,25 @@ class FileSystem:
         else:
             raise LocalPathNotFound(path)
         return str(p.resolve()), filename
+
+    @staticmethod
+    def split_file_directory_with_defaults(path=None, default_filename=None):
+        """
+        Compute the destination file path.
+
+        :param str path: A path to a file or a folder
+        :param str default_filename: The default file name to use unless `path` argument specifies a file path
+
+        :returns: A tuple including the destination directory and filename
+        :rtype: (string, string)
+        """
+        directory = filename = None
+        if path:
+            directory, filename = FileSystem.split_file_directory(path)
+        else:
+            directory = FileSystem.instance().get_dirpath()
+
+        if not filename:
+            filename = default_filename
+
+        return (directory, filename)
