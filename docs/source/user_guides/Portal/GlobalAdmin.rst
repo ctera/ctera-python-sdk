@@ -1036,8 +1036,6 @@ SSL Certificate
        r'C:\Users\jsmith\Downloads\root.crt'
    )
 
-.. code:: python
-
 Logs
 ----
 
