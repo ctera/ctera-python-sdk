@@ -1,6 +1,6 @@
 import logging
 
-from ..common import union, parse_base_object_ref, ApplicationBackupSet, Object
+from ..common import union, parse_base_object_ref, ApplicationBackupSet, PolicyRuleConverter, Object
 from ..exception import CTERAException
 from .base_command import BaseCommand
 from . import query
@@ -113,15 +113,35 @@ class Templates(BaseCommand):
         param.firmware = base_object_ref
         return param
 
-    def list_templates(self, include=None):
+    def by_name(self, names, include=None):
+        """
+        Get Templates by their names
+
+        :param list[str],optional names: List of names of templates
+        :param list[str],optional include: List of fields to retrieve, defaults to ['name']
+        :param list[cterasdk.core.query.FilterBuilder],optional filters: List of additional filters, defaults to None
+
+        :return: Iterator for all matching Templates
+        :rtype: cterasdk.lib.iterator.Iterator
+        """
+        filters = [query.FilterBuilder('name').eq(name) for name in names]
+        return self.list_templates(include, filters)
+
+    def list_templates(self, include=None, filters=None):
         """
         List Configuration Templates.\n
         To retrieve templates, you must first browse the tenant, using: `GlobalAdmin.portals.browse()`
 
         :param list[str],optional include: List of fields to retrieve, defaults to ``['name']``
+        :param list[],optional filters: List of additional filters, defaults to None
         """
         include = union(include or [], Templates.default)
-        param = query.QueryParamBuilder().include(include).build()
+        builder = query.QueryParamBuilder().include(include)
+        if filters:
+            for query_filter in filters:
+                builder.addFilter(query_filter)
+            builder.orFilter((len(filters) > 1))
+        param = builder.build()
         return query.iterator(self._portal, '/deviceTemplates', param)
 
     def delete(self, name):
@@ -167,6 +187,51 @@ class Templates(BaseCommand):
 
 
 class TemplateAutoAssignPolicy(BaseCommand):
+
+    def get_policy(self):
+        """
+        Get templates auto assignment policy
+        """
+        return self._portal.execute('', 'getAutoAssignmentRules')
+
+    def set_policy(self, rules, apply_default=None, default=None, apply_changes=True):
+        """
+        Set templates auto assignment policy
+
+        :param list[cterasdk.common.types.PolicyRule] rules: List of policy rules
+        :param bool,optional apply_default: If no match found, apply default template. If not passed, the current config will be kept
+        :param str,optional default: Name of a template to assign if no match found. Ignored unless the ``apply_default`` is set to ``True``
+        :param bool,optional apply_changes: Apply changes upon update, defaults to ``True``
+        """
+        templates = {rule.assignment for rule in rules}
+        if default:
+            templates.add(default)
+        templates = list(templates)
+        portal_templates = {template.name: template for template in self._portal.templates.by_name(templates, ['baseObjectRef'])}
+
+        not_found = [template for template in templates if template not in portal_templates.keys()]
+        if not_found:
+            logging.getLogger().error('Could not find one or more templates. %s', {'templates': not_found})
+            raise CTERAException('Could not find one or more templates', None, templates=not_found)
+
+        policy = self.get_policy()
+
+        if apply_default is False:
+            policy.defaultTemplate = None
+        elif apply_default is True and default:
+            policy.defaultTemplate = portal_templates.get(default).baseObjectRef
+
+        policy_rules = [PolicyRuleConverter.convert(rule, 'DeviceTemplateAutoAssignmentRule', 'template',
+                        portal_templates.get(rule.assignment).baseObjectRef) for rule in rules]
+        policy.deviceTemplatesAutoAssignmentRules = policy_rules
+
+        response = self._portal.execute('', 'setAutoAssignmentRules', policy)
+        logging.getLogger().info('Set templates auto assignment rules.')
+
+        if apply_changes:
+            self.apply_changes(True)
+
+        return response
 
     def apply_changes(self, wait=False):
         """

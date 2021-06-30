@@ -1,4 +1,5 @@
 from unittest import mock
+import munch
 
 from cterasdk import exception
 from cterasdk.edge import array
@@ -29,7 +30,7 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
         self._filer.get.assert_called_once_with('/config/storage/arrays/' + self._array_name)
         self.assertEqual(ret, get_response)
 
-    def test_add_array_success(self):
+    def test_add_array_with_members_success(self):
         add_response = 'Success'
         self._init_filer(add_response=add_response)
         ret = array.Array(self._filer).add(self._array_name, self._array_level, self._array_members)
@@ -41,7 +42,20 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
 
         self.assertEqual(ret, add_response)
 
-    def test_add_array_failure(self):
+    def test_add_array_without_members_success(self):
+        add_response = 'Success'
+        self._init_filer(get_response=[munch.Munch(dict(name=drive)) for drive in self._array_members], add_response=add_response)
+        ret = array.Array(self._filer).add(self._array_name, self._array_level)
+        self._filer.get.assert_called_once_with('/status/storage/disks')
+        self._filer.add.assert_called_once_with('/config/storage/arrays', mock.ANY)
+
+        expected_param = self._get_array_object()
+        actual_param = self._filer.add.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+
+        self.assertEqual(ret, add_response)
+
+    def test_add_array_with_members_failure(self):
         expected_exception = exception.CTERAException()
         self._filer.add = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exception.CTERAException) as error:

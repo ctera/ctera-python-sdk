@@ -55,14 +55,7 @@ class Config(BaseCommand):
          File destination, defaults to the default directory
         """
         default_filename = self._gateway.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.xml'
-        directory = filename = None
-        if destination:
-            directory, filename = self._filesystem.split_file_directory(destination)
-            if not filename:
-                filename = default_filename
-        else:
-            directory = self._filesystem.get_dirpath()
-            filename = default_filename
+        directory, filename = self._filesystem.split_file_directory_with_defaults(destination, default_filename)
         logging.getLogger().info('Exporting configuration. %s', {'host': self._gateway.host()})
         handle = self._gateway.openfile('/export')
         filepath = FileSystem.instance().save(directory, filename, handle)
