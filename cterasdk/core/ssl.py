@@ -2,7 +2,7 @@ import logging
 from zipfile import ZipFile
 
 from .base_command import BaseCommand
-from ..lib import FileSystem, X509Certificate, TempfileServices, create_certificate_chain
+from ..lib import FileSystem, X509Certificate, PrivateKey, TempfileServices, create_certificate_chain
 
 
 class SSL(BaseCommand):
@@ -50,23 +50,25 @@ class SSL(BaseCommand):
         """
         Create a ZIP archive that can be imported to CTERA Portal
 
-        :param str private_key: A path to the PEM-encoded private key file
-        :param list[str] certificates: A list of paths of the PEM-encoded certificate files
+        :param str private_key: The PEM-encoded private key, or a path to the PEM-encoded private key file
+        :param list[str] certificates: The PEM-encoded certificates, or a list of paths of the PEM-encoded certificate files
         """
         tempdir = TempfileServices.mkdir()
 
         key_basename = 'private.key'
-        private_keyfile = self._filesystem.copyfile(private_key, FileSystem.join(tempdir, key_basename))
+        key_object = PrivateKey.load_private_key(private_key)
+        key_filepath = FileSystem.join(tempdir, key_basename)
+        self._filesystem.write(key_filepath, key_object.pem_data)
 
         cert_basename = 'certificate'
-        certificates = [X509Certificate.from_file(certificate) for certificate in certificates]
+        certificates = [X509Certificate.load_certificate(certificate) for certificate in certificates]
         certificate_chain = create_certificate_chain(*certificates)
 
         certificate_chain_zip_archive = None
         if certificate_chain:
             certificate_chain_zip_archive = FileSystem.join(tempdir, '{}.zip'.format(cert_basename))
             with ZipFile(certificate_chain_zip_archive, 'w') as zip_archive:
-                zip_archive.write(private_keyfile, key_basename)
+                zip_archive.write(key_filepath, key_basename)
                 for idx, certificate in enumerate(certificate_chain):
                     filename = '{}{}.crt'.format(cert_basename, idx if idx > 0 else '')
                     filepath = FileSystem.join(tempdir, filename)
@@ -87,8 +89,8 @@ class SSL(BaseCommand):
         """
         Import an SSL Certificate to CTERA Portal from a chain
 
-        :param str private_key: A path to the PEM-encoded private key file
-        :param list[str] certificates: A list of paths to the PEM-encoded certificates
+        :param str private_key: The PEM-encoded private key, or a path to the PEM-encoded private key file
+        :param list[str] certificates: The PEM-encoded certificates, or a list of paths of the PEM-encoded certificate files
         """
         zipflie = self.create_zip_archive(private_key, *certificates)
         return self.import_from_zip(zipflie)
