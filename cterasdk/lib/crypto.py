@@ -6,9 +6,10 @@ import re
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, PublicFormat, NoEncryption
+from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, PublicFormat, NoEncryption, load_pem_private_key
 
 from .. import config
+from ..exception import LocalFileNotFound
 from .filesystem import FileSystem
 
 
@@ -68,6 +69,41 @@ def compare_certificates(a, b):
     return 0
 
 
+class PrivateKey:
+
+    def __init__(self, private_key):
+        self.private_key = private_key
+
+    @property
+    def pem_data(self):
+        return self.private_key.private_bytes(Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption())
+
+    @staticmethod
+    def from_file(path, password=None):
+        with open(path, 'r') as f:
+            data = f.read()
+        return PrivateKey.from_string(data, password)
+
+    @staticmethod
+    def from_string(data, password=None):
+        return PrivateKey.from_bytes(data.encode('utf-8'), password)
+
+    @staticmethod
+    def from_bytes(data, password=None):
+        return PrivateKey(load_pem_private_key(data, password))
+
+    @staticmethod
+    def load_private_key(key, password=None):
+        if isinstance(key, bytes):
+            return PrivateKey.from_bytes(key, password)
+
+        try:
+            FileSystem.instance().get_local_file_info(key)
+            return PrivateKey.from_file(key, password)
+        except LocalFileNotFound:
+            return PrivateKey.from_string(key, password)
+
+
 class X509Certificate:
 
     def __init__(self, certificate):
@@ -111,6 +147,17 @@ class X509Certificate:
     @staticmethod
     def from_bytes(data):
         return X509Certificate(x509.load_pem_x509_certificate(data))
+
+    @staticmethod
+    def load_certificate(cert):
+        if isinstance(cert, bytes):
+            return X509Certificate.from_bytes(cert)
+
+        try:
+            FileSystem.instance().get_local_file_info(cert)
+            return X509Certificate.from_file(cert)
+        except LocalFileNotFound:
+            return X509Certificate.from_string(cert)
 
     def __str__(self):
         return str(
