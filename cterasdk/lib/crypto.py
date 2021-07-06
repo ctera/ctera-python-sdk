@@ -100,7 +100,7 @@ class PrivateKey:
         try:
             FileSystem.instance().get_local_file_info(key)
             return PrivateKey.from_file(key, password)
-        except LocalFileNotFound:
+        except (OSError, LocalFileNotFound):
             return PrivateKey.from_string(key, password)
 
 
@@ -156,7 +156,7 @@ class X509Certificate:
         try:
             FileSystem.instance().get_local_file_info(cert)
             return X509Certificate.from_file(cert)
-        except LocalFileNotFound:
+        except (OSError, LocalFileNotFound):
             return X509Certificate.from_string(cert)
 
     def __str__(self):

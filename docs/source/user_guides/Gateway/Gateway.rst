@@ -1122,6 +1122,13 @@ Power Management
 SNMP
 ====
 
+.. automethod:: cterasdk.edge.snmp.SNMP.is_enabled
+   :noindex:
+
+.. code-block:: python
+
+   filer.snmp.is_enabled()
+
 .. automethod:: cterasdk.edge.snmp.SNMP.enable
    :noindex:
 
