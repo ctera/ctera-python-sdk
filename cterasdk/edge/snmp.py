@@ -9,6 +9,15 @@ from .base_command import BaseCommand
 class SNMP(BaseCommand):
     """ Edge Filer SNMP Configuration APIs """
 
+    def is_enabled(self):
+        """
+        Check if SNMP is enabled
+
+        :return: True is SNMP is enabled, else False
+        :rtype: bool
+        """
+        return self._gateway.get('/config/snmp/mode') == enum.Mode.Enabled
+
     def enable(self, port=161, community_str=None, username=None, password=None):
         """
         Enable SNMP
