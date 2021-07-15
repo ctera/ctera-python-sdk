@@ -144,6 +144,8 @@ Storage Nodes
 .. automethod:: cterasdk.core.buckets.Buckets.modify
    :noindex:
 
+.. code-block:: python
+
    """Modify an existing bucket, set it to read-delete only and dedicate it to 'mytenant'"""
    filer.buckets.modify('MainStorage', read_only=True, dedicated_to='mytenant')
 

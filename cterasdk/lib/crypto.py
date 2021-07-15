@@ -111,7 +111,8 @@ class X509Certificate:
 
     @property
     def sha1_fingerprint(self):
-        return self.certificate.fingerprint(hashes.SHA1()).hex(':', 1)
+        hexstr = self.certificate.fingerprint(hashes.SHA1()).hex()
+        return ':'.join([a + b for a, b in zip(hexstr[::2], hexstr[1::2])])
 
     @property
     def issuer(self):
