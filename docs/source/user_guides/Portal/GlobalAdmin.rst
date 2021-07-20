@@ -1066,3 +1066,13 @@ Logs
 
    """Retrieve all cloud backup logs for device 'WIN-SRV2019'"""
    admin.logs.device('WIN-SRV2019', topic='backup')
+
+
+Syslog
+------
+
+.. automethod:: cterasdk.core.syslog.Syslog.enable
+   :noindex:
+
+.. automethod:: cterasdk.core.syslog.Syslog.disable
+   :noindex:

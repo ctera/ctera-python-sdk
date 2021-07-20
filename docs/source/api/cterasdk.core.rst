@@ -38,7 +38,9 @@ Submodules
    cterasdk.core.servers
    cterasdk.core.session
    cterasdk.core.setup
+   cterasdk.core.ssl
    cterasdk.core.startup
+   cterasdk.core.syslog
    cterasdk.core.taskmgr
    cterasdk.core.templates
    cterasdk.core.types
