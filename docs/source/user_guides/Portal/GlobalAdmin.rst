@@ -538,26 +538,41 @@ Template Auto Assignment Rules
 
 Servers
 -------
+.. automethod:: cterasdk.core.servers.Servers.get
+   :noindex:
+
+.. code-block:: python
+
+   """Retrieve a server"""
+
+   server = admin.servers.get('server', ['isApplicationServer', 'renderingServer'])
+   print(server.isApplicationServer, server.renderingServer)
+
 .. automethod:: cterasdk.core.servers.Servers.list_servers
    :noindex:
 
 .. code-block:: python
 
    """Retrieve all servers"""
-
    servers = admin.servers.list_servers() # will only retrieve the server name
-
    for server in servers:
-
        print(server.name)
 
    """Retrieve multiple server attributes"""
-
    servers = admin.servers.list_servers(include = ['name', 'connected', 'isApplicationServer', 'mainDB'])
-
    for server in servers:
-
        print(server)
+
+.. automethod:: cterasdk.core.servers.Servers.modify
+   :noindex:
+
+.. code-block:: python
+
+   admin.servers.modify('server2', server_name='replica', app=False, enable_replication=True, replica_of='maindb')  # rename and enable database replication
+
+   admin.servers.modify('server2', allow_user_login=False)  # disable logins to this server
+
+   admin.servers.modify('server2', enable_public_ip=True, public_ip='33.191.55.2')  # configure a public NAT ip address
 
 Antivirus
 ---------
