@@ -5,7 +5,7 @@ from . import query
 from .enum import ListFilter
 from ..common import Object
 from ..common import union
-from ..exception import CTERAException
+from ..exception import CTERAException, ObjectNotFoundException
 
 
 class CloudFS(BaseCommand):
@@ -24,7 +24,7 @@ class CloudFS(BaseCommand):
         include = ['/' + attr for attr in include]
         folder_group = self._portal.get_multi('/foldersGroups/' + name, include)
         if folder_group.name is None:
-            raise CTERAException('Could not find folder group', None, name=name)
+            raise ObjectNotFoundException('Could not find folder group', '/foldersGroups/%s' % name, name=name)
         return folder_group
 
     def list_folder_groups(self, include=None, user=None):

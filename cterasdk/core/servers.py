@@ -3,7 +3,7 @@ import logging
 from ..common import union, Object
 from .base_command import BaseCommand
 from . import query
-from ..exception import CTERAException
+from ..exception import CTERAException, ObjectNotFoundException
 
 
 class Servers(BaseCommand):
@@ -31,7 +31,7 @@ class Servers(BaseCommand):
         include = ['/' + attr for attr in include]
         server = self._portal.get_multi('/servers/%s' % name, include)
         if server.name is None:
-            raise CTERAException('Could not find server', None, name=name)
+            raise ObjectNotFoundException('Could not find server', '/servers/%s' % name, name=name)
         return server
 
     def list_servers(self, include=None):

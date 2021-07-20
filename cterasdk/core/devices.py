@@ -2,7 +2,7 @@ from .base_command import BaseCommand
 from .enum import DeviceType
 from . import remote, query
 from ..common import union
-from ..exception import CTERAException
+from ..exception import CTERAException, ObjectNotFoundException
 
 
 class Devices(BaseCommand):
@@ -38,7 +38,7 @@ class Devices(BaseCommand):
 
         dev = self._portal.get_multi(url, include)
         if dev.name is None:
-            raise CTERAException('Device not found', None, tenant=tenant, device=device_name)
+            raise ObjectNotFoundException('Device not found', url, tenant=tenant, name=device_name)
 
         return remote.remote_command(self._portal, dev)
 
