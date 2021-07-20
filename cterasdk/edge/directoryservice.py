@@ -1,3 +1,4 @@
+import re
 import logging
 
 from ..common import Object
@@ -17,7 +18,7 @@ class DirectoryService(BaseCommand):
         """
         return self._gateway.get('/status/fileservices/cifs/joinStatus') == 0
 
-    def connect(self, domain, username, password, ou=None):
+    def connect(self, domain, username, password, ou=None, check_connection=False):
         """
         Connect the Gateway to an Active Directory
 
@@ -25,13 +26,10 @@ class DirectoryService(BaseCommand):
         :param str username: The user name to use when connecting to the active directory services
         :param str password: The password to use when connecting to the active directory services
         :param str,optional ou: The OU path to use when connecting to the active directory services, defaults to None
+        :param bool,optional check_connection: Check connectivity before attempting to connect to directory services, defaults to `False`
         """
-        port = 389
-        tcp_connect_result = self._gateway.network.tcp_connect(TCPService(domain, port))
-        if not tcp_connect_result.is_open:
-            logging.getLogger().error("Connection failed. No traffic allowed over port %(port)s", dict(port=tcp_connect_result.port))
-            raise CTERAConnectionError('Unable to establish connection', None, host=tcp_connect_result.host,
-                                       port=tcp_connect_result.port, protocol='LDAP')
+        if check_connection:
+            self._check_domain_connectivity(domain)
 
         cifs = self._gateway.get('/config/fileservices/cifs')
         cifs.type = "domain"
@@ -52,6 +50,17 @@ class DirectoryService(BaseCommand):
             logging.getLogger().error("Failed connecting to Active Directory.")
             raise error
         logging.getLogger().info("Connected to Active Directory.")
+
+    def _check_domain_connectivity(self, domain):
+        port = 389
+        domain_controllers = self.get_static_domain_controller()
+        domain_controllers = re.findall(r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b', domain_controllers) if domain_controllers else [domain]
+        connection_results = self._gateway.network.diagnose([TCPService(host, port) for host in domain_controllers])
+        for connection_result in connection_results:
+            if not connection_result.is_open:
+                logging.getLogger().error("Connection failed. No traffic allowed over port %(port)s", dict(port=connection_result.port))
+                raise CTERAConnectionError('Unable to establish connection', None, host=connection_result.host,
+                                           port=connection_result.port, protocol='LDAP')
 
     def get_static_domain_controller(self):
         """
