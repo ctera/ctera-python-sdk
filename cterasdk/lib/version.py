@@ -1,9 +1,9 @@
 from .platform import Platform
 
 
-class Version:
+class Version:  # pylint: disable=unused-private-member
 
-    __instance = None  # pylint: disable=unused-private-member
+    __instance = None
 
     @staticmethod
     def instance():

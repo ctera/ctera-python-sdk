@@ -3,9 +3,9 @@ from . import ls
 from ...exception import RemoteDirectoryNotFound
 
 
-class SrcDstParam(Object):
+class SrcDstParam(Object):  # pylint: disable=unused-private-member
 
-    __instance = None  # pylint: disable=unused-private-member
+    __instance = None
 
     @staticmethod
     def instance(src, dest=None):
@@ -19,9 +19,9 @@ class SrcDstParam(Object):
         SrcDstParam.__instance = self
 
 
-class ActionResourcesParam(Object):
+class ActionResourcesParam(Object):  # pylint: disable=unused-private-member
 
-    __instance = None  # pylint: disable=unused-private-member
+    __instance = None
 
     @staticmethod
     def instance():
@@ -37,9 +37,9 @@ class ActionResourcesParam(Object):
         self.urls.append(param)
 
 
-class CreateShareParam(Object):
+class CreateShareParam(Object):  # pylint: disable=unused-private-member
 
-    __instance = None  # pylint: disable=unused-private-member
+    __instance = None
 
     @staticmethod
     def instance(path, access, expire_on):

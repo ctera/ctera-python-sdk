@@ -3,9 +3,9 @@ import sys
 import logging
 
 
-class Logging:
+class Logging:  # pylint: disable=unused-private-member
 
-    __instance = None  # pylint: disable=unused-private-member
+    __instance = None
 
     @staticmethod
     def get():
