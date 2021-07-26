@@ -1,3 +1,4 @@
+from .common import Object
 from .convert import tojsonstr
 
 
@@ -25,6 +26,18 @@ class CTERAException(Exception):
 
 class CTERAClientException(CTERAException):
     pass
+
+
+class ObjectNotFoundException(CTERAException):
+
+    def __init__(self, message, object_ref, **kwargs):
+        super().__init__(message, None, **kwargs)
+        self.response = Object()
+        self.response.code = 404
+        self.response.reason = 'Not Found'
+        self.response.body = Object()
+        self.response.body.rc = 1
+        self.response.body.msg = "Object '%s' not found" % object_ref
 
 
 class CTERAConnectionError(CTERAException):

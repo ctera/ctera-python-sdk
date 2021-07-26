@@ -482,3 +482,25 @@ class TemplateCriteria:
     Owner = 'OwnerUsername'
     Plan = 'Plan'
     Groups = 'ownerGroups'
+
+
+class IPProtocol:
+    """
+    IP Protocol
+
+    :ivar str TCP: TCP Protocol
+    :ivar str UDP: UDP Protocol
+    """
+    TCP = "TCP"
+    UDP = "UDP"
+
+
+class Mode:
+    """
+    Enum for operational mode
+
+    :ivar str Enabled: Operational mode enabled
+    :ivar str Disabled: Operational mode diabled
+    """
+    Enabled = "enabled"
+    Disabled = "disabled"

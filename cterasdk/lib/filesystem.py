@@ -8,7 +8,7 @@ from .. import config
 from ..exception import RenameException, LocalDirectoryNotFound, LocalFileNotFound, LocalPathNotFound
 
 
-class FileSystem:
+class FileSystem:  # pylint: disable=unused-private-member
 
     __instance = None
 

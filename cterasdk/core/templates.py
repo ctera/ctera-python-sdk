@@ -1,7 +1,7 @@
 import logging
 
 from ..common import union, parse_base_object_ref, ApplicationBackupSet, PolicyRuleConverter, Object
-from ..exception import CTERAException
+from ..exception import CTERAException, ObjectNotFoundException
 from .base_command import BaseCommand
 from . import query
 
@@ -34,7 +34,7 @@ class Templates(BaseCommand):
         include = ['/' + attr for attr in include]
         template = self._portal.get_multi('/deviceTemplates/' + name, include)
         if template.name is None:
-            raise CTERAException('Could not find template', None, name=name)
+            raise ObjectNotFoundException('Could not find server', '/deviceTemplates/%s' % name, name=name)
         return template
 
     def add(self, name, description=None, include_sets=None, exclude_sets=None, apps=None, backup_schedule=None, versions=None):

@@ -1,4 +1,4 @@
-class Registry:
+class Registry:  # pylint: disable=unused-private-member
 
     __instance = None
 

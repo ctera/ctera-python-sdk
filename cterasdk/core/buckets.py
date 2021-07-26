@@ -1,7 +1,7 @@
 import logging
 
 from ..common import union
-from ..exception import CTERAException
+from ..exception import CTERAException, ObjectNotFoundException
 from .base_command import BaseCommand
 from . import query
 
@@ -33,7 +33,7 @@ class Buckets(BaseCommand):
         include = ['/' + attr for attr in include]
         bucket = self._portal.get_multi('/locations/' + name, include)
         if bucket.name is None:
-            raise CTERAException('Could not find bucket', None, name=name)
+            raise ObjectNotFoundException('Could not find bucket', '/locations/%s' % name, name=name)
         return bucket
 
     def add(self, name, bucket, read_only=False, dedicated_to=None):

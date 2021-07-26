@@ -1,7 +1,7 @@
 import platform
 
 
-class Platform:
+class Platform:  # pylint: disable=unused-private-member
 
     __instance = None
 

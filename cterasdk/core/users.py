@@ -2,7 +2,7 @@ import logging
 
 from .base_command import BaseCommand
 from .types import UserAccount
-from ..exception import CTERAException
+from ..exception import CTERAException, ObjectNotFoundException
 from ..common import Object, DateTimeUtils
 from ..common import union
 from . import query
@@ -37,7 +37,7 @@ class Users(BaseCommand):
         include = ['/' + attr for attr in include]
         user_object = self._portal.get_multi(baseurl, include)
         if user_object.name is None:
-            raise CTERAException('Could not find user', None, user_directory=user_account.directory, username=user_account.name)
+            raise ObjectNotFoundException('Could not find user', baseurl, user_directory=user_account.directory, username=user_account.name)
         return user_object
 
     def list_local_users(self, include=None):

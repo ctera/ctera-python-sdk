@@ -16,7 +16,7 @@ class SrcDstParam(Object):
         self._classname = self.__class__.__name__
         self.src = src
         self.dest = dest
-        SrcDstParam.__instance = self
+        SrcDstParam.__instance = self  # pylint: disable=unused-private-member
 
 
 class ActionResourcesParam(Object):
@@ -31,7 +31,7 @@ class ActionResourcesParam(Object):
     def __init__(self):
         self._classname = self.__class__.__name__
         self.urls = []
-        ActionResourcesParam.__instance = self
+        ActionResourcesParam.__instance = self  # pylint: disable=unused-private-member
 
     def add(self, param):
         self.urls.append(param)
@@ -57,7 +57,7 @@ class CreateShareParam(Object):
         self.share.invitee = Object()
         self.share.invitee._classname = 'Collaborator'
         self.share.invitee.type = 'external'
-        CreateShareParam.__instance = self
+        CreateShareParam.__instance = self  # pylint: disable=unused-private-member
 
 
 def get_resource_info(ctera_host, path):

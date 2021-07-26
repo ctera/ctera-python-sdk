@@ -22,6 +22,7 @@ from ..core import settings
 from ..core import setup
 from ..core import ssl
 from ..core import startup
+from ..core import syslog
 from ..core import taskmgr
 from ..core import templates
 from ..core import uri
@@ -166,6 +167,7 @@ class GlobalAdmin(Portal):
     :ivar cterasdk.core.setup.Setup setup: Object holding the Portal setup APIs
     :ivar cterasdk.core.ssl.SSL ssl: Object holding the Portal SSL Certificate APIs
     :ivar cterasdk.core.startup.Startup startup: Object holding the Portal startup APIs
+    :ivar cterasdk.core.syslog.Syslog syslog: Object holding the Portal syslog APIs
     :ivar cterasdk.core.antivirus.Antivirus antivirus: Object holding the Portal Antivirus APIs
     :ivar cterasdk.core.buckets.Buckets buckets: Object holding the Portal Storage Node APIs
     """
@@ -182,12 +184,13 @@ class GlobalAdmin(Portal):
         self.setup = setup.Setup(self)
         self.ssl = ssl.SSL(self)
         self.startup = startup.Startup(self)
+        self.syslog = syslog.Syslog(self)
         self.antivirus = antivirus.Antivirus(self)
         self.buckets = buckets.Buckets(self)
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['portals', 'servers', 'setup', 'ssl', 'startup', 'antivirus', 'buckets']
+        return super()._omit_fields + ['portals', 'servers', 'setup', 'ssl', 'startup', 'syslog', 'antivirus', 'buckets']
 
     @property
     def context(self):

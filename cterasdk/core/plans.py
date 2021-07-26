@@ -1,6 +1,6 @@
 import logging
 from .base_command import BaseCommand
-from ..exception import CTERAException, InputError
+from ..exception import CTERAException, InputError, ObjectNotFoundException
 from .enum import PlanItem, PlanRetention
 from ..common import union, convert_size, DataUnit, PolicyRuleConverter
 from . import query
@@ -77,7 +77,7 @@ class Plans(BaseCommand):
         include = ['/' + attr for attr in include]
         plan = self._portal.get_multi('/plans/' + name, include)
         if plan.name is None:
-            raise CTERAException('Could not find subscription plan', None, name=name)
+            raise ObjectNotFoundException('Could not find subscription plan', '/plans/%s' % name, name=name)
         return plan
 
     def add(self, name, retention=None, quotas=None):
