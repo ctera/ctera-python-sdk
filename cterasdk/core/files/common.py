@@ -3,7 +3,7 @@ from . import ls
 from ...exception import RemoteDirectoryNotFound
 
 
-class SrcDstParam(Object):  # pylint: disable=unused-private-member
+class SrcDstParam(Object):
 
     __instance = None
 
@@ -16,10 +16,10 @@ class SrcDstParam(Object):  # pylint: disable=unused-private-member
         self._classname = self.__class__.__name__
         self.src = src
         self.dest = dest
-        SrcDstParam.__instance = self
+        SrcDstParam.__instance = self  # pylint: disable=unused-private-member
 
 
-class ActionResourcesParam(Object):  # pylint: disable=unused-private-member
+class ActionResourcesParam(Object):
 
     __instance = None
 
@@ -31,13 +31,13 @@ class ActionResourcesParam(Object):  # pylint: disable=unused-private-member
     def __init__(self):
         self._classname = self.__class__.__name__
         self.urls = []
-        ActionResourcesParam.__instance = self
+        ActionResourcesParam.__instance = self  # pylint: disable=unused-private-member
 
     def add(self, param):
         self.urls.append(param)
 
 
-class CreateShareParam(Object):  # pylint: disable=unused-private-member
+class CreateShareParam(Object):
 
     __instance = None
 
@@ -57,7 +57,7 @@ class CreateShareParam(Object):  # pylint: disable=unused-private-member
         self.share.invitee = Object()
         self.share.invitee._classname = 'Collaborator'
         self.share.invitee.type = 'external'
-        CreateShareParam.__instance = self
+        CreateShareParam.__instance = self  # pylint: disable=unused-private-member
 
 
 def get_resource_info(ctera_host, path):
