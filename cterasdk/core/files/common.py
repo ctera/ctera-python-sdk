@@ -5,7 +5,7 @@ from ...exception import RemoteDirectoryNotFound
 
 class SrcDstParam(Object):
 
-    __instance = None
+    __instance = None  # pylint: disable=unused-private-member
 
     @staticmethod
     def instance(src, dest=None):
@@ -21,7 +21,7 @@ class SrcDstParam(Object):
 
 class ActionResourcesParam(Object):
 
-    __instance = None
+    __instance = None  # pylint: disable=unused-private-member
 
     @staticmethod
     def instance():
@@ -39,7 +39,7 @@ class ActionResourcesParam(Object):
 
 class CreateShareParam(Object):
 
-    __instance = None
+    __instance = None  # pylint: disable=unused-private-member
 
     @staticmethod
     def instance(path, access, expire_on):

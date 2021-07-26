@@ -1,6 +1,6 @@
 class Registry:
 
-    __instance = None
+    __instance = None  # pylint: disable=unused-private-member
 
     @staticmethod
     def instance():

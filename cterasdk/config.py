@@ -5,7 +5,7 @@ import logging
 
 class Logging:
 
-    __instance = None
+    __instance = None  # pylint: disable=unused-private-member
 
     @staticmethod
     def get():
