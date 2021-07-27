@@ -92,8 +92,8 @@ class DirectoryService(BaseCommand):
         Configure advanced mapping
 
         :param str domain: The active directory domain
-        :param str start: The minimum id to use for mapping
-        :param str end: The maximum id to use for mapping
+        :param int start: The minimum id to use for mapping
+        :param int end: The maximum id to use for mapping
         """
         mappings = self._gateway.get('/config/fileservices/cifs/idMapping/map')
         for mapping in mappings:

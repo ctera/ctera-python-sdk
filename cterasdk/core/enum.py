@@ -504,3 +504,38 @@ class Mode:
     """
     Enabled = "enabled"
     Disabled = "disabled"
+
+
+class DirectoryServiceType:
+    """
+    Directory Service Type
+
+    :ivar str Microsoft: Active Directory
+    :ivar str LDAP: LDAP
+    :ivar str Apple: Apple Open Directory
+    """
+    Microsoft = 'ActiveDirectory'
+    LDAP = 'LDAP'
+    Apple = 'AppleOpenDirectory'
+
+
+class DirectoryServiceFetchMode:
+    """
+    Directory Service Fetch Mode
+
+    :ivar str Eager: Eager
+    :ivar str Lazy: Lazy
+    """
+    Eager = 'Eager'
+    Lazy = 'Lazy'
+
+
+class DirectorySearchEntityType:
+    """
+    Directory Search Entity Type
+
+    :ivar str User: User
+    :ivar str Group: Group
+    """
+    User = 'user'
+    Group = 'group'

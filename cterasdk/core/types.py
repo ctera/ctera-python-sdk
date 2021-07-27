@@ -17,6 +17,12 @@ PlatformVersion.name.__doc__ = 'The name of the platform'
 PlatformVersion.version.__doc__ = 'The version identifier'
 
 
+AccessControlEntry = namedtuple('AccessControlEntry', ('account', 'role'))
+AccessControlEntry.__doc__ = 'Tuple holding a Portal account and its respective permission'
+AccessControlEntry.account.__doc__ = 'The Portal group or user account'
+AccessControlEntry.role.__doc__ = 'The group or user role'
+
+
 class PortalAccount(ABC):
     """
     Base Class for Portal Account
@@ -393,3 +399,41 @@ class AmazonS3(HTTPBucket):
         param.httpsOnly = self.https
         param.directUpload = self.direct
         return param
+
+
+class DomainControllers:
+
+    def __init__(self, primary=None, secondary=None):
+        self._primary = primary
+        self._secondary = secondary
+
+    @property
+    def primary(self):
+        return self._primary
+
+    @property
+    def secondary(self):
+        return self._secondary
+
+
+class AccessControlRule(Object):
+
+    def __init__(self, group, role):
+        self._classname = 'AccessControlRule'
+        self.group = group
+        self.role = role
+
+
+class ADDomainIDMapping(Object):
+    """
+    Base Class for Directory Service ID Mapping
+
+    :ivar str domain: The domain flat name
+    :param int start: The minimum id to use for mapping
+    :param int end: The maximum id to use for mapping
+    """
+    def __init__(self, domain, start, end):
+        self._classname = 'ADDomainIDMapping'
+        self.domainFlatName = domain
+        self.minID = start
+        self.maxID = end
