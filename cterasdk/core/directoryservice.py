@@ -107,10 +107,7 @@ class DirectoryService(BaseCommand):
     def _configure_advanced_mapping(self, mapping):
         param = Object()
         param._classname = 'ADIDMapping'  # pylint: disable=protected-access
-        param.map = list()
-        for domain_mapping in mapping:
-            param.map.append(domain_mapping)
-
+        param.map = mapping
         logging.getLogger().debug('Updating advanced mapping. %s', {
             'domains': [mapping.domainFlatName for mapping in param.map]
         })
