@@ -674,15 +674,11 @@ Domain Users
 .. code-block:: python
 
    users = admin.users.list_domain_users('domain.ctera.local') # will only retrieve the 'name' attribute
-
    for user in users:
-
        print(user.name)
 
    """Retrieve additional user attributes"""
-
    users = admin.users.list_domain_users('domain.ctera.local', include = ['name', 'email', 'firstName', 'lastName'])
-
    print(user)
 
 Fetch Users & Groups
@@ -698,6 +694,73 @@ Fetch Users & Groups
    bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
 
    admin.directoryservice.fetch([alice, bruce])
+
+Directory Services
+------------------
+.. automethod:: cterasdk.core.directoryservice.DirectoryService.connect
+   :noindex:
+
+.. code-block:: python
+
+   """Connect to Active Directory using a primary domain controller, configure domain UID/GID mapping and access control"""
+   mapping = [portal_types.ADDomainIDMapping('demo.local', 200001, 5000000), portal_types.ADDomainIDMapping('trusted.local', 5000001, 10000000)]
+   rw_admin_group = portal_types.AccessControlEntry(
+       portal_types.GroupAccount('ctera_admins', 'demo.local'),
+       portal_enum.Role.ReadWriteAdmin
+   )
+   ro_admin_user = portal_types.AccessControlEntry(
+       portal_types.UserAccount('jsmith', 'demo.local'),
+       portal_enum.Role.ReadOnlyAdmin
+   )
+   admin.directoryservice.connect('demo.local', 'svc_account', 'P@ssw0rd1', mapping=mapping, domain_controllers=portal_types.DomainControllers('172.54.3.52'), acl=[rw_admin, ro_admin])
+
+.. automethod:: cterasdk.core.directoryservice.DirectoryService.get_advanced_mapping
+   :noindex:
+
+.. code-block:: python
+
+   for domain, mapping in admin.directoryservice.get_advanced_mapping().items():
+       print(domain, mapping)
+
+.. automethod:: cterasdk.core.directoryservice.DirectoryService.set_advanced_mapping
+   :noindex:
+
+.. code-block:: python
+
+   """Configure UID/GID mapping"""
+   mapping = [portal_types.ADDomainIDMapping('demo.local', 200001, 5000000), portal_types.ADDomainIDMapping('trusted.local', 5000001, 10000000)]
+   admin.directoryservice.set_advanced_mapping(mapping)
+
+.. automethod:: cterasdk.core.directoryservice.DirectoryService.get_access_control
+   :noindex:
+
+.. code-block:: python
+
+   for ace in admin.directoryservice.get_access_control():
+       print(ace.account, ace.role)
+
+.. automethod:: cterasdk.core.directoryservice.DirectoryService.set_access_control
+   :noindex:
+
+.. code-block:: python
+
+   """Configure access control for a domain group and a domain user. Set the default role to 'Disabled'"""
+   rw_admin_group = portal_types.AccessControlEntry(
+       portal_types.GroupAccount('ctera_admins', 'demo.local'),
+       portal_enum.Role.ReadWriteAdmin
+   )
+   ro_admin_user = portal_types.AccessControlEntry(
+       portal_types.UserAccount('jsmith', 'demo.local'),
+       portal_enum.Role.ReadOnlyAdmin
+   )
+   admin.directoryservice.set_access_control([rw_admin_group, ro_admin_user], portal_enum.Role.Disabled)
+
+.. automethod:: cterasdk.core.directoryservice.DirectoryService.disconnect
+   :noindex:
+
+.. code-block:: python
+
+   admin.directoryservice.disconnect()
 
 Devices
 -------
