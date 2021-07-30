@@ -714,6 +714,21 @@ Directory Services
    )
    admin.directoryservice.connect('demo.local', 'svc_account', 'P@ssw0rd1', mapping=mapping, domain_controllers=portal_types.DomainControllers('172.54.3.52'), acl=[rw_admin, ro_admin])
 
+.. automethod:: cterasdk.core.directoryservice.DirectoryService.domains
+   :noindex:
+
+.. code-block:: python
+
+   print(admin.directoryservice.domains())
+
+
+.. automethod:: cterasdk.core.directoryservice.DirectoryService.get_connected_domain
+   :noindex:
+
+.. code-block:: python
+
+   print(admin.directoryservice.get_connected_domain())
+
 .. automethod:: cterasdk.core.directoryservice.DirectoryService.get_advanced_mapping
    :noindex:
 
