@@ -170,7 +170,7 @@ class DirectoryService(BaseCommand):
 
     def get_connected_domain(self):
         """
-        Get the connected domain information
+        Get the connected domain information. Returns `None` if the Portal tenant is not connected to a domain
 
         :return str: The connected domain
         """
