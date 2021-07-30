@@ -59,6 +59,7 @@ class DirectoryService(BaseCommand):
         param.accessControlRules = None
         param.idMapping = None
         param.fetchMode = fetch
+        param.ipAddresses = None
 
         if domain_controllers:
             param.ipAddresses = Object()
@@ -166,6 +167,19 @@ class DirectoryService(BaseCommand):
             logging.getLogger().info('Updated default role')
 
         return response
+
+    def get_connected_domain(self):
+        """
+        Get the connected domain information. Returns `None` if the Portal tenant is not connected to a domain
+
+        :return str: The connected domain
+        """
+        domain = None
+        try:
+            domain = self._portal.get('/directoryConnector/domain')
+        except CTERAException:
+            pass
+        return domain
 
     def domains(self):
         """
