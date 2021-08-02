@@ -64,7 +64,7 @@ class Syslog(BaseCommand):
             current_config.server = server
         if port:
             current_config.port = port
-        if proto:
+        if protocol:
             current_config.protocol = protocol
         if min_severity:
             current_config.minSeverity = min_severity
