@@ -26,13 +26,13 @@ class Syslog(BaseCommand):
         """
         return self._portal.get('/settings/logsSettings/syslogConfig')
 
-    def enable(self, server, port=514, proto=IPProtocol.UDP, min_severity=Severity.INFO):
+    def enable(self, server, port=514, protocol=IPProtocol.UDP, min_severity=Severity.INFO):
         """
         Enable Syslog
 
         :param str server: Syslog server address
         :param int,optional port: Syslog server port
-        :param cterasdk.core.enum.IPProtocol,optional proto: Syslog server IP protocol
+        :param cterasdk.core.enum.IPProtocol,optional protocol: Syslog server IP protocol
         :param cterasdk.core.enum.Severity,optional min_severity: Minimum log severity to forward
         """
         param = Object()
@@ -41,20 +41,20 @@ class Syslog(BaseCommand):
         param.server = server
         param.minSeverity = min_severity
         param.port = port
-        param.protocol = proto
+        param.protocol = protocol
         param.useClientCertificate = False
         logging.getLogger().info('Enabling syslog.')
         response = self._portal.put('/settings/logsSettings/syslogConfig', param)
         logging.getLogger().info('Syslog enabled.')
         return response
 
-    def modify(self, server=None, port=None, proto=None, min_severity=None):
+    def modify(self, server=None, port=None, protocol=None, min_severity=None):
         """
         Modify Syslog log forwarding configuration
 
         :param str server: Syslog server address
         :param int,optional port: Syslog server port
-        :param cterasdk.core.enum.IPProtocol,optional proto: Syslog server IP protocol
+        :param cterasdk.core.enum.IPProtocol,optional protocol: Syslog server IP protocol
         :param cterasdk.core.enum.Severity,optional min_severity: Minimum log severity to forward
         """
         current_config = self.get_configuration()
@@ -64,8 +64,8 @@ class Syslog(BaseCommand):
             current_config.server = server
         if port:
             current_config.port = port
-        if proto:
-            current_config.proto = proto
+        if protocol:
+            current_config.protocol = protocol
         if min_severity:
             current_config.minSeverity = min_severity
 
@@ -76,7 +76,7 @@ class Syslog(BaseCommand):
             {
                 'server': current_config.server,
                 'port': current_config.port,
-                'protocol': current_config.proto,
+                'protocol': current_config.protocol,
                 'minSeverity': current_config.minSeverity
             }
         )
