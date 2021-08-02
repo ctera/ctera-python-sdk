@@ -770,6 +770,12 @@ Directory Services
    )
    admin.directoryservice.set_access_control([rw_admin_group, ro_admin_user], portal_enum.Role.Disabled)
 
+.. automethod:: cterasdk.core.directoryservice.DirectoryService.get_default_role
+
+.. code-block:: python
+
+   print(admin.directoryservice.get_default_role())
+
 .. automethod:: cterasdk.core.directoryservice.DirectoryService.disconnect
    :noindex:
 
@@ -1148,6 +1154,12 @@ Logs
 
 Syslog
 ------
+
+.. automethod:: cterasdk.core.syslog.Syslog.is_enabled
+   :noindex:
+
+.. automethod:: cterasdk.core.syslog.Syslog.get_configuration
+   :noindex:
 
 .. automethod:: cterasdk.core.syslog.Syslog.enable
    :noindex:
