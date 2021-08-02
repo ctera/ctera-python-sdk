@@ -3,6 +3,7 @@ import logging
 from .base_command import BaseCommand
 from ..common import Object
 from ..core.enum import Severity, Mode, IPProtocol
+from ..exception import CTERAException
 
 
 class Syslog(BaseCommand):
@@ -46,6 +47,39 @@ class Syslog(BaseCommand):
         response = self._portal.put('/settings/logsSettings/syslogConfig', param)
         logging.getLogger().info('Syslog enabled.')
         return response
+
+    def modify(self, server=None, port=None, proto=None, min_severity=None):
+        """
+        Modify Syslog log forwarding configuration
+
+        :param str server: Syslog server address
+        :param int,optional port: Syslog server port
+        :param cterasdk.core.enum.IPProtocol,optional proto: Syslog server IP protocol
+        :param cterasdk.core.enum.Severity,optional min_severity: Minimum log severity to forward
+        """
+        current_config = self.get_configuration()
+        if current_config.mode == Mode.Disabled:
+            raise CTERAException("Syslog configuration cannot be modified when disabled")
+        if server:
+            current_config.server = server
+        if port:
+            current_config.port = port
+        if proto:
+            current_config.proto = proto
+        if min_severity:
+            current_config.minSeverity = min_severity
+
+        logging.getLogger().info("Updating syslog server configuration.")
+        self._portal.put('/settings/logsSettings/syslogConfig', current_config)
+        logging.getLogger().info(
+            "Syslog server configured. %s",
+            {
+                'server': current_config.server,
+                'port': current_config.port,
+                'protocol': current_config.proto,
+                'minSeverity': current_config.minSeverity
+            }
+        )
 
     def disable(self):
         logging.getLogger().info('Disabling syslog.')
