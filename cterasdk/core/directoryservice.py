@@ -168,6 +168,12 @@ class DirectoryService(BaseCommand):
 
         return response
 
+    def get_default_role(self):
+        """
+        Retrieve the default role assigned when no access control entry match was found
+        """
+        return self._portal.get('/directoryConnector/noMatchRole')
+
     def get_connected_domain(self):
         """
         Get the connected domain information. Returns `None` if the Portal tenant is not connected to a domain
