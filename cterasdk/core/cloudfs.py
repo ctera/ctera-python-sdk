@@ -62,7 +62,7 @@ class CloudFS(BaseCommand):
             logging.getLogger().info('Folder group created. %s', {'name': name, 'owner': param.owner})
             return response
         except CTERAException as error:
-            logging.getLogger().error('Folder group creation failed. %s', {'name': name, 'owner': user})
+            logging.getLogger().error('Folder group creation failed. %s', {'name': name, 'owner': str(user)})
             raise error
 
     def rmfg(self, name):

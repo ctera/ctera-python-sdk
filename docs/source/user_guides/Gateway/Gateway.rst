@@ -1080,7 +1080,7 @@ SSL
 .. automethod:: cterasdk.edge.ssl.SSL.remove_storage_ca
    :noindex:
 
-.. automethod:: cterasdk.edge.ssl.SSL.set_certificate
+.. automethod:: cterasdk.edge.ssl.SSL.import_certificate
    :noindex:
 
 .. code-block:: python
@@ -1096,7 +1096,7 @@ SSL
    Specify certificates in the following order: domain cert, intermediary certs, CA cert
    You may include as many intermediate certificates as needed
    """
-   filer.ssl.set_certificate(private_key, certificate, intermediate_cert, ca_certificate)
+   filer.ssl.import_certificate(private_key, certificate, intermediate_cert, ca_certificate)
 
 .. danger: Exercise caution. Test thoroughly prior to implementing in production. Ensure the integrity of the PEM encoded private key and certificates. Supplying an invalid private key or certificate will disable administrative access to the filer and would require CTERA Support to re-enable it.
 
