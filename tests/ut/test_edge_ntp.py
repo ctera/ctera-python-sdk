@@ -7,6 +7,13 @@ from tests.ut import base_edge
 
 class TestEdgeNTP(base_edge.BaseEdgeTest):
 
+    def test_get_configuration(self):
+        get_response = 'Success'
+        self._init_filer(get_response=get_response)
+        ret = ntp.NTP(self._filer).get_configuration()
+        self._filer.get.assert_called_once_with('/config/time')
+        self.assertEqual(ret, get_response)
+
     def test_enable_ntp(self):
         self._init_filer()
         ntp.NTP(self._filer).enable()
