@@ -6,3 +6,8 @@ class XMLTypes:
     ID = 'id'
     CLASS = 'class'
     UUID = 'uuid'
+    DB = 'db'
+    VERSION = 'version'
+    FIRMWARE = 'firmware'
+    NS = 'xmlns:xsi'
+    LOCATION = 'xsi:noNamespaceSchemaLocation'
