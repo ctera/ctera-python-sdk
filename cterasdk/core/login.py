@@ -22,5 +22,6 @@ class Login(BaseCommand):
         """
         Log out of the portal
         """
+        username = self._portal.session().user.name
         self._portal.form_data('/logout', {})
-        logging.getLogger().info("User logged out. %s", {'host': self._portal.host()})
+        logging.getLogger().info("User logged out. %s", {'host': self._portal.host(), 'user': username})
