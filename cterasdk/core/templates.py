@@ -4,6 +4,7 @@ from ..common import union, parse_base_object_ref, ApplicationBackupSet, PolicyR
 from ..exception import CTERAException, ObjectNotFoundException
 from .base_command import BaseCommand
 from . import query
+from .enum import Platform
 
 
 class Templates(BaseCommand):
@@ -37,24 +38,42 @@ class Templates(BaseCommand):
             raise ObjectNotFoundException('Could not find server', '/deviceTemplates/%s' % name, name=name)
         return template
 
-    def add(self, name, description=None, include_sets=None, exclude_sets=None, apps=None, backup_schedule=None, versions=None):
+    def add(self, name, description=None, include_sets=None, exclude_sets=None,
+            apps=None, backup_schedule=None, versions=None, scripts=None, cli_commands=None):
         """
         Add a Configuration Template
 
         :param str name: Name of the template
-        :param str description: Template description
-        :param list[cterasdk.common.types.FilterBackupSet] include_sets: List of backup sets to include
-        :param list[cterasdk.common.types.FilterBackupSet] exclude_sets: List of backup sets to exclude
-        :param list[cterasdk.core.enum.Application] apps: List of applications to back up
-        :param cterasdk.common.types.TaskSchedule backup_schedule: Backup schedule
-        :param list[cterasdk.core.types.PlatformVersion] versions: List of platforms and their associated versions.
+        :param str,optional description: Template description
+        :param list[cterasdk.common.types.FilterBackupSet],optional include_sets: List of backup sets to include
+        :param list[cterasdk.common.types.FilterBackupSet],optional exclude_sets: List of backup sets to exclude
+        :param list[cterasdk.common.enum.Application],optional apps: List of applications to back up
+        :param cterasdk.common.types.TaskSchedule,optional backup_schedule: Backup schedule
+        :param list[cterasdk.core.types.PlatformVersion],optional versions: List of platforms and their associated versions.
          Pass `None` to inehrit the default settings from the Global Administration Portal
+        :param list[cterasdk.core.types.TemplateScript],optional scripts: Scripts to execute after logon, before or after backup
+        :param list[str],optional cli_commands: Template CLI commands to execute
         """
         param = Object()
         param._classname = 'DeviceTemplate'  # pylint: disable=protected-access
         param.name = name
         param.description = description
 
+        self._configure_firmware_settings(param, versions)
+
+        param.deviceSettings = Object()
+        param.deviceSettings._classname = 'DeviceTemplateSettings'  # pylint: disable=protected-access
+
+        Templates._configure_backup_settings(param, include_sets, exclude_sets, backup_schedule, apps)
+        Templates._add_scripts(param, scripts)
+        Templates._add_cli_commands(param, cli_commands)
+
+        logging.getLogger().info('Adding template. %s', {'name': name})
+        response = self._portal.add('/deviceTemplates', param)
+        logging.getLogger().info('Template added. %s', {'name': name})
+        return response
+
+    def _configure_firmware_settings(self, param, versions):
         param.firmwaresSettings = Object()
         param.firmwaresSettings._classname = 'FirmwaresSettings'  # pylint: disable=protected-access
 
@@ -65,9 +84,8 @@ class Templates(BaseCommand):
             param.firmwaresSettings.useGlobal = True
             param.firmwaresSettings.firmwares = None
 
-        param.deviceSettings = Object()
-        param.deviceSettings._classname = 'DeviceTemplateSettings'  # pylint: disable=protected-access
-
+    @staticmethod
+    def _configure_backup_settings(param, include_sets, exclude_sets, backup_schedule, apps):
         if include_sets or exclude_sets or backup_schedule or apps:
             param.deviceSettings.backup = Object()
             param.deviceSettings.backup._classname = 'BackupTemplate'  # pylint: disable=protected-access
@@ -88,10 +106,26 @@ class Templates(BaseCommand):
                 param.deviceSettings.backup.applicationsTopic.overrideTemplate = True
                 param.deviceSettings.backup.applicationsTopic.includeApps = ApplicationBackupSet(apps)
 
-        logging.getLogger().info('Adding template. %s', {'name': name})
-        response = self._portal.add('/deviceTemplates', param)
-        logging.getLogger().info('Template added. %s', {'name': name})
-        return response
+    @staticmethod
+    def _add_scripts(param, scripts):
+        if scripts:
+            param.deviceSettings.scripts = Object()
+            param.deviceSettings.scripts._classname = 'ScriptTemplates'  # pylint: disable=protected-access
+            for script in scripts:
+                server_object = script.to_server_object()
+                if script.platform == Platform.Windows:
+                    param.deviceSettings.scripts.windowsScripts = server_object
+                if script.platform == Platform.Linux:
+                    param.deviceSettings.scripts.linuxScripts = server_object
+                if script.platform == Platform.OSX:
+                    param.deviceSettings.scripts.macScripts = server_object
+
+    @staticmethod
+    def _add_cli_commands(param, cli_commands):
+        if cli_commands:
+            param.deviceSettings.cliCommands = Object()
+            param.deviceSettings.cliCommands._classname = 'CliCommandTemplate'  # pylint: disable=protected-access
+            param.deviceSettings.cliCommands.cliCommands = cli_commands
 
     def _convert_to_template_firmwares(self, versions):
         firmwares = {image.name: parse_base_object_ref(image.baseObjectRef) for image in self._portal.firmwares.list_images()}
