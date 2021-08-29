@@ -9,7 +9,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, PublicFormat, NoEncryption, load_pem_private_key
 
 from .. import config
-from ..exception import LocalFileNotFound
+from ..exception import CTERAException
 from .filesystem import FileSystem
 
 
@@ -94,14 +94,16 @@ class PrivateKey:
 
     @staticmethod
     def load_private_key(key, password=None):
-        if isinstance(key, bytes):
-            return PrivateKey.from_bytes(key, password)
-
         try:
-            FileSystem.instance().get_local_file_info(key)
-            return PrivateKey.from_file(key, password)
-        except (OSError, LocalFileNotFound):
+            if isinstance(key, bytes):
+                return PrivateKey.from_bytes(key, password)
+
+            if FileSystem.instance().exists(key):
+                return PrivateKey.from_file(key, password)
             return PrivateKey.from_string(key, password)
+        except ValueError as e:
+            logging.getLogger().error('Failed loading private key.')
+            raise CTERAException('Failed loading private key', e, reason=str(e))
 
 
 class X509Certificate:
@@ -151,14 +153,16 @@ class X509Certificate:
 
     @staticmethod
     def load_certificate(cert):
-        if isinstance(cert, bytes):
-            return X509Certificate.from_bytes(cert)
-
         try:
-            FileSystem.instance().get_local_file_info(cert)
-            return X509Certificate.from_file(cert)
-        except (OSError, LocalFileNotFound):
+            if isinstance(cert, bytes):
+                return X509Certificate.from_bytes(cert)
+
+            if FileSystem.instance().exists(cert):
+                return X509Certificate.from_file(cert)
             return X509Certificate.from_string(cert)
+        except ValueError as e:
+            logging.getLogger().error('Failed loading certificate.')
+            raise CTERAException('Failed loading certificate', e, reason=str(e))
 
     def __str__(self):
         return str(
