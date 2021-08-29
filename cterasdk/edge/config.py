@@ -98,7 +98,7 @@ class Config(BaseCommand):
         data = None
         if self._filesystem.exists(config):
             logging.getLogger().info('Reading the Edge Filer configuration from file. %s', {'path': config})
-            with open(config, 'r') as f:
+            with open(config, 'r', encoding='utf-8') as f:
                 data = f.read()
         else:
             data = config
