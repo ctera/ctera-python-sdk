@@ -22,9 +22,9 @@ class BaseCoreServicesTest(base.BaseTest):
         for idx, source in enumerate(sources):
             param = Object()
             param._classname = 'SrcDstParam'  # pylint: disable=protected-access
-            param.src = self._services.file_browser_base_path + '/' + source
+            param.src = self._services.cloud_drive_base_path + '/' + source
             if destinations:
-                param.dest = self._services.file_browser_base_path + '/' + destinations[idx]
+                param.dest = self._services.cloud_drive_base_path + '/' + destinations[idx]
             else:
                 param.dest = None
             action_resource_param.urls.append(param)

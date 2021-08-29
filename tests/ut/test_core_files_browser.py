@@ -1,7 +1,7 @@
 import os
 from unittest import mock
 
-from cterasdk.core.files.browser import FileBrowser
+from cterasdk.core.files.browser import CloudDrive
 from tests.ut import base_core
 
 
@@ -10,7 +10,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
 
     def setUp(self):
         super().setUp()
-        self.files = FileBrowser(self._global_admin, TestCoreFilesBrowser._base_path)
+        self.files = CloudDrive(self._global_admin, TestCoreFilesBrowser._base_path)
 
     def test_ls(self):
         path = 'cloud/Users'

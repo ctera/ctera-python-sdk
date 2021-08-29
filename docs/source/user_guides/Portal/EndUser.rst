@@ -12,7 +12,7 @@ Instantiate a Services Portal object
 
 .. code-block:: python
 
-   user = ServicesPortal('chopin.ctera.com') # will use HTTPS over port 443
+   user = ServicesPortal('portal.ctera.com') # will use HTTPS over port 443
 
 .. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure `chopin-core` to automatically trust the server's certificate, using: ``config.http['ssl'] = 'Trust'``
 
@@ -30,7 +30,7 @@ Logging in
 
 .. code-block:: python
 
-   user.login('admin', 'G3neralZ0d!')
+   user.login('walice', 'G3neralZ0d!')
 
 .. automethod:: cterasdk.object.Portal.ServicesPortal.logout
    :noindex:
