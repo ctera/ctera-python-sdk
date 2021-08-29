@@ -106,17 +106,6 @@ class TaskStatus:
     Completed = "completed"
 
 
-class TaskType:
-    """
-    Edge Filer Task Type
-
-    :ivar str Discovery: Discovery
-    :ivar str Migration: Migration
-    """
-    Discovery = 'Discovery'
-    Migration = 'Migration'
-
-
 class TCPConnectRC:
     Open = "Open"
 
