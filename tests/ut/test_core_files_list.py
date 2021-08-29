@@ -19,7 +19,7 @@ class BaseCoreServicesFilesList(base_core_services.BaseCoreServicesTest):
         iterator = self._services.files.ls(self._path)
         files = BaseCoreServicesFilesList.files[0] + BaseCoreServicesFilesList.files[1]
         for item in iterator:
-            self.assertEqual(item.href, self._services.file_browser_base_path + '/' + files.pop(0))
+            self.assertEqual(item.href, self._services.cloud_drive_base_path + '/' + files.pop(0))
         self._services.execute.assert_has_calls(
             [
                 mock.call('', 'fetchResources', mock.ANY),

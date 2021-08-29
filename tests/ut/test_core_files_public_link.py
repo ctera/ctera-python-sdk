@@ -31,7 +31,7 @@ class BaseCoreServicesFilesPublicLink(base_core_services.BaseCoreServicesTest):
     def _create_public_link_param(self, access_mode, expire_in):
         param = Object()
         param._classname = 'CreateShareParam'  # pylint: disable=protected-access
-        param.url = self._services.file_browser_base_path + '/' + self._path
+        param.url = self._services.cloud_drive_base_path + '/' + self._path
         param.share = Object()
         param.share._classname = 'ShareConfig'  # pylint: disable=protected-access
         param.share.accessMode = access_mode

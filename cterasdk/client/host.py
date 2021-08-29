@@ -254,6 +254,6 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
         """
         Return the name of the logged in user.
 
-        :return str: The name of the logged in user
+        :return cterasdk.common.object.Object: The session object of the current user
         """
         return self._session.whoami()

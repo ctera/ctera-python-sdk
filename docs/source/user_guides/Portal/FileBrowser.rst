@@ -4,6 +4,11 @@ File Browser
 
 .. contents:: Table of Contents
 
+File Browser
+------------
+
+The FileBrowser class is a parent class to :py:class:`cterasdk.common.files.browser.CloudDrive` and :py:class:`cterasdk.common.files.browser.Backups` supporting file access operations
+
 List
 ====
 
@@ -35,61 +40,6 @@ Download
 
    file_browser.download('My Files/Documents/Sample.docx')
 
-Create Directory
-================
-
-.. automethod:: cterasdk.core.files.browser.FileBrowser.mkdir
-   :noindex:
-
-.. code:: python
-
-   file_browser.mkdir('My Files/Documents')
-
-   file_browser.mkdir('The/quick/brown/fox', recurse = True)
-
-Rename
-======
-
-.. automethod:: cterasdk.core.files.browser.FileBrowser.rename
-   :noindex:
-
-.. code:: python
-
-   file_browser.rename('My Files/Documents/Sample.docx', 'Wizard Of Oz.docx')
-
-Delete
-======
-.. automethod:: cterasdk.core.files.browser.FileBrowser.delete
-   :noindex:
-
-.. code:: python
-
-   file_browser.delete('My Files/Documents/Sample.docx')
-
-.. automethod:: cterasdk.core.files.browser.FileBrowser.delete_multi
-   :noindex:
-
-.. code:: python
-
-   file_browser.delete_multi('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
-
-Recover
-=======
-
-.. automethod:: cterasdk.core.files.browser.FileBrowser.undelete
-   :noindex:
-
-.. code:: python
-
-   file_browser.undelete('My Files/Documents/Sample.docx')
-
-.. automethod:: cterasdk.core.files.browser.FileBrowser.undelete_multi
-   :noindex:
-
-.. code:: python
-
-   file_browser.undelete_multi('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
-
 Copy
 ====
 
@@ -106,23 +56,6 @@ Copy
 .. code:: python
 
    file_browser.copy_multi(['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.xlsx'], 'The/quick/brown/fox')
-
-Move
-====
-
-.. automethod:: cterasdk.core.files.browser.FileBrowser.move
-   :noindex:
-
-.. code:: python
-
-   file_browser.move('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
-
-.. automethod:: cterasdk.core.files.browser.FileBrowser.move_multi
-   :noindex:
-
-.. code:: python
-
-   file_browser.move_multi(['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.xlsx'], 'The/quick/brown/fox')
 
 Create Public Link
 ==================
@@ -149,10 +82,119 @@ Create Public Link
 
 .. warning:: you cannot use this tool to create read write public links to files.
 
+Cloud Drive
+-----------
+
+The CloudDrive class is a subclass to :py:class:`cterasdk.common.files.browser.FileBrowser` enabling file access to the user's Cloud Drive
+
+.. code:: python
+
+   from getpass import getpass
+
+   """Accessing Cloud Drive Files and Folders as a Global Administrator"""
+   admin = GlobalAdmin('portal.ctera.com')  # logging in to /admin
+   admin.login('admin', getpass())
+   file_browser = admin.files # the field is an instance of CloudDrive class object
+
+   """Accessing Cloud Drive Files and Folders as a Tenant User Account"""
+   user = ServicesPortal('portal.ctera.com')  # logging in to /ServicesPortal
+   user.login('bwayne', getpass())
+   file_browser = user.files # the field is an instance of CloudDrive class object
+
+Create Directory
+================
+
+.. automethod:: cterasdk.core.files.browser.CloudDrive.mkdir
+   :noindex:
+
+.. code:: python
+
+   file_browser.mkdir('My Files/Documents')
+
+   file_browser.mkdir('The/quick/brown/fox', recurse = True)
+
+Rename
+======
+
+.. automethod:: cterasdk.core.files.browser.CloudDrive.rename
+   :noindex:
+
+.. code:: python
+
+   file_browser.rename('My Files/Documents/Sample.docx', 'Wizard Of Oz.docx')
+
+Delete
+======
+.. automethod:: cterasdk.core.files.browser.CloudDrive.delete
+   :noindex:
+
+.. code:: python
+
+   file_browser.delete('My Files/Documents/Sample.docx')
+
+.. automethod:: cterasdk.core.files.browser.CloudDrive.delete_multi
+   :noindex:
+
+.. code:: python
+
+   file_browser.delete_multi('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
+
+Undelete
+========
+
+.. automethod:: cterasdk.core.files.browser.CloudDrive.undelete
+   :noindex:
+
+.. code:: python
+
+   file_browser.undelete('My Files/Documents/Sample.docx')
+
+.. automethod:: cterasdk.core.files.browser.CloudDrive.undelete_multi
+   :noindex:
+
+.. code:: python
+
+   file_browser.undelete_multi('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
+
+Move
+====
+
+.. automethod:: cterasdk.core.files.browser.CloudDrive.move
+   :noindex:
+
+.. code:: python
+
+   file_browser.move('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
+
+.. automethod:: cterasdk.core.files.browser.CloudDrive.move_multi
+   :noindex:
+
+.. code:: python
+
+   file_browser.move_multi(['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.xlsx'], 'The/quick/brown/fox')
+
+Upload
+======
+
+.. automethod:: cterasdk.core.files.browser.CloudDrive.upload
+
+.. code:: python
+
+   """
+   Upload the 'Tree.jpg' file as an End User to 'Forest' directory
+   """
+   file_browser.files.upload(r'C:\Users\BruceWayne\Downloads\Tree.jpg', 'Images/Forest')
+
+   """
+   Upload the 'Tree.jpg' file as an Administrator to an End User's Cloud Drive
+   """
+   file_browser.files.upload(r'C:\Users\Administrator\Downloads\Tree.jpg', 'Bruce Wayne/Images/Forest')
+
+
 Collaboration Shares
 ====================
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.share
+.. automethod:: cterasdk.core.files.browser.CloudDrive.share
    :noindex:
 
 .. code:: python
@@ -208,17 +250,17 @@ Collaboration Shares
 
    file_browser.share('Cloud/Albany', [albany_rcpt, cleveland_rcpt])
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.add_share_recipients
+.. automethod:: cterasdk.core.files.browser.CloudDrive.add_share_recipients
    :noindex:
 
 .. note:: if the share recipients provided as an argument already exist, they will be skipped and not updated
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.remove_share_recipients
+.. automethod:: cterasdk.core.files.browser.CloudDrive.remove_share_recipients
    :noindex:
 
 ..
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.unshare
+.. automethod:: cterasdk.core.files.browser.CloudDrive.unshare
    :noindex:
 
 .. code:: python
@@ -229,3 +271,22 @@ Collaboration Shares
    file_browser.unshare('Codebase')
    file_browser.unshare('My Files/Projects/2020/ProjectX')
    file_browser.unshare('Cloud/Albany')
+
+Backups
+-------
+
+The Backups class is a subclass to :py:class:`cterasdk.common.files.browser.FileBrowser` enabling access to files and folders backed up by CTERA Edge Filers and Drive Apps
+
+.. code:: python
+
+   from getpass import getpass
+
+   """Accessing Backups as a Global Administrator"""
+   admin = GlobalAdmin('portal.ctera.com')  # logging in to /admin
+   admin.login('admin', getpass())
+   file_browser = admin.files # the field is an instance of Backups class object
+
+   """Accessing Backups as a Tenant User Account"""
+   user = ServicesPortal('portal.ctera.com')  # logging in to /ServicesPortal
+   user.login('bwayne', getpass())
+   file_browser = user.backups # the field is an instance of Backups class object
