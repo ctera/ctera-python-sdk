@@ -1,7 +1,7 @@
 import logging
 
 from ..common import Object
-from .enum import Mode, CIFSPacketSigning
+from .enum import Mode, CIFSPacketSigning, SMBProtocol
 from ..exception import CTERAException, InputError
 from .base_command import BaseCommand
 
@@ -43,10 +43,14 @@ class SMB(BaseCommand):
             raise CTERAException('Invalid packet signing co', error)
 
     def disable(self):
-        """ Disble SMB """
+        """ Disable SMB """
         logging.getLogger().info('Disabling SMB server.')
         self._gateway.put('/config/fileservices/cifs/mode', Mode.Disabled)
         logging.getLogger().info('SMB server disabled.')
+
+    def restart(self):
+        self.disable()
+        self.enable()
 
     def get_configuration(self):
         """
@@ -63,6 +67,10 @@ class SMB(BaseCommand):
             obj.compatibility_mode = cifs.compatibilityMode
             obj.cifs_unix_extensions = cifs.cifsUnixExtensions
             obj.abe_enabled = cifs.hideUnreadable
+            obj.min_client_protocol = cifs.minClientProtocol
+            obj.max_client_protocol = cifs.maxClientProtocol
+            obj.min_server_protocol = cifs.minServerProtocol
+            obj.max_server_protocol = cifs.maxServerProtocol
         return obj
 
     def modify(
@@ -71,7 +79,11 @@ class SMB(BaseCommand):
             idle_disconnect_time=None,
             compatibility_mode=None,
             unix_extensions=None,
-            abe_enabled=None):
+            abe_enabled=None,
+            min_client_protocol=None,
+            max_client_protocol=None,
+            min_server_protocol=None,
+            max_server_protocol=None):
         """
         Modify the current SMB Configuration. Parameters that are not passed will not be affected
 
@@ -80,6 +92,10 @@ class SMB(BaseCommand):
         :param bool,optional compatibility_mode: Enable/Disable compatibility mode
         :param bool,optional unix_extensions: Enable/Disable unix extensions
         :param bool,optional abe_enabled: Enable/Disable ABE
+        :param cterasdk.edge.enum.SMBProtocol,optional min_client_protocol: Minimum client protocol version
+        :param cterasdk.edge.enum.SMBProtocol,optional max_client_protocol: Maximum client protocol version
+        :param cterasdk.edge.enum.SMBProtocol,optional min_server_protocol: Minimum server protocol version
+        :param cterasdk.edge.enum.SMBProtocol,optional max_server_protocol: Maximum server protocol version
         """
         cifs = self._gateway.get('/config/fileservices/cifs')
         if cifs.mode != Mode.Enabled:
@@ -95,6 +111,18 @@ class SMB(BaseCommand):
             cifs.cifsUnixExtensions = unix_extensions
         if abe_enabled is not None:
             cifs.hideUnreadable = abe_enabled
+        if min_client_protocol is not None:
+            self._verify_smb_protocol_version_parameter(min_client_protocol)
+            cifs.minClientProtocol = min_client_protocol
+        if max_client_protocol is not None:
+            self._verify_smb_protocol_version_parameter(max_client_protocol)
+            cifs.maxClientProtocol = max_client_protocol
+        if min_server_protocol is not None:
+            self._verify_smb_protocol_version_parameter(min_server_protocol)
+            cifs.minServerProtocol = min_server_protocol
+        if max_server_protocol is not None:
+            self._verify_smb_protocol_version_parameter(max_server_protocol)
+            cifs.maxServerProtocol = max_server_protocol
         try:
             self._gateway.put('/config/fileservices/cifs', cifs)
             logging.getLogger().info('SMB configuration updated.')
@@ -102,6 +130,12 @@ class SMB(BaseCommand):
             msg = 'Failed to update SMB configuration.'
             logging.getLogger().error(msg)
             raise CTERAException(message=msg, instace=error)
+
+    @staticmethod
+    def _verify_smb_protocol_version_parameter(smb_protocol_version):
+        options = [v for k, v in SMBProtocol.__dict__.items() if not k.startswith('_')]
+        if smb_protocol_version not in options:
+            raise InputError('Invalid SMB protocol version', smb_protocol_version, options)
 
     @staticmethod
     def _verify_packet_signing_parameter(packet_signing):
