@@ -1,7 +1,11 @@
 from datetime import datetime
 import logging
+import copy
 
-from ..lib import FileSystem
+from ..exception import CTERAException
+from ..convert import fromxmlstr, toxmlstr, ParseException
+from ..common import Device, delete_attrs
+from ..lib import FileSystem, TempfileServices
 from .base_command import BaseCommand
 
 
@@ -48,8 +52,68 @@ class Config(BaseCommand):
         logging.getLogger().info('Configuring device hostname. %s', {'hostname': hostname})
         return self._gateway.put('/config/device/hostname', hostname)
 
+    def import_config(self, config, exclude=None):
+        """
+        Import the Edge Filer configuration
+
+        :param str config: A string or a path to the Edge Filer configuration file
+        :param list[str],optional delete_attrs:
+         List of configuration properties to exclude from import
+        """
+        database = None
+        if isinstance(config, Device):
+            database = copy.deepcopy(config)
+        elif isinstance(config, str):
+            database = self.load_config(config)
+
+        if exclude:
+            delete_attrs(database, exclude)
+
+        path = self._filesystem.join(TempfileServices.mkdir(), '{}.xml'.format(self._gateway.session().host))
+        self._filesystem.write(path, toxmlstr(database, True).encode('utf-8'))
+
+        return self._import_configuration(path)
+
+    def _import_configuration(self, path):
+        logging.getLogger().info('Importing Edge Filer configuration.')
+        info = self._filesystem.get_local_file_info(path)
+        with open(path, 'rb') as fd:
+            response = self._gateway.upload(
+                '/config',
+                dict(
+                    name='import',
+                    type='db',
+                    config=(info['name'], fd, info['mimetype'][0])
+                )
+            )
+            logging.getLogger().info('Imported Edge Filer configuration.')
+        return response
+
+    def load_config(self, config):
+        """
+        Load the Edge Filer configuration
+
+        :param str config: A string or a path to the Edge Filer configuration file
+        """
+        data = None
+        if self._filesystem.exists(config):
+            logging.getLogger().info('Reading the Edge Filer configuration from file. %s', {'path': config})
+            with open(config, 'r') as f:
+                data = f.read()
+        else:
+            data = config
+
+        try:
+            database = fromxmlstr(data)
+            logging.getLogger().info('Completed parsing the Edge Filer configuration. %s', {'firmware': database.firmware})
+            return database
+        except ParseException:
+            logging.getLogger().error("Failed parsing the Edge Filer's configuration.")
+            raise CTERAException("Failed parsing the Edge Filer's configuration")
+
     def export(self, destination=None):
-        """ Export the Gateway configuration
+        """
+        Export the Edge Filer configuration
 
         :param str,optional destination:
          File destination, defaults to the default directory

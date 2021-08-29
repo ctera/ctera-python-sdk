@@ -5,7 +5,7 @@ from xml.etree.ElementTree import fromstring, ParseError
 
 from cterasdk.convert.xml_types import XMLTypes
 from .exception import ParseException
-from ..common import Item, Object
+from ..common import Item, Object, Device
 
 
 def ParseValue(data):
@@ -145,5 +145,18 @@ def fromxmlstr(string):  # pylint: disable=too-many-branches,too-many-statements
                         q.put(kid)
             else:
                 SetAppendValue(item, None)              # include empty attrs
+        elif item.node.tag == XMLTypes.DB:              # db.xml
+            item.value = Device(
+                item.node.attrib.get(XMLTypes.ID),
+                item.node.attrib.get(XMLTypes.VERSION),
+                item.node.attrib.get(XMLTypes.FIRMWARE)
+            )
+            SetAppendValue(item, item.value)
+
+            kid = Item()
+            kid.id = item.node.attrib.get(XMLTypes.ID)
+            kid.parent = item
+            kid.node = item.node.getchildren()[0]
+            q.put(kid)
 
     return root.value
