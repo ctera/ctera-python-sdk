@@ -23,7 +23,7 @@ class SSH(BaseCommand):
         if public_key is None:
             if public_key_file is not None:
                 FileSystem.instance().get_local_file_info(public_key_file)
-                with open(public_key_file, 'r') as f:
+                with open(public_key_file, 'r', encoding='utf-8') as f:
                     public_key = f.read()
             else:
                 public_key = CryptoServices.generate_and_save_key_pair(self._gateway.host(), exponent=exponent, key_size=key_size)

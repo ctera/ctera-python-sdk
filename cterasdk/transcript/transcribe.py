@@ -71,13 +71,13 @@ class Transcribe():
 
     def _append_content(self, content):
         header, footer = self._get_header_footer()
-        with open(self._filename, 'w') as f:
+        with open(self._filename, 'w', encoding='utf-8') as f:
             f.write(header + content + Transcribe.COMMENT + footer)
 
     def _get_header_footer(self):
         filename = self._filename if os.path.exists(self._filename) else \
             os.path.join(pathlib.Path(__file__).parent.absolute(), 'apidoc.template')
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='utf-8') as f:
             content = f.read()
         array = content.split(Transcribe.COMMENT)
         return array[0], array[1]

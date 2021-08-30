@@ -21,7 +21,7 @@ def merge(d1, d2):
 
     :return dict: the merged dictionary
     """
-    d3 = dict()
+    d3 = {}
     if d1:
         d3.update(d1)
     if d2:

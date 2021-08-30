@@ -80,7 +80,7 @@ class PrivateKey:
 
     @staticmethod
     def from_file(path, password=None):
-        with open(path, 'r') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             data = f.read()
         return PrivateKey.from_string(data, password)
 
@@ -137,7 +137,7 @@ class X509Certificate:
 
     @staticmethod
     def from_file(path):
-        with open(path, 'r') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             data = f.read()
         return X509Certificate.from_string(data)
 
