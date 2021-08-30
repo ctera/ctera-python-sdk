@@ -1,8 +1,9 @@
 from abc import ABC
 from collections import namedtuple
 from ..common import DateTimeUtils, StringCriteriaBuilder, ListCriteriaBuilder, Object
+from ..lib import FileSystem
 
-from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, BucketType, LocationType
+from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, BucketType, LocationType, Platform
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
@@ -437,3 +438,83 @@ class ADDomainIDMapping(Object):
         self.domainFlatName = domain
         self.minID = start
         self.maxID = end
+
+
+class TemplateScript:
+
+    def __init__(self, platform):
+        self._platform = platform
+        self._after_logon = None
+        self._before_backup = None
+        self._after_backup = None
+
+    @property
+    def platform(self):
+        return self._platform
+
+    @staticmethod
+    def windows():
+        """
+        Configure Windows Scripts
+        """
+        return TemplateScript(Platform.Windows)
+
+    @staticmethod
+    def linux():
+        """
+        Configure Windows Scripts
+        """
+        return TemplateScript(Platform.Linux)
+
+    @staticmethod
+    def mac():
+        """
+        Configure Windows Scripts
+        """
+        return TemplateScript(Platform.OSX)
+
+    def after_logon(self, after_logon):
+        """
+        Set the post logon script
+
+        :param str after_logon: A string or path to the script file
+        """
+        self._after_logon = TemplateScript._get_contents(after_logon)
+        return self
+
+    def before_backup(self, before_backup):
+        """
+        Set the pre backup script
+
+        :param str before_backup: A string or path to the script file
+        """
+        self._before_backup = TemplateScript._get_contents(before_backup)
+        return self
+
+    def after_backup(self, after_backup):
+        """
+        Set the post backup script
+
+        :param str after_backup: A string or path to the script file
+        """
+        self._after_backup = TemplateScript._get_contents(after_backup)
+        return self
+
+    @staticmethod
+    def _get_contents(shell_script):
+        if FileSystem.instance().exists(shell_script):
+            with open(shell_script, 'r', encoding='utf-8') as f:
+                data = f.read()
+            return data
+        return shell_script
+
+    def to_server_object(self):
+        param = Object()
+        param._classname = 'OsScriptTemplates'  # pylint: disable=protected-access
+        if self._before_backup is not None:
+            param.beforeBackup = self._before_backup
+        if self._after_backup is not None:
+            param.afterBackup = self._after_backup
+        if self._after_logon is not None:
+            param.afterFirtSignIn = self._after_logon
+        return param

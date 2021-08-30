@@ -13,7 +13,7 @@ Instantiate a Global Admin object
 
 .. code-block:: python
 
-   admin = GlobalAdmin('chopin.ctera.com') # will use HTTPS over port 443
+   admin = GlobalAdmin('portal.ctera.com') # will use HTTPS over port 443
 
 .. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure this library to automatically trust the server's certificate, using: ``config.http['ssl'] = 'Trust'``
 
@@ -91,7 +91,7 @@ Navigating
 
 .. code-block:: python
 
-   admin.portals.browse('chopin')
+   admin.portals.browse('portal')
 
 Core Methods
 ------------
@@ -434,7 +434,7 @@ Configuration Templates
    #. A time-range class, used to configure backups to run at a specific time. :py:class:`cterasdk.common.types.TimeRange`
    #. Enumerator containing applications supported for backup. :py:class:`cterasdk.common.enum.Application`
    #. A named tuple defining a platform and a software version. :py:class:`cterasdk.core.types.PlatformVersion`
-   #. Enumerator containing a list of platforms. c:py:class:`cterasdk.core.enum.Platform`
+   #. Enumerator containing a list of platforms. :py:class:`cterasdk.core.enum.Platform`
 
 .. code-block:: python
 
@@ -463,8 +463,21 @@ Configuration Templates
    """Configure software versions"""
    versions = [portal_types.PlatformVersion(portal_enum.Platform.Edge_7, '7.0.981.7')]  # use 7.0.981.7 for v7 Edge Filers
 
+   """Configure Scripts"""
+   scripts = [
+       portal_types.TemplateScript.windows().after_logon('echo Current directory: %cd%'),
+       portal_types.TemplateScript.linux().before_backup('./mysqldump -u admin website > /mnt/backup/backup.sql'),
+       portal_types.TemplateScript.linux().after_backup('rm /mnt/backup/backup.sql')
+   ]
+
+   """Configure CLI Commands"""
+   cli_commands = [
+       'set /config/agent/stubs/deleteFilesOfCachedFolderOnDisable false',
+       'add /config/agent/stubs/allowedExplorerExtensions url'
+   ]
+
    admin.templates.add('MyTemplate', 'woohoo', include_sets=[include_sets], exclude_sets=[exclude_sets],
-                       backup_schedule=backup_schedule, apps=apps, versions=versions)
+                       backup_schedule=backup_schedule, apps=apps, versions=versions, scripts=scripts, cli_commands=cli_commands)
 
 .. automethod:: cterasdk.core.templates.Templates.set_default
    :noindex:
