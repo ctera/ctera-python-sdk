@@ -194,7 +194,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         param.delta.policyDelta = []
         for cloud_folders in TestCoreZones._cloud_folders.values():
             owner_id = None
-            folder_ids = list()
+            folder_ids = []
             for folder_info in cloud_folders.values():
                 owner_id = re.search("[1-9][0-9]*", folder_info['owner']).group(0)
                 folder_ids.append(folder_info['uid'])

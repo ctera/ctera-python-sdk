@@ -138,7 +138,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
     def test_mklink_default_values(self):
         for access in [None, 'RW', 'RO']:
             for expire_in in [None, 15, 30, 0]:
-                params = dict()
+                params = {}
                 if access is not None:
                     params['access'] = access
                 if expire_in is not None:

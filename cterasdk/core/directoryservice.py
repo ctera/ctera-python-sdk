@@ -148,7 +148,7 @@ class DirectoryService(BaseCommand):
 
     def _configure_access_control(self, acl, default=None):
 
-        access_control_rules = list()
+        access_control_rules = []
         for ace in acl:
             account = None
             if ace.account.account_type == PortalAccountType.User:

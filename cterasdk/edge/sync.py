@@ -122,7 +122,7 @@ class Sync(BaseCommand):
         :param list[str] paths: List of file paths
         :param list[cterasdk.common.types.FilterBackupSet] rules: Set of custom exclusion rules
         """
-        rules = list()
+        rules = []
         if extensions:
             param = FilterBackupSet('List of file extensions to exclude from sync',
                                     filter_rules=[FileFilterBuilder.extensions().include(extensions).build()])
