@@ -60,11 +60,7 @@ def find_attr(obj, path):
 
     :returns: The attribute, or ``None`` if not found
     """
-    parts = None
-    if isinstance(path, str):
-        parts = re.findall('[^/]+', path)
-    else:
-        parts = path
+    parts = re.findall('[^/]+', path) if isinstance(path, str) else path
 
     attr = obj
     for part in parts:
