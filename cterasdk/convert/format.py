@@ -4,7 +4,7 @@ import copy
 from xml.etree.ElementTree import Element, SubElement, tostring
 from xml.dom import minidom
 
-from cterasdk.common import Item, Object
+from cterasdk.common import Item, Object, Device
 from cterasdk.convert.xml_types import XMLTypes
 
 
@@ -67,7 +67,7 @@ def toxmlstr(obj, pretty_print=False):
     return tostring(xml)
 
 
-def toxml(obj):
+def toxml(obj):  # pylint: disable=too-many-branches
     root = Item()
     root.node = None
     root.parent = None
@@ -91,6 +91,23 @@ def toxml(obj):
                 kid.parent = item.node
                 kid.obj = member
                 q.put(kid)
+        elif isinstance(item.obj, Device):  # db.xml
+            item.node = CreateElement(item.parent, XMLTypes.DB)
+            for key, value in [
+                (XMLTypes.NS, item.obj.namespace),
+                (XMLTypes.LOCATION, item.obj.location),
+                (XMLTypes.ID, item.obj.id),
+                (XMLTypes.VERSION, item.obj.version),
+                (XMLTypes.FIRMWARE, item.obj.firmware)
+            ]:
+                if value is not None:
+                    item.node.set(key, value)
+
+            kid = Item()
+            kid.node = None
+            kid.parent = item.node
+            kid.obj = item.obj.config
+            q.put(kid)
         elif isinstance(item.obj, Object):
             item.node = CreateElement(item.parent, XMLTypes.OBJ)
             classname = item.obj.__dict__.get('_classname')  # Convert { "_classname" : "ShareConfig" }

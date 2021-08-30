@@ -232,6 +232,25 @@ Device Configuration
 
    filer.config.export()
 
+.. automethod:: cterasdk.edge.config.Config.import_config
+   :noindex:
+
+.. code-block:: python
+
+   """Import Edge Filer configuration from file"""
+   filer.config.import_config(r'C:\Users\bwayne\Downloads\EdgeFiler.xml')
+
+   """Import configuration without network settings"""
+   filer.config.import_config(r'C:\Users\bwayne\Downloads\EdgeFiler.xml', exclude=[
+       '/config/network'
+   ])
+
+   """Import configuration without the 'logs' and 'public' shares"""
+   filer.config.import_config(r'C:\Users\bwayne\Downloads\EdgeFiler.xml', exclude=[
+       '/config/fileservices/share/logs',
+       '/config/fileservices/share/public'
+   ])
+
 Code Snippets
 =============
 
