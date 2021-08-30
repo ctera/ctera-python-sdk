@@ -241,3 +241,4 @@ class Backups(FileBrowser):
             return self.download('{}/Device Configuration/db.xml'.format(device), destination)
         except CTERAException as error:
             logging.getLogger().error('Failed downloading configuration file. %s', {'device': device, 'error': error.response.reason})
+            raise error
