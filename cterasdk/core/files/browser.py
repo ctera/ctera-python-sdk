@@ -53,7 +53,7 @@ class FileBrowser(BaseCommand):
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
         path = self.mkpath(path)
-        self._file_access.download(path, destination=destination)
+        return self._file_access.download(path, destination=destination)
 
     def download_as_zip(self, cloud_directory, files, destination=None):
         """
@@ -238,6 +238,6 @@ class Backups(FileBrowser):
         """
         try:
             destination = destination if destination is not None else '{}/{}.xml'.format(config.filesystem['dl'], device)
-            self.download('{}/Device Configuration/db.xml'.format(device), destination)
+            return self.download('{}/Device Configuration/db.xml'.format(device), destination)
         except CTERAException as error:
             logging.getLogger().error('Failed downloading configuration file. %s', {'device': device, 'error': error.response.reason})
