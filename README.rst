@@ -27,7 +27,7 @@ CTERA for Python
     :alt: [Latest Release Development Stage]
 
 A Python SDK for integrating with the CTERA Global File System API. Compatible with Python
-3.5+. 
+3.5+.
 
 Documentation
 -------------
@@ -41,6 +41,24 @@ Installing via `pip <https://pip.pypa.io/>`_:
 
     $ pip install cterasdk
 
+..
+
+If you receive a certificate error, add the following trusted hosts:
+
+.. code-block:: console
+
+    $ pip install cterasdk --trusted-host pypi.org --trusted-host files.pythonhosted.org  # [SSL: CERTIFICATE_VERIFY_FAILED]
+
+..
+
+Installation via proxy:
+
+.. code-block:: console
+
+    $ pip install cterasdk --proxy http://user:password@proxyserver:port  # use proxy
+
+..
+
 Install from source:
 
 .. code-block:: console
@@ -53,14 +71,14 @@ Importing the Library
 ---------------------
 After installation, to get started, open a Python console:
 
-.. code-block:: pycon
+.. code-block:: python
 
     >>> from cterasdk import *
 
 Building Documentation
 -------------------------
 Documentation can be compiled by running ``make html`` from the ``docs``
-folder. After compilation, open ``docs/build/html/index.html``. 
+folder. After compilation, open ``docs/build/html/index.html``.
 
 Testing
 -------

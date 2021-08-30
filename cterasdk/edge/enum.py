@@ -366,3 +366,28 @@ class Traffic:
     """
     Upload = 'Upload'
     Download = 'Download'
+
+
+class SMBProtocol:
+    """
+    SMB Protocol
+
+    :ivar str SMB1: SMB v1
+    :ivar str NT1: SMB v1
+    :ivar str SMB2_02: Vista, Server 2008
+    :ivar str SMB2_10: Windows 7, Server 2008 R2
+    :ivar str SMB3_00: Windows 8, Server 2012
+    :ivar str SMB3_02: Windows 8.1, Server 2012 R2
+    :ivar str SMB3_11: Windows 10, Server 2016
+    :ivar str SMB2: Windows 7, Server 2008
+    :ivar str SMB3: SMB 3.1.1
+    """
+    SMB1 = 'NT1'
+    NT1 = SMB1
+    SMB2_02 = 'SMB2_02'
+    SMB2_10 = 'SMB2_10'
+    SMB3_00 = 'SMB3_00'
+    SMB3_02 = 'SMB3_02'
+    SMB3_11 = 'SMB3_11'
+    SMB2 = 'SMB2'
+    SMB3 = 'SMB3'

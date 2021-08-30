@@ -19,6 +19,14 @@ class TestEdgeSMB(base_edge.BaseEdgeTest):
         smb.SMB(self._filer).enable()
         self._filer.put.assert_called_once_with('/config/fileservices/cifs/mode', Mode.Enabled)
 
+    def test_restart_smb(self):
+        self._init_filer()
+        smb.SMB(self._filer).restart()
+        self._filer.put.assert_has_calls([
+            mock.call('/config/fileservices/cifs/mode', Mode.Disabled),
+            mock.call('/config/fileservices/cifs/mode', Mode.Enabled)
+        ])
+
     def test_enable_abe(self):
         self._init_filer()
         smb.SMB(self._filer).enable_abe()
@@ -93,7 +101,8 @@ class TestEdgeSMB(base_edge.BaseEdgeTest):
 
     @staticmethod
     def _get_cifs_configuration_response(packet_signing=None, idle_disconnect_time=None, compatibility_mode=None,
-                                         cifs_unix_extensions=None, abe_enabled=None):
+                                         cifs_unix_extensions=None, abe_enabled=None, min_client_protocol=None, max_client_protocol=None,
+                                         min_server_protocol=None, max_server_protocol=None):
         cifs = Object()
         cifs.mode = Mode.Enabled
         cifs.packetSigning = packet_signing if packet_signing else CIFSPacketSigning.Disabled
@@ -101,6 +110,10 @@ class TestEdgeSMB(base_edge.BaseEdgeTest):
         cifs.compatibilityMode = compatibility_mode if compatibility_mode is not None else False
         cifs.cifsUnixExtensions = cifs_unix_extensions if cifs_unix_extensions is not None else True
         cifs.hideUnreadable = abe_enabled if abe_enabled is not None else True
+        cifs.minClientProtocol = min_client_protocol if min_client_protocol is not None else None
+        cifs.maxClientProtocol = max_client_protocol if max_client_protocol is not None else None
+        cifs.minServerProtocol = min_server_protocol if min_server_protocol is not None else None
+        cifs.maxServerProtocol = max_server_protocol if max_server_protocol is not None else None
         return cifs
 
     @staticmethod
@@ -113,4 +126,8 @@ class TestEdgeSMB(base_edge.BaseEdgeTest):
         obj.compatibility_mode = cifs.compatibilityMode
         obj.cifs_unix_extensions = cifs.cifsUnixExtensions
         obj.abe_enabled = cifs.hideUnreadable
+        obj.min_client_protocol = cifs.minClientProtocol
+        obj.max_client_protocol = cifs.maxClientProtocol
+        obj.min_server_protocol = cifs.minServerProtocol
+        obj.max_server_protocol = cifs.maxServerProtocol
         return obj
