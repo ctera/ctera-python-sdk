@@ -7,8 +7,6 @@ File Browser
 File Browser
 ------------
 
-The FileBrowser class is a parent class to :py:class:`cterasdk.common.files.browser.CloudDrive` and :py:class:`cterasdk.common.files.browser.Backups` supporting file access operations
-
 List
 ====
 
@@ -85,7 +83,7 @@ Create Public Link
 Cloud Drive
 -----------
 
-The CloudDrive class is a subclass to :py:class:`cterasdk.common.files.browser.FileBrowser` enabling file access to the user's Cloud Drive
+The CloudDrive class is a subclass to :py:class:`cterasdk.common.files.browser.FileBrowser` providing file access to the user's Cloud Drive
 
 .. code:: python
 
@@ -275,7 +273,7 @@ Collaboration Shares
 Backups
 -------
 
-The Backups class is a subclass to :py:class:`cterasdk.common.files.browser.FileBrowser` enabling access to files and folders backed up by CTERA Edge Filers and Drive Apps
+The Backups class is a subclass to :py:class:`cterasdk.common.files.browser.FileBrowser` providing access to files stored in backup folders
 
 .. code:: python
 
@@ -289,4 +287,4 @@ The Backups class is a subclass to :py:class:`cterasdk.common.files.browser.File
    """Accessing Backups as a Tenant User Account"""
    user = ServicesPortal('portal.ctera.com')  # logging in to /ServicesPortal
    user.login('bwayne', getpass())
-   file_browser = user.backups # the field is an instance of Backups class object
+   file_browser = user.backups  # the field is an instance of Backups class object
