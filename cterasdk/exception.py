@@ -76,12 +76,6 @@ class SSLException(CTERAConnectionError):
         super().__init__('Untrusted security certificate', None, host=host, port=port, protocol='TLS', reason=reason)
 
 
-class ParserException(CTERAException):
-
-    def __init__(self, fmt, payload):
-        CTERAException.__init__(self, 'Conversion falied', None, fmt=fmt, to='Python Object', payload=payload)
-
-
 class InputError(CTERAException):
 
     def __init__(self, message, expression, options):

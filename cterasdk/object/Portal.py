@@ -65,7 +65,8 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.zones = zones.Zones(self)
         self.cloudfs = cloudfs.CloudFS(self)
         self.activation = activation.Activation(self)
-        self.files = files.FileBrowser(self, self.file_browser_base_path)
+        self.files = files.CloudDrive(self, self.cloud_drive_base_path)
+        self.backups = files.Backups(self, self.backups_base_path)
         self.logs = logs.Logs(self)
         self.settings = settings.Settings(self)
         self.tasks = taskmgr.Tasks(self)
@@ -93,8 +94,12 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("Implementing class must implement the context property")
 
     @property
-    def file_browser_base_path(self):
-        raise NotImplementedError("Implementing class must implement the file_browser_base_path property")
+    def cloud_drive_base_path(self):
+        raise NotImplementedError("Implementing class must implement the cloud_drive_base_path property")
+
+    @property
+    def backups_base_path(self):
+        raise NotImplementedError("Implementing class must implement the backups_base_path property")
 
     @property
     def _omit_fields(self):
@@ -197,8 +202,12 @@ class GlobalAdmin(Portal):
         return 'admin'
 
     @property
-    def file_browser_base_path(self):
+    def cloud_drive_base_path(self):
         return '/admin/webdav/Users'
+
+    @property
+    def backups_base_path(self):
+        return '/admin/webdav/backupFolders'
 
 
 class ServicesPortal(Portal):
@@ -219,5 +228,9 @@ class ServicesPortal(Portal):
         return 'ServicesPortal'
 
     @property
-    def file_browser_base_path(self):
+    def cloud_drive_base_path(self):
         return '/ServicesPortal/webdav'
+
+    @property
+    def backups_base_path(self):
+        return '/ServicesPortal/webdav/backups'

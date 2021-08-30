@@ -12,7 +12,7 @@ class FileAccessBase(ABC):
     def download(self, path, destination=None):
         directory, filename = self._split_destination(destination, path.name)
         handle = self._openfile(path)
-        self._filesystem.save(directory, filename, handle)
+        return self._filesystem.save(directory, filename, handle)
 
     def download_as_zip(self, cloud_directory, files, destination=None):
         files = files if isinstance(files, list) else [files]
@@ -23,7 +23,7 @@ class FileAccessBase(ABC):
             files=files
         )
         handle = self._get_zip_file_handle(cloud_directory, files)
-        self._filesystem.save(directory, filename, handle)
+        return self._filesystem.save(directory, filename, handle)
 
     def upload(self, local_file, dest_path):
         local_file_info = self._filesystem.get_local_file_info(local_file)

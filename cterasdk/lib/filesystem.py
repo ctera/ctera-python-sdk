@@ -138,6 +138,7 @@ class FileSystem:  # pylint: disable=unused-private-member
         # Exists and dir -> directory=current filename=None
         # Not Exists and parent Exists -> directory=parent filename=name
         # Not Exists and parent not Exists -> Error
+        path = os.path.expanduser(path)
         p = Path(path)
         if p.exists():
             if p.is_dir():

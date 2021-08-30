@@ -43,7 +43,7 @@ class FileBrowser:
         :param str,optional destination:
          File destination, if it is a directory, the filename will be calculated, defaults to the default directory
         """
-        self._file_access.download_as_zip(self.mkpath(cloud_directory), files, destination=destination)
+        return self._file_access.download_as_zip(self.mkpath(cloud_directory), files, destination=destination)
 
     def upload(self, file_path, server_path):
         """

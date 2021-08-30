@@ -1,10 +1,12 @@
+import logging
 from .path import CTERAPath
 
+from ... import config
+from ...exception import CTERAException
 from ..base_command import BaseCommand
 from . import ls, directory, rename, rm, recover, mv, cp, ln, collaboration, file_access
 
 
-# pylint: disable=too-many-public-methods
 class FileBrowser(BaseCommand):
 
     """
@@ -51,7 +53,7 @@ class FileBrowser(BaseCommand):
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
         path = self.mkpath(path)
-        self._file_access.download(path, destination=destination)
+        return self._file_access.download(path, destination=destination)
 
     def download_as_zip(self, cloud_directory, files, destination=None):
         """
@@ -65,6 +67,40 @@ class FileBrowser(BaseCommand):
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
         self._file_access.download_as_zip(self.mkpath(cloud_directory), files, destination=destination)
+
+    def copy(self, src, dest):
+        """
+        Copy a file or directory
+
+        :param str src: The source path of the file or directory
+        :param str dst: The destination path of the file or directory
+        """
+        return cp.copy(self._portal, self.mkpath(src), self.mkpath(dest))
+
+    def copy_multi(self, src, dest):
+        return cp.copy_multi(self._portal, self.mkpath(src), self.mkpath(dest))
+
+    def mklink(self, path, access='RO', expire_in=30):
+        """
+        Create a link to a file
+
+        :param str path: The path of the file to create a link to
+        :param str,optional access: Access policy of the link, defaults to 'RO'
+        :param int,optional expire_in: Number of days until the link expires, defaults to 30
+        """
+        return ln.mklink(self._portal, self.mkpath(path), access, expire_in)
+
+    def mkpath(self, array):
+        if isinstance(array, list):
+            return [CTERAPath(item, self._base_path) for item in array]
+        return CTERAPath(array, self._base_path)
+
+
+class CloudDrive(FileBrowser):
+
+    """
+    Cloud Drive File Browser APIs
+    """
 
     def upload(self, file_path, server_path):
         """
@@ -137,28 +173,6 @@ class FileBrowser(BaseCommand):
     def move_multi(self, src, dest):
         return mv.move_multi(self._portal, self.mkpath(src), self.mkpath(dest))
 
-    def copy(self, src, dest):
-        """
-        Copy a file or directory
-
-        :param str src: The source path of the file or directory
-        :param str dst: The destination path of the file or directory
-        """
-        return cp.copy(self._portal, self.mkpath(src), self.mkpath(dest))
-
-    def copy_multi(self, src, dest):
-        return cp.copy_multi(self._portal, self.mkpath(src), self.mkpath(dest))
-
-    def mklink(self, path, access='RO', expire_in=30):
-        """
-        Create a link to a file
-
-        :param str path: The path of the file to create a link to
-        :param str,optional access: Access policy of the link, defaults to 'RO'
-        :param int,optional expire_in: Number of days until the link expires, defaults to 30
-        """
-        return ln.mklink(self._portal, self.mkpath(path), access, expire_in)
-
     def get_share_info(self, path):
         """
         Get share settings and recipients
@@ -207,7 +221,24 @@ class FileBrowser(BaseCommand):
         """
         return collaboration.unshare(self._portal, self.mkpath(path))
 
-    def mkpath(self, array):
-        if isinstance(array, list):
-            return [CTERAPath(item, self._base_path) for item in array]
-        return CTERAPath(array, self._base_path)
+
+class Backups(FileBrowser):
+
+    """
+    Backups File Browser APIs
+    """
+
+    def device_config(self, device, destination=None):
+        """
+        Download a device configuration file
+
+        :param str device: The device name
+        :param str,optional destination:
+         File destination, if it is a directory, the original filename will be kept, defaults to the default directory
+        """
+        try:
+            destination = destination if destination is not None else '{}/{}.xml'.format(config.filesystem['dl'], device)
+            return self.download('{}/Device Configuration/db.xml'.format(device), destination)
+        except CTERAException as error:
+            logging.getLogger().error('Failed downloading configuration file. %s', {'device': device, 'error': error.response.reason})
+            raise error
