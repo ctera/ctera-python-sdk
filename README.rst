@@ -40,8 +40,24 @@ Installing via `pip <https://pip.pypa.io/>`_:
 .. code-block:: console
 
     $ pip install cterasdk
+
+..
+
+If you receive a certificate error, add the following trusted hosts:
+
+.. code-block:: console
+
     $ pip install cterasdk --trusted-host pypi.org --trusted-host files.pythonhosted.org  # [SSL: CERTIFICATE_VERIFY_FAILED]
+
+..
+
+Installation via proxy:
+
+.. code-block:: console
+
     $ pip install cterasdk --proxy http://user:password@proxyserver:port  # use proxy
+
+..
 
 Install from source:
 
