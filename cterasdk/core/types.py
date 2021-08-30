@@ -503,7 +503,7 @@ class TemplateScript:
     @staticmethod
     def _get_contents(shell_script):
         if FileSystem.instance().exists(shell_script):
-            with open(shell_script, 'r') as f:
+            with open(shell_script, 'r', encoding='utf-8') as f:
                 data = f.read()
             return data
         return shell_script
