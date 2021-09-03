@@ -326,6 +326,7 @@ class RAIDLevel:
     RAID_1 = "1"
     RAID_5 = "5"
     RAID_6 = "6"
+    LVM = 'LVM'
 
 
 class BackupConfStatusID:
