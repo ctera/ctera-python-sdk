@@ -37,7 +37,7 @@ class ObjectNotFoundException(CTERAException):
         self.response.reason = 'Not Found'
         self.response.body = Object()
         self.response.body.rc = 1
-        self.response.body.msg = "Object '%s' not found" % object_ref
+        self.response.body.msg = f"Object '{object_ref}' not found"
 
 
 class CTERAConnectionError(CTERAException):

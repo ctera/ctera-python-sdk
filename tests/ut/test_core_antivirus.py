@@ -41,7 +41,7 @@ class TestCoreAntivirus(base_core.BaseCoreTest):
     def test_get_server(self):
         self._init_global_admin()
         antivirus.AntivirusServers(self._global_admin).get(self._name)
-        self._global_admin.get.assert_called_once_with('/antiviruses/%s' % self._name)
+        self._global_admin.get.assert_called_once_with(f'/antiviruses/{self._name}')
 
     def test_add_server(self):
         self._init_global_admin()
@@ -63,14 +63,14 @@ class TestCoreAntivirus(base_core.BaseCoreTest):
     def test_delete_server(self):
         self._init_global_admin()
         antivirus.AntivirusServers(self._global_admin).delete(self._name)
-        self._global_admin.delete.assert_called_once_with('/antiviruses/%s' % self._name)
+        self._global_admin.delete.assert_called_once_with(f'/antiviruses/{self._name}')
 
     def test_suspend_server(self):
         self._init_global_admin()
         antivirus.AntivirusServers(self._global_admin).suspend(self._name)
-        self._global_admin.put.assert_called_once_with('/antiviruses/%s/enabled' % self._name, False)
+        self._global_admin.put.assert_called_once_with(f'/antiviruses/{self._name}/enabled', False)
 
     def test_unsuspend_server(self):
         self._init_global_admin()
         antivirus.AntivirusServers(self._global_admin).unsuspend(self._name)
-        self._global_admin.put.assert_called_once_with('/antiviruses/%s/enabled' % self._name, True)
+        self._global_admin.put.assert_called_once_with(f'/antiviruses/{self._name}/enabled', True)

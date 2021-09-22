@@ -30,6 +30,6 @@ class FileAccess(FileAccessBase):
     def _get_upload_form(self, local_file_info, fd, dest_path):
         return dict(
             name=local_file_info['name'],
-            fullpath='%s/%s' % (dest_path.fullpath(), local_file_info['name']),
+            fullpath=f'{dest_path.fullpath()}/{local_file_info["name"]}',
             filedata=(local_file_info['name'], fd, local_file_info['mimetype'][0])
         )

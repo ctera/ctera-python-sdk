@@ -270,7 +270,7 @@ class Shares(BaseCommand):
             self._gateway.put('/config/fileservices/share/' + name, share)
             logging.getLogger().info("Share modified. %s", {'name': name})
         except Exception as error:
-            msg = 'Failed to modify the share %s' % name
+            msg = f'Failed to modify the share {name}'
             logging.getLogger().error(msg)
             raise CTERAException(msg, error)
 
@@ -422,7 +422,7 @@ class Shares(BaseCommand):
 
         response = self._gateway.execute('/status/fileManager', 'listPhysicalFolders', param)
         for root in response:
-            if root.fullpath == ('/%s' % name):
+            if root.fullpath == f'/{name}':
                 logging.getLogger().debug("Found root directory. %s", {'name': root.name, 'type': root.type, 'fullpath': root.fullpath})
                 return name
 

@@ -17,14 +17,14 @@ class TestXML(base.BaseTest):
         if values:
             for value in values:
                 list_of_values = list_of_values + TestXML._format_value(value)
-            return '<list>%s</list>' % list_of_values
+            return f'<list>{list_of_values}</list>'
         return '<list />'
 
     @staticmethod
     def _format_value(value):
         if isinstance(value, bool):
             value = str(value).lower()
-        return '<val>%s</val>' % value
+        return f'<val>{value}</val>'
 
     @staticmethod
     def _fromxmlstr(value):

@@ -30,4 +30,4 @@ class TestCoreReports(base_core.BaseCoreTest):
         self.assertEqual(ret, self._get_response)
 
     def _assert_called_once_with(self, report_name):
-        self._global_admin.get.assert_called_once_with('/reports/%s' % report_name)
+        self._global_admin.get.assert_called_once_with(f'/reports/{report_name}')

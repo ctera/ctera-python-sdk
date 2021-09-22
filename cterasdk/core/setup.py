@@ -54,7 +54,7 @@ class Setup(BaseCommand):
             params.settings = Setup.default_settings()
             params.settings.dnsSuffix = domain
             logging.getLogger().info('Initializing Portal. %s', {'domain': domain, 'user': name})
-            self._portal.execute('/%s/public' % (self._portal.context), 'init', params, use_file_url=True)
+            self._portal.execute(f'/{self._portal.context}/public', 'init', params, use_file_url=True)
             SetupWizardStatusMonitor(self._portal).wait(SetupWizardStage.Portal)
             logging.getLogger().info('Portal initialized.')
         elif self.stage == SetupWizardStage.Finish:
@@ -64,7 +64,7 @@ class Setup(BaseCommand):
     def _init_slave(self, ipaddr, secret):
         self._get_current_stage()
 
-        response = self._portal.execute('/%s/setup/authenticaionMethod' % (self._portal.context),
+        response = self._portal.execute(f'/{self._portal.context}/setup/authenticaionMethod',
                                         'askMasterForSlaveAuthenticaionMethod', ipaddr, use_file_url=True)
 
         params = Setup._init_server_params(ServerMode.Slave)
@@ -80,7 +80,7 @@ class Setup(BaseCommand):
 
     def _init_server(self, params, wait=False):
         if self.stage == SetupWizardStage.Server:
-            ref = '/%s/setup' % (self._portal.context)
+            ref = f'/{self._portal.context}/setup'
             form_data = {'inputXml': toxmlstr(params).decode('utf-8'), 'serverMode': params.serverMode}
 
             if params.serverMode == ServerMode.Slave:
@@ -143,13 +143,13 @@ class Setup(BaseCommand):
         self._portal.startup.wait()
 
     def _init_role(self, params):
-        response = self._portal.execute('/%s/public/servers' % (self._portal.context), 'setReplication', params, use_file_url=True)
+        response = self._portal.execute(f'/{self._portal.context}/public/servers', 'setReplication', params, use_file_url=True)
         status = SetupWizardStatusMonitor(self._portal).wait(SetupWizardStage.Replication)
         self.stage = status.wizard
         return response
 
     def get_replication_candidates(self):
-        return self._portal.execute('/%s/public/servers' % (self._portal.context), 'getReplicaitonCandidates', None, use_file_url=True)
+        return self._portal.execute(f'/{self._portal.context}/public/servers', 'getReplicaitonCandidates', None, use_file_url=True)
 
     @staticmethod
     def _init_replication_param(replicate_from=None):
@@ -173,7 +173,7 @@ class Setup(BaseCommand):
         return params
 
     def get_setup_status(self):
-        return self._portal.get('/%s/setup/status' % (self._portal.context), use_file_url=True)
+        return self._portal.get(f'/{self._portal.context}/setup/status', use_file_url=True)
 
     @staticmethod
     def default_settings():

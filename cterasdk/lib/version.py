@@ -19,13 +19,8 @@ class Version:  # pylint: disable=unused-private-member
         self.product_version = '3.0'
         self.system = Platform.instance().os()
         self.machine = Platform.instance().arch()
-        self.header = "{product}/{version} ({system}; {machine}) Python-urllib/{python_version}".format(
-            product=self.product,
-            version=self.product_version,
-            system=self.system,
-            machine=self.machine,
-            python_version=Platform.instance().python_version()
-        )
+        self.header = \
+            f"{self.product}/{self.product_version} ({self.system}; {self.machine}) Python-urllib/{Platform.instance().python_version()}"
         Version.__instance = self
 
     def as_header(self):

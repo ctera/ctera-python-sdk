@@ -126,13 +126,13 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
 
     def _is_authenticated(self, function, *args, **kwargs):
         def is_public(path):
-            return path.startswith('/%s/public' % self.context)
+            return path.startswith(f'/{self.context}/public')
 
         def is_setup(path):
-            return path.startswith('/%s/setup' % self.context)
+            return path.startswith(f'/{self.context}/setup')
 
         def is_startup(path):
-            return path.startswith('/%s/startup' % self.context)
+            return path.startswith(f'/{self.context}/startup')
         current_session = self.session()
         return current_session.authenticated() or current_session.initializing() or \
             is_public(args[0]) or is_setup(args[0]) or is_startup(args[0]) or \

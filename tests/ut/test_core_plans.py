@@ -65,14 +65,14 @@ class TestCorePlans(base_core.BaseCoreTest):
         delete_response = 'Success'
         self._init_global_admin(delete_response=delete_response)
         ret = plans.Plans(self._global_admin).delete(self._plan_name)
-        self._global_admin.delete.assert_called_once_with('/plans/%s' % self._plan_name)
+        self._global_admin.delete.assert_called_once_with(f'/plans/{self._plan_name}')
         self.assertEqual(ret, delete_response)
 
     def test_delete_failure(self):
         self._global_admin.delete = mock.MagicMock(side_effect=exception.CTERAException())
         with self.assertRaises(exception.CTERAException) as error:
             plans.Plans(self._global_admin).delete(self._plan_name)
-        self._global_admin.delete.assert_called_once_with('/plans/%s' % self._plan_name)
+        self._global_admin.delete.assert_called_once_with(f'/plans/{self._plan_name}')
         self.assertEqual('Plan deletion failed', error.exception.message)
 
     def test_modify_plan_not_found(self):
@@ -80,7 +80,7 @@ class TestCorePlans(base_core.BaseCoreTest):
         self._global_admin.get = mock.MagicMock(side_effect=exception.CTERAException())
         with self.assertRaises(exception.CTERAException) as error:
             plans.Plans(self._global_admin).modify(self._plan_name)
-        self._global_admin.get.assert_called_once_with('/plans/%s' % self._plan_name)
+        self._global_admin.get.assert_called_once_with(f'/plans/{self._plan_name}')
         self.assertEqual('Could not find subscription plan', error.exception.message)
 
     def test_modify_update_failure(self):
@@ -88,8 +88,8 @@ class TestCorePlans(base_core.BaseCoreTest):
         self._global_admin.put = mock.MagicMock(side_effect=exception.CTERAException())
         with self.assertRaises(exception.CTERAException) as error:
             plans.Plans(self._global_admin).modify(self._plan_name)
-        self._global_admin.get.assert_called_once_with('/plans/%s' % self._plan_name)
-        self._global_admin.put.assert_called_once_with('/plans/%s' % self._plan_name, mock.ANY)
+        self._global_admin.get.assert_called_once_with(f'/plans/{self._plan_name}')
+        self._global_admin.put.assert_called_once_with(f'/plans/{self._plan_name}', mock.ANY)
         self.assertEqual('Could not modify subscription plan', error.exception.message)
 
     def test_modify_success_without_apply_changes(self):
@@ -156,8 +156,8 @@ class TestCorePlans(base_core.BaseCoreTest):
             Storage=4096
         )
         plans.Plans(self._global_admin).modify(self._plan_name, retention, quotas, False)
-        self._global_admin.get.assert_called_once_with('/plans/%s' % self._plan_name)
-        self._global_admin.put.assert_called_once_with('/plans/%s' % self._plan_name, mock.ANY)
+        self._global_admin.get.assert_called_once_with(f'/plans/{self._plan_name}')
+        self._global_admin.put.assert_called_once_with(f'/plans/{self._plan_name}', mock.ANY)
         expected_param = self._get_plan_object(retention, licenses)
         actual_param = self._global_admin.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)

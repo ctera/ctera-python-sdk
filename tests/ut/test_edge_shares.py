@@ -16,7 +16,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         self._share_name = 'Accounting'
         self._share_directory = 'users/Service Account/DATA/Accounting'
         self._share_volume = 'cloud'
-        self._share_fullpath = '%s/%s' % (self._share_volume, self._share_directory)
+        self._share_fullpath = f'{self._share_volume}/{self._share_directory}'
         self._share_acl = [
             ShareAccessControlEntry(principal_type=PrincipalType.LG, name='Everyone', perm=FileAccessMode.RO),
             ShareAccessControlEntry(principal_type=PrincipalType.LU, name='admin', perm=FileAccessMode.RW),

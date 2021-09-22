@@ -154,7 +154,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def make_local_files_dir(full_path):
-        return 'localFiles/%s' % full_path
+        return f'localFiles/{full_path}'
 
     @property
     def _omit_fields(self):

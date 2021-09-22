@@ -14,7 +14,7 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
         self._filename = self._path.rsplit('/', maxsplit=1)[-1]
         self._fullpath = '/' + self._path
         self._target = 'target/folder'
-        self._target_fullpath = '/%s/%s' % (self._target, self._filename)
+        self._target_fullpath = f'/{self._target}/{self._filename}'
         self._default_download_dir = config.filesystem['dl']
 
     def test_download_default_dir_success(self):
@@ -91,4 +91,4 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
 
     @staticmethod
     def make_local_files_dir(full_path):
-        return 'localFiles/%s' % full_path
+        return f'localFiles/{full_path}'

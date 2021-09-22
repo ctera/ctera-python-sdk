@@ -69,7 +69,7 @@ class Config(BaseCommand):
         if exclude:
             delete_attrs(database, exclude)
 
-        path = self._filesystem.join(TempfileServices.mkdir(), '{}.xml'.format(self._gateway.session().host))
+        path = self._filesystem.join(TempfileServices.mkdir(), f'{self._gateway.session().host}.xml')
         self._filesystem.write(path, toxmlstr(database, True).encode('utf-8'))
 
         return self._import_configuration(path)

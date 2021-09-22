@@ -16,8 +16,8 @@ class Users(BaseCommand):
     default = ['name']
 
     def _get_entire_object(self, user_account):
-        ref = '/users/%s' % user_account.name if user_account.is_local \
-            else '/domains/%s/adUsers/%s' % (user_account.directory, user_account.name)
+        ref = f'/users/{user_account.name}' if user_account.is_local \
+            else f'/domains/{user_account.directory}/adUsers/{user_account.name}'
         try:
             return self._portal.get(ref)
         except CTERAException as error:
@@ -31,8 +31,8 @@ class Users(BaseCommand):
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: The user account, including the requested fields
         """
-        baseurl = '/users/%s' % user_account.name if user_account.is_local \
-            else '/domains/%s/adUsers/%s' % (user_account.directory, user_account.name)
+        baseurl = f'/users/{user_account.name}' if user_account.is_local \
+            else f'/domains/{user_account.directory}/adUsers/{user_account.name}'
         include = union(include or [], Users.default)
         include = ['/' + attr for attr in include]
         user_object = self._portal.get_multi(baseurl, include)
@@ -171,7 +171,7 @@ class Users(BaseCommand):
         :param cterasdk.core.types.UserAccount user: the user account
         """
         logging.getLogger().info('Deleting user. %s', {'user': str(user)})
-        baseurl = '/users/%s' % user.name if user.is_local else '/domains/%s/adUsers/%s' % (user.directory, user.name)
+        baseurl = f'/users/{user.name}' if user.is_local else f'/domains/{user.directory}/adUsers/{user.name}'
         response = self._portal.execute(baseurl, 'delete', True)
         logging.getLogger().info('User deleted. %s', {'user': str(user)})
 

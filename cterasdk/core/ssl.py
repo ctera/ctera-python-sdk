@@ -66,11 +66,11 @@ class SSL(BaseCommand):
 
         certificate_chain_zip_archive = None
         if certificate_chain:
-            certificate_chain_zip_archive = FileSystem.join(tempdir, '{}.zip'.format(cert_basename))
+            certificate_chain_zip_archive = FileSystem.join(tempdir, f'{cert_basename}.zip')
             with ZipFile(certificate_chain_zip_archive, 'w') as zip_archive:
                 zip_archive.write(key_filepath, key_basename)
                 for idx, certificate in enumerate(certificate_chain):
-                    filename = '{}{}.crt'.format(cert_basename, idx if idx > 0 else '')
+                    filename = f'{cert_basename}{idx if idx > 0 else ""}.crt'
                     filepath = FileSystem.join(tempdir, filename)
                     self._filesystem.write(filepath, certificate.pem_data)
                     zip_archive.write(filepath, filename)

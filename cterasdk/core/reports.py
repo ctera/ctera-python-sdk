@@ -34,4 +34,4 @@ class Reports(BaseCommand):
         return self._get_report('folderGroupsStatisticsReport')
 
     def _get_report(self, report_name):
-        return self._portal.get('/reports/%s' % report_name)
+        return self._portal.get(f'/reports/{report_name}')

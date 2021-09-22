@@ -263,7 +263,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
         self._init_filer(get_response=get_response)
         backup.Backup(self._filer).files.unselect_all()
         self._filer.get.assert_called_once_with('/config/backup/backupPolicy/includeSets')
-        self._filer.put.assert_called_once_with('/config/backup/backupPolicy/includeSets/%s' % uuid, mock.ANY)
+        self._filer.put.assert_called_once_with(f'/config/backup/backupPolicy/includeSets/{uuid}', mock.ANY)
         expected_param = TestEdgeBackup._create_backup_set(uuid, all_files, False)
         actual_param = self._filer.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)

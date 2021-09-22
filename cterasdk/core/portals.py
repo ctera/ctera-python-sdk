@@ -27,7 +27,7 @@ class Portals(BaseCommand):
         include = ['/' + attr for attr in include]
         tenant = self._portal.get_multi('/portals/' + name, include)
         if tenant.name is None:
-            raise ObjectNotFoundException('Could not find tenant', '/portals/%s' % name, name=name)
+            raise ObjectNotFoundException('Could not find tenant', f'/portals/{name}', name=name)
         return tenant
 
     def list_tenants(self, include=None, portal_type=None):

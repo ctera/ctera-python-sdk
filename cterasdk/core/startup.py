@@ -18,7 +18,7 @@ class Startup(BaseCommand):
         """
         response = None
         try:
-            response = self._portal.get('/%s/startup' % (self._portal.context), use_file_url=True)
+            response = self._portal.get(f'/{self._portal.context}/startup', use_file_url=True)
         except CTERAClientException as error:
             return error.response.body.status
         return response.status

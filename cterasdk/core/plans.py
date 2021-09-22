@@ -77,7 +77,7 @@ class Plans(BaseCommand):
         include = ['/' + attr for attr in include]
         plan = self._portal.get_multi('/plans/' + name, include)
         if plan.name is None:
-            raise ObjectNotFoundException('Could not find subscription plan', '/plans/%s' % name, name=name)
+            raise ObjectNotFoundException('Could not find subscription plan', f'/plans/{name}', name=name)
         return plan
 
     def add(self, name, retention=None, quotas=None):

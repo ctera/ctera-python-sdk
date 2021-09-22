@@ -217,7 +217,7 @@ class ThrottlingRuleBuilder:
         """
         errors = [k for k, v in self.param.__dict__.items() if v is None]
         if errors:
-            raise ValueError('No value for required field: %s' % errors)
+            raise ValueError(f'No value for required field: {errors}')
         return self.param
 
 

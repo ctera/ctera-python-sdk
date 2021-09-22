@@ -34,7 +34,7 @@ class Devices(BaseCommand):
         if session.is_local_auth():
             url = '/devices/' + device_name  # local auth: auto appends /portals/{tenant_name}
         else:
-            url = '/portals/%s/devices/%s' % (tenant, device_name)  # regular auth: support both tenant and Administration context
+            url = f'/portals/{tenant}/devices/{device_name}'  # regular auth: support both tenant and Administration context
 
         dev = self._portal.get_multi(url, include)
         if dev.name is None:
