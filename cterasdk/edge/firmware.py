@@ -50,6 +50,6 @@ class Firmware(BaseCommand):
                 if task_status.status == UploadTaskStatus.COMPLETE:
                     return
                 raise CTERAException(
-                    message='Filer failed to receive the new firmware - %s' % task_status.statusMessage,
+                    message=f'Filer failed to receive the new firmware - {task_status.statusMessage}',
                     instance=task_status
                 )

@@ -237,8 +237,8 @@ class Backups(FileBrowser):
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
         try:
-            destination = destination if destination is not None else '{}/{}.xml'.format(config.filesystem['dl'], device)
-            return self.download('{}/Device Configuration/db.xml'.format(device), destination)
+            destination = destination if destination is not None else f'{config.filesystem["dl"]}/{device}.xml'
+            return self.download(f'{device}/Device Configuration/db.xml', destination)
         except CTERAException as error:
             logging.getLogger().error('Failed downloading configuration file. %s', {'device': device, 'error': error.response.reason})
             raise error

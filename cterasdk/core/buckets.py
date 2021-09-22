@@ -15,7 +15,7 @@ class Buckets(BaseCommand):
 
     def _get_entire_object(self, name):
         try:
-            return self._portal.get('/locations/%s' % name)
+            return self._portal.get(f'/locations/{name}')
         except CTERAException as error:
             raise CTERAException('Failed to get bucket', error)
 
@@ -33,7 +33,7 @@ class Buckets(BaseCommand):
         include = ['/' + attr for attr in include]
         bucket = self._portal.get_multi('/locations/' + name, include)
         if bucket.name is None:
-            raise ObjectNotFoundException('Could not find bucket', '/locations/%s' % name, name=name)
+            raise ObjectNotFoundException('Could not find bucket', f'/locations/{name}', name=name)
         return bucket
 
     def add(self, name, bucket, read_only=False, dedicated_to=None):
@@ -82,7 +82,7 @@ class Buckets(BaseCommand):
                 param.dedicated = True
                 param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
         logging.getLogger().info("Modifying bucket. %s", {'name': current_name})
-        response = self._portal.put('/locations/%s' % current_name, param)
+        response = self._portal.put(f'/locations/{current_name}', param)
         logging.getLogger().info("Bucket modified. %s", {'name': current_name})
         return response
 
@@ -104,7 +104,7 @@ class Buckets(BaseCommand):
         :param str name: Name of the bucket
         """
         logging.getLogger().info('Deleting bucket. %s', {'name': name})
-        response = self._portal.delete('/locations/%s' % name)
+        response = self._portal.delete(f'/locations/{name}')
         logging.getLogger().info('Bucket deleted. %s', {'name': name})
         return response
 
@@ -127,4 +127,4 @@ class Buckets(BaseCommand):
         return self._read_only(name, True)
 
     def _read_only(self, name, enabled):
-        return self._portal.put('/locations/%s/readOnly' % name, enabled)
+        return self._portal.put(f'/locations/{name}/readOnly', enabled)

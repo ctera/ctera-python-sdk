@@ -14,7 +14,7 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
         super().setUp()
         self._array_name = 'array'
         self._array_level = RAIDLevel.JBOD
-        self._array_members = ['SATA-%s' % i for i in range(1, 9)]
+        self._array_members = [f'SATA-{i}' for i in range(1, 9)]
 
     def test_get_all_arrays(self):
         get_response = 'Success'

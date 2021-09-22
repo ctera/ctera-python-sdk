@@ -20,7 +20,7 @@ class Templates(BaseCommand):
 
     def _get_entire_object(self, name):
         try:
-            return self._portal.get('/deviceTemplates/%s' % name)
+            return self._portal.get(f'/deviceTemplates/{name}')
         except CTERAException as error:
             raise CTERAException('Failed to get template', error)
 
@@ -35,7 +35,7 @@ class Templates(BaseCommand):
         include = ['/' + attr for attr in include]
         template = self._portal.get_multi('/deviceTemplates/' + name, include)
         if template.name is None:
-            raise ObjectNotFoundException('Could not find server', '/deviceTemplates/%s' % name, name=name)
+            raise ObjectNotFoundException('Could not find server', f'/deviceTemplates/{name}', name=name)
         return template
 
     def add(self, name, description=None, include_sets=None, exclude_sets=None,
@@ -132,7 +132,7 @@ class Templates(BaseCommand):
 
         template_firmwares = []
         for platform, version in versions:
-            base_object_ref = firmwares.get('%s-%s' % (platform, version))
+            base_object_ref = firmwares.get(f'{platform}-{version}')
             if base_object_ref is None:
                 raise CTERAException('Could not find firmware version', None, platform=platform, version=version)
             template_firmwares.append(Templates._create_template_firmware(platform, str(base_object_ref)))
@@ -185,7 +185,7 @@ class Templates(BaseCommand):
         :param str name: Name of the template
         """
         logging.getLogger().info('Deleting template. %s', {'name': name})
-        response = self._portal.delete('/deviceTemplates/%s' % name)
+        response = self._portal.delete(f'/deviceTemplates/{name}')
         logging.getLogger().info('Template deleted. %s', {'name': name})
         return response
 
@@ -197,7 +197,7 @@ class Templates(BaseCommand):
         :param bool,optional wait: Wait for all changes to apply, defaults to `False`
         """
         logging.getLogger().info('Setting default template. %s', {'name': name})
-        response = self._portal.execute('/deviceTemplates/%s' % name, 'setAsDefault')
+        response = self._portal.execute(f'/deviceTemplates/{name}', 'setAsDefault')
         self.auto_assign.apply_changes(wait=wait)
         logging.getLogger().info('Set default template. %s', {'name': name})
         return response

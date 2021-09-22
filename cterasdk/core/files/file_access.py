@@ -14,7 +14,7 @@ class FileAccess(FileAccessBase):
 
     def _get_multi_file_url(self, cloud_directory, files):
         folder_uid = self._get_cloud_folder_uid(cloud_directory)
-        return '%s/folders/folders/%s' % (self._ctera_host.context, folder_uid)
+        return f'{self._ctera_host.context}/folders/folders/{folder_uid}'
 
     @property
     def _use_file_url_for_multi_file_url(self):
@@ -31,7 +31,7 @@ class FileAccess(FileAccessBase):
 
     def _get_upload_url(self, dest_path):
         folder_uid = self._get_cloud_folder_uid(dest_path)
-        return '%s/upload/folders/%s' % (self._ctera_host.context, folder_uid)
+        return f'{self._ctera_host.context}/upload/folders/{folder_uid}'
 
     def _get_upload_form(self, local_file_info, fd, dest_path):
         return dict(

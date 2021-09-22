@@ -23,15 +23,15 @@ def api(Gateway):
 
 
 def local(baseurl):
-    return '%s/admingui/api' % (baseurl)
+    return f'{baseurl}/admingui/api'
 
 
 def remote(baseurl, tenant, device):
-    return '%s/devicecmdnew/%s/%s/' % (baseurl, tenant, device)
+    return f'{baseurl}/devicecmdnew/{tenant}/{device}/'
 
 
 def remote_access(baseurl, device):
-    return '%s/devices/%s/admingui/api' % (baseurl, device)
+    return f'{baseurl}/devices/{device}/admingui/api'
 
 
 def files(Gateway):
@@ -43,5 +43,5 @@ def files(Gateway):
         if session.remote_access():
             baseurl = Gateway._Portal.base_portal_url  # pylint: disable=protected-access
             device = Gateway.host()
-            return '%s/devices/%s' % (baseurl, device)
+            return f'{baseurl}/devices/{device}'
     raise CTERAException('Invalid connection type', session)

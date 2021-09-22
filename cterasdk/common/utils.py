@@ -57,9 +57,9 @@ def convert_size(numeric, u1, u2):
     """
     data_units = [DataUnit.B, DataUnit.KB, DataUnit.MB, DataUnit.GB, DataUnit.TB, DataUnit.PB]
     if u1 not in data_units:
-        raise ValueError("Invalid current unit type %s" % u1)
+        raise ValueError(f"Invalid current unit type {u1}")
     if u2 not in data_units:
-        raise ValueError("Invalid target unit type %s" % u2)
+        raise ValueError(f"Invalid target unit type {u2}")
     offset = (data_units.index(u1) - data_units.index(u2)) * 10
     if offset > 0:
         return numeric * (1 << offset)
@@ -77,7 +77,7 @@ def df_military_time(time):
     :rtype: str
     """
     if not isinstance(time, datetime):
-        raise ValueError("Invalid type '%s', expected 'datetime'" % type(time))
+        raise ValueError(f"Invalid type '{type(time)}', expected 'datetime'")
     return time.strftime('%H:%M:%S')
 
 
@@ -91,7 +91,7 @@ def day_of_week(day):
     """
     name = {v: k for k, v in DayOfWeek.__dict__.items() if isinstance(v, int)}.get(day)
     if not name:
-        raise ValueError('Invalid day of week: %s' % day)
+        raise ValueError(f'Invalid day of week: {day}')
     return name
 
 

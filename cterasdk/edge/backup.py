@@ -257,4 +257,4 @@ class BackupFiles(BaseCommand):
         return backup_configs
 
     def _update_backup_config(self, backup_config):
-        return self._gateway.put('/config/backup/backupPolicy/includeSets/%s' % backup_config._uuid, backup_config)  # pylint: disable=W0212
+        return self._gateway.put(f'/config/backup/backupPolicy/includeSets/{backup_config._uuid}', backup_config)  # pylint: disable=W0212

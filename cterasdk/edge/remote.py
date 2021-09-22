@@ -21,7 +21,7 @@ def login(Gateway, ticket):
 
 def obtain_ticket(Portal, device_name):
     tenant = Portal.session().tenant()
-    url = '/portals/%s/devices/%s' % (tenant, device_name)
+    url = f'/portals/{tenant}/devices/{device_name}'
     logging.getLogger().debug("Obtaining SSO ticket. %s", {'tenant': tenant, 'device': device_name})
 
     ticket = Portal.execute(url, 'singleSignOn')

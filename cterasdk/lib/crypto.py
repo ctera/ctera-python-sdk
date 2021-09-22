@@ -31,12 +31,12 @@ class RSAKeyPair:
         filesystem = FileSystem.instance()
 
         logging.getLogger().info('Saving private key.')
-        path = filesystem.save(dirpath, '{}.pem'.format(key_filename), self.private_key)
+        path = filesystem.save(dirpath, f'{key_filename}.pem', self.private_key)
         os.chmod(path, 0o600)
         logging.getLogger().info('Saved private key. %s', {'filepath': path, 'format': 'PEM'})
 
         logging.getLogger().info('Saving public key.')
-        path = filesystem.save(dirpath, '{}.pub'.format(key_filename), self.public_key)
+        path = filesystem.save(dirpath, f'{key_filename}.pub', self.public_key)
         logging.getLogger().info('Saved public key. %s', {'filepath': path, 'format': 'OpenSSH'})
 
 

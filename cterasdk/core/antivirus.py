@@ -70,7 +70,7 @@ class AntivirusServers(BaseCommand):
 
         :param str name: Server name
         """
-        return self._portal.get('/antiviruses/%s' % name)
+        return self._portal.get(f'/antiviruses/{name}')
 
     def add(self, name, vendor, url, connection_timeout=5):
         """
@@ -96,14 +96,14 @@ class AntivirusServers(BaseCommand):
         """
         Remove an antivirus server
         """
-        return self._portal.delete('/antiviruses/%s' % name)
+        return self._portal.delete(f'/antiviruses/{name}')
 
     def suspend(self, name):
         """
         Suspend an antivirus server
         """
         logging.getLogger().info("Suspending antivirus server. %s", {'name': name})
-        self._portal.put('/antiviruses/%s/enabled' % name, False)
+        self._portal.put(f'/antiviruses/{name}/enabled', False)
         logging.getLogger().info("Suspended antivirus server. %s", {'name': name})
 
     def unsuspend(self, name):
@@ -111,5 +111,5 @@ class AntivirusServers(BaseCommand):
         Unsuspend antivirus scanning
         """
         logging.getLogger().info("Unsuspending antivirus server. %s", {'name': name})
-        self._portal.put('/antiviruses/%s/enabled' % name, True)
+        self._portal.put(f'/antiviruses/{name}/enabled', True)
         logging.getLogger().info("Unsuspended antivirus server. %s", {'name': name})

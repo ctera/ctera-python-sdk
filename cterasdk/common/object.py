@@ -66,7 +66,7 @@ def find_attr(obj, path):
     for part in parts:
         attr = get_attr(attr, part)
         if attr is None:
-            logging.getLogger().warning('Could not find attribute. %s', {'path': '/{}'.format('/'.join(parts))})
+            logging.getLogger().warning('Could not find attribute. %s', {'path': f'/{"/".join(parts)}'})
             return attr
     return attr
 

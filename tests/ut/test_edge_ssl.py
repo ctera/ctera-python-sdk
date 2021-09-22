@@ -77,7 +77,7 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
             self._certificate_contents,
             self._certificate_contents
         ])
-        self._filer.put.assert_called_once_with('/config/certificate', '\n{}'.format(expected_param))
+        self._filer.put.assert_called_once_with('/config/certificate', f'\n{expected_param}')
         self.assertEqual(ret, put_response)
 
     def test_get_storage_ca(self):

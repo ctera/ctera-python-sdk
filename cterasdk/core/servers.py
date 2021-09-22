@@ -15,7 +15,7 @@ class Servers(BaseCommand):
 
     def _get_entire_object(self, server):
         try:
-            return self._portal.get('/servers/%s' % server)
+            return self._portal.get(f'/servers/{server}')
         except CTERAException as error:
             raise CTERAException('Failed to retreive server', error)
 
@@ -29,9 +29,9 @@ class Servers(BaseCommand):
         """
         include = union(include or [], Servers.default)
         include = ['/' + attr for attr in include]
-        server = self._portal.get_multi('/servers/%s' % name, include)
+        server = self._portal.get_multi(f'/servers/{name}', include)
         if server.name is None:
-            raise ObjectNotFoundException('Could not find server', '/servers/%s' % name, name=name)
+            raise ObjectNotFoundException('Could not find server', f'/servers/{name}', name=name)
         return server
 
     def list_servers(self, include=None):
@@ -83,7 +83,7 @@ class Servers(BaseCommand):
             server.allowUserLogin = allow_user_login
 
         try:
-            response = self._portal.put('/servers/%s' % name, server)
+            response = self._portal.put(f'/servers/{name}', server)
             logging.getLogger().info("Server modified. %s", {'server': name})
             return response
         except CTERAException as error:

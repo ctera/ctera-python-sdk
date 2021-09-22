@@ -78,6 +78,6 @@ class SSL(BaseCommand):
         certificate_chain = [certificate.pem_data.decode('utf-8') for certificate in create_certificate_chain(*certificates)]
         server_certificate = ''.join([key_object.pem_data.decode('utf-8')] + certificate_chain)
         logging.getLogger().info("Uploading SSL certificate.")
-        response = self._gateway.put('/config/certificate', "\n{}".format(server_certificate))
+        response = self._gateway.put('/config/certificate', f"\n{server_certificate}")
         logging.getLogger().info("Uploaded SSL certificate.")
         return response

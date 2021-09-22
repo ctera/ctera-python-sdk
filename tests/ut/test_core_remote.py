@@ -39,7 +39,7 @@ class TestCoreRemote(base_core.BaseCoreTest):
         portal_device = devices.Devices(self._global_admin).device(self._device_name)
         portal_device.get = mock.MagicMock()
         portal_device.remote_access()
-        self._global_admin.execute.assert_called_once_with('/portals/%s/devices/%s' % (self._device_portal, self._device_name),
+        self._global_admin.execute.assert_called_once_with(f'/portals/{self._device_portal}/devices/{self._device_name}',
                                                            'singleSignOn')
         portal_device.get.assert_called_once_with('/ssologin', {'ticket': self._sso_ticket})
 

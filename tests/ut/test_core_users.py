@@ -161,7 +161,7 @@ class TestCoreUsers(base_core.BaseCoreTest):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
         ret = users.Users(self._global_admin).delete(self._domain_user_account)
-        baseurl = '/domains/%s/adUsers/%s' % (self._domain_user_account.directory, self._domain_user_account.name)
+        baseurl = f'/domains/{self._domain_user_account.directory}/adUsers/{self._domain_user_account.name}'
         self._global_admin.execute.assert_called_once_with(baseurl, 'delete', True)
         self.assertEqual(ret, execute_response)
 
