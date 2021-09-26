@@ -151,6 +151,14 @@ class Sync(BaseCommand):
         self._gateway.put('/config/cloudsync/excludeFiles', None)
         logging.getLogger().info('Sync exclusion rules removed')
 
+    def get_linux_avoid_using_fanotify(self):
+        logging.getLogger().info('Getting LinuxAvoidUsingFAnotify')
+        return self._gateway.get('/config/cloudsync/LinuxAvoidUsingFAnotify')
+
+    def set_linux_avoid_using_fanotify(self, avoid):
+        logging.getLogger().info('Setting LinuxAvoidUsingFAnotify to %s', avoid)
+        self._gateway.put('/config/cloudsync/LinuxAvoidUsingFAnotify', avoid)
+
 
 class CloudSyncBandwidthThrottling(BaseCommand):
     """ Edge Filer Cloud Sync Bandwidth Throttling APIs """

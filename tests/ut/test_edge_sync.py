@@ -85,6 +85,25 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
         sync.Sync(self._filer).refresh()
         self._filer.execute.assert_called_once_with('/config/cloudsync/cloudExtender', 'refreshPaths', None)
 
+    def test_get_linux_avoid_using_fanotify(self):
+        for avoid in [True, False]:
+            self._test_get_linux_avoid_using_fanotify(avoid)
+
+    def _test_get_linux_avoid_using_fanotify(self, avoid):
+        self._init_filer(get_response=avoid)
+        actual = sync.Sync(self._filer).get_linux_avoid_using_fanotify()
+        self._filer.get.assert_called_once_with('/config/cloudsync/LinuxAvoidUsingFAnotify')
+        self.assertEqual(avoid, actual)
+
+    def test_set_linux_avoid_using_fanotify(self):
+        for avoid in [True, False]:
+            self._test_set_linux_avoid_using_fanotify(avoid)
+
+    def _test_set_linux_avoid_using_fanotify(self, avoid):
+        self._init_filer()
+        sync.Sync(self._filer).set_linux_avoid_using_fanotify(avoid)
+        self._filer.put.assert_called_once_with('/config/cloudsync/LinuxAvoidUsingFAnotify', avoid)
+
     def test_get_bandwidth_throttling(self):
         get_response = [
             self._throttling_rule.to_server_object()
