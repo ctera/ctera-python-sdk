@@ -31,7 +31,8 @@ class Shares(BaseCommand):
             export_to_pc_agent=False,
             export_to_rsync=False,
             indexed=False,
-            trusted_nfs_clients=None
+            trusted_nfs_clients=None,
+            uuid=None
             ):  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
         """
         Add a network share.
@@ -77,6 +78,8 @@ class Shares(BaseCommand):
         Shares._validate_acl(acl)
         param.acl = [acl_entry.to_server_object() for acl_entry in acl]
         param.trustedNFSClients = [client.to_server_object() for client in (trusted_nfs_clients or [])]
+        if uuid:
+            param._uuid = uuid  # pylint: disable=protected-access
 
         try:
             self._gateway.add('/config/fileservices/share', param)
