@@ -36,7 +36,11 @@ class NFS(BaseCommand):
     def modify(
             self,
             async_write=None,
-            aggregate_writes=None):
+            aggregate_writes=None,
+            mountd_port=None,
+            statd_port=None,
+            nfsv4_enabled=None,
+            krb5_enabled=None):
         """
         Modify the FTP Configuration. Parameters that are not passed will not be affected
 
@@ -50,4 +54,14 @@ class NFS(BaseCommand):
             setattr(config, 'async', Mode.Enabled if async_write else Mode.Disabled)
         if aggregate_writes is not None:
             config.aggregateWrites = Mode.Enabled if aggregate_writes else Mode.Disabled
+        if mountd_port is not None:
+            config.mountdPort = mountd_port
+        if statd_port is not None:
+            config.statdPort = statd_port
+        if nfsv4_enabled is not None:
+            config.nfsv4enabled = nfsv4_enabled
+        if krb5_enabled is not None:
+            if krb5_enabled and config.nfsv4enabled is not None and not config.nfsv4enabled:
+                raise CTERAException("NFSv4 must be enabled in order to enable Kerberos")
+            config.krb5 = krb5_enabled
         self._gateway.put('/config/fileservices/nfs', config)
