@@ -39,10 +39,15 @@ class TestEdgeNFS(base_edge.BaseEdgeTest):
 
     def test_modify_success(self):
         self._init_filer(get_response=TestEdgeNFS._get_nfs_configuration_response())
-        nfs.NFS(self._filer).modify(False, False)
+        params = {
+            'async_write': False,
+            'aggregate_writes': False,
+            'statd_port': 12345
+        }
+        nfs.NFS(self._filer).modify(**params)
         self._filer.get.assert_called_once_with('/config/fileservices/nfs')
         self._filer.put.assert_called_once_with('/config/fileservices/nfs', mock.ANY)
-        expected_param = TestEdgeNFS._get_nfs_configuration_response(False, False)
+        expected_param = TestEdgeNFS._get_nfs_configuration_response(**params)
         actual_param = self._filer.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
@@ -55,9 +60,11 @@ class TestEdgeNFS(base_edge.BaseEdgeTest):
         self.assertEqual('NFS must be enabled in order to modify its configuration', error.exception.message)
 
     @staticmethod
-    def _get_nfs_configuration_response(async_write=True, aggregate_writes=True):
+    def _get_nfs_configuration_response(async_write=True, aggregate_writes=True, statd_port=None):
         obj = Object()
         obj.mode = Mode.Enabled
         setattr(obj, 'async', Mode.Enabled if async_write else Mode.Disabled)
         obj.aggregateWrites = Mode.Enabled if aggregate_writes else Mode.Disabled
+        if statd_port is not None:
+            obj.statdPort = statd_port
         return obj
