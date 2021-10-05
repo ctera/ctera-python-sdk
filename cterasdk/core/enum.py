@@ -539,3 +539,14 @@ class DirectorySearchEntityType:
     """
     User = 'user'
     Group = 'group'
+
+
+class DeduplicationMethodType:
+    """
+    Folder Group Deduplication Method Type
+
+    :ivar str AverageBlockSizeKb: AverageBlockSizeKb
+    :ivar str FixedBlockSize: FixedBlockSize
+    """
+    AverageBlockSizeKb = 'AverageBlockSizeKb'
+    FixedBlockSize = 'FixedBlockSize'
