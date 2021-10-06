@@ -58,10 +58,7 @@ class CloudFS(BaseCommand):
         param.name = name
         param.disabled = True
         param.owner = self._portal.users.get(user, ['baseObjectRef']).baseObjectRef if user is not None else None
-        if deduplication_method_type:
-            param.deduplicationMethodType = deduplication_method_type
-        if fixed_block_size_kb:
-            param.fixedBlockSizeKb = fixed_block_size_kb
+        param.deduplicationMethodType = deduplication_method_type
 
         try:
             response = self._portal.execute('', 'createFolderGroup', param)

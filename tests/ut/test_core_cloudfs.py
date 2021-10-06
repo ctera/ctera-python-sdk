@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exception, portal_enum
 from cterasdk.core import cloudfs
 from cterasdk.core.types import UserAccount
 from cterasdk.core import query
@@ -18,6 +18,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         self._name = 'folderGroup'
         self._description = 'description'
         self._user_uid = 1337
+        self.fixed_block_size = portal_enum.DeduplicationMethodType.FixedBlockSize
 
     def test_list_folder_groups_owned_by(self):
         get_user_uid_mock = self._mock_get_user_uid()
@@ -80,6 +81,41 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
             cloudfs.CloudFS(self._global_admin).mkfg(self._name)
         self.assertEqual(error_message, error.exception.message)
 
+    def test_mkfg_no_owner_fixedBlockSize(self):
+        self._init_global_admin(execute_response='Success')
+        ret = cloudfs.CloudFS(self._global_admin).mkfg(self._name, deduplication_method_type=self.fixed_block_size)
+        self._global_admin.get.assert_not_called()
+        self._global_admin.execute.assert_called_once_with('', 'createFolderGroup', mock.ANY)
+
+        expected_param = self._get_mkfg_object(fixed_block_size=True)
+        actual_param = self._global_admin.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+
+        self.assertEqual(ret, 'Success')
+
+    def test_mkfg_with_local_owner_fixedBlockSize(self):
+        self._init_global_admin(execute_response='Success')
+        self._mock_get_user_base_object_ref()
+
+        ret = cloudfs.CloudFS(self._global_admin).mkfg(self._name, self._local_user_account, self.fixed_block_size)
+
+        self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
+        self._global_admin.execute.assert_called_once_with('', 'createFolderGroup', mock.ANY)
+
+        expected_param = self._get_mkfg_object(with_owner=True, fixed_block_size=True)
+        actual_param = self._global_admin.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+
+        self.assertEqual(ret, 'Success')
+
+    def test_mkfg_no_owner_raise_fixedBlockSize(self):
+        error_message = "Expected Failure"
+        expected_exception = exception.CTERAException(message=error_message)
+        self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
+        with self.assertRaises(exception.CTERAException) as error:
+            cloudfs.CloudFS(self._global_admin).mkfg(self._name, deduplication_method_type=self.fixed_block_size)
+        self.assertEqual(error_message, error.exception.message)
+
     def test_rmfg(self):
         self._init_global_admin(execute_response='Success')
         cloudfs.CloudFS(self._global_admin).rmfg(self._name)
@@ -128,7 +164,8 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         self._init_global_admin(get_response='admin', execute_response='Success')
         self._mock_get_user_base_object_ref()
 
-        ret = cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._local_user_account, description=self._description)
+        ret = cloudfs.CloudFS(self._global_admin).mkdir(self._name, self._group, self._local_user_account,
+                                                        description=self._description)
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
         self._global_admin.get.assert_called_once_with('/foldersGroups/' + self._group + '/baseObjectRef')
@@ -208,11 +245,12 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['displayName'])
         self._global_admin.files.undelete.assert_called_once_with(self._owner + '/' + self._name)
 
-    def _get_mkfg_object(self, with_owner=False):
+    def _get_mkfg_object(self, with_owner=False, fixed_block_size=False):
         mkfg_param_object = Object()
         mkfg_param_object.name = self._name
         mkfg_param_object.disabled = True
         mkfg_param_object.owner = self._owner if with_owner else None
+        mkfg_param_object.deduplicationMethodType = self.fixed_block_size if fixed_block_size else None
         return mkfg_param_object
 
     def _get_mkdir_object(self, winacls=True, description=None):
