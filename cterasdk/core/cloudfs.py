@@ -43,19 +43,21 @@ class CloudFS(BaseCommand):
         param = builder.build()
         return query.iterator(self._portal, '/foldersGroups', param)
 
-    def mkfg(self, name, user=None):
+    def mkfg(self, name, user=None, deduplication_method_type=None):
         """
         Create a new Folder Group
 
         :param str name: Name of the new folder group
         :param cterasdk.core.types.UserAccount user:
          User account, the user directory and name of the new folder group owner (default to None)
+        :param cterasdk.core.enum.DeduplicationMethodType deduplication_method_type: Deduplication-Method
         """
 
         param = Object()
         param.name = name
         param.disabled = True
         param.owner = self._portal.users.get(user, ['baseObjectRef']).baseObjectRef if user is not None else None
+        param.deduplicationMethodType = deduplication_method_type
 
         try:
             response = self._portal.execute('', 'createFolderGroup', param)
