@@ -93,14 +93,16 @@ class NFSv3AccessControlEntry():
     :ivar str address: IP address, hostname or fully qualified domain name of client machine
     :ivar str netmask: Subnet mask
     :ivar cterasdk.edge.enum.FileAccessMode perm: File access permission
+    :ivar bool insecure: Allow insecure NFS connections
     """
 
-    def __init__(self, address, netmask, perm):
+    def __init__(self, address, netmask, perm, insecure=False):
         AccessControlEntryValidator.validate_permission(perm)
         self._address = address
         self._netmask = netmask
         self._perm = perm
         self._noRootSquash = False
+        self._insecure = insecure
 
     @property
     def address(self):
@@ -127,9 +129,22 @@ class NFSv3AccessControlEntry():
         AccessControlEntryValidator.validate_permission(perm)
         self._perm = perm
 
+    @property
+    def insecure(self):
+        return self._insecure
+
+    @insecure.setter
+    def insecure(self, insecure):
+        self._insecure = insecure
+
     @staticmethod
     def from_server_object(server_object):
-        return NFSv3AccessControlEntry(server_object.address, server_object.netmask, server_object.accessLevel)
+        return NFSv3AccessControlEntry(
+            server_object.address,
+            server_object.netmask,
+            server_object.accessLevel,
+            getattr(server_object, 'insecure', False)  # Use getattr for backward compatibility
+        )
 
     def to_server_object(self):
         param = Object()
@@ -137,10 +152,18 @@ class NFSv3AccessControlEntry():
         param.netmask = self._netmask
         param.accessLevel = self._perm
         param.noRootSquash = self._noRootSquash
+        param.insecure = self._insecure
         return param
 
     def __str__(self):
-        return str(dict(address=self.address, netmask=self.netmask, permission=self.perm))
+        return str(
+            dict(
+                address=self._address,
+                netmask=self._netmask,
+                permission=self._perm,
+                insecure=self._insecure
+            )
+        )
 
 
 class RemoveNFSv3AccessControlEntry():
