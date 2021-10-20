@@ -40,12 +40,18 @@ class NFS(BaseCommand):
             mountd_port=None,
             statd_port=None,
             nfsv4_enabled=None,
-            krb5_enabled=None):
+            krb5_enabled=None,
+            nfsd_host=None):
         """
         Modify the FTP Configuration. Parameters that are not passed will not be affected
 
         :param bool,optional async_write: If True, use asynchronous writes
         :param bool,optional aggregate_writes: If True, aggregate write requests
+        :param int,optional mountd_port: Instruct mountd to bind to a specific port
+        :param int,optional statd_port: Instruct statd to bind to a specific port
+        :param bool,optional nfsv4_enabled: Enable NFSv4
+        :param bool,optional krb5_enabled: Enable Kerberos. Note that NFS4V must be enabled to enable Kerberos
+        :param str,optional nfsd_host: Instruct nfsd to bind to a specific network interface. Set to an empty string to clear
         """
         config = self.get_configuration()
         if config.mode != Mode.Enabled:
@@ -64,4 +70,6 @@ class NFS(BaseCommand):
             if krb5_enabled and config.nfsv4enabled is not None and not config.nfsv4enabled:
                 raise CTERAException("NFSv4 must be enabled in order to enable Kerberos")
             config.krb5 = krb5_enabled
+        if nfsd_host is not None:
+            config.nfsHost = nfsd_host
         self._gateway.put('/config/fileservices/nfs', config)
