@@ -52,12 +52,6 @@ jobs:
     - name: Build package
       run: |
         python setup.py sdist bdist_wheel
-    - name: Deploy to Test PyPi
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.TEST_PYPI_TOKEN }}
-        repository_url: https://test.pypi.org/legacy/
     - name: Deploy to PyPi
       uses: pypa/gh-action-pypi-publish@master
       with:
