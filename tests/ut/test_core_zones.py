@@ -1,3 +1,4 @@
+# pylint: disable=protected-access
 import re
 from unittest import mock
 

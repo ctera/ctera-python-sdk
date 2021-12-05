@@ -1,3 +1,4 @@
+# pylint: disable=protected-access
 import json
 
 from cterasdk import Object

@@ -1,3 +1,4 @@
+# pylint: disable=protected-access
 from cterasdk import Object
 from tests.ut import base_convert
 

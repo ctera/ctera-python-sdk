@@ -1,3 +1,4 @@
+# pylint: disable=protected-access
 from unittest import mock
 
 from cterasdk.common import Object
