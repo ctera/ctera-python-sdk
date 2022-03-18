@@ -94,13 +94,13 @@ class DirectoryService(BaseCommand):
         :returns: A dictionary of domain mapping objects
         :rtype: dict
         """
-        return {map.domainFlatName: map for map in self._gateway.get('/config/fileservices/cifs/idMapping/map')}
+        return {mapping.domainFlatName: mapping for mapping in self._gateway.get('/config/fileservices/cifs/idMapping/map')}
 
-    def set_advanced_mapping(self, mapping):
+    def set_advanced_mapping(self, mappings):
         """
         Configure advanced mapping
 
-        :param list[cterasdk.common.types.ADDomainIDMapping] mapping: List of domains and their UID/GID mapping range
+        :param list[cterasdk.common.types.ADDomainIDMapping] mappings: List of domains and their UID/GID mapping range
         """
         if not self.connected():
             raise CTERAException('Failed to configure advanced mapping. Not connected to directory services.')
@@ -108,14 +108,14 @@ class DirectoryService(BaseCommand):
         domains = self.domains()
         advanced_mapping = self._gateway.get('/config/fileservices/cifs/idMapping/map')
         advanced_mapping = []
-        for map in mapping:
-            if map.domainFlatName in domains:
-                advanced_mapping.append(map)
+        for mapping in mappings:
+            if mapping.domainFlatName in domains:
+                advanced_mapping.append(mapping)
             else:
-                logging.getLogger().warning('Invalid mapping. Could not find domain. %s', {'domain': map.domainFlatName})
+                logging.getLogger().warning('Invalid mapping. Could not find domain. %s', {'domain': mapping.domainFlatName})
 
         logging.getLogger().debug('Updating advanced mapping. %s', {
-            'domains': [map.domainFlatName for map in advanced_mapping]
+            'domains': [map.domainFlatName for mapping in advanced_mapping]
         })
         response = self._gateway.put('/config/fileservices/cifs/idMapping/map', advanced_mapping)
         logging.getLogger().info('Updated advanced mapping.')

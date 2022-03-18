@@ -164,9 +164,9 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
     @staticmethod
     def _create_get_domains_response(*domains):
         param = []
-        for domain in domains:
+        for domain_name in domains:
             domain = Object()
-            domain.flatName = domain
+            domain.flatName = domain_name
             param.append(domain)
         return param
 
@@ -214,7 +214,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         mapping.domainFlatName = domain_flat_name
         mapping.minID = min_id
         mapping.maxID = max_id
-        return [mapping]
+        return mapping
 
     def _get_domain_join_param(self, ou=None):
         o = Object()
