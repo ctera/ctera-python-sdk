@@ -425,21 +425,6 @@ class AccessControlRule(Object):
         self.role = role
 
 
-class ADDomainIDMapping(Object):
-    """
-    Base Class for Directory Service ID Mapping
-
-    :ivar str domain: The domain flat name
-    :param int start: The minimum id to use for mapping
-    :param int end: The maximum id to use for mapping
-    """
-    def __init__(self, domain, start, end):
-        self._classname = 'ADDomainIDMapping'
-        self.domainFlatName = domain
-        self.minID = start
-        self.maxID = end
-
-
 class TemplateScript:
 
     def __init__(self, platform):

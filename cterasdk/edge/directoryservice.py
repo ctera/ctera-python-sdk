@@ -87,24 +87,40 @@ class DirectoryService(BaseCommand):
         """
         self._gateway.put('/config/fileservices/cifs/passwordServer', None)
 
-    def advanced_mapping(self, domain, start, end):
+    def get_advanced_mapping(self):
+        """
+        Retrieve directory services advanced mapping configuration
+
+        :returns: A dictionary of domain mapping objects
+        :rtype: dict
+        """
+        return {mapping.domainFlatName: mapping for mapping in self._gateway.get('/config/fileservices/cifs/idMapping/map')}
+
+    def set_advanced_mapping(self, mappings):
         """
         Configure advanced mapping
 
-        :param str domain: The active directory domain
-        :param int start: The minimum id to use for mapping
-        :param int end: The maximum id to use for mapping
+        :param list[cterasdk.common.types.ADDomainIDMapping] mappings: List of domains and their UID/GID mapping range
         """
-        mappings = self._gateway.get('/config/fileservices/cifs/idMapping/map')
-        for mapping in mappings:
-            if domain == mapping.domainFlatName:
-                mapping.minID = start
-                mapping.maxID = end
-                logging.getLogger().debug('Configuring advanced mapping. %s', {'domain': domain, 'start': start, 'end': end})
-                return self._gateway.put('/config/fileservices/cifs/idMapping/map', mappings)
+        if not self.connected():
+            raise CTERAException('Failed to configure advanced mapping. Not connected to directory services.')
 
-        logging.getLogger().error('Could not find domain name. %s', {'domain': domain})
-        raise CTERAException('Could not find domain name', None, domain=domain, domains=self.domains())
+        domains = self.domains()
+        advanced_mapping = self._gateway.get('/config/fileservices/cifs/idMapping/map')
+        advanced_mapping = []
+        for mapping in mappings:
+            if mapping.domainFlatName in domains:
+                advanced_mapping.append(mapping)
+            else:
+                logging.getLogger().warning('Invalid mapping. Could not find domain. %s', {'domain': mapping.domainFlatName})
+
+        logging.getLogger().debug('Updating advanced mapping. %s', {
+            'domains': [mapping.domainFlatName for mapping in advanced_mapping]
+        })
+        response = self._gateway.put('/config/fileservices/cifs/idMapping/map', advanced_mapping)
+        logging.getLogger().info('Updated advanced mapping.')
+
+        return response
 
     def get_connected_domain(self):
         """

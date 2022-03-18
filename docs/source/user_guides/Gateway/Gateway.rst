@@ -514,12 +514,31 @@ Active Directory
 
 .. note:: the `ou` parameter must specify the distinguished name of the organizational unit
 
-.. automethod:: cterasdk.edge.directoryservice.DirectoryService.advanced_mapping
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.get_advanced_mapping
    :noindex:
 
 .. code-block:: python
 
-   filer.directoryservice.advanced_mapping('CTERA', 200001, 5000001)
+   for domain, mapping in filer.directoryservice.get_advanced_mapping().items():
+       print(domain)
+       print(mapping)
+
+.. note:: to retrieve a list of domain flat names, use :py:func:`cterasdk.edge.directoryservice.domains()`
+
+.. automethod:: cterasdk.edge.directoryservice.DirectoryService.set_advanced_mapping
+   :noindex:
+
+.. code-block:: python
+
+   """Create a list of domain mappings"""
+
+   advanced_mapping = [
+       common_types.ADDomainIDMapping('CTERA-PRD', 1000001, 2000000),
+       common_types.ADDomainIDMapping('CTERA-LAB', 2000001, 3000000),
+       common_types.ADDomainIDMapping('CTERA-LDR', 3000001, 4000000)
+   ]
+
+   filer.directoryservice.set_advanced_mapping(advanced_mapping)  # this function will skip domains that are not found
 
 .. note:: to retrieve a list of domain flat names, use :py:func:`cterasdk.edge.directoryservice.domains()`
 
