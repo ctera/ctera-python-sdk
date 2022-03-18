@@ -129,7 +129,6 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
         self.assertEqual('Unable to establish connection', error.exception.message)
 
-
     def test_get_advanced_mapping(self):
         get_response = TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, 0, 0)
         self._init_filer(get_response=get_response)
@@ -138,32 +137,38 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self._assert_equal_objects(ret[self._domain_flat_name], get_response)
 
     def test_set_advanced_mapping(self):
-        get_response = TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, 0, 0)
-        self._init_filer(get_response=get_response)
+        execute_response = TestEdgeDirectoryService._create_get_domains_response(self._domain_flat_name)
+        self._init_filer(get_response=0, execute_response=execute_response)
         directoryservice.DirectoryService(self._filer).set_advanced_mapping([self._domain_flat_name, self._mapping_min, self._mapping_max])
+        self._filer.get.assert_called_once_with('/status/fileservices/cifs/joinStatus')
         self._filer.execute.assert_called_once_with('/status/fileservices/cifs', 'enumDiscoveredDomains')
         self._filer.put.assert_called_once_with('/config/fileservices/cifs/idMapping/map', mock.ANY)
-
-        expected_param = [TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, self._mapping_min, self._mapping_max)]
+        expected_param = [
+            TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, self._mapping_min, self._mapping_max)
+        ]
         actual_param = self._filer.put.call_args[0][1]
         self._assert_equal_objects(expected_param[0], actual_param[0])
 
     def test_set_advanced_mapping_raise(self):
-        self.patch_call("cterasdk.edge.directoryservice.DirectoryService.domains")
-        get_response = self._get_advanced_mapping_object('Invalid domain name', 0, 0)
-        self._init_filer(get_response=get_response)
+        self._init_filer(get_response=1)
         with self.assertRaises(exception.CTERAException) as error:
-            directoryservice.DirectoryService(self._filer).advanced_mapping(self._domain_flat_name, self._mapping_min, self._mapping_max)
-        self.assertEqual('Could not find domain name', error.exception.message)
+            directoryservice.DirectoryService(self._filer).set_advanced_mapping([])
+        self.assertEqual('Failed to configure advanced mapping. Not connected to directory services.', error.exception.message)
 
     def test_domains(self):
-        domain = Object()
-        domain.flatName = self._domain_flat_name
-        execute_response = [domain]
-        self._init_filer(execute_response=execute_response)
+        self._init_filer(execute_response=TestEdgeDirectoryService._create_get_domains_response(self._domain_flat_name))
         ret = directoryservice.DirectoryService(self._filer).domains()
         self._filer.execute.assert_called_once_with('/status/fileservices/cifs', 'enumDiscoveredDomains')
         self.assertEqual(ret[0], self._domain_flat_name)
+
+    @staticmethod
+    def _create_get_domains_response(*domains):
+        param = []
+        for domain in domains:
+            domain = Object()
+            domain.flatName = self._domain_flat_name
+            param.append(domain)
+        return param
 
     def test_disconnect(self):
         get_response = self._get_domain_param()
