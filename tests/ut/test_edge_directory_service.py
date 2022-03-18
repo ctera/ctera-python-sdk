@@ -138,16 +138,14 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
 
     def test_set_advanced_mapping(self):
         execute_response = TestEdgeDirectoryService._create_get_domains_response(self._domain_flat_name)
+        advanced_mapping = [TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, self._mapping_min, self._mapping_max)]
         self._init_filer(get_response=0, execute_response=execute_response)
-        directoryservice.DirectoryService(self._filer).set_advanced_mapping([self._domain_flat_name, self._mapping_min, self._mapping_max])
+        directoryservice.DirectoryService(self._filer).set_advanced_mapping(advanced_mapping)
         self._filer.get.assert_called_once_with('/status/fileservices/cifs/joinStatus')
         self._filer.execute.assert_called_once_with('/status/fileservices/cifs', 'enumDiscoveredDomains')
         self._filer.put.assert_called_once_with('/config/fileservices/cifs/idMapping/map', mock.ANY)
-        expected_param = [
-            TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, self._mapping_min, self._mapping_max)
-        ]
         actual_param = self._filer.put.call_args[0][1]
-        self._assert_equal_objects(expected_param[0], actual_param[0])
+        self._assert_equal_objects(advanced_mapping[0], actual_param[0])
 
     def test_set_advanced_mapping_raise(self):
         self._init_filer(get_response=1)
