@@ -143,7 +143,10 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         ]
         self._init_filer(get_response=0, execute_response=execute_response)
         directoryservice.DirectoryService(self._filer).set_advanced_mapping(advanced_mapping)
-        self._filer.get.assert_called_once_with('/status/fileservices/cifs/joinStatus')
+        self._filer.get.assert_has_calls([
+            mock.call('/status/fileservices/cifs/joinStatus'),
+            mock.call('/config/fileservices/cifs/idMapping/map')
+        ])
         self._filer.execute.assert_called_once_with('/status/fileservices/cifs', 'enumDiscoveredDomains')
         self._filer.put.assert_called_once_with('/config/fileservices/cifs/idMapping/map', mock.ANY)
         actual_param = self._filer.put.call_args[0][1]
