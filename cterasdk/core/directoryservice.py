@@ -41,7 +41,7 @@ class DirectoryService(BaseCommand):
             Connect to a primary and a secondary domain controllers, defaults to `None`
         :param bool,optional ssl: Connect using SSL, defaults to `False`
         :param bool,optional krb: Connect using Kerberos, defaults to `False`
-        :param list[cterasdk.core.types.ADDomainIDMapping],optional: The directory services UID/GID mapping
+        :param list[cterasdk.common.types.ADDomainIDMapping],optional: The directory services UID/GID mapping
         :param list[cterasdk.core.types.AccessControlEntry],optional acl: List of access control entries and their associated roles
         :param cterasdk.core.enum.Role default: Default role if no match applies, defaults to `None`
         :param str,optional fetch: Configure identity fetching mode, defaults to `'Lazy'`
@@ -98,7 +98,7 @@ class DirectoryService(BaseCommand):
         """
         Configure advanced mapping
 
-        :param list[cterasdk.core.types.ADDomainIDMapping] mapping: The directory services UID/GID mapping
+        :param list[cterasdk.common.types.ADDomainIDMapping] mapping: List of domains and their UID/GID mapping range
         """
         if self._get_configuration() is None:
             raise CTERAException('Failed to apply mapping. Not connected to directory services.')
