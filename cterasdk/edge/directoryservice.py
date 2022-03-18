@@ -115,7 +115,7 @@ class DirectoryService(BaseCommand):
                 logging.getLogger().warning('Invalid mapping. Could not find domain. %s', {'domain': mapping.domainFlatName})
 
         logging.getLogger().debug('Updating advanced mapping. %s', {
-            'domains': [map.domainFlatName for mapping in advanced_mapping]
+            'domains': [mapping.domainFlatName for mapping in advanced_mapping]
         })
         response = self._gateway.put('/config/fileservices/cifs/idMapping/map', advanced_mapping)
         logging.getLogger().info('Updated advanced mapping.')
