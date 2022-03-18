@@ -130,11 +130,11 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self.assertEqual('Unable to establish connection', error.exception.message)
 
     def test_get_advanced_mapping(self):
-        get_response = TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, 0, 0)
+        get_response = [TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, 0, 0)]
         self._init_filer(get_response=get_response)
         ret = directoryservice.DirectoryService(self._filer).get_advanced_mapping()
         self._filer.get.assert_called_once_with('/config/fileservices/cifs/idMapping/map')
-        self._assert_equal_objects(ret[self._domain_flat_name], get_response)
+        self._assert_equal_objects(ret[self._domain_flat_name], get_response[0])
 
     def test_set_advanced_mapping(self):
         execute_response = TestEdgeDirectoryService._create_get_domains_response(self._domain_flat_name)
@@ -166,7 +166,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         param = []
         for domain in domains:
             domain = Object()
-            domain.flatName = self._domain_flat_name
+            domain.flatName = domain
             param.append(domain)
         return param
 
