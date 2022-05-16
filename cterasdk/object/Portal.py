@@ -27,6 +27,7 @@ from ..core import taskmgr
 from ..core import templates
 from ..core import uri
 from ..core import files
+from ..core import admins
 
 
 class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
@@ -34,7 +35,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     Parent class for communicating with the Portal through either GlobalAdmin or ServicesPortal
 
     :ivar cterasdk.core.users.Users users: Object holding the Portal user APIs
-    :ivar cterasdk.core.users.Administrators administrators: Object holding the Portal GlobalAdmin APIs
+    :ivar cterasdk.core.admins.Administrators admins: Object holding the Portal GlobalAdmin users APIs
     :ivar cterasdk.core.plans.Plans plans: Object holding the Plan APIs
     :ivar cterasdk.core.reports.Reports reports: Object holding the Portal reports APIs
     :ivar cterasdk.core.devices.Devices devices: Object holding the Portal devices APIs
@@ -59,7 +60,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         super().__init__(host, port, https)
         self._session = session.Session(self.host(), self.context)
         self.users = users.Users(self)
-        self.administrators = users.Administrators(self)
+        self.admins = admins.Administrators(self)
         self.reports = reports.Reports(self)
         self.plans = plans.Plans(self)
         self.devices = devices.Devices(self)

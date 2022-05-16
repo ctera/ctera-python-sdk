@@ -8,16 +8,15 @@ from ..common import union
 from . import query
 
 
-class Users(BaseCommand):
+class Administrators(BaseCommand):
     """
-    Portal User Management APIs
+    Portal GlobalAdmin User Management APIs
     """
 
     default = ['name']
 
     def _get_entire_object(self, user_account):
-        ref = f'/users/{user_account.name}' if user_account.is_local \
-            else f'/domains/{user_account.directory}/adUsers/{user_account.name}'
+        ref = f'/administrators/{user_account.name}'
         try:
             return self._portal.get(ref)
         except CTERAException as error:
@@ -25,71 +24,51 @@ class Users(BaseCommand):
 
     def get(self, user_account, include=None):
         """
-        Get a user account
+        Get a GlobalAdmin user account
 
-        :param cterasdk.core.types.UserAccount user_account: User account, including the user directory and user name
+        :param cterasdk.core.types.UserAccount user_account: GlobalAdmin User account, including directory and username
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: The user account, including the requested fields
         """
-        baseurl = f'/users/{user_account.name}' if user_account.is_local \
-            else f'/domains/{user_account.directory}/adUsers/{user_account.name}'
-        include = union(include or [], Users.default)
+        baseurl = f'/administrators/{user_account.name}'
+        include = union(include or [], Administrators.default)
         include = ['/' + attr for attr in include]
         user_object = self._portal.get_multi(baseurl, include)
         if user_object.name is None:
-            raise ObjectNotFoundException('Could not find user', baseurl, user_directory=user_account.directory, username=user_account.name)
+            raise ObjectNotFoundException('Could not find user', baseurl,
+                                          user_directory=user_account.directory, username=user_account.name)
         return user_object
 
-    def list_local_users(self, include=None):
+    def list_global_administrators(self, include=None):
         """
-        List all local users
+        List all local administrators
 
         :param list[str] include: List of fields to retrieve, defaults to ['name']
-        :return: Iterator for all local users
+        :return: Iterator for all local administrators
         :rtype: cterasdk.lib.iterator.Iterator
         """
-        include = union(include or [], Users.default)
+        include = union(include or [], Administrators.default)
         param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._portal, '/users', param)
-
-    def list_domains(self):
-        """
-        List all domains
-
-        :return list: List of all domains
-        """
-        return self._portal.get('/domains')
-
-    def list_domain_users(self, domain, include=None):
-        """
-        List all the users in the domain
-
-        :param list[str] include: List of fields to retrieve, defaults to ['name']
-        :return: Iterator for all the domain users
-        :rtype: cterasdk.lib.iterator.Iterator
-        """
-        include = union(include or [], Users.default)
-        param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._portal, '/domains/' + domain + '/adUsers', param)
+        return query.iterator(self._portal, '/administrators', param)
 
     def add(self, name, email, first_name, last_name, password, role, company=None, comment=None, password_change=False):
         """
-        Create a local user account
+        Create a GlobalAdmin user account
 
-        :param str name: User name for the new user
-        :param str email: E-mail address of the new user
-        :param str first_name: The first name of the new user
-        :param str last_name: The last name of the new user
-        :param str password: Password for the new user
-        :param cterasdk.core.enum.Role role: User role of the new user
-        :param str,optional company: The name of the company of the new user, defaults to None
-        :param str,optional comment: Additional comment for the new user, defaults to None
+        :param str name: User name for the new GlobalAdmin
+        :param str email: E-mail address of the new GlobalAdmin
+        :param str first_name: The first name of the new GlobalAdmin
+        :param str last_name: The last name of the new GlobalAdmin
+        :param str password: Password for the new GlobalAdmin
+        :param cterasdk.core.enum.Role role: User role of the new GlobalAdmin
+        :param str,optional company: The name of the company of the new GlobalAdmin, defaults to None
+        :param str,optional comment: Additional comment for the new GlobalAdmin, defaults to None
         :param variable,optional password_change:
             Require the user to change the password on the first login.
             Pass datetime.date for a specific date, integer for days from creation, or True for immediate , defaults to False
         """
         param = Object()
-        param._classname = "PortalUser"  # pylint: disable=protected-access
+        param._classname = "PortalAdmin"  # pylint: disable=protected-access
         param.name = name
         param.email = email
         param.firstName = first_name
@@ -101,18 +80,18 @@ class Users(BaseCommand):
         if password_change:
             param.requirePasswordChangeOn = DateTimeUtils.get_expiration_date(password_change).strftime('%Y-%m-%d')
 
-        logging.getLogger().info('Creating user. %s', {'user': name})
-        response = self._portal.add('/users', param)
-        logging.getLogger().info('User created. %s', {'user': name, 'email': email, 'role': role})
+        logging.getLogger().info('Creating GlobalAdmin user. %s', {'user': name})
+        response = self._portal.add('/administrators', param)
+        logging.getLogger().info('GlobalAdmin User created. %s', {'user': name, 'email': email, 'role': role})
 
         return response
 
     def modify(self, current_username, new_username=None, email=None, first_name=None,
                last_name=None, password=None, role=None, company=None, comment=None):
         """
-        Modify a local user account
+        Modify a GlobalAdmin user account
 
-        :param str current_username: The current user name
+        :param str current_username: The current GlobalAdmin username
         :param str,optional new_username: New name
         :param str,optional email: E-mail address
         :param str,optional first_name: First name
@@ -142,36 +121,21 @@ class Users(BaseCommand):
             user.comment = comment
 
         try:
-            response = self._portal.put('/users/' + current_username, user)
-            logging.getLogger().info("User modified. %s", {'username': user.name})
+            response = self._portal.put('/administrators/' + current_username, user)
+            logging.getLogger().info("GlobalAdmin User modified. %s", {'username': user.name})
             return response
         except CTERAException as error:
-            logging.getLogger().error("Failed to modify user.")
+            logging.getLogger().error("Failed to modify GlobalAdmin user.")
             raise CTERAException('Failed to modify user', error)
-
-    def apply_changes(self, wait=False):
-        """
-        Apply provisioning changes.\n
-
-        :param bool,optional wait: Wait for all changes to apply
-        """
-        param = Object()
-        param.objectId = None
-        param.type = 'users'
-        logging.getLogger().info('Applying provisioning changes.')
-        task = self._portal.execute('', 'updateAccounts', param)
-        if wait:
-            task = self._portal.tasks.wait(task)
-        return task
 
     def delete(self, user):
         """
-        Delete a user
+        Delete a GlobalAdmin user
 
-        :param cterasdk.core.types.UserAccount user: the user account
+        :param cterasdk.core.types.UserAccount user: the GlobalAdmin user account
         """
         logging.getLogger().info('Deleting user. %s', {'user': str(user)})
-        baseurl = f'/users/{user.name}' if user.is_local else f'/domains/{user.directory}/adUsers/{user.name}'
+        baseurl = f'/administrators/{user.name}'
         response = self._portal.execute(baseurl, 'delete', True)
         logging.getLogger().info('User deleted. %s', {'user': str(user)})
 
