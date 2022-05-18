@@ -645,13 +645,13 @@ Global Users
 .. code-block:: python
 
    """list all global admins"""
-   users = admin.users.list_global_administrators()
+   users = admin.admins.list_global_administrators()
 
    for user in users:
 
        print(user.name)
 
-   users = admin.users.list_global_administrators(include = ['name', 'email', 'firstName', 'lastName'])
+   users = admin.admins.list_global_administrators(include = ['name', 'email', 'firstName', 'lastName'])
 
    for user in users:
 
