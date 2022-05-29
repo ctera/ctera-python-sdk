@@ -107,8 +107,8 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     @property
     def _omit_fields(self):
         return super()._omit_fields + [
+            'admins',
             'users',
-            'administrators',
             'reports',
             'plans',
             'devices',
