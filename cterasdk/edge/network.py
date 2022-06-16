@@ -184,37 +184,36 @@ class Network(BaseCommand):
         """
         return self._gateway.get('/config/network/static_routes')
 
-    def set_static_route(self, source_ip, destination_ip, destination_mask):
+    def add_static_route(self, source_ip, destination_ip_mask):
         """
         Set a Static Route
 
-        :param str source_ip: The source Filer IP (Gateway IP)
-        :param str destination_ip: The destination IP
-        :param str destination_mask: The destination IP subnet mask CIDR Notation (1-32)
+        :param str source_ip: The source IP
+        :param str destination_ip_mask: The destination IP and CIDR block (10.0.0.0/16)
         """
         param = Object()
         param.GwIP = source_ip
-        param.DestIpMask = f'{destination_ip}_{destination_mask}'
+        param.DestIpMask = destination_ip_mask.replace("/", "_")
         try:
             res = self._gateway.add('/config/network/static_routes', param)
             logging.getLogger().info(
-                "Static Route updated. %s", {'Source': param.GwIP, 'Destination': param.DestIpMask})
+                "Static route updated. %s", {'Source': param.GwIP, 'Destination': destination_ip_mask})
             return res
         except CTERAException as error:
             logging.getLogger().error("Static route creation failed.")
             raise CTERAException('Static route creation failed', error)
 
-    def del_static_route(self, destination_ip, destination_subnet_mask):
+    def remove_static_route(self, destination_ip_mask):
         """
         Delete a Static Route
 
-        :param str destination_ip: The destination IP
-        :param str destination_subnet_mask: The destination IP subnet mask CIDR Notation (1-32)
+        :param str destination_ip_mask: The destination IP and CIDR block (10.0.0.0/16)
         """
         try:
-            response = self._gateway.delete(f'/config/network/static_routes/{destination_ip}_{destination_subnet_mask}')
+            ip_mask = destination_ip_mask.replace("/", "_")
+            response = self._gateway.delete(f'/config/network/static_routes/{ip_mask}')
             logging.getLogger().info(
-                "Static Route deleted. %s", {'Destination': destination_ip + '_' + destination_subnet_mask})
+                "Static route deleted. %s", {'Destination': ip_mask})
             return response
         except CTERAException as error:
             logging.getLogger().error("Static route deletion failed.")
@@ -222,12 +221,11 @@ class Network(BaseCommand):
 
     def clean_all_static_routes(self):
         """
-        Clean all Static Routes
+        Clean all Static routes
         """
         try:
             self._gateway.execute('/config/network', 'cleanStaticRoutes')
-            logging.getLogger().info('All Static Routes cleaned Successfully')
-            return 'All Static Routes cleaned Successfully'
+            logging.getLogger().info('Static routes were deleted successfully')
         except CTERAException as error:
             logging.getLogger().error("Failed to clean Static routes")
-            raise CTERAException('Failed to clean Static routes', error)
+            raise CTERAException('Failed to delete Static routes', error)
