@@ -9,7 +9,7 @@ from cterasdk import exception
 from tests.ut import base_edge
 
 
-class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=(too-many-public-methods
+class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public-methods
 
     def setUp(self):
         super().setUp()
