@@ -944,6 +944,42 @@ Network
 
    filer.network.reset_mtu()  # disable custom mtu configuration and restore default setting (1500)
 
+.. automethod:: cterasdk.edge.network.Network.get_static_routes
+   :noindex:
+
+.. code-block:: python
+
+   # get static routes
+   filer.network.get_static_routes()
+
+.. automethod:: cterasdk.edge.network.Network.add_static_route
+   :noindex:
+
+.. code-block:: python
+
+   # add static route from 10.10.12.1 to 192.168.55.7/32
+   filer.network.add_static_route('10.10.12.1', '192.168.55.7/32')
+
+   # add static route from 10.100.102.4 to 172.18.100.0/24
+   filer.network.add_static_route('10.100.102.4', '172.18.100.0/24')
+
+.. automethod:: cterasdk.edge.network.Network.remove_static_route
+   :noindex:
+
+.. code-block:: python
+
+   # remove static route 192.168.55.7/32
+   filer.network.remove_static_route('192.168.55.7/32')
+
+.. automethod:: cterasdk.edge.network.Network.clean_all_static_routes
+   :noindex:
+
+.. code-block:: python
+
+   # remove all static routes -  (clean)
+   filer.network.clean_all_static_routes()
+
+
 Network Diagnostics
 ^^^^^^^^^^^^^^^^^^^
 
