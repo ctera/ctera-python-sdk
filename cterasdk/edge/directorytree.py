@@ -87,7 +87,7 @@ class DirectoryTree:
     def _is_dir(node):
         return getattr(node, '_classname', 'DirEntry') == 'DirEntry'
 
-    # pylint: disable=R0201
+    # pylint: disable=R6301
     def _has_children(self, node):
         return node.children is not None
 
@@ -98,7 +98,7 @@ class DirectoryTree:
                     return child
         return None
 
-    # pylint: disable=R0201
+    # pylint: disable=R6301
     def _add_child(self, parent, node):
         node._parent = parent  # pylint: disable=protected-access
         if parent.children is None:
@@ -131,6 +131,7 @@ class DirectoryTree:
     def _get_dir_entry(self, name, include):
         return self._get_entry(True, name, include)
 
+    # pylint: disable=R6301
     def _get_entry(self, is_dir, name, include):
         param = Object()
         param.displayName = None

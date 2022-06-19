@@ -1165,6 +1165,48 @@ Logs
    admin.logs.device('WIN-SRV2019', topic='backup')
 
 
+Log Based Alerts
+^^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.core.logs.Alerts.get
+   :noindex:
+
+.. code:: python
+
+   """Get a list of log based alerts"""
+   for alert in admin.logs.alerts.get():
+      print(alert)
+
+.. automethod:: cterasdk.core.logs.Alerts.add
+   :noindex:
+
+.. code:: python
+
+   """Alert on a volume full error event"""
+   admin.logs.alerts.add('Volume Full', topic='system', log='VolumeFull', origin_type='Device', min_severity='error')
+
+.. automethod:: cterasdk.core.logs.Alerts.put
+   :noindex:
+
+.. code:: python
+
+   """Set alerts. Overrides all existing alerts"""
+   volume_full = portal_types.AlertBuilder.name('volume_full').log('VolumeFull').build()
+   agent_repo = portal_types.AlertBuilder.name('agent_repo').log('AgentRepositoryNotReady').build()
+   admin.logs.alerts.put([volume_full, agent_repo])
+
+.. automethod:: cterasdk.core.logs.Alerts.delete
+   :noindex:
+
+.. code:: python
+
+   """Delete an alert by name"""
+   admin.logs.alerts.delete('volume_full')
+
+   """Delete all alerts"""
+   admin.logs.alerts.put([])
+
+
 Syslog
 ------
 
