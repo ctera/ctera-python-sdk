@@ -129,6 +129,7 @@ class DirectoryTree:
     def _get_dir_entry(self, name, include):
         return self._get_entry(True, name, include)
 
+    # pylint: disable=R6301
     def _get_entry(self, is_dir, name, include):
         param = Object()
         param.displayName = None
