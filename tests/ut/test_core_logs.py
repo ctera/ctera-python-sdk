@@ -57,7 +57,7 @@ class TestCoreLogs(base_core.BaseCoreTest):
         self._global_admin.put.assert_called_once_with('/alerts', mock.ANY)
         expected_param = TestCoreLogs._create_alert(self._alert_name)
         actual_param = self._global_admin.put.call_args[0][1]
-        self._assert_equal_objects(actual_param, expected_param)
+        self._assert_equal_objects(actual_param[0], expected_param)
 
     def test_logs_alerts_delete(self):
         self._init_global_admin(get_response=[TestCoreLogs._create_alert(self._alert_name)])
