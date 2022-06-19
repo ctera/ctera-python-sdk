@@ -1,3 +1,4 @@
+import ipaddress
 import re
 import logging
 from datetime import datetime
@@ -144,3 +145,26 @@ def parse_base_object_ref(base_object_ref):
         return BaseObjectRef(classname, uid, tenant, name)
     logging.getLogger().debug('No match found. %s', {'ref': base_object_ref})
     return None
+
+
+def parse_to_ipaddress(address):
+    """
+    Parse an ip or network address into ipaddress object
+
+    :param str address: ip (10.0.0.5) or network address (192.168.44.0/28)
+    :return: ipaddress.IPV4Address/IPV6Address or ipaddress.IPV4Network/IPV6Network
+    """
+
+    try:
+        try:
+            ip_addrr = ipaddress.ip_address(address)
+            logging.getLogger().debug('ip address validated. %s', {'ip': str(ip_addrr)})
+            return ip_addrr
+        except (ValueError, TypeError):
+            ip_network = ipaddress.ip_network(address)
+            logging.getLogger().debug('ip network validated. %s', {'network': str(ip_network)})
+            return ip_network
+    except (ValueError, TypeError):
+        err = ValueError(f'{address} does not appear to be an IPv4 or IPv6 network or ip address')
+        logging.getLogger().error('Incorrect entry, please use IPv4 or IPv6 CIDR Formats. %s', {'Error': err})
+        raise err

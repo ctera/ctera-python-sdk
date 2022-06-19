@@ -4,7 +4,7 @@ from cterasdk.exception import CTERAException
 from .enum import Mode, IPProtocol, Traffic
 from .types import TCPConnectResult
 from ..lib.task_manager_base import TaskError
-from ..common import Object
+from ..common import Object, parse_to_ipaddress
 from .base_command import BaseCommand
 
 
@@ -188,13 +188,13 @@ class Network(BaseCommand):
         """
         Set a Static Route
 
-        :param str source_ip: The source IP
-        :param str destination_ip_mask: The destination IP and CIDR block (10.0.0.0/16)
+        :param str source_ip: The source IP (192.168.15.55)
+        :param str destination_ip_mask: The destination IP and CIDR block (10.5.0.1/32)
         """
-        param = Object()
-        param.GwIP = source_ip
-        param.DestIpMask = destination_ip_mask.replace("/", "_")
         try:
+            param = Object()
+            param.GwIP = str(parse_to_ipaddress(source_ip))
+            param.DestIpMask = str(parse_to_ipaddress(destination_ip_mask)).replace("/", "_")
             res = self._gateway.add('/config/network/static_routes', param)
             logging.getLogger().info(
                 "Static route updated. %s", {'Source': param.GwIP, 'Destination': destination_ip_mask})
@@ -207,13 +207,13 @@ class Network(BaseCommand):
         """
         Delete a Static Route
 
-        :param str destination_ip_mask: The destination IP and CIDR block (10.0.0.0/16)
+        :param str destination_ip_mask: The destination IP and CIDR block (10.5.0.1/32)
         """
         try:
-            ip_mask = destination_ip_mask.replace("/", "_")
-            response = self._gateway.delete(f'/config/network/static_routes/{ip_mask}')
+            dest_ip_mask = str(parse_to_ipaddress(destination_ip_mask)).replace("/", "_")
+            response = self._gateway.delete(f'/config/network/static_routes/{dest_ip_mask}')
             logging.getLogger().info(
-                "Static route deleted. %s", {'Destination': ip_mask})
+                "Static route deleted. %s", {'Destination': dest_ip_mask})
             return response
         except CTERAException as error:
             logging.getLogger().error("Static route deletion failed.")
