@@ -12,7 +12,7 @@ class DirectoryTree:
         nodes = [root]
         while nodes:
             node = nodes.pop(0)
-            if DirectoryTree._has_children(node):
+            if self._has_children(node):
                 for child_node in node.children:
                     child_node._parent = node  # pylint: disable=protected-access
                     nodes.append(child_node)
@@ -72,7 +72,7 @@ class DirectoryTree:
         parts = path.split('/')[1:]
         node = self.root
         while parts:
-            if DirectoryTree._has_children(node):
+            if self._has_children(node):
                 child_name = parts.pop(0)
                 child_node = self._get_child(node, child_name)
                 if child_node is None:
@@ -87,19 +87,19 @@ class DirectoryTree:
     def _is_dir(node):
         return getattr(node, '_classname', 'DirEntry') == 'DirEntry'
 
-    @staticmethod
-    def _has_children(node):
+    # pylint: disable=R0201
+    def _has_children(self, node):
         return node.children is not None
 
     def _get_child(self, node, child_name):
-        if DirectoryTree._has_children(node):
+        if self._has_children(node):
             for child in node.children:
                 if child.name == child_name:
                     return child
         return None
 
-    @staticmethod
-    def _add_child(parent, node):
+    # pylint: disable=R0201
+    def _add_child(self, parent, node):
         node._parent = parent  # pylint: disable=protected-access
         if parent.children is None:
             parent.children = []
@@ -107,7 +107,7 @@ class DirectoryTree:
 
     def _remove_child(self, parent, child_name):
         ret = None
-        if DirectoryTree._has_children(parent):
+        if self._has_children(parent):
             for i, child in enumerate(parent.children):
                 if child.name == child_name:
                     ret = parent.children.pop(i)
@@ -121,18 +121,17 @@ class DirectoryTree:
         descendant = self._get_dir_entry(descendant_name, include) if is_dir else self._get_file_entry(descendant_name, include)
         for part in parts:
             child_node = self._get_dir_entry(part, parent.isIncluded)
-            DirectoryTree._add_child(parent, child_node)
+            self._add_child(parent, child_node)
             parent = child_node
-        DirectoryTree._add_child(parent, descendant)
+        self._add_child(parent, descendant)
 
     def _get_file_entry(self, name, include):
-        return DirectoryTree._get_entry(False, name, include)
+        return self._get_entry(False, name, include)
 
     def _get_dir_entry(self, name, include):
-        return DirectoryTree._get_entry(True, name, include)
+        return self._get_entry(True, name, include)
 
-    @staticmethod
-    def _get_entry(is_dir, name, include):
+    def _get_entry(self, is_dir, name, include):
         param = Object()
         param.displayName = None
         param.name = name
