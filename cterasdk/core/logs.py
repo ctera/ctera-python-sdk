@@ -144,7 +144,7 @@ class Alerts(BaseCommand):
         logging.getLogger().info('Log based alerts updated.')
         return response
 
-    def get(self, name=None):
+    def get(self):
         """
         Get a List of Log Based Alerts
 
