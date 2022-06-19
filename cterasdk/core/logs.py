@@ -6,7 +6,6 @@ from ..lib import Iterator, Command
 from ..core import enum
 from ..common import Object
 from . import query
-from ..exception import CTERAException
 
 
 class Logs(BaseCommand):
