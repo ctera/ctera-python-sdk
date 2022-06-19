@@ -1,5 +1,6 @@
 # pylint: disable=protected-access
 from datetime import date, timedelta
+from unittest import mock
 
 from cterasdk.common import Object
 from cterasdk.core.enum import LogTopic, Severity, OriginType
