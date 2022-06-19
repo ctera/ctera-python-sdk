@@ -503,3 +503,97 @@ class TemplateScript:
         if self._after_logon is not None:
             param.afterFirtSignIn = self._after_logon
         return param
+
+
+class AlertBuilder:
+
+    def __init__(self, name):
+        self.param = Object()
+        self.param._classname = 'AlertRule'
+        self.param.id = name
+
+    @staticmethod
+    def name(name):
+        """
+        Create an Alert Builder
+
+        :param str name: Alert name
+        :returns: Alert Builder
+        :rtype: cterasdk.core.types.AlertBuilder
+        """
+        return AlertBuilder(name)
+
+    def description(self, description):
+        """
+        Set alert description
+
+        :param str description: Alert description
+        :returns: Alert Builder
+        :rtype: cterasdk.core.types.AlertBuilder
+        """
+        self.param.description = description
+        return self
+
+    def log(self, log):
+        """
+        Set alert log class name
+
+        :param str log: Log class name
+        :returns: Alert Builder
+        :rtype: cterasdk.core.types.AlertBuilder
+        """
+        self.param.logName = log
+        return self
+
+    def topic(self, topic):
+        """
+        Set alert log topic
+
+        :param cterasdk.core.enum.LogTopic topic: Log topic
+        :returns: Alert Builder
+        :rtype: cterasdk.core.types.AlertBuilder
+        """
+        self.param.topic = topic
+        return self
+
+    def min_severity(self, min_severity):
+        """
+        Set alert log minimum severity
+
+        :param cterasdk.core.enum.Severity min_severity: Minimum severity
+        :returns: Alert Builder
+        :rtype: cterasdk.core.types.AlertBuilder
+        """
+        self.param.minSeverity = min_severity
+        return self
+
+    def origin_type(self, origin_type):
+        """
+        Set alert origin type
+
+        :param cterasdk.core.enum.OriginType origin_type: Log origin type
+        :returns: Alert Builder
+        :rtype: cterasdk.core.types.AlertBuilder
+        """
+        self.param.originType = origin_type
+        return self
+
+    def content(self, content):
+        """
+        Set alert log message content
+
+        :param str content: Log content
+        :returns: Alert Builder
+        :rtype: cterasdk.core.types.AlertBuilder
+        """
+        self.param.messageContent = content
+        return self
+
+    def build(self):
+        """
+        Build the alert
+
+        :returns: Alert object
+        :rtype: cterasdk.common.object.Object
+        """
+        return self.param
