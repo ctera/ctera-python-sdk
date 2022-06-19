@@ -1199,6 +1199,7 @@ Log Based Alerts
    :noindex:
 
 .. code:: python
+
    """Delete an alert by name"""
    admin.logs.alerts.delete('volume_full')
 

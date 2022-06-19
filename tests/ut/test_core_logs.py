@@ -77,6 +77,7 @@ class TestCoreLogs(base_core.BaseCoreTest):
     def _create_alert(name):
         alert = Object()
         alert.id = name
+        alert._classname = 'AlertRule'
         return alert
 
     @staticmethod
