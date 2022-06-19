@@ -950,7 +950,7 @@ Network
 .. code-block:: python
 
    # get static routes
-   filer.network.get_static_route()
+   filer.network.get_static_routes()
 
 .. automethod:: cterasdk.edge.network.Network.add_static_route
    :noindex:
@@ -971,13 +971,13 @@ Network
    # remove static route 192.168.55.7/32
    filer.network.remove_static_route('192.168.55.7/32')
 
-.. automethod:: cterasdk.edge.network.Network.clean_static_routes
+.. automethod:: cterasdk.edge.network.Network.clean_all_static_routes
    :noindex:
 
 .. code-block:: python
 
    # remove all static routes -  (clean)
-   filer.network.clean_static_routes()
+   filer.network.clean_all_static_routes()
 
 
 Network Diagnostics
