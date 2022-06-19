@@ -5,10 +5,11 @@ from cterasdk.edge.types import TCPService, TCPConnectResult
 from cterasdk.lib import task_manager_base
 from cterasdk.edge.enum import Mode, IPProtocol, Traffic
 from cterasdk.common import Object
+from cterasdk import exception
 from tests.ut import base_edge
 
 
-class TestEdgeNetwork(base_edge.BaseEdgeTest):
+class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public-methods
 
     def setUp(self):
         super().setUp()
@@ -35,6 +36,12 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         self._tcp_connect_port = 995
 
         self._mtu = 1320
+
+        self._static_route_1 = Object()
+        self._static_route_1.GwIP = '192.168.0.150'
+        self._static_route_1.DestIpMask = '172.64.28.15_32'
+        self._static_routes = []
+        self._static_routes.append(self._static_route_1)
 
     def test_network_status(self):
         get_response = 'Success'
@@ -226,3 +233,68 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):
         tcp_connect_param.address = self._tcp_connect_address
         tcp_connect_param.port = self._tcp_connect_port
         return tcp_connect_param
+
+    def test_add_static_routes(self):
+        add_response = f'/config/network/static_routes/{self._static_routes[0].DestIpMask}'
+        self._init_filer(add_response=add_response)
+        network.Network(self._filer).add_static_route(
+            self._static_routes[0].GwIP,
+            self._static_routes[0].DestIpMask.replace("_", "/")
+        )
+        self._filer.add.assert_called_once_with('/config/network/static_routes', mock.ANY)
+
+        expected_param = self._static_routes[0]
+        actual_param = self._filer.add.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def test_add_static_routes_raise(self):
+        expected_exception = exception.CTERAException()
+        self._filer.add = mock.MagicMock(side_effect=expected_exception)
+        with self.assertRaises(exception.CTERAException) as error:
+            network.Network(self._filer).add_static_route(
+                self._static_routes[0].GwIP,
+                self._static_routes[0].DestIpMask.replace("_", "/")
+            )
+        self.assertEqual('Static route creation failed', error.exception.message)
+
+    def test_get_all_static_routes(self):
+        get_response = 'Success'
+        self._init_filer(get_response=get_response)
+        ret = network.Network(self._filer).get_static_routes()
+        self._filer.get.assert_called_once_with('/config/network/static_routes')
+        self.assertEqual(ret, get_response)
+
+    def test_remove_static_route(self):
+        self._init_filer(delete_response=self._static_routes[0])
+
+        ret = network.Network(self._filer).remove_static_route(self._static_routes[0].DestIpMask.replace("_", "/"))
+        self._filer.delete.assert_called_once_with(f'/config/network/static_routes/{self._static_routes[0].DestIpMask}')
+
+        self.assertEqual(self._static_routes[0], ret)
+
+    def test_remove_static_route_raise(self):
+        expected_exception = exception.CTERAException()
+        self._filer.delete = mock.MagicMock(side_effect=expected_exception)
+        with self.assertRaises(exception.CTERAException) as error:
+            network.Network(self._filer).remove_static_route(self._static_routes[0].DestIpMask.replace("_", "/"))
+        self.assertEqual('Static route deletion failed', error.exception.message)
+
+    def test_clean_all_static_routes_success(self):
+        expected_exception = 'Success'
+        self._init_filer(execute_response=expected_exception)
+        self._filer.execute = mock.MagicMock(side_effect=expected_exception)
+
+        network.Network(self._filer).clean_all_static_routes()
+
+        expected_param = 'cleanStaticRoutes'
+        actual_param = self._filer.execute.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def test_clean_all_static_routes_raise(self):
+        expected_exception = exception.CTERAException()
+        self._init_filer(execute_response=expected_exception)
+        self._filer.execute = mock.MagicMock(side_effect=expected_exception)
+
+        with self.assertRaises(exception.CTERAException) as error:
+            network.Network(self._filer).clean_all_static_routes()
+        self.assertEqual('Failed to delete Static routes', error.exception.message)
