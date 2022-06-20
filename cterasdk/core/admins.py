@@ -1,7 +1,6 @@
 import logging
 
 from .base_command import BaseCommand
-from .types import UserAccount
 from ..exception import CTERAException, ObjectNotFoundException
 from ..common import Object, DateTimeUtils
 from ..common import union
