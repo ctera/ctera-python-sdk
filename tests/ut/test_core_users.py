@@ -213,7 +213,7 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
     def test_get_admin_user_default_attrs(self):
         get_multi_response = self._get_admin_object(name=self._local_user_account.name)
         self._init_global_admin(get_multi_response=get_multi_response)
-        ret = admins.Administrators(self._global_admin).get(self._local_user_account)
+        ret = admins.Administrators(self._global_admin).get(self._local_user_account.name)
         self._global_admin.get_multi.assert_called_once_with(
             '/administrators/' + self._local_user_account.name, mock.ANY)
         expected_include = ['/' + attr for attr in admins.Administrators.default]
@@ -284,7 +284,7 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
         get_multi_response = self._get_admin_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exception.CTERAException) as error:
-            admins.Administrators(self._global_admin).get(self._local_user_account)
+            admins.Administrators(self._global_admin).get(self._local_user_account.name)
         self._global_admin.get_multi.assert_called_once_with(
             '/administrators/' + self._local_user_account.name, mock.ANY)
         expected_include = ['/' + attr for attr in admins.Administrators.default]
@@ -328,7 +328,7 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
     def test_delete_admin_user(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
-        ret = admins.Administrators(self._global_admin).delete(self._local_user_account)
+        ret = admins.Administrators(self._global_admin).delete(self._local_user_account.name)
         self._global_admin.execute.assert_called_once_with(
             '/administrators/' + self._local_user_account.name, 'delete', True)
         self.assertEqual(ret, execute_response)
