@@ -44,5 +44,6 @@ Submodules
    cterasdk.core.taskmgr
    cterasdk.core.templates
    cterasdk.core.types
+   cterasdk.core.admins
    cterasdk.core.users
    cterasdk.core.zones

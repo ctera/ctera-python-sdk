@@ -14,6 +14,7 @@ __all__ = [
     'servers',
     'devices',
     'session',
+    'admins',
     'users',
     'cloudfs',
     'zones',
