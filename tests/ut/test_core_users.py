@@ -273,7 +273,7 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
 
     def test_list_admin_users_default_attrs(self):
         with mock.patch("cterasdk.core.users.query.iterator") as query_iterator_mock:
-            admins.Administrators(self._global_admin).list_global_administrators()
+            admins.Administrators(self._global_admin).list_admins()
             query_iterator_mock.assert_called_once_with(self._global_admin, '/administrators', mock.ANY)
             expected_query_params = base_core.BaseCoreTest._create_query_params(include=admins.Administrators.default,
                                                                                 start_from=0, count_limit=50)

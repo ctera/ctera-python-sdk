@@ -10,7 +10,7 @@ from . import query
 
 class Administrators(BaseCommand):
     """
-    Portal GlobalAdmin User Management APIs
+    Portal Global Administrators User Management APIs
     """
 
     default = ['name']
@@ -22,29 +22,28 @@ class Administrators(BaseCommand):
         except CTERAException as error:
             raise CTERAException('Failed to get the user', error)
 
-    def get(self, user_account, include=None):
+    def get(self, name, include=None):
         """
-        Get a GlobalAdmin user account
+        Get a Global Administrator user account
 
-        :param cterasdk.core.types.UserAccount user_account: GlobalAdmin User account, including directory and username
+        :param str name: Global administrator username
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: The user account, including the requested fields
         """
-        baseurl = f'/administrators/{user_account.name}'
+        baseurl = f'/administrators/{name}'
         include = union(include or [], Administrators.default)
         include = ['/' + attr for attr in include]
         user_object = self._portal.get_multi(baseurl, include)
         if user_object.name is None:
-            raise ObjectNotFoundException('Could not find user', baseurl,
-                                          user_directory=user_account.directory, username=user_account.name)
+            raise ObjectNotFoundException('Could not find user', baseurl, username=user_account.name)
         return user_object
 
-    def list_global_administrators(self, include=None):
+    def list_admins(self, include=None):
         """
-        List all local administrators
+        List local administrators
 
         :param list[str] include: List of fields to retrieve, defaults to ['name']
-        :return: Iterator for all local administrators
+        :return: Iterator for local administrators
         :rtype: cterasdk.lib.iterator.Iterator
         """
         include = union(include or [], Administrators.default)
@@ -53,7 +52,7 @@ class Administrators(BaseCommand):
 
     def add(self, name, email, first_name, last_name, password, role, company=None, comment=None, password_change=False):
         """
-        Create a GlobalAdmin user account
+        Create a Global Administrator
 
         :param str name: User name for the new GlobalAdmin
         :param str email: E-mail address of the new GlobalAdmin
@@ -80,16 +79,16 @@ class Administrators(BaseCommand):
         if password_change:
             param.requirePasswordChangeOn = DateTimeUtils.get_expiration_date(password_change).strftime('%Y-%m-%d')
 
-        logging.getLogger().info('Creating GlobalAdmin user. %s', {'user': name})
+        logging.getLogger().info('Creating a global administrator. %s', {'user': name})
         response = self._portal.add('/administrators', param)
-        logging.getLogger().info('GlobalAdmin User created. %s', {'user': name, 'email': email, 'role': role})
+        logging.getLogger().info('Global administrator created. %s', {'user': name, 'email': email, 'role': role})
 
         return response
 
     def modify(self, current_username, new_username=None, email=None, first_name=None,
                last_name=None, password=None, role=None, company=None, comment=None):
         """
-        Modify a GlobalAdmin user account
+        Modify a Global Administrator user account
 
         :param str current_username: The current GlobalAdmin username
         :param str,optional new_username: New name
@@ -122,20 +121,20 @@ class Administrators(BaseCommand):
 
         try:
             response = self._portal.put('/administrators/' + current_username, user)
-            logging.getLogger().info("GlobalAdmin User modified. %s", {'username': user.name})
+            logging.getLogger().info("User modified. %s", {'username': user.name})
             return response
         except CTERAException as error:
-            logging.getLogger().error("Failed to modify GlobalAdmin user.")
+            logging.getLogger().error("Failed to modify user.")
             raise CTERAException('Failed to modify user', error)
 
-    def delete(self, user):
+    def delete(self, name):
         """
-        Delete a GlobalAdmin user
+        Delete a Global Administrator
 
-        :param cterasdk.core.types.UserAccount user: the GlobalAdmin user account
+        :param str username: Global administrator username
         """
         logging.getLogger().info('Deleting user. %s', {'user': str(user)})
-        baseurl = f'/administrators/{user.name}'
+        baseurl = f'/administrators/{name}'
         response = self._portal.execute(baseurl, 'delete', True)
         logging.getLogger().info('User deleted. %s', {'user': str(user)})
 

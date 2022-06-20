@@ -623,39 +623,21 @@ Antivirus Servers
 .. automethod:: cterasdk.core.antivirus.AntivirusServers.unsuspend
    :noindex:
 
-Admins
-------
 
-.. automethod:: cterasdk.core.admins.Administrators.delete
-   :noindex:
+Global Administrators
+---------------------
 
-.. code-block:: python
-
-   """Delete a global admin"""
-
-   alice = portal_types.UserAccount('alice')
-   admin.admins.delete(alice)
-
-
-Global Users
-^^^^^^^^^^^^
-.. automethod:: cterasdk.core.admins.Administrators.list_global_administrators
+.. automethod:: cterasdk.core.admins.Administrators.list_admins
    :noindex:
 
 .. code-block:: python
 
    """list all global admins"""
-   users = admin.admins.list_global_administrators()
+   for admin in admin.admins.list_global_administrators():
+       print(admin.name)
 
-   for user in users:
-
-       print(user.name)
-
-   users = admin.admins.list_global_administrators(include = ['name', 'email', 'firstName', 'lastName'])
-
-   for user in users:
-
-       print(user)
+   for admin in admin.admins.list_global_administrators(include=['name', 'email', 'firstName', 'lastName']):
+       print(admin)
 
 .. automethod:: cterasdk.core.admins.Administrators.add
    :noindex:
@@ -672,6 +654,16 @@ Global Users
 
    """Modify a global admin"""
    admin.admins.modify('bruce', 'bwayne@we.com', 'Bruce', 'Wayne', 'Str0ngP@ssword!', 'Wayne Enterprises')
+
+
+.. automethod:: cterasdk.core.admins.Administrators.delete
+   :noindex:
+
+.. code-block:: python
+
+   """Delete a global admin"""
+   admin.admins.delete('alice')
+
 
 Users
 -----
