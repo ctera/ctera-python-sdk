@@ -15,8 +15,8 @@ class Administrators(BaseCommand):
 
     default = ['name']
 
-    def _get_entire_object(self, user_account):
-        ref = f'/administrators/{user_account.name}'
+    def _get_entire_object(self, name):
+        ref = f'/administrators/{name}'
         try:
             return self._portal.get(ref)
         except CTERAException as error:
@@ -100,8 +100,7 @@ class Administrators(BaseCommand):
         :param str,optional company: Company name
         :param str,optional comment: Comment
         """
-        user_account = UserAccount(current_username)
-        user = self._get_entire_object(user_account)
+        user = self._get_entire_object(current_username)
         if new_username:
             user.name = new_username
         if email:
