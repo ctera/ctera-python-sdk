@@ -35,7 +35,7 @@ class Administrators(BaseCommand):
         include = ['/' + attr for attr in include]
         user_object = self._portal.get_multi(baseurl, include)
         if user_object.name is None:
-            raise ObjectNotFoundException('Could not find user', baseurl, username=user_account.name)
+            raise ObjectNotFoundException('Could not find user', baseurl, username=name)
         return user_object
 
     def list_admins(self, include=None):
@@ -133,9 +133,9 @@ class Administrators(BaseCommand):
 
         :param str username: Global administrator username
         """
-        logging.getLogger().info('Deleting user. %s', {'user': str(user)})
+        logging.getLogger().info('Deleting user. %s', {'user': name})
         baseurl = f'/administrators/{name}'
         response = self._portal.execute(baseurl, 'delete', True)
-        logging.getLogger().info('User deleted. %s', {'user': str(user)})
+        logging.getLogger().info('User deleted. %s', {'user': name})
 
         return response
