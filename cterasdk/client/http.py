@@ -74,6 +74,7 @@ def geturi(baseurl, path):
 class ContentType:
     urlencoded = {'Content-Type': 'application/x-www-form-urlencoded'}
     textplain = {'Content-Type': 'text/plain'}
+    application_json = {'Content-Type': 'application/json'}
 
 
 class HttpClientBase():

@@ -5,7 +5,7 @@ import socket
 from ..common import Object
 from ..convert import tojsonstr
 from ..exception import HostUnreachable
-from .cteraclient import CTERAClient
+from .cteraclient import CTERAClient, MigrationClient, RESTClient
 from ..exception import CTERAException
 
 
@@ -67,11 +67,49 @@ class NetworkHost:
         return tojsonstr(x)
 
 
+class MigrationHost(NetworkHost):
+
+    def __init__(self, host, port, https, is_authenticated=None, http_client=None):
+        super().__init__(host, port, https)
+
+        def always_authenticated(self, function):
+            return True
+        self._is_authenticated = is_authenticated if is_authenticated else always_authenticated
+        self._client = MigrationClient(http_client) if http_client else RESTClient()
+
+    @staticmethod
+    def from_ctera_host(ctera_host):
+        """Create a RESTful host instance from an existing CTERA host instance"""
+        return MigrationHost(ctera_host.host(), ctera_host.port(), ctera_host.https(),
+                             ctera_host._is_authenticated, ctera_host._ctera_client.http_client)
+
+    @authenticated
+    def login(self, path):
+        return self._client.login(self.baseurl(), path)
+
+    @authenticated
+    def get(self, path, params=None):
+        return self._client.get(self.baseurl(), path, params or {})
+
+    @authenticated
+    def put(self, path, value):
+        return self._client.put(self.baseurl(), path, value)
+
+    @authenticated
+    def post(self, path, value):
+        return self._client.post(self.baseurl(), path, value)
+
+    @authenticated
+    def delete(self, path):
+        return self._client.delete(self.baseurl(), path)
+
+
 class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
 
     def __init__(self, host, port, https):
         super().__init__(host, port, https)
         self._ctera_client = CTERAClient(self._session_id_key)
+        self.rest = MigrationHost.from_ctera_host(self)
         self._session = None
 
     @property

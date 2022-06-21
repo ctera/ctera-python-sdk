@@ -16,6 +16,7 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
         self._init_filer()
         login.Login(self._filer).login(self._username, self._password)
         self._filer.form_data.assert_called_once_with('/login', {'username': self._username, 'password': self._password})
+        self._filer.form_data.assert_called_once_with('/login', {'username': self._username, 'password': self._password})
 
     def test_login_failure(self):
         error_message = "Expected Failure"

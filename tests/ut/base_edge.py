@@ -13,7 +13,7 @@ class BaseEdgeTest(base.BaseTest):
     def _init_filer(self, get_response=None, put_response=None, post_response=None,  # pylint: disable=too-many-arguments
                     form_data_response=None, add_response=None, execute_response=None,
                     delete_response=None, upload_response=None, openfile_response=None,
-                    mkcol_response=None, copy_response=None, move_response=None):
+                    mkcol_response=None, copy_response=None, move_response=None, migration_response=None):
         self._filer.get = mock.MagicMock(return_value=get_response)
         self._filer.put = mock.MagicMock(return_value=put_response)
         self._filer.post = mock.MagicMock(return_value=post_response)
@@ -26,3 +26,4 @@ class BaseEdgeTest(base.BaseTest):
         self._filer.mkcol = mock.MagicMock(return_value=mkcol_response)
         self._filer.copy = mock.MagicMock(return_value=copy_response)
         self._filer.move = mock.MagicMock(return_value=move_response)
+        self._filer.migration_tool = mock.MagicMock(return_value=migration_response)
