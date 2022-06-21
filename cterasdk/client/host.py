@@ -72,7 +72,7 @@ class MigrationHost(NetworkHost):
     def __init__(self, host, port, https, is_authenticated=None, http_client=None):
         super().__init__(host, port, https)
 
-        def always_authenticated(self, function):
+        def always_authenticated(self, function):  # pylint: disable=unused-argument
             return True
         self._is_authenticated = is_authenticated if is_authenticated else always_authenticated
         self._client = MigrationClient(http_client) if http_client else RESTClient()
@@ -81,7 +81,7 @@ class MigrationHost(NetworkHost):
     def from_ctera_host(ctera_host):
         """Create a RESTful host instance from an existing CTERA host instance"""
         return MigrationHost(ctera_host.host(), ctera_host.port(), ctera_host.https(),
-                             ctera_host._is_authenticated, ctera_host._ctera_client.http_client)
+                             ctera_host._is_authenticated, ctera_host._ctera_client.http_client)  # pylint: disable=protected-access
 
     @authenticated
     def login(self, path):
@@ -108,7 +108,7 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
 
     def __init__(self, host, port, https):
         super().__init__(host, port, https)
-        self._ctera_client = CTERAClient(self._session_id_key)
+        self._ctera_client = CTERAClient(self._session_id_key)  # pylint: disable=protected-access
         self.rest = MigrationHost.from_ctera_host(self)
         self._session = None
 
@@ -137,7 +137,7 @@ class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
     def _session_id_key(self):
         raise NotImplementedError("Implementing class must implement the _session_id_key property")
 
-    def _is_authenticated(self, function, *args, **kwargs):
+    def _is_authenticated(self, function, *args, **kwargs):  # pylint: disable=protected-access
         raise NotImplementedError("Implementing class must implement the _is_authenticated method")
 
     def login(self, username, password):

@@ -87,7 +87,7 @@ class MigrationTool(BaseCommand):
         param.task_id = task.id
         return self._gateway.rest.post(f'/migration/rest/v1/tasks/{action}', param)
 
-    def details(self, task):
+    def details(self, task):  # pylint: disable=inconsistent-return-statements
         """
         Get task details
         """
@@ -96,7 +96,7 @@ class MigrationTool(BaseCommand):
             return response.history
         logging.getLogger().error('Task not found. %s', {'task_id': task.id})
 
-    def results(self, task):
+    def results(self, task):  # pylint: disable=inconsistent-return-statements
         if task.type == TaskType.Discovery:
             return self._gateway.rest.get('/migration/rest/v1/discovery/results', {'id': task.id}).discovery
         if task.type == TaskType.Migration:
@@ -110,7 +110,7 @@ class TaskManager:
     def __init__(self, migration_tool):
         self._migration_tool = migration_tool
 
-    def _create_add_parameter(self, name, credentials, shares, host_type=None, auto_start=False, notes=None):
+    def _create_add_parameter(self, name, credentials, shares, host_type=None, auto_start=False, notes=None):  # pylint: disable=no-self-use
         param = Object()
         param.name = name
         param.host = credentials.host
@@ -129,7 +129,7 @@ class TaskManager:
         return param
 
     def _add(self, param):
-        task = self._migration_tool._gateway.rest.post('/migration/rest/v1/tasks/create', param)
+        task = self._migration_tool._gateway.rest.post('/migration/rest/v1/tasks/create', param)  # pylint: disable=protected-access
         return Task(task.task_id, int(task.type), task.name)
 
 
@@ -156,7 +156,7 @@ class Discovery(TaskManager):
         param.discovery_log_files = int(log_every_file)
         return self._add(param)
 
-    def update(self, task, name=None, notes=None):
+    def update(self, task, name=None, notes=None):   # pylint: disable=protected-access
         """
         Update a discovery task
 
@@ -169,7 +169,7 @@ class Discovery(TaskManager):
             param.name = name
         if notes:
             param.notes = notes
-        return self._migration_tool._gateway.rest.post('/migration/rest/v1/tasks/update', param)
+        return self._migration_tool._gateway.rest.post('/migration/rest/v1/tasks/update', param)  # pylint: disable=protected-access
 
 
 class Migration(TaskManager):
@@ -177,7 +177,7 @@ class Migration(TaskManager):
     def list_tasks(self, deleted=False):
         return [task for task in self._migration_tool.list_tasks(deleted) if task.type == 'migration']
 
-    def add(self, name, credentials, shares, host_type=None, auto_start=False,
+    def add(self, name, credentials, shares, host_type=None, auto_start=False,  # pylint: disable=too-many-arguments
             winacls=True, cloud_folder=None, create_cloud_folder_per_share=False,
             compute_checksum=False, exclude=None, include=None, notes=None):
         """
@@ -233,7 +233,7 @@ class Task(Object):
             self.notes = notes
 
     @staticmethod
-    def from_server_object(server_object):
+    def from_server_object(server_object):  # pylint: disable=inconsistent-return-statements
         parameters = dict(
             task_id=server_object.task_id,
             task_type=server_object.type,
@@ -247,7 +247,7 @@ class Task(Object):
         )
         if server_object.type == TaskType.Discovery:
             return DiscoveryTask(**parameters)
-        elif server_object.type == TaskType.Migration:
+        if server_object.type == TaskType.Migration:
             parameters.update(dict(
                 winacls=bool(server_object.ntacl),
                 cloud_folder=server_object.cf,
@@ -263,8 +263,8 @@ class DiscoveryTask(Task):
 class MigrationTask(Task):
     """Class representing a migration tool migration task"""
 
-    def __init__(self, task_id, task_type, name, created_at, source, source_type, last_status, shares, notes, winacls,
-                 cloud_folder, create_cloud_folder_per_share):
+    def __init__(self, task_id, task_type, name, created_at, source, source_type,  # pylint: disable=too-many-arguments
+                 last_status, shares, notes, winacls, cloud_folder, create_cloud_folder_per_share):
         super().__init__(task_id, task_type, name, created_at, source, source_type, last_status, shares, notes)
         self.winacls = winacls
         self.cloud_folder = cloud_folder
