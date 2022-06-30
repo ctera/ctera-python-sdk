@@ -198,7 +198,7 @@ class CloudFS(BaseCommand):
         :return: execution response
         """
         param = Object()
-        param._classname = 'SDDLFoldersParam'
+        param._classname = 'SDDLFoldersParam'  # pylint: disable=protected-access
         param.foldersPath = folders_path
         param.sddlString = sddl_string
         param.isRecursive = is_recursive
@@ -218,7 +218,7 @@ class CloudFS(BaseCommand):
         :return:
         """
         param = Object()
-        param._classname = 'OwnerSidFoldersParam'
+        param._classname = 'OwnerSidFoldersParam'  # pylint: disable=protected-access
         param.foldersPath = folders_path
         param.ownerSid = owner_sid
         param.isRecursive = is_recursive
