@@ -194,7 +194,7 @@ class CloudFS(BaseCommand):
 
         :param list folders_path: A list of paths
         :param str sddl_string: The SDDL string with the ACL permissions
-        :param bool is_recursive: If the path is not a file but a folder
+        :param bool is_recursive: For path that is not a file but a folder
         :return: execution response
         """
         param = Object()
@@ -206,7 +206,7 @@ class CloudFS(BaseCommand):
             return self._portal.execute('', 'setFoldersACL', param)
         except CTERAException as error:
             logging.getLogger().error('setFoldersACL failed. %s', {'error': error})
-            raise error
+            raise CTERAException('Failed to setFoldersACL', error)
 
     def set_owner_acl(self, folders_path, owner_sid, is_recursive):
         """
@@ -215,7 +215,7 @@ class CloudFS(BaseCommand):
         :param list folders_path:  A list of paths
         :param str owner_sid: The SID string that identifies the object's owner.
         :param bool is_recursive: If the path is not a file but a folder
-        :return:
+        :return: execution response
         """
         param = Object()
         param._classname = 'OwnerSidFoldersParam'  # pylint: disable=protected-access
@@ -226,4 +226,4 @@ class CloudFS(BaseCommand):
             return self._portal.execute('', 'setOwnerACL', param)
         except CTERAException as error:
             logging.getLogger().error('setOwnerACL failed. %s', {'error': error})
-            raise error
+            raise CTERAException('Failed to setOwnerACL', error)

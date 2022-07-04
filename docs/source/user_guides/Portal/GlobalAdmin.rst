@@ -1178,6 +1178,30 @@ Cloud Drive Folders
    wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.undelete('DIR-002', wbruce)
 
+NT ACLs
+^^^^^^^^^^^^^^^^^^^
+.. automethod:: cterasdk.core.cloudfs.CloudFS.set_folders_acl
+   :noindex:
+
+.. code:: python
+
+   """Changing the file or Folder ACLs"""
+   folders_paths = ["portaladmin/cloudFolder/diagrams", "adrian/data/docs"]
+   sddl_string = 'O:S-1-12-1-1536910496-1126310805-1188065941-1612002142' \
+                 'G:S-1-12-1-1536910496-1126310805-1188065941-1612002142' \
+                 'D:AI(A;ID;FA;;;BA)(A;ID;FA;;;SY)(A;ID;0x1200a9;;;BU)(A;ID;0x1301bf;;;AU)'
+   admin.cloudfs.set_folders_acl(folders_paths, sddl_string, True)
+
+.. automethod:: cterasdk.core.cloudfs.CloudFS.set_owner_acl
+   :noindex:
+
+.. code:: python
+
+   """Changing the File or Folder Owner SID or ACLs"""
+   folders_paths = ["portaladmin/cloudFolder/diagrams", "dorian/data/docs"]
+   owner_sid = 'S-1-12-1-1536910496-1126310805-1188065941-1612002142'
+   admin.cloudfs.set_folders_acl(folders_paths, owner_sid, True)
+
 Timezone
 --------
 
