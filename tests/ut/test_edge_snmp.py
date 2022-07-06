@@ -74,7 +74,7 @@ class TestEdgeSNMP(base_edge.BaseEdgeTest):
         param.mode = Mode.Enabled
         param.port = self._snmp_default_port if port is None else port
         param.readCommunity = community_str
-        if username is not None and password is not None:
+        if username is not None and auth_password is not None and privacy_password is not None:
             param.snmpV3 = Object()
             param.snmpV3.mode = Mode.Enabled
             param.snmpV3.username = username
