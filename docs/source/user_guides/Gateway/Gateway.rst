@@ -1208,7 +1208,8 @@ SNMP
 
 .. code-block:: python
 
-   filer.snmp.enable(community_str='MpPcKl2sArSdTLZ4URj4')
+   filer.snmp.enable(community_str='MpPcKl2sArSdTLZ4URj4')  # enable SNMP v2c
+   filer.snmp.enable(username='snmp_user', auth_password='gVQBaHSOGV', privacy_password='VG0zbn5aJ')  # enable SNMP v3
 
 .. automethod:: cterasdk.edge.snmp.SNMP.disable
    :noindex:
@@ -1218,7 +1219,7 @@ SNMP
 .. automethod:: cterasdk.edge.snmp.SNMP.modify
    :noindex:
 
-   filer.snmp.modify(community_str='L0K2zGpgmOQH2CXaUSuB', username='snmp_user', password='gVQBaHSOGV')
+   filer.snmp.modify(community_str='L0K2zGpgmOQH2CXaUSuB', username='snmp_user', auth_password='gVQBaHSOGV', privacy_password='VG0zbn5aJ')
 
 .. automethod:: cterasdk.edge.snmp.SNMP.get_configuration
    :noindex:
