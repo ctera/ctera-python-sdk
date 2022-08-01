@@ -156,7 +156,7 @@ def fromxmlstr(string):  # pylint: disable=too-many-branches,too-many-statements
             kid = Item()
             kid.id = item.node.attrib.get(XMLTypes.ID)
             kid.parent = item
-            kid.node = item.node.getchildren()[0]
+            kid.node = list(item.node)[0]
             q.put(kid)
 
     return root.value
