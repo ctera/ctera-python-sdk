@@ -156,12 +156,12 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         return super().put(path, value, use_file_url=use_file_url)
 
     @authenticated
-    def query(self, path, param):
-        return query.query(self, path, param)
+    def query(self, path, name, param):
+        return query.query(self, path, name, param)
 
     @authenticated
-    def show_query(self, path, param):
-        return query.show(self, path, param)
+    def show_query(self, path, name, param):
+        return query.show(self, path, name, param)
 
     def iterator(self, path, param):
         return query.iterator(self, path, param)

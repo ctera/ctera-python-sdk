@@ -16,6 +16,8 @@ class Zones(BaseCommand):
     Portal Zones APIs
     """
 
+    name_attr = 'name'
+
     def get(self, name):
         """
         Get zone by name
@@ -38,6 +40,33 @@ class Zones(BaseCommand):
         zone = objects[0]
         logging.getLogger().info('Zone found. %s', {'name': name, 'id': zone.zoneId})
         return zone
+
+    def list_zones(self, filters=None):
+        """
+        List Zones
+        :param list[],optional filters: List of additional filters, defaults to None
+
+        :return: Iterator for all Zones
+        :rtype: cterasdk.lib.iterator.Iterator
+        """
+        builder = query.QueryParamBuilder().include_classname().startFrom(0).countLimit(25)
+        filters = filters or []
+        for query_filter in filters:
+            builder.addFilter(query_filter)
+        builder.orFilter((len(filters) > 1))
+        param = builder.build()
+        return query.iterator(self._portal, '', param, 'getZonesDisplayInfo')
+
+    def search(self, name):
+        """
+        Search for Zones by name
+        :param str name: Search query
+
+        :return: Iterator for all matching Zones
+        :rtype: cterasdk.lib.iterator.Iterator
+        """
+        filters = [query.FilterBuilder(Zones.name_attr).like(name)]
+        return self.list_zones(filters)
 
     def add(self, name, policy_type=enum.PolicyType.SELECT, description=None):
         """

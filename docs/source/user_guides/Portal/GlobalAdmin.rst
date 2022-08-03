@@ -960,6 +960,25 @@ Retrieve a Zone
 
    zone = admin.zones.get('ZN-001')
 
+List & Search Zones
+^^^^^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.core.zones.Zones.list_zones
+   :noindex:
+
+.. code:: python
+
+   for zone in admin.zones.list_zones():
+       print(zone)
+
+.. automethod:: cterasdk.core.zones.Zones.search
+   :noindex:
+
+.. code:: python
+
+   for zone in admin.zones.search('ZN'):
+       print(zone)
+
 Create a Zone
 ^^^^^^^^^^^^^
 .. automethod:: cterasdk.core.zones.Zones.add
