@@ -74,6 +74,7 @@ class CTERAClient:
         obj.type = exec_type
         obj.name = name
         obj.param = param
+        print(toxmlstr(obj))
         function = Command(HTTPClient.post, self.http_client, geturi(baseurl, path), ContentType.textplain, toxmlstr(obj))
         return self._execute(function)
 

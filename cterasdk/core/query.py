@@ -5,8 +5,8 @@ from ..common import Object
 from ..convert import tojsonstr
 
 
-def query(CTERAHost, path, param):
-    response = CTERAHost.db(path, 'query', param)
+def query(CTERAHost, path, name, param):
+    response = CTERAHost.execute(path, name, param) if name is not None else CTERAHost.db(path, 'query', param)
     return (response.hasMore, response.objects)
 
 
@@ -16,8 +16,8 @@ def show(CTERAHost, path, param):
     return hasMore
 
 
-def iterator(CTERAHost, path, param):
-    function = Command(query, CTERAHost, path)
+def iterator(CTERAHost, path, param, name=None):
+    function = Command(query, CTERAHost, path, name)
     return Iterator(function, param)
 
 
