@@ -10,8 +10,8 @@ def query(CTERAHost, path, name, param):
     return (response.hasMore, response.objects)
 
 
-def show(CTERAHost, path, param):
-    hasMore, objects = query(CTERAHost, path, param)
+def show(CTERAHost, path, name, param):
+    hasMore, objects = query(CTERAHost, path, name, param)
     print(tojsonstr(objects, no_log=False))
     return hasMore
 
