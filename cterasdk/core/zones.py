@@ -84,10 +84,10 @@ class Zones(BaseCommand):
         response = self._portal.execute('', 'addZone', param)
         try:
             self._process_response(response)
+            logging.getLogger().info('Zone added. %s', {'name': name})
         except CTERAException as error:
             logging.getLogger().error('Zone creation failed. %s', {'rc': response.rc})
             raise error
-        logging.getLogger().info('Zone added. %s', {'name': name})
 
     def delete(self, name):
         """
