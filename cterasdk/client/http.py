@@ -1,12 +1,13 @@
 import urllib.parse
 import logging
+import time
 
 import requests
 import requests.exceptions as requests_exceptions
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 # from .ssl import CertificateServices
-from ..convert import fromxmlstr
+from ..convert import fromxmlstr, ParseException
 from ..common import Object, merge
 from .. import config
 from ..exception import SSLException, HostUnreachable, ExhaustedException
@@ -20,7 +21,10 @@ class HTTPException(Exception):
         self.response = Object()
         self.response.code = http_error.response.status_code
         self.response.reason = http_error.response.reason
-        self.response.body = fromxmlstr(http_error.response.text)
+        try:
+            self.response.body = fromxmlstr(http_error.response.text)
+        except ParseException:
+            self.response.body = ''
         if config.http['verbose']:
             self.response.headers = http_error.response.headers
             self.request = HTTPException._parse_request(http_error.request)
@@ -91,7 +95,10 @@ class HttpClientBase():
             try:
                 return self._do_dispatch(ctera_request)
             except requests_exceptions.HTTPError as error:
-                raise HTTPException(error)
+                http_exception = HTTPException(error)
+                if http_exception.response.code != 504:
+                    raise http_exception
+                logging.getLogger().warning('Server timed out. %s', {'attempt': (attempt + 1)})
             except requests_exceptions.Timeout:
                 self.on_timeout(attempt)
             except requests_exceptions.SSLError as error:
@@ -101,7 +108,10 @@ class HttpClientBase():
                 self._on_unreachable(error)
             except requests_exceptions.RequestException as error:
                 logging.getLogger().warning(error)
+
             attempt = attempt + 1
+            if attempt < self.retries:
+                time.sleep(self.timeout)
         logging.getLogger().error('Reached maximum number of retries. %s', {'retries': self.retries, 'timeout': self.timeout})
         raise ExhaustedException(self.retries, self.timeout)
 
