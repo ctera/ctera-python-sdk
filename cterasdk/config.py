@@ -70,8 +70,8 @@ logconf = dict(
 )
 
 http = dict(
-    timeout=20,  # http client timeout (seconds)
-    retries=3,  # handle connection timeout
+    timeout=10,  # http client or server timeout (seconds)
+    retries=3,  # handle client or server timeout
     ssl='Consent',  # ['Consent', 'Trust']
     verbose=False  # include request info on error
 )
