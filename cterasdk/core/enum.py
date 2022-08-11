@@ -397,7 +397,7 @@ class BucketType:
     Scality = 'ScalityS3'
     AWS = 'S3'
     ICOS = 'CleverSafeS3'
-    S3Compatible = 'GenericS3'
+    GenericS3 = 'GenericS3'
     Nutanix = 'Nutanix'
     Wasabi = 'WasabiS3'
     Google = 'GoogleS3'
