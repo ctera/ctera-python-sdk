@@ -387,7 +387,7 @@ class BucketType:
     :ivar str Scality: Scality
     :ivar str AWS: Amazon Web Services S3
     :ivar str ICOS: IBM Cloud Object Storage
-    :ivar str S3Compatible: Generic S3
+    :ivar str GenericS3: Generic S3
     :ivar str Nutanix: Nutanix S3
     :ivar str Wasabi: Wasabi S3
     :ivar str Google: Google S3
