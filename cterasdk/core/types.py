@@ -370,7 +370,7 @@ class GenericS3(S3Compatible):
 
     def __init__(self, bucket, access_key, secret_key,
                  endpoint, https=False, direct=False):
-        super().__init__(bucket, BucketType.S3Compatible, access_key, secret_key, endpoint, https, direct)
+        super().__init__(bucket, BucketType.GenericS3, access_key, secret_key, endpoint, https, direct)
 
 
 class NetAppStorageGRID(S3Compatible):
