@@ -188,7 +188,7 @@ class CloudFS(BaseCommand):
         path = owner + '/' + name
         return path
 
-    def set_folders_acl(self, folders_path, sddl_string, is_recursive):
+    def set_folders_acl(self, folders_path, sddl_string, is_recursive=False):
         """
         Changing the file or Folder ACLs
 
@@ -208,7 +208,7 @@ class CloudFS(BaseCommand):
             logging.getLogger().error('setFoldersACL failed. %s', {'error': error})
             raise CTERAException('Failed to setFoldersACL', error)
 
-    def set_owner_acl(self, folders_path, owner_sid, is_recursive):
+    def set_owner_acl(self, folders_path, owner_sid, is_recursive=False):
         """
         Changing the File or Folder Owner SID or ACLs
 

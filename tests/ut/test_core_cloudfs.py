@@ -26,13 +26,13 @@ class TestCoreCloudFS(base_core.BaseCoreTest):   # pylint: disable=too-many-publ
         self._nt_acl_folders.sddlString = 'O:S-1-12-1-1536910496-1126310805-1188065941-1612002142' \
                                           'G:S-1-12-1-1536910496-1126310805-1188065941-1612002142' \
                                           'D:AI(A;ID;FA;;;BA)(A;ID;FA;;;SY)(A;ID;0x1200a9;;;BU)(A;ID;0x1301bf;;;AU)'
-        self._nt_acl_folders.isRecursive = 'true'
+        self._nt_acl_folders.isRecursive = True
 
         self._nt_acl_owner = Object()
         self._nt_acl_owner._classname = 'SDDLFoldersParam'  # pylint: disable=protected-access
         self._nt_acl_owner.foldersPath = ["testfolder/sadada", "testfolder1/one"]
         self._nt_acl_owner.ownerSid = 'S-1-12-1-1536910496-1126310805-1188065941-1612002142'
-        self._nt_acl_owner.isRecursive = 'true'
+        self._nt_acl_owner.isRecursive = True
 
     def test_list_folder_groups_owned_by(self):
         get_user_uid_mock = self._mock_get_user_uid()
