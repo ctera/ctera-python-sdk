@@ -1,5 +1,5 @@
 from ..client import CTERAHost, authenticated
-from ..core import connection
+from ..core import connection, messaging
 from ..core import activation
 from ..core import antivirus
 from ..core import buckets
@@ -167,7 +167,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         return query.iterator(self, path, param)
 
 
-class GlobalAdmin(Portal):
+class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
     """
     Main class for Global Admin operations on a Portal
 
@@ -179,6 +179,8 @@ class GlobalAdmin(Portal):
     :ivar cterasdk.core.syslog.Syslog syslog: Object holding the Portal syslog APIs
     :ivar cterasdk.core.antivirus.Antivirus antivirus: Object holding the Portal Antivirus APIs
     :ivar cterasdk.core.buckets.Buckets buckets: Object holding the Portal Storage Node APIs
+    :ivar cterasdk.core.messaging.Messaging messaging: Object holding the Portal Messaging Service Management APIs
+
     """
 
     def __init__(self, host, port=None, https=True):
@@ -196,10 +198,11 @@ class GlobalAdmin(Portal):
         self.syslog = syslog.Syslog(self)
         self.antivirus = antivirus.Antivirus(self)
         self.buckets = buckets.Buckets(self)
+        self.messaging = messaging.Messaging(self)
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['portals', 'servers', 'setup', 'ssl', 'startup', 'syslog', 'antivirus', 'buckets']
+        return super()._omit_fields + ['portals', 'servers', 'setup', 'ssl', 'startup', 'syslog', 'antivirus', 'buckets', 'messaging']
 
     @property
     def context(self):

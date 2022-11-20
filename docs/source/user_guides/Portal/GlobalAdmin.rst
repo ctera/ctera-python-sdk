@@ -587,6 +587,36 @@ Servers
 
    admin.servers.modify('server2', enable_public_ip=True, public_ip='33.191.55.2')  # configure a public NAT ip address
 
+Messaging Service
+-----------------
+.. automethod:: cterasdk.core.messaging.Messaging.get_status
+   :noindex:
+
+.. code-block:: python
+
+   """Retrieve the global status of Messaging service"""
+
+   print(admin.messaging.get_status())
+
+.. automethod:: cterasdk.core.messaging.Messaging.get_servers_status
+   :noindex:
+
+.. code-block:: python
+
+   """Retrieve the status of the Messaging servers"""
+
+   print(admin.messaging.get_servers_status())
+
+.. automethod:: cterasdk.core.messaging.Messaging.add
+   :noindex:
+
+.. code-block:: python
+
+   """Add Messaging servers to cluster"""
+
+   servers = ["server1", "server2", "server3"]
+   admin.messaging.add(servers)
+
 Antivirus
 ---------
 

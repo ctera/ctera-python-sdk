@@ -9,7 +9,7 @@ from ..edge import sync
 from ..edge import uri
 
 
-class Agent(CTERAHost):
+class Agent(CTERAHost):  # pylint: disable=too-many-instance-attributes
     """
     Main class operating on a Agent
 
