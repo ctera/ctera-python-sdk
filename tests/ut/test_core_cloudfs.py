@@ -8,7 +8,7 @@ from cterasdk.common import Object, union
 from tests.ut import base_core
 
 
-class TestCoreCloudFS(base_core.BaseCoreTest):
+class TestCoreCloudFS(base_core.BaseCoreTest):   # pylint: disable=too-many-public-methods
 
     def setUp(self):
         super().setUp()
@@ -19,6 +19,20 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
         self._description = 'description'
         self._user_uid = 1337
         self.fixed_block_size = portal_enum.DeduplicationMethodType.FixedBlockSize
+
+        self._nt_acl_folders = Object()
+        self._nt_acl_folders._classname = 'SDDLFoldersParam'  # pylint: disable=protected-access
+        self._nt_acl_folders.foldersPath = ["testfolder/sadada", "testfolder1/one"]
+        self._nt_acl_folders.sddlString = 'O:S-1-12-1-1536910496-1126310805-1188065941-1612002142' \
+                                          'G:S-1-12-1-1536910496-1126310805-1188065941-1612002142' \
+                                          'D:AI(A;ID;FA;;;BA)(A;ID;FA;;;SY)(A;ID;0x1200a9;;;BU)(A;ID;0x1301bf;;;AU)'
+        self._nt_acl_folders.isRecursive = True
+
+        self._nt_acl_owner = Object()
+        self._nt_acl_owner._classname = 'SDDLFoldersParam'  # pylint: disable=protected-access
+        self._nt_acl_owner.foldersPath = ["testfolder/sadada", "testfolder1/one"]
+        self._nt_acl_owner.ownerSid = 'S-1-12-1-1536910496-1126310805-1188065941-1612002142'
+        self._nt_acl_owner.isRecursive = True
 
     def test_list_folder_groups_owned_by(self):
         get_user_uid_mock = self._mock_get_user_uid()
@@ -274,3 +288,43 @@ class TestCoreCloudFS(base_core.BaseCoreTest):
 
     def _mock_get_user(self, return_value):
         self._global_admin.users.get = mock.MagicMock(return_value=return_value)
+
+    def test_set_folders_acl_success(self):
+        execute_response = 'Success'
+        self._init_global_admin(execute_response=execute_response)
+        ret = cloudfs.CloudFS(self._global_admin).set_folders_acl(self._nt_acl_folders.foldersPath,
+                                                                  self._nt_acl_folders.sddlString,
+                                                                  self._nt_acl_folders.isRecursive)
+        self._global_admin.execute.assert_called_once_with('', 'setFoldersACL', mock.ANY)
+        self.assertEqual(ret, execute_response)
+
+    def test_set_folders_acl_raise(self):
+        expected_exception = exception.CTERAException()
+        self._init_global_admin(execute_response=expected_exception)
+        self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
+
+        with self.assertRaises(exception.CTERAException) as error:
+            cloudfs.CloudFS(self._global_admin).set_folders_acl(self._nt_acl_folders.foldersPath,
+                                                                self._nt_acl_folders.sddlString,
+                                                                self._nt_acl_folders.isRecursive)
+        self.assertEqual('Failed to setFoldersACL', error.exception.message)
+
+    def test_set_owner_acl_success(self):
+        execute_response = 'Success'
+        self._init_global_admin(execute_response=execute_response)
+        ret = cloudfs.CloudFS(self._global_admin).set_owner_acl(self._nt_acl_owner.foldersPath,
+                                                                self._nt_acl_owner.ownerSid,
+                                                                self._nt_acl_owner.isRecursive)
+        self._global_admin.execute.assert_called_once_with('', 'setOwnerACL', mock.ANY)
+        self.assertEqual(ret, execute_response)
+
+    def test_set_owner_acl_raise(self):
+        expected_exception = exception.CTERAException()
+        self._init_global_admin(execute_response=expected_exception)
+        self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
+
+        with self.assertRaises(exception.CTERAException) as error:
+            cloudfs.CloudFS(self._global_admin).set_owner_acl(self._nt_acl_owner.foldersPath,
+                                                              self._nt_acl_owner.ownerSid,
+                                                              self._nt_acl_owner.isRecursive)
+        self.assertEqual('Failed to setOwnerACL', error.exception.message)
