@@ -64,7 +64,7 @@ def toxmlstr(obj, pretty_print=False):
     if pretty_print:
         string = minidom.parseString(tostring(xml)).toprettyxml(indent="   ")
         return ''.join(string.split('\n', 1)[1:])
-    return tostring(xml)
+    return tostring(xml, 'utf-8')
 
 
 def toxml(obj):  # pylint: disable=too-many-branches
