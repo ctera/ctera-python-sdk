@@ -2,6 +2,7 @@ import logging
 
 from ..common import union, Object
 from .base_command import BaseCommand
+from .types import ScheduledTask, BackgroundTask
 from . import query
 from ..exception import CTERAException, ObjectNotFoundException
 
@@ -12,6 +13,10 @@ class Servers(BaseCommand):
     """
 
     default = ['name']
+
+    def __init__(self, portal):
+        super().__init__(portal)
+        self.tasks = Tasks(self._portal)
 
     def _get_entire_object(self, server):
         try:
@@ -89,3 +94,24 @@ class Servers(BaseCommand):
         except CTERAException as error:
             logging.getLogger().error("Could not modify server.")
             raise CTERAException('Could not modify server', error)
+
+
+class Tasks(BaseCommand):
+
+    def background(self, name):
+        """
+        Get all background tasks
+
+        :param str name: Name of the server
+        :return: List of tasks
+        """
+        return [BackgroundTask.from_server_object(task) for task in self._portal.get(f'/servers/{name}/bgTasks')]
+
+    def scheduled(self, name):
+        """
+        Get all scheduled tasks
+
+        :param str name: Name of the server
+        :return: List of tasks
+        """
+        return [ScheduledTask.from_server_object(task) for task in self._portal.get(f'/servers/{name}/schedTasks')]

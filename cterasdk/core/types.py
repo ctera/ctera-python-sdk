@@ -597,3 +597,47 @@ class AlertBuilder:
         :rtype: cterasdk.common.object.Object
         """
         return self.param
+
+
+class Task(Object):
+
+    def __init__(self, task_id, name):
+        self.id = task_id
+        self.name = name
+
+
+class ScheduledTask(Task):
+
+    def __init__(self, task_id, name, start_time):
+        super().__init__(task_id, name)
+        self.start_time = start_time
+
+    @staticmethod
+    def from_server_object(server_object):
+        return ScheduledTask(
+            server_object.id,
+            server_object.name,
+            server_object.startTime,
+        )
+
+
+class BackgroundTask(ScheduledTask):
+
+    def __init__(self, task_id, name, start_time, end_time, elapsed_time, status, message):
+        super().__init__(task_id, name, start_time)
+        self.end_time = end_time
+        self.elapsed_time = elapsed_time
+        self.status = status
+        self.message = message
+
+    @staticmethod
+    def from_server_object(server_object):
+        return BackgroundTask(
+            server_object.id,
+            server_object.name,
+            server_object.startTime,
+            server_object.endTime,
+            server_object.elapsedTime,
+            server_object.status,
+            server_object.progstring
+        )
