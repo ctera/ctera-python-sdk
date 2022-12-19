@@ -105,7 +105,7 @@ class Tasks(BaseCommand):
         :param str name: Name of the server
         :return: List of tasks
         """
-        return [BackgroundTask.from_server_object(task) for task in self._portal.get(f'/servers/{name}/bgTasks')]
+        return [BackgroundTask.from_server_object(task, f'servers/{name}/bgTasks/{task.id}') for task in self._portal.get(f'/servers/{name}/bgTasks')]
 
     def scheduled(self, name):
         """

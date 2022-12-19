@@ -623,15 +623,16 @@ class ScheduledTask(Task):
 
 class BackgroundTask(ScheduledTask):
 
-    def __init__(self, task_id, name, start_time, end_time, elapsed_time, status, message):
+    def __init__(self, task_id, name, start_time, end_time, elapsed_time, status, message, ref):
         super().__init__(task_id, name, start_time)
         self.end_time = end_time
         self.elapsed_time = elapsed_time
         self.status = status
         self.message = message
+        self.ref = ref
 
     @staticmethod
-    def from_server_object(server_object):
+    def from_server_object(server_object, ref):
         return BackgroundTask(
             server_object.id,
             server_object.name,
@@ -639,5 +640,6 @@ class BackgroundTask(ScheduledTask):
             server_object.endTime,
             server_object.elapsedTime,
             server_object.status,
-            server_object.progstring
+            server_object.progstring,
+            ref
         )
