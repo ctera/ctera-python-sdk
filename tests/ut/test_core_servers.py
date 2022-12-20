@@ -1,6 +1,7 @@
 # pylint: disable=protected-access
 from unittest import mock
 
+from cterasdk.common import Object
 from cterasdk.core import servers
 from tests.ut import base_core
 
@@ -17,7 +18,7 @@ class TestCoreServers(base_core.BaseCoreTest):
         self._task_elapsed_time = 12345
         self._task_status = 'success'
         self._task_message = 'Updated 12345 templates successfully'
-        self._task_ref = f'servers/{self._server_}/bgTasks/{self._task_id}'
+        self._task_ref = f'servers/{self._server}/bgTasks/{self._task_id}'
 
     def test_list_servers_default_attrs(self):
         with mock.patch("cterasdk.core.servers.query.iterator") as query_iterator_mock:
@@ -28,7 +29,6 @@ class TestCoreServers(base_core.BaseCoreTest):
             actual_query_params = query_iterator_mock.call_args[0][2]
             self._assert_equal_objects(actual_query_params, expected_query_params)
 
-
     def test_get_server_background_tasks(self):
         self._init_filer(get_response=TestCoreServers._create_task_object(id=self._task_id,
                                                                           name=self._task_name,
@@ -38,7 +38,7 @@ class TestCoreServers(base_core.BaseCoreTest):
                                                                           status=self._task_status,
                                                                           progstring=self._task_message
                                                                           ))
-        ret = servers.Servers(self._global_admin).tasks.background(self._server)
+        servers.Servers(self._global_admin).tasks.background(self._server)
         self._global_admin.get.assert_called_once_with(f'/servers/{self._server}/bgTasks')
         self.assertEqual(ret.ref, self._ref)
 
