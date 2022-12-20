@@ -3,6 +3,7 @@ from ..core import connection, messaging
 from ..core import activation
 from ..core import antivirus
 from ..core import buckets
+from ..core import cli
 from ..core import decorator
 from ..core import directoryservice
 from ..core import firmwares
@@ -172,6 +173,7 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
     Main class for Global Admin operations on a Portal
 
     :ivar cterasdk.core.portals.Portals portals: Object holding the Portals Management APIs
+    :ivar cterasdk.core.cli.CLI cli: Object holding the Portal GlobalAdmin CLI APIs
     :ivar cterasdk.core.servers.Servers servers: Object holding the Servers Management APIs
     :ivar cterasdk.core.setup.Setup setup: Object holding the Portal setup APIs
     :ivar cterasdk.core.ssl.SSL ssl: Object holding the Portal SSL Certificate APIs
@@ -192,6 +194,7 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
         super().__init__(host, port, https)
         self.portals = portals.Portals(self)
         self.servers = servers.Servers(self)
+        self.cli = cli.CLI(self)
         self.setup = setup.Setup(self)
         self.ssl = ssl.SSL(self)
         self.startup = startup.Startup(self)
