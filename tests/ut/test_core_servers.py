@@ -30,7 +30,7 @@ class TestCoreServers(base_core.BaseCoreTest):
             self._assert_equal_objects(actual_query_params, expected_query_params)
 
     def test_get_server_background_tasks(self):
-        self._init_filer(get_response=TestCoreServers._create_task_object(id=self._task_id,
+        self._init_global_admin(get_response=TestCoreServers._create_task_object(id=self._task_id,
                                                                           name=self._task_name,
                                                                           startTime=self._task_start_time,
                                                                           endTime=self._task_end_time,
@@ -43,7 +43,7 @@ class TestCoreServers(base_core.BaseCoreTest):
         self.assertEqual(ret.ref, self._ref)
 
     def test_get_server_scheduled_tasks(self):
-        self._init_filer(get_response=TestCoreServers._create_task_object(id=self._task_id,
+        self._init_global_admin(get_response=TestCoreServers._create_task_object(id=self._task_id,
                                                                           name=self._task_name,
                                                                           startTime=self._task_start_time
                                                                           ))
