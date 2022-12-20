@@ -621,10 +621,11 @@ class ScheduledTask(Task):
         )
 
 
-class BackgroundTask(ScheduledTask):
+class BackgroundTask(Task):
 
     def __init__(self, task_id, name, start_time, end_time, elapsed_time, status, message, ref):
-        super().__init__(task_id, name, start_time)
+        super().__init__(task_id, name)
+        self.start_time = start_time
         self.end_time = end_time
         self.elapsed_time = elapsed_time
         self.status = status
