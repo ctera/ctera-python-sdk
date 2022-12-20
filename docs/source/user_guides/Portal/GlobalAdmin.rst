@@ -587,6 +587,25 @@ Servers
 
    admin.servers.modify('server2', enable_public_ip=True, public_ip='33.191.55.2')  # configure a public NAT ip address
 
+Server Tasks
+^^^^^^^^^^^^
+
+.. automethod:: cterasdk.core.servers.Tasks.background
+   :noindex:
+
+.. code-block:: python
+
+   for task in admin.servers.tasks.background('database'):
+       print(task.name)
+
+.. automethod:: cterasdk.core.servers.Tasks.scheduled
+   :noindex:
+
+.. code-block:: python
+
+   for task in admin.servers.tasks.scheduled('database'):
+      print(task.name)
+
 Messaging Service
 -----------------
 .. automethod:: cterasdk.core.messaging.Messaging.get_status
@@ -1336,3 +1355,15 @@ Syslog
 
 .. automethod:: cterasdk.core.syslog.Syslog.disable
    :noindex:
+
+
+CLI Execution
+-------------
+
+.. automethod:: cterasdk.core.cli.CLI.run_command
+  :noindex:
+
+.. code-block:: python
+
+   result = admin.cli.run_command('show /settings')
+   print(result)
