@@ -2,7 +2,7 @@ from cterasdk.core import cli
 from tests.ut import base_core
 
 
-class TestCoreCLI(base_edge.BaseEdgeTest):
+class TestCoreCLI(base_core.BaseEdgeTest):
 
     def setUp(self):
         super().setUp()

@@ -13,7 +13,7 @@ class TestCoreServers(base_core.BaseCoreTest):
         self._task_id = 12345
         self._task_name = 'Zones Synchronizer'
         self._task_start_time = '2022-05-06T10:42:00'
-        self._task_end_time = self._start_time
+        self._task_end_time = self._task_start_time
         self._task_elapsed_time = 12345
         self._task_status = 'success'
         self._task_message = 'Updated 12345 templates successfully'
