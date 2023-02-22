@@ -34,6 +34,7 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
 
     def test_logout_success_after_login_success(self):
         self._init_filer()
+        self._init_ctera_migrate()
         login.Login(self._filer).login(self._username, self._password)
         login.Login(self._filer).logout()
         self._filer.form_data.assert_has_calls(
@@ -42,6 +43,7 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
                 mock.call('/logout', {'foo': 'bar'})
             ]
         )
+        self._filer._ctera_migrate.login.assert_called_once_with('/migration/rest/v1/auth/user')
 
     def test_logout_failure_after_login_success(self):
         self._init_filer()

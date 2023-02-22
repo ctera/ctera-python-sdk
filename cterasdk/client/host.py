@@ -70,8 +70,7 @@ class NetworkHost:
 class MigrationHost(NetworkHost):
 
     def __init__(self, host, port, https, is_authenticated=None, http_client=None):
-        super().__init__(host, port, https)
-        
+        super().__init__(host, port, https)     
         def always_authenticated(self, function):
             return True
         self._is_authenticated = is_authenticated if is_authenticated else always_authenticated
