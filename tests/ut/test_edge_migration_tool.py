@@ -80,14 +80,14 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
     def test_details(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(history=self._jobs)))
         jobs = migration_tool.MigrationTool(self._filer).details(munch.Munch(id=self._task_id))
-        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/history', {'task_id': self._task_id})
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/history', {'id': self._task_id})
         self.assertEqual(jobs.all(), self._jobs)
         self.assertEqual(jobs.latest, self._jobs[0])
 
     def test_details_not_found(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(history=None)))
         migration_tool.MigrationTool(self._filer).details(munch.Munch(id=self._task_id))
-        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/history', {'task_id': self._task_id})
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/history', {'id': self._task_id})
 
     def test_results(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(discovery='discovery', migration='migration')))
