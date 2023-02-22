@@ -75,13 +75,10 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         for i in [TaskType.Discovery, TaskType.Migration, 3]:
             ret = migration_tool.MigrationTool(self._filer).results(munch.Munch(id=i, type=i, name='task'))
             if i == TaskType.Discovery:
+                self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/discovery/results', {'id': TaskType.Discovery})
                 self.assertEqual(ret, 'discovery')
             elif i == TaskType.Migration:
+                self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/discovery/results', {'id': TaskType.Migration})
                 self.assertEqual(ret, 'migration')
             else:
                 self.assertEqual(ret, None)
-        self._filer._ctera_migrate.get.assert_has_calls(
-            [
-                mock.call('/migration/rest/v1/discovery/results', {'id': i}) for i in [TaskType.Discovery, TaskType.Migration]
-            ]
-        )
