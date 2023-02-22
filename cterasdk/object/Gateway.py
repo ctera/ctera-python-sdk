@@ -215,7 +215,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
             return path.startswith('/nosession')
 
         def is_migration_auth(path):
-            return path.startswith('/migration/rest/v1/auth/user')            
+            return path.startswith('/migration/rest/v1/auth/user')
         current_session = self.session()
         return current_session.authenticated() or current_session.initializing() or is_nosession(args[0]) or is_migration_auth(args[0])
 
