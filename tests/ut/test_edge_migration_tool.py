@@ -15,6 +15,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._username = 'admin'
         self._password = 'password'
         self._shares = ['public', 'ctera', 'private']
+        self._jobs = [1, 2, 3]
         self._task_id = 1
         self._task_ids = [1, 2, 3]
 
@@ -35,6 +36,12 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
 
         for name in self._shares:
             self.assertIn(name, ret)
+
+    def test_list_tasks_empty(self):
+        self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=None)))
+        ret = migration_tool.MigrationTool(self._filer).list_tasks()
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
+        self.assertEqual(ret, [])
 
     def test_delete(self):
         self._init_ctera_migrate(post_response='Success')
@@ -69,6 +76,18 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         actual_param = self._filer._ctera_migrate.post.call_args[0][1]
         self._assert_equal_objects(actual_param, munch.Munch(task_id=self._task_id))
         self.assertEqual(ret, 'Success')
+
+    def test_details(self):
+        self._init_ctera_migrate(get_response=munch.Munch(dict(history=self._jobs)))
+        jobs = migration_tool.MigrationTool(self._filer).details(munch.Munch(id=self._task_id))
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/history', {'task_id': self._task_id})
+        self.assertEqual(jobs.all(), self._jobs)
+        self.assertEqual(jobs.latest, self._jobs[0])
+
+    def test_details_not_found(self):
+        self._init_ctera_migrate(get_response=munch.Munch(dict(history=None)))
+        migration_tool.MigrationTool(self._filer).details(munch.Munch(id=self._task_id))
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/history', {'task_id': self._task_id})
 
     def test_results(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(discovery='discovery', migration='migration')))
