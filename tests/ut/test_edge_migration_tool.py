@@ -78,7 +78,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
                 self._filer._ctera_migrate.get.assert_called_with('/migration/rest/v1/discovery/results', {'id': TaskType.Discovery})
                 self.assertEqual(ret, 'discovery')
             elif i == TaskType.Migration:
-                self._filer._ctera_migrate.get.assert_called_with('/migration/rest/v1/discovery/results', {'id': TaskType.Migration})
+                self._filer._ctera_migrate.get.assert_called_with('/migration/rest/v1/migration/results', {'id': TaskType.Migration})
                 self.assertEqual(ret, 'migration')
             else:
                 self.assertEqual(ret, None)
