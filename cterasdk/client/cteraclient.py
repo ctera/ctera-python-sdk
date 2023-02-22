@@ -1,5 +1,5 @@
 from .http import HTTPClient, ContentType, HTTPException, HTTPResponse, geturi
-from ..convert import fromxmlstr, toxmlstr
+from ..convert import fromxmlstr, fromjsonstr, toxmlstr, tojsonstr
 from ..exception import CTERAClientException
 from ..lib import Command
 from ..common import Object
@@ -88,24 +88,81 @@ class CTERAClient:
 
     @staticmethod
     def fromxmlstr(request, response):
-        if not config.transcript['disabled']:
-            response = HTTPResponse(response)
-            transcribe.transcribe(request, response)
-        return fromxmlstr(response.content.decode('utf-8'))
+        response = transcribe_request(request, response, True)
+        return fromxmlstr(response.text)
 
     @staticmethod
     def file_descriptor(request, response):
-        if not config.transcript['disabled']:
-            transcribe.transcribe(request)
-        return response
+        return transcribe_request(request, response, False)
 
     @staticmethod
     def _execute(function, return_function=None):
         return_function = return_function or CTERAClient.fromxmlstr
-        try:
-            request, response = function()
-            return return_function(request, response)
-        except HTTPException as http_error:
-            client_error = CTERAClientException()
-            client_error.__dict__ = http_error.__dict__.copy()
-            raise client_error
+        return execute_request(function, return_function)
+
+
+def execute_request(request_function, return_function):
+    """
+    Execute an HTTP request
+    """
+    try:
+        request, response = request_function()
+        return return_function(request, response)
+    except HTTPException as http_error:
+        client_error = CTERAClientException()
+        client_error.__dict__ = http_error.__dict__.copy()
+        raise client_error
+
+
+def transcribe_request(request, response, transcribe_response=True):
+    """
+    Transcribe the HTTP request
+    """
+    if not config.transcript['disabled']:
+        if transcribe_response:
+            response = HTTPResponse(response)
+            transcribe.transcribe(request, response)
+        else:
+            transcribe.transcribe(request)
+    return response
+
+
+class RESTClient:
+
+    def __init__(self, http_client=None, session_id_key=None):
+        self.http_client = http_client if http_client else HTTPClient(session_id_key)
+
+    def get(self, baseurl, path, params=None):
+        function = Command(HTTPClient.get, self.http_client, geturi(baseurl, path), params if params else {})
+        return self._execute(function)
+
+    def put(self, baseurl, path, data):
+        function = Command(HTTPClient.put, self.http_client, geturi(baseurl, path), ContentType.application_json, tojsonstr(data))
+        return self._execute(function)
+
+    def post(self, baseurl, path, data):
+        function = Command(HTTPClient.post, self.http_client, geturi(baseurl, path), ContentType.application_json, tojsonstr(data))
+        return self._execute(function)
+
+    def delete(self, baseurl, path):
+        function = Command(HTTPClient.delete, self.http_client, geturi(baseurl, path))
+        return self._execute(function)
+
+    @staticmethod
+    def fromjsonstr(request, response):
+        response = transcribe_request(request, response, True)
+        return fromjsonstr(response.text)
+
+    @staticmethod
+    def _execute(function):
+        return execute_request(function, RESTClient.fromjsonstr)
+
+
+class MigrationClient(RESTClient):
+
+    XSRF_TOKEN_ID = 'x-mt-x'
+
+    def login(self, baseurl, path):
+        request, response = self.http_client.get(geturi(baseurl, path))
+        xsrf_token = response.headers.get(MigrationClient.XSRF_TOKEN_ID, None)
+        self.http_client.set_custom_headers({MigrationClient.XSRF_TOKEN_ID: xsrf_token})
