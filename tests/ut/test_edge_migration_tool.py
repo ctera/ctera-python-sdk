@@ -1,8 +1,6 @@
 from unittest import mock
 import munch
 
-from cterasdk import exception
-from cterasdk.common import Object
 from cterasdk.edge import migration_tool
 from cterasdk.edge.enum import TaskType
 from cterasdk.edge.types import HostCredentials
@@ -32,7 +30,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         actual_param = self._filer._ctera_migrate.post.call_args[0][1]
 
         expected_param = munch.Munch(host=self._host, user=self._username)
-        setattr(param, 'pass', self._password)
+        setattr(expected_param, 'pass', self._password)
         self._assert_equal_objects(actual_param, expected_param)
 
         for name in self._shares:

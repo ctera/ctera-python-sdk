@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 
 from .base_command import BaseCommand
 from ..common import Object
@@ -64,7 +63,6 @@ class MigrationTool(BaseCommand):
         param.task_ids = [task.id for task in tasks]
         return self._gateway._ctera_migrate.post(f'/migration/rest/v1/tasks/{action}', param)
 
-
     def start(self, task):
         """
         Start a task
@@ -93,7 +91,7 @@ class MigrationTool(BaseCommand):
         """
         Get task details
         """
-        response = self._gateway._ctera_migrate.get(f'/migration/rest/v1/tasks/history', {'id': task.id})
+        response = self._gateway._ctera_migrate.get('/migration/rest/v1/tasks/history', {'id': task.id})
         if response.history:
             return Jobs(response.history)
         logging.getLogger().error('Task not found. %s', {'task_id': task.id})
@@ -196,7 +194,6 @@ class Discovery(TaskManager):
         return self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/update', param)
 
 
-
 class Migration(TaskManager):
 
     def list_tasks(self, deleted=False):
@@ -213,7 +210,8 @@ class Migration(TaskManager):
         :param bool,optional auto_start: Start task after creation, defaults to ``False``
         :param bool,optional access_time: Copy last access time, defaults to ``None``
         :param bool,optional winacls: Copy NTFS ACL's, defaults to ``True``
-        :param str,optional cloud_folder: Target cloud folder, if ``create_cloud_folder_per_share`` was set to ``True`` then this attribute serves as the cloud folder name prefix
+        :param str,optional cloud_folder: Target cloud folder, if ``create_cloud_folder_per_share`` was set to ``True`` then
+         this attribute serves as the cloud folder name prefix
         :param bool,optional create_cloud_folder_per_share: Create cloud folder per share, defaults to ``False``
         :param bool,optional compute_checksum: Validate and report checksums post-migration, defaults to ``False``
         :param list(str),optional exclude: List of patterns to exclude, defaults to ``None``
@@ -250,7 +248,7 @@ class Task(Object):
         if source:
             self.source = source
         if source_type:
-            sources = {v: k for k,v in SourceType.__dict__.items() if not k.startswith('_')}
+            sources = {v: k for k, v in SourceType.__dict__.items() if not k.startswith('_')}
             self.source_type = sources.get(source_type, None) if source_type else 'other'
         if last_status:
             self.last_status = last_status
@@ -285,8 +283,9 @@ class Task(Object):
                 compute_checksum=bool(server_object.calc_write_checksum),
                 exclude=server_object.excludes,
                 include=server_object.includes,
-                access_time = getattr(server_object, 'atimes', None),
-                schedule=f'{server_object.schedule_date.replace("/", "-")} {server_object.schedule_time}' if server_object.schedule_date else None
+                access_time=getattr(server_object, 'atimes', None),
+                schedule=f'{server_object.schedule_date.replace("/", "-")} {server_object.schedule_time}'
+                         if server_object.schedule_date else None
             ))
 
             throttling_rule = getattr(server_object, 'bwlimit', None)
@@ -314,7 +313,8 @@ class MigrationTask(Task):
     """Class representing a migration tool migration task"""
 
     def __init__(self, task_id, task_type, name, created_at, source, source_type, last_status, shares, notes,
-                 winacls, cloud_folder, create_cloud_folder_per_share, compute_checksum, exclude, include, access_time, schedule, throttling):
+                 winacls, cloud_folder, create_cloud_folder_per_share, compute_checksum, exclude, include, access_time,
+                 schedule, throttling):
         super().__init__(task_id, task_type, name, created_at, source, source_type, last_status, shares, notes)
         self.winacls = winacls
         self.cloud_folder = cloud_folder
