@@ -165,6 +165,7 @@ class Discovery(TaskManager):
         Create a discovery task
 
         :param str name: Task name
+        :param cterasdk.edge.types.HostCredentials credentials: Target host credentials
         :param cterasdk.edge.enum.HostType,optional host_type: Target host type, defaults to ``None``
         :param bool,optional auto_start: Start task after creation, defaults to ``False``
         :param bool,optional log_every_file: Log every file, defaults to ``False``
@@ -206,6 +207,7 @@ class Migration(TaskManager):
         Create a discovery task
 
         :param str name: Task name
+        :param cterasdk.edge.types.HostCredentials credentials: Target host credentials
         :param cterasdk.edge.enum.HostType,optional host_type: Target host type, defaults to ``None``
         :param bool,optional auto_start: Start task after creation, defaults to ``False``
         :param bool,optional access_time: Copy last access time, defaults to ``None``

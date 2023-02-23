@@ -37,11 +37,17 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         for name in self._shares:
             self.assertIn(name, ret)
 
-    def test_list_tasks_empty(self):
+    def test_list_tasks_empty_response(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=None)))
         ret = migration_tool.MigrationTool(self._filer).list_tasks()
         self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
         self.assertEqual(ret, [])
+
+    def test_list_tasks_with_response(self):
+        tasks = [TestMigrationTool._create_discovery_task_object(), TestMigrationTool._create_migration_task_object()]
+        self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
+        migration_tool.MigrationTool(self._filer).list_tasks()
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
 
     def test_delete(self):
         self._init_ctera_migrate(post_response='Success')
@@ -81,7 +87,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._init_ctera_migrate(get_response=munch.Munch(dict(history=self._jobs)))
         jobs = migration_tool.MigrationTool(self._filer).details(munch.Munch(id=self._task_id))
         self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/history', {'id': self._task_id})
-        self.assertEqual(jobs.all(), self._jobs)
+        self.assertEqual(jobs.all, self._jobs)
         self.assertEqual(jobs.latest, self._jobs[0])
 
     def test_details_not_found(self):
@@ -101,3 +107,27 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
                 self.assertEqual(ret, 'migration')
             else:
                 self.assertEqual(ret, None)
+
+    @staticmethod
+    def _create_discovery_task_object():
+        return _create_object(**{
+            'task_id': 1, 'type': TaskType.Discovery, 'name': 'discovery', 'created_time': None, 'host': '192.168.0.1',
+            'host_type': 'windowsServer', 'status_text': 'status', 'shares': [munch.Munch(dict(src='public'))],
+            'notes': 'test note', 'discovery_log_files': 1
+        })
+
+    @staticmethod
+    def _create_migration_task_object():
+        return _create_object(**{
+            'task_id': 1, 'type': TaskType.Migration, 'name': 'migration', 'created_time': None, 'host': '192.168.0.1',
+            'host_type': 'windowsServer', 'status_text': 'status', 'shares': [munch.Munch(dict(src='public'))],
+            'notes': 'test note', 'ntacl': 1, 'cf': 'My Files', 'cf_per_share': False, 'calc_write_checksum': True,
+            'excludes': '', 'includes': '', 'atimes': True, 'schedule_date': None, 'bwlimit': munch.Munch({'kbps': 100, 'from': 'start', 'to': 'end'})
+        })
+
+    @staticmethod
+    def _create_object(**kwargs):
+        param = munch.Munch()
+        for key, value in kwargs:
+            setattr(param, key, value)
+        return param
