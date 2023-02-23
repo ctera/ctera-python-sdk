@@ -128,6 +128,6 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
     @staticmethod
     def _create_object(**kwargs):
         param = munch.Munch()
-        for key, value in kwargs:
+        for key, value in kwargs.items():
             setattr(param, key, value)
         return param
