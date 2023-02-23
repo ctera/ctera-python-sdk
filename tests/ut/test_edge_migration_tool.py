@@ -44,7 +44,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self.assertEqual(ret, [])
 
     def test_list_tasks_with_response(self):
-        tasks = [TestMigrationTool._create_discovery_task_object(), TestMigrationTool._create_migration_task_object()]
+        tasks = {'1': TestMigrationTool._create_discovery_task_object(), '2': TestMigrationTool._create_migration_task_object()}
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
         migration_tool.MigrationTool(self._filer).list_tasks()
         self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
