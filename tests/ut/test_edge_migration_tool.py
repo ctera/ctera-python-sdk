@@ -110,7 +110,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
 
     @staticmethod
     def _create_discovery_task_object():
-        return _create_object(**{
+        return TestMigrationTool._create_object(**{
             'task_id': 1, 'type': TaskType.Discovery, 'name': 'discovery', 'created_time': None, 'host': '192.168.0.1',
             'host_type': 'windowsServer', 'status_text': 'status', 'shares': [munch.Munch(dict(src='public'))],
             'notes': 'test note', 'discovery_log_files': 1
@@ -118,7 +118,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
 
     @staticmethod
     def _create_migration_task_object():
-        return _create_object(**{
+        return TestMigrationTool._create_object(**{
             'task_id': 1, 'type': TaskType.Migration, 'name': 'migration', 'created_time': None, 'host': '192.168.0.1',
             'host_type': 'windowsServer', 'status_text': 'status', 'shares': [munch.Munch(dict(src='public'))],
             'notes': 'test note', 'ntacl': 1, 'cf': 'My Files', 'cf_per_share': False, 'calc_write_checksum': True,
