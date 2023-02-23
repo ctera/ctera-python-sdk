@@ -99,9 +99,11 @@ class MigrationTool(BaseCommand):
 
     def results(self, task):
         if task.type == TaskType.Discovery:
-            return self._gateway._ctera_migrate.get('/migration/rest/v1/discovery/results', {'id': task.id}).discovery  # pylint: disable=W0212
+            return self._gateway._ctera_migrate.get('/migration/rest/v1/discovery/results',
+                                                    {'id': task.id}).discovery  # pylint: disable=W0212
         if task.type == TaskType.Migration:
-            return self._gateway._ctera_migrate.get('/migration/rest/v1/migration/results', {'id': task.id}).migration  # pylint: disable=W0212
+            return self._gateway._ctera_migrate.get('/migration/rest/v1/migration/results',
+                                                    {'id': task.id}).migration  # pylint: disable=W0212
         logging.getLogger().error('Could not determine task type. %s', {'id': task.id, 'type': task.type, 'name': task.name})
 
 
@@ -152,7 +154,8 @@ class TaskManager:
         return param
 
     def _add(self, param):
-        task = self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/create', param)  # pylint: disable=protected-access
+        task = self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/create',
+                                                                 param)  # pylint: disable=protected-access
         return Task(task.task_id, int(task.type), task.name)
 
 
@@ -193,7 +196,8 @@ class Discovery(TaskManager):
             param.name = name
         if notes:
             param.notes = notes
-        return self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/update', param)  # pylint: disable=protected-access
+        return self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/update',
+                                                                 param)  # pylint: disable=protected-access
 
 
 class Migration(TaskManager):
@@ -306,8 +310,8 @@ class Task(Object):
 class DiscoveryTask(Task):
     """Class representing a migration tool discovery task"""
 
-    def __init__(self, task_id, task_type, name, created_at, source, source_type, last_status, shares, notes,  # pylint: disable=too-many-arguments
-                 log_every_file):
+    def __init__(self, task_id, task_type, name, created_at, source, source_type,  # pylint: disable=too-many-arguments
+                 last_status, shares, notes, log_every_file):
         super().__init__(task_id, task_type, name, created_at, source, source_type, last_status, shares, notes)
         self.log_every_file = log_every_file
 
@@ -315,9 +319,9 @@ class DiscoveryTask(Task):
 class MigrationTask(Task):
     """Class representing a migration tool migration task"""
 
-    def __init__(self, task_id, task_type, name, created_at, source, source_type, last_status, shares, notes,  # pylint: disable=too-many-arguments
-                 winacls, cloud_folder, create_cloud_folder_per_share, compute_checksum, exclude, include, access_time,
-                 schedule, throttling):
+    def __init__(self, task_id, task_type, name, created_at, source, source_type,  # pylint: disable=too-many-arguments 
+                 last_status, shares, notes, winacls, cloud_folder, create_cloud_folder_per_share,
+                 compute_checksum, exclude, include, access_time, schedule, throttling):
         super().__init__(task_id, task_type, name, created_at, source, source_type, last_status, shares, notes)
         self.winacls = winacls
         self.cloud_folder = cloud_folder
