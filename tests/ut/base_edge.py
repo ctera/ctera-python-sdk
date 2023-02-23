@@ -28,8 +28,8 @@ class BaseEdgeTest(base.BaseTest):
         self._filer.move = mock.MagicMock(return_value=move_response)
 
     def _init_ctera_migrate(self, get_response=None, put_response=None, post_response=None, delete_response=None):
-        self._filer._ctera_migrate.get = mock.MagicMock(return_value=get_response)
-        self._filer._ctera_migrate.put = mock.MagicMock(return_value=put_response)
-        self._filer._ctera_migrate.post = mock.MagicMock(return_value=post_response)
-        self._filer._ctera_migrate.delete = mock.MagicMock(return_value=delete_response)
-        self._filer._ctera_migrate.login = mock.MagicMock()
+        self._filer._ctera_migrate.get = mock.MagicMock(return_value=get_response)  # pylint: disable=protected-access
+        self._filer._ctera_migrate.put = mock.MagicMock(return_value=put_response)  # pylint: disable=protected-access
+        self._filer._ctera_migrate.post = mock.MagicMock(return_value=post_response)  # pylint: disable=protected-access
+        self._filer._ctera_migrate.delete = mock.MagicMock(return_value=delete_response)  # pylint: disable=protected-access
+        self._filer._ctera_migrate.login = mock.MagicMock()  # pylint: disable=protected-access

@@ -17,7 +17,7 @@ class MigrationTool(BaseCommand):
         """
         Login to CTERA Migrate
         """
-        return self._gateway._ctera_migrate.login('/migration/rest/v1/auth/user')
+        return self._gateway._ctera_migrate.login('/migration/rest/v1/auth/user')  # pylint: disable=protected-access
 
     def list_shares(self, credentials):
         """
@@ -29,7 +29,8 @@ class MigrationTool(BaseCommand):
         param.host = credentials.host
         param.user = credentials.username
         setattr(param, 'pass', credentials.password)
-        return [share.name for share in self._gateway._ctera_migrate.post('/migration/rest/v1/inventory/shares', param).shares]
+        return [share.name for share in
+                self._gateway._ctera_migrate.post('/migration/rest/v1/inventory/shares', param).shares]  # pylint: disable=protected-access
 
     def list_tasks(self, deleted=False):
         """
@@ -39,7 +40,7 @@ class MigrationTool(BaseCommand):
         :returns: List of tasks
         :rtype: list(cterasdk.common.object.Object)
         """
-        tasks = self._gateway._ctera_migrate.get('/migration/rest/v1/tasks/list', {'deleted': int(deleted)}).tasks
+        tasks = self._gateway._ctera_migrate.get('/migration/rest/v1/tasks/list', {'deleted': int(deleted)}).tasks  # pylint: disable=W0212
         return [Task.from_server_object(task) for task in tasks.__dict__.values()] if tasks else []
 
     def delete(self, tasks):
@@ -61,7 +62,7 @@ class MigrationTool(BaseCommand):
     def _delete_or_restore(self, tasks, action):
         param = Object()
         param.task_ids = [task.id for task in tasks]
-        return self._gateway._ctera_migrate.post(f'/migration/rest/v1/tasks/{action}', param)
+        return self._gateway._ctera_migrate.post(f'/migration/rest/v1/tasks/{action}', param)  # pylint: disable=protected-access
 
     def start(self, task):
         """
@@ -85,22 +86,22 @@ class MigrationTool(BaseCommand):
         """
         param = Object()
         param.task_id = task.id
-        return self._gateway._ctera_migrate.post(f'/migration/rest/v1/tasks/{action}', param)
+        return self._gateway._ctera_migrate.post(f'/migration/rest/v1/tasks/{action}', param)  # pylint: disable=protected-access
 
     def details(self, task):
         """
         Get task details
         """
-        response = self._gateway._ctera_migrate.get('/migration/rest/v1/tasks/history', {'id': task.id})
+        response = self._gateway._ctera_migrate.get('/migration/rest/v1/tasks/history', {'id': task.id})  # pylint: disable=protected-access
         if response.history:
             return Jobs(response.history)
         logging.getLogger().error('Task not found. %s', {'task_id': task.id})
 
     def results(self, task):
         if task.type == TaskType.Discovery:
-            return self._gateway._ctera_migrate.get('/migration/rest/v1/discovery/results', {'id': task.id}).discovery
+            return self._gateway._ctera_migrate.get('/migration/rest/v1/discovery/results', {'id': task.id}).discovery  # pylint: disable=W0212
         if task.type == TaskType.Migration:
-            return self._gateway._ctera_migrate.get('/migration/rest/v1/migration/results', {'id': task.id}).migration
+            return self._gateway._ctera_migrate.get('/migration/rest/v1/migration/results', {'id': task.id}).migration  # pylint: disable=W0212
         logging.getLogger().error('Could not determine task type. %s', {'id': task.id, 'type': task.type, 'name': task.name})
 
 
@@ -151,14 +152,14 @@ class TaskManager:
         return param
 
     def _add(self, param):
-        task = self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/create', param)
+        task = self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/create', param)  # pylint: disable=protected-access
         return Task(task.task_id, int(task.type), task.name)
 
 
 class Discovery(TaskManager):
 
     def list_tasks(self, deleted=False):
-        return [task for task in self._migration_tool.list_tasks(deleted) if task.type == 'discovery']
+        return [task for task in self._migration_tool.list_tasks(deleted) if task.type == 'discovery']  # pylint: disable=protected-access
 
     def add(self, name, credentials, shares, host_type=None, auto_start=False, log_every_file=False, notes=None):
         """
@@ -192,15 +193,15 @@ class Discovery(TaskManager):
             param.name = name
         if notes:
             param.notes = notes
-        return self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/update', param)
+        return self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/update', param)  # pylint: disable=protected-access
 
 
 class Migration(TaskManager):
 
     def list_tasks(self, deleted=False):
-        return [task for task in self._migration_tool.list_tasks(deleted) if task.type == 'migration']
+        return [task for task in self._migration_tool.list_tasks(deleted) if task.type == 'migration']  # pylint: disable=protected-access
 
-    def add(self, name, credentials, shares, host_type=None, auto_start=False, access_time=None,
+    def add(self, name, credentials, shares, host_type=None, auto_start=False, access_time=None,  # pylint: disable=too-many-arguments
             winacls=True, cloud_folder=None, create_cloud_folder_per_share=False,
             compute_checksum=False, exclude=None, include=None, notes=None):
         """
@@ -305,7 +306,7 @@ class Task(Object):
 class DiscoveryTask(Task):
     """Class representing a migration tool discovery task"""
 
-    def __init__(self, task_id, task_type, name, created_at, source, source_type, last_status, shares, notes,
+    def __init__(self, task_id, task_type, name, created_at, source, source_type, last_status, shares, notes,  # pylint: disable=too-many-arguments
                  log_every_file):
         super().__init__(task_id, task_type, name, created_at, source, source_type, last_status, shares, notes)
         self.log_every_file = log_every_file
@@ -314,7 +315,7 @@ class DiscoveryTask(Task):
 class MigrationTask(Task):
     """Class representing a migration tool migration task"""
 
-    def __init__(self, task_id, task_type, name, created_at, source, source_type, last_status, shares, notes,
+    def __init__(self, task_id, task_type, name, created_at, source, source_type, last_status, shares, notes,  # pylint: disable=too-many-arguments
                  winacls, cloud_folder, create_cloud_folder_per_share, compute_checksum, exclude, include, access_time,
                  schedule, throttling):
         super().__init__(task_id, task_type, name, created_at, source, source_type, last_status, shares, notes)

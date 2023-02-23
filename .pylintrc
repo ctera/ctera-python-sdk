@@ -73,7 +73,8 @@ disable=raw-checker-failed,
         duplicate-code,
         no-member,
         unsubscriptable-object,
-        raise-missing-from
+        raise-missing-from,
+        use-dict-literal
 
 
 # Enable the message, report, category or checker with the given id(s). You can

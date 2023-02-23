@@ -81,7 +81,7 @@ class MigrationHost(NetworkHost):
     def from_ctera_host(ctera_host):
         """Create a RESTful host instance from an existing CTERA host instance"""
         return MigrationHost(ctera_host.host(), ctera_host.port(), ctera_host.https(),
-                             ctera_host._is_authenticated, ctera_host._ctera_client.http_client)
+                             ctera_host._is_authenticated, ctera_host._ctera_client.http_client)  # pylint: disable=protected-access
 
     @authenticated
     def login(self, path):
