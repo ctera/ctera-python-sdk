@@ -319,7 +319,7 @@ class DiscoveryTask(Task):
 class MigrationTask(Task):
     """Class representing a migration tool migration task"""
 
-    def __init__(self, task_id, task_type, name, created_at, source, source_type,  # pylint: disable=too-many-arguments 
+    def __init__(self, task_id, task_type, name, created_at, source, source_type,  # pylint: disable=too-many-arguments
                  last_status, shares, notes, winacls, cloud_folder, create_cloud_folder_per_share,
                  compute_checksum, exclude, include, access_time, schedule, throttling):
         super().__init__(task_id, task_type, name, created_at, source, source_type, last_status, shares, notes)
