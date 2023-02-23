@@ -121,7 +121,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self.assertEqual(len(ret), 1)
         self.assertEqual(ret[0].type, 'discovery')
 
-    def test_list_discovery_tasks(self):
+    def test_list_migration_tasks(self):
         tasks = munch.Munch(dict(discovery=TestMigrationTool._create_discovery_task_object(),
                                  migration=TestMigrationTool._create_migration_task_object()))
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
@@ -151,7 +151,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._task.type = TaskType.Migration
         self._init_ctera_migrate(post_response=self._task)
         ret = migration_tool.MigrationTool(self._filer).migration.add('migrationjob1', self._credentials, self._shares,
-                                                                       access_time=True, exclude=['*'], include=['*'])
+                                                                      access_time=True, exclude=['*'], include=['*'])
         self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/create', mock.ANY)
         self.assertEqual(ret.type, 'migration')
 
