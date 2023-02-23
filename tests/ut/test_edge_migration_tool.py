@@ -134,15 +134,15 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._task.type = TaskType.Discovery
         self._init_ctera_migrate(post_response=self._task)
         ret = migration_tool.MigrationTool(self._filer).discovery.add('discoveryjob1', self._credentials, self._shares)
-        self._filer._ctera_migrate.post('/migration/rest/v1/tasks/create', mock.ANY)
-        self.assertEqual(ret.type, TaskType.Discovery)
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/create', mock.ANY)
+        self.assertEqual(ret.type, 'discovery')
 
     def test_update_discovery_job(self):
         new_name, new_notes = 'discoveryjob2', 'notes2'
         task = munch.Munch(dict(id=self._task_id, name='discoveryjob1', notes='notes1'))
         self._init_ctera_migrate()
         migration_tool.MigrationTool(self._filer).discovery.update(task, name=new_name, notes=new_notes)
-        self._filer._ctera_migrate.post('/migration/rest/v1/tasks/update', mock.ANY)
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/update', mock.ANY)
         actual_param = self._filer._ctera_migrate.post.call_args[0][1]
         self.assertEqual(actual_param.name, new_name)
         self.assertEqual(actual_param.notes, new_notes)
@@ -152,8 +152,8 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._init_ctera_migrate(post_response=self._task)
         ret = migration_tool.MigrationTool(self._filer).migration.add('migrationjob1', self._credentials, self._shares,
                                                                        access_time=True, exclude=['*'], include=['*'])
-        self._filer._ctera_migrate.post('/migration/rest/v1/tasks/create', mock.ANY)
-        self.assertEqual(ret.type, TaskType.Migration)
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/create', mock.ANY)
+        self.assertEqual(ret.type, 'migration')
 
     @staticmethod
     def _create_discovery_task_object():
