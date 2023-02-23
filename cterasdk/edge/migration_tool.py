@@ -139,7 +139,7 @@ class TaskManager:
         self._migration_tool = migration_tool
 
     @staticmethod
-    def _create_add_parameter(self, name, credentials, shares, host_type=None, auto_start=False, notes=None):
+    def _create_add_parameter(name, credentials, shares, host_type=None, auto_start=False, notes=None):
         param = Object()
         param.name = name
         param.host = credentials.host
