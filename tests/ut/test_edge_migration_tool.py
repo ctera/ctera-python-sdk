@@ -125,7 +125,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
             'host_type': 'windowsServer', 'status_text': 'status', 'shares': [munch.Munch(dict(src='public'))],
             'notes': 'test note', 'ntacl': 1, 'cf': 'My Files', 'cf_per_share': False, 'calc_write_checksum': True,
             'excludes': '', 'includes': '', 'atimes': True, 'schedule_date': None,
-            'bwlimit': munch.Munch({'kbps': 100, 'from': 'start', 'to': 'end'})
+            'bwlimit': munch.Munch({'limit': 100, 'from': 'start', 'to': 'end'})
         })
 
     @staticmethod
