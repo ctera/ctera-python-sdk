@@ -183,7 +183,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         param.address = self._static_ip.address
         param.port = port
         param.threads = threads
-        param.reverse = (direction == Traffic.Download)
+        param.reverse = direction == Traffic.Download
         param.protocol = None if protocol == IPProtocol.TCP else IPProtocol.UDP
         return param
 

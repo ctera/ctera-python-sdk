@@ -138,6 +138,7 @@ class TaskManager:
     def __init__(self, migration_tool):
         self._migration_tool = migration_tool
 
+    @staticmethod
     def _create_add_parameter(self, name, credentials, shares, host_type=None, auto_start=False, notes=None):
         param = Object()
         param.name = name
@@ -181,7 +182,7 @@ class Discovery(TaskManager):
         :returns: Task
         :rtype: cterasdk.common.object.Object
         """
-        param = self._create_add_parameter(name, credentials, shares, host_type, auto_start, notes)
+        param = TaskManager._create_add_parameter(name, credentials, shares, host_type, auto_start, notes)
         param.type = TaskType.Discovery
         param.discovery_log_files = int(log_every_file)
         return self._add(param)
@@ -231,7 +232,7 @@ class Migration(TaskManager):
         :returns: Task
         :rtype: cterasdk.common.object.Object
         """
-        param = self._create_add_parameter(name, credentials, shares, host_type, auto_start, notes)
+        param = TaskManager._create_add_parameter(name, credentials, shares, host_type, auto_start, notes)
         param.type = TaskType.Migration
         param.ntacl = int(winacls)
         param.calc_write_checksum = int(compute_checksum)

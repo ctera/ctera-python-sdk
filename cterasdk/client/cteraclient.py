@@ -163,6 +163,6 @@ class MigrationClient(RESTClient):
     XSRF_TOKEN_ID = 'x-mt-x'
 
     def login(self, baseurl, path):
-        request, response = self.http_client.get(geturi(baseurl, path))
+        _, response = self.http_client.get(geturi(baseurl, path))
         xsrf_token = response.headers.get(MigrationClient.XSRF_TOKEN_ID, None)
         self.http_client.set_custom_headers({MigrationClient.XSRF_TOKEN_ID: xsrf_token})
