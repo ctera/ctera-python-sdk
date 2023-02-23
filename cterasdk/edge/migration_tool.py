@@ -100,11 +100,11 @@ class MigrationTool(BaseCommand):
 
     def results(self, task):
         if task.type == TaskType.Discovery:
-            return self._gateway._ctera_migrate.get('/migration/rest/v1/discovery/results',
-                                                    {'id': task.id}).discovery  # pylint: disable=protected-access
+            return self._gateway._ctera_migrate.get('/migration/rest/v1/discovery/results',  # pylint: disable=protected-access
+                                                    {'id': task.id}).discovery
         if task.type == TaskType.Migration:
-            return self._gateway._ctera_migrate.get('/migration/rest/v1/migration/results',
-                                                    {'id': task.id}).migration  # pylint: disable=protected-access
+            return self._gateway._ctera_migrate.get('/migration/rest/v1/migration/results',  # pylint: disable=protected-access
+                                                    {'id': task.id}).migration
         logging.getLogger().error('Could not determine task type. %s', {'id': task.id, 'type': task.type, 'name': task.name})
         return None
 
@@ -157,8 +157,8 @@ class TaskManager:
         return param
 
     def _add(self, param):
-        task = self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/create',
-                                                                 param)  # pylint: disable=protected-access
+        task = self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/create',  # pylint: disable=protected-access
+                                                                 param)
         return Task(task.task_id, int(task.type), task.name)
 
 
@@ -199,8 +199,8 @@ class Discovery(TaskManager):
             param.name = name
         if notes:
             param.notes = notes
-        return self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/update',
-                                                                 param)  # pylint: disable=protected-access
+        return self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/update',  # pylint: disable=protected-access
+                                                                 param)
 
 
 class Migration(TaskManager):
@@ -285,7 +285,7 @@ class Task(Object):
                 log_every_file=bool(server_object.discovery_log_files)
             ))
             return DiscoveryTask(**parameters)
-        elif server_object.type == TaskType.Migration:
+        if server_object.type == TaskType.Migration:
             parameters.update(dict(
                 winacls=bool(server_object.ntacl),
                 cloud_folder=server_object.cf,
@@ -308,6 +308,7 @@ class Task(Object):
             parameters['throttling'] = throttling
 
             return MigrationTask(**parameters)
+        return None
 
 
 class DiscoveryTask(Task):

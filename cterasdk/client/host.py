@@ -72,7 +72,7 @@ class MigrationHost(NetworkHost):
     def __init__(self, host, port, https, is_authenticated=None, http_client=None):
         super().__init__(host, port, https)
 
-        def always_authenticated(self, function):
+        def always_authenticated(self, function):  # pylint: disable=unused-argument
             return True
         self._is_authenticated = is_authenticated if is_authenticated else always_authenticated
         self._client = MigrationClient(http_client) if http_client else RESTClient()
