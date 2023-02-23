@@ -392,3 +392,33 @@ class SMBProtocol:
     SMB3_11 = 'SMB3_11'
     SMB2 = 'SMB2'
     SMB3 = 'SMB3'
+
+
+class SourceType:
+    """
+    Source Host Type
+
+    :ivar str Windows: Windows Server
+    :ivar str ONTAP: NetApp ONTAP
+    :ivar str OneFS: Isilon OneFS
+    :ivar str Panzura: Panzura Freedom Filer
+    :ivar str SGRID9_SMB: NetApp StorageGRID 9
+    :ivar str SGRID11_SMB: NetApp StorageGRID 11
+    """
+    Windows = 'windowsServer'
+    ONTAP = 'netapp'
+    OneFS = 'isilon'
+    Panzura = 'panzura'
+    SGRID9_SMB = 'storageGrid9'
+    SGRID11_SMB = 'storageGrid11'
+
+
+class TaskType:
+    """
+    Migration Tool Task Type
+
+    :ivar str Discovery: Discovery
+    :ivar str Migration: Migration
+    """
+    Discovery = 0
+    Migration = 1

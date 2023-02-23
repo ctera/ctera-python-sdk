@@ -31,7 +31,7 @@ class Services(BaseCommand):
         """
         status = self._gateway.get('/status/services')
         connection = Object()
-        connection.connected = (status.CTERAPortal.connectionState == enum.ServicesConnectionState.Connected)
+        connection.connected = status.CTERAPortal.connectionState == enum.ServicesConnectionState.Connected
         if connection.connected:
             connection.ipaddr = status.CTERAPortal.connectedAddress
             connection.user = status.userDisplayName

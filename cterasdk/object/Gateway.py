@@ -14,6 +14,7 @@ from ..edge import directoryservice
 from ..edge import drive
 from ..edge import ftp
 from ..edge import groups
+from ..edge import migration_tool
 from ..edge import licenses
 from ..edge import login
 from ..edge import logs
@@ -68,6 +69,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.edge.power.Power power: Object holding the Gateway Power APIs
     :ivar cterasdk.edge.users.Users users: Object holding the Gateway Users APIs
     :ivar cterasdk.edge.groups.Groups groups: Object holding the Gateway Groups APIs
+    :ivar cterasdk.edge.migration_tool.MigrationTool mtool: Object holding the Edge Filer's Migration Tool APIs
     :ivar cterasdk.edge.drive.Drive drive: Object holding the Gateway Drive APIs
     :ivar cterasdk.edge.volumes.Volumes volumes: Object holding the Gateway Volumes APIs
     :ivar cterasdk.edge.array.Array array: Object holding the Gateway Array APIs
@@ -139,6 +141,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.files = files.FileBrowser(self)
         self.firmware = firmware.Firmware(self)
         self.tasks = taskmgr.Tasks(self)
+        self.mtool = migration_tool.MigrationTool(self)
 
     @property
     def base_api_url(self):
@@ -207,10 +210,14 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         return not login.Login(self).info().isfirstlogin
 
     def _is_authenticated(self, function, *args, **kwargs):
+
         def is_nosession(path):
             return path.startswith('/nosession')
+
+        def is_migration_auth(path):
+            return path.startswith('/migration/rest/v1/auth/user')
         current_session = self.session()
-        return current_session.authenticated() or current_session.initializing() or is_nosession(args[0])
+        return current_session.authenticated() or current_session.initializing() or is_nosession(args[0]) or is_migration_auth(args[0])
 
     def test(self):
         """ Verification check to ensure the target host is a Gateway. """

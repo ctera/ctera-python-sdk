@@ -1302,3 +1302,118 @@ SSH Access
 .. code-block:: python
 
    filer.ssh.disable()
+
+
+Migration Tool
+==============
+
+.. automethod:: cterasdk.edge.migration_tool.MigrationTool.list_shares
+   :noindex:
+
+.. code-block:: python
+
+   """ List all shares available on a source host """
+   credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
+   filer.mtool.migration.list_shares(credentials)
+
+.. automethod:: cterasdk.edge.migration_tool.MigrationTool.list_tasks
+   :noindex:
+
+.. code-block:: python
+
+   """ Print all tasks, optional flag to list deleted tasks """
+   for task in filer.mtool.list_tasks(deleted=False):
+       print(task)
+
+.. automethod:: cterasdk.edge.migration_tool.MigrationTool.start
+   :noindex:
+
+.. code-block:: python
+
+   filer.mtool.start(task)
+
+.. automethod:: cterasdk.edge.migration_tool.MigrationTool.stop
+   :noindex:
+
+.. code-block:: python
+
+   filer.mtool.stop(task)
+
+.. automethod:: cterasdk.edge.migration_tool.MigrationTool.delete
+   :noindex:
+
+.. code-block:: python
+
+   filer.mtool.delete(filer.mtool.list_tasks())  # delete all tasks
+
+.. automethod:: cterasdk.edge.migration_tool.MigrationTool.restore
+   :noindex:
+
+.. code-block:: python
+
+   filer.mtool.restore(filer.mtool.list_tasks(deleted=True))  # recover all deleted tasks
+
+.. automethod:: cterasdk.edge.migration_tool.MigrationTool.details
+   :noindex:
+
+.. code-block:: python
+
+   filer.mtool.details(task)
+
+.. automethod:: cterasdk.edge.migration_tool.MigrationTool.results
+   :noindex:
+
+.. code-block:: python
+
+   filer.mtool.results(task)
+
+
+Discovery Tasks
+^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.edge.migration_tool.Discovery.list_tasks
+   :noindex:
+
+.. code-block:: python
+
+   """ Print all discovery tasks, optional flag to list deleted tasks """
+   for task in filer.mtool.discovery.list_tasks(deleted=False):
+       print(task)
+
+.. automethod:: cterasdk.edge.migration_tool.Discovery.add
+   :noindex:
+
+.. code-block:: python
+
+   credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
+   task = filer.mtool.discovery.add('my-discovery', credentials, ['share1', 'share2'], auto_start=False, log_every_file=True, notes='job 1')
+
+   """Run the task"""
+   filer.mtool.start(task)
+
+.. automethod:: cterasdk.edge.migration_tool.Discovery.update
+   :noindex:
+
+
+Migration Tasks
+^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.edge.migration_tool.Migration.list_tasks
+   :noindex:
+
+.. code-block:: python
+
+   """ Print all migration tasks, optional flag to list deleted tasks """
+   for task in filer.mtool.migration.list_tasks(deleted=False):
+       print(task)
+
+.. automethod:: cterasdk.edge.migration_tool.Migration.add
+   :noindex:
+
+.. code-block:: python
+
+   credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
+   task = filer.mtool.migration.add('my-discovery', credentials, ['share1', 'share2'], auto_start=False, winacls=True, cloud_folder='my_cloud_folder', create_cloud_folder_per_share=False, compute_checksum=False, exclude=['*.pdf', '*.jpg'], include=['*.png', '*.avi'], notes='migration job 1')
+
+   """Run the task"""
+   filer.mtool.start(task)

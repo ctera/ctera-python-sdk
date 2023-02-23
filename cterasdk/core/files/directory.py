@@ -70,8 +70,7 @@ def _process_response(response, path):
     except ReservedName as error:
         logging.getLogger().error('Reserved directory name. %s', {'name': path})
         raise error
-    else:
-        logging.getLogger().info('Directory created. %s', {'path': path})
+    logging.getLogger().info('Directory created. %s', {'path': path})
 
 
 def _process_error(response, path):

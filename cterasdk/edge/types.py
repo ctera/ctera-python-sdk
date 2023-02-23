@@ -18,6 +18,13 @@ TCPConnectResult.is_open.__doc__ = 'Boolean, indicating whether a TCP connection
                                    'established to the target host over the specified port'
 
 
+HostCredentials = namedtuple('HostCredentials', ('host', 'username', 'password'))
+HostCredentials.__doc__ = 'Tuple holding login credentials to a target host'
+HostCredentials.host.__doc__ = 'The ip address, hostname or fully qualified domain name of the host'
+HostCredentials.username.__doc__ = 'Username'
+HostCredentials.password.__doc__ = 'Password'
+
+
 class UserGroupEntry():
     """
     User or Group Entry

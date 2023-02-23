@@ -169,7 +169,7 @@ class Network(BaseCommand):
         param.address = address
         param.port = port
         param.threads = threads
-        param.reverse = (direction == Traffic.Download)
+        param.reverse = direction == Traffic.Download
         param.protocol = None if protocol == IPProtocol.TCP else IPProtocol.UDP
         task = self._gateway.execute("/status/network", "iperf", param)
         try:
