@@ -25,13 +25,14 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
     def test_login(self):
         self._init_ctera_migrate()
         migration_tool.MigrationTool(self._filer).login()
-        self._filer._ctera_migrate.login.assert_called_once_with('/migration/rest/v1/auth/user')
+        self._filer._ctera_migrate.login.assert_called_once_with('/migration/rest/v1/auth/user')  # pylint: disable=protected-access
 
     def test_list_shares(self):
         self._init_ctera_migrate(post_response=munch.Munch(dict(shares=[munch.Munch(dict(name=name)) for name in self._shares])))
         ret = migration_tool.MigrationTool(self._filer).list_shares(self._credentials)
-        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/inventory/shares', mock.ANY)
-        actual_param = self._filer._ctera_migrate.post.call_args[0][1]
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/inventory/shares',
+                                                                mock.ANY)  # pylint: disable=protected-access
+        actual_param = self._filer._ctera_migrate.post.call_args[0][1]  # pylint: disable=protected-access
 
         expected_param = munch.Munch(host=self._host, user=self._username)
         setattr(expected_param, 'pass', self._password)
@@ -43,7 +44,8 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
     def test_list_tasks_empty_response(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=None)))
         ret = migration_tool.MigrationTool(self._filer).list_tasks()
-        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list',
+                                                               {'deleted': int(False)})  # pylint: disable=protected-access
         self.assertEqual(ret, [])
 
     def test_list_tasks_with_response(self):
@@ -51,14 +53,15 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
                                  migration=TestMigrationTool._create_migration_task_object()))
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
         migration_tool.MigrationTool(self._filer).list_tasks()
-        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list',
+                                                               {'deleted': int(False)})  # pylint: disable=protected-access
 
     def test_delete(self):
         self._init_ctera_migrate(post_response='Success')
         tasks = [munch.Munch(id=task_id) for task_id in self._task_ids]
         ret = migration_tool.MigrationTool(self._filer).delete(tasks)
-        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/delete', mock.ANY)
-        actual_param = self._filer._ctera_migrate.post.call_args[0][1]
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/delete', mock.ANY)  # pylint: disable=protected-access
+        actual_param = self._filer._ctera_migrate.post.call_args[0][1]  # pylint: disable=protected-access
         self._assert_equal_objects(actual_param, munch.Munch(task_ids=self._task_ids))
         self.assertEqual(ret, 'Success')
 
@@ -66,48 +69,53 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._init_ctera_migrate(post_response='Success')
         tasks = [munch.Munch(id=task_id) for task_id in self._task_ids]
         ret = migration_tool.MigrationTool(self._filer).restore(tasks)
-        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/restore', mock.ANY)
-        actual_param = self._filer._ctera_migrate.post.call_args[0][1]
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/restore', mock.ANY)  # pylint: disable=protected-access
+        actual_param = self._filer._ctera_migrate.post.call_args[0][1]  # pylint: disable=protected-access
         self._assert_equal_objects(actual_param, munch.Munch(task_ids=self._task_ids))
         self.assertEqual(ret, 'Success')
 
     def test_start(self):
         self._init_ctera_migrate(post_response='Success')
         ret = migration_tool.MigrationTool(self._filer).start(munch.Munch(id=self._task_id))
-        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/enable', mock.ANY)
-        actual_param = self._filer._ctera_migrate.post.call_args[0][1]
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/enable', mock.ANY)  # pylint: disable=protected-access
+        actual_param = self._filer._ctera_migrate.post.call_args[0][1]  # pylint: disable=protected-access
         self._assert_equal_objects(actual_param, munch.Munch(task_id=self._task_id))
         self.assertEqual(ret, 'Success')
 
     def test_stop(self):
         self._init_ctera_migrate(post_response='Success')
         ret = migration_tool.MigrationTool(self._filer).stop(munch.Munch(id=self._task_id))
-        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/disable', mock.ANY)
-        actual_param = self._filer._ctera_migrate.post.call_args[0][1]
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/disable',
+                                                                mock.ANY)  # pylint: disable=protected-access
+        actual_param = self._filer._ctera_migrate.post.call_args[0][1]  # pylint: disable=protected-access
         self._assert_equal_objects(actual_param, munch.Munch(task_id=self._task_id))
         self.assertEqual(ret, 'Success')
 
     def test_details(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(history=self._jobs)))
         jobs = migration_tool.MigrationTool(self._filer).details(munch.Munch(id=self._task_id))
-        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/history', {'id': self._task_id})
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/history',
+                                                               {'id': self._task_id})  # pylint: disable=protected-access
         self.assertEqual(jobs.all, self._jobs)
         self.assertEqual(jobs.latest, self._jobs[0])
 
     def test_details_not_found(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(history=None)))
         migration_tool.MigrationTool(self._filer).details(munch.Munch(id=self._task_id))
-        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/history', {'id': self._task_id})
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/history',
+                                                               {'id': self._task_id})  # pylint: disable=protected-access
 
     def test_results(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(discovery='discovery', migration='migration')))
         for i in [TaskType.Discovery, TaskType.Migration, 3]:
             ret = migration_tool.MigrationTool(self._filer).results(munch.Munch(id=i, type=i, name='task'))
             if i == TaskType.Discovery:
-                self._filer._ctera_migrate.get.assert_called_with('/migration/rest/v1/discovery/results', {'id': TaskType.Discovery})
+                self._filer._ctera_migrate.get.assert_called_with('/migration/rest/v1/discovery/results',
+                                                                  {'id': TaskType.Discovery})  # pylint: disable=protected-access
                 self.assertEqual(ret, 'discovery')
             elif i == TaskType.Migration:
-                self._filer._ctera_migrate.get.assert_called_with('/migration/rest/v1/migration/results', {'id': TaskType.Migration})
+                self._filer._ctera_migrate.get.assert_called_with('/migration/rest/v1/migration/results',
+                                                                  {'id': TaskType.Migration})  # pylint: disable=protected-access
                 self.assertEqual(ret, 'migration')
             else:
                 self.assertEqual(ret, None)
@@ -117,7 +125,8 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
                                  migration=TestMigrationTool._create_migration_task_object()))
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
         ret = migration_tool.MigrationTool(self._filer).discovery.list_tasks()
-        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list',
+                                                               {'deleted': int(False)})  # pylint: disable=protected-access
         self.assertEqual(len(ret), 1)
         self.assertEqual(ret[0].type, 'discovery')
 
@@ -126,7 +135,8 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
                                  migration=TestMigrationTool._create_migration_task_object()))
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
         ret = migration_tool.MigrationTool(self._filer).migration.list_tasks()
-        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list',
+                                                               {'deleted': int(False)})  # pylint: disable=protected-access
         self.assertEqual(len(ret), 1)
         self.assertEqual(ret[0].type, 'migration')
 
@@ -134,7 +144,8 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._task.type = TaskType.Discovery
         self._init_ctera_migrate(post_response=self._task)
         ret = migration_tool.MigrationTool(self._filer).discovery.add('discoveryjob1', self._credentials, self._shares)
-        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/create', mock.ANY)
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/create',
+                                                                mock.ANY)  # pylint: disable=protected-access
         self.assertEqual(ret.type, 'discovery')
 
     def test_update_discovery_job(self):
@@ -142,8 +153,9 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         task = munch.Munch(dict(id=self._task_id, name='discoveryjob1', notes='notes1'))
         self._init_ctera_migrate()
         migration_tool.MigrationTool(self._filer).discovery.update(task, name=new_name, notes=new_notes)
-        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/update', mock.ANY)
-        actual_param = self._filer._ctera_migrate.post.call_args[0][1]
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/update',
+                                                                mock.ANY)  # pylint: disable=protected-access
+        actual_param = self._filer._ctera_migrate.post.call_args[0][1]  # pylint: disable=protected-access
         self.assertEqual(actual_param.name, new_name)
         self.assertEqual(actual_param.notes, new_notes)
 
@@ -152,7 +164,8 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._init_ctera_migrate(post_response=self._task)
         ret = migration_tool.MigrationTool(self._filer).migration.add('migrationjob1', self._credentials, self._shares,
                                                                       access_time=True, exclude=['*'], include=['*'])
-        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/create', mock.ANY)
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/create',
+                                                                mock.ANY)  # pylint: disable=protected-access
         self.assertEqual(ret.type, 'migration')
 
     @staticmethod

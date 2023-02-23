@@ -96,15 +96,17 @@ class MigrationTool(BaseCommand):
         if response.history:
             return Jobs(response.history)
         logging.getLogger().error('Task not found. %s', {'task_id': task.id})
+        return None
 
     def results(self, task):
         if task.type == TaskType.Discovery:
             return self._gateway._ctera_migrate.get('/migration/rest/v1/discovery/results',
-                                                    {'id': task.id}).discovery  # pylint: disable=W0212
+                                                    {'id': task.id}).discovery  # pylint: disable=protected-access
         if task.type == TaskType.Migration:
             return self._gateway._ctera_migrate.get('/migration/rest/v1/migration/results',
-                                                    {'id': task.id}).migration  # pylint: disable=W0212
+                                                    {'id': task.id}).migration  # pylint: disable=protected-access
         logging.getLogger().error('Could not determine task type. %s', {'id': task.id, 'type': task.type, 'name': task.name})
+        return None
 
 
 class Jobs:
@@ -120,6 +122,7 @@ class Jobs:
         """
         if self._all:
             return self._all[0]
+        return None
 
     @property
     def all(self):
@@ -319,7 +322,7 @@ class DiscoveryTask(Task):
 class MigrationTask(Task):
     """Class representing a migration tool migration task"""
 
-    def __init__(self, task_id, task_type, name, created_at, source, source_type,  # pylint: disable=too-many-arguments
+    def __init__(self, task_id, task_type, name, created_at, source, source_type,  # pylint: disable=too-many-arguments, too-many-locals
                  last_status, shares, notes, winacls, cloud_folder, create_cloud_folder_per_share,
                  compute_checksum, exclude, include, access_time, schedule, throttling):
         super().__init__(task_id, task_type, name, created_at, source, source_type, last_status, shares, notes)
