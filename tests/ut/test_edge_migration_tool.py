@@ -1,6 +1,7 @@
 from unittest import mock
 import munch
 
+from cterasdk.common import Object
 from cterasdk.edge import migration_tool
 from cterasdk.edge.enum import TaskType
 from cterasdk.edge.types import HostCredentials
@@ -129,7 +130,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
 
     @staticmethod
     def _create_object(**kwargs):
-        param = munch.Munch()
+        param = Object()
         for key, value in kwargs.items():
             setattr(param, key, value)
         return param
