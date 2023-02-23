@@ -110,6 +110,24 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
             else:
                 self.assertEqual(ret, None)
 
+    def test_list_discovery_tasks(self):
+        tasks = munch.Munch(dict(discovery=TestMigrationTool._create_discovery_task_object(),
+                                 migration=TestMigrationTool._create_migration_task_object()))
+        self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
+        ret = migration_tool.MigrationTool(self._filer).discovery.list_tasks()
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
+        self.assertEqual(len(ret), 1)
+        self.assertEqual(ret[0].type, 'discovery')
+
+    def test_list_discovery_tasks(self):
+        tasks = munch.Munch(dict(discovery=TestMigrationTool._create_discovery_task_object(),
+                                 migration=TestMigrationTool._create_migration_task_object()))
+        self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
+        ret = migration_tool.MigrationTool(self._filer).migration.list_tasks()
+        self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
+        self.assertEqual(len(ret), 1)
+        self.assertEqual(ret[0].type, 'migration')
+
     @staticmethod
     def _create_discovery_task_object():
         return TestMigrationTool._create_object(**{
