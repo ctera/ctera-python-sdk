@@ -79,8 +79,8 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
     def test_start(self):
         self._init_ctera_migrate(post_response='Success')
         ret = migration_tool.MigrationTool(self._filer).start(munch.Munch(id=self._task_id))
-        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/enable',
-                                                                mock.ANY)  # pylint: disable=protected-access
+        self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/enable',  # pylint: disable=protected-access
+                                                                mock.ANY)
         actual_param = self._filer._ctera_migrate.post.call_args[0][1]  # pylint: disable=protected-access
         self._assert_equal_objects(actual_param, munch.Munch(task_id=self._task_id))
         self.assertEqual(ret, 'Success')
