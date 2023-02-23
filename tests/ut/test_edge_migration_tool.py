@@ -44,7 +44,8 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self.assertEqual(ret, [])
 
     def test_list_tasks_with_response(self):
-        tasks = {'1': TestMigrationTool._create_discovery_task_object(), '2': TestMigrationTool._create_migration_task_object()}
+        tasks = munch.Munch(dict(discovery=TestMigrationTool._create_discovery_task_object(),
+                                 migration=TestMigrationTool._create_migration_task_object()))
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
         migration_tool.MigrationTool(self._filer).list_tasks()
         self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
@@ -122,7 +123,8 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
             'task_id': 1, 'type': TaskType.Migration, 'name': 'migration', 'created_time': None, 'host': '192.168.0.1',
             'host_type': 'windowsServer', 'status_text': 'status', 'shares': [munch.Munch(dict(src='public'))],
             'notes': 'test note', 'ntacl': 1, 'cf': 'My Files', 'cf_per_share': False, 'calc_write_checksum': True,
-            'excludes': '', 'includes': '', 'atimes': True, 'schedule_date': None, 'bwlimit': munch.Munch({'kbps': 100, 'from': 'start', 'to': 'end'})
+            'excludes': '', 'includes': '', 'atimes': True, 'schedule_date': None,
+            'bwlimit': munch.Munch({'kbps': 100, 'from': 'start', 'to': 'end'})
         })
 
     @staticmethod
