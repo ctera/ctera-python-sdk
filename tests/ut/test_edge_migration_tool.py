@@ -15,6 +15,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._host = '192.168.0.1'
         self._username = 'admin'
         self._password = 'password'
+        self._credentials = HostCredentials(self._host, self._username, self._password)
         self._shares = ['public', 'ctera', 'private']
         self._jobs = [1, 2, 3]
         self._task_id = 1
@@ -27,7 +28,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
 
     def test_list_shares(self):
         self._init_ctera_migrate(post_response=munch.Munch(dict(shares=[munch.Munch(dict(name=name)) for name in self._shares])))
-        ret = migration_tool.MigrationTool(self._filer).list_shares(HostCredentials(self._host, self._username, self._password))
+        ret = migration_tool.MigrationTool(self._filer).list_shares(self._credentials)
         self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/inventory/shares', mock.ANY)
         actual_param = self._filer._ctera_migrate.post.call_args[0][1]
 
@@ -127,6 +128,29 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._filer._ctera_migrate.get.assert_called_once_with('/migration/rest/v1/tasks/list', {'deleted': int(False)})
         self.assertEqual(len(ret), 1)
         self.assertEqual(ret[0].type, 'migration')
+
+    def test_add_discovery_job(self):
+        self._init_ctera_migrate()
+        ret = migration_tool.MigrationTool(self._filer).discovery.add('discoveryjob1', self._credentials, self._shares)
+        self._filer._ctera_migrate.post('/migration/rest/v1/tasks/create', mock.ANY)
+        self.assertEqual(ret.type, TaskType.Discovery)
+
+    def test_update_discovery_job(self):
+        new_name, new_notes = 'discoveryjob2', 'notes2'
+        task = munch.Munch(dict(task_id=self._task_id, name='discoveryjob1', notes='notes1'))
+        self._init_ctera_migrate()
+        migration_tool.MigrationTool(self._filer).discovery.update(task, name=new_name, notes=new_notes)
+        self._filer._ctera_migrate.post('/migration/rest/v1/tasks/update', mock.ANY)
+        actual_param = self._filer._ctera_migrate.post.call_args[0][1]
+        self.assertEqual(actual_param.name, new_name)
+        self.assertEqual(actual_param.notes, new_notes)
+
+    def test_add_migration_job(self):
+        self._init_ctera_migrate()
+        ret = migration_tool.MigrationTool(self._filer).migration.add('migrationjob1', self._credentials, self._shares,
+                                                                       access_time=True, exclude=['*'], include=['*'])
+        self._filer._ctera_migrate.post('/migration/rest/v1/tasks/create', mock.ANY)
+        self.assertEqual(ret.type, TaskType.Migration)
 
     @staticmethod
     def _create_discovery_task_object():
