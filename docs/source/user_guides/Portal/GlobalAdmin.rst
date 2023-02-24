@@ -959,6 +959,20 @@ Devices
 .. automethod:: cterasdk.core.devices.Devices.by_name
    :noindex:
 
+.. automethod:: cterasdk.core.devices.Devices.get_comment
+   :noindex:
+
+.. code-block:: python
+
+   print(admin.devices.get_comment('FSRV'))
+
+.. automethod:: cterasdk.core.devices.Devices.set_comment
+   :noindex:
+
+.. code-block:: python
+
+   admin.devices.set_comment('FSRV', 'Production')
+
 Generate Activation Codes
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automethod:: cterasdk.core.activation.Activation.generate_code
