@@ -39,6 +39,7 @@ Submodules
    cterasdk.edge.login
    cterasdk.edge.logs
    cterasdk.edge.mail
+   cterasdk.edge.migration_tool
    cterasdk.edge.network
    cterasdk.edge.nfs
    cterasdk.edge.ntp

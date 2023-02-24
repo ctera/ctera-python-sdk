@@ -1314,7 +1314,7 @@ Migration Tool
 
    """ List all shares available on a source host """
    credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
-   filer.mtool.migration.list_shares(credentials)
+   filer.mtool.list_shares(credentials)
 
 .. automethod:: cterasdk.edge.migration_tool.MigrationTool.list_tasks
    :noindex:
