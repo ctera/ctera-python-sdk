@@ -122,9 +122,9 @@ class TestCoreDevices(base_core.BaseCoreTest):
         self._global_admin.get.assert_called_once_with(f'/devices/{self._device_name}')
         self.assertEqual(ret, self._expected_code)
 
-    def test_get_device_comment(self):
+    def test_set_device_comment(self):
         self._init_global_admin(put_response=munch.Munch(dict(code=self._expected_code)))
-        ret = devices.Devices(self._global_admin).get_comment(self._device_name, self._comment)
+        ret = devices.Devices(self._global_admin).set_comment(self._device_name, self._comment)
         self._global_admin.put.assert_called_once_with(f'/devices/{self._device_name}', self._comment)
         self.assertEqual(ret.code, self._expected_code)
 
