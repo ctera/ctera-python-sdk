@@ -119,7 +119,7 @@ class TestCoreDevices(base_core.BaseCoreTest):
 
     def test_get_device_comment(self):
         ret = devices.Devices(self._global_admin).get_comment(self._device_name)
-        self._global_admin.get.assert_called_once_with(f'/portals/None/devices/{self._device_name}')
+        self._global_admin.get.assert_called_once_with(f'/portals/None/devices/{self._device_name}/comment')
         self.assertEqual(ret, self._expected_code)
 
     def test_set_device_comment(self):
