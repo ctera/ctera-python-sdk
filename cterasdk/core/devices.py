@@ -12,6 +12,18 @@ class Devices(BaseCommand):
     type_attr = 'deviceType'
     default = ['name', 'portal', 'deviceType']
 
+    def _create_device_resource_uri(self, device_name, tenant):
+        session = self._portal.session()
+        if not tenant:
+            if not session.in_tenant_context():
+                raise CTERAException('You must specify a tenant name or browse the tenant first.')
+            tenant = self._portal.session().tenant()
+        if session.is_local_auth():
+            resource_uri = '/devices/' + device_name  # local auth: auto appends /portals/{tenant_name}
+        else:
+            resource_uri = f'/portals/{tenant}/devices/{device_name}'  # regular auth: support both tenant and Administration context
+        return resource_uri
+
     def device(self, device_name, tenant=None, include=None):
         """
         Get a Device by its name
@@ -26,19 +38,11 @@ class Devices(BaseCommand):
         include = union(include or [], Devices.default)
         include = ['/' + attr for attr in include]
 
-        session = self._portal.session()
-        if not tenant:
-            if not session.in_tenant_context():
-                raise CTERAException('You must specify a tenant name or browse the tenant first.')
-            tenant = self._portal.session().tenant()
-        if session.is_local_auth():
-            url = '/devices/' + device_name  # local auth: auto appends /portals/{tenant_name}
-        else:
-            url = f'/portals/{tenant}/devices/{device_name}'  # regular auth: support both tenant and Administration context
+        resource_uri = self._create_device_resource_uri(device_name, tenant)
 
-        dev = self._portal.get_multi(url, include)
+        dev = self._portal.get_multi(resource_uri, include)
         if dev.name is None:
-            raise ObjectNotFoundException('Device not found', url, tenant=tenant, name=device_name)
+            raise ObjectNotFoundException('Device not found', resource_uri, tenant=tenant, name=device_name)
 
         return remote.remote_command(self._portal, dev)
 
@@ -139,3 +143,22 @@ class Devices(BaseCommand):
         iterator = query.iterator(self._portal, '/devices', param)
         for dev in iterator:
             yield remote.remote_command(self._portal, dev)
+
+    def get_comment(self, device_name, tenant=None):
+        """
+        Get Portal device comment
+
+        :param str device: Device name
+        :returns: Comment
+        :rtype: str
+        """
+        return self._portal.get(f'{self._create_device_resource_uri(device_name, tenant)}/comment')
+
+    def set_comment(self, device_name, comment, tenant=None):
+        """
+        Set a comment to a Portal device
+
+        :param str device: Device name
+        :param str comment: Comment
+        """
+        return self._portal.put(f'{self._create_device_resource_uri(device_name, tenant)}/comment', comment)

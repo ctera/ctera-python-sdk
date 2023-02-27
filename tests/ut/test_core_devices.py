@@ -22,6 +22,8 @@ class TestCoreDevices(base_core.BaseCoreTest):
         self._user_account = UserAccount('user')
         self._user_uid = 1337
         self._get_user_mock = self.patch_call("cterasdk.core.users.Users.get")
+        self._device_name = 'FSRV'
+        self._comment = 'comment'
 
     def test_device_ok(self):
         o = Object()
@@ -114,6 +116,17 @@ class TestCoreDevices(base_core.BaseCoreTest):
     def test_devices_owned_by_user(self):
         self._mock_get_user()
         self._test_devices(user=self._user_account)
+
+    def test_get_device_comment(self):
+        ret = devices.Devices(self._global_admin).get_comment(self._device_name)
+        self._global_admin.get.assert_called_once_with(f'/portals/None/devices/{self._device_name}/comment')
+        self.assertEqual(ret.code, self._expected_code)
+
+    def test_set_device_comment(self):
+        self._init_global_admin(put_response=munch.Munch(dict(code=self._expected_code)))
+        ret = devices.Devices(self._global_admin).set_comment(self._device_name, self._comment)
+        self._global_admin.put.assert_called_once_with(f'/portals/None/devices/{self._device_name}/comment', self._comment)
+        self.assertEqual(ret.code, self._expected_code)
 
     def _test_devices(self, filters=None, user=None):
         with mock.patch("cterasdk.core.devices.query.iterator") as query_iterator_mock:
