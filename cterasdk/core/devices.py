@@ -12,8 +12,7 @@ class Devices(BaseCommand):
     type_attr = 'deviceType'
     default = ['name', 'portal', 'deviceType']
 
-    @staticmethod
-    def _create_device_resource_uri(device_name):
+    def _create_device_resource_uri(self, device_name, tenant):
         session = self._portal.session()
         if not tenant:
             if not session.in_tenant_context():
@@ -23,7 +22,7 @@ class Devices(BaseCommand):
             resource_uri = '/devices/' + device_name  # local auth: auto appends /portals/{tenant_name}
         else:
             resource_uri = f'/portals/{tenant}/devices/{device_name}'  # regular auth: support both tenant and Administration context
-
+        return resource_uri
 
     def device(self, device_name, tenant=None, include=None):
         """
@@ -39,7 +38,7 @@ class Devices(BaseCommand):
         include = union(include or [], Devices.default)
         include = ['/' + attr for attr in include]
 
-        resource_uri = Devices._create_device_resource_uri(device_name)
+        resource_uri = self._create_device_resource_uri(device_name, tenant)
 
         dev = self._portal.get_multi(resource_uri, include)
         if dev.name is None:
@@ -145,7 +144,7 @@ class Devices(BaseCommand):
         for dev in iterator:
             yield remote.remote_command(self._portal, dev)
 
-    def get_comment(self, device_name, comment):
+    def get_comment(self, device_name, tenant=None):
         """
         Get Portal device comment
 
@@ -153,13 +152,13 @@ class Devices(BaseCommand):
         :returns: Comment
         :rtype: str
         """
-        return self._portal.get(f'{Devices._create_device_resource_uri(device_name)}/comment')
+        return self._portal.get(f'{self._create_device_resource_uri(device_name, tenant)}/comment')
 
-    def set_comment(self, device_name, comment):
+    def set_comment(self, device_name, comment, tenant=None):
         """
         Set a comment to a Portal device
 
         :param str device: Device name
         :param str comment: Comment
         """
-        self._portal.put(f'{Devices._create_device_resource_uri(device_name)}/comment', comment)
+        self._portal.put(f'{self._create_device_resource_uri(device_name, tenant)}/comment', comment)

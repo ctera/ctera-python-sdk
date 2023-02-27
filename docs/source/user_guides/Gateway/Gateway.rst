@@ -1304,8 +1304,8 @@ SSH Access
    filer.ssh.disable()
 
 
-Migration Tool
-==============
+CTERA Migrate
+=============
 
 .. automethod:: cterasdk.edge.migration_tool.MigrationTool.list_shares
    :noindex:
