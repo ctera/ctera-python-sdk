@@ -125,7 +125,7 @@ class TestCoreDevices(base_core.BaseCoreTest):
     def test_set_device_comment(self):
         self._init_global_admin(put_response=munch.Munch(dict(code=self._expected_code)))
         devices.Devices(self._global_admin).set_comment(self._device_name, self._comment)
-        self._global_admin.put.assert_called_once_with(f'/portals/None/devices/{self._device_name}', self._comment)
+        self._global_admin.put.assert_called_once_with(f'/portals/None/devices/{self._device_name}/comment', self._comment)
 
     def _test_devices(self, filters=None, user=None):
         with mock.patch("cterasdk.core.devices.query.iterator") as query_iterator_mock:
