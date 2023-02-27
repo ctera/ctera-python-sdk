@@ -161,4 +161,4 @@ class Devices(BaseCommand):
         :param str device: Device name
         :param str comment: Comment
         """
-        self._portal.put(f'{self._create_device_resource_uri(device_name, tenant)}/comment', comment)
+        return self._portal.put(f'{self._create_device_resource_uri(device_name, tenant)}/comment', comment)
