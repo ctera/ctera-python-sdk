@@ -3,7 +3,6 @@ import logging
 from .base_command import BaseCommand
 from ..common import Object
 from .enum import TaskType, SourceType
-from .types import HostCredentials
 
 
 class MigrationTool(BaseCommand):
