@@ -398,19 +398,23 @@ class SourceType:
     """
     Source Host Type
 
+    :ivar str Edge: This Edge Filer
     :ivar str Windows: Windows Server
     :ivar str ONTAP: NetApp ONTAP
     :ivar str OneFS: Isilon OneFS
     :ivar str Panzura: Panzura Freedom Filer
     :ivar str SGRID9_SMB: NetApp StorageGRID 9
     :ivar str SGRID11_SMB: NetApp StorageGRID 11
+    :ivar str StorSimple: Microsoft Azure StorSimple
     """
+    Edge = 'currentDevice'
     Windows = 'windowsServer'
     ONTAP = 'netapp'
     OneFS = 'isilon'
     Panzura = 'panzura'
     SGRID9_SMB = 'storageGrid9'
     SGRID11_SMB = 'storageGrid11'
+    StorSimple = 'azureStorSimple'
 
 
 class TaskType:

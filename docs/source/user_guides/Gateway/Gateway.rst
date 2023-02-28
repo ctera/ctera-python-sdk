@@ -1316,6 +1316,10 @@ CTERA Migrate
    credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
    filer.mtool.list_shares(credentials)
 
+   """ List all shares available on the current Edge Filer """
+   credentials = gateway_types.HostCredentials.localhost()
+   filer.mtool.list_shares(credentials)
+
 .. automethod:: cterasdk.edge.migration_tool.MigrationTool.list_tasks
    :noindex:
 
@@ -1387,6 +1391,11 @@ Discovery Tasks
 
    credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
    task = filer.mtool.discovery.add('my-discovery', credentials, ['share1', 'share2'], auto_start=False, log_every_file=True, notes='job 1')
+
+
+   """Add a local discovery task"""
+   credentials = gateway_types.HostCredentials.localhost()
+   task = filer.mtool.discovery.add('my-discovery', credentials, ['share1', 'share2'], log_every_file=True, notes='local discovery job')
 
    """Run the task"""
    filer.mtool.start(task)
