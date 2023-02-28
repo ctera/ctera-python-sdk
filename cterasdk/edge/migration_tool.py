@@ -168,9 +168,6 @@ class Discovery(TaskManager):
     def list_tasks(self, deleted=False):
         return [task for task in self._migration_tool.list_tasks(deleted) if task.type == 'discovery']  # pylint: disable=protected-access
 
-    def localhost(self, name, shares, auto_start=False, log_every_file=False, notes=None):
-        return self.add(name, None, shares, SourceType.Edge, auto_start, log_every_file, notes)
-
     def add(self, name, credentials, shares, auto_start=False, log_every_file=False, notes=None):
         """
         Create a discovery task
