@@ -139,15 +139,15 @@ class TaskManager:
         self._migration_tool = migration_tool
 
     @staticmethod
-    def _create_add_parameter(name, credentials, shares, host_type=None, auto_start=False, notes=None):
+    def _create_add_parameter(name, credentials, shares, auto_start=False, notes=None):
         param = Object()
         param.name = name
         param.host = credentials.host
         param.user = credentials.username
         setattr(param, 'pass', credentials.password)
         param.shares = []
-        if host_type:
-            param.host_type = host_type
+        if credentials.host_type:
+            param.host_type = credentials.host_type
         for share in shares:
             share_param = Object()
             share_param.src = share
@@ -168,13 +168,12 @@ class Discovery(TaskManager):
     def list_tasks(self, deleted=False):
         return [task for task in self._migration_tool.list_tasks(deleted) if task.type == 'discovery']  # pylint: disable=protected-access
 
-    def add(self, name, credentials, shares, host_type=None, auto_start=False, log_every_file=False, notes=None):
+    def add(self, name, credentials, shares, auto_start=False, log_every_file=False, notes=None):
         """
         Create a discovery task
 
         :param str name: Task name
         :param cterasdk.edge.types.HostCredentials credentials: Target host credentials
-        :param cterasdk.edge.enum.HostType,optional host_type: Target host type, defaults to ``None``
         :param bool,optional auto_start: Start task after creation, defaults to ``False``
         :param bool,optional log_every_file: Log every file, defaults to ``False``
         :param str,optional notes: Task notes
@@ -182,7 +181,7 @@ class Discovery(TaskManager):
         :returns: Task
         :rtype: cterasdk.common.object.Object
         """
-        param = TaskManager._create_add_parameter(name, credentials, shares, host_type, auto_start, notes)
+        param = TaskManager._create_add_parameter(name, credentials, shares, auto_start, notes)
         param.type = TaskType.Discovery
         param.discovery_log_files = int(log_every_file)
         return self._add(param)
@@ -209,7 +208,7 @@ class Migration(TaskManager):
     def list_tasks(self, deleted=False):
         return [task for task in self._migration_tool.list_tasks(deleted) if task.type == 'migration']  # pylint: disable=protected-access
 
-    def add(self, name, credentials, shares, host_type=None, auto_start=False, access_time=None,  # pylint: disable=too-many-arguments
+    def add(self, name, credentials, shares, auto_start=False, access_time=None,  # pylint: disable=too-many-arguments
             winacls=True, cloud_folder=None, create_cloud_folder_per_share=False,
             compute_checksum=False, exclude=None, include=None, notes=None):
         """
@@ -217,7 +216,6 @@ class Migration(TaskManager):
 
         :param str name: Task name
         :param cterasdk.edge.types.HostCredentials credentials: Target host credentials
-        :param cterasdk.edge.enum.HostType,optional host_type: Target host type, defaults to ``None``
         :param bool,optional auto_start: Start task after creation, defaults to ``False``
         :param bool,optional access_time: Copy last access time, defaults to ``None``
         :param bool,optional winacls: Copy NTFS ACL's, defaults to ``True``
@@ -232,7 +230,7 @@ class Migration(TaskManager):
         :returns: Task
         :rtype: cterasdk.common.object.Object
         """
-        param = TaskManager._create_add_parameter(name, credentials, shares, host_type, auto_start, notes)
+        param = TaskManager._create_add_parameter(name, credentials, shares, auto_start, notes)
         param.type = TaskType.Migration
         param.ntacl = int(winacls)
         param.calc_write_checksum = int(compute_checksum)

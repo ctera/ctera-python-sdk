@@ -18,13 +18,6 @@ TCPConnectResult.is_open.__doc__ = 'Boolean, indicating whether a TCP connection
                                    'established to the target host over the specified port'
 
 
-HostCredentials = namedtuple('HostCredentials', ('host', 'username', 'password'))
-HostCredentials.__doc__ = 'Tuple holding login credentials to a target host'
-HostCredentials.host.__doc__ = 'The ip address, hostname or fully qualified domain name of the host'
-HostCredentials.username.__doc__ = 'Username'
-HostCredentials.password.__doc__ = 'Password'
-
-
 class UserGroupEntry():
     """
     User or Group Entry
@@ -261,3 +254,40 @@ class RemoveShareAccessControlEntry(UserGroupEntry):
     :ivar cterasdk.edge.enum.PrincipalType principal_type: Principal type of the ACL
     :ivar str name: The name of the user or group
     """
+
+
+class HostCredentials:
+    """
+    Source Host Credential Object
+
+    :ivar cterasdk.edge.enum.SourceType host_type: Host type
+    :ivar str host: Fully qualified domain name, hostname or IP address
+    :ivar str username: Source host account username
+    :ivar str password: Source host account password
+    """
+
+    def __init__(self, host, username, password, host_type=None):
+        self._host = host
+        self._username = username
+        self._password = password
+        self._host_type = host_type
+
+    @property
+    def host_type(self):
+        return self._host_type
+
+    @property
+    def host(self):
+        return self._host
+
+    @property
+    def username(self):
+        return self._username
+
+    @property
+    def password(self):
+        return self._password
+
+    @staticmethod
+    def localhost():
+        return HostCredentials('127.0.0.1', 'dummy', 'dummy', enum.SourceType.Edge)
