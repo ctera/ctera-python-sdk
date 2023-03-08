@@ -1,8 +1,7 @@
 import logging
 
-from ..common import Object, parse_base_object_ref
+from ..common import Object
 from .base_command import BaseCommand
-from ..exception import CTERAException
 
 
 class StorageClasses(BaseCommand):

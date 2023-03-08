@@ -89,7 +89,7 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
 
     def test_evict_wait(self):
         execute_response = '/proc/bgtasks/6192'
-        get_response = munch.Munch(dict(id=1, name='task', status='completed', start_time='start', end_time='end'))
+        get_response = munch.Munch(dict(id=1, name='task', status='completed', startTime='start', endTime='end'))
         self._init_filer(get_response=get_response, execute_response=execute_response)
         ret = sync.Sync(self._filer).evict(self._path, wait=True)
         self._filer.execute.assert_called_once_with('/config/cloudsync', 'evictFolder', mock.ANY)
