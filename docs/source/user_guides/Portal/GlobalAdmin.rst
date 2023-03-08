@@ -111,6 +111,34 @@ Core Methods
 .. automethod:: cterasdk.object.Portal.GlobalAdmin.show_query
    :noindex:
 
+
+Storage Classes
+---------------
+
+.. automethod:: cterasdk.core.storage_classes.StorageClasses.add
+   :noindex:
+
+.. code-block:: python
+
+   admin.storage_classes.add('Archive')
+
+.. automethod:: cterasdk.core.storage_classes.StorageClasses.all
+   :noindex:
+
+
+.. code-block:: python
+
+   for storage_class in admin.storage_classes.all():
+       print(storage_class)
+
+.. automethod:: cterasdk.core.storage_classes.StorageClasses.get
+   :noindex:
+
+.. code-block:: python
+
+   print(admin.storage_classes.get('Archive'))
+
+
 Storage Nodes
 -------------
 .. automethod:: cterasdk.core.buckets.Buckets.get
@@ -118,10 +146,10 @@ Storage Nodes
 
 .. code-block:: python
 
-   bucket = filer.buckets.get('MainStorage')
+   bucket = admin.buckets.get('MainStorage')
    print(bucket)
 
-   bucket = filer.buckets.get('MainStorage', include=['bucket', 'driver'])
+   bucket = admin.buckets.get('MainStorage', include=['bucket', 'driver'])
    print(bucket.name, bucket.bucket, bucket.driver)
 
 .. automethod:: cterasdk.core.buckets.Buckets.add
@@ -131,15 +159,15 @@ Storage Nodes
 
    """Add an Amazon S3 bucket called 'mybucket'"""
    bucket = portal_types.AmazonS3('mybucket', 'access-key', 'secret-key')
-   filer.buckets.add('cterabucket', bucket)
+   admin.buckets.add('cterabucket', bucket)
 
    """Add an Amazon S3 bucket called 'mybucket', dedicated to a tenant called 'mytenant'"""
    bucket = portal_types.AmazonS3('mybucket', 'access-key', 'secret-key')
-   filer.buckets.add('cterabucket', bucket, dedicated_to='mytenant')
+   admin.buckets.add('cterabucket', bucket, dedicated_to='mytenant')
 
    """Add a bucket in read-delete only mode"""
    bucket = portal_types.AmazonS3('mybucket', 'access-key', 'secret-key')
-   filer.buckets.add('cterabucket', bucket, read_only=True)
+   admin.buckets.add('cterabucket', bucket, read_only=True)
 
 .. automethod:: cterasdk.core.buckets.Buckets.modify
    :noindex:
@@ -147,14 +175,14 @@ Storage Nodes
 .. code-block:: python
 
    """Modify an existing bucket, set it to read-delete only and dedicate it to 'mytenant'"""
-   filer.buckets.modify('MainStorage', read_only=True, dedicated_to='mytenant')
+   admin.buckets.modify('MainStorage', read_only=True, dedicated_to='mytenant')
 
 .. automethod:: cterasdk.core.buckets.Buckets.list_buckets
    :noindex:
 
 .. code-block:: python
 
-   for bucket in filer.buckets.list_buckets():
+   for bucket in admin.buckets.list_buckets():
        print(bucket)
 
 .. automethod:: cterasdk.core.buckets.Buckets.delete
@@ -162,21 +190,21 @@ Storage Nodes
 
 .. code-block:: python
 
-   filer.buckets.delete('MainStorage')
+   admin.buckets.delete('MainStorage')
 
 .. automethod:: cterasdk.core.buckets.Buckets.read_write
    :noindex:
 
 .. code-block:: python
 
-   filer.buckets.read_write('MainStorage')
+   admin.buckets.read_write('MainStorage')
 
 .. automethod:: cterasdk.core.buckets.Buckets.read_only
    :noindex:
 
 .. code-block:: python
 
-   filer.buckets.read_only('MainStorage')
+   admin.buckets.read_only('MainStorage')
 
 
 Portals
@@ -1141,6 +1169,9 @@ Folder Groups
    admin.cloudfs.mkfg('FG-002', wbruce)
 
    admin.cloudfs.mkfg('FG-003') # without an owner
+
+   """Create a Folder Group, assigned to an 'Archive' storage class"""
+   admin.cloudfs.mkfg('Archive', portal_types.UserAccount('svc_account'), storage_class='Archive')
 
 .. automethod:: cterasdk.core.cloudfs.CloudFS.rmfg
    :noindex:
