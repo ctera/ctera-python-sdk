@@ -29,6 +29,7 @@ Submodules
    cterasdk.edge.config
    cterasdk.edge.connection
    cterasdk.edge.decorator
+   cterasdk.edge.dedup
    cterasdk.edge.directoryservice
    cterasdk.edge.drive
    cterasdk.edge.enum

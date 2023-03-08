@@ -306,6 +306,55 @@ Volumes
 
    filer.volumes.delete_all()
 
+
+Local Deduplication
+^^^^^^^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.edge.dedup.Dedup.enable
+   :noindex:
+
+.. code-block:: python
+
+   """Enable local de-duplication without rebooting the Edge Filer"""
+   filer.dedup.enable()
+
+   """Enable local de-duplication and wait for reboot to complete"""
+   filer.dedup.enable(reboot=True, wait=True)
+
+.. automethod:: cterasdk.edge.dedup.Dedup.disable
+   :noindex:
+
+.. code-block:: python
+
+   """Disable local de-duplication without rebooting the Edge Filer"""
+   filer.dedup.disable()
+
+   """Disable local de-duplication and wait for reboot to complete"""
+   filer.dedup.disable(reboot=True, wait=True)
+
+
+.. automethod:: cterasdk.edge.dedup.Dedup.status
+   :noindex:
+
+.. code-block:: python
+
+   print(filer.dedup.status())
+
+.. automethod:: cterasdk.edge.dedup.Regeneration.run
+   :noindex:
+
+.. code-block:: python
+
+   filer.dedup.regen.run()
+
+.. automethod:: cterasdk.edge.dedup.Regeneration.status
+   :noindex:
+
+.. code-block:: python
+
+   print(filer.dedup.regen.status())
+
+
 Shares
 ======
 

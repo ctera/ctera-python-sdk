@@ -12,7 +12,7 @@ class Power(BaseCommand):
         """
         Reboot the Gateway
 
-        :param bool,optional wait: Wait got the reboot to complete, defaults to False
+        :param bool,optional wait: Wait for reboot to complete, defaults to False
         """
         logging.getLogger().info("Rebooting device. %s", {'host': self._gateway.host()})
         self._gateway.execute("/status/device", "reboot", None)
@@ -27,7 +27,7 @@ class Power(BaseCommand):
         """
         Reset the Gateway setting
 
-        :param bool,optional wait: Wait got the reset to complete, defaults to False
+        :param bool,optional wait: Wait for reset to complete, defaults to False
         """
         self._gateway.execute("/status/device", "reset2default", None)
         logging.getLogger().info("Resetting device to default settings. %s", {'host': self._gateway.host()})
@@ -52,7 +52,7 @@ class Boot:
                 logging.getLogger().info("Device is back up and running.")
                 break
             except (HostUnreachable, ExhaustedException) as e:
-                logging.getLogger().debug('Exception. %s', {'exception': e.classname, 'message': e.message})
+                logging.getLogger().debug('Exception. %s', {'exception': e.__class__.__name__, 'message': e.message})
 
     def _increment(self):
         self._attempt = self._attempt + 1
