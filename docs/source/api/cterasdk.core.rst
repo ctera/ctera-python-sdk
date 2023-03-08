@@ -22,6 +22,7 @@ Submodules
    cterasdk.core.antivirus
    cterasdk.core.base_command
    cterasdk.core.buckets
+   cterasdk.core.cli
    cterasdk.core.cloudfs
    cterasdk.core.connection
    cterasdk.core.decorator
@@ -30,6 +31,7 @@ Submodules
    cterasdk.core.enum
    cterasdk.core.login
    cterasdk.core.logs
+   cterasdk.core.messaging
    cterasdk.core.portals
    cterasdk.core.query
    cterasdk.core.reports

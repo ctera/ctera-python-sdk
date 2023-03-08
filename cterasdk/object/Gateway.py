@@ -10,6 +10,7 @@ from ..edge import backup
 from ..edge import cache
 from ..edge import cli
 from ..edge import config
+from ..edge import dedup
 from ..edge import directoryservice
 from ..edge import drive
 from ..edge import ftp
@@ -85,6 +86,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.edge.ntp.NTP ntp: Object holding the Gateway NTP APIs
     :ivar cterasdk.edge.shell.Shell shell: Object holding the Gateway Shell APIs
     :ivar cterasdk.edge.cli.CLI cli: Object holding the Gateway CLI APIs
+    :ivar cterasdk.edge.dedup.Dedup dedup: Object holding the Gateway Local Deduplication APIs
     :ivar cterasdk.edge.support.Support support: Object holding the Gateway Support APIs
     :ivar cterasdk.edge.files.FileBrowser files: Object holding the Gateway File Browsing APIs
     :ivar cterasdk.edge.firmware.Firmware firmware: Object holding the Gateway Firmware APIs
@@ -105,6 +107,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
             self._ctera_client = Portal._ctera_client
             self._session.start_remote_session(self._Portal.session())
         self.config = config.Config(self)
+        self.dedup = dedup.Dedup(self)
         self.network = network.Network(self)
         self.licenses = licenses.Licenses(self)
         self.services = services.Services(self)

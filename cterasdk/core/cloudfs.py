@@ -51,7 +51,7 @@ class CloudFS(BaseCommand):
         :param cterasdk.core.types.UserAccount user:
          User account, the user directory and name of the new folder group owner (default to None)
         :param cterasdk.core.enum.DeduplicationMethodType deduplication_method_type: Deduplication-Method
-        :param str storage_class: Storage class, defaults to the Default storage class
+        :param str,optional storage_class: Storage class, defaults to the Default storage class
         """
 
         param = Object()
