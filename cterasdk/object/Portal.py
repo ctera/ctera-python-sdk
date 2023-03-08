@@ -16,6 +16,7 @@ from ..core import reports
 from ..core import servers
 from ..core import devices
 from ..core import session
+from ..core import storage_classes
 from ..core import users
 from ..core import cloudfs
 from ..core import zones
@@ -46,6 +47,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.logs.Logs logs: Object holding the Portal logs APIs
     :ivar cterasdk.core.cloudfs.CloudFS cloudfs: Object holding the Portal CloudFS APIs
     :ivar cterasdk.core.settings.Settings settings: Object holding the Portal Settings APIs
+    :ivar cterasdk.core.settings.StorageClasses storage_classes: Object holding the Portal Storage Classes APIs
     :ivar cterasdk.core.taskmgr.Tasks tasks: Object holding the Portal Background Tasks APIs
     :ivar cterasdk.core.templates.Templates templates: Object holding the Portal Configuration Templates APIs
     :ivar cterasdk.core.firmwares.Firmwares firmwares: Object holding the Portal Firmware Repository APIs
@@ -73,6 +75,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.backups = files.Backups(self, self.backups_base_path)
         self.logs = logs.Logs(self)
         self.settings = settings.Settings(self)
+        self.storage_classes = storage_classes.StorageClasses(self)
         self.tasks = taskmgr.Tasks(self)
         self.templates = templates.Templates(self)
         self.firmwares = firmwares.Firmwares(self)

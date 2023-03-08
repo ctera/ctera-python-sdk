@@ -1,4 +1,5 @@
 from unittest import mock
+import munch
 
 from cterasdk.edge import sync
 from cterasdk.edge.enum import Mode, SyncStatus, Acl
@@ -14,6 +15,7 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
         self._disable_aio = (False, 0, 0)
         self._enable_aio = (True, 1, 1)
         self._throttling_rule = TestEdgeSync._create_bandwidth_rule(100, 100, '00:00:00', '23:59:59', [0, 1, 2, 3, 4, 5, 6])
+        self._path = '/path/to/folder'
 
     def test_cloudsync_status(self):
         get_response = 'Success'
@@ -84,6 +86,28 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
         self._init_filer()
         sync.Sync(self._filer).refresh()
         self._filer.execute.assert_called_once_with('/config/cloudsync/cloudExtender', 'refreshPaths', None)
+
+    def test_evict_wait(self):
+        execute_response = '/proc/bgtasks/6192'
+        get_response = munch.Munch(dict(id=1, name='task', status='completed', startTime='start', endTime='end'))
+        self._init_filer(get_response=get_response, execute_response=execute_response)
+        ret = sync.Sync(self._filer).evict(self._path, wait=True)
+        self._filer.execute.assert_called_once_with('/config/cloudsync', 'evictFolder', mock.ANY)
+        self._filer.get.assert_called_once_with(execute_response)
+        actual_param = self._filer.execute.call_args[0][2]
+        expected_param = munch.Munch(dict(path=self._path))
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, execute_response)
+
+    def test_evict_no_wait(self):
+        execute_response = 'Success'
+        self._init_filer(execute_response=execute_response)
+        ret = sync.Sync(self._filer).evict(self._path)
+        self._filer.execute.assert_called_once_with('/config/cloudsync', 'evictFolder', mock.ANY)
+        actual_param = self._filer.execute.call_args[0][2]
+        expected_param = munch.Munch(dict(path=self._path))
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, execute_response)
 
     def test_get_linux_avoid_using_fanotify(self):
         for avoid in [True, False]:

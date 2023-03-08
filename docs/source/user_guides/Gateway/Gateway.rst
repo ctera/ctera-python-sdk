@@ -792,6 +792,19 @@ Cloud Sync
 
    filer.sync.remove_file_exclusion_rules()
 
+.. automethod:: cterasdk.edge.sync.Sync.evict
+   :noindex:
+
+.. code-block:: python
+
+   """Evict a directory"""
+   background_task_ref = filer.sync.evict('/Share/path/to/sub/directory')  # non-blocking call
+   print(background_task_ref)
+
+   """Evict a directory and wait for eviction to complete - blocking"""
+   filer.sync.evict('/Share/path/to/sub/directory', wait=True)  # blocking call
+
+
 Cloud Sync Bandwidth Throttling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
