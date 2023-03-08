@@ -1,9 +1,10 @@
 import logging
 
 from ..lib import track, ErrorStatus
+from .taskmgr import Task
 from .enum import Mode, SyncStatus, Acl
 from .base_command import BaseCommand
-from ..common import ThrottlingRule, FilterBackupSet, FileFilterBuilder
+from ..common import Object, ThrottlingRule, FilterBackupSet, FileFilterBuilder
 
 
 class Sync(BaseCommand):
@@ -158,6 +159,22 @@ class Sync(BaseCommand):
     def set_linux_avoid_using_fanotify(self, avoid):
         logging.getLogger().info('Setting LinuxAvoidUsingFAnotify to %s', avoid)
         self._gateway.put('/config/cloudsync/LinuxAvoidUsingFAnotify', avoid)
+
+    def evict(self, path, wait=False):
+        """
+        Evict a directory from the Edge Filer
+
+        :param str path: Directory path
+        :param bool wait: Wait for eviction task to complete, defaults to ``False``
+        :returns: A reference to the background task
+        :rtype: str
+        """
+        param = Object()
+        param.path = path
+        ref = self._gateway.execute('/config/cloudsync', 'evictFolder', param)
+        if wait:
+            Task(self._gateway, ref).wait()
+        return ref
 
 
 class CloudSyncBandwidthThrottling(BaseCommand):
