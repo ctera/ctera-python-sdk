@@ -46,8 +46,8 @@ class Dedup(BaseCommand):
         status.size = self._gateway.execute('/config/cloudsync/cloudExtender', 'allFilesTotalUsedBytes')
         status.usage = self._gateway.execute('/config/cloudsync/cloudExtender', 'storageUsedBytes')
         if status.usage < status.size:
-            status.dedup = size - usage
-            status.savings = f"{1 - usage / size:.2%}"
+            status.dedup = status.size - status.usage
+            status.savings = f"{1 - status.usage / status.size:.2%}"
         else:
             status.dedup = 0
             status.savings = '0%'
