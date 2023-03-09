@@ -1,6 +1,7 @@
 import logging
 
 from ..common import Object
+from .types import DeduplicationStatus
 from .base_command import BaseCommand
 
 
@@ -40,18 +41,11 @@ class Dedup(BaseCommand):
         Get the de-duplication status
 
         :returns: An object including the deduplication status
-        :rtype: cterasdk.common.object.Object
+        :rtype: cterasdk.edge.types.DeduplicationStatus
         """
-        status = Object()
-        status.size = self._gateway.execute('/config/cloudsync/cloudExtender', 'allFilesTotalUsedBytes')
-        status.usage = self._gateway.execute('/config/cloudsync/cloudExtender', 'storageUsedBytes')
-        if status.usage < status.size:
-            status.dedup = status.size - status.usage
-            status.savings = f"{1 - status.usage / status.size:.2%}"
-        else:
-            status.dedup = 0
-            status.savings = '0%'
-        return status
+        size = self._gateway.execute('/config/cloudsync/cloudExtender', 'allFilesTotalUsedBytes')
+        usage = self._gateway.execute('/config/cloudsync/cloudExtender', 'storageUsedBytes')
+        return DeduplicationStatus(size, usage)
 
     def _wait_for_reboot(self, reboot, wait):
         if reboot:

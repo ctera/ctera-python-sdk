@@ -291,3 +291,24 @@ class HostCredentials:
     @staticmethod
     def localhost():
         return HostCredentials('127.0.0.1', 'dummy', 'dummy', enum.SourceType.Edge)
+
+
+class DeduplicationStatus(Object):
+    """
+    Edge Filer Local Deduplication Status Object
+
+    :ivar int size: Logical Size in Bytes
+    :ivar int usage: Actual Size in Bytes
+    """
+
+    def __init__(self, size, usage):
+        self.size = size
+        self.usage = usage
+
+        savings, dedup = 0, 0
+        if self.usage < self.size:
+            dedup = self.size - self.usage
+            savings = 1 - self.usage / self.size
+
+        self.dedup = dedup
+        self.savings = f"{savings:.2%}"
