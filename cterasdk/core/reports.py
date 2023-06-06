@@ -33,5 +33,12 @@ class Reports(BaseCommand):
         """
         return self._get_report('folderGroupsStatisticsReport')
 
+    def devices(self):
+        """
+        Retrieve the devices statistics report.\n
+        To retrieve this report, you must first browse the Virtual Portal that contains the report, using: `GlobalAdmin.portals.browse()`
+        """
+        return self._get_report('devicesStatisticsReport')
+
     def _get_report(self, report_name):
         return self._portal.get(f'/reports/{report_name}')
