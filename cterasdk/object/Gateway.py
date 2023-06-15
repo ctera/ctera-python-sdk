@@ -201,7 +201,9 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'support',
             'files',
             'firmware',
-            'tasks'
+            'tasks',
+            'dedup',
+            'ctera_migrate'
             ]
 
     @property
