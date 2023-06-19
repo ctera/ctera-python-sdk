@@ -81,7 +81,7 @@ class CloudFS(BaseCommand):
         self._portal.execute('/foldersGroups/' + name, 'deleteGroup', True)
         logging.getLogger().info('Folder group deleted. %s', {'name': name})
 
-    def mkdir(self, name, group, owner, winacls=True, description=None):
+    def mkdir(self, name, group, owner, winacls=True, description=None, quota=None):
         """
         Create a new directory
 
@@ -90,6 +90,7 @@ class CloudFS(BaseCommand):
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the new directory
         :param bool,optional winacls: Use Windows ACLs, defaults to True
         :param str,optional description: Cloud drive folder description
+        :param str,optional quota: Cloud drive folder quota in GB
         """
 
         owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
@@ -100,6 +101,7 @@ class CloudFS(BaseCommand):
         param.owner = owner
         param.group = group
         param.enableSyncWinNtExtendedAttributes = winacls
+        param.folderQuota = quota
         if description:
             param.description = description
 
