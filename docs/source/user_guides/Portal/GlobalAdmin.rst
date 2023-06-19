@@ -1211,6 +1211,7 @@ Cloud Drive Folders
    svc_account = portal_types.UserAccount('svc_account')
    admin.cloudfs.mkdir('DIR-001', 'FG-001', svc_account)
    admin.cloudfs.mkdir('DIR-003', 'FG-003', svc_account, winacls = False) # disable Windows ACL's
+   admin.cloudfs.mkdir('DIR-003', 'FG-003', svc_account, quota = 1024) # Set folder quota, in GB
 
    """Create a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
    wbruce = portal_types.UserAccount('wbruce', 'ctera.local')

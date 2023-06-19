@@ -261,12 +261,13 @@ class TestCoreCloudFS(base_core.BaseCoreTest):   # pylint: disable=too-many-publ
         mkfg_param_object.deduplicationMethodType = self.fixed_block_size if fixed_block_size else None
         return mkfg_param_object
 
-    def _get_mkdir_object(self, winacls=True, description=None):
+    def _get_mkdir_object(self, winacls=True, description=None, quota=None):
         mkdir_param_object = Object()
         mkdir_param_object.name = self._name
         mkdir_param_object.owner = self._owner
         mkdir_param_object.group = self._group
         mkdir_param_object.enableSyncWinNtExtendedAttributes = winacls
+        mkdir_param_object.quota = quota
         if description:
             mkdir_param_object.description = description
         return mkdir_param_object
