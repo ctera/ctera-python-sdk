@@ -267,7 +267,7 @@ class TestCoreCloudFS(base_core.BaseCoreTest):   # pylint: disable=too-many-publ
         mkdir_param_object.owner = self._owner
         mkdir_param_object.group = self._group
         mkdir_param_object.enableSyncWinNtExtendedAttributes = winacls
-        mkdir_param_object.quota = quota
+        mkdir_param_object.folderQuota = quota
         if description:
             mkdir_param_object.description = description
         return mkdir_param_object
