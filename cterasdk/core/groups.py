@@ -15,12 +15,13 @@ class Groups(BaseCommand):
 
     default = ['name']
 
-    def _build_resource_url(self, group_account):
+    @staticmethod
+    def _build_resource_url(group_account):
         return f'/localGroups/{group_account.name}' if group_account.is_local \
             else f'/domains/{group_account.directory}/adGroups/{group_account.name}'
 
     def _get_entire_object(self, group_account):
-        ref = self._build_resource_url(group_account)
+        ref = Groups._build_resource_url(group_account)
         try:
             return self._portal.get(ref)
         except CTERAException as error:
@@ -34,7 +35,7 @@ class Groups(BaseCommand):
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: The group account, including the requested fields
         """
-        baseurl = self._build_resource_url(group_account)
+        baseurl = Groups._build_resource_url(group_account)
         include = union(include or [], Groups.default)
         include = ['/' + attr for attr in include]
         group_object = self._portal.get_multi(baseurl, include)
@@ -110,7 +111,7 @@ class Groups(BaseCommand):
             group.description = description
 
         param = Object()
-        param._classname = 'UpdateGroupParam'
+        param._classname = 'UpdateGroupParam'  # pylint: disable=protected-access
         param.groupData = group
         param.membersToAdd = []
         param.membersToDelete = []
@@ -130,7 +131,7 @@ class Groups(BaseCommand):
         :param cterasdk.core.types.GroupAccount group_account: Group account
         """
         param = query.QueryParamBuilder().startFrom(0).build()
-        return [member for member in query.iterator(self._portal, self._build_resource_url(group_account), param, 'getMembers')]
+        return list(query.iterator(self._portal, Groups._build_resource_url(group_account), param, 'getMembers'))
 
     def add_members(self, group_account, members):
         """
