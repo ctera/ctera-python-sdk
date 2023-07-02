@@ -52,18 +52,11 @@ class Users(BaseCommand):
         param = query.QueryParamBuilder().include(include).build()
         return query.iterator(self._portal, '/users', param)
 
-    def list_domains(self):
-        """
-        List all domains
-
-        :return list: List of all domains
-        """
-        return self._portal.get('/domains')
-
     def list_domain_users(self, domain, include=None):
         """
         List all the users in the domain
 
+        :param str domain: Domain name
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: Iterator for all the domain users
         :rtype: cterasdk.lib.iterator.Iterator
