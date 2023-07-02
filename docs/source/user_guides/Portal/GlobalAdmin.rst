@@ -915,6 +915,77 @@ Directory Services
 
    admin.directoryservice.disconnect()
 
+
+Groups
+------
+
+.. automethod:: cterasdk.core.groups.Groups.delete
+   :noindex:
+
+.. code-block:: python
+
+   """Delete a local group"""
+   group = portal_types.GroupAccount('local_group')
+   admin.groups.delete(group)
+
+   """Delete a domain group"""
+
+   group = portal_types.GroupAccount('domain_group', 'domain.ctera.local')
+   admin.groups.delete(group)
+
+Local Groups
+^^^^^^^^^^^^
+.. automethod:: cterasdk.core.groups.Groups.list_local_groups
+   :noindex:
+
+.. code-block:: python
+
+   groups = admin.groups.list_local_groups()
+   for group in groups:
+       print(group.name)
+
+   groups = admin.groups.list_local_groups(include=['name', 'description'])
+   for group in groups:
+       print(group)
+
+.. automethod:: cterasdk.core.groups.Groups.add
+   :noindex:
+
+.. code-block:: python
+
+   """Create a local group"""
+   admin.groups.add('Users')
+   admin.groups.add('Users', 'A group of users')  # with description
+   admin.groups.add('Users', members=[portal_types.UserAccount('alice'), portal_types.UserAccount('bruce', 'domain.ctera.local')])  # with members
+
+.. automethod:: cterasdk.core.groups.Groups.modify
+   :noindex:
+
+.. code-block:: python
+
+   """Modify a local group"""
+   admin.groups.modify('Users', new_groupname='End Users')  # change group name
+   admin.groups.modify('Users', description='A group of end users')  # change group description
+
+.. automethod:: cterasdk.core.groups.Groups.get_members
+   :noindex:
+
+.. code-block:: python
+
+   """Get group members"""
+   admin.groups.get_members(portal_types.GroupAccount('Users'))  # get members of a local group
+   admin.groups.get_members(portal_types.GroupAccount('Users', 'domain.ctera.local'))  # get members of a domain group
+
+.. automethod:: cterasdk.core.groups.Groups.add_members
+   :noindex:
+
+.. code-block:: python
+
+   """Add group members"""
+   admin.groups.add_members(portal_types.GroupAccount('Users'), [portal_types.UserAccount('alice')])  # add local users to a local group
+   admin.groups.add_members(portal_types.GroupAccount('Users'), [portal_types.UserAccount('bruce', 'domain.ctera.local')])  # add domain users to a local group
+
+
 Devices
 -------
 .. automethod:: cterasdk.core.devices.Devices.device

@@ -17,7 +17,9 @@ from ..core import servers
 from ..core import devices
 from ..core import session
 from ..core import storage_classes
+from ..core import domains
 from ..core import users
+from ..core import groups
 from ..core import cloudfs
 from ..core import zones
 from ..core import settings
@@ -36,7 +38,9 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     """
     Parent class for communicating with the Portal through either GlobalAdmin or ServicesPortal
 
+    :ivar cterasdk.core.domains.Domains domains: Object holding the Portal domain APIs
     :ivar cterasdk.core.users.Users users: Object holding the Portal user APIs
+    :ivar cterasdk.core.groups.Groups groups: Object holding the Portal group APIs
     :ivar cterasdk.core.admins.Administrators admins: Object holding the Portal GlobalAdmin users APIs
     :ivar cterasdk.core.plans.Plans plans: Object holding the Plan APIs
     :ivar cterasdk.core.reports.Reports reports: Object holding the Portal reports APIs
@@ -62,7 +66,9 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         """
         super().__init__(host, port, https)
         self._session = session.Session(self.host(), self.context)
+        self.domains = domains.Domains(self)
         self.users = users.Users(self)
+        self.groups = groups.Groups(self)
         self.admins = admins.Administrators(self)
         self.reports = reports.Reports(self)
         self.plans = plans.Plans(self)
@@ -112,7 +118,9 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     def _omit_fields(self):
         return super()._omit_fields + [
             'admins',
+            'domains',
             'users',
+            'groups',
             'reports',
             'plans',
             'devices',

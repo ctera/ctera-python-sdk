@@ -24,7 +24,6 @@ class TestCoreUsers(base_core.BaseCoreTest):
         self._role = 'EndUser'
         self._domain = 'ctera.local'
         self._domain_user_account = UserAccount(self._username, self._domain)
-        self._domains = ['na.ctera.local', 'eu.ctera.local']
 
     def test_get_user_default_attrs(self):
         get_multi_response = self._get_user_object(name=self._local_user_account.name)
@@ -104,13 +103,6 @@ class TestCoreUsers(base_core.BaseCoreTest):
                                                                                 start_from=0, count_limit=50)
             actual_query_params = query_iterator_mock.call_args[0][2]
             self._assert_equal_objects(actual_query_params, expected_query_params)
-
-    def test_list_domains(self):
-        get_response = self._domains
-        self._init_global_admin(get_response=get_response)
-        ret = users.Users(self._global_admin).list_domains()
-        self._global_admin.get.assert_called_once_with('/domains')
-        self.assertEqual(ret, get_response)
 
     def test_get_user_not_found(self):
         get_multi_response = self._get_user_object(name=None)
