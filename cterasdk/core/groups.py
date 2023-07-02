@@ -169,7 +169,8 @@ class Groups(BaseCommand):
         :param cterasdk.core.types.GroupAccount group_account: Group account
         """
         logging.getLogger().info('Deleting group. %s', {'group': str(group_account.name)})
-        baseurl = f'/users/{group_account.name}' if group_account.is_local else f'/domains/{group_account.directory}/adGroups/{group_account.name}'
+        baseurl = f'/users/{group_account.name}' if group_account.is_local \
+            else f'/domains/{group_account.directory}/adGroups/{group_account.name}'
         response = self._portal.execute(baseurl, 'delete', True)
         logging.getLogger().info('Group deleted. %s', {'group': str(group_account.name)})
 
