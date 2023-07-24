@@ -111,6 +111,22 @@ class TestCoreGroups(base_core.BaseCoreTest):
         param.membersToDelete = remove_members if remove_members else []
         return param
 
+    def test_get_members_of_local_group(self):
+        with mock.patch("cterasdk.core.groups.query.iterator") as query_iterator_mock:
+            groups.Groups(self._global_admin).get_members(self._local_group)
+            query_iterator_mock.assert_called_once_with(self._global_admin, self._get_group_url(self._local_group), mock.ANY, 'getMembers')
+            expected_query_params = base_core.BaseCoreTest._create_query_params(include=groups.Groups.default, start_from=0)
+            actual_query_params = query_iterator_mock.call_args[0][2]
+            self._assert_equal_objects(actual_query_params, expected_query_params)
+
+    def test_get_members_of_local_group(self):
+        with mock.patch("cterasdk.core.groups.query.iterator") as query_iterator_mock:
+            groups.Groups(self._global_admin).get_members(self._domain_group)
+            query_iterator_mock.assert_called_once_with(self._global_admin, self._get_group_url(self._domain_group), mock.ANY, 'getMembers')
+            expected_query_params = base_core.BaseCoreTest._create_query_params(include=groups.Groups.default, start_from=0)
+            actual_query_params = query_iterator_mock.call_args[0][2]
+            self._assert_equal_objects(actual_query_params, expected_query_params)
+
     def test_delete_group(self):
         execute_response = 'Success'
         for group_account in [self._local_group, self._domain_group]:
