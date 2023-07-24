@@ -95,10 +95,5 @@ class TestCoreGroups(base_core.BaseCoreTest):
         for group_account in [self._local_group, self._domain_group]:
             self._init_global_admin(execute_response=execute_response)
             ret = groups.Groups(self._global_admin).delete(group_account)
+            self._global_admin.execute.assert_called_once_with(self._get_group_url(group_account))
             self.assertEqual(ret, execute_response)
-        self._global_admin.execute.assert_has_calls(
-            [
-                mock.call(f'/localGroups/{self._groupname}', 'delete', True),
-                mock.call(f'/domains/{self._domain}/adGroups/{self._groupname}', 'delete', True)
-            ]
-        )
