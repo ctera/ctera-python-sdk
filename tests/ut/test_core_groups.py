@@ -35,7 +35,7 @@ class TestCoreGroups(base_core.BaseCoreTest):
             self.assertEqual(ret.name, group_account.name)
 
     @staticmethod
-    def _get_group_url(self, group):
+    def _get_group_url(group):
         return f'/localGroups/{group.name}' if group.is_local else f'/domains/{group.directory}/adGroups/{group.name}'
 
     def test_get_group_not_found(self):
@@ -88,7 +88,8 @@ class TestCoreGroups(base_core.BaseCoreTest):
 
     def test_modify_local_group(self):
         execute_response = 'Success'
-        self._init_global_admin(execute_response=execute_response)
+        get_response = self._get_group_object(name=self._groupname)
+        self._init_global_admin(get_response=get_response, execute_response=execute_response)
         ret = groups.Groups(self._global_admin).modify(self._groupname, self._new_groupname, self._description)
         self._global_admin.execute.assert_called_once_with(f'/localGroups/{self._groupname}', 'updateGroup', mock.ANY)
         expected_param = self._get_update_group_object(name=self._new_groupname, description=self._description)
