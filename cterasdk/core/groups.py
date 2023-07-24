@@ -40,7 +40,7 @@ class Groups(BaseCommand):
         include = ['/' + attr for attr in include]
         group_object = self._portal.get_multi(baseurl, include)
         if group_object.name is None:
-            raise ObjectNotFoundException('Could not find user', baseurl, group_directory=group_account.directory, name=group_account.name)
+            raise ObjectNotFoundException('Could not find group', baseurl, group_directory=group_account.directory, name=group_account.name)
         return group_object
 
     def list_local_groups(self, include=None):
