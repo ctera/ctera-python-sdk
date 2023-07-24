@@ -119,7 +119,7 @@ class TestCoreGroups(base_core.BaseCoreTest):
             actual_query_params = query_iterator_mock.call_args[0][2]
             self._assert_equal_objects(actual_query_params, expected_query_params)
 
-    def test_get_members_of_local_group(self):
+    def test_get_members_of_domain_group(self):
         with mock.patch("cterasdk.core.groups.query.iterator") as query_iterator_mock:
             groups.Groups(self._global_admin).get_members(self._domain_group)
             query_iterator_mock.assert_called_once_with(self._global_admin, self._get_group_url(self._domain_group), mock.ANY, 'getMembers')
