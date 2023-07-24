@@ -34,7 +34,7 @@ class TestCoreGroups(base_core.BaseCoreTest):
             self.assertEqual(ret.name, group_account.name)
 
     def _get_group_url(self, group):
-        return f'/localGroups/{group.name}' if group.is_local else f'/domains/{account.directory}/adGroups/{group_account.name}'
+        return f'/localGroups/{group.name}' if group.is_local else f'/domains/{group.directory}/adGroups/{group.name}'
 
     def test_get_group_not_found(self):
         get_multi_response = self._get_group_object(name=None)
@@ -67,7 +67,7 @@ class TestCoreGroups(base_core.BaseCoreTest):
 
     def test_list_domain_groups_default_attrs(self):
         with mock.patch("cterasdk.core.groups.query.iterator") as query_iterator_mock:
-            groups.Groups(self._global_admin).list_domain_groups()
+            groups.Groups(self._global_admin).list_domain_groups(self._domain)
             query_iterator_mock.assert_called_once_with(self._global_admin, f'/domains/{self._domain}/adGroups', mock.ANY)
             expected_query_params = base_core.BaseCoreTest._create_query_params(include=groups.Groups.default,
                                                                                 start_from=0, count_limit=50)
@@ -75,14 +75,14 @@ class TestCoreGroups(base_core.BaseCoreTest):
             self._assert_equal_objects(actual_query_params, expected_query_params)
 
     def test_add_local_group(self):
-        add_response = 'Success'
-        self._init_global_admin(add_response=add_response)
+        execute_response = 'Success'
+        self._init_global_admin(execute_response=execute_response)
         ret = groups.Groups(self._global_admin).add(self._groupname, self._description)
         self._global_admin.execute.assert_called_once_with('', 'addGroup', mock.ANY)
         expected_param = self._get_add_group_object(name=self._groupname, description=self._description)
         actual_param = self._global_admin.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(ret, add_response)
+        self.assertEqual(ret, execute_response)
 
     def _get_add_group_object(self, **kwargs):
         param = Object()
@@ -93,9 +93,9 @@ class TestCoreGroups(base_core.BaseCoreTest):
     def test_delete_group(self):
         execute_response = 'Success'
         for group_account in [self._local_group, self._domain_group]:
-            self._init_global_admin(execute_response=delete_response)
+            self._init_global_admin(execute_response=execute_response)
             ret = groups.Groups(self._global_admin).delete(group_account)
-            self.assertEqual(ret, delete_response)
+            self.assertEqual(ret, execute_response)
         self._global_admin.execute.assert_has_calls(
             [
                 mock.call(f'/localGroups/{self._groupname}', 'delete', True),
