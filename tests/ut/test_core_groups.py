@@ -15,6 +15,7 @@ class TestCoreGroups(base_core.BaseCoreTest):
         super().setUp()
         self._group_class_name = 'PortalGroup'
         self._groupname = 'groupname'
+        self._new_groupname = 'new_groupname'
         self._description = 'this is a test group'
         self._domain = 'ctera.local'
         self._local_group = GroupAccount(self._groupname)
@@ -25,7 +26,7 @@ class TestCoreGroups(base_core.BaseCoreTest):
             get_multi_response = self._get_group_object(name=group_account.name)
             self._init_global_admin(get_multi_response=get_multi_response)
             ret = groups.Groups(self._global_admin).get(group_account)
-            self._global_admin.get_multi.assert_called_once_with(self._get_group_url(group_account), mock.ANY)
+            self._global_admin.get_multi.assert_called_once_with(TestCoreGroups._get_group_url(group_account), mock.ANY)
             expected_include = ['/' + attr for attr in groups.Groups.default]
             actual_include = self._global_admin.get_multi.call_args[0][1]
             self.assertEqual(len(expected_include), len(actual_include))
@@ -33,6 +34,7 @@ class TestCoreGroups(base_core.BaseCoreTest):
                 self.assertIn(attr, actual_include)
             self.assertEqual(ret.name, group_account.name)
 
+    @staticmethod
     def _get_group_url(self, group):
         return f'/localGroups/{group.name}' if group.is_local else f'/domains/{group.directory}/adGroups/{group.name}'
 
@@ -84,10 +86,28 @@ class TestCoreGroups(base_core.BaseCoreTest):
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, execute_response)
 
+    def test_modify_local_group(self):
+        execute_response = 'Success'
+        self._init_global_admin(execute_response=execute_response)
+        ret = groups.Groups(self._global_admin).modify(self._groupname, self._new_groupname, self._description)
+        self._global_admin.execute.assert_called_once_with(f'/localGroups/{self._groupname}', 'updateGroup', mock.ANY)
+        expected_param = self._get_update_group_object(name=self._new_groupname, description=self._description)
+        actual_param = self._global_admin.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, execute_response)
+
     def _get_add_group_object(self, **kwargs):
         param = Object()
         param._classname = 'AddGroupParam'  # pylint: disable=protected-access
         param.groupData = self._get_group_object(**kwargs)
+        return param
+
+    def _get_update_group_object(self, add_members=None, remove_members=None, **kwargs):
+        param = Object()
+        param._classname = 'UpdateGroupParam'  # pylint: disable=protected-access
+        param.groupData = self._get_group_object(**kwargs)
+        param.membersToAdd = add_members if add_members else []
+        param.membersToDelete = remove_members if remove_members else []
         return param
 
     def test_delete_group(self):
@@ -95,5 +115,5 @@ class TestCoreGroups(base_core.BaseCoreTest):
         for group_account in [self._local_group, self._domain_group]:
             self._init_global_admin(execute_response=execute_response)
             ret = groups.Groups(self._global_admin).delete(group_account)
-            self._global_admin.execute.assert_called_once_with(self._get_group_url(group_account), 'delete', True)
+            self._global_admin.execute.assert_called_once_with(TestCoreGroups._get_group_url(group_account), 'delete', True)
             self.assertEqual(ret, execute_response)
