@@ -91,7 +91,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         zone = self._get_zones_display_info_response().objects.pop()
         self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._mock_execute)
         self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
-        find_cloud_folder_mock = self.patch_call("cterasdk.core.zones.cloudfs.CloudFS.find")
+        find_cloud_folder_mock = self.patch_call("cterasdk.core.cloudfs.CloudDrives.find")
         find_cloud_folder_mock.side_effect = mock.MagicMock(side_effect=TestCoreZones._find_cloud_folder)
 
         cloudfs.Zones(self._global_admin).add_folders(self._zone_name, self._find_folder_helpers)
@@ -116,7 +116,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         zone = self._get_zones_display_info_response().objects.pop()
         self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._save_zone_side_effect)
         self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
-        find_cloud_folder_mock = self.patch_call("cterasdk.core.zones.cloudfs.CloudFS.find")
+        find_cloud_folder_mock = self.patch_call("cterasdk.core.cloudfs.CloudDrives.find")
         find_cloud_folder_mock.side_effect = mock.MagicMock(side_effect=TestCoreZones._find_cloud_folder)
 
         with self.assertRaises(exception.CTERAException) as error:
@@ -143,7 +143,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         zone = self._get_zones_display_info_response().objects.pop()
         self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._mock_execute)
         self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
-        query_devices_mock = self.patch_call("cterasdk.core.zones.devices.Devices.by_name")
+        query_devices_mock = self.patch_call("cterasdk.core.cloudfs.devices.Devices.by_name")
         query_devices_mock.return_value = self._get_device_objects()
 
         cloudfs.Zones(self._global_admin).add_devices(self._zone_name, self._device_names)
@@ -165,7 +165,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         zone = self._get_zones_display_info_response().objects.pop()
         self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._save_zone_side_effect)
         self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
-        query_devices_mock = self.patch_call("cterasdk.core.zones.devices.Devices.by_name")
+        query_devices_mock = self.patch_call("cterasdk.core.cloudfs.devices.Devices.by_name")
         query_devices_mock.return_value = self._get_device_objects()
 
         with self.assertRaises(exception.CTERAException) as error:
