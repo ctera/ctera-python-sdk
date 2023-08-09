@@ -27,6 +27,80 @@ class CloudFS(BaseCommand):
         self.zones = Zones(self._portal)
 
 
+class FolderGroups(BaseCommand):
+    """ Folder Groups APIs """
+
+    default = ['name', 'owner']
+
+    def get(self, name, include=None):
+        """
+        Get folder group
+
+        :param str name: Name of the Folder Group to find
+        :param str,optional include: List of fields to retrieve, defaults to ['name', 'owner']
+        """
+        include = union(include or [], FolderGroups.default)
+        include = ['/' + attr for attr in include]
+        folder_group = self._portal.get_multi('/foldersGroups/' + name, include)
+        if folder_group.name is None:
+            raise ObjectNotFoundException('Could not find folder group', f'/foldersGroups/{name}', name=name)
+        return folder_group
+
+    def all(self, include=None, user=None):
+        """
+        List folder groups
+
+        :param str,optional include: List of fields to retrieve, defaults to ['name', 'owner']
+        :param cterasdk.core.types.UserAccount user: User account of the folder group owner
+        :returns: Iterator for all folder groups
+        """
+        include = union(include or [], FolderGroups.default)
+        builder = query.QueryParamBuilder().include(include)
+        if user:
+            uid = self._portal.users.get(user, ['uid']).uid
+            builder.ownedBy(uid)
+        param = builder.build()
+        return query.iterator(self._portal, '/foldersGroups', param)
+
+    def add(self, name, user=None, deduplication_method_type=None, storage_class=None):
+        """
+        Create a new Folder Group
+
+        :param str name: Name of the new folder group
+        :param cterasdk.core.types.UserAccount user:
+         User account, the user directory and name of the new folder group owner (default to None)
+        :param cterasdk.core.enum.DeduplicationMethodType deduplication_method_type: Deduplication-Method
+        :param str,optional storage_class: Storage class, defaults to the Default storage class
+        """
+
+        param = Object()
+        param.name = name
+        param.disabled = True
+        param.owner = self._portal.users.get(user, ['baseObjectRef']).baseObjectRef if user is not None else None
+        param.deduplicationMethodType = deduplication_method_type
+        if storage_class:
+            param.storageClass = self._portal.storage_classes.get(storage_class).baseObjectRef
+
+        try:
+            response = self._portal.execute('', 'createFolderGroup', param)
+            logging.getLogger().info('Folder group created. %s', {'name': name, 'owner': param.owner})
+            return response
+        except CTERAException as error:
+            logging.getLogger().error('Folder group creation failed. %s', {'name': name, 'owner': str(user)})
+            raise error
+
+    def delete(self, name):
+        """
+        Remove a Folder Group
+
+        :param str name: Name of the folder group to remove
+        """
+
+        logging.getLogger().info('Deleting folder group. %s', {'name': name})
+        self._portal.execute('/foldersGroups/' + name, 'deleteGroup', True)
+        logging.getLogger().info('Folder group deleted. %s', {'name': name})
+
+
 class CloudDrives(BaseCommand):
     """ Cloud Drive Folder APIs """
 
@@ -182,79 +256,8 @@ class CloudDrives(BaseCommand):
         path = owner + '/' + name
         return path
 
-
-class FolderGroups(BaseCommand):
-    """ Folder Groups APIs """
-
-    default = ['name', 'owner']
-
-    def get(self, name, include=None):
-        """
-        Get folder group
-
-        :param str name: Name of the Folder Group to find
-        :param str,optional include: List of fields to retrieve, defaults to ['name', 'owner']
-        """
-        include = union(include or [], FolderGroups.default)
-        include = ['/' + attr for attr in include]
-        folder_group = self._portal.get_multi('/foldersGroups/' + name, include)
-        if folder_group.name is None:
-            raise ObjectNotFoundException('Could not find folder group', f'/foldersGroups/{name}', name=name)
-        return folder_group
-
-    def all(self, include=None, user=None):
-        """
-        List folder groups
-
-        :param str,optional include: List of fields to retrieve, defaults to ['name', 'owner']
-        :param cterasdk.core.types.UserAccount user: User account of the folder group owner
-        :returns: Iterator for all folder groups
-        """
-        include = union(include or [], FolderGroups.default)
-        builder = query.QueryParamBuilder().include(include)
-        if user:
-            uid = self._portal.users.get(user, ['uid']).uid
-            builder.ownedBy(uid)
-        param = builder.build()
-        return query.iterator(self._portal, '/foldersGroups', param)
-
-    def add(self, name, user=None, deduplication_method_type=None, storage_class=None):
-        """
-        Create a new Folder Group
-
-        :param str name: Name of the new folder group
-        :param cterasdk.core.types.UserAccount user:
-         User account, the user directory and name of the new folder group owner (default to None)
-        :param cterasdk.core.enum.DeduplicationMethodType deduplication_method_type: Deduplication-Method
-        :param str,optional storage_class: Storage class, defaults to the Default storage class
-        """
-
-        param = Object()
-        param.name = name
-        param.disabled = True
-        param.owner = self._portal.users.get(user, ['baseObjectRef']).baseObjectRef if user is not None else None
-        param.deduplicationMethodType = deduplication_method_type
-        if storage_class:
-            param.storageClass = self._portal.storage_classes.get(storage_class).baseObjectRef
-
-        try:
-            response = self._portal.execute('', 'createFolderGroup', param)
-            logging.getLogger().info('Folder group created. %s', {'name': name, 'owner': param.owner})
-            return response
-        except CTERAException as error:
-            logging.getLogger().error('Folder group creation failed. %s', {'name': name, 'owner': str(user)})
-            raise error
-
-    def delete(self, name):
-        """
-        Remove a Folder Group
-
-        :param str name: Name of the folder group to remove
-        """
-
-        logging.getLogger().info('Deleting folder group. %s', {'name': name})
-        self._portal.execute('/foldersGroups/' + name, 'deleteGroup', True)
-        logging.getLogger().info('Folder group deleted. %s', {'name': name})
+class Backups:
+    """ Backup Folder APIs """
 
 
 class Zones(BaseCommand):
