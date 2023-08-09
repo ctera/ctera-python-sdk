@@ -256,7 +256,7 @@ class CloudDrives(BaseCommand):
         path = owner + '/' + name
         return path
 
-class Backups:
+class Backups(BaseCommand):
     """ Backup Folder APIs """
 
 
