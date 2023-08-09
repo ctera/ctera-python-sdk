@@ -1108,42 +1108,165 @@ Generate activation codes for all domain users
 
    # ... logout ...
 
+CloudFS
+-------
+You must be a Read Write Administrator to manage the Cloud File System, folder groups, backup folders, cloud drive folders, and zones.
+
+Folder Groups
+^^^^^^^^^^^^^
+.. automethod:: cterasdk.core.cloudfs.FolderGroups.all
+   :noindex:
+
+.. code:: python
+
+   """List all folder groups"""
+   folder_groups = admin.cloudfs.groups.all()
+   for folder_group in folder_groups:
+       print(folder_group.name, folder_group.owner)
+
+   """List folder groups owned by a domain user"""
+   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
+   folder_groups = admin.cloudfs.groups.all(user=bruce)
+
+.. automethod:: cterasdk.core.cloudfs.FolderGroups.add
+   :noindex:
+
+.. code:: python
+
+   """Create a Folder Group, owned by a local user account 'svc_account'"""
+   svc_account = portal_types.UserAccount('svc_account')
+   admin.cloudfs.groups.add('FG-001', svc_account)
+
+   """Create a Folder Group, owned by the domain user 'ctera.local\wbruce'"""
+   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   admin.cloudfs.groups.add('FG-002', wbruce)
+
+   admin.cloudfs.groups.add('FG-003') # without an owner
+
+   """Create a Folder Group, assigned to an 'Archive' storage class"""
+   admin.cloudfs.groups.add('Archive', portal_types.UserAccount('svc_account'), storage_class='Archive')
+
+.. automethod:: cterasdk.core.cloudfs.FolderGroups.delete
+   :noindex:
+
+.. code:: python
+
+   admin.cloudfs.groups.delete('FG-001')
+
+Cloud Drive Folders
+^^^^^^^^^^^^^^^^^^^
+.. automethod:: cterasdk.core.cloudfs.CloudDrives.all
+   :noindex:
+
+.. code:: python
+
+   """List all cloud drive folders"""
+   cloud_drive_folders = admin.cloudfs.drives.all()
+   for cloud_drive_folder in cloud_drive_folders:
+       print(cloud_drive_folder)
+
+   """List cloud drive folders owned by a domain user"""
+   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
+   cloud_drive_folders = admin.cloudfs.drives.all(user=bruce)
+
+   """List both deleted and non-deleted cloud drive folders"""
+   cloud_drive_folders = admin.cloudfs.drives.all(list_filter=portal_enum.ListFilter.All)
+
+   """List deleted cloud drive folders"""
+   cloud_drive_folders = admin.cloudfs.drives.all(list_filter=portal_enum.ListFilter.Deleted)
+
+.. automethod:: cterasdk.core.cloudfs.CloudDrives.add
+   :noindex:
+
+.. code:: python
+
+   """Create a Cloud Drive folder, owned by a local user account 'svc_account'"""
+   svc_account = portal_types.UserAccount('svc_account')
+   admin.cloudfs.drives.add('DIR-001', 'FG-001', svc_account)
+   admin.cloudfs.drives.add('DIR-003', 'FG-003', svc_account, winacls = False) # disable Windows ACL's
+   admin.cloudfs.drives.add('DIR-003', 'FG-003', svc_account, quota = 1024) # Set folder quota, in GB
+
+   """Create a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
+   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   admin.cloudfs.drives.add('DIR-002', 'FG-002', wbruce)
+
+.. automethod:: cterasdk.core.cloudfs.CloudDrives.delete
+   :noindex:
+
+.. code:: python
+
+   """Delete a Cloud Drive folder, owned by the local user account 'svc_account'"""
+   svc_account = portal_types.UserAccount('svc_account')
+   admin.cloudfs.drives.delete('DIR-001', svc_account)
+
+   """Delete a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
+   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   admin.cloudfs.drives.delete('DIR-002', wbruce)
+
+.. automethod:: cterasdk.core.cloudfs.CloudDrives.recover
+   :noindex:
+
+.. code:: python
+
+   """Recover a deleted Cloud Drive folder, owned by the local user account 'svc_account'"""
+   svc_account = portal_types.UserAccount('svc_account')
+   admin.cloudfs.drives.recover('DIR-001', svc_account)
+
+   """Recover a deleted Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
+   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   admin.cloudfs.drives.recover('DIR-002', wbruce)
+
+.. automethod:: cterasdk.core.cloudfs.CloudDrives.setfacl
+   :noindex:
+
+.. code:: python
+
+   """Changing the file or Folder ACLs"""
+   folders_paths = ["portaladmin/cloudFolder/diagrams", "adrian/data/docs"]
+   sddl_string = 'O:S-1-12-1-1536910496-1126310805-1188065941-1612002142' \
+                 'G:S-1-12-1-1536910496-1126310805-1188065941-1612002142' \
+                 'D:AI(A;ID;FA;;;BA)(A;ID;FA;;;SY)(A;ID;0x1200a9;;;BU)(A;ID;0x1301bf;;;AU)'
+   admin.cloudfs.drives.setfacl(folders_paths, sddl_string, True)
+
+.. automethod:: cterasdk.core.cloudfs.CloudDrives.setoacl
+   :noindex:
+
+.. code:: python
+
+   """Changing the File or Folder Owner SID or ACLs"""
+   folders_paths = ["portaladmin/cloudFolder/diagrams", "dorian/data/docs"]
+   owner_sid = 'S-1-12-1-1536910496-1126310805-1188065941-1612002142'
+   admin.cloudfs.drives.setoacl(folders_paths, owner_sid, True)
+
 Zones
------
+^^^^^
 
 To manage zones, you must be a Read Write Administrator
 
-Retrieve a Zone
-^^^^^^^^^^^^^^^
-.. automethod:: cterasdk.core.zones.Zones.get
+.. automethod:: cterasdk.core.cloudfs.Zones.get
    :noindex:
 
 .. code:: python
 
-   zone = admin.zones.get('ZN-001')
+   zone = admin.cloudfs.zones.get('ZN-001')
 
-List & Search Zones
-^^^^^^^^^^^^^^^^^^^
-
-.. automethod:: cterasdk.core.zones.Zones.list_zones
+.. automethod:: cterasdk.core.cloudfs.Zones.all
    :noindex:
 
 .. code:: python
 
-   for zone in admin.zones.list_zones():
+   for zone in admin.cloudfs.zones.all():
        print(zone)
 
-.. automethod:: cterasdk.core.zones.Zones.search
+.. automethod:: cterasdk.core.cloudfs.Zones.search
    :noindex:
 
 .. code:: python
 
-   for zone in admin.zones.search('ZN'):
+   for zone in admin.cloudfs.zones.search('ZN'):
        print(zone)
 
-Create a Zone
-^^^^^^^^^^^^^
-.. automethod:: cterasdk.core.zones.Zones.add
+.. automethod:: cterasdk.core.cloudfs.Zones.add
    :noindex:
 
 .. code:: python
@@ -1157,19 +1280,17 @@ Create a Zone
 
    """Create a zone with a description"""
 
-   admin.zones.add('ZN-NYS-001', description = 'The New York State Zone')
+   admin.cloudfs.zones.add('ZN-NYS-001', description = 'The New York State Zone')
 
    """Create a zone and include all folders"""
 
-   admin.zones.add('ZN-NYS-002', 'All', 'All Folders')
+   admin.cloudfs.zones.add('ZN-NYS-002', 'All', 'All Folders')
 
    """Create an empty zone"""
 
-   admin.zones.add('ZN-NYS-003', 'None', 'Empty Zone')
+   admin.cloudfs.zones.add('ZN-NYS-003', 'None', 'Empty Zone')
 
-Add Folders to a Zone
-^^^^^^^^^^^^^^^^^^^^^
-.. automethod:: cterasdk.core.zones.Zones.add_folders
+.. automethod:: cterasdk.core.cloudfs.Zones.add_folders
    :noindex:
 
 .. code:: python
@@ -1184,159 +1305,21 @@ Add Folders to a Zone
    accounting = portal_types.CloudFSFolderFindingHelper('Accounting', 'Bruce')
    hr = portal_types.CloudFSFolderFindingHelper('HR', 'Diana')
 
-   admin.zones.add_folders('ZN-001', [accounting, hr])
+   admin.cloudfs.zones.add_folders('ZN-001', [accounting, hr])
 
-Add Devices to a Zone
-^^^^^^^^^^^^^^^^^^^^^
-.. automethod:: cterasdk.core.zones.Zones.add_devices
+.. automethod:: cterasdk.core.cloudfs.Zones.add_devices
    :noindex:
 
 .. code:: python
 
-   admin.zones.add_devices('ZN-001', ['vGateway-01ba', 'vGateway-bd02'])
+   admin.cloudfs.zones.add_devices('ZN-001', ['vGateway-01ba', 'vGateway-bd02'])
 
-Delete a Zone
-^^^^^^^^^^^^^
-.. automethod:: cterasdk.core.zones.Zones.delete
+.. automethod:: cterasdk.core.cloudfs.Zones.delete
    :noindex:
 
 .. code:: python
 
-   admin.zones.delete('ZN-001')
-
-CloudFS
--------
-
-To manage the Cloud File System, folder groups, backup and cloud drive folders,
-you must be a Read Write Administrator
-
-Folder Groups
-^^^^^^^^^^^^^
-.. automethod:: cterasdk.core.cloudfs.CloudFS.list_folder_groups
-   :noindex:
-
-.. code:: python
-
-   """List all folder groups"""
-   folder_groups = admin.cloudfs.list_folder_groups()
-   for folder_group in folder_groups:
-       print(folder_group.name, folder_group.owner)
-
-   """List folder groups owned by a domain user"""
-   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
-   folder_groups = admin.cloudfs.list_folder_groups(user=bruce)
-
-.. automethod:: cterasdk.core.cloudfs.CloudFS.mkfg
-   :noindex:
-
-.. code:: python
-
-   """Create a Folder Group, owned by a local user account 'svc_account'"""
-   svc_account = portal_types.UserAccount('svc_account')
-   admin.cloudfs.mkfg('FG-001', svc_account)
-
-   """Create a Folder Group, owned by the domain user 'ctera.local\wbruce'"""
-   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
-   admin.cloudfs.mkfg('FG-002', wbruce)
-
-   admin.cloudfs.mkfg('FG-003') # without an owner
-
-   """Create a Folder Group, assigned to an 'Archive' storage class"""
-   admin.cloudfs.mkfg('Archive', portal_types.UserAccount('svc_account'), storage_class='Archive')
-
-.. automethod:: cterasdk.core.cloudfs.CloudFS.rmfg
-   :noindex:
-
-.. code:: python
-
-   admin.cloudfs.rmfg('FG-001')
-
-Cloud Drive Folders
-^^^^^^^^^^^^^^^^^^^
-.. automethod:: cterasdk.core.cloudfs.CloudFS.list_folders
-   :noindex:
-
-.. code:: python
-
-   """List all cloud drive folders"""
-   cloud_drive_folders = admin.cloudfs.list_folders()
-   for cloud_drive_folder in cloud_drive_folders:
-       print(cloud_drive_folder)
-
-   """List cloud drive folders owned by a domain user"""
-   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
-   cloud_drive_folders = admin.cloudfs.list_folders(user=bruce)
-
-   """List both deleted and non-deleted cloud drive folders"""
-   cloud_drive_folders = admin.cloudfs.list_folders(list_filter=portal_enum.ListFilter.All)
-
-   """List deleted cloud drive folders"""
-   cloud_drive_folders = admin.cloudfs.list_folders(list_filter=portal_enum.ListFilter.Deleted)
-
-.. automethod:: cterasdk.core.cloudfs.CloudFS.mkdir
-   :noindex:
-
-.. code:: python
-
-   """Create a Cloud Drive folder, owned by a local user account 'svc_account'"""
-   svc_account = portal_types.UserAccount('svc_account')
-   admin.cloudfs.mkdir('DIR-001', 'FG-001', svc_account)
-   admin.cloudfs.mkdir('DIR-003', 'FG-003', svc_account, winacls = False) # disable Windows ACL's
-   admin.cloudfs.mkdir('DIR-003', 'FG-003', svc_account, quota = 1024) # Set folder quota, in GB
-
-   """Create a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
-   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
-   admin.cloudfs.mkdir('DIR-002', 'FG-002', wbruce)
-
-.. automethod:: cterasdk.core.cloudfs.CloudFS.delete
-   :noindex:
-
-.. code:: python
-
-   """Delete a Cloud Drive folder, owned by the local user account 'svc_account'"""
-   svc_account = portal_types.UserAccount('svc_account')
-   admin.cloudfs.delete('DIR-001', svc_account)
-
-   """Delete a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
-   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
-   admin.cloudfs.delete('DIR-002', wbruce)
-
-.. automethod:: cterasdk.core.cloudfs.CloudFS.undelete
-   :noindex:
-
-.. code:: python
-
-   """Recover a deleted Cloud Drive folder, owned by the local user account 'svc_account'"""
-   svc_account = portal_types.UserAccount('svc_account')
-   admin.cloudfs.undelete('DIR-001', svc_account)
-
-   """Recover a deleted Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
-   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
-   admin.cloudfs.undelete('DIR-002', wbruce)
-
-NT ACLs
-^^^^^^^^^^^^^^^^^^^
-.. automethod:: cterasdk.core.cloudfs.CloudFS.set_folders_acl
-   :noindex:
-
-.. code:: python
-
-   """Changing the file or Folder ACLs"""
-   folders_paths = ["portaladmin/cloudFolder/diagrams", "adrian/data/docs"]
-   sddl_string = 'O:S-1-12-1-1536910496-1126310805-1188065941-1612002142' \
-                 'G:S-1-12-1-1536910496-1126310805-1188065941-1612002142' \
-                 'D:AI(A;ID;FA;;;BA)(A;ID;FA;;;SY)(A;ID;0x1200a9;;;BU)(A;ID;0x1301bf;;;AU)'
-   admin.cloudfs.set_folders_acl(folders_paths, sddl_string, True)
-
-.. automethod:: cterasdk.core.cloudfs.CloudFS.set_owner_acl
-   :noindex:
-
-.. code:: python
-
-   """Changing the File or Folder Owner SID or ACLs"""
-   folders_paths = ["portaladmin/cloudFolder/diagrams", "dorian/data/docs"]
-   owner_sid = 'S-1-12-1-1536910496-1126310805-1188065941-1612002142'
-   admin.cloudfs.set_folders_acl(folders_paths, owner_sid, True)
+   admin.cloudfs.zones.delete('ZN-001')
 
 Timezone
 --------

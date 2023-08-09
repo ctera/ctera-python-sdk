@@ -1,17 +1,36 @@
+import re
+import copy
 import logging
 
 from .base_command import BaseCommand
-from . import query
-from .enum import ListFilter
-from ..common import Object
-from ..common import union
+from . import query, devices
+from .enum import ListFilter, PolicyType
+from ..common import union, Object
 from ..exception import CTERAException, ObjectNotFoundException
 
 
 class CloudFS(BaseCommand):
-    """ CloudFS APIs """
+    """
+    CloudFS APIs
 
-    default = ['name', 'group', 'owner']
+    :ivar cterasdk.core.cloudfs.FolderGroups groups: Object holding Folder Groups APIs
+    :ivar cterasdk.core.cloudfs.CloudDrives drives: Object holding Cloud Drive Folders APIs
+    :ivar cterasdk.core.cloudfs.Backups backups: Object holding Backup Folders APIs
+    :ivar cterasdk.core.cloudfs.Zones zones: Object holding Zones APIs
+    """
+
+    def __init__(self, portal):
+        super().__init__(portal)
+        self.groups = FolderGroups(self._portal)
+        self.drives = CloudDrives(self._portal)
+        self.backups = Backups(self._portal)
+        self.zones = Zones(self._portal)
+
+
+class FolderGroups(BaseCommand):
+    """ Folder Groups APIs """
+
+    default = ['name', 'owner']
 
     def get(self, name, include=None):
         """
@@ -20,14 +39,14 @@ class CloudFS(BaseCommand):
         :param str name: Name of the Folder Group to find
         :param str,optional include: List of fields to retrieve, defaults to ['name', 'owner']
         """
-        include = union(include or [], ['name', 'owner'])
+        include = union(include or [], FolderGroups.default)
         include = ['/' + attr for attr in include]
         folder_group = self._portal.get_multi('/foldersGroups/' + name, include)
         if folder_group.name is None:
             raise ObjectNotFoundException('Could not find folder group', f'/foldersGroups/{name}', name=name)
         return folder_group
 
-    def list_folder_groups(self, include=None, user=None):
+    def all(self, include=None, user=None):
         """
         List folder groups
 
@@ -35,7 +54,7 @@ class CloudFS(BaseCommand):
         :param cterasdk.core.types.UserAccount user: User account of the folder group owner
         :returns: Iterator for all folder groups
         """
-        include = union(include or [], ['name', 'owner'])
+        include = union(include or [], FolderGroups.default)
         builder = query.QueryParamBuilder().include(include)
         if user:
             uid = self._portal.users.get(user, ['uid']).uid
@@ -43,7 +62,7 @@ class CloudFS(BaseCommand):
         param = builder.build()
         return query.iterator(self._portal, '/foldersGroups', param)
 
-    def mkfg(self, name, user=None, deduplication_method_type=None, storage_class=None):
+    def add(self, name, user=None, deduplication_method_type=None, storage_class=None):
         """
         Create a new Folder Group
 
@@ -70,7 +89,7 @@ class CloudFS(BaseCommand):
             logging.getLogger().error('Folder group creation failed. %s', {'name': name, 'owner': str(user)})
             raise error
 
-    def rmfg(self, name):
+    def delete(self, name):
         """
         Remove a Folder Group
 
@@ -81,7 +100,13 @@ class CloudFS(BaseCommand):
         self._portal.execute('/foldersGroups/' + name, 'deleteGroup', True)
         logging.getLogger().info('Folder group deleted. %s', {'name': name})
 
-    def mkdir(self, name, group, owner, winacls=True, description=None, quota=None):
+
+class CloudDrives(BaseCommand):
+    """ Cloud Drive Folder APIs """
+
+    default = ['name', 'group', 'owner']
+
+    def add(self, name, group, owner, winacls=True, description=None, quota=None):
         """
         Create a new directory
 
@@ -119,30 +144,7 @@ class CloudFS(BaseCommand):
             )
             raise error
 
-    def delete(self, name, owner):
-        """
-        Delete a Cloud Drive Folder
-
-        :param str name: Name of the Cloud Drive Folder to delete
-        :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
-        """
-
-        path = self._dirpath(name, owner)
-        logging.getLogger().info('Deleting cloud drive folder. %s', {'path': path})
-        self._portal.files.delete(path)
-
-    def undelete(self, name, owner):
-        """
-        Un-Delete a Cloud Drive Folder
-
-        :param str name: Name of the Cloud Drive Folder to un-delete
-        :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
-        """
-        path = self._dirpath(name, owner)
-        logging.getLogger().info('Restoring cloud drive folder. %s', {'path': path})
-        self._portal.files.undelete(path)
-
-    def list_folders(self, include=None, list_filter=ListFilter.NonDeleted, user=None):
+    def all(self, include=None, list_filter=ListFilter.NonDeleted, user=None):
         """
         List Cloud Drive folders.
 
@@ -151,7 +153,7 @@ class CloudFS(BaseCommand):
         :param cterasdk.core.types.UserAccount user: User account of the cloud folder owner
         :returns: Iterator for all Cloud Drive folders
         """
-        include = union(include or [], CloudFS.default)
+        include = union(include or [], CloudDrives.default)
         builder = query.QueryParamBuilder().include(include)
         if list_filter != ListFilter.NonDeleted:
             builder.put('includeDeleted', True)
@@ -176,7 +178,7 @@ class CloudFS(BaseCommand):
         """
 
         uid = self._portal.users.get(owner, ['uid']).uid
-        include = union(include or [], CloudFS.default)
+        include = union(include or [], CloudDrives.default)
         builder = query.QueryParamBuilder().include(include).ownedBy(uid)
         builder.addFilter(query.FilterBuilder('name').eq(name))
         param = builder.build()
@@ -188,47 +190,279 @@ class CloudFS(BaseCommand):
             logging.getLogger().info('Could not find cloud folder. %s', {'folder': name, 'owner': str(owner)})
             raise CTERAException('Could not find cloud folder', None, folder=name, owner=str(owner))
 
-    def _dirpath(self, name, owner):
-        owner = self._portal.users.get(owner, ['displayName']).displayName
-        path = owner + '/' + name
-        return path
+    def delete(self, name, owner):
+        """
+        Delete a Cloud Drive Folder
 
-    def set_folders_acl(self, folders_path, sddl_string, is_recursive=False):
+        :param str name: Name of the Cloud Drive Folder to delete
+        :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
+        """
+
+        path = self._get_directory_path(name, owner)
+        logging.getLogger().info('Deleting cloud drive folder. %s', {'path': path})
+        self._portal.files.delete(path)
+
+    def recover(self, name, owner):
+        """
+        Recover a deleted a Cloud Drive Folder
+
+        :param str name: Name of the Cloud Drive Folder to un-delete
+        :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
+        """
+        path = self._get_directory_path(name, owner)
+        logging.getLogger().info('Recovering cloud drive folder. %s', {'path': path})
+        self._portal.files.undelete(path)
+
+    def setfacl(self, paths, acl, recursive=False):
         """
         Changing the file or Folder ACLs
 
-        :param list folders_path: A list of paths
-        :param str sddl_string: The SDDL string with the ACL permissions
-        :param bool is_recursive: For path that is not a file but a folder
-        :return: execution response
+        :param list(str) paths:  List of folder paths
+        :param str acl: Access control list (ACL) represented as an SDDL String
+        :param bool,optional recursive: Apply changes recursively to subfolders and files
         """
         param = Object()
         param._classname = 'SDDLFoldersParam'  # pylint: disable=protected-access
-        param.foldersPath = folders_path
-        param.sddlString = sddl_string
-        param.isRecursive = is_recursive
+        param.foldersPath = paths
+        param.sddlString = acl
+        param.isRecursive = recursive
         try:
             return self._portal.execute('', 'setFoldersACL', param)
         except CTERAException as error:
             logging.getLogger().error('setFoldersACL failed. %s', {'error': error})
             raise CTERAException('Failed to setFoldersACL', error)
 
-    def set_owner_acl(self, folders_path, owner_sid, is_recursive=False):
+    def setoacl(self, paths, owner_sid, recursive=False):
         """
         Changing the File or Folder Owner SID or ACLs
 
-        :param list folders_path:  A list of paths
-        :param str owner_sid: The SID string that identifies the object's owner.
-        :param bool is_recursive: If the path is not a file but a folder
-        :return: execution response
+        :param list(str) paths:  List of folder paths
+        :param str owner_sid: Owner SID (Security Descriptor)
+        :param bool,optional recursive: Apply changes recursively to subfolders and files
         """
         param = Object()
         param._classname = 'OwnerSidFoldersParam'  # pylint: disable=protected-access
-        param.foldersPath = folders_path
+        param.foldersPath = paths
         param.ownerSid = owner_sid
-        param.isRecursive = is_recursive
+        param.isRecursive = recursive
         try:
             return self._portal.execute('', 'setOwnerACL', param)
         except CTERAException as error:
             logging.getLogger().error('setOwnerACL failed. %s', {'error': error})
             raise CTERAException('Failed to setOwnerACL', error)
+
+    def _get_directory_path(self, name, owner):
+        owner = self._portal.users.get(owner, ['displayName']).displayName
+        path = owner + '/' + name
+        return path
+
+
+class Backups(BaseCommand):
+    """ Backup Folder APIs """
+
+
+class Zones(BaseCommand):
+    """
+    Portal Zones APIs
+    """
+
+    name_attr = 'name'
+
+    def get(self, name):
+        """
+        Get zone by name
+
+        :param str name: The name of the zone to get
+        :return: The requested zone
+        """
+        query_filter = query.FilterBuilder('name').eq(name)
+        param = query.QueryParamBuilder().include_classname().startFrom(0).countLimit(1).addFilter(query_filter).orFilter(False).build()
+
+        logging.getLogger().info('Retrieving zone. %s', {'name': name})
+
+        response = self._portal.execute('', 'getZonesDisplayInfo', param)
+
+        objects = response.objects
+        if len(objects) < 1:
+            logging.getLogger().error('Zone not found. %s', {'name': name})
+            raise CTERAException('Zone not found', None, name=name)
+
+        zone = objects[0]
+        logging.getLogger().info('Zone found. %s', {'name': name, 'id': zone.zoneId})
+        return zone
+
+    def all(self, filters=None):
+        """
+        List Zones
+        :param list[],optional filters: List of additional filters, defaults to None
+
+        :return: Iterator for all Zones
+        :rtype: cterasdk.lib.iterator.Iterator
+        """
+        builder = query.QueryParamBuilder().include_classname().startFrom(0).countLimit(25)
+        filters = filters or []
+        for query_filter in filters:
+            builder.addFilter(query_filter)
+        builder.orFilter((len(filters) > 1))
+        param = builder.build()
+        return query.iterator(self._portal, '', param, 'getZonesDisplayInfo')
+
+    def search(self, name):
+        """
+        Search for Zones by name
+        :param str name: Search query
+
+        :return: Iterator for all matching Zones
+        :rtype: cterasdk.lib.iterator.Iterator
+        """
+        filters = [query.FilterBuilder(Zones.name_attr).like(name)]
+        return self.all(filters)
+
+    def add(self, name, policy_type=PolicyType.SELECT, description=None):
+        """
+        Add a new zone
+
+        :param str name: The name of the new zone
+        :param cterasdk.core.enum.PolicyType,optional policy_type:
+         Policy type of the new zone, defaults to cterasdk.core.enum.PolicyType.SELECT
+        :param str,optional description: The description of the new zone
+        """
+        param = self._zone_param(name, policy_type, description)
+
+        logging.getLogger().info('Adding zone. %s', {'name': name})
+
+        response = self._portal.execute('', 'addZone', param)
+        try:
+            self._process_response(response)
+            logging.getLogger().info('Zone added. %s', {'name': name})
+        except CTERAException as error:
+            logging.getLogger().error('Zone creation failed. %s', {'rc': response.rc})
+            raise error
+
+    def delete(self, name):
+        """
+        Delete a zone
+
+        :param str name: The name of the zone to delete
+        """
+        zone = self._portal.cloudfs.zones.get(name)
+        logging.getLogger().info('Deleting zone. %s', {'zone': name})
+        response = self._portal.execute('', 'deleteZones', [zone.zoneId])
+        if response == 'ok':
+            logging.getLogger().info('Zone deleted. %s', {'zone': name})
+
+    def add_devices(self, name, device_names):
+        """
+        Add devices to a zone
+
+        :param str name: The name of the zone to add devices to
+        :param list[str] device_names: The names of the devices to add to the zone
+        """
+        zone = self._portal.cloudfs.zones.get(name)
+        portal_devices = devices.Devices(self._portal).by_name(include=['uid'], names=device_names)
+        info = self._zone_info(zone.zoneId)
+        description = (info.description if hasattr(info, 'description') else None)
+
+        param = self._zone_param(info.name, info.policyType, description, info.zoneId)
+        for portal_device in portal_devices:
+            param.delta.devicesDelta.added.append(portal_device.uid)
+
+        logging.getLogger().info('Adding devices to zone. %s', {'zone': info.name})
+
+        try:
+            self._save(param)
+        except CTERAException as error:
+            logging.getLogger().error('Failed adding devices to zone.')
+            raise CTERAException('Failed adding devices to zone', error, zone=name, devices=device_names)
+
+    def add_folders(self, name, folder_finding_helpers):
+        """
+        Add the folders to the zone
+
+        :param str name: The name of the zone
+        :param list[cterasdk.core.types.CloudFSFolderFindingHelper] folder_finding_helpers: List of folder names and owners
+        """
+        zone = self._portal.cloudfs.zones.get(name)
+        folders = self._find_folders(folder_finding_helpers)
+        info = self._zone_info(zone.zoneId)
+        description = info.description if hasattr(info, 'description') else None
+        param = self._zone_param(info.name, info.policyType, description, info.zoneId)
+        param.delta.policyDelta = []
+
+        for owner_id, folder_ids in folders.items():
+            policyDelta = Object()
+            policyDelta._classname = 'ZonePolicyDelta'  # pylint: disable=protected-access
+            policyDelta.userUid = owner_id
+            policyDelta.foldersDelta = Object()
+            policyDelta.foldersDelta._classname = 'ZoneFolderDelta'  # pylint: disable=protected-access
+            policyDelta.foldersDelta.added = copy.deepcopy(folder_ids)
+            policyDelta.foldersDelta.removed = []
+
+            param.delta.policyDelta.append(policyDelta)
+
+        try:
+            self._save(param)
+        except CTERAException as error:
+            logging.getLogger().error('Failed adding folders to zone.')
+            raise CTERAException('Failed adding folders to zone', error, zone=name)
+
+    def _zone_info(self, zid):
+        logging.getLogger().debug('Obtaining zone info. %s', {'id': zid})
+        response = self._portal.execute('', 'getZoneBasicInfo', zid)
+        logging.getLogger().debug('Obtained zone info. %s', {'id': zid})
+        return response
+
+    def _find_folders(self, folder_finding_helpers):
+        folders = {}
+        for folder_finding_helper in folder_finding_helpers:
+            cloud_folder = CloudDrives(self._portal).find(
+                folder_finding_helper.name,
+                folder_finding_helper.owner,
+                include=['uid', 'owner']
+            )
+            folder_id = cloud_folder.uid
+            owner_id = re.search("[1-9][0-9]*", cloud_folder.owner).group(0)
+
+            if folders.get(owner_id) is None:
+                folders[owner_id] = [folder_id]
+            else:
+                folders.get(owner_id).append(folder_id)
+
+        return folders
+
+    def _save(self, param):
+        zone_name = param.basicInfo.name
+
+        logging.getLogger().debug('Applying changes to zone. %s', {'zone': param.basicInfo.name})
+
+        response = self._portal.execute('', 'saveZone', param)
+        try:
+            self._process_response(response)
+        except CTERAException as error:
+            logging.getLogger().error('Failed applying changes to zone. %s', {'zone': zone_name, 'rc': response.rc})
+            raise error
+
+        logging.getLogger().debug('Zone changes applied successfully. %s', {'zone': zone_name})
+
+    @staticmethod
+    def _process_response(response):
+        if response.rc != 'OK':
+            raise CTERAException('Zone creation failed', response)
+
+    @staticmethod
+    def _zone_param(name, policy_type, description=None, zid=None):
+        param = Object()
+        param._classname = "SaveZoneParam"  # pylint: disable=protected-access
+        param.basicInfo = Object()
+        param.basicInfo._classname = 'ZoneBasicInfo'  # pylint: disable=protected-access
+        param.basicInfo.name = name
+        param.basicInfo.policyType = policy_type
+        param.basicInfo.description = description
+        param.basicInfo.zoneId = zid
+        param.delta = Object()
+        param.delta._classname = 'ZoneDelta'  # pylint: disable=protected-access
+        param.delta.devicesDelta = Object()
+        param.delta.devicesDelta._classname = 'ZoneDeviceDelta'  # pylint: disable=protected-access
+        param.delta.devicesDelta.added = []
+        param.delta.devicesDelta.removed = []
+        return param
