@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception, portal_enum
+from cterasdk import exception
 from cterasdk.core import cloudfs
 from cterasdk.core.types import UserAccount
 from cterasdk.core import query
@@ -152,7 +152,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._mock_get_user_display_name()
 
         self._global_admin.files.undelete = mock.MagicMock(return_value='Success')
-        cloudfs.CloudDrives(self._global_admin).undelete(self._name, self._local_user_account)
+        cloudfs.CloudDrives(self._global_admin).recover(self._name, self._local_user_account)
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['displayName'])
         self._global_admin.files.undelete.assert_called_once_with(self._owner + '/' + self._name)
 
@@ -178,6 +178,13 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
     def _mock_get_user(self, return_value):
         self._global_admin.users.get = mock.MagicMock(return_value=return_value)
 
+    def _mock_get_user_uid(self):
+        param = Object()
+        param.uid = self._user_uid
+        get_user_uid_mock = self.patch_call("cterasdk.core.users.Users.get")
+        get_user_uid_mock.return_value = param
+        return get_user_uid_mock
+
     def _get_user_object(self, **kwargs):
         user_account = Object()
         user_account.name = self._owner
@@ -188,9 +195,8 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
     def test_set_folders_acl_success(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
-        ret = cloudfs.CloudDrives(self._global_admin).setfacl(self._nt_acl_folders.foldersPath,
-                                                                  self._nt_acl_folders.sddlString,
-                                                                  self._nt_acl_folders.isRecursive)
+        ret = cloudfs.CloudDrives(self._global_admin).setfacl(self._nt_acl_folders.foldersPath, self._nt_acl_folders.sddlString,
+                                                              self._nt_acl_folders.isRecursive)
         self._global_admin.execute.assert_called_once_with('', 'setFoldersACL', mock.ANY)
         self.assertEqual(ret, execute_response)
 
@@ -200,17 +206,15 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
 
         with self.assertRaises(exception.CTERAException) as error:
-            cloudfs.CloudDrives(self._global_admin).setfacl(self._nt_acl_folders.foldersPath,
-                                                                self._nt_acl_folders.sddlString,
-                                                                self._nt_acl_folders.isRecursive)
+            cloudfs.CloudDrives(self._global_admin).setfacl(self._nt_acl_folders.foldersPath, self._nt_acl_folders.sddlString,
+                                                            self._nt_acl_folders.isRecursive)
         self.assertEqual('Failed to setFoldersACL', error.exception.message)
 
     def test_set_owner_acl_success(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
-        ret = cloudfs.CloudDrives(self._global_admin).setoacl(self._nt_acl_owner.foldersPath,
-                                                                self._nt_acl_owner.ownerSid,
-                                                                self._nt_acl_owner.isRecursive)
+        ret = cloudfs.CloudDrives(self._global_admin).setoacl(self._nt_acl_owner.foldersPath, self._nt_acl_owner.ownerSid,
+                                                              self._nt_acl_owner.isRecursive)
         self._global_admin.execute.assert_called_once_with('', 'setOwnerACL', mock.ANY)
         self.assertEqual(ret, execute_response)
 
@@ -220,7 +224,6 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
 
         with self.assertRaises(exception.CTERAException) as error:
-            cloudfs.CloudDrives(self._global_admin).setoacl(self._nt_acl_owner.foldersPath,
-                                                              self._nt_acl_owner.ownerSid,
-                                                              self._nt_acl_owner.isRecursive)
+            cloudfs.CloudDrives(self._global_admin).setoacl(self._nt_acl_owner.foldersPath, self._nt_acl_owner.ownerSid,
+                                                            self._nt_acl_owner.isRecursive)
         self.assertEqual('Failed to setOwnerACL', error.exception.message)

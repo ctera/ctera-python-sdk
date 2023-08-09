@@ -90,13 +90,13 @@ class TestCoreZones(base_core.BaseCoreTest):
         self._init_global_admin()
         zone = self._get_zones_display_info_response().objects.pop()
         self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._mock_execute)
-        self._global_admin.zones.get = mock.MagicMock(return_value=zone)
+        self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
         find_cloud_folder_mock = self.patch_call("cterasdk.core.zones.cloudfs.CloudFS.find")
         find_cloud_folder_mock.side_effect = mock.MagicMock(side_effect=TestCoreZones._find_cloud_folder)
 
         cloudfs.Zones(self._global_admin).add_folders(self._zone_name, self._find_folder_helpers)
 
-        self._global_admin.zones.get.assert_called_once_with(self._zone_name)
+        self._global_admin.cloudfs.zones.get.assert_called_once_with(self._zone_name)
         find_folder_calls = []
         for find_folder_helper in self._find_folder_helpers:
             find_folder_calls.append(mock.call(find_folder_helper.name, find_folder_helper.owner, include=['uid', 'owner']))
@@ -115,14 +115,14 @@ class TestCoreZones(base_core.BaseCoreTest):
         self._init_global_admin()
         zone = self._get_zones_display_info_response().objects.pop()
         self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._save_zone_side_effect)
-        self._global_admin.zones.get = mock.MagicMock(return_value=zone)
+        self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
         find_cloud_folder_mock = self.patch_call("cterasdk.core.zones.cloudfs.CloudFS.find")
         find_cloud_folder_mock.side_effect = mock.MagicMock(side_effect=TestCoreZones._find_cloud_folder)
 
         with self.assertRaises(exception.CTERAException) as error:
             cloudfs.Zones(self._global_admin).add_folders(self._zone_name, self._find_folder_helpers)
 
-        self._global_admin.zones.get.assert_called_once_with(self._zone_name)
+        self._global_admin.cloudfs.zones.get.assert_called_once_with(self._zone_name)
         find_folder_calls = []
         for find_folder_helper in self._find_folder_helpers:
             find_folder_calls.append(mock.call(find_folder_helper.name, find_folder_helper.owner, include=['uid', 'owner']))
@@ -142,13 +142,13 @@ class TestCoreZones(base_core.BaseCoreTest):
         self._init_global_admin()
         zone = self._get_zones_display_info_response().objects.pop()
         self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._mock_execute)
-        self._global_admin.zones.get = mock.MagicMock(return_value=zone)
+        self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
         query_devices_mock = self.patch_call("cterasdk.core.zones.devices.Devices.by_name")
         query_devices_mock.return_value = self._get_device_objects()
 
         cloudfs.Zones(self._global_admin).add_devices(self._zone_name, self._device_names)
 
-        self._global_admin.zones.get.assert_called_once_with(self._zone_name)
+        self._global_admin.cloudfs.zones.get.assert_called_once_with(self._zone_name)
         query_devices_mock.assert_called_once_with(include=['uid'], names=self._device_names)
         self._global_admin.execute.assert_has_calls(
             [
@@ -164,14 +164,14 @@ class TestCoreZones(base_core.BaseCoreTest):
         self._init_global_admin()
         zone = self._get_zones_display_info_response().objects.pop()
         self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._save_zone_side_effect)
-        self._global_admin.zones.get = mock.MagicMock(return_value=zone)
+        self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
         query_devices_mock = self.patch_call("cterasdk.core.zones.devices.Devices.by_name")
         query_devices_mock.return_value = self._get_device_objects()
 
         with self.assertRaises(exception.CTERAException) as error:
             cloudfs.Zones(self._global_admin).add_devices(self._zone_name, self._device_names)
 
-        self._global_admin.zones.get.assert_called_once_with(self._zone_name)
+        self._global_admin.cloudfs.zones.get.assert_called_once_with(self._zone_name)
         query_devices_mock.assert_called_once_with(include=['uid'], names=self._device_names)
         self._global_admin.execute.assert_has_calls(
             [
@@ -248,9 +248,9 @@ class TestCoreZones(base_core.BaseCoreTest):
     def test_delete_zone_success(self):
         self._init_global_admin(execute_response='ok')
         zone = self._get_zones_display_info_response().objects.pop()
-        self._global_admin.zones.get = mock.MagicMock(return_value=zone)
+        self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
         cloudfs.Zones(self._global_admin).delete(self._zone_name)
-        self._global_admin.zones.get.assert_called_once_with(self._zone_name)
+        self._global_admin.cloudfs.zones.get.assert_called_once_with(self._zone_name)
         self._global_admin.execute.assert_called_once_with('', 'deleteZones', [self._zone_id])
 
     @staticmethod
@@ -289,3 +289,4 @@ class TestCoreZones(base_core.BaseCoreTest):
         zone.zoneId = self._zone_id
         response.objects = [zone]
         return response
+        

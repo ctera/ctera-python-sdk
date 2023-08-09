@@ -10,8 +10,8 @@ from ..exception import CTERAException, ObjectNotFoundException
 
 
 class CloudFS(BaseCommand):
-    """ 
-    CloudFS APIs 
+    """
+    CloudFS APIs
 
     :ivar cterasdk.core.cloudfs.FolderGroups groups: Object holding Folder Groups APIs
     :ivar cterasdk.core.cloudfs.CloudDrives drives: Object holding Cloud Drive Folders APIs
@@ -153,7 +153,7 @@ class CloudDrives(BaseCommand):
         :param cterasdk.core.types.UserAccount user: User account of the cloud folder owner
         :returns: Iterator for all Cloud Drive folders
         """
-        include = union(include or [], CloudDrive.default)
+        include = union(include or [], CloudDrives.default)
         builder = query.QueryParamBuilder().include(include)
         if list_filter != ListFilter.NonDeleted:
             builder.put('includeDeleted', True)
@@ -178,7 +178,7 @@ class CloudDrives(BaseCommand):
         """
 
         uid = self._portal.users.get(owner, ['uid']).uid
-        include = union(include or [], CloudDrive.default)
+        include = union(include or [], CloudDrives.default)
         builder = query.QueryParamBuilder().include(include).ownedBy(uid)
         builder.addFilter(query.FilterBuilder('name').eq(name))
         param = builder.build()
@@ -255,6 +255,7 @@ class CloudDrives(BaseCommand):
         owner = self._portal.users.get(owner, ['displayName']).displayName
         path = owner + '/' + name
         return path
+
 
 class Backups(BaseCommand):
     """ Backup Folder APIs """
@@ -464,5 +465,5 @@ class Zones(BaseCommand):
         param.delta.devicesDelta._classname = 'ZoneDeviceDelta'  # pylint: disable=protected-access
         param.delta.devicesDelta.added = []
         param.delta.devicesDelta.removed = []
-
         return param
+        
