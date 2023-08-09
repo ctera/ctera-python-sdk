@@ -289,4 +289,3 @@ class TestCoreZones(base_core.BaseCoreTest):
         zone.zoneId = self._zone_id
         response.objects = [zone]
         return response
-        
