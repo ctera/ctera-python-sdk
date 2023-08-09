@@ -17,7 +17,6 @@ __all__ = [
     'admins',
     'users',
     'cloudfs',
-    'zones',
     'files',
     'decorator',
     'messaging'
