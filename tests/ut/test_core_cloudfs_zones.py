@@ -7,7 +7,7 @@ from cterasdk.common import Object
 from cterasdk.core.enum import PolicyType
 from cterasdk.core.types import CloudFSFolderFindingHelper, UserAccount
 from cterasdk.core import query
-from cterasdk.core import zones
+from cterasdk.core import cloudfs
 from tests.ut import base_core
 
 
@@ -42,7 +42,7 @@ class TestCoreZones(base_core.BaseCoreTest):
     def test_get_zone_success(self):
         execute_response = self._get_zones_display_info_response()
         self._init_global_admin(execute_response=execute_response)
-        ret = zones.Zones(self._global_admin).get(self._zone_name)
+        ret = cloudfs.Zones(self._global_admin).get(self._zone_name)
         self._global_admin.execute.assert_called_once_with('', 'getZonesDisplayInfo', mock.ANY)
         query_filter = base_core.BaseCoreTest._create_filter(query.FilterType.String, 'name', query.Restriction.EQUALS, self._zone_name)
         expected_param = base_core.BaseCoreTest._create_query_params(include_classname=True, start_from=0, count_limit=1,
@@ -56,7 +56,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         self._init_global_admin(execute_response=execute_response)
 
         with self.assertRaises(exception.CTERAException) as error:
-            zones.Zones(self._global_admin).get(self._zone_name)
+            cloudfs.Zones(self._global_admin).get(self._zone_name)
 
         self._global_admin.execute.assert_called_once_with('', 'getZonesDisplayInfo', mock.ANY)
         query_filter = base_core.BaseCoreTest._create_filter(query.FilterType.String, 'name', query.Restriction.EQUALS, self._zone_name)
@@ -69,7 +69,7 @@ class TestCoreZones(base_core.BaseCoreTest):
     def test_add_zone_default_args_success(self):
         execute_response = TestCoreZones._get_add_zone_response('OK')
         self._init_global_admin(execute_response=execute_response)
-        zones.Zones(self._global_admin).add(self._zone_name)
+        cloudfs.Zones(self._global_admin).add(self._zone_name)
         self._global_admin.execute.assert_called_once_with('', 'addZone', mock.ANY)
         expected_param = self._get_zone_param()
         actual_param = self._global_admin.execute.call_args[0][2]
@@ -79,7 +79,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         execute_response = TestCoreZones._get_add_zone_response('Expected Failure')
         self._init_global_admin(execute_response=execute_response)
         with self.assertRaises(exception.CTERAException) as error:
-            zones.Zones(self._global_admin).add(self._zone_name)
+            cloudfs.Zones(self._global_admin).add(self._zone_name)
         self._global_admin.execute.assert_called_once_with('', 'addZone', mock.ANY)
         expected_param = self._get_zone_param()
         actual_param = self._global_admin.execute.call_args[0][2]
@@ -94,7 +94,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         find_cloud_folder_mock = self.patch_call("cterasdk.core.zones.cloudfs.CloudFS.find")
         find_cloud_folder_mock.side_effect = mock.MagicMock(side_effect=TestCoreZones._find_cloud_folder)
 
-        zones.Zones(self._global_admin).add_folders(self._zone_name, self._find_folder_helpers)
+        cloudfs.Zones(self._global_admin).add_folders(self._zone_name, self._find_folder_helpers)
 
         self._global_admin.zones.get.assert_called_once_with(self._zone_name)
         find_folder_calls = []
@@ -120,7 +120,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         find_cloud_folder_mock.side_effect = mock.MagicMock(side_effect=TestCoreZones._find_cloud_folder)
 
         with self.assertRaises(exception.CTERAException) as error:
-            zones.Zones(self._global_admin).add_folders(self._zone_name, self._find_folder_helpers)
+            cloudfs.Zones(self._global_admin).add_folders(self._zone_name, self._find_folder_helpers)
 
         self._global_admin.zones.get.assert_called_once_with(self._zone_name)
         find_folder_calls = []
@@ -146,7 +146,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         query_devices_mock = self.patch_call("cterasdk.core.zones.devices.Devices.by_name")
         query_devices_mock.return_value = self._get_device_objects()
 
-        zones.Zones(self._global_admin).add_devices(self._zone_name, self._device_names)
+        cloudfs.Zones(self._global_admin).add_devices(self._zone_name, self._device_names)
 
         self._global_admin.zones.get.assert_called_once_with(self._zone_name)
         query_devices_mock.assert_called_once_with(include=['uid'], names=self._device_names)
@@ -169,7 +169,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         query_devices_mock.return_value = self._get_device_objects()
 
         with self.assertRaises(exception.CTERAException) as error:
-            zones.Zones(self._global_admin).add_devices(self._zone_name, self._device_names)
+            cloudfs.Zones(self._global_admin).add_devices(self._zone_name, self._device_names)
 
         self._global_admin.zones.get.assert_called_once_with(self._zone_name)
         query_devices_mock.assert_called_once_with(include=['uid'], names=self._device_names)
@@ -249,7 +249,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         self._init_global_admin(execute_response='ok')
         zone = self._get_zones_display_info_response().objects.pop()
         self._global_admin.zones.get = mock.MagicMock(return_value=zone)
-        zones.Zones(self._global_admin).delete(self._zone_name)
+        cloudfs.Zones(self._global_admin).delete(self._zone_name)
         self._global_admin.zones.get.assert_called_once_with(self._zone_name)
         self._global_admin.execute.assert_called_once_with('', 'deleteZones', [self._zone_id])
 

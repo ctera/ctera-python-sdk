@@ -21,7 +21,6 @@ from ..core import domains
 from ..core import users
 from ..core import groups
 from ..core import cloudfs
-from ..core import zones
 from ..core import settings
 from ..core import setup
 from ..core import ssl
@@ -46,7 +45,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.reports.Reports reports: Object holding the Portal reports APIs
     :ivar cterasdk.core.devices.Devices devices: Object holding the Portal devices APIs
     :ivar cterasdk.core.directoryservice.DirectoryService directoryservice: Object holding the Portal Active Directory Service APIs
-    :ivar cterasdk.core.zones.Zones zones: Object holding the Portal zones APIs
     :ivar cterasdk.core.activation.Activation activation: Object holding the Portal activation APIs
     :ivar cterasdk.core.logs.Logs logs: Object holding the Portal logs APIs
     :ivar cterasdk.core.cloudfs.CloudFS cloudfs: Object holding the Portal CloudFS APIs
@@ -74,7 +72,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.plans = plans.Plans(self)
         self.devices = devices.Devices(self)
         self.directoryservice = directoryservice.DirectoryService(self)
-        self.zones = zones.Zones(self)
         self.cloudfs = cloudfs.CloudFS(self)
         self.activation = activation.Activation(self)
         self.files = files.CloudDrive(self, self.cloud_drive_base_path)
@@ -125,7 +122,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'plans',
             'devices',
             'directoryservice',
-            'zones',
             'cloudfs',
             'activation',
             'files',
