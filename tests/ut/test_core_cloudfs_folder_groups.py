@@ -92,7 +92,7 @@ class TestCoreFolderGroups(base_core.BaseCoreTest):   # pylint: disable=too-many
     def test_add_folder_group_with_local_owner_fixed_block_size(self):
         self._init_global_admin(execute_response='Success')
         self._mock_get_user_base_object_ref()
-        ret = cloudfs.FolderGroups(self._global_admin).add(self._name, user=self._local_user_account, 
+        ret = cloudfs.FolderGroups(self._global_admin).add(self._name, user=self._local_user_account,
                                                            deduplication_method_type=self.fixed_block_size)
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
         self._global_admin.execute.assert_called_once_with('', 'createFolderGroup', mock.ANY)

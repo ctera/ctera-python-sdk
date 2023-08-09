@@ -345,7 +345,7 @@ class Zones(BaseCommand):
 
         :param str name: The name of the zone to delete
         """
-        zone = self._portal.zones.get(name)
+        zone = self._portal.cloudfs.zones.get(name)
         logging.getLogger().info('Deleting zone. %s', {'zone': name})
         response = self._portal.execute('', 'deleteZones', [zone.zoneId])
         if response == 'ok':
@@ -358,7 +358,7 @@ class Zones(BaseCommand):
         :param str name: The name of the zone to add devices to
         :param list[str] device_names: The names of the devices to add to the zone
         """
-        zone = self._portal.zones.get(name)
+        zone = self._portal.cloudfs.zones.get(name)
         portal_devices = devices.Devices(self._portal).by_name(include=['uid'], names=device_names)
         info = self._zone_info(zone.zoneId)
         description = (info.description if hasattr(info, 'description') else None)
@@ -382,7 +382,7 @@ class Zones(BaseCommand):
         :param str name: The name of the zone
         :param list[cterasdk.core.types.CloudFSFolderFindingHelper] folder_finding_helpers: List of folder names and owners
         """
-        zone = self._portal.zones.get(name)
+        zone = self._portal.cloudfs.zones.get(name)
         folders = self._find_folders(folder_finding_helpers)
         info = self._zone_info(zone.zoneId)
         description = info.description if hasattr(info, 'description') else None
@@ -466,4 +466,3 @@ class Zones(BaseCommand):
         param.delta.devicesDelta.added = []
         param.delta.devicesDelta.removed = []
         return param
-        
