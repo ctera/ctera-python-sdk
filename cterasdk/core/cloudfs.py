@@ -202,8 +202,7 @@ class CloudDrives(BaseCommand):
         if quota:
             param.folderQuota = quota
         if compliance_settings:
-            param.wormSettings = compliance_settings
-            
+            param.wormSettings = compliance_settings            
         try:
             response = self._portal.put(f'/{param.baseObjectRef}', param)
             logging.getLogger().info('Cloud drive folder updated. %s', {'name': current_name})
