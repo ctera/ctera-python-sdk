@@ -659,19 +659,19 @@ class ComplianceSettingsBuilder:
 
     @staticmethod
     def default():
-        return ComplianceSettingsBuilder(False, None, RetentionMode.Delete)
+        return ComplianceSettingsBuilder(False, RetentionMode.Delete, None)
 
     @staticmethod
     def none(amount, duration):
-        return ComplianceSettingsBuilder(True, RetentionMode.Delete, WORMSettings._get_retention_period(amount, duration))
+        return ComplianceSettingsBuilder(True, RetentionMode.Delete, ComplianceSettingsBuilder._get_retention_period(amount, duration))
 
     @staticmethod
     def enterprise(amount, duration):
-        return ComplianceSettingsBuilder(True, RetentionMode.Enterprise, WORMSettings._get_retention_period(amount, duration))
+        return ComplianceSettingsBuilder(True, RetentionMode.Enterprise, ComplianceSettingsBuilder._get_retention_period(amount, duration))
 
     @staticmethod
     def compliance(amount, duration):
-        return ComplianceSettingsBuilder(True, RetentionMode.Compliance, WORMSettings._get_retention_period(amount, duration))
+        return ComplianceSettingsBuilder(True, RetentionMode.Compliance, ComplianceSettingsBuilder._get_retention_period(amount, duration))
 
     @staticmethod
     def _get_retention_period(amount, duration):
