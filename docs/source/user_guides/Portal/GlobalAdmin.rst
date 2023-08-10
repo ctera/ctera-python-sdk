@@ -1146,6 +1146,14 @@ Folder Groups
    """Create a Folder Group, assigned to an 'Archive' storage class"""
    admin.cloudfs.groups.add('Archive', portal_types.UserAccount('svc_account'), storage_class='Archive')
 
+.. automethod:: cterasdk.core.cloudfs.FolderGroups.modify
+   :noindex:
+
+.. code:: python
+
+   """Rename a Folder Group"
+   admin.cloudfs.groups.modify('FG-001', 'FG-002')
+
 .. automethod:: cterasdk.core.cloudfs.FolderGroups.delete
    :noindex:
 

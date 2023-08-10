@@ -108,7 +108,7 @@ class FolderGroups(BaseCommand):
             param.name = new_name
         
         try:
-            self._portal.put(f'/foldersGroups/{name}', param)
+            response = self._portal.put(f'/foldersGroups/{name}', param)
             logging.getLogger().info('Folder group updated. %s', {'name': name})
             return response
         except CTERAException as error:
