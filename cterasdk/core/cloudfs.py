@@ -148,14 +148,10 @@ class CloudDrives(BaseCommand):
         :param cterasdk.common.object.Object,optional compliance_settings: Compliance settings, defaults to disabled.
          Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
         """
-
-        owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
-        group = self._portal.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
-
         param = Object()
         param.name = name
-        param.owner = owner
-        param.group = group
+        param.owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
+        param.group = self._portal.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
         param.enableSyncWinNtExtendedAttributes = winacls
         param.folderQuota = quota
         if description:

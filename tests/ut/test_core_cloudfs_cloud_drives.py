@@ -1,3 +1,4 @@
+import munch
 from unittest import mock
 
 from cterasdk import exception
@@ -59,11 +60,12 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
     def test_add_cloud_drive_with_local_owner_no_winacls_param(self):
         self._init_global_admin(get_response='admin', execute_response='Success')
         self._mock_get_user_base_object_ref()
+        self._mock_get_folder_group()
 
         ret = cloudfs.CloudDrives(self._global_admin).add(self._name, self._group, self._local_user_account)
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
-        self._global_admin.get.assert_called_once_with('/foldersGroups/' + self._group + '/baseObjectRef')
+        self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
         self._global_admin.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
 
         expected_param = self._get_add_cloud_drive_object()
@@ -156,7 +158,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['displayName'])
         self._global_admin.files.undelete.assert_called_once_with(self._owner + '/' + self._name)
 
-    def _get_add_cloud_drive_object(self, winacls=True, description=None, quota=None):
+    def _get_add_cloud_drive_object(self, winacls=True, description=None, quota=None, compliance_settings=None):
         add_cloud_drive_param = Object()
         add_cloud_drive_param.name = self._name
         add_cloud_drive_param.owner = self._owner
@@ -165,6 +167,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         add_cloud_drive_param.folderQuota = quota
         if description:
             add_cloud_drive_param.description = description
+        add_cloud_drive_param.folderQuota.wormSettings = compliance_settings if compliance_settings else compliance_settings.default().build()
         return add_cloud_drive_param
 
     def _mock_get_user_base_object_ref(self):
@@ -177,6 +180,9 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
 
     def _mock_get_user(self, return_value):
         self._global_admin.users.get = mock.MagicMock(return_value=return_value)
+
+    def _mock_get_folder_group(self):
+        self._global_admin.cloudfs.groups.get = mock.MagicMock(return_value=munch.Munch(dict(name=self._group, baseObjectRef=self._group)))
 
     def _mock_get_user_uid(self):
         param = Object()
