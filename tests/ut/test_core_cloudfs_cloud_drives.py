@@ -1,5 +1,5 @@
-import munch
 from unittest import mock
+import munch
 
 from cterasdk import exception
 from cterasdk.core import cloudfs
