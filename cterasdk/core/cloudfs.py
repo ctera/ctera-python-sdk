@@ -210,10 +210,10 @@ class CloudDrives(BaseCommand):
         
         try:
             response = self._portal.put(f'/{param.baseObjectRef}', param)
-            logging.getLogger().info('Cloud drive folder updated. %s', {'name': name})
+            logging.getLogger().info('Cloud drive folder updated. %s', {'name': current_name})
             return response
         except CTERAException as error:
-            logging.getLogger().error('Cloud drive folder update failed. %s', {'name': name})
+            logging.getLogger().error('Cloud drive folder update failed. %s', {'name': current_name})
             raise error
 
     def all(self, include=None, list_filter=ListFilter.NonDeleted, user=None):
