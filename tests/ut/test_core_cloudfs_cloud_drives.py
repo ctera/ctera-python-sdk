@@ -3,7 +3,7 @@ from unittest import mock
 
 from cterasdk import exception
 from cterasdk.core import cloudfs
-from cterasdk.core.types import UserAccount
+from cterasdk.core.types import UserAccount, ComplianceSettingsBuilder
 from cterasdk.core import query
 from cterasdk.common import Object, union
 from tests.ut import base_core
@@ -167,7 +167,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         add_cloud_drive_param.folderQuota = quota
         if description:
             add_cloud_drive_param.description = description
-        add_cloud_drive_param.folderQuota.wormSettings = compliance_settings if compliance_settings else compliance_settings.default().build()
+        add_cloud_drive_param.folderQuota.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
         return add_cloud_drive_param
 
     def _mock_get_user_base_object_ref(self):
