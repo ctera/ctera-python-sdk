@@ -659,19 +659,19 @@ class WORMSettings:
 
     @staticmethod
     def default():
-        return WORMSettings(False, None)
+        return WORMSettings(False, None, RetentionMode.Delete)
 
     @staticmethod
     def none(amount, duration):
-        return WORMSettings(True, RetentionMode.Delete, self._get_retention_period(amount, duration))
+        return WORMSettings(True, RetentionMode.Delete, WORMSettings._get_retention_period(amount, duration))
 
     @staticmethod
     def enterprise(amount, duration):
-        return WORMSettings(True, RetentionMode.Enterprise, self._get_retention_period(amount, duration))
+        return WORMSettings(True, RetentionMode.Enterprise, WORMSettings._get_retention_period(amount, duration))
 
     @staticmethod
     def compliance(amount, duration):
-        return WORMSettings(True, RetentionMode.Compliance, self._get_retention_period(amount, duration))
+        return WORMSettings(True, RetentionMode.Compliance, WORMSettings._get_retention_period(amount, duration))
 
     @staticmethod
     def _get_retention_period(amount, duration):
