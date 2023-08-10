@@ -133,7 +133,7 @@ class CloudDrives(BaseCommand):
     default = ['name', 'group', 'owner']
 
     def _get_entire_object(self, name, owner):
-        return self._portal.get(f'{self.find(name, owner, include=['baseObjectRef']).baseObjectRef}')
+        return self._portal.get(f'{self.find(name, owner, include=["baseObjectRef"]).baseObjectRef}')
 
     def add(self, name, group, owner, winacls=True, description=None, quota=None, compliance_settings=None):
         """
