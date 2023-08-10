@@ -77,11 +77,12 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
     def test_add_cloud_drive_with_local_owner_no_winacls_param_with_description(self):
         self._init_global_admin(get_response='admin', execute_response='Success')
         self._mock_get_user_base_object_ref()
+        self._mock_get_folder_group()
 
         ret = cloudfs.CloudDrives(self._global_admin).add(self._name, self._group, self._local_user_account, description=self._description)
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
-        self._global_admin.get.assert_called_once_with('/foldersGroups/' + self._group + '/baseObjectRef')
+        self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
         self._global_admin.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
 
         expected_param = self._get_add_cloud_drive_object(description=self._description)
@@ -94,11 +95,12 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         get_response = 'admin'
         self._init_global_admin(get_response=get_response, execute_response='Success')
         self._mock_get_user_base_object_ref()
+        self._mock_get_folder_group()
 
         ret = cloudfs.CloudDrives(self._global_admin).add(self._name, self._group, self._local_user_account, True)
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
-        self._global_admin.get.assert_called_once_with('/foldersGroups/' + self._group + '/baseObjectRef')
+        self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
         self._global_admin.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
 
         expected_param = self._get_add_cloud_drive_object()
@@ -111,11 +113,12 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         get_response = 'admin'
         self._init_global_admin(get_response=get_response, execute_response='Success')
         self._mock_get_user_base_object_ref()
+        self._mock_get_folder_group()
 
         ret = cloudfs.CloudDrives(self._global_admin).add(self._name, self._group, self._local_user_account, False)
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
-        self._global_admin.get.assert_called_once_with('/foldersGroups/' + self._group + '/baseObjectRef')
+        self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
         self._global_admin.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
 
         expected_param = self._get_add_cloud_drive_object(winacls=False)
@@ -128,6 +131,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         get_response = 'admin'
         self._init_global_admin(get_response=get_response, execute_response='Success')
         self._mock_get_user_base_object_ref()
+        self._mock_get_folder_group()
 
         error_message = "Expected Failure"
         expected_exception = exception.CTERAException(message=error_message)
@@ -136,7 +140,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
             cloudfs.CloudDrives(self._global_admin).add(self._name, self._group, self._local_user_account)
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
-        self._global_admin.get.assert_called_once_with('/foldersGroups/' + self._group + '/baseObjectRef')
+        self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
 
         self.assertEqual(error_message, error.exception.message)
 
