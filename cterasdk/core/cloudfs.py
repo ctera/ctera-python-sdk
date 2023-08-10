@@ -108,11 +108,11 @@ class FolderGroups(BaseCommand):
             param.name = new_name
         
         try:
-            response = self._portal.put(f'/foldersGroups/{name}', param)
-            logging.getLogger().info('Folder group updated. %s', {'name': name})
+            response = self._portal.put(f'/foldersGroups/{current_name}', param)
+            logging.getLogger().info('Folder group updated. %s', {'name': current_name})
             return response
         except CTERAException as error:
-            logging.getLogger().error('Folder group update failed. %s', {'name': name})
+            logging.getLogger().error('Folder group update failed. %s', {'name': current_name})
             raise error
 
     def delete(self, name):

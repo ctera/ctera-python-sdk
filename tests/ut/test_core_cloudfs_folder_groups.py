@@ -1,3 +1,4 @@
+import munch
 from unittest import mock
 
 from cterasdk import exception, portal_enum
