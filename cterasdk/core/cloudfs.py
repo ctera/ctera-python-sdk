@@ -33,7 +33,7 @@ class FolderGroups(BaseCommand):
 
     default = ['name', 'owner']
 
-    def _get_entire_object(self):
+    def _get_entire_object(self, name):
         try:
             return self._portal.get(f'/foldersGroups/{name}')
         except CTERAException as error:
