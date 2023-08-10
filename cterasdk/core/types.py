@@ -647,7 +647,7 @@ class BackgroundTask(Task):
         )
 
 
-class WORMSettings:
+class ComplianceSettingsBuilder:
 
     def __init__(self, enabled, mode, retain_for):
         self.settings = Object()

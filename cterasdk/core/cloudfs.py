@@ -5,6 +5,7 @@ import logging
 from .base_command import BaseCommand
 from . import query, devices
 from .enum import ListFilter, PolicyType
+from .types import ComplianceSettingsBuilder
 from ..common import union, Object
 from ..exception import CTERAException, ObjectNotFoundException
 
@@ -32,6 +33,12 @@ class FolderGroups(BaseCommand):
 
     default = ['name', 'owner']
 
+    def _get_entire_object(self):
+        try:
+            return self._portal.get(f'/foldersGroups/{name}')
+        except CTERAException as error:
+            raise CTERAException('Failed to get folder group', error)
+
     def get(self, name, include=None):
         """
         Get folder group
@@ -41,7 +48,7 @@ class FolderGroups(BaseCommand):
         """
         include = union(include or [], FolderGroups.default)
         include = ['/' + attr for attr in include]
-        folder_group = self._portal.get_multi('/foldersGroups/' + name, include)
+        folder_group = self._portal.get_multi(f'/foldersGroups/{name}', include)
         if folder_group.name is None:
             raise ObjectNotFoundException('Could not find folder group', f'/foldersGroups/{name}', name=name)
         return folder_group
@@ -64,7 +71,7 @@ class FolderGroups(BaseCommand):
 
     def add(self, name, user=None, deduplication_method_type=None, storage_class=None):
         """
-        Create a new Folder Group
+        Create a Folder Group
 
         :param str name: Name of the new folder group
         :param cterasdk.core.types.UserAccount user:
@@ -75,7 +82,7 @@ class FolderGroups(BaseCommand):
 
         param = Object()
         param.name = name
-        param.disabled = True
+        param.disabled = False
         param.owner = self._portal.users.get(user, ['baseObjectRef']).baseObjectRef if user is not None else None
         param.deduplicationMethodType = deduplication_method_type
         if storage_class:
@@ -87,6 +94,25 @@ class FolderGroups(BaseCommand):
             return response
         except CTERAException as error:
             logging.getLogger().error('Folder group creation failed. %s', {'name': name, 'owner': str(user)})
+            raise error
+
+    def modify(self, current_name, new_name):
+        """
+        Modify a folder group
+
+        :param str current_name: Current folder group name
+        :param str new_name: New folder group name
+        """
+        param = self._get_entire_object(current_name)
+        if new_name:
+            param.name = new_name
+        
+        try:
+            self._portal.put(f'/foldersGroups/{name}', param)
+            logging.getLogger().info('Folder group updated. %s', {'name': name})
+            return response
+        except CTERAException as error:
+            logging.getLogger().error('Folder group update failed. %s', {'name': name})
             raise error
 
     def delete(self, name):
@@ -106,20 +132,25 @@ class CloudDrives(BaseCommand):
 
     default = ['name', 'group', 'owner']
 
-    def add(self, name, group, owner, winacls=True, description=None, quota=None):
-        """
-        Create a new directory
+    def _get_entire_object(self, name, owner):
+        return self._portal.get(f'{self.find(name, owner, include=['baseObjectRef']).baseObjectRef}')
 
-        :param str name: Name of the new directory
-        :param str group: The Folder Group to which the directory belongs
-        :param cterasdk.core.types.UserAccount owner: User account, the owner of the new directory
+    def add(self, name, group, owner, winacls=True, description=None, quota=None, compliance_settings=None):
+        """
+        Create a new Cloud Drive Folder (Cloud Volume)
+
+        :param str name: Name of the new folder
+        :param str group: Folder Group to assign this folder to
+        :param cterasdk.core.types.UserAccount owner: User account, the owner of the new folder
         :param bool,optional winacls: Use Windows ACLs, defaults to True
         :param str,optional description: Cloud drive folder description
         :param str,optional quota: Cloud drive folder quota in GB
+        :param cterasdk.common.object.Object,optional compliance_settings: Compliance settings, defaults to disabled.
+         Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
         """
 
         owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
-        group = self._portal.get('/foldersGroups/' + group + '/baseObjectRef')
+        group = self._portal.cloudfs.groups.get(group).baseObjectRef
 
         param = Object()
         param.name = name
@@ -129,11 +160,12 @@ class CloudDrives(BaseCommand):
         param.folderQuota = quota
         if description:
             param.description = description
+        param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
 
         try:
             response = self._portal.execute('', 'addCloudDrive', param)
             logging.getLogger().info(
-                'Created directory. %s',
+                'Cloud drive folder created. %s',
                 {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls}
             )
             return response
@@ -142,6 +174,46 @@ class CloudDrives(BaseCommand):
                 'Cloud drive folder creation failed. %s',
                 {'name': name, 'folder_group': group, 'owner': owner, 'win_acls': winacls}
             )
+            raise error
+
+    def modify(self, current_name, owner, new_name=None, new_owner=None, new_group=None, 
+               description=None, winacls=None, quota=None, compliance_settings=None):
+        """
+        Modify a Cloud Drive Folder (Cloud Volume)
+
+        :param str current_name: Current folder name
+        :param cterasdk.core.types.UserAccount owner: User account, the owner of the folder
+        :param str,optional new_name: New folder name
+        :param cterasdk.core.types.UserAccount,optional new_owner: User account, the new owner of the folder
+        :param str,optional new_group: Folder Group to assign this folder to
+        :param str,optional description: Folder description
+        :param bool,optional winacls: Enable or disable Windows ACLs
+        :param str,optional quota: Folder quota in GB
+        :param cterasdk.common.object.Object,optional compliance_settings: Compliance settings.
+         Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
+        """
+        param = self._get_entire_object(current_name, owner)
+        if new_name:
+            param.name = new_name
+        if new_owner:
+            param.owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
+        if new_group:
+            param.group = self._portal.cloudfs.groups.get(new_group, include=['baseObjectRef']).baseObjectRef
+        if description:
+            param.description = description
+        if winacls:
+            param.enableSyncWinNtExtendedAttributes = winacls
+        if quota:
+            param.folderQuota = quota
+        if compliance_settings:
+            param.wormSettings = compliance_settings
+        
+        try:
+            response = self._portal.put(f'/{param.baseObjectRef}', param)
+            logging.getLogger().info('Cloud drive folder updated. %s', {'name': name})
+            return response
+        except CTERAException as error:
+            logging.getLogger().error('Cloud drive folder update failed. %s', {'name': name})
             raise error
 
     def all(self, include=None, list_filter=ListFilter.NonDeleted, user=None):

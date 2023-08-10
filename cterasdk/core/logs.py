@@ -135,7 +135,7 @@ class Alerts(BaseCommand):
     def put(self, alerts):
         """
         Set Log Based Alerts
-         Use :func:`cterasdk.core.types.AlertBuilder` to build log based alerts`
+         Use :func:`cterasdk.core.types.AlertBuilder` to build log based alerts
 
         :param list[cterasdk.core.types.Alert] alerts: List of alerts
         """
