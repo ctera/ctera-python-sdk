@@ -133,6 +133,7 @@ class TestCoreFolderGroups(base_core.BaseCoreTest):   # pylint: disable=too-many
     def test_modify_folder_group_update_failure(self):
         error_message = "Expected Failure"
         expected_exception = exception.CTERAException(message=error_message)
+        self._global_admin.get = mock.MagicMock(return_value=munch.Munch(dict(name=self._name)))
         self._global_admin.put = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exception.CTERAException) as error:
             cloudfs.FolderGroups(self._global_admin).modify(self._name, self._new_name)
