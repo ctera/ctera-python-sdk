@@ -167,7 +167,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         add_cloud_drive_param.folderQuota = quota
         if description:
             add_cloud_drive_param.description = description
-        add_cloud_drive_param.folderQuota.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
+        add_cloud_drive_param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
         return add_cloud_drive_param
 
     def _mock_get_user_base_object_ref(self):
