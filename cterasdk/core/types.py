@@ -3,7 +3,8 @@ from collections import namedtuple
 from ..common import DateTimeUtils, StringCriteriaBuilder, ListCriteriaBuilder, Object
 from ..lib import FileSystem
 
-from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, BucketType, LocationType, Platform
+from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, 
+                  BucketType, LocationType, Platform, RetentionMode, Duration
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
@@ -644,3 +645,47 @@ class BackgroundTask(Task):
             server_object.progstring,
             ref
         )
+
+
+class WORMSettings:
+
+    def __init__(self, enabled, mode, retain_for):
+        self.settings = Object()
+        self.settings._classname = 'WormSettings'
+        self.settings.worm = enabled
+        self.settings.retentionMode = mode
+        self.settings.retentionPeriod = retain_for
+        self.settings.gracePeriod = None
+
+    @staticmethod
+    def default():
+        return WORMSettings(False, None)
+
+    @staticmethod
+    def none(amount, duration):
+        return WORMSettings(True, RetentionMode.Delete, self._get_retention_period(amount, duration))
+
+    @staticmethod
+    def enterprise(amount, duration):
+        return WORMSettings(True, RetentionMode.Enterprise, self._get_retention_period(amount, duration))
+
+    @staticmethod
+    def compliance(amount, duration):
+        return WORMSettings(True, RetentionMode.Compliance, self._get_retention_period(amount, duration))
+
+    @staticmethod
+    def _get_retention_period(amount, duration):
+        retain_for = Object()
+        retain_for._classname = 'WormPeriod'
+        retain_for.amount = amount
+        retain_for.type = duration
+        return retain_for
+
+    def grace_period(self, amount=30, duration=Duration.Minutes):
+        self.settings.gracePeriod = _get_retention_period(amount, duration)
+        return self
+
+    def build(self):
+        if self.settings.gracePeriod is None: 
+            self.settings.grace_period()
+        return self.settings

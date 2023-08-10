@@ -550,3 +550,33 @@ class DeduplicationMethodType:
     """
     AverageBlockSize = 'AverageBlockSize'
     FixedBlockSize = 'FixedBlockSize'
+
+
+class RetentionMode:
+    """
+    Write Once Read Many Retention Mode
+
+    :ivar str Enterprise: Enterprise
+    :ivar str Compliance: Compliance
+    :ivar str Delete: Delete
+    """
+    Delete = 'None'
+    Enterprise = 'Enterprise'
+    Compliance = 'Compliance'
+
+
+class Duration:
+    """
+    Duration
+
+    :ivar str Minutes: Minutes
+    :ivar str Hours: Hours
+    :ivar str Days: Days
+    :ivar str Months: Months
+    :ivar str Years: Years
+    """
+    Minutes = 'Minutes'
+    Hours = 'Hours'
+    Days = 'Days'
+    Months = 'Months'
+    Years = 'Years'
