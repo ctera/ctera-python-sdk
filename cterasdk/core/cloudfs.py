@@ -150,7 +150,7 @@ class CloudDrives(BaseCommand):
         """
 
         owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
-        group = self._portal.cloudfs.groups.get(group).baseObjectRef
+        group = self._portal.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
 
         param = Object()
         param.name = name
