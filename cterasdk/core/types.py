@@ -3,7 +3,7 @@ from collections import namedtuple
 from ..common import DateTimeUtils, StringCriteriaBuilder, ListCriteriaBuilder, Object
 from ..lib import FileSystem
 
-from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, 
+from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, \
                   BucketType, LocationType, Platform, RetentionMode, Duration
 
 
