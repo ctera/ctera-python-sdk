@@ -106,7 +106,7 @@ class FolderGroups(BaseCommand):
         param = self._get_entire_object(current_name)
         if new_name:
             param.name = new_name
-        
+
         try:
             response = self._portal.put(f'/foldersGroups/{current_name}', param)
             logging.getLogger().info('Folder group updated. %s', {'name': current_name})
@@ -172,7 +172,7 @@ class CloudDrives(BaseCommand):
             )
             raise error
 
-    def modify(self, current_name, owner, new_name=None, new_owner=None, new_group=None, 
+    def modify(self, current_name, owner, new_name=None, new_owner=None, new_group=None,
                description=None, winacls=None, quota=None, compliance_settings=None):
         """
         Modify a Cloud Drive Folder (Cloud Volume)
@@ -203,7 +203,7 @@ class CloudDrives(BaseCommand):
             param.folderQuota = quota
         if compliance_settings:
             param.wormSettings = compliance_settings
-        
+            
         try:
             response = self._portal.put(f'/{param.baseObjectRef}', param)
             logging.getLogger().info('Cloud drive folder updated. %s', {'name': current_name})

@@ -686,6 +686,6 @@ class ComplianceSettingsBuilder:
         return self
 
     def build(self):
-        if self.settings.gracePeriod is None: 
+        if self.settings.gracePeriod is None:
             self.grace_period()
         return self.settings
