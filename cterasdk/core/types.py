@@ -3,7 +3,8 @@ from collections import namedtuple
 from ..common import DateTimeUtils, StringCriteriaBuilder, ListCriteriaBuilder, Object
 from ..lib import FileSystem
 
-from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, BucketType, LocationType, Platform
+from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, \
+                  BucketType, LocationType, Platform, RetentionMode, Duration
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
@@ -644,3 +645,47 @@ class BackgroundTask(Task):
             server_object.progstring,
             ref
         )
+
+
+class ComplianceSettingsBuilder:
+
+    def __init__(self, enabled, mode, retain_for):
+        self.settings = Object()
+        self.settings._classname = 'WormSettings'  # pylint: disable=protected-access
+        self.settings.worm = enabled
+        self.settings.retentionMode = mode
+        self.settings.retentionPeriod = retain_for
+        self.settings.gracePeriod = None
+
+    @staticmethod
+    def default():
+        return ComplianceSettingsBuilder(False, RetentionMode.Delete, None)
+
+    @staticmethod
+    def none(amount, duration):
+        return ComplianceSettingsBuilder(True, RetentionMode.Delete, ComplianceSettingsBuilder._get_retention_period(amount, duration))
+
+    @staticmethod
+    def enterprise(amount, duration):
+        return ComplianceSettingsBuilder(True, RetentionMode.Enterprise, ComplianceSettingsBuilder._get_retention_period(amount, duration))
+
+    @staticmethod
+    def compliance(amount, duration):
+        return ComplianceSettingsBuilder(True, RetentionMode.Compliance, ComplianceSettingsBuilder._get_retention_period(amount, duration))
+
+    @staticmethod
+    def _get_retention_period(amount, duration):
+        retain_for = Object()
+        retain_for._classname = 'WormPeriod'  # pylint: disable=protected-access
+        retain_for.amount = amount
+        retain_for.type = duration
+        return retain_for
+
+    def grace_period(self, amount=30, duration=Duration.Minutes):
+        self.settings.gracePeriod = self._get_retention_period(amount, duration)
+        return self
+
+    def build(self):
+        if self.settings.gracePeriod is None:
+            self.grace_period()
+        return self.settings

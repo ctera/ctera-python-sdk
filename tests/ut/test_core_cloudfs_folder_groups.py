@@ -1,4 +1,5 @@
 from unittest import mock
+import munch
 
 from cterasdk import exception, portal_enum
 from cterasdk.core import cloudfs
@@ -15,6 +16,7 @@ class TestCoreFolderGroups(base_core.BaseCoreTest):   # pylint: disable=too-many
         self._owner = 'admin'
         self._local_user_account = UserAccount(self._owner)
         self._name = 'folderGroup'
+        self._new_name = 'folderGroup2'
         self._user_uid = 1337
         self.fixed_block_size = portal_enum.DeduplicationMethodType.FixedBlockSize
 
@@ -109,6 +111,34 @@ class TestCoreFolderGroups(base_core.BaseCoreTest):   # pylint: disable=too-many
             cloudfs.FolderGroups(self._global_admin).add(self._name, deduplication_method_type=self.fixed_block_size)
         self.assertEqual(error_message, error.exception.message)
 
+    def test_modify_folder_group(self):
+        get_response = munch.Munch(dict(name=self._name))
+        self._init_global_admin(get_response=get_response, put_response='Success')
+        ret = cloudfs.FolderGroups(self._global_admin).modify(self._name, self._new_name)
+        self._global_admin.get.assert_called_once_with(f'/foldersGroups/{self._name}')
+        self._global_admin.put.assert_called_once_with(f'/foldersGroups/{self._name}', mock.ANY)
+        expected_param = munch.Munch(dict(name=self._new_name))
+        actual_param = self._global_admin.put.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, 'Success')
+
+    def test_modify_folder_group_user_not_exists(self):
+        error_message = "Failed to get folder group"
+        expected_exception = exception.CTERAException(message=error_message)
+        self._global_admin.get = mock.MagicMock(side_effect=expected_exception)
+        with self.assertRaises(exception.CTERAException) as error:
+            cloudfs.FolderGroups(self._global_admin).modify(self._name, self._new_name)
+        self.assertEqual(error_message, error.exception.message)
+
+    def test_modify_folder_group_update_failure(self):
+        error_message = "Expected Failure"
+        expected_exception = exception.CTERAException(message=error_message)
+        self._global_admin.get = mock.MagicMock(return_value=munch.Munch(dict(name=self._name)))
+        self._global_admin.put = mock.MagicMock(side_effect=expected_exception)
+        with self.assertRaises(exception.CTERAException) as error:
+            cloudfs.FolderGroups(self._global_admin).modify(self._name, self._new_name)
+        self.assertEqual(error_message, error.exception.message)
+
     def test_delete(self):
         self._init_global_admin(execute_response='Success')
         cloudfs.FolderGroups(self._global_admin).delete(self._name)
@@ -117,7 +147,7 @@ class TestCoreFolderGroups(base_core.BaseCoreTest):   # pylint: disable=too-many
     def _get_add_folder_group_object(self, with_owner=False, fixed_block_size=False):
         add_folder_group_param = Object()
         add_folder_group_param.name = self._name
-        add_folder_group_param.disabled = True
+        add_folder_group_param.disabled = False
         add_folder_group_param.owner = self._owner if with_owner else None
         add_folder_group_param.deduplicationMethodType = self.fixed_block_size if fixed_block_size else None
         return add_folder_group_param
