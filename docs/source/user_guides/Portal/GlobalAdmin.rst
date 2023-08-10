@@ -1198,6 +1198,37 @@ Cloud Drive Folders
    wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.drives.add('DIR-002', 'FG-002', wbruce)
 
+   """Create immutable Cloud Drive folders"""
+
+   svc_account = portal_types.UserAccount('svc_account')
+
+   """
+   Mode: Enterprise (i.e., allow privileged delete by the CTERA Compliance Officer role)
+   Retention Period: 7 Years.
+   Grace Period: 30 Minutes.
+   """
+   admin.cloudfs.groups.add('FG-Enterprise', svc_account)
+   settings = portal_types.ComplianceSettingsBuilder.enterprise(7, portal_enum.Duration.Years).grace_period(30, portal_enum.Duration.Minutes).build()
+   admin.cloudfs.drives.add('Enterprise', 'FG-Enterprise', svc_account, compliance_settings=settings)
+
+   """
+   Mode: Compliance (data cannot be deleted after grace period expires)
+   Retention Period: 1 Years.
+   Grace Period: 1 Hour.
+   """
+   admin.cloudfs.groups.add('FG-Compliance', svc_account)
+   settings = portal_types.ComplianceSettingsBuilder.enterprise(1, portal_enum.Duration.Years).grace_period(1, portal_enum.Duration.Hours).build()
+   admin.cloudfs.drives.add('Compliance', 'FG-Compliance', svc_account, compliance_settings=settings)
+
+.. automethod:: cterasdk.core.cloudfs.CloudDrives.modify
+   :noindex:
+
+.. code:: python
+
+   """Update Quota of a Cloud Drive Folder"""
+   svc_account = portal_types.UserAccount('svc_account')
+   admin.cloudfs.drives.modify('DIR-001', svc_account, quota=5120) # Set folder quota to 5 TB
+
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.delete
    :noindex:
 

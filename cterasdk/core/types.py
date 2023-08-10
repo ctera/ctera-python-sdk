@@ -651,7 +651,7 @@ class ComplianceSettingsBuilder:
 
     def __init__(self, enabled, mode, retain_for):
         self.settings = Object()
-        self.settings._classname = 'WormSettings'
+        self.settings._classname = 'WormSettings'  # pylint: disable=protected-access
         self.settings.worm = enabled
         self.settings.retentionMode = mode
         self.settings.retentionPeriod = retain_for
@@ -676,7 +676,7 @@ class ComplianceSettingsBuilder:
     @staticmethod
     def _get_retention_period(amount, duration):
         retain_for = Object()
-        retain_for._classname = 'WormPeriod'
+        retain_for._classname = 'WormPeriod'  # pylint: disable=protected-access
         retain_for.amount = amount
         retain_for.type = duration
         return retain_for
