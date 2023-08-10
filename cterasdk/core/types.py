@@ -682,10 +682,10 @@ class WORMSettings:
         return retain_for
 
     def grace_period(self, amount=30, duration=Duration.Minutes):
-        self.settings.gracePeriod = _get_retention_period(amount, duration)
+        self.settings.gracePeriod = self._get_retention_period(amount, duration)
         return self
 
     def build(self):
         if self.settings.gracePeriod is None: 
-            self.settings.grace_period()
+            self.grace_period()
         return self.settings
