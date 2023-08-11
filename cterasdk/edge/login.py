@@ -24,10 +24,10 @@ class Login(BaseCommand):
 
     def logout(self):
         host = self._gateway.host()
-        user = self._gateway.session().user
+        user = self._gateway.session().user.name
         try:
             self._gateway.form_data('/logout', {'foo': 'bar'})
-            logging.getLogger().info("User logged out. %s", {'host': self._gateway.host(), 'user': user})
+            logging.getLogger().info("User logged out. %s", {'host': host, 'user': user})
         except CTERAException as error:
             logging.getLogger().error("Logout failed. %s", {'host': host, 'user': user})
             raise error
