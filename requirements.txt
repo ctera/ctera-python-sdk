@@ -1,3 +1,4 @@
 requests>=2.23
 requests-toolbelt
 cryptography
+packaging
