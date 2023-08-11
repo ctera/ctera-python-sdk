@@ -60,6 +60,6 @@ class SessionBase(Object):
         return self.status == SessionStatus.Active
 
     def whoami(self):
-        session = self.__dict__.copy()
-        session['version'] = str(self.version)
+        session = copy.deepcopy(self)
+        session.version = str(self.version)
         print(session)
