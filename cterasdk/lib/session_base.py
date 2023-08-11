@@ -17,10 +17,17 @@ class SessionUser(Object):
         self.role = role
 
 
+class SessionHostType:
+    Edge = 'Edge Filer'
+    Portal = 'Portal'
+    Agent = 'Agent'
+
+
 class SessionBase(Object):
 
-    def __init__(self, host):
+    def __init__(self, host, host_type):
         self.host = host
+        self.host_type = host_type
         self.status = SessionStatus.Inactive
         self.user = None
         self.local_auth = False

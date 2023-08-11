@@ -1,4 +1,4 @@
-from ..lib.session_base import SessionBase, SessionUser
+from ..lib.session_base import SessionBase, SessionUser, SessionHostType
 from .enum import Context, Role
 
 
@@ -7,7 +7,7 @@ class Session(SessionBase):
     Administration = 'Administration'
 
     def __init__(self, host, context):
-        super().__init__(host)
+        super().__init__(host, SessionHostType.Portal)
         self.context = context
 
     def _do_start_local_session(self, ctera_host):

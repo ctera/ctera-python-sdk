@@ -1,7 +1,7 @@
 import logging
 
 from ..common import Object
-from ..lib.session_base import SessionBase, SessionUser, SessionStatus
+from ..lib.session_base import SessionBase, SessionUser, SessionStatus, SessionHostType
 
 
 class SessionType:
@@ -23,7 +23,7 @@ class SessionConnection(Object):
 class Session(SessionBase):
 
     def __init__(self, host):
-        super().__init__(host)
+        super().__init__(host, SessionHostType.Edge)
         self.connection = SessionConnection(SessionType.Local)
 
     def _do_start_local_session(self, ctera_host):
