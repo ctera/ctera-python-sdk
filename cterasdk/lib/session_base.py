@@ -33,12 +33,12 @@ class SessionBase(Object):
     def set_version(self, version):
         self.version = Version(version)
 
-    def start_local_session(self, ctera_host):
+    def start_local_session(self, CTERA_Host):
         self.status = SessionStatus.Initializing
-        self._do_start_local_session(ctera_host)
+        self._do_start_local_session(CTERA_Host)
         self.status = SessionStatus.Active
 
-    def _do_start_local_session(self, ctera_host):
+    def _do_start_local_session(self, CTERA_Host):
         raise NotImplementedError("Subclass must implement the _do_start_local_session method")
 
     def terminate(self):
