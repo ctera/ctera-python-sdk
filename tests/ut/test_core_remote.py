@@ -50,7 +50,7 @@ class TestCoreRemote(base_core.BaseCoreTest):
         self.assertIsInstance(portal_device, instance_type)
 
     def _activate_portal_session(self):
-        self._global_admin.get = mock.MagicMock(side_effect=['team-portal-name', TestCoreRemote._create_current_session_object()])
+        self._global_admin.get = mock.MagicMock(side_effect=['team-portal-name', '7.5.182.16', TestCoreRemote._create_current_session_object()])
         self._global_admin.session().start_local_session(self._global_admin)
 
     @staticmethod
