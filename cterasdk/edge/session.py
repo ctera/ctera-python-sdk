@@ -1,7 +1,7 @@
 import logging
 
 from ..common import Object
-from ..lib.session_base import SessionBase, SessionUser, SessionStatus
+from ..lib.session_base import SessionBase, SessionUser, SessionStatus, SessionHostType
 
 
 class SessionType:
@@ -20,18 +20,33 @@ class SessionConnection(Object):
             self.remote_access = None
 
 
+class LocalUser(SessionUser):
+    """Local Session Object"""
+
+
+class RemoteUser(SessionUser):
+    """Remote Session Object"""
+
+    def __init__(self, name, tenant):
+        super().__init__(name)
+        self.tenant = tenant
+
+
 class Session(SessionBase):
 
     def __init__(self, host):
-        super().__init__(host)
+        super().__init__(host, SessionHostType.Edge)
         self.connection = SessionConnection(SessionType.Local)
 
-    def _do_start_local_session(self, ctera_host):
-        user = ctera_host.get('currentuser')
-        self._activate(SessionType.Local, user.username)
+    def _do_start_local_session(self, CTERA_Host):
+        user = CTERA_Host.get('/currentuser').username
+        self.set_version(CTERA_Host.get('/status/device/runningFirmware'))
+        self.user = LocalUser(user)
+        self.connection = SessionConnection(SessionType.Local)
 
     def start_remote_session(self, remote_session):
-        self._activate(SessionType.Remote, remote_session.user.name, tenant=remote_session.user.tenant, remote_from=remote_session.host)
+        self.user = RemoteUser(remote_session.user.name, remote_session.user.tenant)
+        self.connection = SessionConnection(SessionType.Remote, remote_session.host)
         self.status = SessionStatus.Active
 
     def _do_terminate(self):
@@ -63,6 +78,5 @@ class Session(SessionBase):
     def remote_from(self):  # pylint: disable=method-hidden
         return self.connection.remote_from
 
-    def _activate(self, session_type, user, tenant=None, remote_from=None):
-        self.user = SessionUser(user, tenant=tenant)
-        self.connection = SessionConnection(session_type, remote_from=remote_from)
+    def tenant(self):
+        return self.user.tenant if isinstance(self.user, RemoteUser) else None

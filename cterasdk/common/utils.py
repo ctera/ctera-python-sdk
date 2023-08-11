@@ -2,6 +2,7 @@ import ipaddress
 import re
 import logging
 from datetime import datetime
+from packaging.version import parse as parse_version
 
 from .object import Object
 from .enum import DayOfWeek
@@ -168,3 +169,35 @@ def parse_to_ipaddress(address):
         err = ValueError(f'{address} does not appear to be an IPv4 or IPv6 network or ip address')
         logging.getLogger().error('Incorrect entry, please use IPv4 or IPv6 CIDR Formats. %s', {'Error': err})
         raise err
+
+
+class Version:
+    """Software Version"""
+
+    def __init__(self, version):
+        self._version = parse_version(version)
+
+    def __eq__(self, v):
+        return self._version == parse_version(v)
+
+    def __gt__(self, v):
+        return self._version > parse_version(v)
+
+    def __ge__(self, v):
+        return self._version >= parse_version(v)
+
+    def __lt__(self, v):
+        return self._version < parse_version(v)
+
+    def __le__(self, v):
+        return self._version <= parse_version(v)
+
+    def __ne__(self, v):
+        return self._version != parse_version(v)
+
+    @property
+    def version(self):
+        return str(self._version)
+
+    def __str__(self):
+        return self.version

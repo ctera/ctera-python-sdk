@@ -11,6 +11,7 @@ class TestCoreLogin(base_core.BaseCoreTest):
     _username = 'admin'
     _password = 'password'
     _role = 'ReadWriteAdmin'
+    _version = '7.5.182.16'
 
     def setUp(self):
         super().setUp()
@@ -23,6 +24,8 @@ class TestCoreLogin(base_core.BaseCoreTest):
     def _obtain_session_info(path):
         if path == '/currentPortal':
             return TestCoreLogin._tenant
+        if path == '/version':
+            return TestCoreLogin._version
         if path == '/currentSession':
             current_session = Object()
             current_session.username = TestCoreLogin._username
