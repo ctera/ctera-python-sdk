@@ -1,5 +1,5 @@
 from ..common import Object
-from ..common.utils import Version
+from packaging.version import parse as parse_version
 
 
 class SessionStatus:
@@ -25,7 +25,7 @@ class SessionBase(Object):
         self.version = None
 
     def set_version(self, version):
-        self.version = Version(version)
+        self.version = parse_version(version)
 
     def start_local_session(self, ctera_host):
         self.status = SessionStatus.Initializing
@@ -60,4 +60,6 @@ class SessionBase(Object):
         return self.status == SessionStatus.Active
 
     def whoami(self):
-        print(self)
+        session = self.__dict__.copy()
+        session['version'] = str(self.version)
+        print(session)
