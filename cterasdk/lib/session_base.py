@@ -21,6 +21,7 @@ class SessionBase(Object):
         self.status = SessionStatus.Inactive
         self.user = None
         self.local_auth = False
+        self.version = None
 
     def start_local_session(self, ctera_host):
         self.status = SessionStatus.Initializing
