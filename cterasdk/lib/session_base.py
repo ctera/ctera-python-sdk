@@ -1,3 +1,5 @@
+import copy
+
 from ..common import Object
 from packaging.version import parse as parse_version
 
