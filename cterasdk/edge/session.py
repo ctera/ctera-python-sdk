@@ -27,7 +27,8 @@ class Session(SessionBase):
         self.connection = SessionConnection(SessionType.Local)
 
     def _do_start_local_session(self, ctera_host):
-        user = ctera_host.get('currentuser')
+        user = ctera_host.get('/currentuser')
+        self.set_version(ctera_host.get('/status/device/runningFirmware'))
         self._activate(SessionType.Local, user.username)
 
     def start_remote_session(self, remote_session):
