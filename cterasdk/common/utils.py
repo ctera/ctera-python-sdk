@@ -106,17 +106,19 @@ class BaseObjectRef(Object):
     :ivar str tenant: Base object tenant name
     :ivar str name: Base object name
     """
-    def __init__(self, classname, uid, tenant, name):
+    def __init__(self, uid, tenant=None, classname=None, name=None, more=None):
         """
-        :param str classname: Base object class name
         :param str uid: Base object unique identifier
-        :param str tenant: Base object tenant
-        :param str name: Base object name
+        :param str,optional tenant: Base object tenant
+        :param str,optional classname: Base object class name
+        :param str,optional name: Base object name
+        :param str,optional more: Base object more info
         """
-        self.classname = classname
         self.uid = uid
         self.tenant = tenant
+        self.classname = classname
         self.name = name
+        self.more = more
 
     def in_tenant_context(self):
         """
@@ -128,24 +130,23 @@ class BaseObjectRef(Object):
         """
         Returns a string representation of the base object reference
         """
-        return '/'.join(['objs', self.uid, self.tenant, self.classname, self.name])
+        output = ['objs', self.uid, self.tenant or '', self.classname or '', self.name or '', self.more or '']
+        return '/'.join([x for x in output if x])
 
 
 def parse_base_object_ref(base_object_ref):
-    """
-    Parse a base object reference.
-
-    :param str base_object_ref: Base object reference
-    :return cterasdk.common.utils.BaseObjectRef: Object holding the classname, uid, tenant and object name
-    """
-    regex = '^objs/[1-9][0-9]*/[^/]*/[A-Za-z]+/.*$'
-    match = re.search(regex, base_object_ref)
-    if match:
-        logging.getLogger().debug('Found match. %s', {'ref': base_object_ref})
-        _, uid, tenant, classname, name = match.group(0).split('/')
-        return BaseObjectRef(classname, uid, tenant, name)
-    logging.getLogger().debug('No match found. %s', {'ref': base_object_ref})
-    return None
+    if not base_object_ref.startswith('objs/'):
+        logging.getLogger().error('Invalid base object reference. %s', {'ref': base_object_ref})
+        return None
+    base_object_ref = base_object_ref[5:]
+    p = re.compile('[^/]*')
+    components = ['uid', 'tenant', 'classname', 'name', 'more']
+    arguments = {}
+    while base_object_ref:
+        match = p.match(base_object_ref)
+        arguments[components.pop(0)] = match.group()
+        base_object_ref = base_object_ref[match.end() + 1:]
+    return BaseObjectRef(**arguments)
 
 
 def parse_to_ipaddress(address):
