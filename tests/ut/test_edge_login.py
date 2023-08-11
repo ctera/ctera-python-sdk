@@ -38,8 +38,8 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
         self._init_filer()
         self._filer.get = mock.MagicMock(side_effect=[munch.Munch(dict(username=self._username)), self._version])
         self._init_ctera_migrate()
-        login.Login(self._filer).login(self._username, self._password)
-        login.Login(self._filer).logout()
+        self._filer.login(self._username, self._password)
+        self._filer.logout()
         self._filer.form_data.assert_has_calls(
             [
                 mock.call('/login', {'username': self._username, 'password': self._password}),
