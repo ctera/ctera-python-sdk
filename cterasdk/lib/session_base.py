@@ -1,4 +1,5 @@
 from ..common import Object
+from ..common.utils import Version
 
 
 class SessionStatus:
@@ -22,6 +23,9 @@ class SessionBase(Object):
         self.user = None
         self.local_auth = False
         self.version = None
+
+    def set_version(self, version):
+        self.version = Version(version)
 
     def start_local_session(self, ctera_host):
         self.status = SessionStatus.Initializing

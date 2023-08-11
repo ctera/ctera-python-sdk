@@ -12,7 +12,7 @@ class Session(SessionBase):
 
     def _do_start_local_session(self, ctera_host):
         tenant = ctera_host.get('/currentPortal') or Session.Administration
-        self.version = ctera_host.get('/version')
+        self.set_version(ctera_host.get('/version'))
         if self.local_auth:
             self.user = SessionUser('$admin', tenant=tenant, role=Role.ReadWriteAdmin)
         else:
