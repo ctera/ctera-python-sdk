@@ -1,7 +1,7 @@
 import copy
 
 from ..common import Object
-from packaging.version import parse as parse_version
+from ..common.utils import Version
 
 
 class SessionStatus:
@@ -27,7 +27,7 @@ class SessionBase(Object):
         self.version = None
 
     def set_version(self, version):
-        self.version = parse_version(version)
+        self.version = Version(version)
 
     def start_local_session(self, ctera_host):
         self.status = SessionStatus.Initializing
@@ -63,5 +63,5 @@ class SessionBase(Object):
 
     def whoami(self):
         session = copy.deepcopy(self)
-        session.version = str(self.version)
+        session.version = str(session.version)
         print(session)
