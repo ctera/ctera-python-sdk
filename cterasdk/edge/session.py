@@ -20,6 +20,18 @@ class SessionConnection(Object):
             self.remote_access = None
 
 
+class LocalUser(SessionUser):
+    """Local Session Object"""
+
+
+class RemoteUser(SessionUser):
+    """Remote Session Object"""
+
+    def __init__(self, name, tenant):
+        super().__init__(name)
+        self.tenant = tenant
+
+
 class Session(SessionBase):
 
     def __init__(self, host):
@@ -29,10 +41,12 @@ class Session(SessionBase):
     def _do_start_local_session(self, ctera_host):
         user = ctera_host.get('/currentuser')
         self.set_version(ctera_host.get('/status/device/runningFirmware'))
-        self._activate(SessionType.Local, user.username)
+        self.user = LocalUser(user)
+        self.connection = SessionConnection(SessionType.Local)
 
     def start_remote_session(self, remote_session):
-        self._activate(SessionType.Remote, remote_session.user.name, tenant=remote_session.user.tenant, remote_from=remote_session.host)
+        self.user = RemoteUser(remote_session.user.name, remote_session.user.tenant)
+        self.connection = SessionConnection(SessionType.Remote, remote_session.host)
         self.status = SessionStatus.Active
 
     def _do_terminate(self):
@@ -63,7 +77,3 @@ class Session(SessionBase):
 
     def remote_from(self):  # pylint: disable=method-hidden
         return self.connection.remote_from
-
-    def _activate(self, session_type, user, tenant=None, remote_from=None):
-        self.user = SessionUser(user, tenant=tenant)
-        self.connection = SessionConnection(session_type, remote_from=remote_from)
