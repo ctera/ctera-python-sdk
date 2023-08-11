@@ -180,13 +180,16 @@ class Version:
     def __eq__(self, v):
         return self._version == parse_version(v)
 
+    def __gt__(self, v):
+        return self._version > parse_version(v)
+
     def __ge__(self, v):
         return self._version >= parse_version(v)
 
     def __lt__(self, v):
         return self._version < parse_version(v)
 
-    def __lt__(self, v):
+    def __le__(self, v):
         return self._version <= parse_version(v)
 
     def __ne__(self, v):
