@@ -50,13 +50,13 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
 
     def test_logout_failure_after_login_success(self):
         self._init_filer()
+        self._filer.get = mock.MagicMock(side_effect=[munch.Munch(dict(username=self._username)), self._version])
         self._init_ctera_migrate()
-        login.Login(self._filer).login(self._username, self._password)
+        self._filer.login(self._username, self._password)
         self._filer.form_data.assert_called_once_with('/login', {'username': self._username, 'password': self._password})
         self._filer._ctera_migrate.login.assert_called_once_with('/migration/rest/v1/auth/user')  # pylint: disable=protected-access
         error_message = "Expected Failure"
-        expected_exception = exception.CTERAException(message=error_message)
-        self._filer.form_data = mock.MagicMock(side_effect=expected_exception)
+        self._filer.form_data = mock.MagicMock(side_effect=exception.CTERAException(message=error_message))
         with self.assertRaises(exception.CTERAException) as error:
             login.Login(self._filer).logout()
         self._filer.form_data.assert_called_once_with('/logout', {'foo': 'bar'})
