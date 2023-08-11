@@ -1,4 +1,5 @@
 from unittest import mock
+import munch
 
 from cterasdk import exception
 from cterasdk.edge import login
