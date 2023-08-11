@@ -77,3 +77,6 @@ class Session(SessionBase):
 
     def remote_from(self):  # pylint: disable=method-hidden
         return self.connection.remote_from
+
+    def tenant(self):
+        return self.user.tenant if isinstance(self.user, RemoteUser) else None
