@@ -172,7 +172,7 @@ def parse_to_ipaddress(address):
 
 
 class Version:
-    """Software Version""""
+    """Software Version"""
 
     def __init__(self, version):
         self.version = parse_version(version)
