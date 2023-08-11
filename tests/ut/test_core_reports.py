@@ -29,5 +29,10 @@ class TestCoreReports(base_core.BaseCoreTest):
         self._assert_called_once_with('folderGroupsStatisticsReport')
         self.assertEqual(ret, self._get_response)
 
+    def test_devices_report(self):
+        ret = reports.Reports(self._global_admin).devices()
+        self._assert_called_once_with('devicesStatisticsReport')
+        self.assertEqual(ret, self._get_response)
+
     def _assert_called_once_with(self, report_name):
         self._global_admin.get.assert_called_once_with(f'/reports/{report_name}')
