@@ -38,9 +38,9 @@ class Session(SessionBase):
         super().__init__(host, SessionHostType.Edge)
         self.connection = SessionConnection(SessionType.Local)
 
-    def _do_start_local_session(self, ctera_host):
-        user = ctera_host.get('/currentuser').username
-        self.set_version(ctera_host.get('/status/device/runningFirmware'))
+    def _do_start_local_session(self, CTERA_Host):
+        user = CTERA_Host.get('/currentuser').username
+        self._update_version(CTERA_Host)
         self.user = LocalUser(user)
         self.connection = SessionConnection(SessionType.Local)
 
@@ -48,6 +48,9 @@ class Session(SessionBase):
         self.user = RemoteUser(remote_session.user.name, remote_session.user.tenant)
         self.connection = SessionConnection(SessionType.Remote, remote_session.host)
         self.status = SessionStatus.Active
+
+    def _update_version(self, CTERA_Host):
+        self.set_version(CTERA_Host.get('/status/device/runningFirmware'))
 
     def _do_terminate(self):
         if self.local():
@@ -66,7 +69,8 @@ class Session(SessionBase):
     def remote(self):
         return self.connection.type == SessionType.Remote
 
-    def enable_remote_access(self):
+    def enable_remote_access(self, CTERA_Host):
+        self._update_version(CTERA_Host)
         self.connection.remote_access = True
 
     def disable_remote_access(self):
