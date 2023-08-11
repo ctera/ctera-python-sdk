@@ -9,9 +9,9 @@ def remote_access(Gateway, Portal):
     logging.getLogger().info("Enabling remote access. %s", {'tenant': tenant, 'device': device})
 
     ticket = obtain_ticket(Portal, device)
+    Gateway.session().enable_remote_access()
     login(Gateway, ticket)
     logging.getLogger().info("Enabled remote access. %s", {'tenant': tenant, 'device': device})
-    Gateway.session().enable_remote_access(Gateway)
 
 
 def login(Gateway, ticket):
