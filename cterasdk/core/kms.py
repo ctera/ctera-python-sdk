@@ -1,0 +1,134 @@
+import logging
+
+from .base_command import BaseCommand
+from ..common import Object
+from ..lib import X509Certificate, PrivateKey
+from . import query
+
+
+class KMS(BaseCommand):
+    """
+    External Key Management APIs 
+    
+    :ivar cterasdk.core.kms.KMS servers: Object holding the Portal External Key Management Server APIs
+    """
+    def __init__(self, portal):
+        super().__init__(portal)
+        self.servers = KMSServers(self._portal)
+
+    def settings(self):
+        """
+        Get Key Management Service Settings
+        """
+        return self._portal.get('/settings/keyManagerSettings')
+
+    def status(self):
+        """
+        Get Key Management Service Status
+        """
+        return self._portal.execute('', 'getKeyManagerGlobalStatus')
+
+    def enable(self, private_key, client_certificate, server_certificate, expiration=None, timeout=None, port=None):
+        """
+        Enable Key Management Service
+
+        :param str private_key: The PEM-encoded private key, or a path to the PEM-encoded private key file
+        :param str client_certificate: The PEM-encoded client certificate, or a path to the certificate file
+        :param str server_certificate: The PEM-encoded KMS server certificate, or a path to the certificate file
+        :param int,optional expiration: Key expiration in days, defaults to ``365``.
+        :param int,optional timeout: Connection timeout in seconds, defaults to ``2``
+        :param int,optional port: Key server port, defaults to ``5696``
+        """
+        param = self._portal.default_class('KeyManagerSettings')
+        param.expiration = expiration if expiration else 365
+        param.integration.connectionSettings.timeout = timeout if timeout else 2
+        param.integration.connectionSettings.port = port if port else 5696
+        param.integration.tlsDetails = Object()
+        param.integration.tlsDetails.clientCert = X509Certificate.load_certificate(client_certificate).pem_data
+        param.integration.tlsDetails.privateKey = PrivateKey.load_private_key(private_key).pem_data
+        param.integration.tlsDetails.rootCACert = X509Certificate.load_certificate(server_certificate).pem_data
+        self._portal.put('/keyManagerSettings', param)
+
+    def disable(self):
+        """
+        Disbale Key Management Service
+        """
+        return self._portal.execute('', 'removeKeyManagmentService')
+
+    def modify(self, expiration=None, timeout=None, port=None):
+        """
+        Modify Key Management Service Settings
+
+        :param str,optional private_key: The PEM-encoded private key, or a path to the PEM-encoded private key file
+        :param str,optional client_certificate: The PEM-encoded client certificate, or a path to the certificate file
+        :param str,optional server_certificate: The PEM-encoded KMS server certificate, or a path to the certificate file
+        :param int,optional expiration: Key expiration in days, defaults to ``365``.
+        :param int,optional timeout: Connection timeout in seconds, defaults to ``2``
+        :param int,optional port: Key server port, defaults to ``5696``
+        """
+        settings = self.settings()
+        if client_certificate:
+            settings.integration.tlsDetails.clientCert = X509Certificate.load_certificate(client_certificate).pem_data
+        if private_key:
+            settings.integration.tlsDetails.privateKey = PrivateKey.load_private_key(private_key).pem_data
+        if server_certificate:
+            settings.integration.tlsDetails.rootCACert = X509Certificate.load_certificate(server_certificate).pem_data
+        if expiration:
+            settings.expiration = expiration
+        if timeout:
+            settings.integration.connectionSettings.timeout = timeout
+        if port:
+            settings.integration.connectionSettings.port = port
+        return self._portal.put('/settings/keyManagerSettings', settings)
+
+
+class KMSServers(BaseCommand):
+    """ External Key Management Server APIs """
+
+    def get(self, name):
+        """
+        Retrieve a key-server
+
+        :param str name: Key-server name
+        """
+        return self._portal.get(f'/keyManagerServers/{name}')
+
+    def all(self):
+        """
+        List Key Management Servers
+        """
+        param = query.QueryParamBuilder().startFrom(0).countLimit(25).orFilter(True).build()
+        return query.iterator(self._portal, '/keyManagerServers', param)
+
+    def add(self, name, ipaddr):
+        """
+        Add a key-server
+
+        :param str name: Key-server name
+        :param str ipaddr: Key-server IP address
+        """
+        param = Object()
+        param._classname = 'KeyManagerServer'  # pylint: disable=protected-access
+        param.name = name
+        param.host = ipaddr
+        return self._portal.add('/keyManagerServers', param)
+        
+
+    def modify(self, current_name, new_name):
+        """
+        Remove a key-server
+
+        :param str current_name: Key-server current name
+        :param str new_name: Key-server new name
+        """
+        key_server = self.get(current_name)
+        key_server.name = new_name
+        return self._portal.put(f'/keyManagerServers/{current_name}', key_server)
+
+    def delete(self, name):
+        """
+        Remove a key-server
+
+        :param str name: Key-server name
+        """
+        return self._portal.delete(f'/keyManagerServers/{name}')
