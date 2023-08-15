@@ -1,4 +1,6 @@
 from unittest import mock
+from unittest.mock import Mock
+
 import munch
 
 from cterasdk.core import kms
@@ -12,6 +14,9 @@ class TestCoreKMS(base_core.BaseCoreTest):
         self._kms_server_classname = 'KeyManagerServer'
         self._kms_server_name = 'kms001'
         self._kms_server_ipaddr = '192.168.30.1'
+        self._portal_mock = Mock()
+        self._kms = kms.KMS(self._portal_mock)
+        self._kms_globalStatus = {'status': 'OK'}
 
     def test_get_settings(self):
         get_response = 'Success'
@@ -21,18 +26,18 @@ class TestCoreKMS(base_core.BaseCoreTest):
         self.assertEqual(ret, get_response)
 
     def test_get_status(self):
-        execute_response = 'Success'
-        self._init_global_admin(execute_response=execute_response)
-        ret = kms.KMS(self._global_admin).status()
-        self._global_admin.get.assert_called_once_with('', 'getKeyManagerGlobalStatus')
-        self.assertEqual(ret, execute_response)
+        self._portal_mock.execute.return_value = self._kms_globalStatus
+        ret = self._kms.status()
+        self._portal_mock.execute.assert_called_once_with('', 'getKeyManagerGlobalStatus')
+        self.assertEqual(ret, self._kms_globalStatus)
 
     def test_add_kms_server(self):
         add_response = 'Success'
         self._init_global_admin(add_response=add_response)
         ret = kms.KMS(self._global_admin).servers.add(self._kms_server_name, self._kms_server_ipaddr)
         self._global_admin.add.assert_called_once_with('/keyManagerServers', mock.ANY)
-        expected_param = munch.Munch({'name': self._kms_server_name, 'host': self._kms_server_ipaddr, '_classname': self._kms_server_classname})
+        expected_param = munch.Munch({'name': self._kms_server_name,
+                                      'host': self._kms_server_ipaddr, '_classname': self._kms_server_classname})
         actual_param = self._global_admin.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
@@ -43,4 +48,3 @@ class TestCoreKMS(base_core.BaseCoreTest):
         ret = kms.KMS(self._global_admin).servers.delete(self._kms_server_name)
         self._global_admin.delete.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}')
         self.assertEqual(ret, delete_response)
-        
