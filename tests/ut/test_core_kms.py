@@ -45,3 +45,11 @@ class TestCoreKMS(base_core.BaseCoreTest):
         ret = kms.KMS(self._global_admin).servers.delete(self._kms_server_name)
         self._global_admin.delete.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}')
         self.assertEqual(ret, delete_response)
+
+    def test_get_kms_server(self):
+        get_response = 'Success'
+        self._init_global_admin(get_response=get_response)
+        ret = kms.KMS(self._global_admin).servers.get(self._kms_server_name)
+        self._global_admin.get.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}')
+        self.assertEqual(ret, get_response)
+
