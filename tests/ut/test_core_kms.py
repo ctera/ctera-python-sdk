@@ -14,9 +14,6 @@ class TestCoreKMS(base_core.BaseCoreTest):
         self._kms_server_classname = 'KeyManagerServer'
         self._kms_server_name = 'kms001'
         self._kms_server_ipaddr = '192.168.30.1'
-        self._portal_mock = Mock()
-        self._kms = kms.KMS(self._portal_mock)
-        self._kms_globalStatus = {'status': 'OK'}
 
     def test_get_settings(self):
         get_response = 'Success'
@@ -26,10 +23,11 @@ class TestCoreKMS(base_core.BaseCoreTest):
         self.assertEqual(ret, get_response)
 
     def test_get_status(self):
-        self._portal_mock.execute.return_value = self._kms_globalStatus
-        ret = self._kms.status()
-        self._portal_mock.execute.assert_called_once_with('', 'getKeyManagerGlobalStatus')
-        self.assertEqual(ret, self._kms_globalStatus)
+        execute_response = 'Success'
+        self._init_global_admin(execute_response=execute_response)
+        ret = kms.KMS(self._global_admin).status()
+        self._global_admin.execute.assert_called_once_with('', 'getKeyManagerGlobalStatus')
+        self.assertEqual(ret, execute_response)
 
     def test_add_kms_server(self):
         add_response = 'Success'
