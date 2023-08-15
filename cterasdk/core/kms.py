@@ -8,10 +8,10 @@ from . import query
 
 class KMS(BaseCommand):
     """
-    External Key Management APIs 
-    
+    External Key Management APIs
     :ivar cterasdk.core.kms.KMS servers: Object holding the Portal External Key Management Server APIs
     """
+
     def __init__(self, portal):
         super().__init__(portal)
         self.servers = KMSServers(self._portal)
@@ -51,9 +51,12 @@ class KMS(BaseCommand):
 
     def disable(self):
         """
-        Disbale Key Management Service
+        Disable Key Management Service
         """
-        return self._portal.execute('', 'removeKeyManagmentService')
+        logging.getLogger().info('Disabling Key Management Service')
+        response = self._portal.execute('', 'removeKeyManagementService')
+        logging.getLogger().info('Key Management Service Disabled Successfully')
+        return response
 
     def modify(self, expiration=None, timeout=None, port=None):
         """
@@ -66,6 +69,10 @@ class KMS(BaseCommand):
         :param int,optional timeout: Connection timeout in seconds, defaults to ``2``
         :param int,optional port: Key server port, defaults to ``5696``
         """
+        private_key = None
+        client_certificate = None
+        server_certificate = None
+
         settings = self.settings()
         if client_certificate:
             settings.integration.tlsDetails.clientCert = X509Certificate.load_certificate(client_certificate).pem_data
@@ -111,8 +118,10 @@ class KMSServers(BaseCommand):
         param._classname = 'KeyManagerServer'  # pylint: disable=protected-access
         param.name = name
         param.host = ipaddr
-        return self._portal.add('/keyManagerServers', param)
-        
+        logging.getLogger().info('Adding Key Server. %s', {'name': name, 'host': ipaddr})
+        response = self._portal.add('/keyManagerServers', param)
+        logging.getLogger().info('Key Server. %s Added', {'name': name, 'host': ipaddr})
+        return response
 
     def modify(self, current_name, new_name):
         """
@@ -123,7 +132,10 @@ class KMSServers(BaseCommand):
         """
         key_server = self.get(current_name)
         key_server.name = new_name
-        return self._portal.put(f'/keyManagerServers/{current_name}', key_server)
+        logging.getLogger().info("Modifying Key Server. %s", {'name': current_name})
+        response = self._portal.put(f'/keyManagerServers/{current_name}', key_server)
+        logging.getLogger().info("Key Server modified. %s", {'name': current_name})
+        return response
 
     def delete(self, name):
         """
@@ -131,4 +143,7 @@ class KMSServers(BaseCommand):
 
         :param str name: Key-server name
         """
-        return self._portal.delete(f'/keyManagerServers/{name}')
+        logging.getLogger().info('Deleting Key Server. %s', {'name': name})
+        response = self._portal.delete(f'/keyManagerServers/{name}')
+        logging.getLogger().info('Key Server deleted. %s', {'name': name})
+        return response

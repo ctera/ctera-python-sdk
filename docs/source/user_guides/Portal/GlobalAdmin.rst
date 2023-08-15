@@ -675,7 +675,7 @@ Key Management Service
 
 .. automethod:: cterasdk.core.kms.KMS.status
    :noindex:
-   
+
 .. code-block:: python
 
    admin.kms.status()
