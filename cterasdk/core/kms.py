@@ -49,7 +49,8 @@ class KMS(BaseCommand):
         logging.getLogger().info('Key Management Service enabled')
         return response
 
-    def _TLS_details(self, private_key, client_certificate, server_certificate):
+    @staticmethod
+    def _TLS_details(private_key, client_certificate, server_certificate):
         param = Object()
         param._classname = 'TLSDetails'  # pylint: disable=protected-access
         param.files = Object()
@@ -93,7 +94,7 @@ class KMS(BaseCommand):
             settings.integration.connectionSettings.timeout = timeout
         if port:
             settings.integration.connectionSettings.port = port
-        
+
         logging.getLogger().info('Updating Key Management Service settings')
         response = self._portal.put('/settings/keyManagerSettings', settings)
         logging.getLogger().info('Updated Key Management Service settings')
