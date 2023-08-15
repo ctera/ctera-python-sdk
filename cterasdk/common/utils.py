@@ -202,3 +202,10 @@ class Version:
 
     def __str__(self):
         return self.version
+
+
+def utf8_decode(message):
+    """
+    Decode UTF-8 String
+    """
+    return message.decode('utf-8')

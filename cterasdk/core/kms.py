@@ -1,7 +1,7 @@
 import logging
 
 from .base_command import BaseCommand
-from ..common import Object
+from ..common import Object, utf8_decode
 from ..lib import X509Certificate, PrivateKey
 from . import query
 
@@ -43,11 +43,21 @@ class KMS(BaseCommand):
         param.expiration = expiration if expiration else 365
         param.integration.connectionSettings.timeout = timeout if timeout else 2
         param.integration.connectionSettings.port = port if port else 5696
-        param.integration.tlsDetails = Object()
-        param.integration.tlsDetails.clientCert = X509Certificate.load_certificate(client_certificate).pem_data
-        param.integration.tlsDetails.privateKey = PrivateKey.load_private_key(private_key).pem_data
-        param.integration.tlsDetails.rootCACert = X509Certificate.load_certificate(server_certificate).pem_data
-        self._portal.put('/keyManagerSettings', param)
+        param.integration.tlsDetails = self._TLS_details(private_key, client_certificate, server_certificate)
+        logging.getLogger().info('Enabling Key Management Service')
+        response = self._portal.put('/settings/keyManagerSettings', param)
+        logging.getLogger().info('Key Management Service enabled')
+        return response
+
+    def _TLS_details(self, private_key, client_certificate, server_certificate):
+        param = Object()
+        param._classname = 'TLSDetails'  # pylint: disable=protected-access
+        param.files = Object()
+        param.files._classname = 'TLSFiles'  # pylint: disable=protected-access
+        param.files.clientCert = utf8_decode(X509Certificate.load_certificate(client_certificate).pem_data)
+        param.files.privateKey = utf8_decode(PrivateKey.load_private_key(private_key).pem_data)
+        param.files.rootCACert = utf8_decode(X509Certificate.load_certificate(server_certificate).pem_data)
+        return param
 
     def disable(self):
         """
@@ -55,10 +65,10 @@ class KMS(BaseCommand):
         """
         logging.getLogger().info('Disabling Key Management Service')
         response = self._portal.execute('', 'removeKeyManagementService')
-        logging.getLogger().info('Key Management Service Disabled Successfully')
+        logging.getLogger().info('Key Management Service disabled')
         return response
 
-    def modify(self, expiration=None, timeout=None, port=None):
+    def modify(self, private_key=None, client_certificate=None, server_certificate=None, expiration=None, timeout=None, port=None):
         """
         Modify Key Management Service Settings
 
@@ -69,24 +79,25 @@ class KMS(BaseCommand):
         :param int,optional timeout: Connection timeout in seconds, defaults to ``2``
         :param int,optional port: Key server port, defaults to ``5696``
         """
-        private_key = None
-        client_certificate = None
-        server_certificate = None
 
         settings = self.settings()
         if client_certificate:
-            settings.integration.tlsDetails.clientCert = X509Certificate.load_certificate(client_certificate).pem_data
+            settings.integration.tlsDetails.files.clientCert = utf8_decode(X509Certificate.load_certificate(client_certificate).pem_data)
         if private_key:
-            settings.integration.tlsDetails.privateKey = PrivateKey.load_private_key(private_key).pem_data
+            settings.integration.tlsDetails.files.privateKey = utf8_decode(PrivateKey.load_private_key(private_key).pem_data)
         if server_certificate:
-            settings.integration.tlsDetails.rootCACert = X509Certificate.load_certificate(server_certificate).pem_data
+            settings.integration.tlsDetails.files.rootCACert = utf8_decode(X509Certificate.load_certificate(server_certificate).pem_data)
         if expiration:
             settings.expiration = expiration
         if timeout:
             settings.integration.connectionSettings.timeout = timeout
         if port:
             settings.integration.connectionSettings.port = port
-        return self._portal.put('/settings/keyManagerSettings', settings)
+        
+        logging.getLogger().info('Updating Key Management Service settings')
+        response = self._portal.put('/settings/keyManagerSettings', settings)
+        logging.getLogger().info('Updated Key Management Service settings')
+        return response
 
 
 class KMSServers(BaseCommand):
