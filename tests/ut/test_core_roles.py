@@ -38,7 +38,7 @@ class TestCoreRoles(base_core.BaseCoreTest):
         role_settings = RoleSettings.from_server_object(TestCoreRoles._role_settings(self._role))
         self._init_global_admin(put_response=role_settings.to_server_object())
         ret = roles.Roles(self._global_admin).modify(self._role, role_settings)
-        self._global_admin.get.assert_called_once_with(f'/rolesSettings/{self._role}', mock.ANY)
+        self._global_admin.put.assert_called_once_with(f'/rolesSettings/{self._role}', mock.ANY)
         actual_param = self._global_admin.put.call_args[0][1]
         self._assert_equal_objects(actual_param, role_settings)
         self._assert_equal_objects(ret, role_settings)
