@@ -36,16 +36,17 @@ class TestCoreRoles(base_core.BaseCoreTest):
 
     def test_modify_role_success(self):
         role_settings = RoleSettings.from_server_object(TestCoreRoles._role_settings(self._role))
-        self._init_global_admin(put_response=role_settings)
+        self._init_global_admin(put_response=role_settings.to_server_object())
         ret = roles.Roles(self._global_admin).modify(self._role, role_settings)
         self._global_admin.get.assert_called_once_with(f'/rolesSettings/{self._role}', mock.ANY)
         actual_param = self._global_admin.put.call_args[0][1]
-        self._assert_equal_objects(actual_param, role_settings.to_server_object())
-        self._assert_equal_objects(ret.to_server_object(), role_settings)
+        self._assert_equal_objects(actual_param, role_settings)
+        self._assert_equal_objects(ret, role_settings)
 
     @staticmethod
     def _role_settings(name):
         return munch.Munch({
+            '_classname': 'PortalRoleSettings',  # pylint: disable=protected-access'
             'name': name,
             'superUser': False,
             'allowRemoteWipe': True,
