@@ -742,6 +742,32 @@ Global Administrators
    admin.admins.delete('alice')
 
 
+Roles
+-----
+
+.. automethod:: cterasdk.core.roles.Roles.types
+   :noindex:
+
+.. code-block:: python
+
+   print(admin.roles.types)
+
+.. automethod:: cterasdk.core.roles.Roles.get
+   :noindex:
+
+.. code-block:: python
+
+   rw_admin_settings = admin.roles.get(portal_enum.Role.ReadWriteAdmin)
+   ro_admin_settings = admin.roles.get(portal_enum.Role.ReadOnlyAdmin)
+   support_admin_settings = admin.roles.get(portal_enum.Role.Support)
+
+.. automethod:: cterasdk.core.roles.Roles.modify
+   :noindex:
+
+   support_admin_settings = admin.roles.get(portal_enum.Role.Support)
+   support_admin_settings.manage_logs = True
+   admin.roles.modify(portal_enum.Role.Support, support_admin_settings)
+
 Users
 -----
 
