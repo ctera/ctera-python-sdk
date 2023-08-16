@@ -691,7 +691,7 @@ class ComplianceSettingsBuilder:
         return self.settings
 
 
-class RoleSettings(Object):
+class RoleSettings(Object):  # pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-locals
     """
     Role Settings
 
@@ -712,7 +712,7 @@ class RoleSettings(Object):
     """
     def __init__(self, name, sudo, enable_remote_wipe, enable_sso, enable_seeding_export, enable_seeding_import, access_end_user_folders,
                  update_settings, update_roles, update_account_emails, update_account_password, manage_cloud_drives, manage_plans,
-                 manage_users, manage_logs):  # pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-locals
+                 manage_users, manage_logs):
         self.name = name
         self.sudo = sudo
         self.enable_remote_wipe = enable_remote_wipe
