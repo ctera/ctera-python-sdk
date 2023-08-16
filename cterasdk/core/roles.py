@@ -10,7 +10,8 @@ class Roles(BaseCommand):
     Role Settings APIs
     """
 
-    def types(self):
+    @staticmethod
+    def types():
         """
         Get a list of roles
         """
@@ -36,6 +37,7 @@ class Roles(BaseCommand):
         if role:
             return RoleSettings.from_server_object(self._portal.get(f'/rolesSettings/{role}'))
         logging.getLogger().warning('Could not find role. %s', {'role': role})
+        return None
 
     def modify(self, role, settings):
         """
@@ -53,3 +55,4 @@ class Roles(BaseCommand):
             logging.getLogger().info('Role settings updated. %s', {'role': role})
             return RoleSettings.from_server_object(response)
         logging.getLogger().warning('Could not find role. %s', {'role': role})
+        return None
