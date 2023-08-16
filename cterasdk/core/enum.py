@@ -81,6 +81,20 @@ class Role:
     Support = "Support"
 
 
+class RoleResolver:
+    """
+    Role Settings Resolver
+
+    :ivar str ReadWriteAdmin: ReadWriteAdmin user role
+    :ivar str ReadOnlyAdmin: ReadOnlyAdmin user role
+    :ivar str Support: Support user role
+    """
+    ReadWriteAdmin = "readWriteAdminSettings"
+    ReadOnlyAdmin = "readOnlyAdminSettings"
+    Support = "supportAdminSettings"
+    ComplianceOfficer = 'complianceOfficerSettings'
+
+
 class Severity:
     """
     Portal Log Severity

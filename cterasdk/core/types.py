@@ -689,3 +689,84 @@ class ComplianceSettingsBuilder:
         if self.settings.gracePeriod is None:
             self.grace_period()
         return self.settings
+
+
+class RoleSettings(Object):  # pylint: disable=too-many-instance-attributes
+    """
+    Role Settings
+
+    :ivar str name: Role name
+    :ivar bool sudo: Super user
+    :ivar bool enable_remote_wipe: Allow Remote Wipe for Devices
+    :ivar bool enable_sso: Super user
+    :ivar bool enable_seeding_export: Allow Seeding Export
+    :ivar bool enable_seeding_import: Allow Seeding Import
+    :ivar bool access_end_user_folders: Access End User Folders
+    :ivar bool update_settings: Modify Virtual Portal Settings
+    :ivar bool update_roles: Modify Roles
+    :ivar bool update_account_emails: Modify User Email
+    :ivar bool update_account_password: Modify User Password
+    :ivar bool manage_cloud_drives: Manage Cloud Folders
+    :ivar bool manage_plans: Manage Plans
+    :ivar bool manage_logs: Manage Log Settings
+    """
+    # pylint: disable=too-many-arguments, too-many-locals
+    def __init__(self, name, sudo, enable_remote_wipe, enable_sso, enable_seeding_export, enable_seeding_import, access_end_user_folders,
+                 update_settings, update_roles, update_account_emails, update_account_password, manage_cloud_drives, manage_plans,
+                 manage_users, manage_logs):
+        self.name = name
+        self.sudo = sudo
+        self.enable_remote_wipe = enable_remote_wipe
+        self.enable_sso = enable_sso
+        self.enable_seeding_export = enable_seeding_export
+        self.enable_seeding_import = enable_seeding_import
+        self.access_end_user_folders = access_end_user_folders
+        self.update_settings = update_settings
+        self.update_roles = update_roles
+        self.update_account_emails = update_account_emails
+        self.update_account_password = update_account_password
+        self.manage_cloud_drives = manage_cloud_drives
+        self.manage_plans = manage_plans
+        self.manage_users = manage_users
+        self.manage_logs = manage_logs
+
+    def to_server_object(self):
+        param = Object()
+        param._classname = 'PortalRoleSettings'  # pylint: disable=protected-access
+        param.name = self.name
+        param.superUser = self.sudo
+        param.allowRemoteWipe = self.enable_remote_wipe
+        param.allowSSO = self.enable_sso
+        param.allowSeedingExport = self.enable_seeding_export
+        param.allowSeedingImport = self.enable_seeding_import
+        param.canAccessEndUserFolders = self.access_end_user_folders
+        param.canChangePortalSettings = self.update_settings
+        param.canChangeRoles = self.update_roles
+        param.canChangeUserEmail = self.update_account_emails
+        param.canChangeUserPassword = self.update_account_password
+        param.canManageAllFolders = self.manage_cloud_drives
+        param.canManagePlans = self.manage_plans
+        param.canManageUsers = self.manage_users
+        param.canManageLogSettings = self.manage_logs
+        return param
+
+    @staticmethod
+    def from_server_object(server_object):
+        params = {
+            'name': server_object.name,
+            'sudo': server_object.superUser,
+            'enable_remote_wipe': server_object.allowRemoteWipe,
+            'enable_sso': server_object.allowSSO,
+            'enable_seeding_export': server_object.allowSeedingExport,
+            'enable_seeding_import': server_object.allowSeedingImport,
+            'access_end_user_folders': server_object.canAccessEndUserFolders,
+            'update_settings': server_object.canChangePortalSettings,
+            'update_roles': server_object.canChangeRoles,
+            'update_account_emails': server_object.canChangeUserEmail,
+            'update_account_password': server_object.canChangeUserPassword,
+            'manage_cloud_drives': server_object.canManageAllFolders,
+            'manage_plans': server_object.canManagePlans,
+            'manage_users': server_object.canManageUsers,
+            'manage_logs': server_object.canManageLogSettings
+        }
+        return RoleSettings(**params)
