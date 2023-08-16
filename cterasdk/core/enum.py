@@ -80,6 +80,7 @@ class Role:
     ReadOnlyAdmin = "ReadOnlyAdmin"
     Support = "Support"
 
+
 class RoleResolver:
     """
     Role Settings Resolver

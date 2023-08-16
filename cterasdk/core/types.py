@@ -697,7 +697,7 @@ class RoleSettings(Object):
 
     :ivar str name: Role name
     :ivar bool sudo: Super user
-    :ivar bool enable_remote_wipe: Allow Remote Wipe for Devices 
+    :ivar bool enable_remote_wipe: Allow Remote Wipe for Devices
     :ivar bool enable_sso: Super user
     :ivar bool enable_seeding_export: Allow Seeding Export
     :ivar bool enable_seeding_import: Allow Seeding Import
@@ -710,24 +710,24 @@ class RoleSettings(Object):
     :ivar bool manage_plans: Manage Plans
     :ivar bool manage_logs: Manage Log Settings
     """
-    def __init__(self, name, sudo, enable_remote_wipe, enable_sso, enable_seeding_export, enable_seeding_import, access_end_user_folders,
+    def __init__(self, name, sudo, enable_remote_wipe, enable_sso, enable_seeding_export, enable_seeding_import, access_end_user_folders, 
                  update_settings, update_roles, update_account_emails, update_account_password, manage_cloud_drives, manage_plans, manage_users,
                  manage_logs):
-                 self.name = name
-                 self.sudo = sudo
-                 self.enable_remote_wipe = enable_remote_wipe
-                 self.enable_sso = enable_sso
-                 self.enable_seeding_export = enable_seeding_export
-                 self.enable_seeding_import = enable_seeding_import
-                 self.access_end_user_folders = access_end_user_folders
-                 self.update_settings = update_settings
-                 self.update_roles = update_roles
-                 self.update_account_emails = update_account_emails
-                 self.update_account_password = update_account_password
-                 self.manage_cloud_drives = manage_cloud_drives
-                 self.manage_plans = manage_plans
-                 self.manage_users = manage_users
-                 self.manage_logs = manage_logs
+                self.name = name
+                self.sudo = sudo
+                self.enable_remote_wipe = enable_remote_wipe
+                self.enable_sso = enable_sso
+                self.enable_seeding_export = enable_seeding_export
+                self.enable_seeding_import = enable_seeding_import
+                self.access_end_user_folders = access_end_user_folders
+                self.update_settings = update_settings
+                self.update_roles = update_roles
+                self.update_account_emails = update_account_emails
+                self.update_account_password = update_account_password
+                self.manage_cloud_drives = manage_cloud_drives
+                self.manage_plans = manage_plans
+                self.manage_users = manage_users
+                self.manage_logs = manage_logs
 
     def to_server_object(self):
         param = Object()
