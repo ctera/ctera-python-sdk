@@ -3,6 +3,7 @@ import munch
 
 from cterasdk.core import roles
 from cterasdk.core.enum import Role
+from cterasdk.core.types import RoleSettings
 from tests.ut import base_core
 
 
@@ -11,6 +12,7 @@ class TestCoreRoles(base_core.BaseCoreTest):
     def setUp(self):
         super().setUp()
         self._role = 'ReadWriteAdmin'
+        self._role_settings_resource = 'readWriteAdminSettings'
 
     def test_types(self):
         self._init_global_admin()
@@ -25,7 +27,7 @@ class TestCoreRoles(base_core.BaseCoreTest):
     def test_get_role_success(self):
         self._init_global_admin(get_response=TestCoreRoles._role_settings(self._role))
         ret = roles.Roles(self._global_admin).get(self._role)
-        self._global_admin.get.assert_called_once_with(f'/rolesSettings/{self._role}')
+        self._global_admin.get.assert_called_once_with(f'/rolesSettings/{self._role_settings_resource}')
         self._assert_equal_objects(ret, TestCoreRoles._role_settings())
 
     def test_modify_role_not_found(self):
@@ -33,7 +35,7 @@ class TestCoreRoles(base_core.BaseCoreTest):
         roles.Roles(self._global_admin).modify('not_found', None)
 
     def test_modify_role_success(self):
-        role_settings = TestCoreRoles._role_settings(self._role)
+        role_settings = RoleSettings.from_server_object(TestCoreRoles._role_settings(self._role))
         self._init_global_admin(put_response=role_settings)
         ret = roles.Roles(self._global_admin).modify(self._role, role_settings)
         self._global_admin.get.assert_called_once_with(f'/rolesSettings/{self._role}', mock.ANY)
