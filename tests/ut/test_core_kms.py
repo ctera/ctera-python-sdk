@@ -52,4 +52,3 @@ class TestCoreKMS(base_core.BaseCoreTest):
         ret = kms.KMS(self._global_admin).servers.get(self._kms_server_name)
         self._global_admin.get.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}')
         self.assertEqual(ret, get_response)
-
