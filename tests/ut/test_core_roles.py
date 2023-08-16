@@ -61,4 +61,3 @@ class TestCoreRoles(base_core.BaseCoreTest):
             'canManageUsers': True,
             'canManageLogSettings': False
         })
-
