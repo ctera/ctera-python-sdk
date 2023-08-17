@@ -23,7 +23,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         ret = directoryservice.DirectoryService(self._global_admin).disconnect()
         self._global_admin.put.assert_called_once_with('/directoryConnector', None)
         self.assertEqual(ret, put_response)
-    
+
     def test_get_default_role(self):
         get_response = 'Success'
         self._init_global_admin(get_response=get_response)
@@ -96,6 +96,6 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
     @staticmethod
     def _create_mapping_param(mapping):
         param = Object()
-        param._classname = 'ADIDMapping'
+        param._classname = 'ADIDMapping'  # pylint: disable=protected-access
         param.map = mapping
         return param
