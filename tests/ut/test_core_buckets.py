@@ -126,7 +126,10 @@ class TestCoreBuckets(base_core.BaseCoreTest):
         with mock.patch("cterasdk.core.buckets.query.iterator") as query_iterator_mock:
             buckets.Buckets(self._global_admin).list_buckets()
             query_iterator_mock.assert_called_once_with(self._global_admin, '/locations', mock.ANY)
-            expected_query_params = base_core.BaseCoreTest._create_query_params(include=buckets.Buckets.default,
-                                                                                start_from=0, count_limit=50)
+            expected_query_params = base_core.BaseCoreTest._create_query_params(  # pylint: disable=protected-access
+                include=buckets.Buckets.default,
+                start_from=0,
+                count_limit=50
+            )
             actual_query_params = query_iterator_mock.call_args[0][2]
             self._assert_equal_objects(actual_query_params, expected_query_params)
