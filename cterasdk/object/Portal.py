@@ -7,6 +7,7 @@ from ..core import cli
 from ..core import decorator
 from ..core import directoryservice
 from ..core import firmwares
+from ..core import kms
 from ..core import login
 from ..core import query
 from ..core import logs
@@ -47,6 +48,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.devices.Devices devices: Object holding the Portal devices APIs
     :ivar cterasdk.core.directoryservice.DirectoryService directoryservice: Object holding the Portal Active Directory Service APIs
     :ivar cterasdk.core.activation.Activation activation: Object holding the Portal activation APIs
+    :ivar cterasdk.core.kms.KMS kms: Object holding the Portal External Key Management APIs
     :ivar cterasdk.core.logs.Logs logs: Object holding the Portal logs APIs
     :ivar cterasdk.core.cloudfs.CloudFS cloudfs: Object holding the Portal CloudFS APIs
     :ivar cterasdk.core.roles.Roles roles: Object holding the Portal Role Settings APIs
@@ -76,6 +78,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.directoryservice = directoryservice.DirectoryService(self)
         self.cloudfs = cloudfs.CloudFS(self)
         self.activation = activation.Activation(self)
+        self.kms = kms.KMS(self)
         self.files = files.CloudDrive(self, self.cloud_drive_base_path)
         self.backups = files.Backups(self, self.backups_base_path)
         self.logs = logs.Logs(self)
@@ -127,6 +130,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'directoryservice',
             'cloudfs',
             'activation',
+            'kms',
             'files',
             'logs',
             'roles',

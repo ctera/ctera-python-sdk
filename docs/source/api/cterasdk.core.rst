@@ -29,6 +29,7 @@ Submodules
    cterasdk.core.devices
    cterasdk.core.directoryservice
    cterasdk.core.enum
+   cterasdk.core.kms
    cterasdk.core.login
    cterasdk.core.logs
    cterasdk.core.messaging
@@ -49,4 +50,3 @@ Submodules
    cterasdk.core.types
    cterasdk.core.admins
    cterasdk.core.users
-   cterasdk.core.zones
