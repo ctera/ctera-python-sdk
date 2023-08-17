@@ -70,6 +70,28 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
 
+    def test_connected_disconnected(self):
+        self._init_global_admin(get_response=None)
+        ret = directoryservice.DirectoryService(self._global_admin).connected()
+        self._global_admin.get.assert_called_once_with('/directoryConnector')
+        self.assertEqual(ret, False)
+
+    def test_connected_failure(self):
+        get_response = 'settings'
+        self._init_global_admin(get_response=get_response, execute_response=mock.MagicMock(side_effect=exception.CTERAException()))
+        ret = directoryservice.DirectoryService(self._global_admin).connected()
+        self._global_admin.get.assert_called_once_with('/directoryConnector')
+        self._global_admin.execute.assert_called_once_with('', 'testAndSaveAD', get_response)
+        self.assertEqual(ret, False)
+
+    def test_connected_success(self):
+        get_response = 'settings'
+        self._init_global_admin(get_response=get_response, execute_response=None)
+        ret = directoryservice.DirectoryService(self._global_admin).connected()
+        self._global_admin.get.assert_called_once_with('/directoryConnector')
+        self._global_admin.execute.assert_called_once_with('', 'testAndSaveAD', get_response)
+        self.assertEqual(ret, True)
+
     @staticmethod
     def _create_mapping_param(mapping):
         param = Object()
