@@ -78,7 +78,8 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
 
     def test_connected_failure(self):
         get_response = 'settings'
-        self._init_global_admin(get_response=get_response, execute_response=mock.MagicMock(side_effect=exception.CTERAException()))
+        self._init_global_admin(get_response=get_response)
+        self._global_admin.execute = mock.MagicMock(side_effect=exception.CTERAException())
         ret = directoryservice.DirectoryService(self._global_admin).connected()
         self._global_admin.get.assert_called_once_with('/directoryConnector')
         self._global_admin.execute.assert_called_once_with('', 'testAndSaveAD', get_response)
