@@ -20,7 +20,7 @@ class Roles(BaseCommand):
     @staticmethod
     def find(role):
         """
-        Find a Role
+        Find Role
         """
         options = {k: v for k, v in RoleResolver.__dict__.items() if not k.startswith('_')}
         return options.get(role, None)
