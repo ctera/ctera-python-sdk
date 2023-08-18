@@ -1,5 +1,5 @@
 from .path import CTERAPath
-from . import copy, move, mkdir, rm, file_access
+from . import listdir, copy, move, mkdir, rm, file_access
 from . import open as openfile
 
 
@@ -10,9 +10,11 @@ class FileBrowser:
         self._CTERAHost = Gateway
         self._file_access = file_access.FileAccess(Gateway)
 
-    @staticmethod
-    def ls(_path):
-        return
+    def ls(self, path):
+        """
+        List a directory
+        """
+        return listdir.ls(self._CTERAHost, path)
 
     def openfile(self, path):
         """

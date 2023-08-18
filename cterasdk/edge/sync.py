@@ -104,6 +104,13 @@ class Sync(BaseCommand):
             else:
                 logging.getLogger().error("An error occurred while unsuspendeding sync. %s", {'status': error.status})
 
+    def restart(self):
+        """
+        Suspend and Unsuspend Cloud Synchronization
+        """
+        self.suspend()
+        self.unsuspend()
+
     def _track_status(self, success, progress, transient, failure):
         track(self._gateway, '/proc/cloudsync/serviceStatus/id', success, progress, transient, failure)
 

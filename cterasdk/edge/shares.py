@@ -420,10 +420,7 @@ class Shares(BaseCommand):
         self._gateway.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', new_list)
 
     def _validate_root_directory(self, name):
-        param = Object()
-        param.path = '/'
-
-        response = self._gateway.execute('/status/fileManager', 'listPhysicalFolders', param)
+        response = self._gateway.files.ls('/')
         for root in response:
             if root.fullpath == f'/{name}':
                 logging.getLogger().debug("Found root directory. %s", {'name': root.name, 'type': root.type, 'fullpath': root.fullpath})

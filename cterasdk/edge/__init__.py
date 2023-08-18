@@ -1,6 +1,4 @@
 __all__ = [
-    'connection',
-    'query',
     'afp',
     'aio',
     'array',
@@ -9,9 +7,12 @@ __all__ = [
     'cache',
     'cli',
     'config',
+    'connection',
+    'decorator',
     'directoryservice',
     'drive',
     'enum',
+    'files',
     'ftp',
     'groups',
     'licenses',
@@ -22,6 +23,9 @@ __all__ = [
     'nfs',
     'ntp',
     'power',
+    'query',
+    'quotas',
+    'remote',
     'rsync',
     'services',
     'session',
@@ -33,10 +37,7 @@ __all__ = [
     'syslog',
     'telnet',
     'timezone',
-    'users',
-    'volumes',
-    'files',
-    'remote',
     'uri',
-    'decorator'
+    'users',
+    'volumes'
 ]
