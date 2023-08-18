@@ -131,6 +131,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.nfs = nfs.NFS(self)
         self.ntp = ntp.NTP(self)
         self.power = power.Power(self)
+        self.quotas = quotas.Quotas(self)
         self.rsync = rsync.RSync(self)
         self.services = services.Services(self)
         self.shares = shares.Shares(self)

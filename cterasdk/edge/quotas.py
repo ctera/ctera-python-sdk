@@ -44,7 +44,7 @@ class Quotas(BaseCommand):
         message = 'Indexing directory. %s' if fid != 0 else 'Indexing all directories. %s'
         logging.getLogger().info(message, {'id': fid})
         return self._gateway.execute('/config/cloudsync', 'markFolderForScan', param)
-    
+
     def reset(self):
         """
         Reset Local Quotas and Index All Directories. Ensure Telnet daemon is enabled.
@@ -73,7 +73,6 @@ class Quotas(BaseCommand):
         :param str path: Folder path
         :param int limit: Quota in Megabytes (MB)
         :param bool,optional enforce: Enforce quota, defaults to ``True``
-        :param str,optional owner: 
         """
         cloud_drive, relative_path = self._validate_directory(path)
         param = Object()
