@@ -683,8 +683,16 @@ Key Management Service
 .. automethod:: cterasdk.core.kms.KMS.enable
    :noindex:
 
+.. code-block:: python
+
+   admin.kms.KSM.enable()
+
 .. automethod:: cterasdk.core.kms.KMS.disable
    :noindex:
+
+.. code-block:: python
+
+   admin.kms.KSM.disable()
 
 .. automethod:: cterasdk.core.kms.KMS.modify
    :noindex:
