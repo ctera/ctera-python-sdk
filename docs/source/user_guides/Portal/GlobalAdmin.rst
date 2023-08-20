@@ -685,7 +685,11 @@ Key Management Service
 
 .. code-block:: python
 
-   admin.kms.KSM.enable()
+   private_key = './private_key.pem'
+   client_certificate = './client_certificate.crt'
+   server_certificate = './server_certificate.crt'
+
+   admin.kms.KMS.enable(private_key, client_certificate, server_certificate)
 
 .. automethod:: cterasdk.core.kms.KMS.disable
    :noindex:
