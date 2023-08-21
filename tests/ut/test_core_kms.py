@@ -6,7 +6,7 @@ from cterasdk.core import kms
 from tests.ut import base_core
 
 
-class TestCoreKMS(base_core.BaseCoreTest):
+class TestCoreKMS(base_core.BaseCoreTest):  # pylint: disable=too-many-instance-attributes
 
     def setUp(self):
         super().setUp()
@@ -132,8 +132,8 @@ class TestCoreKMS(base_core.BaseCoreTest):
         with mock.patch("cterasdk.core.kms.query.iterator") as query_iterator_mock:
             kms.KMS(self._global_admin).servers.all()
             query_iterator_mock.assert_called_once_with(self._global_admin, '/keyManagerServers', mock.ANY)
-            expected_query_params = base_core.BaseCoreTest._create_query_params(
-                start_from=0, count_limit=25, orFilter=True)  # pylint: disable=W0212
+            expected_query_params = base_core.BaseCoreTest._create_query_params(  # pylint: disable=W0212
+                start_from=0, count_limit=25, orFilter=True)
             actual_query_params = query_iterator_mock.call_args[0][2]
             self._assert_equal_objects(actual_query_params, expected_query_params)
 
