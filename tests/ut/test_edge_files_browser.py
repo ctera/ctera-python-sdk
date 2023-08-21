@@ -72,7 +72,7 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
     def test_delete_success(self):
         self._filer.rm = mock.MagicMock()
         self._files.delete(self._path)
-        self._filer.rm.assert_called_once_with(self._fullpath)
+        self._filer.rm.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath))
 
     def test_mkdir_success(self):
         self._init_filer()
