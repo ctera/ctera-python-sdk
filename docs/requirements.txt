@@ -1,3 +1,7 @@
+requests>=2.23
+requests-toolbelt
+cryptography
+packaging
 sphinx>=3.0.4
-sphinx-rtd-theme
+sphinx-book-theme
 m2r
