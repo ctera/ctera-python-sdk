@@ -841,6 +841,7 @@ Roles
    :noindex:
 
 .. code-block:: python
+
    support_admin_settings = admin.roles.get(portal_enum.Role.Support)
    support_admin_settings.manage_logs = True
    admin.roles.modify(portal_enum.Role.Support, support_admin_settings)
