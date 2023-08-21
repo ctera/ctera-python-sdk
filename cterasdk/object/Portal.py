@@ -220,14 +220,15 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
     @property
     def _omit_fields(self):
         return super()._omit_fields + [
-            'portals', 
-            'kms', 
-            'servers', 
-            'setup', 'ssl', 
-            'startup', 
-            'syslog', 
-            'antivirus', 
-            'buckets', 
+            'portals',
+            'kms',
+            'servers',
+            'setup',
+            'ssl',
+            'startup',
+            'syslog',
+            'antivirus',
+            'buckets',
             'messaging'
         ]
 
