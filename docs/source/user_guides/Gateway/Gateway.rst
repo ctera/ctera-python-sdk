@@ -1199,9 +1199,6 @@ SSL
 
    filer.ssl.is_http_enabled()
 
-.. automethod:: cterasdk.edge.ssl.SSL.set_storage_ca
-   :noindex:
-
 .. code-block:: python
 
    """
