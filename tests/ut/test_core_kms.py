@@ -44,10 +44,10 @@ class TestCoreKMS(base_core.BaseCoreTest):
         mock_load_private_key = self.patch_call("cterasdk.lib.crypto.PrivateKey.load_private_key")
         mock_load_private_key.return_value = munch.Munch({'pem_data': self._kms_private_key.encode('utf-8')})
         mock_load_certificate = self.patch_call("cterasdk.lib.crypto.X509Certificate.load_certificate")
-        mock_load_certificate.side_effect = [munch.Munch({'pem_data': self._kms_client_certificate.encode('utf-8')}), 
+        mock_load_certificate.side_effect = [munch.Munch({'pem_data': self._kms_client_certificate.encode('utf-8')}),
                                              munch.Munch({'pem_data': self._kms_server_certificate.encode('utf-8')})]
-        ret = kms.KMS(self._global_admin).enable(self._kms_private_key_file, self._kms_client_certificate_file, 
-                                                 self._kms_server_certificate_file, self._kms_key_expiration, 
+        ret = kms.KMS(self._global_admin).enable(self._kms_private_key_file, self._kms_client_certificate_file,
+                                                 self._kms_server_certificate_file, self._kms_key_expiration,
                                                  self._kms_timeout, self._kms_port)
         mock_load_private_key.assert_called_once_with(self._kms_private_key_file)
         mock_load_certificate.assert_has_calls(
@@ -85,20 +85,20 @@ class TestCoreKMS(base_core.BaseCoreTest):
         param.integration.tlsDetails.files.privateKey = self._kms_private_key
         param.integration.tlsDetails.files.rootCACert = self._kms_server_certificate
         if include_classnames:
-            param.integration.tlsDetails._classname = 'TLSDetails' # pylint: disable=protected-access
+            param.integration.tlsDetails._classname = 'TLSDetails'  # pylint: disable=protected-access
             param.integration.tlsDetails.files._classname = 'TLSFiles'  # pylint: disable=protected-access
         return param
-    
+
     def test_kms_modify(self):
         put_response = 'Success'
         self._init_global_admin(put_response=put_response, get_response=TestCoreKMS.get_default_object())
         mock_load_private_key = self.patch_call("cterasdk.lib.crypto.PrivateKey.load_private_key")
         mock_load_private_key.return_value = munch.Munch({'pem_data': self._kms_private_key.encode('utf-8')})
         mock_load_certificate = self.patch_call("cterasdk.lib.crypto.X509Certificate.load_certificate")
-        mock_load_certificate.side_effect = [munch.Munch({'pem_data': self._kms_client_certificate.encode('utf-8')}), 
+        mock_load_certificate.side_effect = [munch.Munch({'pem_data': self._kms_client_certificate.encode('utf-8')}),
                                              munch.Munch({'pem_data': self._kms_server_certificate.encode('utf-8')})]
-        ret = kms.KMS(self._global_admin).modify(self._kms_private_key_file, self._kms_client_certificate_file, 
-                                                 self._kms_server_certificate_file, self._kms_key_expiration, 
+        ret = kms.KMS(self._global_admin).modify(self._kms_private_key_file, self._kms_client_certificate_file,
+                                                 self._kms_server_certificate_file, self._kms_key_expiration,
                                                  self._kms_timeout, self._kms_port)
         mock_load_private_key.assert_called_once_with(self._kms_private_key_file)
         mock_load_certificate.assert_has_calls(
@@ -132,7 +132,8 @@ class TestCoreKMS(base_core.BaseCoreTest):
         with mock.patch("cterasdk.core.kms.query.iterator") as query_iterator_mock:
             kms.KMS(self._global_admin).servers.all()
             query_iterator_mock.assert_called_once_with(self._global_admin, '/keyManagerServers', mock.ANY)
-            expected_query_params = base_core.BaseCoreTest._create_query_params(start_from=0, count_limit=25, orFilter=True)
+            expected_query_params = base_core.BaseCoreTest._create_query_params(
+                start_from=0, count_limit=25, orFilter=True)  # pylint: disable=W0212
             actual_query_params = query_iterator_mock.call_args[0][2]
             self._assert_equal_objects(actual_query_params, expected_query_params)
 
