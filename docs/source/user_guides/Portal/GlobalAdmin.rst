@@ -703,14 +703,14 @@ Key Management Service
 
 Key Management Service Servers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. automethod:: cterasdk.core.kms.KMS.get
+.. automethod:: cterasdk.core.kms.KMSServers.get
    :noindex:
 
 .. code-block:: python
 
    admin.kms.servers.get('kms001')
 
-.. automethod:: cterasdk.core.kms.KMS.all
+.. automethod:: cterasdk.core.kms.KMSServers.all
    :noindex:
 
 .. code-block:: python
@@ -718,21 +718,21 @@ Key Management Service Servers
    for server in admin.kms.servers.all():
        print(server)
 
-.. automethod:: cterasdk.core.kms.KMS.add
+.. automethod:: cterasdk.core.kms.KMSServers.add
    :noindex:
 
 .. code-block:: python
 
    admin.kms.servers.add('kms001', '192.168.30.1')
 
-.. automethod:: cterasdk.core.kms.KMS.modify
+.. automethod:: cterasdk.core.kms.KMSServers.modify
    :noindex:
 
 .. code-block:: python
 
    admin.kms.servers.modify('kms001', 'kms001-renamed')
 
-.. automethod:: cterasdk.core.kms.KMS.delete
+.. automethod:: cterasdk.core.kms.KMSServers.delete
    :noindex:
 
 .. code-block:: python
@@ -840,6 +840,8 @@ Roles
 .. automethod:: cterasdk.core.roles.Roles.modify
    :noindex:
 
+.. code-block:: python
+
    support_admin_settings = admin.roles.get(portal_enum.Role.Support)
    support_admin_settings.manage_logs = True
    admin.roles.modify(portal_enum.Role.Support, support_admin_settings)
@@ -900,8 +902,6 @@ Local Users
 Domain Users
 ^^^^^^^^^^^^
 
-.. automethod:: cterasdk.core.users.Users.list_domains
-   :noindex:
 .. automethod:: cterasdk.core.users.Users.list_domain_users
    :noindex:
 
