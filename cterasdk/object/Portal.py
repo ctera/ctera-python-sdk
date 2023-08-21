@@ -48,7 +48,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.devices.Devices devices: Object holding the Portal devices APIs
     :ivar cterasdk.core.directoryservice.DirectoryService directoryservice: Object holding the Directory Services APIs
     :ivar cterasdk.core.activation.Activation activation: Object holding the Portal activation APIs
-    :ivar cterasdk.core.kms.KMS kms: Object holding the Portal External Key Management APIs
     :ivar cterasdk.core.logs.Logs logs: Object holding the Portal logs APIs
     :ivar cterasdk.core.cloudfs.CloudFS cloudfs: Object holding the Portal CloudFS APIs
     :ivar cterasdk.core.roles.Roles roles: Object holding the Portal Role Settings APIs
@@ -78,7 +77,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.directoryservice = directoryservice.DirectoryService(self)
         self.cloudfs = cloudfs.CloudFS(self)
         self.activation = activation.Activation(self)
-        self.kms = kms.KMS(self)
         self.files = files.CloudDrive(self, self.cloud_drive_base_path)
         self.backups = files.Backups(self, self.backups_base_path)
         self.logs = logs.Logs(self)
@@ -130,7 +128,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'directoryservice',
             'cloudfs',
             'activation',
-            'kms',
             'files',
             'logs',
             'roles',
@@ -192,6 +189,7 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.servers.Servers servers: Object holding the Servers Management APIs
     :ivar cterasdk.core.setup.Setup setup: Object holding the Portal setup APIs
     :ivar cterasdk.core.ssl.SSL ssl: Object holding the Portal SSL Certificate APIs
+    :ivar cterasdk.core.kms.KMS kms: Object holding the Portal External Key Management APIs
     :ivar cterasdk.core.startup.Startup startup: Object holding the Portal startup APIs
     :ivar cterasdk.core.syslog.Syslog syslog: Object holding the Portal syslog APIs
     :ivar cterasdk.core.antivirus.Antivirus antivirus: Object holding the Portal Antivirus APIs
@@ -210,6 +208,7 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
         self.portals = portals.Portals(self)
         self.servers = servers.Servers(self)
         self.cli = cli.CLI(self)
+        self.kms = kms.KMS(self)
         self.setup = setup.Setup(self)
         self.ssl = ssl.SSL(self)
         self.startup = startup.Startup(self)
@@ -220,7 +219,7 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['portals', 'servers', 'setup', 'ssl', 'startup', 'syslog', 'antivirus', 'buckets', 'messaging']
+        return super()._omit_fields + ['portals', 'kms', 'servers', 'setup', 'ssl', 'startup', 'syslog', 'antivirus', 'buckets', 'messaging']
 
     @property
     def context(self):

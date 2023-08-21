@@ -44,6 +44,7 @@ Submodules
    cterasdk.edge.network
    cterasdk.edge.nfs
    cterasdk.edge.ntp
+   cterasdk.edge.snmp
    cterasdk.edge.ssh
    cterasdk.edge.ssl
    cterasdk.edge.power

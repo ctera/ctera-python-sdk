@@ -1169,7 +1169,7 @@ Reset
 .. seealso:: create the first admin account after resetting the Gateway to its default settings: :py:func:`cterasdk.edge.users.Users.add_first_user()`
 
 SSL
-================
+===
 
 .. automethod:: cterasdk.edge.ssl.SSL.disable_http
    :noindex:
@@ -1198,14 +1198,6 @@ SSL
 .. code-block:: python
 
    filer.ssl.is_http_enabled()
-
-.. code-block:: python
-
-   """
-   ca_certificate = './certs/certificate.crt'
-   """
-
-   filer.ssl.set_trusted_ca(ca_certificate)
 
 .. automethod:: cterasdk.edge.ssl.SSL.get_storage_ca
    :noindex:
