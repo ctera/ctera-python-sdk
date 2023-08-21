@@ -40,7 +40,7 @@ class TestCoreKMS(base_core.BaseCoreTest):
 
     def test_enable_kms(self):
         put_response = 'Success'
-        self._init_global_admin(put_response=put_response, get_response=munch.Munch())
+        self._init_global_admin(put_response=put_response, get_response=TestCoreKMS.get_default_object())
         mock_load_private_key = self.patch_call("cterasdk.lib.crypto.PrivateKey.load_private_key")
         mock_load_private_key.return_value = munch.Munch({'pem_data': self._kms_private_key.encode('utf-8')})
         mock_load_certificate = self.patch_call("cterasdk.lib.crypto.X509Certificate.load_certificate")
@@ -49,7 +49,7 @@ class TestCoreKMS(base_core.BaseCoreTest):
         ret = kms.KMS(self._global_admin).enable(self._kms_private_key_file, self._kms_client_certificate_file, 
                                                  self._kms_server_certificate_file, self._kms_key_expiration, 
                                                  self._kms_timeout, self._kms_port)
-        mock_load_private_key.assert_called_once_with(self._kms_client_certificate_file)
+        mock_load_private_key.assert_called_once_with(self._kms_private_key_file)
         mock_load_certificate.assert_has_calls(
             [
                 mock.call(self._kms_client_certificate_file),
@@ -59,19 +59,30 @@ class TestCoreKMS(base_core.BaseCoreTest):
         self._global_admin.get.assert_called_once_with('/defaults/KeyManagerSettings')
         self._global_admin.put.assert_called_once_with('/settings/keyManagerSettings', mock.ANY)
         expected_param = self._create_enable_kms_parameter(True)
-        actual_param = self._global_admin.call_args[0][1]
+        actual_param = self._global_admin.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
+
+    @staticmethod
+    def get_default_object():
+        param = munch.Munch()
+        param.integration = munch.Munch()
+        param.integration.connectionSettings = munch.Munch()
+        param.integration.tlsDetails = munch.Munch()
+        param.integration.tlsDetails.files = munch.Munch()
+        return param
 
     def _create_enable_kms_parameter(self, include_classnames=False):
         param = munch.Munch()
         param.expiration = self._kms_key_expiration
+        param.integration = munch.Munch()
+        param.integration.connectionSettings = munch.Munch()
         param.integration.connectionSettings.timeout = self._kms_timeout
         param.integration.connectionSettings.port = self._kms_port
         param.integration.tlsDetails = munch.Munch()
         param.integration.tlsDetails.files = munch.Munch()
-        param.integration.tlsDetails.files.clientCert = self._kms_private_key
-        param.integration.tlsDetails.files.privateKey = self._kms_client_certificate
+        param.integration.tlsDetails.files.clientCert = self._kms_client_certificate
+        param.integration.tlsDetails.files.privateKey = self._kms_private_key
         param.integration.tlsDetails.files.rootCACert = self._kms_server_certificate
         if include_classnames:
             param.integration.tlsDetails._classname = 'TLSDetails' # pylint: disable=protected-access
@@ -80,7 +91,7 @@ class TestCoreKMS(base_core.BaseCoreTest):
     
     def test_kms_modify(self):
         put_response = 'Success'
-        self._init_global_admin(put_response=put_response, get_response=munch.Munch())
+        self._init_global_admin(put_response=put_response, get_response=TestCoreKMS.get_default_object())
         mock_load_private_key = self.patch_call("cterasdk.lib.crypto.PrivateKey.load_private_key")
         mock_load_private_key.return_value = munch.Munch({'pem_data': self._kms_private_key.encode('utf-8')})
         mock_load_certificate = self.patch_call("cterasdk.lib.crypto.X509Certificate.load_certificate")
@@ -89,7 +100,7 @@ class TestCoreKMS(base_core.BaseCoreTest):
         ret = kms.KMS(self._global_admin).modify(self._kms_private_key_file, self._kms_client_certificate_file, 
                                                  self._kms_server_certificate_file, self._kms_key_expiration, 
                                                  self._kms_timeout, self._kms_port)
-        mock_load_private_key.assert_called_once_with(self._kms_client_certificate_file)
+        mock_load_private_key.assert_called_once_with(self._kms_private_key_file)
         mock_load_certificate.assert_has_calls(
             [
                 mock.call(self._kms_client_certificate_file),
@@ -99,7 +110,7 @@ class TestCoreKMS(base_core.BaseCoreTest):
         self._global_admin.get.assert_called_once_with('/settings/keyManagerSettings')
         self._global_admin.put.assert_called_once_with('/settings/keyManagerSettings', mock.ANY)
         expected_param = self._create_enable_kms_parameter()
-        actual_param = self._global_admin.call_args[0][1]
+        actual_param = self._global_admin.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
 
@@ -119,9 +130,9 @@ class TestCoreKMS(base_core.BaseCoreTest):
 
     def test_list_all_kms_servers(self):
         with mock.patch("cterasdk.core.kms.query.iterator") as query_iterator_mock:
-            kms.KMS(self._global_admin).all()
+            kms.KMS(self._global_admin).servers.all()
             query_iterator_mock.assert_called_once_with(self._global_admin, '/keyManagerServers', mock.ANY)
-            expected_query_params = base_core.BaseCoreTest._create_query_params(start_from=0, count_limit=50, orFilter=True)
+            expected_query_params = base_core.BaseCoreTest._create_query_params(start_from=0, count_limit=25, orFilter=True)
             actual_query_params = query_iterator_mock.call_args[0][2]
             self._assert_equal_objects(actual_query_params, expected_query_params)
 
@@ -138,7 +149,7 @@ class TestCoreKMS(base_core.BaseCoreTest):
 
     def test_modify_kms_server(self):
         put_response = 'Success'
-        self._init_global_admin(put_response=put_response)
+        self._init_global_admin(put_response=put_response, get_response=munch.Munch())
         ret = kms.KMS(self._global_admin).servers.modify(self._kms_server_name, self._kms_server_new_name)
         self._global_admin.get.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}')
         self._global_admin.put.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}', mock.ANY)
