@@ -6,7 +6,6 @@ from ..core import buckets
 from ..core import cli
 from ..core import decorator
 from ..core import directoryservice
-from ..core import edgefilerssyslog
 from ..core import firmwares
 from ..core import kms
 from ..core import login
@@ -47,8 +46,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.plans.Plans plans: Object holding the Plan APIs
     :ivar cterasdk.core.reports.Reports reports: Object holding the Portal reports APIs
     :ivar cterasdk.core.devices.Devices devices: Object holding the Portal devices APIs
-    :ivar cterasdk.core.directoryservice.DirectoryService directoryservice: Object holding the Portal Active Directory Service APIs
-    :ivar cterasdk.core.edgefilerssyslog.EdgeFilersSyslog edgefilerssyslog: Object holding the Edge Filers Syslog APIs
+    :ivar cterasdk.core.directoryservice.DirectoryService directoryservice: Object holding the Portal Active Directory
     :ivar cterasdk.core.activation.Activation activation: Object holding the Portal activation APIs
     :ivar cterasdk.core.kms.KMS kms: Object holding the Portal External Key Management APIs
     :ivar cterasdk.core.logs.Logs logs: Object holding the Portal logs APIs
@@ -80,7 +78,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.directoryservice = directoryservice.DirectoryService(self)
         self.cloudfs = cloudfs.CloudFS(self)
         self.activation = activation.Activation(self)
-        self.edgefilerssyslog = edgefilerssyslog.EdgeFilersSyslog(self)
         self.kms = kms.KMS(self)
         self.files = files.CloudDrive(self, self.cloud_drive_base_path)
         self.backups = files.Backups(self, self.backups_base_path)
@@ -131,7 +128,6 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'plans',
             'devices',
             'directoryservice',
-            'edgefilerssyslog',
             'cloudfs',
             'activation',
             'kms',
