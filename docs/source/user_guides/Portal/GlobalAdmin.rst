@@ -664,6 +664,82 @@ Messaging Service
    servers = ["server1", "server2", "server3"]
    admin.messaging.add(servers)
 
+Key Management Service
+----------------------
+.. automethod:: cterasdk.core.kms.KMS.settings
+   :noindex:
+
+.. code-block:: python
+
+   admin.kms.settings()
+
+.. automethod:: cterasdk.core.kms.KMS.status
+   :noindex:
+
+.. code-block:: python
+
+   admin.kms.status()
+
+.. automethod:: cterasdk.core.kms.KMS.enable
+   :noindex:
+
+.. code-block:: python
+
+   private_key = './private_key.pem'
+   client_certificate = './client_certificate.crt'
+   server_certificate = './server_certificate.crt'
+
+   admin.kms.KMS.enable(private_key, client_certificate, server_certificate)
+
+.. automethod:: cterasdk.core.kms.KMS.disable
+   :noindex:
+
+.. code-block:: python
+
+   admin.kms.KSM.disable()
+
+.. automethod:: cterasdk.core.kms.KMS.modify
+   :noindex:
+
+Key Management Service Servers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automethod:: cterasdk.core.kms.KMS.get
+   :noindex:
+
+.. code-block:: python
+
+   admin.kms.servers.get('kms001')
+
+.. automethod:: cterasdk.core.kms.KMS.all
+   :noindex:
+
+.. code-block:: python
+
+   for server in admin.kms.servers.all():
+       print(server)
+
+.. automethod:: cterasdk.core.kms.KMS.add
+   :noindex:
+
+.. code-block:: python
+
+   admin.kms.servers.add('kms001', '192.168.30.1')
+
+.. automethod:: cterasdk.core.kms.KMS.modify
+   :noindex:
+
+.. code-block:: python
+
+   admin.kms.servers.modify('kms001', 'kms001-renamed')
+
+.. automethod:: cterasdk.core.kms.KMS.delete
+   :noindex:
+
+.. code-block:: python
+
+   admin.kms.servers.delete('kms001')
+
+
 Antivirus
 ---------
 
