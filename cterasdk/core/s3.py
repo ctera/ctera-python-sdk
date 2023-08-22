@@ -11,7 +11,7 @@ class S3Keys(BaseCommand):
 
     def get_keys(self, user):
         """
-        Retrieve User Access Keys
+        Retrieve all User Access Keys
 
         :param str user: Retrieve the Access Keys for the User
         """
