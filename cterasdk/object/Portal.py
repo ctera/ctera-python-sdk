@@ -16,6 +16,7 @@ from ..core import plans
 from ..core import reports
 from ..core import servers
 from ..core import devices
+from ..core import s3
 from ..core import session
 from ..core import storage_classes
 from ..core import domains
@@ -83,6 +84,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.roles = roles.Roles(self)
         self.settings = settings.Settings(self)
         self.storage_classes = storage_classes.StorageClasses(self)
+        self.s3 = s3.S3Keys(self)
         self.tasks = taskmgr.Tasks(self)
         self.templates = templates.Templates(self)
         self.firmwares = firmwares.Firmwares(self)
@@ -132,6 +134,7 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'logs',
             'roles',
             'settings',
+            's3',
             'tasks',
             'templates',
             'firmwares'
