@@ -11,9 +11,15 @@ from . import query
 class Users(BaseCommand):
     """
     Portal User Management APIs
+
+    :ivar cterasdk.core.credentials.Credentials credentials: Object holding Portal User Credential Management APIs.
     """
 
     default = ['name']
+
+    def __init__(self, portal):
+        super().__init__(portal)
+        self.credentials = Credentials(self._portal)
 
     def _get_entire_object(self, user_account):
         ref = f'/users/{user_account.name}' if user_account.is_local \
@@ -169,3 +175,46 @@ class Users(BaseCommand):
         logging.getLogger().info('User deleted. %s', {'user': str(user)})
 
         return response
+
+
+class Credentials(BaseCommand):
+    """
+    Portal Credential Management APIs
+
+    :ivar cterasdk.core.credentials.S3 s3: Object holding the Portal User S3 Credential Management APIs.
+    """
+
+    def __init__(self, portal):
+        super().__init__(portal)
+        self.s3 = S3(self._portal)
+
+
+class S3(BaseCommand):
+    """
+    S3 Credential Management APIs
+    """
+
+    def all(self, user_account):
+        """
+        List Credentials
+
+        :param cterasdk.core.types.UserAccount user_account: User account
+        """
+        return self._portal.credentials.s3.all(user_account)
+
+    def create(self, user_account):
+        """
+        Create Credential
+
+        :param cterasdk.core.types.UserAccount user_account: User account
+        """
+        return self._portal.credentials.s3.create(user_account)
+
+    def delete(self, access_key_id, user_account):
+        """
+        Delete Credential
+
+        :param str access_key_id: Access Key ID
+        :param cterasdk.core.types.UserAccount user_account: User account
+        """
+        return self._portal.credentials.s3.delete(access_key_id, user_account)

@@ -18,6 +18,7 @@ class CloudFS(BaseCommand):
     :ivar cterasdk.core.cloudfs.CloudDrives drives: Object holding Cloud Drive Folders APIs
     :ivar cterasdk.core.cloudfs.Backups backups: Object holding Backup Folders APIs
     :ivar cterasdk.core.cloudfs.Zones zones: Object holding Zones APIs
+    :ivar cterasdk.core.cloudfs.Exports exports: Object holding Bucket Exports APIs
     """
 
     def __init__(self, portal):
@@ -26,7 +27,7 @@ class CloudFS(BaseCommand):
         self.drives = CloudDrives(self._portal)
         self.backups = Backups(self._portal)
         self.zones = Zones(self._portal)
-        self.buckets = Buckets(self._portal)
+        self.exports = Exports(self._portal)
 
 
 class FolderGroups(BaseCommand):
@@ -536,12 +537,12 @@ class Zones(BaseCommand):
         return param
 
 
-class Buckets(BaseCommand):
-    """ Folder Groups APIs """
+class Exports(BaseCommand):
+    """ S3 Exports APIs """
 
     def get(self, name):
         """
-        Retrieve a Bucket
+        Get Buckets
 
         :param str name: Bucket name
         """
@@ -549,7 +550,7 @@ class Buckets(BaseCommand):
 
     def get_endpoint(self, name):
         """
-        Get endpoint
+        Get Endpoint
 
         :param str name: Bucket name
         :returns: Bucket endpoint
@@ -559,18 +560,18 @@ class Buckets(BaseCommand):
 
     def all(self):
         """
-        List all Buckets
+        List Buckets
         """
         param = query.QueryParamBuilder().startFrom(0).countLimit(25).orFilter(True).build()
         return query.iterator(self._portal, '/buckets', param)
 
     def add(self, name, drive_name, drive_owner, description=None):
         """
-        Add a new Bucket
+        Add Bucket
 
         :param str name: Bucket name
-        :param str drive_name: Cloud Drive folder name
-        :param str drive_owner: Cloud Drive folder owner
+        :param str drive_name: Cloud Drive Folder name
+        :param str drive_owner: Cloud Drive Folder owner
         :param str,optional description: Bucket description
         """
         param = Object()
@@ -586,6 +587,7 @@ class Buckets(BaseCommand):
     def modify(self, name, description):
         """
         Modify Bucket
+        
         :param str name: Bucket name
         :param str description: Bucket description
         """
