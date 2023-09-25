@@ -13,7 +13,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         super().setUp()
         self._display_name = None
         self._root = 'users'
-        self._pin_valid_folder_path = 'users/Service Account/TopLevelFolder/1/2/3/included_folder'
+        self._pin_valid_folder_path = 'users/Service Account/folder'
         self._pin_exclude_subfolder_path = 'users/Service Account/folder/excluded_folder'
         self._pin_invalid_folder_path = 'wrongpath/Service Account/folder'
 
