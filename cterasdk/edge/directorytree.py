@@ -94,7 +94,7 @@ class DirectoryTree:
     def _get_child(self, node, child_name):
         if self._has_children(node):
             for child in node.children:
-                if child.name == child_name:
+                if str(child.name) == child_name:
                     return child
         return None
 
