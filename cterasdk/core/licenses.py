@@ -24,11 +24,11 @@ class Licenses(BaseCommand):
 
         :param list[str] keys: List of license keys
         """
-        logging.getLogger().info(f'Adding license{"s" if len(keys) > 1 else ""}.')
+        logging.getLogger().info('Adding license(s)')
         param = Object()
         param.keys = list(keys)
-        response = self._portal.execute('', 'addLicenses', param)
-        logging.getLogger().info(f'License{"s" if len(keys) > 1 else ""} added.')
+        self._portal.execute('', 'addLicenses', param)
+        logging.getLogger().info('License(s) added')
 
     def remove(self, *keys):
         """
@@ -40,7 +40,8 @@ class Licenses(BaseCommand):
         licenses = self.all()
         param = [license for license in licenses if license.key not in keys and license.originalKey not in keys]
         if len(param) != len(licenses):
-            logging.getLogger().info(f'Updating licenses.')
+            logging.getLogger().info('Updating licenses.')
             response = self._portal.put('/portalLicenses', param)
-            logging.getLogger().info(f'Licenses updated.')
+            logging.getLogger().info('Licenses updated.')
             return response
+        return None
