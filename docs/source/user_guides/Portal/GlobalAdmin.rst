@@ -112,6 +112,27 @@ Core Methods
    :noindex:
 
 
+Licenses
+--------
+
+.. automethod:: cterasdk.core.licenses.Licenses.all
+   :noindex:
+
+.. automethod:: cterasdk.core.licenses.Licenses.add
+   :noindex:
+
+.. code-block:: python
+
+   admin.licenses.add('ABCD', 'EFGH', 'IJKL')
+
+.. automethod:: cterasdk.core.licenses.Licenses.remove
+   :noindex:
+
+.. code-block:: python
+
+   admin.licenses.remove('ABCD')
+
+
 Storage Classes
 ---------------
 

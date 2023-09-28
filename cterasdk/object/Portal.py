@@ -8,6 +8,7 @@ from ..core import decorator
 from ..core import directoryservice
 from ..core import firmwares
 from ..core import kms
+from ..core import licenses
 from ..core import login
 from ..core import query
 from ..core import logs
@@ -185,6 +186,7 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
     Main class for Global Admin operations on a Portal
 
     :ivar cterasdk.core.portals.Portals portals: Object holding the Portals Management APIs
+    :ivar cterasdk.core.licenses.Licenses licenses: Object holding the Portal license APIs
     :ivar cterasdk.core.cli.CLI cli: Object holding the Portal GlobalAdmin CLI APIs
     :ivar cterasdk.core.servers.Servers servers: Object holding the Servers Management APIs
     :ivar cterasdk.core.setup.Setup setup: Object holding the Portal setup APIs
@@ -208,6 +210,7 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
         self.portals = portals.Portals(self)
         self.servers = servers.Servers(self)
         self.cli = cli.CLI(self)
+        self.licenses = licenses.Licenses(self)
         self.kms = kms.KMS(self)
         self.setup = setup.Setup(self)
         self.ssl = ssl.SSL(self)
@@ -221,6 +224,8 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
     def _omit_fields(self):
         return super()._omit_fields + [
             'portals',
+            'cli',
+            'licenses',
             'kms',
             'servers',
             'setup',
