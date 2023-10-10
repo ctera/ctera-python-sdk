@@ -14,7 +14,7 @@ class CTERAPath:
             self.relativepath = PurePosixPath(item)
         elif isinstance(item, Object) and hasattr(item, '_classname') and item._classname == 'ResourceInfo':
             href = unquote(item.href)
-            match = re.search('^/(ServicesPortal|Users)/webdav', href)
+            match = re.search('^/(ServicesPortal|admin)/webdav', href)
             start, end = match.span()
             self.basepath = PurePosixPath(href[start: end])
             self.relativepath = PurePosixPath(href[end + 1:])
