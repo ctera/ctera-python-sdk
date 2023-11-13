@@ -710,14 +710,14 @@ Key Management Service
    client_certificate = './client_certificate.crt'
    server_certificate = './server_certificate.crt'
 
-   admin.kms.KMS.enable(private_key, client_certificate, server_certificate)
+   admin.kms.enable(private_key, client_certificate, server_certificate)
 
 .. automethod:: cterasdk.core.kms.KMS.disable
    :noindex:
 
 .. code-block:: python
 
-   admin.kms.KSM.disable()
+   admin.kms.disable()
 
 .. automethod:: cterasdk.core.kms.KMS.modify
    :noindex:
