@@ -15,7 +15,7 @@ class Credentials(BaseCommand):
         super().__init__(portal)
         self.s3 = S3(self._portal)
 
-    
+
 class S3(BaseCommand):
     """S3 Credential Management APIs"""
 

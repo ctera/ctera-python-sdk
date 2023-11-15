@@ -587,7 +587,7 @@ class Exports(BaseCommand):
     def modify(self, name, description):
         """
         Modify Bucket
-        
+
         :param str name: Bucket name
         :param str description: Bucket description
         """
