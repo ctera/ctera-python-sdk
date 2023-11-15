@@ -1315,6 +1315,44 @@ Folder Groups
 
    admin.cloudfs.groups.delete('FG-001')
 
+Backup Folders
+^^^^^^^^^^^^^^
+.. automethod:: cterasdk.core.cloudfs.Backups.all
+   :noindex:
+
+.. code:: python
+
+   """List all backup folder"""
+   for backup_folder in admin.cloudfs.backups.all():
+      print(backup_folder)
+
+.. automethod:: cterasdk.core.cloudfs.Backups.add
+   :noindex:
+
+.. code:: python
+
+   """Create a backup folder"""
+   folder_group = 'backup-fg'
+   owner = portal_types.UserAccount('bwayne', 'domain.ctera.local')
+   admin.cloudfs.backups.add('my-backup', folder_group, owner)
+
+.. automethod:: cterasdk.core.cloudfs.Backups.modify
+   :noindex:
+
+.. code:: python
+
+   """Change backup folder owner"""
+   bwayne = portal_types.UserAccount('bwayne', 'domain.ctera.local')
+   admin.cloudfs.backups.modify('my-backup', new_owner=bwayne)
+
+.. automethod:: cterasdk.core.cloudfs.Backups.delete
+   :noindex:
+
+.. code:: python
+
+   """Delete a backup folder"""
+   admin.cloudfs.backups.modify('my-backup')
+
 Cloud Drive Folders
 ^^^^^^^^^^^^^^^^^^^
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.all

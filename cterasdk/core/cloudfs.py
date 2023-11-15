@@ -329,6 +329,101 @@ class CloudDrives(BaseCommand):
 class Backups(BaseCommand):
     """ Backup Folder APIs """
 
+    default = ['name', 'group', 'owner']
+
+    def _get_entire_object(self, name):
+        return self._portal.get(f'/backups/{name}')
+
+    def add(self, name, group, owner, xattr=True):
+        """
+        Create a new Backup Folder
+
+        :param str name: Name of the backup folder
+        :param str group: Folder Group to assign this folder to
+        :param cterasdk.core.types.UserAccount owner: User account, the owner of the backup folder
+        :param bool,optional xattr: Backup extended attributes, defaults to True
+        """
+        param = Object()
+        param._classname = 'Backup'  # pylint: disable=protected-access
+        param.name = name
+        param.owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
+        param.group = self._portal.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
+        param.enableBackupExtendedAttributes = xattr
+        try:
+            response = self._portal.add('/backups', param)
+            logging.getLogger().info(
+                'Backup folder created. %s',
+                {'name': name, 'owner': param.owner, 'folder_group': group, 'xattr': xattr}
+            )
+            return response
+        except CTERAException as error:
+            logging.getLogger().error(
+                'Backup folder creation failed. %s',
+                {'name': name, 'folder_group': group, 'owner': owner, 'xattr': xattr}
+            )
+            raise error
+
+    def modify(self, current_name, new_name=None, new_owner=None, new_group=None, xattr=None):
+        """
+        Modify a Backup Folder
+
+        :param str current_name: Current folder name
+        :param cterasdk.core.types.UserAccount owner: User account, the owner of the folder
+        :param str,optional new_name: New folder name
+        :param cterasdk.core.types.UserAccount,optional new_owner: User account, the new owner of the folder
+        :param str,optional new_group: Folder Group to assign this folder to
+        :param bool,optional xattr: Backup extended attributes
+        """
+        param = self._get_entire_object(current_name)
+        if new_name:
+            param.name = new_name
+        if new_owner:
+            param.owner = self._portal.users.get(new_owner, ['baseObjectRef']).baseObjectRef
+        if new_group:
+            param.group = self._portal.cloudfs.groups.get(new_group, include=['baseObjectRef']).baseObjectRef
+        if xattr:
+            param.enableBackupExtendedAttributes = xattr
+        try:
+            response = self._portal.put(f'/backups/{current_name}', param)
+            logging.getLogger().info('Backup folder updated. %s', {'name': current_name})
+            return response
+        except CTERAException as error:
+            logging.getLogger().error('Backup folder update failed. %s', {'name': current_name})
+            raise error
+
+    def all(self, include=None, list_filter=ListFilter.NonDeleted, user=None):
+        """
+        List Backup folders.
+
+        :param str,optional include: List of fields to retrieve, defaults to ['name', 'group', 'owner']
+        :param cterasdk.core.enum.ListFilter list_filter: Filter the list of Backup folders, defaults to non-deleted folders
+        :param cterasdk.core.types.UserAccount user: Filter by backup folder owner
+        :returns: Iterator for all Backup folders
+        """
+        include = union(include or [], Backups.default)
+        builder = query.QueryParamBuilder().include(include)
+        if list_filter != ListFilter.NonDeleted:
+            builder.put('includeDeleted', True)
+            if list_filter == ListFilter.Deleted:
+                query_filter = query.FilterBuilder('isDeleted').eq(True)
+                builder.addFilter(query_filter)
+        if user:
+            uid = self._portal.users.get(user, ['uid']).uid
+            builder.ownedBy(uid)
+        param = builder.build()
+        return query.iterator(self._portal, '/backups', param)
+
+    def delete(self, name):
+        """
+        Delete a Backup Folder
+
+        :param str name: Name of the Backup Folder to delete
+        """
+        logging.getLogger().info('Deleting Backup folder. %s', {'name': name})
+        response = self._portal.execute(f'/backups/{name}', 'delete')
+        logging.getLogger().info('Backup folder deleted. %s', {'name': name})
+        return response
+
 
 class Zones(BaseCommand):
     """
