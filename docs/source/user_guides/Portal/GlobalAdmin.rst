@@ -1039,6 +1039,37 @@ Directory Services
    admin.directoryservice.disconnect()
 
 
+Credentials
+-----------
+.. automethod:: cterasdk.core.credentials.S3.all
+   :noindex:
+
+.. code-block:: python
+
+   """List all of 'jsmith@demo.local' S3 credentials"""
+   jsmith = portal_types.UserAccount('jsmith', 'demo.local')
+   for credential in user.credentials.s3.all(jsmith):
+       print(credential.accessKey, credential.activated)
+
+.. automethod:: cterasdk.core.credentials.S3.create
+   :noindex:
+
+.. code-block:: python
+
+   """Create an S3 credential for a service account"""
+   service_account = portal_types.UserAccount('service_account')
+   credential = user.credentials.s3.create(service_account)
+
+.. automethod:: cterasdk.core.credentials.S3.delete
+   :noindex:
+
+.. code-block:: python
+
+   """Delete an S3 credentials associated with a user account"""
+   user_account = portal_types.UserAccount('jsmith', 'demo.local')
+   access_key_id = 'ABCDEFGHIJKLMOP'
+   user.credentials.s3.delete(access_key_id, user_account)
+
 Groups
 ------
 

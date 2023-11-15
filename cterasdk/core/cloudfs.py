@@ -18,6 +18,7 @@ class CloudFS(BaseCommand):
     :ivar cterasdk.core.cloudfs.CloudDrives drives: Object holding Cloud Drive Folders APIs
     :ivar cterasdk.core.cloudfs.Backups backups: Object holding Backup Folders APIs
     :ivar cterasdk.core.cloudfs.Zones zones: Object holding Zones APIs
+    :ivar cterasdk.core.cloudfs.Exports exports: Object holding Bucket Exports APIs
     """
 
     def __init__(self, portal):
@@ -26,6 +27,7 @@ class CloudFS(BaseCommand):
         self.drives = CloudDrives(self._portal)
         self.backups = Backups(self._portal)
         self.zones = Zones(self._portal)
+        self.exports = Exports(self._portal)
 
 
 class FolderGroups(BaseCommand):
@@ -192,7 +194,7 @@ class CloudDrives(BaseCommand):
         if new_name:
             param.name = new_name
         if new_owner:
-            param.owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
+            param.owner = self._portal.users.get(new_owner, ['baseObjectRef']).baseObjectRef
         if new_group:
             param.group = self._portal.cloudfs.groups.get(new_group, include=['baseObjectRef']).baseObjectRef
         if description:
@@ -533,3 +535,77 @@ class Zones(BaseCommand):
         param.delta.devicesDelta.added = []
         param.delta.devicesDelta.removed = []
         return param
+
+
+class Exports(BaseCommand):
+    """ S3 Exports APIs """
+
+    def get(self, name):
+        """
+        Get Buckets
+
+        :param str name: Bucket name
+        """
+        return self._portal.get(f'/buckets/{name}')
+
+    def get_endpoint(self, name):
+        """
+        Get Endpoint
+
+        :param str name: Bucket name
+        :returns: Bucket endpoint
+        :rtype: str
+        """
+        return self.get(name).url
+
+    def all(self):
+        """
+        List Buckets
+        """
+        param = query.QueryParamBuilder().startFrom(0).countLimit(25).orFilter(True).build()
+        return query.iterator(self._portal, '/buckets', param)
+
+    def add(self, name, drive_name, drive_owner, description=None):
+        """
+        Add Bucket
+
+        :param str name: Bucket name
+        :param str drive_name: Cloud Drive Folder name
+        :param str drive_owner: Cloud Drive Folder owner
+        :param str,optional description: Bucket description
+        """
+        param = Object()
+        param._classname = 'Bucket'  # pylint: disable=protected-access
+        param.description = description
+        param.name = name
+        param.cloudDrive = self._portal.cloudfs.drives.find(drive_name, drive_owner, include=['baseObjectRef']).baseObjectRef
+        logging.getLogger().info('Adding Bucket. %s', {'name': name})
+        response = self._portal.add('/buckets', param)
+        logging.getLogger().info('Bucket Added. %s', {'name': name})
+        return response
+
+    def modify(self, name, description):
+        """
+        Modify Bucket
+
+        :param str name: Bucket name
+        :param str description: Bucket description
+        """
+
+        bucket = self.get(name)
+        bucket.description = description
+        logging.getLogger().info("Modifying Bucket. %s", {'name': name})
+        response = self._portal.put(f'/buckets/{name}', bucket)
+        logging.getLogger().info("Bucket modified. %s", {'name': name})
+        return response
+
+    def delete(self, name):
+        """
+        Remove Bucket
+
+        :param str name: Bucket name
+        """
+        logging.getLogger().info('Deleting Bucket. %s', {'name': name})
+        response = self._portal.delete(f'/buckets/{name}')
+        logging.getLogger().info('Bucket deleted. %s', {'name': name})
+        return response
