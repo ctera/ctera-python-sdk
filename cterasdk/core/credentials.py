@@ -56,9 +56,9 @@ class S3(BaseCommand):
         user_account = self._user_account(user_account)
         for key in self.all(user_account):
             if key.accessKey == access_key_id:
-                logging.getLogger().info('Deleting Credential. %s', {'type': 's3', 'key': access_key_id})
+                logging.getLogger().info('Deleting Credential. %s', {'type': 's3'})
                 response = self._portal.execute('', 'deleteApiKey', key.uid)
-                logging.getLogger().info('Credetial deleted. %s', {'type': 's3', 'key': access_key_id})
+                logging.getLogger().info('Credetial deleted. %s', {'type': 's3'})
                 return response
         logging.getLogger().warning('Could not find access key. %s', {'key': access_key_id})
         return None

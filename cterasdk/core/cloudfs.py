@@ -194,7 +194,7 @@ class CloudDrives(BaseCommand):
         if new_name:
             param.name = new_name
         if new_owner:
-            param.owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
+            param.owner = self._portal.users.get(new_owner, ['baseObjectRef']).baseObjectRef
         if new_group:
             param.group = self._portal.cloudfs.groups.get(new_group, include=['baseObjectRef']).baseObjectRef
         if description:
