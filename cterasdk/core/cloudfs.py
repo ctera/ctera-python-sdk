@@ -344,7 +344,7 @@ class Backups(BaseCommand):
         :param bool,optional xattr: Backup extended attributes, defaults to True
         """
         param = Object()
-        param._classname = 'Backup'
+        param._classname = 'Backup'  # pylint: disable=protected-access
         param.name = name
         param.owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
         param.group = self._portal.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
