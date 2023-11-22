@@ -292,7 +292,7 @@ The Backups class is a subclass to :py:class:`cterasdk.common.files.browser.File
 CTERA Fusion (S3)
 -----------------
 
-Starting CTERA 8.0, CTERA Portal features programmatic access via the S3 protocol, also known as *CTERA Fusion* 
+Starting CTERA 8.0, CTERA Portal features programmatic access via the S3 protocol, also known as *CTERA Fusion*
 For more information on how to enable CTERA Fusion and the supported extensions of the S3 protocol, please refer to the following `article <https://kb.ctera.com/v1/docs/en/setting-up-access-from-an-s3-browser>`.
 
 The following section includes examples on how to instantiate an S3 client using the Amazon SDK for Python (boto3).
@@ -304,10 +304,10 @@ The following section includes examples on how to instantiate an S3 client using
 
    """Instantiate the boto3 client"""
    client = boto3.client(
-         's3', 
+         's3',
          endpoint_url=https://domain.ctera.com:8443,  # your CTERA Portal tenant domain
          aws_access_key_id=credentials.accessKey,
-         aws_secret_access_key=credentials.secretKey, 
+         aws_secret_access_key=credentials.secretKey,
          verify=False  # disable certificate verification (Optional)
    )
 
