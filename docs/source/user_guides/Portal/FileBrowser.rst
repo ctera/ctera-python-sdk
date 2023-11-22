@@ -288,3 +288,47 @@ The Backups class is a subclass to :py:class:`cterasdk.common.files.browser.File
    user = ServicesPortal('portal.ctera.com')  # logging in to /ServicesPortal
    user.login('bwayne', getpass())
    file_browser = user.backups  # the field is an instance of Backups class object
+
+CTERA Fusion (S3)
+-----------------
+
+Starting CTERA 8.0, CTERA Portal features programmatic access via the S3 protocol, also known as *CTERA Fusion* 
+For more information on how to enable CTERA Fusion and the supported extensions of the S3 protocol, please refer to the following `article <https://kb.ctera.com/v1/docs/en/setting-up-access-from-an-s3-browser>`.
+
+The following section includes examples on how to instantiate an S3 client using the Amazon SDK for Python (boto3).
+
+.. code:: python
+
+   credentials = user.credentials.s3.create()  # if logged in as a user
+   # credentials = admin.credentials.s3.create(portal_types.UserAccount('username', 'domain'))  # if logged in as a Global Admin
+
+   """Instantiate the boto3 client"""
+   client = boto3.client(
+         's3', 
+         endpoint_url=https://domain.ctera.com:8443,  # your CTERA Portal tenant domain
+         aws_access_key_id=credentials.accessKey,
+         aws_secret_access_key=credentials.secretKey, 
+         verify=False  # disable certificate verification (Optional)
+   )
+
+   """List Buckets"""
+   response = client.list_buckets()
+   for bucket in response['Buckets']:
+      print(bucket['Name'])
+
+   """Upload a file"""
+   client.upload_file(r'./document.docx', 'my-bucket-name', 'data-management-document.docx')
+
+   """List files"""
+   response = client.list_objects_v2(Bucket='my-bucket-name')
+   for item in response['Contents']:
+      print(item['Key'], item['LastModified'])
+
+   """List files, using Pagination"""
+   paginator = client.get_paginator('list_objects_v2')
+   for page in paginator.paginate(Bucket='my-bucket-name'):
+      for item in page['Contents']:
+         print(item['Key'], item['LastModified'])
+
+   """Download a file"""
+   client.download_file(r'./data-management-document.docx', 'my-bucket-name', 'data-management-document-copy.docx')
