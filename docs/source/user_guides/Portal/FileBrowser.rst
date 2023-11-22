@@ -332,3 +332,5 @@ The following section includes examples on how to instantiate an S3 client using
 
    """Download a file"""
    client.download_file(r'./data-management-document.docx', 'my-bucket-name', 'data-management-document-copy.docx')
+
+   # for more information, please refer to the Amazon SDK for Python (boto3) documentation.
