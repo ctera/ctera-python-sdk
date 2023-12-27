@@ -1,3 +1,4 @@
+import re
 import logging
 from . import common
 from ..enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode
@@ -82,9 +83,10 @@ def get_share_info(ctera_host, path):
 
 
 def share(ctera_host, path, recipients, as_project, allow_reshare, allow_sync):
-    if len(path.relativepath.parts) > 1:  # The shared path is not a cloud folder. Therefore, the following attrs aren't customizable.
-        as_project = False
-        allow_sync = False
+
+    if _is_subfolder(path):
+        as_project = False  # Can't be a team project
+        allow_sync = False  # Can't allow sync of a sub-folder
 
     valid_recipients = _obtain_valid_recipients(ctera_host, path, recipients)
     if valid_recipients:
@@ -100,6 +102,16 @@ def share(ctera_host, path, recipients, as_project, allow_reshare, allow_sync):
         return valid_recipients
     logging.getLogger().warning('Resource was not shared. Could not find valid recipients. %s', {'path': str(path.relativepath)})
     return valid_recipients
+
+
+def _is_sharing_on_user_behalf(path):
+    return True if re.match(r'^Users/[^/]+(?=/)', path.relativepath.as_posix()) is not None else False
+
+
+def _is_subfolder(path):
+    depth = len(path.relativepath.parts)
+    sharing_on_user_behalf = _is_sharing_on_user_behalf(path)
+    return True if (sharing_on_user_behalf and depth > 3) or (not sharing_on_user_behalf and depth > 1) else False
 
 
 def add_share_recipients(ctera_host, path, recipients):
@@ -159,7 +171,8 @@ def _obtain_valid_recipients(ctera_host, path, recipients):
 def unshare(ctera_host, path):
     resource_info = common.get_resource_info(ctera_host, path)
     as_project, allow_reshare, allow_sync = True, True, True
-    if len(path.relativepath.parts) > 1:  # The shared path is not a cloud folder. Therefore, the following attrs aren't customizable.
+    
+    if _is_subfolder(path):
         as_project = False
         allow_sync = False
 
