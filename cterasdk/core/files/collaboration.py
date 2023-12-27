@@ -105,13 +105,13 @@ def share(ctera_host, path, recipients, as_project, allow_reshare, allow_sync):
 
 
 def _is_sharing_on_user_behalf(path):
-    return True if re.match(r'^Users/[^/]+(?=/)', path.relativepath.as_posix()) is not None else False
+    return re.match(r'^Users/[^/]+(?=/)', path.relativepath.as_posix()) is not None
 
 
 def _is_subfolder(path):
     depth = len(path.relativepath.parts)
     sharing_on_user_behalf = _is_sharing_on_user_behalf(path)
-    return True if (sharing_on_user_behalf and depth > 3) or (not sharing_on_user_behalf and depth > 1) else False
+    return (sharing_on_user_behalf and depth > 3) or (not sharing_on_user_behalf and depth > 1)
 
 
 def add_share_recipients(ctera_host, path, recipients):
@@ -171,7 +171,7 @@ def _obtain_valid_recipients(ctera_host, path, recipients):
 def unshare(ctera_host, path):
     resource_info = common.get_resource_info(ctera_host, path)
     as_project, allow_reshare, allow_sync = True, True, True
-    
+
     if _is_subfolder(path):
         as_project = False
         allow_sync = False
