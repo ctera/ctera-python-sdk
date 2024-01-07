@@ -28,6 +28,7 @@ from ..edge import ssl
 from ..edge import ssh
 from ..edge import power
 from ..edge import rsync
+from ..edge import ransomprotect
 from ..edge import services
 from ..edge import session
 from ..edge import shares
@@ -88,6 +89,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.edge.cli.CLI cli: Object holding the Gateway CLI APIs
     :ivar cterasdk.edge.dedup.Dedup dedup: Object holding the Gateway Local Deduplication APIs
     :ivar cterasdk.edge.support.Support support: Object holding the Gateway Support APIs
+    ivar cterasdk.edge.ransomprotect.RansomProtect support: Object holding the Gateway RansomProtect APIs
     :ivar cterasdk.edge.files.FileBrowser files: Object holding the Gateway File Browsing APIs
     :ivar cterasdk.edge.firmware.Firmware firmware: Object holding the Gateway Firmware APIs
     """
@@ -145,6 +147,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.firmware = firmware.Firmware(self)
         self.tasks = taskmgr.Tasks(self)
         self.mtool = migration_tool.MigrationTool(self)
+        self.ransomprotect = ransomprotect.RansomProtect(self)
 
     @property
     def base_api_url(self):

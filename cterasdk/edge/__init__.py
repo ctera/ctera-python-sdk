@@ -23,6 +23,7 @@ __all__ = [
     'ntp',
     'power',
     'rsync',
+    'ransomprotect',
     'services',
     'session',
     'shares',
