@@ -39,7 +39,8 @@ class Templates(BaseCommand):
         return template
 
     def add(self, name, description=None, include_sets=None, exclude_sets=None,
-            apps=None, backup_schedule=None, versions=None, update_settings=None, scripts=None, cli_commands=None):
+            apps=None, backup_schedule=None, versions=None, update_settings=None, 
+            scripts=None, cli_commands=None, consent_page=None):
         """
         Add a Configuration Template
 
@@ -54,6 +55,7 @@ class Templates(BaseCommand):
         :param cterasdk.common.types.SoftwareUpdatesTopic,optional update_settings: Software update settings
         :param list[cterasdk.core.types.TemplateScript],optional scripts: Scripts to execute after logon, before or after backup
         :param list[str],optional cli_commands: Template CLI commands to execute
+        :param cterasdk.common.types.ConsentPage consent_page: Consent page
         """
         param = Object()
         param._classname = 'DeviceTemplate'  # pylint: disable=protected-access
@@ -68,7 +70,8 @@ class Templates(BaseCommand):
         Templates._configure_backup_settings(param, include_sets, exclude_sets, backup_schedule, apps)
         Templates._add_scripts(param, scripts)
         Templates._add_cli_commands(param, cli_commands)
-        Templates._add_software_update_schedule(param, update_settings)
+        Templates._configure_software_update_schedule(param, update_settings)
+        Templates._configure_consent_page(param, consent_page)
 
         logging.getLogger().info('Adding template. %s', {'name': name})
         response = self._portal.add('/deviceTemplates', param)
@@ -109,13 +112,22 @@ class Templates(BaseCommand):
                 param.deviceSettings.backup.applicationsTopic.includeApps = ApplicationBackupSet(apps)
 
     @staticmethod
-    def _add_software_update_schedule(param, update_settings):
+    def _configure_software_update_schedule(param, update_settings):
         if update_settings:
-            param.softwareUpdates = Object()
-            param.softwareUpdates._classname = 'SoftwareUpdatesTopic'
-            param.softwareUpdates.overrideTemplate = False
-            param.softwareUpdates.softwareUpdates = update_settings
+            param.deviceSettings.softwareUpdates = Object()
+            param.deviceSettings.softwareUpdates._classname = 'SoftwareUpdatesTopic'
+            param.deviceSettings.softwareUpdates.overrideTemplate = False
+            param.deviceSettings.softwareUpdates.softwareUpdates = update_settings
 
+    @staticmethod
+    def _configure_consent_page(param, consent_page):
+        if consent_page:
+            param.deviceSettings.consentPage = Object()
+            param.deviceSettings.consentPage._classname = 'ConsentPageTopic'
+            param.deviceSettings.consentPage.enabled = True
+            param.deviceSettings.consentPage.consentPageHeader = consent_page.header
+            param.deviceSettings.consentPage.consentPageBody = consent_page.body
+            
     @staticmethod
     def _add_scripts(param, scripts):
         if scripts:

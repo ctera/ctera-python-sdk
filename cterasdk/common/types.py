@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from collections import namedtuple
 
 from .object import Object
 from .utils import df_military_time, day_of_week
@@ -481,6 +482,8 @@ class SoftwareUpdatePolicyBuilder:
         """
         Build the Software Update Policy
         """
+        if self.param.rebootAfterUpdate is False:
+            self.param.reboot_asap()
         return self.param
 
 
@@ -498,7 +501,16 @@ class SoftwareUpdatesTopic(Object):
     def reboot_after_update(self, enabled):
         self.rebootAfterUpdate = enabled
 
+    def reboot_asap(self):
+        self.rebootWhen = None
+
     def schedule(self, window):
         self.rebootWhen = Object()
         self.rebootWhen.mode = ScheduleType.Window
         self.rebootWhen.window = window
+
+    
+ConsentPage = namedtuple('ConsentPage', ('header', 'body'))
+ConsentPage.__doc__ = 'Tuple holding the consent page header and body'
+ConsentPage.header.__doc__ = 'The consent page header'
+ConsentPage.body.__doc__ = 'The consent page body'
