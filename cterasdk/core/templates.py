@@ -38,8 +38,9 @@ class Templates(BaseCommand):
             raise ObjectNotFoundException('Could not find server', f'/deviceTemplates/{name}', name=name)
         return template
 
-    def add(self, name, description=None, include_sets=None, exclude_sets=None,
-            apps=None, backup_schedule=None, versions=None, scripts=None, cli_commands=None):
+    def add(self, name, description=None, include_sets=None, exclude_sets=None,  # pylint: disable=too-many-arguments
+            apps=None, backup_schedule=None, versions=None, update_settings=None,
+            scripts=None, cli_commands=None, consent_page=None):
         """
         Add a Configuration Template
 
@@ -50,9 +51,11 @@ class Templates(BaseCommand):
         :param list[cterasdk.common.enum.Application],optional apps: List of applications to back up
         :param cterasdk.common.types.TaskSchedule,optional backup_schedule: Backup schedule
         :param list[cterasdk.core.types.PlatformVersion],optional versions: List of platforms and their associated versions.
-         Pass `None` to inehrit the default settings from the Global Administration Portal
+         Pass `None` to inherit the default settings from the Global Administration Portal
+        :param cterasdk.common.types.SoftwareUpdatesTopic,optional update_settings: Software update settings
         :param list[cterasdk.core.types.TemplateScript],optional scripts: Scripts to execute after logon, before or after backup
         :param list[str],optional cli_commands: Template CLI commands to execute
+        :param cterasdk.common.types.ConsentPage consent_page: Consent page to show to end-user
         """
         param = Object()
         param._classname = 'DeviceTemplate'  # pylint: disable=protected-access
@@ -67,6 +70,8 @@ class Templates(BaseCommand):
         Templates._configure_backup_settings(param, include_sets, exclude_sets, backup_schedule, apps)
         Templates._add_scripts(param, scripts)
         Templates._add_cli_commands(param, cli_commands)
+        Templates._configure_software_update_schedule(param, update_settings)
+        Templates._configure_consent_page(param, consent_page)
 
         logging.getLogger().info('Adding template. %s', {'name': name})
         response = self._portal.add('/deviceTemplates', param)
@@ -105,6 +110,23 @@ class Templates(BaseCommand):
                 param.deviceSettings.backup.applicationsTopic._classname = 'ApplicationsTopic'  # pylint: disable=protected-access
                 param.deviceSettings.backup.applicationsTopic.overrideTemplate = True
                 param.deviceSettings.backup.applicationsTopic.includeApps = ApplicationBackupSet(apps)
+
+    @staticmethod
+    def _configure_software_update_schedule(param, update_settings):
+        if update_settings:
+            param.deviceSettings.softwareUpdates = Object()
+            param.deviceSettings.softwareUpdates._classname = 'SoftwareUpdatesTopic'  # pylint: disable=protected-access
+            param.deviceSettings.softwareUpdates.overrideTemplate = False
+            param.deviceSettings.softwareUpdates.softwareUpdates = update_settings
+
+    @staticmethod
+    def _configure_consent_page(param, consent_page):
+        if consent_page:
+            param.deviceSettings.consentPage = Object()
+            param.deviceSettings.consentPage._classname = 'ConsentPageTopic'  # pylint: disable=protected-access
+            param.deviceSettings.consentPage.enabled = True
+            param.deviceSettings.consentPage.consentPageHeader = consent_page.header
+            param.deviceSettings.consentPage.consentPageBody = consent_page.body
 
     @staticmethod
     def _add_scripts(param, scripts):
@@ -153,7 +175,6 @@ class Templates(BaseCommand):
 
         :param list[str],optional names: List of names of templates
         :param list[str],optional include: List of fields to retrieve, defaults to ['name']
-        :param list[cterasdk.core.query.FilterBuilder],optional filters: List of additional filters, defaults to None
 
         :return: Iterator for all matching Templates
         :rtype: cterasdk.lib.iterator.Iterator

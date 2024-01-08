@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from collections import namedtuple
 
 from .object import Object
 from .utils import df_military_time, day_of_week
@@ -439,3 +440,75 @@ class ADDomainIDMapping(Object):
         self.domainFlatName = domain
         self.minID = start
         self.maxID = end
+
+
+class SoftwareUpdatePolicyBuilder:
+    """
+    Software Update Policy Builder
+    """
+
+    def __init__(self):
+        self.param = SoftwareUpdatesTopic(enabled=True, reboot_after_update=True, reboot_when=None)
+
+    def download_and_install(self, download_and_install):
+        """
+        Download and install updates automatically.
+        :param bool download_and_install: Set ``True`` to enable and ``False`` to disable.
+        """
+        self.param.download_and_install(download_and_install)
+        return self
+
+    def reboot_after_update(self, reboot_after_update):
+        """
+        Restart device automatically after installing new firmware
+
+        :param bool reboot_after_update: Set ``True`` to enable and ``False`` to disable.
+        """
+        self.param.reboot_after_update(reboot_after_update)
+        return self
+
+    def schedule(self, schedule):
+        """
+        Set the throttling rule schedule
+
+        :param cterasdk.common.types.TimeRange schedule: Schedule
+        """
+        self.param.schedule(schedule)
+        return self
+
+    def build(self):
+        """
+        Build the Software Update Policy
+        """
+        if self.param.rebootAfterUpdate is False:
+            self.param.reboot_asap()
+        return self.param
+
+
+class SoftwareUpdatesTopic(Object):
+
+    def __init__(self, enabled, reboot_after_update, reboot_when):
+        self._classname = "SoftwareUpdatesSettings"
+        self.enabled = enabled if enabled else None
+        self.rebootAfterUpdate = reboot_after_update if reboot_after_update else None
+        self.rebootWhen = reboot_when if reboot_when else None
+
+    def download_and_install(self, enabled):
+        self.enabled = enabled
+
+    def reboot_after_update(self, enabled):
+        self.rebootAfterUpdate = enabled
+
+    def reboot_asap(self):
+        self.rebootWhen = None
+
+    def schedule(self, window):
+        self.rebootWhen = Object()
+        self.rebootWhen.mode = ScheduleType.Window
+        self.rebootWhen.window = window
+
+
+ConsentPage = namedtuple('ConsentPage', ('header', 'body'))
+ConsentPage.__doc__ = 'Tuple holding the consent page header and body'
+ConsentPage.header.__doc__ = 'The consent page header'
+ConsentPage.body.__doc__ = 'The consent page body'

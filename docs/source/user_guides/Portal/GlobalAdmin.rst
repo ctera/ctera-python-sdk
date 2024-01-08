@@ -512,6 +512,11 @@ Configuration Templates
    """Configure software versions"""
    versions = [portal_types.PlatformVersion(portal_enum.Platform.Edge_7, '7.0.981.7')]  # use 7.0.981.7 for v7 Edge Filers
 
+   """Configure software update schedule"""
+   schedule = common_types.TimeRange().start('01:00:00').end('02:00:00').days(common_enum.DayOfWeek.Weekdays).build()
+   builder = common_types.SoftwareUpdatePolicyBuilder()
+   update_settings = builder.download_and_install(True).reboot_after_update(True).schedule(schedule).build()
+
    """Configure Scripts"""
    scripts = [
        portal_types.TemplateScript.windows().after_logon('echo Current directory: %cd%'),
@@ -525,8 +530,12 @@ Configuration Templates
        'add /config/agent/stubs/allowedExplorerExtensions url'
    ]
 
+   """Configure Consent Page"""
+   consent_page = common_types.ConsentPage('the header of your consent page', 'the body of your consent page')
+
    admin.templates.add('MyTemplate', 'woohoo', include_sets=[include_sets], exclude_sets=[exclude_sets],
-                       backup_schedule=backup_schedule, apps=apps, versions=versions, scripts=scripts, cli_commands=cli_commands)
+                      backup_schedule=backup_schedule, apps=apps, versions=versions, update_settings=update_settings,
+                      scripts=scripts, cli_commands=cli_commands, consent_page=consent_page)
 
 .. automethod:: cterasdk.core.templates.Templates.set_default
    :noindex:
