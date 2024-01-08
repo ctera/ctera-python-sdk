@@ -534,8 +534,8 @@ Configuration Templates
    consent_page = common_types.ConsentPage('the header of your consent page', 'the body of your consent page')
 
    admin.templates.add('MyTemplate', 'woohoo', include_sets=[include_sets], exclude_sets=[exclude_sets],
-                       backup_schedule=backup_schedule, apps=apps, versions=versions, update_settings=update_settings, 
-                       scripts=scripts, cli_commands=cli_commands, consent_page=consent_page)
+                      backup_schedule=backup_schedule, apps=apps, versions=versions, update_settings=update_settings,
+                      scripts=scripts, cli_commands=cli_commands, consent_page=consent_page)
 
 .. automethod:: cterasdk.core.templates.Templates.set_default
    :noindex:

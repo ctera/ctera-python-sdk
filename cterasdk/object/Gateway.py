@@ -28,7 +28,6 @@ from ..edge import ssl
 from ..edge import ssh
 from ..edge import power
 from ..edge import rsync
-from ..edge import ransomprotect
 from ..edge import services
 from ..edge import session
 from ..edge import shares
@@ -147,7 +146,6 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.firmware = firmware.Firmware(self)
         self.tasks = taskmgr.Tasks(self)
         self.mtool = migration_tool.MigrationTool(self)
-        self.ransomprotect = ransomprotect.RansomProtect(self)
 
     @property
     def base_api_url(self):
