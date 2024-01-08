@@ -88,7 +88,6 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.edge.cli.CLI cli: Object holding the Gateway CLI APIs
     :ivar cterasdk.edge.dedup.Dedup dedup: Object holding the Gateway Local Deduplication APIs
     :ivar cterasdk.edge.support.Support support: Object holding the Gateway Support APIs
-    ivar cterasdk.edge.ransomprotect.RansomProtect support: Object holding the Gateway RansomProtect APIs
     :ivar cterasdk.edge.files.FileBrowser files: Object holding the Gateway File Browsing APIs
     :ivar cterasdk.edge.firmware.Firmware firmware: Object holding the Gateway Firmware APIs
     """

@@ -130,8 +130,7 @@ class BaseObjectRef(Object):
         """
         Returns a string representation of the base object reference
         """
-        output = ['objs', self.uid, self.tenant or '', self.classname or '', self.name or '', self.more or '']
-        return '/'.join([x for x in output if x])
+        return '/'.join(['objs', self.uid, self.tenant or '', self.classname or '', self.name or '', self.more or ''])
 
 
 def parse_base_object_ref(base_object_ref):
