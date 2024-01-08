@@ -448,14 +448,12 @@ class SoftwareUpdatePolicyBuilder:
     """
 
     def __init__(self):
-        self.param = SoftwareUpdatesTopic(enabled=True, rebootAfterUpdate=True, rebootWhen=None)
-
+        self.param = SoftwareUpdatesTopic(enabled=True, reboot_after_update=True, reboot_when=None)
 
     def download_and_install(self, download_and_install):
         """
         Download and install updates automatically.
-
-        :param bool enabled: Set ``True`` to enable and ``False`` to disable.
+        :param bool download_and_install: Set ``True`` to enable and ``False`` to disable.
         """
         self.param.download_and_install(download_and_install)
         return self
@@ -464,11 +462,11 @@ class SoftwareUpdatePolicyBuilder:
         """
         Restart device automatically after installing new firmware
 
-        :param bool enabled: Set ``True`` to enable and ``False`` to disable.
+        :param bool reboot_after_update: Set ``True`` to enable and ``False`` to disable.
         """
         self.param.reboot_after_update(reboot_after_update)
         return self
-    
+
     def schedule(self, schedule):
         """
         Set the throttling rule schedule
@@ -489,11 +487,11 @@ class SoftwareUpdatePolicyBuilder:
 
 class SoftwareUpdatesTopic(Object):
 
-    def __init__(self, enabled, rebootAfterUpdate, rebootWhen):
+    def __init__(self, enabled, reboot_after_update, reboot_when):
         self._classname = "SoftwareUpdatesSettings"
-        self.enabled = None
-        self.rebootAfterUpdate = None
-        self.rebootWhen = None
+        self.enabled = enabled if enabled else None
+        self.rebootAfterUpdate = reboot_after_update if reboot_after_update else None
+        self.rebootWhen = reboot_when if reboot_when else None
 
     def download_and_install(self, enabled):
         self.enabled = enabled
@@ -509,7 +507,7 @@ class SoftwareUpdatesTopic(Object):
         self.rebootWhen.mode = ScheduleType.Window
         self.rebootWhen.window = window
 
-    
+
 ConsentPage = namedtuple('ConsentPage', ('header', 'body'))
 ConsentPage.__doc__ = 'Tuple holding the consent page header and body'
 ConsentPage.header.__doc__ = 'The consent page header'
