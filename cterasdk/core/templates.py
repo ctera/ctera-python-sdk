@@ -55,7 +55,7 @@ class Templates(BaseCommand):
         :param cterasdk.common.types.SoftwareUpdatesTopic,optional update_settings: Software update settings
         :param list[cterasdk.core.types.TemplateScript],optional scripts: Scripts to execute after logon, before or after backup
         :param list[str],optional cli_commands: Template CLI commands to execute
-        :param cterasdk.common.types.ConsentPage consent_page: Consent page
+        :param cterasdk.common.types.ConsentPage consent_page: Consent page to show to end-user
         """
         param = Object()
         param._classname = 'DeviceTemplate'  # pylint: disable=protected-access
