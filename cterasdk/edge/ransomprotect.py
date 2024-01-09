@@ -1,6 +1,6 @@
 import logging
 from .base_command import BaseCommand
-from .. import CTERAException
+from ..exception import CTERAException
 
 
 class RansomProtect(BaseCommand):
