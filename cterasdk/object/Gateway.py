@@ -28,6 +28,7 @@ from ..edge import ssl
 from ..edge import ssh
 from ..edge import power
 from ..edge import rsync
+from ..edge import ransomprotect
 from ..edge import services
 from ..edge import session
 from ..edge import shares
@@ -81,6 +82,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.edge.afp.AFP afp: Object holding the Gateway AFP APIs
     :ivar cterasdk.edge.nfs.NFS nfs: Object holding the Gateway NFS APIs
     :ivar cterasdk.edge.rsync.RSync rsync: Object holding the Gateway RSync APIs
+    :ivar cterasdk.edge.ransomprotect.RansomProtect ransomprotect: Object holding the Gateway RansomProtect APIs
     :ivar cterasdk.edge.timezone.Timezone timezone: Object holding the Gateway Timezone APIs
     :ivar cterasdk.edge.logs.Logs logs: Object holding the Gateway Logs APIs
     :ivar cterasdk.edge.ntp.NTP ntp: Object holding the Gateway NTP APIs
@@ -135,6 +137,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
         self.afp = afp.AFP(self)
         self.nfs = nfs.NFS(self)
         self.rsync = rsync.RSync(self)
+        self.ransomprotect = ransomprotect.RansomProtect(self)
         self.timezone = timezone.Timezone(self)
         self.logs = logs.Logs(self)
         self.ntp = ntp.NTP(self)
@@ -193,6 +196,7 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
             'afp',
             'nfs',
             'rsync',
+            'ransomprotect',
             'timezone',
             'logs',
             'ntp',
