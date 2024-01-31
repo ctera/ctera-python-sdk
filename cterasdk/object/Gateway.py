@@ -92,15 +92,14 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.edge.firmware.Firmware firmware: Object holding the Gateway Firmware APIs
     """
 
-    def __init__(self, host, port=None, https=False, Portal=None):
+    def __init__(self, host=None, port=None, https=False, Portal=None, *, uri=None):
         """
-        :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
+        :param str,optional host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
         :param int,optional port: Set a custom port number (0 - 65535), If not set defaults to 80 for http and 443 for https
         :param bool,optional https: Set to True to require HTTPS, defaults to False
-        :param cterasdk.object.Portal.Portal,optional Portal: The portal throught which the remote session was created, defaults to None
+        :param cterasdk.object.Portal.Portal,optional Portal: The Portal throught which the remote session was created, defaults to None
         """
-        super().__init__(host, port, https)
-        self._remote_access = False
+        super().__init__(host, port, https, uri=uri)
         self._session = session.Session(self.host())
         if Portal is not None:
             self._Portal = Portal
@@ -216,20 +215,23 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
 
     def _is_authenticated(self, function, *args, **kwargs):
 
+        def is_ssologin(path):
+            return path.endswith('/ssologin')
+
         def is_nosession(path):
             return path.startswith('/nosession')
 
         def is_migration_auth(path):
             return path.startswith('/migration/rest/v1/auth/user')
         current_session = self.session()
-        return current_session.authenticated() or current_session.initializing() or is_nosession(args[0]) or is_migration_auth(args[0])
+        return current_session.authenticated() or current_session.initializing() or is_ssologin(args[0]) or is_nosession(args[0]) or is_migration_auth(args[0])
 
     def test(self):
         """ Verification check to ensure the target host is a Gateway. """
         return connection.test(self)
 
     def remote_access(self):
-        remote.remote_access(self, self._Portal)
+        return remote.remote_access(self, self._Portal)
 
     @decorator.authenticated
     def query(self, path, key, value):

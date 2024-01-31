@@ -61,13 +61,13 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.files.browser.FileBrowser files: Object holding the Portal File Browsing APIs
     """
 
-    def __init__(self, host, port, https):
+    def __init__(self, host, port, https, *, uri=None):
         """
         :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
         :param int port: Set a custom port number (0 - 65535)
         :param bool https: Set to True to require HTTPS
         """
-        super().__init__(host, port, https)
+        super().__init__(host, port, https, uri=uri)
         self._session = session.Session(self.host(), self.context)
         self.domains = domains.Domains(self)
         self.users = users.Users(self)
@@ -203,13 +203,13 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
 
     """
 
-    def __init__(self, host, port=None, https=True):
+    def __init__(self, host=None, port=None, https=True, *, uri=None):
         """
         :param str host: The fully qualified domain name, hostname or an IPv4 address of the Portal
         :param int,optional port: Set a custom port number (0 - 65535), If not set defaults to 80 for http and 443 for https
         :param bool,optional https: Set to True to require HTTPS, defaults to True
         """
-        super().__init__(host, port, https)
+        super().__init__(host, port, https, uri=uri)
         self.portals = portals.Portals(self)
         self.servers = servers.Servers(self)
         self.cli = cli.CLI(self)
@@ -258,13 +258,13 @@ class ServicesPortal(Portal):
     Main class for Service operations on a Portal
     """
 
-    def __init__(self, host, port=None, https=True):
+    def __init__(self, host=None, port=None, https=True, *, uri=None):
         """
         :param str host: The fully qualified domain name, hostname or an IPv4 address of the Portal
         :param int,optional port: Set a custom port number (0 - 65535), If not set defaults to 80 for http and 443 for https
         :param bool,optional https: Set to True to require HTTPS, defaults to True
         """
-        super().__init__(host, port, https)
+        super().__init__(host, port, https, uri=uri)
 
     @property
     def context(self):

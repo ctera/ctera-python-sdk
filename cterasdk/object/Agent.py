@@ -21,7 +21,7 @@ class Agent(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.edge.sync.Sync sync: Object holding the Agent Sync APIs
     """
 
-    def __init__(self, host, port=80, https=False, Portal=None):
+    def __init__(self, host=None, port=80, https=False, Portal=None, *, uri=None):
         """
         :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
         :param int,optional port: Set a custom port number (0 - 65535), defaults to 80
@@ -29,7 +29,6 @@ class Agent(CTERAHost):  # pylint: disable=too-many-instance-attributes
         :param cterasdk.object.Portal.Portal,optional Portal: The portal throught which the remote session was created, defaults to None
         """
         super().__init__(host, port, https)
-        self._remote_access = False
         self._session = session.Session(self.host())
         if Portal is not None:
             self._Portal = Portal

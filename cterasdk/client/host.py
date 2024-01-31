@@ -6,6 +6,7 @@ from ..common import Object
 from ..convert import tojsonstr
 from ..exception import HostUnreachable
 from .cteraclient import CTERAClient, MigrationClient, RESTClient
+from .utilities import URI
 from ..exception import CTERAException
 
 
@@ -21,10 +22,8 @@ def authenticated(function):
 
 
 class NetworkHost:
-    def __init__(self, host, port, https):
-        self._host = host
-        self._port = port or 443 if https else 80
-        self._https = https
+    def __init__(self, host=None, port=None, https=None, *, uri=None):
+        self._uri = URI(uri) if uri else URI.instance('http' + ("s" if https else ""), host, port or 443 if https else 80)
 
     @property
     def _omit_fields(self):
@@ -35,31 +34,31 @@ class NetworkHost:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         rc = None
         try:
-            rc = sock.connect_ex((self._host, self._port))
+            rc = sock.connect_ex((self.host(), self.port()))
         except socket.gaierror:
             logging.getLogger().debug('Host unreachable. %s', {'host': self.host(), 'port': self.port()})
-            raise HostUnreachable(None, self._host, self._port, self.scheme().upper())
+            raise HostUnreachable(None, self.host(), self.port(), self.scheme().upper())
 
         if rc != 0:
             logging.getLogger().debug('Host unreachable. %s', {'host': self.host(), 'port': self.port()})
-            raise HostUnreachable(None, self._host, self._port, self.scheme().upper())
+            raise HostUnreachable(None, self.host(), self.port(), self.scheme().upper())
 
         logging.getLogger().debug('Host is reachable. %s', {'host': self.host(), 'port': self.port()})
 
     def scheme(self):
-        return 'http' + ("s" if self._https else '')
+        return self._uri.scheme
 
     def host(self):
-        return self._host
+        return self._uri.host
 
     def port(self):
-        return self._port
+        return self._uri.port
 
     def https(self):
-        return self._https
+        return True if self._uri.scheme == 'https' else False
 
     def baseurl(self):
-        return 'http' + ("s" if self._https else '') + '://' + self._host + ':' + str(self._port)
+        return str(self._uri)
 
     def __str__(self):
         x = Object()
@@ -67,21 +66,14 @@ class NetworkHost:
         return tojsonstr(x)
 
 
-class MigrationHost(NetworkHost):
+class CTERAMigrate(NetworkHost):
 
-    def __init__(self, host, port, https, is_authenticated=None, http_client=None):
-        super().__init__(host, port, https)
-
+    def __init__(self, uri, is_authenticated=None, http_client=None):
+        super().__init__(uri=uri)
         def always_authenticated(self, function):  # pylint: disable=unused-argument
             return True
         self._is_authenticated = is_authenticated if is_authenticated else always_authenticated
         self._client = MigrationClient(http_client) if http_client else RESTClient()
-
-    @staticmethod
-    def from_ctera_host(ctera_host):
-        """Create a RESTful host instance from an existing CTERA host instance"""
-        return MigrationHost(ctera_host.host(), ctera_host.port(), ctera_host.https(),
-                             ctera_host._is_authenticated, ctera_host._ctera_client.http_client)  # pylint: disable=protected-access
 
     @authenticated
     def login(self, path):
@@ -106,10 +98,10 @@ class MigrationHost(NetworkHost):
 
 class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
 
-    def __init__(self, host, port, https):
-        super().__init__(host, port, https)
+    def __init__(self, host, port, https, *, uri):
+        super().__init__(host, port, https, uri=uri)
         self._ctera_client = CTERAClient(self._session_id_key)
-        self._ctera_migrate = MigrationHost.from_ctera_host(self)
+        self._ctera_migrate = CTERAMigrate(self.baseurl(), self._is_authenticated, self._ctera_client.http_client)
         self._session = None
 
     @property
