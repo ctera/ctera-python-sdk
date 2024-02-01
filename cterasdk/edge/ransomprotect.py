@@ -1,5 +1,7 @@
 import logging
 from .base_command import BaseCommand
+from . import query
+from ..common import Object
 from ..exception import CTERAException
 
 
@@ -55,3 +57,22 @@ class RansomProtect(BaseCommand):
         if detection_int is not None:
             config.detectionInterval = detection_int
         self._gateway.put('/config/ransomProtect/', config)
+
+    def incidents(self):
+        """
+        List Incidents
+
+        :returns: A list of Ransomware Incidents
+        """
+        return self._gateway.execute('/proc/rpsrv', 'getListOfIncidents')
+    def details(self, incident):
+        """
+        Get Incident Details
+
+        :param object incident: Incident identifier, or object
+
+        :returns: Incident details
+        """
+        param = query.QueryParamBuilder()
+        param.put('incidentId', incident if isinstance(incident, int) else incident.incident_id)
+        return query.iterator(self._gateway, '/proc/rpsrv', param.build(), 'getIncidentDetails')

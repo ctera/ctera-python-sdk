@@ -1,3 +1,4 @@
+from ..lib import Iterator, Command
 from ..common import Object
 from ..convert import tojsonstr
 
@@ -11,6 +12,15 @@ def query(CTERAHost, path, key, value):
 
 def show(CTERAHost, path, key, value):
     print(tojsonstr(query(CTERAHost, path, key, value), no_log=False))
+
+
+def query_iterator(CTERAHost, path, name, param):
+    response = CTERAHost.execute(path, name, param)
+    return response.hasMore, response.objects
+
+def iterator(CTERAHost, path, param, name=None):
+    function = Command(query_iterator, CTERAHost, path, name)
+    return Iterator(function, param)
 
 
 class QueryParam(Object):

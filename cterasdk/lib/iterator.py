@@ -16,6 +16,7 @@ class Iterator:
     def __next__(self):
         if not self._objects:
             if self._hasMore:
+                print(self._param)
                 self._hasMore, self._objects = self._function(self._param)
                 if not self._hasMore and not self._objects:
                     self._terminate()
