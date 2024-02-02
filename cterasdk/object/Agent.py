@@ -11,7 +11,7 @@ from ..edge import uri
 
 class Agent(CTERAHost):  # pylint: disable=too-many-instance-attributes
     """
-    Main class operating on a Agent
+    Class for Drive Agent Functions
 
     :ivar cterasdk.edge.backup.Backup backup: Object holding the Agent Backup APIs
     :ivar cterasdk.edge.cli.CLI cli: Object holding the Agent CLI APIs
