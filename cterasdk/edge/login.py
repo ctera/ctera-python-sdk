@@ -21,6 +21,16 @@ class Login(BaseCommand):
         except CTERAException as error:
             logging.getLogger().error("Login failed. %s", {'host': host, 'user': username})
             raise error
+        
+    def sso(self, ticket):
+        """
+        Single Sign On
+
+        :param str ticket: SSO Ticket.
+        """
+        logging.getLogger().info("Performing Single Sign On.")
+        self._gateway.get('/ssologin', {'ticket': ticket})
+        self._gateway.ctera_migrate.login()
 
     def logout(self):
         host = self._gateway.host()

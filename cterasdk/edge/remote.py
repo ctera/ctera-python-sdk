@@ -11,9 +11,8 @@ def remote_access(device, Portal):
     logging.getLogger().info("Enabling remote access. %s", {'tenant': device_tenant, 'device': device_name})
     token = authn_token(Portal, device_tenant, device_name)
     device_object = create_device_object(device)
-    authn_device_session(device_object, token)
+    device_object.sso(token)
     logging.getLogger().info("Enabled remote access. %s", {'tenant': device_tenant, 'device': device_name})
-    device_object.session().start_local_session(device_object)
     return device_object
 
 
@@ -30,8 +29,3 @@ def authn_token(Portal, device_tenant, device_name):
         raise CTERAException('Failed to Retrieve SSO Ticket.')
     logging.getLogger().debug("Retrieved SSO Ticket. %s", {'tenant': device_tenant, 'device': device_name})
     return token
-
-
-def authn_device_session(device_object, token):
-    logging.getLogger().debug("Logging in using SSO Ticket.")
-    device_object.get('/ssologin', {'ticket': token})

@@ -121,10 +121,10 @@ class HttpClientBase():
     @staticmethod
     def _on_unreachable(error):
         uri = URI(error.request.url)
-        logging.getLogger().error('Cannot reach target host. %s', {'host': uri.hostname, 'port': uri.port})
+        logging.getLogger().error('Cannot reach target host. %s', {'host': uri.host, 'port': uri.port})
         socket_error = Object()
         socket_error.message = str(error)
-        raise HostUnreachable(socket_error, uri.hostname, uri.port, uri.scheme.upper())
+        raise HostUnreachable(socket_error, uri.host, uri.port, uri.scheme.upper())
 
     @staticmethod
     def on_timeout(attempt):
