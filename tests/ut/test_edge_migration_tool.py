@@ -110,18 +110,18 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
 
     def test_results(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(discovery='discovery', migration='migration')))
-        for i in [TaskType.Discovery, TaskType.Migration, 3]:
+        for i in ['discovery', 'migration', 'other']:
             ret = ctera_migrate.CTERAMigrate(self._filer).results(munch.Munch(id=i, type=i, name='task'))
-            if i == TaskType.Discovery:
+            if i == 'discovery':
                 self._filer._ctera_migrate.get.assert_called_with(  # pylint: disable=protected-access
                                                                   '/migration/rest/v1/discovery/results',
-                                                                  {'id': TaskType.Discovery}
+                                                                  {'id': i}
                                                                  )
                 self.assertEqual(ret, 'discovery')
-            elif i == TaskType.Migration:
+            elif i == 'migration':
                 self._filer._ctera_migrate.get.assert_called_with(  # pylint: disable=protected-access
                                                                   '/migration/rest/v1/migration/results',
-                                                                  {'id': TaskType.Migration}
+                                                                  {'id': i}
                                                                  )
                 self.assertEqual(ret, 'migration')
             else:

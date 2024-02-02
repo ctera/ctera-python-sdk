@@ -234,6 +234,11 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     def remote_access(self):
         return remote.remote_access(self, self._Portal)
 
+    def sso(self, ticket):
+        """ Login using Single Sign On"""
+        self._login_object.sso(ticket)
+        self._session.start_local_session(self)
+
     @decorator.authenticated
     def query(self, path, key, value):
         return query.query(self, path, key, value)

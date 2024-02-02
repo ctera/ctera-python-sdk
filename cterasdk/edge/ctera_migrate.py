@@ -99,10 +99,10 @@ class CTERAMigrate(BaseCommand):
         return None
 
     def results(self, task):
-        if task.type == TaskType.Discovery:
+        if task.type == 'discovery':
             return self._gateway._ctera_migrate.get('/migration/rest/v1/discovery/results',  # pylint: disable=protected-access
                                                     {'id': task.id}).discovery
-        if task.type == TaskType.Migration:
+        if task.type == 'migration':
             return self._gateway._ctera_migrate.get('/migration/rest/v1/migration/results',  # pylint: disable=protected-access
                                                     {'id': task.id}).migration
         logging.getLogger().error('Could not determine task type. %s', {'id': task.id, 'type': task.type, 'name': task.name})
