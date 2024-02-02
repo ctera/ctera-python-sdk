@@ -133,7 +133,7 @@ class HttpClientBase():
     def on_ssl_error(self, request):
         uri = URI(request.url)
         if self.should_trust(uri):
-            self.trust(uri)
+            self.trust()
         else:
             raise SSLException(uri.host, uri.port, 'Cancelled by user')
 
@@ -142,7 +142,7 @@ class HttpClientBase():
             return ask(f'Proceed to {uri.netloc}?')
         raise SSLException(uri.host, uri.port, 'Configuration file requires the use of trusted certificates')
 
-    def trust(self, netloc):
+    def trust(self):
         self.session.verify = False  # CertificateServices.save_cert_from_server(host, port)
 
     def get_session_id(self):

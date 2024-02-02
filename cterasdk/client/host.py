@@ -22,8 +22,8 @@ def authenticated(function):
 
 
 class NetworkHost:
-    def __init__(self, host=None, port=None, https=None, *, uri=None):
-        self._uri = URI(uri) if uri else URI.instance('http' + ("s" if https else ""), host, port or 443 if https else 80)
+    def __init__(self, host=None, port=None, https=None, *, url=None):
+        self._uri = URI(url) if url else URI.instance('http' + ("s" if https else ""), host, port or 443 if https else 80)
 
     @property
     def _omit_fields(self):
@@ -49,13 +49,13 @@ class NetworkHost:
         return self._uri.scheme
 
     def host(self):
-        return self._uri.host
+        return self._uri.host if self._uri.host else ''
 
     def port(self):
         return self._uri.port
 
     def https(self):
-        return True if self._uri.scheme == 'https' else False
+        return self._uri.scheme == 'https'
 
     def baseurl(self):
         return str(self._uri)
@@ -68,8 +68,9 @@ class NetworkHost:
 
 class CTERAMigrate(NetworkHost):
 
-    def __init__(self, uri, is_authenticated=None, http_client=None):
-        super().__init__(uri=uri)
+    def __init__(self, url, is_authenticated=None, http_client=None):
+        super().__init__(url=url)
+
         def always_authenticated(self, function):  # pylint: disable=unused-argument
             return True
         self._is_authenticated = is_authenticated if is_authenticated else always_authenticated
@@ -98,8 +99,8 @@ class CTERAMigrate(NetworkHost):
 
 class CTERAHost(NetworkHost):  # pylint: disable=too-many-public-methods
 
-    def __init__(self, host, port, https, *, uri):
-        super().__init__(host, port, https, uri=uri)
+    def __init__(self, host, port, https, *, url):
+        super().__init__(host, port, https, url=url)
         self._ctera_client = CTERAClient(self._session_id_key)
         self._ctera_migrate = CTERAMigrate(self.baseurl(), self._is_authenticated, self._ctera_client.http_client)
         self._session = None

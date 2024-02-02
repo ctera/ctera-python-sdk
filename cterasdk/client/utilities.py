@@ -1,4 +1,3 @@
-import re
 import urllib.parse
 from ..common import Object
 
@@ -16,19 +15,19 @@ class URI:
     @property
     def host(self):
         return self._uri.hostname
-    
+
     @property
     def port(self):
         return self._uri.port
-    
+
     @property
     def netloc(self):
         return self._uri.netloc
-    
+
     @property
     def path(self):
         return self._uri.path
-    
+
     def to_server_object(self):
         param = Object()
         param.scheme = self.scheme
@@ -38,7 +37,7 @@ class URI:
         param.path = self.path
         param.uri = str(self)
         return param
-    
+
     @staticmethod
     def instance(scheme, host, port=None, path=None, query=None):
         """
@@ -54,6 +53,6 @@ class URI:
         return URI(urllib.parse.urlunparse(
             (scheme, netloc, path if path else '', '', query, '')
         ))
-    
+
     def __str__(self):
         return self._uri.geturl()

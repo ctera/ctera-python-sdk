@@ -170,7 +170,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._task.type = TaskType.Migration
         self._init_ctera_migrate(post_response=self._task)
         ret = ctera_migrate.CTERAMigrate(self._filer).migration.add('migrationjob1', self._credentials, self._shares,
-                                                                      access_time=True, exclude=['*'], include=['*'])
+                                                                    access_time=True, exclude=['*'], include=['*'])
         self._filer._ctera_migrate.post.assert_called_once_with('/migration/rest/v1/tasks/create',  # pylint: disable=protected-access
                                                                 mock.ANY)
         self.assertEqual(ret.type, 'migration')

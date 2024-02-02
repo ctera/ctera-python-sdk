@@ -61,13 +61,13 @@ class Portal(CTERAHost):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.users.Users users: Object holding the Portal user APIs
     """
 
-    def __init__(self, host, port, https, *, uri=None):
+    def __init__(self, host, port, https, *, url=None):
         """
         :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
         :param int port: Set a custom port number (0 - 65535)
         :param bool https: Set to True to require HTTPS
         """
-        super().__init__(host, port, https, uri=uri)
+        super().__init__(host, port, https, url=url)
         self._session = session.Session(self.host(), self.context)
         self.activation = activation.Activation(self)
         self.admins = admins.Administrators(self)
@@ -202,13 +202,13 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
     :ivar cterasdk.core.syslog.Syslog syslog: Object holding the Portal syslog APIs
     """
 
-    def __init__(self, host=None, port=None, https=True, *, uri=None):
+    def __init__(self, host=None, port=None, https=True, *, url=None):
         """
         :param str host: The fully qualified domain name, hostname or an IPv4 address of the Portal
         :param int,optional port: Set a custom port number (0 - 65535), If not set defaults to 80 for http and 443 for https
         :param bool,optional https: Set to True to require HTTPS, defaults to True
         """
-        super().__init__(host, port, https, uri=uri)
+        super().__init__(host, port, https, url=url)
         self.antivirus = antivirus.Antivirus(self)
         self.buckets = buckets.Buckets(self)
         self.cli = cli.CLI(self)
@@ -257,13 +257,13 @@ class ServicesPortal(Portal):
     Class for End User or Tenant Administrator Functions
     """
 
-    def __init__(self, host=None, port=None, https=True, *, uri=None):
+    def __init__(self, host=None, port=None, https=True, *, url=None):
         """
         :param str host: The fully qualified domain name, hostname or an IPv4 address of the Portal
         :param int,optional port: Set a custom port number (0 - 65535), If not set defaults to 80 for http and 443 for https
         :param bool,optional https: Set to True to require HTTPS, defaults to True
         """
-        super().__init__(host, port, https, uri=uri)
+        super().__init__(host, port, https, url=url)
 
     @property
     def context(self):
