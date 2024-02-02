@@ -1,7 +1,7 @@
 import logging
 import time
 
-from ..exception import CTERAException, CTERAClientException, HostUnreachable, ExhaustedException
+from ..exception import CTERAException, CTERAClientException, HostUnreachable, ConnectionRetryFailure
 from .base_command import BaseCommand
 
 
@@ -40,7 +40,7 @@ class Startup(BaseCommand):
                     logging.getLogger().error('Timed out. Server did not start in a timely manner.')
                     raise CTERAException('Timed out. Server did not start in a timely manner')
                 time.sleep(seconds)
-            except (HostUnreachable, ExhaustedException) as e:
+            except (HostUnreachable, ConnectionRetryFailure) as e:
                 logging.getLogger().debug('Exception. %s', e.__dict__)
                 attempt = attempt + 1
                 time.sleep(seconds)

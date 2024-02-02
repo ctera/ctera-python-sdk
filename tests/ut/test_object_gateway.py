@@ -9,7 +9,7 @@ class TestObjectGateway(base_edge.BaseEdgeTest):
 
     def setUp(self):
         super().setUp()
-        self._host = ""
+        self._host = ''
         self._port = 80
         self._socket_connect_mock = self.patch_call("cterasdk.client.host.socket.socket.connect_ex")
 

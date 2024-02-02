@@ -7,10 +7,11 @@ import requests.exceptions as requests_exceptions
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 # from .ssl import CertificateServices
+from .utilities import URI
 from ..convert import fromxmlstr, ParseException
 from ..common import Object, merge
 from .. import config
-from ..exception import SSLException, HostUnreachable, ExhaustedException
+from ..exception import SSLException, HostUnreachable, ConnectionRetryFailure
 from ..lib import ask
 
 
@@ -31,14 +32,10 @@ class HTTPException(Exception):
 
     @staticmethod
     def _parse_request(request):
-        o = urllib.parse.urlparse(request.url)
+        uri = URI(request.url)
         target = Object()
-        target.host = Object()
-        target.host.scheme = o.scheme
-        target.host.hostname = o.hostname
-        target.host.port = o.port
+        target.host = uri.to_server_object()
         target.method = request.method
-        target.uri = o.path
         target.headers = request.headers
         if request.body is not None:
             target.body = request.body.decode('utf-8')  # decode from 'Bytes' to 'UTF-8'
@@ -114,7 +111,7 @@ class HttpClientBase():
             if attempt < self.retries:
                 time.sleep(self.timeout)
         logging.getLogger().error('Reached maximum number of retries. %s', {'retries': self.retries, 'timeout': self.timeout})
-        raise ExhaustedException(self.retries, self.timeout)
+        raise ConnectionRetryFailure(self.retries, self.timeout)
 
     def _do_dispatch(self, ctera_request):
         response = self.session.request(ctera_request.method, ctera_request.url, **ctera_request.kwargs)
@@ -123,29 +120,29 @@ class HttpClientBase():
 
     @staticmethod
     def _on_unreachable(error):
-        parsed_url = urllib.parse.urlparse(error.request.url)
-        logging.getLogger().error('Cannot reach target host. %s', {'host': parsed_url.hostname, 'port': parsed_url.port})
+        uri = URI(error.request.url)
+        logging.getLogger().error('Cannot reach target host. %s', {'host': uri.host, 'port': uri.port})
         socket_error = Object()
         socket_error.message = str(error)
-        raise HostUnreachable(socket_error, parsed_url.hostname, parsed_url.port, parsed_url.scheme.upper())
+        raise HostUnreachable(socket_error, uri.host, uri.port, uri.scheme.upper())
 
     @staticmethod
     def on_timeout(attempt):
         logging.getLogger().warning('Request timed out. %s', {'attempt': (attempt + 1)})
 
     def on_ssl_error(self, request):
-        parsed_url = urllib.parse.urlparse(request.url)
-        if self.should_trust(parsed_url.hostname, parsed_url.port):
-            self.trust(parsed_url.hostname, parsed_url.port)
+        uri = URI(request.url)
+        if self.should_trust(uri):
+            self.trust()
         else:
-            raise SSLException(parsed_url.hostname, parsed_url.port, 'Cancelled by user')
+            raise SSLException(uri.host, uri.port, 'Cancelled by user')
 
-    def should_trust(self, host, port):
+    def should_trust(self, uri):
         if self.ssl_error_handling == 'Consent':
-            return ask('Proceed to ' + host + ':' + str(port) + '?')
-        raise SSLException(host, port, 'Configuration file requires the use of trusted certificates')
+            return ask(f'Proceed to {uri.netloc}?')
+        raise SSLException(uri.host, uri.port, 'Configuration file requires the use of trusted certificates')
 
-    def trust(self, _host, _port):
+    def trust(self):
         self.session.verify = False  # CertificateServices.save_cert_from_server(host, port)
 
     def get_session_id(self):

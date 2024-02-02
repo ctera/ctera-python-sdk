@@ -1,7 +1,7 @@
 import logging
 import time
 
-from ..exception import HostUnreachable, ExhaustedException
+from ..exception import HostUnreachable, ConnectionRetryFailure
 from .base_command import BaseCommand
 
 
@@ -51,7 +51,7 @@ class Boot:
                 self._gateway.test()
                 logging.getLogger().info("Device is back up and running.")
                 break
-            except (HostUnreachable, ExhaustedException) as e:
+            except (HostUnreachable, ConnectionRetryFailure) as e:
                 logging.getLogger().debug('Exception. %s', {'exception': e.__class__.__name__, 'message': e.message})
 
     def _increment(self):

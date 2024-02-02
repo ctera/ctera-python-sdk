@@ -1162,29 +1162,21 @@ Devices
    """Retrieve all Gateways from the current tenant"""
 
    filers = admin.devices.filers()
-
    for filer in filers:
-
        print(filer.name) # will print the Gateway name
 
    """Retrieve additional Gateway attributes"""
-
    filers = admin.devices.filers(['owner', 'deviceConnectionStatus'])
 
    """Retrieve nested attributes using the '.' delimiter"""
-
    filers = admin.devices.filers(['deviceReportedStatus.status.device.runningFirmware'])
 
    """Retrieve filers from all portals"""
-
    admin.portals.browse_global_admin()
 
    filers = admin.devices.filers(allPortals = True)
-
    """Retrieve C200's and C400's from all portals"""
-
    admin.portals.browse_global_admin()
-
    filers = admin.devices.filers(allPortals = True, deviceTypes = ['C200', 'C400'])
 
 .. automethod:: cterasdk.core.devices.Devices.agents
@@ -1193,15 +1185,11 @@ Devices
 .. code-block:: python
 
    """Retrieve all Agents from the current tenant"""
-
    agents = admin.devices.agents()
-
    for agent in agents:
-
        print(agent.name) # will print the Agent name
 
    """Retrieve all Agents and the underlying OS name"""
-
    agents = admin.devices.agents(['deviceReportedStatus.status.agent.details.osName'])
 
 .. automethod:: cterasdk.core.devices.Devices.servers
@@ -1209,7 +1197,7 @@ Devices
 
 .. code-block:: python
 
-   server_agents = admin.devices.server()
+   server_agents = admin.devices.servers()
 
 .. automethod:: cterasdk.core.devices.Devices.desktops
    :noindex:
@@ -1235,6 +1223,38 @@ Devices
 
    admin.devices.set_comment('FSRV', 'Production')
 
+
+Remote Access
+^^^^^^^^^^^^^
+
+The Devices APIs retrieve a handle that can be used to query and update the configuration of remote Edge Filers or Drive Agents.
+
+.. code-block:: python
+
+   """Retrieving a List of Shares from an Edge Filer"""
+
+   filer = admin.devices.device('edge-hostname')
+   shares = filer.shares.get()
+   for share in shares:
+       print(share.name)
+
+However, the handle retrieved from the Portal does not provide full access to the Edge Filer or Drive Agent APIs.
+To obtain full access to the remote Edge Filer or Drive Agent APIs, use the ``remote_access`` function.
+
+.. automethod:: cterasdk.object.Gateway.Gateway.remote_access
+   :noindex:
+
+.. code-block:: python
+
+   """Retrieving a List of Shares from an Edge Filer"""
+
+   filer = admin.devices.device('edge-hostname')
+   remote_session = filer.remote_access()  # Returns an authenticated remote access session
+
+   """Downloading a File via a Remote Access Edge Filer Session"""
+   remote_session.files.download('cloud/users/Service Account/My Files/docs/document.docx')
+
+
 Generate Activation Codes
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automethod:: cterasdk.core.activation.Activation.generate_code
@@ -1243,11 +1263,8 @@ Generate Activation Codes
 .. code-block:: python
 
    """Generate a device activation code"""
-
    code = admin.activation.generate_code() # will generate a code for the current, logged on, user
-
    code = admin.activation.generate_code('bruce') # will generate a code for 'bruce' in the current tenant
-
    code = admin.activation.generate_code('batman', 'gotham') # will generate a code for 'bruce' in the 'gotham' tenant
 
 .. note:: Read Write Administrator, granted with the "Super User" role permission, can generate 200 codes every 5 minutes
@@ -1259,17 +1276,10 @@ Generate activation codes for all domain users
 
 .. code-block:: python
 
-   # ... login ...
-
    users = admin.users.list_domain_users('dc.ctera.local') # obtain a list of domain users
-
    for user in users:
-
        activation_code = admin.activation.generate_code(user.name) # generate activation code
-
        print((user.name, activation_code))
-
-   # ... logout ...
 
 CloudFS
 -------

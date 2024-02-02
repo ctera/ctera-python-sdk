@@ -17,10 +17,20 @@ class Login(BaseCommand):
         try:
             self._gateway.form_data('/login', {'username': username, 'password': password})
             logging.getLogger().info("User logged in. %s", {'host': host, 'user': username})
-            self._gateway.mtool.login()
+            self._gateway.ctera_migrate.login()
         except CTERAException as error:
             logging.getLogger().error("Login failed. %s", {'host': host, 'user': username})
             raise error
+
+    def sso(self, ticket):
+        """
+        Single Sign On
+
+        :param str ticket: SSO Ticket.
+        """
+        logging.getLogger().info("Performing Single Sign On.")
+        self._gateway.get('/ssologin', {'ticket': ticket})
+        self._gateway.ctera_migrate.login()
 
     def logout(self):
         host = self._gateway.host()
