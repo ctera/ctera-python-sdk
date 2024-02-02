@@ -21,7 +21,7 @@ class Login(BaseCommand):
         except CTERAException as error:
             logging.getLogger().error("Login failed. %s", {'host': host, 'user': username})
             raise error
-        
+
     def sso(self, ticket):
         """
         Single Sign On
