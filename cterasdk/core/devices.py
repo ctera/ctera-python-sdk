@@ -10,7 +10,7 @@ class Devices(BaseCommand):
 
     name_attr = 'name'
     type_attr = 'deviceType'
-    default = ['name', 'portal', 'deviceType', 'version']
+    default = ['name', 'portal', 'deviceType', 'version', 'remoteAccessUrl']
 
     def _create_device_resource_uri(self, device_name, tenant):
         session = self._portal.session()

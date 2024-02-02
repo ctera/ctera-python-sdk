@@ -5,7 +5,7 @@ from ..common import Object
 from .enum import TaskType, SourceType
 
 
-class MigrationTool(BaseCommand):
+class CTERAMigrate(BaseCommand):
     """Edge Filer Migration Tool APIs """
 
     def __init__(self, gateway):

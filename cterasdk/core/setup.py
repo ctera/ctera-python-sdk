@@ -6,7 +6,7 @@ from .base_command import BaseCommand
 from .enum import ServerMode, SetupWizardStage, SetupWizardStatus, SlaveAuthenticaionMethod
 from ..common import Object
 from ..convert import toxmlstr
-from ..exception import CTERAException, HostUnreachable, ExhaustedException
+from ..exception import CTERAException, HostUnreachable, ConnectionRetryFailure
 
 
 class Setup(BaseCommand):
@@ -217,7 +217,7 @@ class SetupWizardStatusMonitor:
                 if status.currentWizardProgress == SetupWizardStatus.Failed:
                     raise CTERAException('Initialization failed.', status)
                 current_stage = status.wizard
-            except (HostUnreachable, ExhaustedException) as e:
+            except (HostUnreachable, ConnectionRetryFailure) as e:
                 logging.getLogger().debug('Exception. %s', e.__dict__)
         logging.getLogger().debug('Wizard update. %s', {'previous_stage': stage, 'current_stage': current_stage})
         return status

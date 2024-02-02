@@ -1,34 +1,37 @@
+import re
 import logging
 
+from ..common import parse_base_object_ref
 from ..exception import CTERAException
 
 
-def remote_access(Gateway, Portal):
-    tenant = Portal.session().tenant()
-    device = Gateway.host()
-    logging.getLogger().info("Enabling remote access. %s", {'tenant': tenant, 'device': device})
-
-    ticket = obtain_ticket(Portal, device)
-    Gateway.session().enable_remote_access()
-    login(Gateway, ticket)
-    logging.getLogger().info("Enabled remote access. %s", {'tenant': tenant, 'device': device})
-
-
-def login(Gateway, ticket):
-    logging.getLogger().debug("Logging in using SSO ticket. %s", {'device': Gateway.host()})
-    Gateway.get('/ssologin', {'ticket': ticket})
+def remote_access(device, Portal):
+    device_tenant = parse_base_object_ref(device.portal).name
+    device_name = device.name
+    logging.getLogger().info("Enabling remote access. %s", {'tenant': device_tenant, 'device': device_name})
+    token = authn_token(Portal, device_tenant, device_name)
+    device_object = create_device_object(device)
+    authn_device_session(device_object, token)
+    logging.getLogger().info("Enabled remote access. %s", {'tenant': device_tenant, 'device': device_name})
+    device_object.session().start_local_session(device_object)
+    return device_object
 
 
-def obtain_ticket(Portal, device_name):
-    tenant = Portal.session().tenant()
-    url = f'/portals/{tenant}/devices/{device_name}'
-    logging.getLogger().debug("Obtaining SSO ticket. %s", {'tenant': tenant, 'device': device_name})
+def create_device_object(device):
+    device_object = device.__class__(url=re.sub(r'^http(?=:)', 'https', device.remoteAccessUrl))
+    return device_object
 
-    ticket = Portal.execute(url, 'singleSignOn')
-    if not ticket:
-        logging.getLogger().error('Could not obtain SSO ticket. %s', {'tenant': tenant, 'device': device_name})
-        raise CTERAException('Could not obtain SSO ticket.')
 
-    logging.getLogger().debug("Obtained SSO ticket. %s", {'tenant': tenant, 'device': device_name})
+def authn_token(Portal, device_tenant, device_name):
+    logging.getLogger().debug("Retrieving SSO Ticket. %s", {'tenant': device_tenant, 'device': device_name})
+    token = Portal.execute(f"/portals/{device_tenant}/devices/{device_name}", 'singleSignOn')
+    if not token:
+        logging.getLogger().error('Failed to Retrieve SSO Ticket. %s', {'tenant': device_tenant, 'device': device_name})
+        raise CTERAException('Failed to Retrieve SSO Ticket.')
+    logging.getLogger().debug("Retrieved SSO Ticket. %s", {'tenant': device_tenant, 'device': device_name})
+    return token
 
-    return ticket
+
+def authn_device_session(device_object, token):
+    logging.getLogger().debug("Logging in using SSO Ticket.")
+    device_object.get('/ssologin', {'ticket': token})

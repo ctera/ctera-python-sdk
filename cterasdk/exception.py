@@ -58,10 +58,10 @@ class HostUnreachable(CTERAConnectionError):
         super().__init__("Unable to reach host", instance, host=host, port=port, protocol=protocol)
 
 
-class ExhaustedException(ConnectionTimeout):
+class ConnectionRetryFailure(ConnectionTimeout):
 
     def __init__(self, retries, timeout):
-        super().__init__("Don't blame me for lack of trying", retries * timeout, retries=retries, timeout=timeout)
+        super().__init__("Too many failed attempts", retries * timeout, retries=retries, timeout=timeout)
 
 
 class PythonVersionException(CTERAException):

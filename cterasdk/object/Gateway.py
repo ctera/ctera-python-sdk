@@ -1,7 +1,4 @@
 from ..client import NetworkHost, CTERAHost
-from ..edge import decorator
-from ..edge import connection
-from ..edge import query
 from ..edge import afp
 from ..edge import aio
 from ..edge import array
@@ -10,12 +7,16 @@ from ..edge import backup
 from ..edge import cache
 from ..edge import cli
 from ..edge import config
+from ..edge import connection
+from ..edge import ctera_migrate
+from ..edge import decorator
 from ..edge import dedup
 from ..edge import directoryservice
 from ..edge import drive
+from ..edge import files
+from ..edge import firmware
 from ..edge import ftp
 from ..edge import groups
-from ..edge import migration_tool
 from ..edge import licenses
 from ..edge import login
 from ..edge import logs
@@ -23,128 +24,126 @@ from ..edge import mail
 from ..edge import network
 from ..edge import nfs
 from ..edge import ntp
-from ..edge import snmp
-from ..edge import ssl
-from ..edge import ssh
 from ..edge import power
+from ..edge import query
+from ..edge import remote
 from ..edge import rsync
 from ..edge import services
 from ..edge import session
 from ..edge import shares
 from ..edge import shell
 from ..edge import smb
+from ..edge import snmp
+from ..edge import ssh
+from ..edge import ssl
 from ..edge import support
 from ..edge import sync
 from ..edge import syslog
 from ..edge import taskmgr
 from ..edge import telnet
 from ..edge import timezone
+from ..edge import uri
 from ..edge import users
 from ..edge import volumes
-from ..edge import files
-from ..edge import remote
-from ..edge import uri
-from ..edge import firmware
 
 
 class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     """
-    Main class operating on a Gateway
+    Class for Edge Filer Functions
 
-    :ivar cterasdk.edge.config.Config config: Object holding the Gateway Configuration APIs
-    :ivar cterasdk.edge.network.Network network: Object holding the Gateway Network APIs
-    :ivar cterasdk.edge.licenses.Licenses licenses: Object holding the Gateway Licenses APIs
-    :ivar cterasdk.edge.services.Services services: Object holding the Gateway Services APIs
-    :ivar cterasdk.edge.directoryservice.DirectoryService directoryservice: Object holding the Gateway Active Directory APIs
-    :ivar cterasdk.edge.telnet.Telnet telnet: Object holding the Gateway Telnet APIs
-    :ivar cterasdk.edge.syslog.Syslog syslog: Object holding the Gateway Syslog APIs
-    :ivar cterasdk.edge.taskmgr.Tasks tasks: Object holding the Gateway Background Tasks APIs
-    :ivar cterasdk.edge.audit.Audit audit: Object holding the Gateway Audit APIs
-    :ivar cterasdk.edge.mail.Mail mail: Object holding the Gateway Mail APIs
-    :ivar cterasdk.edge.backup.Backup backup: Object holding the Gateway Backup APIs
-    :ivar cterasdk.edge.sync.Sync sync: Object holding the Gateway Sync APIs
-    :ivar cterasdk.edge.cache.Cache cache: Object holding the Gateway Cache APIs
-    :ivar cterasdk.edge.snmp.SNMP snmp: Object holding the Gateway SNMP APIs
-    :ivar cterasdk.edge.ssl.SSL ssl: Object holding the Gateway SSL APIs
-    :ivar cterasdk.edge.ssh.SSH ssh: Object holding the Gateway SSH APIs
-    :ivar cterasdk.edge.power.Power power: Object holding the Gateway Power APIs
-    :ivar cterasdk.edge.users.Users users: Object holding the Gateway Users APIs
-    :ivar cterasdk.edge.groups.Groups groups: Object holding the Gateway Groups APIs
-    :ivar cterasdk.edge.migration_tool.MigrationTool mtool: Object holding the Edge Filer's Migration Tool APIs
-    :ivar cterasdk.edge.drive.Drive drive: Object holding the Gateway Drive APIs
-    :ivar cterasdk.edge.volumes.Volumes volumes: Object holding the Gateway Volumes APIs
-    :ivar cterasdk.edge.array.Array array: Object holding the Gateway Array APIs
-    :ivar cterasdk.edge.shares.Shares shares: Object holding the Gateway Shares APIs
-    :ivar cterasdk.edge.smb.SMB smb: Object holding the Gateway SMB APIs
-    :ivar cterasdk.edge.aio.AIO aio: Object holding the Gateway AIO APIs
-    :ivar cterasdk.edge.ftp.FTP ftp: Object holding the Gateway FTP APIs
     :ivar cterasdk.edge.afp.AFP afp: Object holding the Gateway AFP APIs
-    :ivar cterasdk.edge.nfs.NFS nfs: Object holding the Gateway NFS APIs
-    :ivar cterasdk.edge.rsync.RSync rsync: Object holding the Gateway RSync APIs
-    :ivar cterasdk.edge.timezone.Timezone timezone: Object holding the Gateway Timezone APIs
-    :ivar cterasdk.edge.logs.Logs logs: Object holding the Gateway Logs APIs
-    :ivar cterasdk.edge.ntp.NTP ntp: Object holding the Gateway NTP APIs
-    :ivar cterasdk.edge.shell.Shell shell: Object holding the Gateway Shell APIs
+    :ivar cterasdk.edge.aio.AIO aio: Object holding the Gateway AIO APIs
+    :ivar cterasdk.edge.array.Array array: Object holding the Gateway Array APIs
+    :ivar cterasdk.edge.audit.Audit audit: Object holding the Gateway Audit APIs
+    :ivar cterasdk.edge.backup.Backup backup: Object holding the Gateway Backup APIs
+    :ivar cterasdk.edge.cache.Cache cache: Object holding the Gateway Cache APIs
     :ivar cterasdk.edge.cli.CLI cli: Object holding the Gateway CLI APIs
+    :ivar cterasdk.edge.config.Config config: Object holding the Gateway Configuration APIs
+    :ivar cterasdk.edge.ctera_migrate.CTERAMigrate ctera_migrate: Object holding the Edge Filer's Migration Tool APIs
     :ivar cterasdk.edge.dedup.Dedup dedup: Object holding the Gateway Local Deduplication APIs
-    :ivar cterasdk.edge.support.Support support: Object holding the Gateway Support APIs
+    :ivar cterasdk.edge.directoryservice.DirectoryService directoryservice: Object holding the Gateway Active Directory APIs
+    :ivar cterasdk.edge.drive.Drive drive: Object holding the Gateway Drive APIs
     :ivar cterasdk.edge.files.FileBrowser files: Object holding the Gateway File Browsing APIs
     :ivar cterasdk.edge.firmware.Firmware firmware: Object holding the Gateway Firmware APIs
+    :ivar cterasdk.edge.ftp.FTP ftp: Object holding the Gateway FTP APIs
+    :ivar cterasdk.edge.groups.Groups groups: Object holding the Gateway Groups APIs
+    :ivar cterasdk.edge.licenses.Licenses licenses: Object holding the Gateway Licenses APIs
+    :ivar cterasdk.edge.logs.Logs logs: Object holding the Gateway Logs APIs
+    :ivar cterasdk.edge.mail.Mail mail: Object holding the Gateway Mail APIs
+    :ivar cterasdk.edge.network.Network network: Object holding the Gateway Network APIs
+    :ivar cterasdk.edge.nfs.NFS nfs: Object holding the Gateway NFS APIs
+    :ivar cterasdk.edge.ntp.NTP ntp: Object holding the Gateway NTP APIs
+    :ivar cterasdk.edge.power.Power power: Object holding the Gateway Power APIs
+    :ivar cterasdk.edge.rsync.RSync rsync: Object holding the Gateway RSync APIs
+    :ivar cterasdk.edge.services.Services services: Object holding the Gateway Services APIs
+    :ivar cterasdk.edge.shares.Shares shares: Object holding the Gateway Shares APIs
+    :ivar cterasdk.edge.shell.Shell shell: Object holding the Gateway Shell APIs
+    :ivar cterasdk.edge.smb.SMB smb: Object holding the Gateway SMB APIs
+    :ivar cterasdk.edge.snmp.SNMP snmp: Object holding the Gateway SNMP APIs
+    :ivar cterasdk.edge.ssh.SSH ssh: Object holding the Gateway SSH APIs
+    :ivar cterasdk.edge.ssl.SSL ssl: Object holding the Gateway SSL APIs
+    :ivar cterasdk.edge.support.Support support: Object holding the Gateway Support APIs
+    :ivar cterasdk.edge.sync.Sync sync: Object holding the Gateway Sync APIs
+    :ivar cterasdk.edge.syslog.Syslog syslog: Object holding the Gateway Syslog APIs
+    :ivar cterasdk.edge.taskmgr.Tasks tasks: Object holding the Gateway Background Tasks APIs
+    :ivar cterasdk.edge.telnet.Telnet telnet: Object holding the Gateway Telnet APIs
+    :ivar cterasdk.edge.timezone.Timezone timezone: Object holding the Gateway Timezone APIs
+    :ivar cterasdk.edge.users.Users users: Object holding the Gateway Users APIs
+    :ivar cterasdk.edge.volumes.Volumes volumes: Object holding the Gateway Volumes APIs
     """
 
-    def __init__(self, host, port=None, https=False, Portal=None):
+    def __init__(self, host=None, port=None, https=False, Portal=None, *, url=None):
         """
-        :param str host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
+        :param str,optional host: The fully qualified domain name, hostname or an IPv4 address of the Gateway
         :param int,optional port: Set a custom port number (0 - 65535), If not set defaults to 80 for http and 443 for https
         :param bool,optional https: Set to True to require HTTPS, defaults to False
-        :param cterasdk.object.Portal.Portal,optional Portal: The portal throught which the remote session was created, defaults to None
+        :param cterasdk.object.Portal.Portal,optional Portal: The Portal throught which the remote session was created, defaults to None
         """
-        super().__init__(host, port, https)
-        self._remote_access = False
+        super().__init__(host, port, https, url=url)
         self._session = session.Session(self.host())
         if Portal is not None:
             self._Portal = Portal
             self._ctera_client = Portal._ctera_client
             self._session.start_remote_session(self._Portal.session())
-        self.config = config.Config(self)
-        self.dedup = dedup.Dedup(self)
-        self.network = network.Network(self)
-        self.licenses = licenses.Licenses(self)
-        self.services = services.Services(self)
-        self.directoryservice = directoryservice.DirectoryService(self)
-        self.telnet = telnet.Telnet(self)
-        self.syslog = syslog.Syslog(self)
-        self.audit = audit.Audit(self)
-        self.mail = mail.Mail(self)
-        self.backup = backup.Backup(self)
-        self.sync = sync.Sync(self)
-        self.cache = cache.Cache(self)
-        self.snmp = snmp.SNMP(self)
-        self.ssl = ssl.SSL(self)
-        self.ssh = ssh.SSH(self)
-        self.power = power.Power(self)
-        self.users = users.Users(self)
-        self.groups = groups.Groups(self)
-        self.drive = drive.Drive(self)
-        self.volumes = volumes.Volumes(self)
-        self.array = array.Array(self)
-        self.shares = shares.Shares(self)
-        self.smb = smb.SMB(self)
-        self.aio = aio.AIO(self)
-        self.ftp = ftp.FTP(self)
         self.afp = afp.AFP(self)
-        self.nfs = nfs.NFS(self)
-        self.rsync = rsync.RSync(self)
-        self.timezone = timezone.Timezone(self)
-        self.logs = logs.Logs(self)
-        self.ntp = ntp.NTP(self)
-        self.shell = shell.Shell(self)
+        self.aio = aio.AIO(self)
+        self.array = array.Array(self)
+        self.audit = audit.Audit(self)
+        self.backup = backup.Backup(self)
+        self.cache = cache.Cache(self)
         self.cli = cli.CLI(self)
-        self.support = support.Support(self)
+        self.config = config.Config(self)
+        self.ctera_migrate = ctera_migrate.CTERAMigrate(self)
+        self.dedup = dedup.Dedup(self)
+        self.directoryservice = directoryservice.DirectoryService(self)
+        self.drive = drive.Drive(self)
         self.files = files.FileBrowser(self)
         self.firmware = firmware.Firmware(self)
+        self.ftp = ftp.FTP(self)
+        self.groups = groups.Groups(self)
+        self.licenses = licenses.Licenses(self)
+        self.logs = logs.Logs(self)
+        self.mail = mail.Mail(self)
+        self.network = network.Network(self)
+        self.nfs = nfs.NFS(self)
+        self.ntp = ntp.NTP(self)
+        self.power = power.Power(self)
+        self.rsync = rsync.RSync(self)
+        self.services = services.Services(self)
+        self.shares = shares.Shares(self)
+        self.shell = shell.Shell(self)
+        self.smb = smb.SMB(self)
+        self.snmp = snmp.SNMP(self)
+        self.ssh = ssh.SSH(self)
+        self.ssl = ssl.SSL(self)
+        self.support = support.Support(self)
+        self.sync = sync.Sync(self)
+        self.syslog = syslog.Syslog(self)
         self.tasks = taskmgr.Tasks(self)
-        self.mtool = migration_tool.MigrationTool(self)
+        self.telnet = telnet.Telnet(self)
+        self.timezone = timezone.Timezone(self)
+        self.users = users.Users(self)
+        self.volumes = volumes.Volumes(self)
 
     @property
     def base_api_url(self):
@@ -165,45 +164,45 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
     @property
     def _omit_fields(self):
         return super()._omit_fields + [
-            'config',
-            'network',
-            'licenses',
-            'services',
-            'directoryservice',
-            'telnet',
-            'syslog',
-            'audit',
-            'mail',
-            'backup',
-            'sync',
-            'cache',
-            'snmp',
-            'ssl',
-            'ssh',
-            'power',
-            'users',
-            'groups',
-            'drive',
-            'volumes',
-            'array',
-            'shares',
-            'smb',
-            'aio',
-            'ftp',
             'afp',
-            'nfs',
-            'rsync',
-            'timezone',
-            'logs',
-            'ntp',
-            'shell',
+            'aio',
+            'array',
+            'audit',
+            'backup',
+            'cache',
             'cli',
-            'support',
+            'config',
+            'ctera_migrate',
+            'dedup',
+            'directoryservice',
+            'drive',
             'files',
             'firmware',
+            'ftp',
+            'groups',
+            'licenses',
+            'logs',
+            'mail',
+            'network',
+            'nfs',
+            'ntp',
+            'power',
+            'rsync',
+            'services',
+            'shares',
+            'shell',
+            'smb',
+            'snmp',
+            'ssh',
+            'ssl',
+            'support',
+            'sync',
+            'syslog',
             'tasks',
-            'dedup',
-            'mtool'
+            'telnet',
+            'timezone',
+            'users',
+            'volumes'
             ]
 
     @property
@@ -216,20 +215,24 @@ class Gateway(CTERAHost):  # pylint: disable=too-many-instance-attributes
 
     def _is_authenticated(self, function, *args, **kwargs):
 
+        def is_ssologin(path):
+            return path.endswith('/ssologin')
+
         def is_nosession(path):
             return path.startswith('/nosession')
 
         def is_migration_auth(path):
             return path.startswith('/migration/rest/v1/auth/user')
         current_session = self.session()
-        return current_session.authenticated() or current_session.initializing() or is_nosession(args[0]) or is_migration_auth(args[0])
+        return current_session.authenticated() or current_session.initializing() or \
+            is_ssologin(args[0]) or is_nosession(args[0]) or is_migration_auth(args[0])
 
     def test(self):
         """ Verification check to ensure the target host is a Gateway. """
         return connection.test(self)
 
     def remote_access(self):
-        remote.remote_access(self, self._Portal)
+        return remote.remote_access(self, self._Portal)
 
     @decorator.authenticated
     def query(self, path, key, value):

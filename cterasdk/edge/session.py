@@ -12,12 +12,7 @@ class SessionType:
 class SessionConnection(Object):
     def __init__(self, session_type, remote_from=None):
         self.type = session_type
-        if session_type == SessionType.Remote:
-            self.remote_from = remote_from
-            self.remote_access = False
-        else:
-            self.remote_from = None
-            self.remote_access = None
+        self.remote_from = remote_from if session_type == SessionType.Remote else None
 
 
 class LocalUser(SessionUser):
@@ -50,30 +45,14 @@ class Session(SessionBase):
         self.status = SessionStatus.Active
 
     def _do_terminate(self):
-        if self.local():
-            logging.getLogger().debug('Terminating local session. %s', {'host': self.host, 'user': self.user.name})
-            self.connection = SessionConnection(SessionType.Local)
-        elif self.remote():
-            logging.getLogger().debug(
-                'Terminating remote session. %s',
-                {'host': self.host, 'tenant': self.user.tenant, 'user': self.user.name}
-            )
-            self.disable_remote_access()
+        logging.getLogger().debug('Terminating local session. %s', {'host': self.host, 'user': self.user.name})
+        self.connection = SessionConnection(SessionType.Local)
 
     def local(self):
         return self.connection.type == SessionType.Local
 
     def remote(self):
         return self.connection.type == SessionType.Remote
-
-    def enable_remote_access(self):
-        self.connection.remote_access = True
-
-    def disable_remote_access(self):
-        self.connection.remote_access = False
-
-    def remote_access(self):  # pylint: disable=method-hidden
-        return self.connection.remote_access
 
     def remote_from(self):  # pylint: disable=method-hidden
         return self.connection.remote_from

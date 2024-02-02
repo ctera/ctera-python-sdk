@@ -17,7 +17,7 @@ class Login(BaseCommand):
         try:
             self._gateway.form_data('/login', {'username': username, 'password': password})
             logging.getLogger().info("User logged in. %s", {'host': host, 'user': username})
-            self._gateway.mtool.login()
+            self._gateway.ctera_migrate.login()
         except CTERAException as error:
             logging.getLogger().error("Login failed. %s", {'host': host, 'user': username})
             raise error
