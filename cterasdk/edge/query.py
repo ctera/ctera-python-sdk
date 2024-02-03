@@ -4,6 +4,7 @@ from ..convert import tojsonstr
 
 
 def query(CTERAHost, path, key, value):
+    """Query based on key and value"""
     param = Object()
     param.key = key
     param.value = value
@@ -14,12 +15,14 @@ def show(CTERAHost, path, key, value):
     print(tojsonstr(query(CTERAHost, path, key, value), no_log=False))
 
 
-def query_iterator(CTERAHost, path, name, param):
+def query_page(CTERAHost, path, name, param):
+    """Query a page"""
     response = CTERAHost.execute(path, name, param)
     return response.hasMore, response.objects
 
+
 def iterator(CTERAHost, path, param, name=None):
-    function = Command(query_iterator, CTERAHost, path, name)
+    function = Command(query_page, CTERAHost, path, name)
     return Iterator(function, param)
 
 

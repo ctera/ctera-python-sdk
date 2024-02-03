@@ -28,27 +28,25 @@ Submodules
    cterasdk.edge.cli
    cterasdk.edge.config
    cterasdk.edge.connection
+   cterasdk.edge.ctera_migrate
    cterasdk.edge.decorator
    cterasdk.edge.dedup
    cterasdk.edge.directoryservice
    cterasdk.edge.drive
    cterasdk.edge.enum
-   cterasdk.edge.ftp
    cterasdk.edge.firmware
+   cterasdk.edge.ftp
    cterasdk.edge.groups
    cterasdk.edge.licenses
    cterasdk.edge.login
    cterasdk.edge.logs
    cterasdk.edge.mail
-   cterasdk.edge.migration_tool
    cterasdk.edge.network
    cterasdk.edge.nfs
    cterasdk.edge.ntp
-   cterasdk.edge.snmp
-   cterasdk.edge.ssh
-   cterasdk.edge.ssl
    cterasdk.edge.power
    cterasdk.edge.query
+   cterasdk.edge.ransom_protect
    cterasdk.edge.remote
    cterasdk.edge.rsync
    cterasdk.edge.services
@@ -56,6 +54,9 @@ Submodules
    cterasdk.edge.shares
    cterasdk.edge.shell
    cterasdk.edge.smb
+   cterasdk.edge.snmp
+   cterasdk.edge.ssh
+   cterasdk.edge.ssl
    cterasdk.edge.support
    cterasdk.edge.sync
    cterasdk.edge.syslog

@@ -28,7 +28,7 @@ from ..edge import power
 from ..edge import query
 from ..edge import remote
 from ..edge import rsync
-from ..edge import ransomprotect
+from ..edge import ransom_protect
 from ..edge import services
 from ..edge import session
 from ..edge import shares
