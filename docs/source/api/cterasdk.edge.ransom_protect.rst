@@ -1,7 +1,7 @@
-cterasdk.edge.migration_tool module
+cterasdk.edge.ransom_protect module
 ===================================
 
-.. automodule:: cterasdk.edge.migration_tool
+.. automodule:: cterasdk.edge.ransom_protect
     :members:
     :undoc-members:
     :show-inheritance:
