@@ -1,7 +1,6 @@
 import logging
 from .base_command import BaseCommand
 from . import query
-from ..common import Object
 from ..exception import CTERAException
 
 

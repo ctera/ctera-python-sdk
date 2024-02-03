@@ -26,7 +26,7 @@ __all__ = [
     'query',
     'remote',
     'rsync',
-    'ransomprotect',
+    'ransom_protect',
     'services',
     'session',
     'shares',
