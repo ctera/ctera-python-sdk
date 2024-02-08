@@ -333,7 +333,8 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._init_filer(put_response=put_response)
         ret = network.Network(self._filer).proxy.modify(self._proxy_address, self._proxy_port, self._proxy_user, self._proxy_pass)
         actual_param = self.filer.put.call_args[0][1]
-        expected_param = TestEdgeNetwork._create_proxy_param(True, self._proxy_address, self._proxy_port, self._proxy_user, self._proxy_pass)
+        expected_param = TestEdgeNetwork._create_proxy_param(True, self._proxy_address, self._proxy_port, 
+                                                             self._proxy_user, self._proxy_pass)
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
 

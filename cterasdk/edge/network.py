@@ -163,7 +163,7 @@ class Network(BaseCommand):
             return task.result.res
         except TaskError as error:
             return error.task.result.res
-        
+
 
 class Proxy(BaseCommand):
     """Edge Filer Proxy Configuration APIs"""
@@ -173,7 +173,7 @@ class Proxy(BaseCommand):
         Get Proxy Configuration
         """
         return self._gateway.get('/config/network/proxy')
-    
+
     def is_enabled(self):
         """
         Check if Proxy Configuration is Enabled
@@ -195,7 +195,7 @@ class Proxy(BaseCommand):
         :rtype: cterasdk.common.object.Object
         """
         return self._configure(True, address, port, username, password)
-    
+
     def _configure(self, enabled, address=None, port=None, username=None, password=None):
         param = Object()
         param._classname = 'ProxySettings'  # pylint: disable=protected-access
@@ -212,7 +212,7 @@ class Proxy(BaseCommand):
         response = self._gateway.put('/config/network/proxy', param)
         logging.getLogger().info('Updated Proxy Server Configuration.')
         return response
-    
+
     def disable(self):
         """
         Disable Proxy
@@ -222,7 +222,7 @@ class Proxy(BaseCommand):
         """
         logging.getLogger().info('Disabling Proxy.')
         return self._configure(False)
-        
+
 
 class MTU(BaseCommand):
     """Edge Filer MTU Configuration APIs"""
@@ -247,7 +247,7 @@ class MTU(BaseCommand):
         settings.mtu = mtu
         logging.getLogger().info('Configuring MTU. %s', {'MTU': mtu})
         return self._gateway.put('/config/network/ports/0/ethernet', settings)
-    
+
 
 class StaticRoutes(BaseCommand):
     """Edge Filer Static Route Configuration APIs"""

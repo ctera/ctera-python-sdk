@@ -45,7 +45,7 @@ class Services(BaseCommand):
         Check if the Edge Filer is connected to CTERA Portal
         """
         return self._gateway.get('/status/services/CTERAPortal/connectionState') == enum.ServicesConnectionState.Connected
-    
+
     def _before_connect_to_services(self, ctera_license, server):
         Services._validate_license(ctera_license)
         if self._gateway.network.proxy.is_enabled():
@@ -58,7 +58,7 @@ class Services(BaseCommand):
         Connect to a Portal.\n
         The connect method will first validate the `license` argument,
          ensure the Edge Filer can establish a TCP connection over port 995 to `server` using :py:func:`Gateway.tcp_connect()` and
-         verify the Portal does not require device activation via code. 
+         verify the Portal does not require device activation via code.
          TCP connection verification over port 995 is skipped when the Edge Filer is configured to use a proxy.
 
         :param str server: Address of the Portal
