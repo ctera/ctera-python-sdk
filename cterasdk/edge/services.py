@@ -46,20 +46,27 @@ class Services(BaseCommand):
         """
         return self._gateway.get('/status/services/CTERAPortal/connectionState') == enum.ServicesConnectionState.Connected
 
+    def _before_connect_to_services(self, ctera_license, server):
+        Services._validate_license(ctera_license)
+        if self._gateway.network.proxy.is_enabled():
+            logging.getLogger().debug('Skipping TCP connection verification over port 995.')
+        else:
+            self._check_cttp_traffic(address=server)
+
     def connect(self, server, user, password, ctera_license=enum.License.EV16):
         """
         Connect to a Portal.\n
         The connect method will first validate the `license` argument,
-         ensure the Gateway can establish a TCP connection over port 995 to `server` using :py:func:`Gateway.tcp_connect()` and
-         verify the Portal does not require device activation via code
+         ensure the Edge Filer can establish a TCP connection over port 995 to `server` using :py:func:`Gateway.tcp_connect()` and
+         verify the Portal does not require device activation via code.
+         TCP connection verification over port 995 is skipped when the Edge Filer is configured to use a proxy.
 
         :param str server: Address of the Portal
         :param str user: User for the Portal connection
         :param str password: Password for the Portal connection
         :param cterasdk.edge.enum.License,optional ctera_license: CTERA License, defaults to cterasdk.edge.enum.License.EV16
         """
-        Services._validate_license(ctera_license)
-        self._check_cttp_traffic(address=server)
+        self._before_connect_to_services(ctera_license, server)
         self._check_connection(server)
 
         param = Object()
@@ -78,8 +85,7 @@ class Services(BaseCommand):
         :param str code: Activation code for the Portal connection
         :param cterasdk.edge.enum.License,optional ctera_license: CTERA License, defaults to cterasdk.edge.enum.License.EV16
         """
-        Services._validate_license(ctera_license)
-        self._check_cttp_traffic(address=server)
+        self._before_connect_to_services(ctera_license, server)
 
         param = Object()
         param.server = server

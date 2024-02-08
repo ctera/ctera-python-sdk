@@ -982,56 +982,95 @@ Network
 
    filer.network.enable_dhcp()
 
-.. automethod:: cterasdk.edge.network.Network.set_mtu
+Proxy Server
+^^^^^^^^^^^^
+
+.. automethod:: cterasdk.edge.network.Proxy.get_configuration
    :noindex:
 
 .. code-block:: python
 
-   filer.network.set_mtu(1320)  # set the maximum transmission unit (MTU) to 1320
+   configuration = filer.network.proxy.get_configuration()
+   print(configuration)
 
-   filer.network.set_mtu(9000)  # configure 'jumbo' frames (MTU: 9000)
-
-.. automethod:: cterasdk.edge.network.Network.reset_mtu
+.. automethod:: cterasdk.edge.network.Proxy.is_enabled
    :noindex:
 
 .. code-block:: python
 
-   filer.network.reset_mtu()  # disable custom mtu configuration and restore default setting (1500)
+   if filer.network.proxy.is_enabled():
+       print('Proxy Server is Enabled')
 
-.. automethod:: cterasdk.edge.network.Network.get_static_routes
+.. automethod:: cterasdk.edge.network.Proxy.modify
+   :noindex:
+
+.. code-block:: python
+
+   filer.network.proxy.modify('192.168.11.11', 8081, 'proxy-user', 'proxy-user-password')
+
+.. automethod:: cterasdk.edge.network.Proxy.disable
+   :noindex:
+
+.. code-block:: python
+
+   filer.network.proxy.disable()
+
+MTU
+^^^
+
+.. automethod:: cterasdk.edge.network.MTU.modify
+   :noindex:
+
+.. code-block:: python
+
+   filer.network.mtu.modify(1320)  # set the maximum transmission unit (MTU) to 1320
+
+   filer.network.mtu.modify(9000)  # configure 'jumbo' frames (MTU: 9000)
+
+.. automethod:: cterasdk.edge.network.MTU.reset
+   :noindex:
+
+.. code-block:: python
+
+   filer.network.mtu.reset()  # disable custom mtu configuration and restore default setting (1500)
+
+Static Routes
+^^^^^^^^^^^^^
+
+.. automethod:: cterasdk.edge.network.StaticRoutes.get
    :noindex:
 
 .. code-block:: python
 
    # get static routes
-   filer.network.get_static_routes()
+   filer.network.routes.get()
 
-.. automethod:: cterasdk.edge.network.Network.add_static_route
+.. automethod:: cterasdk.edge.network.StaticRoutes.add
    :noindex:
 
 .. code-block:: python
 
    # add static route from 10.10.12.1 to 192.168.55.7/32
-   filer.network.add_static_route('10.10.12.1', '192.168.55.7/32')
+   filer.network.routes.add('10.10.12.1', '192.168.55.7/32')
 
    # add static route from 10.100.102.4 to 172.18.100.0/24
-   filer.network.add_static_route('10.100.102.4', '172.18.100.0/24')
+   filer.network.routes.add('10.100.102.4', '172.18.100.0/24')
 
-.. automethod:: cterasdk.edge.network.Network.remove_static_route
+.. automethod:: cterasdk.edge.network.StaticRoutes.remove
    :noindex:
 
 .. code-block:: python
 
    # remove static route 192.168.55.7/32
-   filer.network.remove_static_route('192.168.55.7/32')
+   filer.network.routes.remove('192.168.55.7/32')
 
-.. automethod:: cterasdk.edge.network.Network.clean_all_static_routes
+.. automethod:: cterasdk.edge.network.StaticRoutes.clear
    :noindex:
 
 .. code-block:: python
 
    # remove all static routes -  (clean)
-   filer.network.clean_all_static_routes()
+   filer.network.routes.clear()
 
 
 Network Diagnostics

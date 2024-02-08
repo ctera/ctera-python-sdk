@@ -9,7 +9,13 @@ from .base_command import BaseCommand
 
 
 class Network(BaseCommand):
-    """ Gateway Network configuration APIs """
+    """ Edge Filer Network configuration APIs """
+
+    def __init__(self, portal):
+        super().__init__(portal)
+        self.proxy = Proxy(self._gateway)
+        self.mtu = MTU(self._gateway)
+        self.routes = StaticRoutes(self._gateway)
 
     def get_status(self):
         """
@@ -78,26 +84,6 @@ class Network(BaseCommand):
         self._gateway.put('/config/network/ports/0/ip', ip)
 
         logging.getLogger().info('Nameserver settings updated. %s', {'DNS1': primary_dns_server, 'DNS2': secondary_dns_server})
-
-    def reset_mtu(self):
-        """
-        Set the default maximum transmission unit (MTU) settings
-        """
-        self._set_mtu(False, 1500)
-
-    def set_mtu(self, mtu):
-        """
-        Set a custom network maximum transmission unit (MTU)
-
-        :param int mtu: Maximum transmission unit
-        """
-        self._set_mtu(True, mtu)
-
-    def _set_mtu(self, jumbo, mtu):
-        settings = self._gateway.get('/config/network/ports/0/ethernet')
-        settings.jumbo = jumbo
-        settings.mtu = mtu
-        return self._gateway.put('/config/network/ports/0/ethernet', settings)
 
     def enable_dhcp(self):
         """
@@ -178,15 +164,103 @@ class Network(BaseCommand):
         except TaskError as error:
             return error.task.result.res
 
-    def get_static_routes(self):
+
+class Proxy(BaseCommand):
+    """Edge Filer Proxy Configuration APIs"""
+
+    def get_configuration(self):
         """
-        Get all Static Routes
+        Get Proxy Configuration
+        """
+        return self._gateway.get('/config/network/proxy')
+
+    def is_enabled(self):
+        """
+        Check if Proxy Configuration is Enabled
+
+        :returns: ``True`` if a proxy server was configured and ``False`` otherwise.
+        :rtype: bool
+        """
+        return self._gateway.get('/config/network/proxy/configurationMode') != 'NoProxy'
+
+    def modify(self, address, port=None, username=None, password=None):
+        """
+        Modify Proxy Configuration
+
+        :param str address: Proxy address
+        :param int,optional port: Proxy port, defaults to ``8080``
+        :param str,optional username: Username
+        :param str,optional password: Password
+        :returns: Proxy settings
+        :rtype: cterasdk.common.object.Object
+        """
+        return self._configure(True, address, port, username, password)
+
+    def _configure(self, enabled, address=None, port=None, username=None, password=None):
+        param = Object()
+        param._classname = 'ProxySettings'  # pylint: disable=protected-access
+        param.configurationMode = 'Manual' if enabled else 'NoProxy'
+        if enabled:
+            param.port = port if port else 8080
+            if address:
+                param.address = address
+            if username:
+                param.username = username
+            if password:
+                param.password = password
+        logging.getLogger().info('Updating Proxy Server Configuration.')
+        response = self._gateway.put('/config/network/proxy', param)
+        logging.getLogger().info('Updated Proxy Server Configuration.')
+        return response
+
+    def disable(self):
+        """
+        Disable Proxy
+
+        :returns: Proxy settings
+        :rtype: cterasdk.common.object.Object
+        """
+        logging.getLogger().info('Disabling Proxy.')
+        return self._configure(False)
+
+
+class MTU(BaseCommand):
+    """Edge Filer MTU Configuration APIs"""
+
+    def reset(self):
+        """
+        Set the default maximum transmission unit (MTU) settings
+        """
+        return self._configure(False, 1500)
+
+    def modify(self, mtu):
+        """
+        Set a custom network maximum transmission unit (MTU)
+
+        :param int mtu: Maximum transmission unit
+        """
+        return self._configure(True, mtu)
+
+    def _configure(self, jumbo, mtu):
+        settings = self._gateway.get('/config/network/ports/0/ethernet')
+        settings.jumbo = jumbo
+        settings.mtu = mtu
+        logging.getLogger().info('Configuring MTU. %s', {'MTU': mtu})
+        return self._gateway.put('/config/network/ports/0/ethernet', settings)
+
+
+class StaticRoutes(BaseCommand):
+    """Edge Filer Static Route Configuration APIs"""
+
+    def get(self):
+        """
+        Get All Static Routes
         """
         return self._gateway.get('/config/network/static_routes')
 
-    def add_static_route(self, source_ip, destination_ip_mask):
+    def add(self, source_ip, destination_ip_mask):
         """
-        Set a Static Route
+        Add a Static Route
 
         :param str source_ip: The source IP (192.168.15.55)
         :param str destination_ip_mask: The destination IP and CIDR block (10.5.0.1/32)
@@ -203,9 +277,9 @@ class Network(BaseCommand):
             logging.getLogger().error("Static route creation failed.")
             raise CTERAException('Static route creation failed', error)
 
-    def remove_static_route(self, destination_ip_mask):
+    def remove(self, destination_ip_mask):
         """
-        Delete a Static Route
+        Remove a Static Route
 
         :param str destination_ip_mask: The destination IP and CIDR block (10.5.0.1/32)
         """
@@ -219,13 +293,13 @@ class Network(BaseCommand):
             logging.getLogger().error("Static route deletion failed.")
             raise CTERAException('Static route deletion failed', error)
 
-    def clean_all_static_routes(self):
+    def clear(self):
         """
-        Clean all Static routes
+        Clear All Static routes
         """
         try:
             self._gateway.execute('/config/network', 'cleanStaticRoutes')
             logging.getLogger().info('Static routes were deleted successfully')
         except CTERAException as error:
-            logging.getLogger().error("Failed to clean Static routes")
-            raise CTERAException('Failed to delete Static routes', error)
+            logging.getLogger().error("Failed to clear static routes")
+            raise CTERAException('Failed to clear static routes', error)

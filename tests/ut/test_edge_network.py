@@ -1,4 +1,5 @@
 from unittest import mock
+import munch
 
 from cterasdk.edge import network
 from cterasdk.edge.types import TCPService, TCPConnectResult
@@ -9,7 +10,7 @@ from cterasdk import exception
 from tests.ut import base_edge
 
 
-class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public-methods
+class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public-methods,too-many-instance-attributes
 
     def setUp(self):
         super().setUp()
@@ -42,6 +43,11 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._static_route_1.DestIpMask = '172.64.28.15_32'
         self._static_routes = []
         self._static_routes.append(self._static_route_1)
+
+        self._proxy_address = '192.168.27.131'
+        self._proxy_port = 3192
+        self._proxy_user = 'admin'
+        self._proxy_pass = 'password'
 
     def test_network_status(self):
         get_response = 'Success'
@@ -206,7 +212,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_edge_set_mtu(self):
         get_response = TestEdgeNetwork._get_ethernet_object()
         self._init_filer(get_response=get_response)
-        network.Network(self._filer).set_mtu(self._mtu)
+        network.Network(self._filer).mtu.modify(self._mtu)
         self._filer.put.assert_called_once_with('/config/network/ports/0/ethernet', mock.ANY)
         expected_param = TestEdgeNetwork._get_ethernet_object(jumbo=True, mtu=self._mtu)
         actual_param = self._filer.put.call_args[0][1]
@@ -215,7 +221,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_edge_reset_mtu(self):
         get_response = TestEdgeNetwork._get_ethernet_object(jumbo=True, mtu=1320)
         self._init_filer(get_response=get_response)
-        network.Network(self._filer).reset_mtu()
+        network.Network(self._filer).mtu.reset()
         self._filer.put.assert_called_once_with('/config/network/ports/0/ethernet', mock.ANY)
         expected_param = TestEdgeNetwork._get_ethernet_object()
         actual_param = self._filer.put.call_args[0][1]
@@ -237,7 +243,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_add_static_routes(self):
         add_response = f'/config/network/static_routes/{self._static_routes[0].DestIpMask}'
         self._init_filer(add_response=add_response)
-        network.Network(self._filer).add_static_route(
+        network.Network(self._filer).routes.add(
             self._static_routes[0].GwIP,
             self._static_routes[0].DestIpMask.replace("_", "/")
         )
@@ -251,7 +257,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         expected_exception = exception.CTERAException()
         self._filer.add = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exception.CTERAException) as error:
-            network.Network(self._filer).add_static_route(
+            network.Network(self._filer).routes.add(
                 self._static_routes[0].GwIP,
                 self._static_routes[0].DestIpMask.replace("_", "/")
             )
@@ -260,14 +266,14 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_get_all_static_routes(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = network.Network(self._filer).get_static_routes()
+        ret = network.Network(self._filer).routes.get()
         self._filer.get.assert_called_once_with('/config/network/static_routes')
         self.assertEqual(ret, get_response)
 
     def test_remove_static_route(self):
         self._init_filer(delete_response=self._static_routes[0])
 
-        ret = network.Network(self._filer).remove_static_route(self._static_routes[0].DestIpMask.replace("_", "/"))
+        ret = network.Network(self._filer).routes.remove(self._static_routes[0].DestIpMask.replace("_", "/"))
         self._filer.delete.assert_called_once_with(f'/config/network/static_routes/{self._static_routes[0].DestIpMask}')
 
         self.assertEqual(self._static_routes[0], ret)
@@ -276,7 +282,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         expected_exception = exception.CTERAException()
         self._filer.delete = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exception.CTERAException) as error:
-            network.Network(self._filer).remove_static_route(self._static_routes[0].DestIpMask.replace("_", "/"))
+            network.Network(self._filer).routes.remove(self._static_routes[0].DestIpMask.replace("_", "/"))
         self.assertEqual('Static route deletion failed', error.exception.message)
 
     def test_clean_all_static_routes_success(self):
@@ -284,7 +290,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._init_filer(execute_response=expected_exception)
         self._filer.execute = mock.MagicMock(side_effect=expected_exception)
 
-        network.Network(self._filer).clean_all_static_routes()
+        network.Network(self._filer).routes.clear()
 
         expected_param = 'cleanStaticRoutes'
         actual_param = self._filer.execute.call_args[0][1]
@@ -296,5 +302,52 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._filer.execute = mock.MagicMock(side_effect=expected_exception)
 
         with self.assertRaises(exception.CTERAException) as error:
-            network.Network(self._filer).clean_all_static_routes()
-        self.assertEqual('Failed to delete Static routes', error.exception.message)
+            network.Network(self._filer).routes.clear()
+        self.assertEqual('Failed to clear static routes', error.exception.message)
+
+    def test_get_proxy_config(self):
+        get_response = 'Success'
+        self._init_filer(get_response=get_response)
+        ret = network.Network(self._filer).proxy.get_configuration()
+        self._filer.get.assert_called_once_with('/config/network/proxy')
+        self.assertEqual(ret, get_response)
+
+    def test_is_proxy_enabled(self):
+        for expected_response, configuration in [(False, 'NoProxy'), (True, 'Manual')]:
+            self._init_filer(get_response=configuration)
+            ret = network.Network(self._filer).proxy.is_enabled()
+            self._filer.get.assert_called_once_with('/config/network/proxy/configurationMode')
+            self.assertEqual(ret, expected_response)
+
+    def test_disable_proxy(self):
+        put_response = 'Success'
+        self._init_filer(put_response=put_response)
+        ret = network.Network(self._filer).proxy.disable()
+        actual_param = self._filer.put.call_args[0][1]
+        expected_param = TestEdgeNetwork._create_proxy_param(False)
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, put_response)
+
+    def test_modify_proxy(self):
+        put_response = 'Success'
+        self._init_filer(put_response=put_response)
+        ret = network.Network(self._filer).proxy.modify(self._proxy_address, self._proxy_port, self._proxy_user, self._proxy_pass)
+        actual_param = self._filer.put.call_args[0][1]
+        expected_param = TestEdgeNetwork._create_proxy_param(True, self._proxy_address, self._proxy_port,
+                                                             self._proxy_user, self._proxy_pass)
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, put_response)
+
+    @staticmethod
+    def _create_proxy_param(enabled=None, address=None, port=None, username=None, password=None):
+        m = munch.Munch({'_classname': 'ProxySettings'})
+        m.configurationMode = 'Manual' if enabled else 'NoProxy'
+        if enabled:
+            m.port = port if port else 8080
+        if address:
+            m.address = address
+        if username:
+            m.username = username
+        if password:
+            m.password = password
+        return m
