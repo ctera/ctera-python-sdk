@@ -10,7 +10,7 @@ from cterasdk import exception
 from tests.ut import base_edge
 
 
-class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public-methods
+class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public-methods,too-many-instance-attributes
 
     def setUp(self):
         super().setUp()
@@ -323,7 +323,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         put_response = 'Success'
         self._init_filer(put_response=put_response)
         ret = network.Network(self._filer).proxy.disable()
-        actual_param = self.filer.put.call_args[0][1]
+        actual_param = self._filer.put.call_args[0][1]
         expected_param = TestEdgeNetwork._create_proxy_param(False)
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
@@ -332,8 +332,8 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         put_response = 'Success'
         self._init_filer(put_response=put_response)
         ret = network.Network(self._filer).proxy.modify(self._proxy_address, self._proxy_port, self._proxy_user, self._proxy_pass)
-        actual_param = self.filer.put.call_args[0][1]
-        expected_param = TestEdgeNetwork._create_proxy_param(True, self._proxy_address, self._proxy_port, 
+        actual_param = self._filer.put.call_args[0][1]
+        expected_param = TestEdgeNetwork._create_proxy_param(True, self._proxy_address, self._proxy_port,
                                                              self._proxy_user, self._proxy_pass)
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
