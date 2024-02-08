@@ -29,6 +29,13 @@ class Network(BaseCommand):
         """
         return self._gateway.get('/config/network/ports/0')
 
+    def proxy(self):
+        """
+        Retrieve the Proxy configuration
+        """
+        return self._gateway.get('config/network/proxy')
+
+
     def set_static_ipaddr(self, address, subnet, gateway, primary_dns_server, secondary_dns_server=None):
         """
         Set a Static IP Address
@@ -229,3 +236,52 @@ class Network(BaseCommand):
         except CTERAException as error:
             logging.getLogger().error("Failed to clean Static routes")
             raise CTERAException('Failed to delete Static routes', error)
+
+    def set_proxy(self, address, port=8080, username=None, password=None):
+        """
+        Set Manual Proxy
+
+        :param str address: The host running the iperf server
+        :param int,optional port: The Proxu server port, defaults to 8080
+        :param str,optional username: username for the Proxy Server
+        :param str,optional password: password for the Proxy Server
+
+        """
+        param = Object()
+        param._classname = 'ProxySettings'  # pylint: disable=protected-access
+        param.address = address
+        param.port = port
+        if username is not None:
+            param.username = username
+        if password is not None:
+            param.password = password
+        param.configurationMode = 'Manual'
+
+        logging.getLogger().info('Enabling Proxy Server.')
+
+        self._gateway.put('/config/network/proxy', param)
+
+        logging.getLogger().info('Network settings updated. Proxy Server Enabled.')
+
+    def disbale_proxy(self):
+        """
+        Set Manual Proxy
+
+        :param str address: The host running the iperf server
+        :param int,optional port: The Proxu server port, defaults to 8080
+        :param str,optional username: username for the Proxy Server
+        :param cterasdk.edge.enum.IPProtocol,optional protocol: IP protocol, defaults to `'TCP'`
+        :param cterasdk.edge.enum.Traffic,optional direction: Traffic direction, defaults to `'Upload'`
+        :param int,optional retries: Number of retries when sampling the iperf task status, defaults to 120
+        :param int,optional seconds: Number of seconds to wait between retries, defaults to 1
+        """
+        param = Object()
+        param._classname = 'ProxySettings'  # pylint: disable=protected-access
+        param.configurationMode = 'NoProxy'
+
+        logging.getLogger().info('Disabling Proxy.')
+
+        self._gateway.put('/config/network/proxy', param)
+
+        logging.getLogger().info('Network settings updated. Proxy Disabled.')
+        
