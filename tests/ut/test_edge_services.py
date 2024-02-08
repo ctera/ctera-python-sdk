@@ -28,6 +28,8 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         self._cttp_port = 995
         self._cttp_service = TCPService(self._server, self._cttp_port)
         self._tracker_mock = self.patch_call("cterasdk.edge.services.track")
+        self._network_proxy_status_mock = self.patch_call("cterasdk.edge.network.Proxy.is_enabled")
+        self._network_proxy_status_mock.return_value = False
 
     def test_get_services_status(self):
         self._init_filer(get_response=self._get_services_status_response())
