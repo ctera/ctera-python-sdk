@@ -1,6 +1,6 @@
-import aiohttp
 import asyncio
 import logging
+import aiohttp
 
 from yarl import URL
 from . import async_tracers

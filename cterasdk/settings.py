@@ -7,7 +7,7 @@ sessions, downloads = None, None
 
 
 def default_settings():
-    global sessions, downloads
+    global sessions, downloads  # # pylint: disable=global-statement
     with open(Path(__file__).parent.absolute().joinpath('settings.yml'), 'r', encoding='utf-8') as f:
         sdk_settings = yaml.safe_load(f)
         sessions = convert_to_object(sdk_settings['sessions'])

@@ -15,9 +15,9 @@ class Drive(CTERA):
 
     def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
         super().__init__(host, port, https, base=base)
-        async_session = self._generic._async_session
         self._ctera_session = session.Session(self.host())
-        self._management = clients.Management(EndpointBuilder.new(self.base, '/admingui/api'), async_session, lambda *_: True)
+
+        self._initialize(Portal)
 
         self.backup = backup.Backup(self)
         self.cli = cli.CLI(self)
@@ -26,9 +26,15 @@ class Drive(CTERA):
         self.support = support.Support(self)
         self.sync = sync.Sync(self)
 
-    @property
-    def management(self):
-        return self._management
+    def _initialize(self, Portal):
+        if Portal:
+            self._generic.shutdown()
+            async_session = Portal.generic._async_session  # pylint: disable=protected-access
+            self._ctera_session.start_remote_session(Portal.session())
+            self._api = clients.API(EndpointBuilder.new(self.base), async_session, lambda *_: True)
+        else:
+            async_session = self._generic._async_session  # pylint: disable=protected-access
+            self._api = clients.API(EndpointBuilder.new(self.base, '/admingui/api'), async_session, self._authenticator)
 
     @property
     def _session_id_key(self):

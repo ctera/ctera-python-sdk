@@ -102,7 +102,7 @@ class CTERA(Service):
         return self.management.cookies.update({self._session_id_key: session_id})
 
     @abstractmethod
-    def _authenticator(self, function, *args, **kwargs):
+    def _authenticator(self, url):
         raise NotImplementedError("Subclass must implement the '_authenticator' function")
 
     @abstractmethod

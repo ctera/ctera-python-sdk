@@ -130,7 +130,7 @@ class Path:
             raise ValueError('You must specify a relative path. Omit leading / characters')
 
     @staticmethod
-    def _is_server_object(self, param):
+    def _is_server_object(param):
         return isinstance(param, Object) and param.__dict__.get('_classname', None) == 'ResourceInfo'
 
     def _from_server_object(self, param):

@@ -2,8 +2,7 @@ import os
 from unittest import mock
 
 from cterasdk.common.object import Object
-from cterasdk.core.files import cp
-from cterasdk.core.files.path import CTERAPath
+from cterasdk.core.files import io, common
 from tests.ut import base_core
 
 
@@ -15,7 +14,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         src = 'cloud/Users'
         dst = 'public'
         self._init_global_admin(execute_response=expected_response)
-        actual_response = cp.copy(self._global_admin, self._mkpath(src), self._mkpath(dst))
+        actual_response = io.copy(self._global_admin, self._get_object_path(src), destination=self._get_object_path(dst))
         self.assertEqual(expected_response, actual_response)
         self._global_admin.execute.assert_called_once_with('', 'copyResources', mock.ANY)
         expected_copy_param = self._get_expected_copy_params(src, dst)
@@ -33,5 +32,5 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         o.urls = [src_dst_obj]
         return o
 
-    def _mkpath(self, path):
-        return CTERAPath(path, self._base_path)
+    def _get_object_path(self, path):
+        return common.get_object_path(self._base_path, path)

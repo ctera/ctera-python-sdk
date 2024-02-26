@@ -10,7 +10,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
 
     def setUp(self):
         super().setUp()
-        self.files = CloudDrive(self._global_admin, TestCoreFilesBrowser._base_path)
+        self.files = CloudDrive(self._global_admin)
 
     def test_ls(self):
         path = 'cloud/Users'

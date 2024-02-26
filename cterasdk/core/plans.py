@@ -61,9 +61,7 @@ class Plans(BaseCommand):
             builder.addFilter(query_filter)
         builder.orFilter((len(filters) > 1))
         param = builder.build()
-        iterator = query.iterator(self._core, '/plans', param)
-        for plan in iterator:
-            yield plan
+        yield from query.iterator(self._core, '/plans', param)
 
     def get(self, name, include=None):
         """
