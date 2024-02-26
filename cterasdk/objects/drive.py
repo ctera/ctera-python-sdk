@@ -13,7 +13,7 @@ from ..edge import sync
 
 class Drive(CTERA):
 
-    def __init__(self, host=None, port=None, https=None, *, base=None):
+    def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
         super().__init__(host, port, https, base=base)
         async_session = self._generic._async_session
         self._ctera_session = session.Session(self.host())

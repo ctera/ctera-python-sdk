@@ -1,7 +1,7 @@
 from unittest import mock
 
 from cterasdk.common import Object
-from cterasdk.object import ServicesPortal
+from cterasdk.objects import ServicesPortal
 from tests.ut import base
 
 

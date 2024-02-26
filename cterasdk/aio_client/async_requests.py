@@ -2,8 +2,8 @@ import aiohttp
 import asyncio
 import logging
 
-from . import async_tracers
 from yarl import URL
+from . import async_tracers
 
 
 def create_connector(**kwargs):

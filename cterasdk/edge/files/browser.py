@@ -6,7 +6,7 @@ class FileBrowser(BaseCommand):
     """ Edge Filer File Browser APIs """
 
     def __init__(self, edge):
-        self._edge = edge
+        super().__init__(edge)
         self._file_access = file_access.FileAccess(edge)
 
     def download(self, path, destination=None):

@@ -1,7 +1,7 @@
 from unittest import mock
 
 from cterasdk.common import Object
-from cterasdk.object import GlobalAdmin
+from cterasdk.objects import GlobalAdmin
 from tests.ut import base
 
 

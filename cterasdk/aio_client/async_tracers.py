@@ -1,11 +1,12 @@
 import json
-import aiohttp
 import logging
+import aiohttp
 
 
 def default():
 
     async def on_request_start(session, context, params):
+        # pylint: disable=unused-argument
         param = {
             'request': {
                 'method': params.method,
@@ -16,6 +17,7 @@ def default():
         logging.getLogger().debug('Starting request. %s', serialize(param))
 
     async def on_request_redirect(session, context, params):
+        # pylint: disable=unused-argument
         param = {
             'redirect': {
                 'source': str(params.response.real_url),
@@ -25,6 +27,7 @@ def default():
         logging.getLogger().debug('Starting redirect. %s', serialize(param))
 
     async def on_request_end(session, context, params):
+        # pylint: disable=unused-argument
         param = {
             'request': {
                 'method': params.response.method,

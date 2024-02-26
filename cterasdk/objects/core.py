@@ -42,7 +42,7 @@ from ..core import templates
 from ..core import users
 
 
-class Portal(CTERA):
+class Portal(CTERA):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https, base=None)
@@ -109,7 +109,7 @@ class Portal(CTERA):
                                        'users']
 
 
-class GlobalAdmin(Portal):
+class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https)

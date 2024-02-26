@@ -1,5 +1,4 @@
 pyyaml
-requests>=2.23
-requests-toolbelt
+aiohttp
 cryptography
 packaging

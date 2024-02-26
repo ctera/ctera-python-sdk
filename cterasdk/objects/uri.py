@@ -12,8 +12,8 @@ def create(base, *segments):
     :returns: Full URL, comprised of the Base URL and URL segments
     :rtype: str
     """
-    components = urllib.parse.urlparse(base)
-    segments = [components.path, *segments]
+    url_components = components(base)
+    segments = [url_components.path, *segments]
     root = '/'
     url = Path(root)
     for segment in segments:

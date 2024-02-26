@@ -117,7 +117,7 @@ class Path:
     def __init__(self, param, base):
         self._base = PurePosixPath(base)
         self._relative = PurePosixPath()
-        if self._is_server_object(param):
+        if Path._is_server_object(param):
             self._from_server_object(param)
         elif isinstance(param, str):
             self._from_string(param)
@@ -129,6 +129,7 @@ class Path:
         if self._relative.root == '/' or self._base.joinpath(self._relative) == self._relative:
             raise ValueError('You must specify a relative path. Omit leading / characters')
 
+    @staticmethod
     def _is_server_object(self, param):
         return isinstance(param, Object) and param.__dict__.get('_classname', None) == 'ResourceInfo'
 

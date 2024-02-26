@@ -2,12 +2,11 @@
 import time
 import asyncio
 import logging
+import cterasdk.settings
 from . import async_requests, errors, decorators
 from .async_responses import Response, Deserializers
 from ..convert import tojsonstr, toxmlstr
 from ..common import Object, utils
-
-import cterasdk.settings
 
 
 class Serializers:
@@ -117,13 +116,13 @@ class Client:
 class Folders(Client):
 
     def download_zip(self, path, data, **kwargs):
-        return super().form_data(path, data, on_response=Response.new())
+        return super().form_data(path, data, on_response=Response.new(), **kwargs)
 
 
 class Upload(Client):
 
     def upload(self, path, data, **kwargs):
-        return super().form_data(path, data, on_response=Response.new())
+        return super().form_data(path, data, on_response=Response.new(), **kwargs)
 
 
 class Dav(Client):
@@ -243,9 +242,6 @@ class Migrate(JSON):
 
     ID = 'x-mt-x'
 
-    def __init__(self, builder=None, async_session=None, authenticator=None):
-        super().__init__(builder, async_session, authenticator)
-
     def login(self):
         request = async_requests.GetRequest(self._builder('/auth/user'))
         response = self._request(request, on_response=Response.new(Deserializers.JSON))
@@ -265,11 +261,12 @@ def execute_request(async_session, request, *, on_response, max_retries=3, backo
             retries += 1
             if retries < max_retries:
                 delay = backoff_factor ** retries
-                logging.getLogger().warning(f"Retrying in {delay} seconds.")
+                logging.getLogger().warning("Retrying in %s seconds.", delay)
                 time.sleep(delay)
             else:
                 logging.getLogger().error("Max retries reached. Request failed.")
                 raise
+    return None
 
 
 def session_settings():

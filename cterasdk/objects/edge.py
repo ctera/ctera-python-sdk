@@ -52,7 +52,7 @@ from ..edge import users
 from ..edge import volumes
 
 
-class Edge(CTERA):
+class Edge(CTERA):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
         super().__init__(host, port, https, base=base)
@@ -104,11 +104,11 @@ class Edge(CTERA):
     def _initialize(self, Portal):
         if Portal:
             self._generic.shutdown()
-            async_session = Portal.generic._async_session
+            async_session = Portal.generic._async_session  # pylint: disable=protected-access
             self._ctera_session.start_remote_session(Portal.session())
             self._api = clients.API(EndpointBuilder.new(self.base), async_session, lambda *_: True)
         else:
-            async_session = self._generic._async_session
+            async_session = self._generic._async_session  # pylint: disable=protected-access
             self._migrate = clients.Migrate(EndpointBuilder.new(self.base, '/migration/rest/v1'), async_session, self._authenticator)
             self._webdav = clients.Dav(EndpointBuilder.new(self.base, '/localFiles'), async_session, self._authenticator)
             self._api = clients.API(EndpointBuilder.new(self.base, '/admingui/api'), async_session, self._authenticator)
