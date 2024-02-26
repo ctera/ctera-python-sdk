@@ -35,7 +35,7 @@ class Session:
     async def await_promise(self, r, *, on_response=None):
         promise = await self._request(r, on_response=on_response)
         return await promise
-    
+
     async def _request(self, r, *, on_response=None):
         try:
             response = await self._session.request(r.method, r.url, **r.kwargs)

@@ -10,7 +10,7 @@ class CLI(BaseCommand):
         """
         Run a CLI command
 
-        :param str cli_command: Command 
+        :param str cli_command: Command
         :return str: Response
         """
         logging.getLogger().warning('Usage of the CLI module is discouraged.'

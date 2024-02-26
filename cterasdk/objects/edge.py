@@ -57,7 +57,7 @@ class Edge(CTERA):
     def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
         super().__init__(host, port, https, base=base)
         self._ctera_session = session.Session(self.host())
-        
+
         self._initialize(Portal)
 
         self.afp = afp.AFP(self)
@@ -145,10 +145,10 @@ class Edge(CTERA):
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['afp', 'aio', 'array', 'audit', 'backup', 'cache', 'cli', 'config', 'ctera_migrate', 'dedup', 
-                                       'directoryservice', 'drive', 'files', 'firmware', 'ftp', 'groups', 'licenses', 'logs', 'mail', 
-                                       'network', 'nfs', 'ntp', 'power', 'ransom_protect', 'rsync', 'services', 'shares', 'shell', 
-                                       'smb', 'snmp', 'ssh', 'ssl', 'support', 'sync', 'syslog', 'tasks', 'telnet', 'timezone', 
+        return super()._omit_fields + ['afp', 'aio', 'array', 'audit', 'backup', 'cache', 'cli', 'config', 'ctera_migrate', 'dedup',
+                                       'directoryservice', 'drive', 'files', 'firmware', 'ftp', 'groups', 'licenses', 'logs', 'mail',
+                                       'network', 'nfs', 'ntp', 'power', 'ransom_protect', 'rsync', 'services', 'shares', 'shell',
+                                       'smb', 'snmp', 'ssh', 'ssl', 'support', 'sync', 'syslog', 'tasks', 'telnet', 'timezone',
                                        'users', 'volumes']
 
     def query(self, path, key, value):

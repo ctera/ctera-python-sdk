@@ -9,7 +9,6 @@ from ..edge import services
 from ..edge import session
 from ..edge import support
 from ..edge import sync
-from ..edge import uri
 
 
 class Drive(CTERA):

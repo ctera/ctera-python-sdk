@@ -118,7 +118,7 @@ class Folders(Client):
 
     def download_zip(self, path, data, **kwargs):
         return super().form_data(path, data, on_response=Response.new())
-    
+
 
 class Upload(Client):
 
@@ -253,7 +253,7 @@ class Migrate(JSON):
         if token:
             self.headers.update_headers({Migrate.ID: token})
         return response.deserialize()
-    
+
 
 def execute_request(async_session, request, *, on_response, max_retries=3, backoff_factor=2):
     retries = 0

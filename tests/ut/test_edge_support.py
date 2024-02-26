@@ -2,7 +2,7 @@ import datetime
 
 from freezegun import freeze_time
 
-from cterasdk import exceptionss
+from cterasdk import exceptions
 from cterasdk.edge import support
 from tests.ut import base_edge
 

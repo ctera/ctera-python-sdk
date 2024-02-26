@@ -41,7 +41,7 @@ class Service:
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         self._generic.shutdown()
-    
+
 
 class CTERA(Service):
 

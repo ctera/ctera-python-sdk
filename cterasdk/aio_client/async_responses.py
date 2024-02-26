@@ -37,10 +37,6 @@ class Response:
     def headers(self):
         return self._response.headers
 
-    @property
-    def real_url(self):
-        return self._response.content_type
-
     def raise_for_status(self):
         return self._response.raise_for_status()
 

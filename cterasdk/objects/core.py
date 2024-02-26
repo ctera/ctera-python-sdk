@@ -48,7 +48,7 @@ class Portal(CTERA):
         super().__init__(host, port, https, base=None)
         async_session = self._generic._async_session
         self._ctera_session = session.Session(self.host(), self.context)
-        self._folders = clients.Folders(EndpointBuilder.new(self.base, self.context, '/folders/folders'), 
+        self._folders = clients.Folders(EndpointBuilder.new(self.base, self.context, '/folders/folders'),
                                         async_session, self._authenticator)
         self._upload = clients.Upload(EndpointBuilder.new(self.base, self.context, '/upload/folders'), async_session, self._authenticator)
         self._webdav = clients.Dav(EndpointBuilder.new(self.base, self.context, '/webdav'), async_session, self._authenticator)
@@ -105,7 +105,7 @@ class Portal(CTERA):
     @property
     def _omit_fields(self):
         return super()._omit_fields + ['activation', 'admins', 'cloudfs', 'credentials', 'devices', 'directoryservice', 'domains', 'files',
-                                       'firmwares', 'groups', 'logs', 'plans', 'reports', 'roles', 'settings', 'tasks', 'templates', 
+                                       'firmwares', 'groups', 'logs', 'plans', 'reports', 'roles', 'settings', 'tasks', 'templates',
                                        'users']
     
 
@@ -132,7 +132,7 @@ class GlobalAdmin(Portal):
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['antivirus', 'buckets', 'cli', 'kms', 'licenses', 'messaging', 'portals', 'servers', 'setup', 
+        return super()._omit_fields + ['antivirus', 'buckets', 'cli', 'kms', 'licenses', 'messaging', 'portals', 'servers', 'setup',
                                        'ssl', 'startup', 'syslog']
 
 

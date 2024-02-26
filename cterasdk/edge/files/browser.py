@@ -48,7 +48,7 @@ class FileBrowser(BaseCommand):
         :param str path: Directory path
         """
         return io.mkdir(self._core, self.get_object_path(path))
-    
+
     def makedirs(self, path):
         """
         Create a directory recursively
