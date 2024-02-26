@@ -107,7 +107,7 @@ class Portal(CTERA):
         return super()._omit_fields + ['activation', 'admins', 'cloudfs', 'credentials', 'devices', 'directoryservice', 'domains', 'files',
                                        'firmwares', 'groups', 'logs', 'plans', 'reports', 'roles', 'settings', 'tasks', 'templates',
                                        'users']
-    
+
 
 class GlobalAdmin(Portal):
 

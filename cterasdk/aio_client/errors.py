@@ -23,4 +23,4 @@ def accept_response(response):
     except aiohttp.ClientResponseError as error:
         error_object = ClientError(error, message)
         raise ClientResponseException(error_object)
-    return response        
+    return response
