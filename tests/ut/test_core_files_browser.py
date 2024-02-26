@@ -29,14 +29,18 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         self.assertEqual(actual_ctera_path.fullpath(), os.path.join(TestCoreFilesBrowser._base_path, path))
 
     def test_mkdir(self):
-        for recurse in [True, False]:
-            self._test_mkdir(recurse)
-
-    def _test_mkdir(self, recurse):
         path = 'cloud/Users'
         directory_mock = self.patch_call('cterasdk.core.files.browser.directory')
-        self.files.mkdir(path, recurse=recurse)
-        directory_mock.mkdir.assert_called_once_with(self._global_admin, mock.ANY, recurse)
+        self.files.mkdir(path)
+        directory_mock.mkdir.assert_called_once_with(self._global_admin, mock.ANY)
+        actual_ctera_path = directory_mock.mkdir.call_args[0][1]
+        self.assertEqual(actual_ctera_path.fullpath(), os.path.join(TestCoreFilesBrowser._base_path, path))
+
+    def test_makedirs(self):
+        path = 'cloud/Users'
+        directory_mock = self.patch_call('cterasdk.core.files.browser.directory')
+        self.files.makedirs(path)
+        directory_mock.mkdir.assert_called_once_with(self._global_admin, mock.ANY)
         actual_ctera_path = directory_mock.mkdir.call_args[0][1]
         self.assertEqual(actual_ctera_path.fullpath(), os.path.join(TestCoreFilesBrowser._base_path, path))
 

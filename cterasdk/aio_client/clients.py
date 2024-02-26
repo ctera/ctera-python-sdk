@@ -146,7 +146,7 @@ class Dav(Client):
         response = self._request(request, on_response=Response.new(Deserializers.XML))
         return response.deserialize()
 
-    def delete(self, path):
+    def delete(self, path):  # pylint: disable=arguments-differ
         response = super().delete(path, on_response=Response.new())
         return response.text
 

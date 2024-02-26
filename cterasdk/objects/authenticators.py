@@ -28,4 +28,4 @@ def _core_no_session_resources(context):
 
 
 def _no_session_resources(context, *paths):
-    return tuple([uri.create(context, path) for path in paths])
+    return tuple(uri.create(context, path) for path in paths)
