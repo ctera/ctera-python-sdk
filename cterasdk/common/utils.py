@@ -225,4 +225,4 @@ def tcp_connect(host, port):
     if rc != 0:
         logging.getLogger().debug(message)
         raise ConnectionError(message)
-    logging.getLogger().debug(f"Connection established to remote host {host} on port {port}")
+    logging.getLogger().debug("Connection established to remote host %s on port %s", host, port)

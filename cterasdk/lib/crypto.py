@@ -1,7 +1,8 @@
-import functools
-import logging
-import os
 import re
+import os
+import logging
+import functools
+import cterasdk.settings
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
@@ -10,8 +11,6 @@ from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat
 
 from ..exceptions import CTERAException
 from .filesystem import FileSystem
-
-import cterasdk.settings
 
 
 class RSAKeyPair:

@@ -3,7 +3,7 @@ import munch
 
 from cterasdk.core import devices
 from cterasdk.common import Object
-from cterasdk.object import Gateway, Agent
+from cterasdk.objects import Edge, Drive
 from tests.ut import base_core
 
 
@@ -29,11 +29,11 @@ class TestCoreRemote(base_core.BaseCoreTest):
         for filer_type in filer_types:
             get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
                                                                      filer_type, self._device_remote_access_url)
-            self._call_and_assert_instance_type(get_multi_response, Gateway)
+            self._call_and_assert_instance_type(get_multi_response, Edge)
         for agent_type in agent_types:
             get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
                                                                      agent_type, self._device_remote_access_url)
-            self._call_and_assert_instance_type(get_multi_response, Agent)
+            self._call_and_assert_instance_type(get_multi_response, Drive)
         for other_type in other_types:
             get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
                                                                      other_type, self._device_remote_access_url)

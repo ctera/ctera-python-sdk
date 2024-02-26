@@ -4,9 +4,8 @@ import shutil
 import os
 from pathlib import Path
 
-from ..exceptions import RenameException, LocalDirectoryNotFound, LocalFileNotFound, LocalPathNotFound
-
 import cterasdk.settings
+from ..exceptions import RenameException, LocalDirectoryNotFound, LocalFileNotFound, LocalPathNotFound
 
 
 class FileSystem:  # pylint: disable=unused-private-member

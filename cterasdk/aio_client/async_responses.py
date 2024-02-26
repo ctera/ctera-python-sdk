@@ -71,12 +71,12 @@ def contents():
     return text
 
 
-def deserialize(deserializer):
+def deserialize_object(deserializer):
     async def deserialize(response):
         return deserializer(await response.read())
     return deserialize
 
 
 class Deserializers:
-    JSON = deserialize(fromjsonstr)
-    XML = deserialize(fromxmlstr)
+    JSON = deserialize_object(fromjsonstr)
+    XML = deserialize_object(fromxmlstr)

@@ -1,4 +1,5 @@
 import logging
+import cterasdk.settings
 
 from ..lib.task_manager_base import TaskError
 from .licenses import Licenses
@@ -8,8 +9,6 @@ from ..exceptions import CTERAException, InputError
 from . import enum
 from .base_command import BaseCommand
 from .types import TCPService
-
-import cterasdk.settings
 
 
 class Services(BaseCommand):

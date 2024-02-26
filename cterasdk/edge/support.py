@@ -1,11 +1,10 @@
 from datetime import datetime
 import logging
+import cterasdk.settings
 
 from ..lib import FileSystem
 from ..exceptions import InputError
 from .base_command import BaseCommand
-
-import cterasdk.settings
 
 
 class DebugLevel:

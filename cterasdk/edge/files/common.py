@@ -1,8 +1,6 @@
 import logging
-from ...exceptions import CTERAException
-
-
 from pathlib import PurePosixPath
+from ...exceptions import CTERAException
 from ...objects import uri
 
 

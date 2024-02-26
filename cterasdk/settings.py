@@ -1,5 +1,5 @@
-import yaml
 from pathlib import Path
+import yaml
 from .convert import tojsonstr, fromjsonstr
 
 
@@ -8,7 +8,7 @@ sessions, downloads = None, None
 
 def default_settings():
     global sessions, downloads
-    with open(Path(__file__).parent.absolute().joinpath('settings.yml'), 'r') as f:
+    with open(Path(__file__).parent.absolute().joinpath('settings.yml'), 'r', encoding='utf-8') as f:
         sdk_settings = yaml.safe_load(f)
         sessions = convert_to_object(sdk_settings['sessions'])
         downloads = convert_to_object(sdk_settings['downloads'])
