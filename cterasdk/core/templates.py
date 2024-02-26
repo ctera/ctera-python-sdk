@@ -1,7 +1,7 @@
 import logging
 
 from ..common import union, parse_base_object_ref, ApplicationBackupSet, PolicyRuleConverter, Object
-from ..exception import CTERAException, ObjectNotFoundException
+from ..exceptions import CTERAException, ObjectNotFoundException
 from .base_command import BaseCommand
 from . import query
 from .enum import Platform
@@ -16,11 +16,11 @@ class Templates(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.auto_assign = TemplateAutoAssignPolicy(self._portal)
+        self.auto_assign = TemplateAutoAssignPolicy(self._core)
 
     def _get_entire_object(self, name):
         try:
-            return self._portal.get(f'/deviceTemplates/{name}')
+            return self._core.api.get(f'/deviceTemplates/{name}')
         except CTERAException as error:
             raise CTERAException('Failed to get template', error)
 
@@ -33,7 +33,7 @@ class Templates(BaseCommand):
         """
         include = union(include or [], Templates.default)
         include = ['/' + attr for attr in include]
-        template = self._portal.get_multi('/deviceTemplates/' + name, include)
+        template = self._core.api.get_multi('/deviceTemplates/' + name, include)
         if template.name is None:
             raise ObjectNotFoundException('Could not find server', f'/deviceTemplates/{name}', name=name)
         return template
@@ -74,7 +74,7 @@ class Templates(BaseCommand):
         Templates._configure_consent_page(param, consent_page)
 
         logging.getLogger().info('Adding template. %s', {'name': name})
-        response = self._portal.add('/deviceTemplates', param)
+        response = self._core.api.add('/deviceTemplates', param)
         logging.getLogger().info('Template added. %s', {'name': name})
         return response
 
@@ -150,7 +150,7 @@ class Templates(BaseCommand):
             param.deviceSettings.cliCommands.cliCommands = cli_commands
 
     def _convert_to_template_firmwares(self, versions):
-        firmwares = {image.name: parse_base_object_ref(image.baseObjectRef) for image in self._portal.firmwares.list_images()}
+        firmwares = {image.name: parse_base_object_ref(image.baseObjectRef) for image in self._core.firmwares.list_images()}
 
         template_firmwares = []
         for platform, version in versions:
@@ -197,7 +197,7 @@ class Templates(BaseCommand):
                 builder.addFilter(query_filter)
             builder.orFilter((len(filters) > 1))
         param = builder.build()
-        return query.iterator(self._portal, '/deviceTemplates', param)
+        return query.iterator(self._core, '/deviceTemplates', param)
 
     def delete(self, name):
         """
@@ -206,7 +206,7 @@ class Templates(BaseCommand):
         :param str name: Name of the template
         """
         logging.getLogger().info('Deleting template. %s', {'name': name})
-        response = self._portal.delete(f'/deviceTemplates/{name}')
+        response = self._core.api.delete(f'/deviceTemplates/{name}')
         logging.getLogger().info('Template deleted. %s', {'name': name})
         return response
 
@@ -218,7 +218,7 @@ class Templates(BaseCommand):
         :param bool,optional wait: Wait for all changes to apply, defaults to `False`
         """
         logging.getLogger().info('Setting default template. %s', {'name': name})
-        response = self._portal.execute(f'/deviceTemplates/{name}', 'setAsDefault')
+        response = self._core.api.execute(f'/deviceTemplates/{name}', 'setAsDefault')
         self.auto_assign.apply_changes(wait=wait)
         logging.getLogger().info('Set default template. %s', {'name': name})
         return response
@@ -233,7 +233,7 @@ class Templates(BaseCommand):
         template = self.get(name, include=['isDefault'])
         if template.isDefault:
             logging.getLogger().info('Removing default template. %s', {'name': name})
-            response = self._portal.execute('', 'removeDefaultDeviceTemplate')
+            response = self._core.api.execute('', 'removeDefaultDeviceTemplate')
             logging.getLogger().info('Removed default template. %s', {'name': name})
             self.auto_assign.apply_changes(wait=wait)
             return response
@@ -247,7 +247,7 @@ class TemplateAutoAssignPolicy(BaseCommand):
         """
         Get templates auto assignment policy
         """
-        return self._portal.execute('', 'getAutoAssignmentRules')
+        return self._core.api.execute('', 'getAutoAssignmentRules')
 
     def set_policy(self, rules, apply_default=None, default=None, apply_changes=True):
         """
@@ -262,7 +262,7 @@ class TemplateAutoAssignPolicy(BaseCommand):
         if default:
             templates.add(default)
         templates = list(templates)
-        portal_templates = {template.name: template for template in self._portal.templates.by_name(templates, ['baseObjectRef'])}
+        portal_templates = {template.name: template for template in self._core.templates.by_name(templates, ['baseObjectRef'])}
 
         not_found = [template for template in templates if template not in portal_templates.keys()]
         if not_found:
@@ -280,7 +280,7 @@ class TemplateAutoAssignPolicy(BaseCommand):
                         portal_templates.get(rule.assignment).baseObjectRef) for rule in rules]
         policy.deviceTemplatesAutoAssignmentRules = policy_rules
 
-        response = self._portal.execute('', 'setAutoAssignmentRules', policy)
+        response = self._core.api.execute('', 'setAutoAssignmentRules', policy)
         logging.getLogger().info('Set templates auto assignment rules.')
 
         if apply_changes:
@@ -294,7 +294,7 @@ class TemplateAutoAssignPolicy(BaseCommand):
 
         :param bool,optional wait: Wait for all changes to apply, defaults to `False`
         """
-        task = self._portal.execute('', 'applyAutoAssignmentRules')
+        task = self._core.api.execute('', 'applyAutoAssignmentRules')
         if wait:
-            task = self._portal.tasks.wait(task)
+            task = self._core.tasks.wait(task)
         return task

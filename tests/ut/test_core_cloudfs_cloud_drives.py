@@ -134,9 +134,9 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._mock_get_folder_group()
 
         error_message = "Expected Failure"
-        expected_exception = exception.CTERAException(message=error_message)
+        expected_exception = exceptions.CTERAException(message=error_message)
         self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.CloudDrives(self._global_admin).add(self._name, self._group, self._local_user_account)
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
@@ -211,11 +211,11 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self.assertEqual(ret, execute_response)
 
     def test_set_folders_acl_raise(self):
-        expected_exception = exception.CTERAException()
+        expected_exception = exceptions.CTERAException()
         self._init_global_admin(execute_response=expected_exception)
         self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.CloudDrives(self._global_admin).setfacl(self._nt_acl_folders.foldersPath, self._nt_acl_folders.sddlString,
                                                             self._nt_acl_folders.isRecursive)
         self.assertEqual('Failed to setFoldersACL', error.exception.message)
@@ -229,11 +229,11 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self.assertEqual(ret, execute_response)
 
     def test_set_owner_acl_raise(self):
-        expected_exception = exception.CTERAException()
+        expected_exception = exceptions.CTERAException()
         self._init_global_admin(execute_response=expected_exception)
         self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.CloudDrives(self._global_admin).setoacl(self._nt_acl_owner.foldersPath, self._nt_acl_owner.ownerSid,
                                                             self._nt_acl_owner.isRecursive)
         self.assertEqual('Failed to setOwnerACL', error.exception.message)

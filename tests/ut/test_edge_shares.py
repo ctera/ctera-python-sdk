@@ -106,20 +106,20 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_add_cifs_share_invalid_principal_type(self):
-        with self.assertRaises(exception.InputError) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             ShareAccessControlEntry(principal_type='Expected Failure', name='Everyone', perm=FileAccessMode.RO)
         self.assertEqual('Invalid principal type', error.exception.message)
 
     def test_add_cifs_share_invalid_permission(self):
-        with self.assertRaises(exception.InputError) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             ShareAccessControlEntry(principal_type=PrincipalType.LG, name='Everyone', perm='Expected Failure')
         self.assertEqual('Invalid permissions', error.exception.message)
 
     def test_add_share_failure(self):
         execute_response = self._get_list_physical_folders_response_object()
         self._init_filer(execute_response=execute_response)
-        self._filer.add = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._filer.add = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             shares.Shares(self._filer).add(self._share_name, self._share_fullpath, [])
 
         self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
@@ -137,7 +137,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
     def test_list_physical_folders_input_error(self):
         execute_response = []
         self._init_filer(execute_response=execute_response)
-        with self.assertRaises(exception.InputError) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             shares.Shares(self._filer).add(self._share_name, self._share_fullpath, [])
 
         self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
@@ -166,7 +166,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
     def test_block_files_invalid_share_access_type(self):
         get_response = self._get_share_object(access='Expected Failure')
         self._init_filer(get_response=get_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             shares.Shares(self._filer).block_files(self._share_name, self._share_block_files)
         self._filer.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
         self.assertEqual('Cannot block file types on non Windows-ACL enabled shares', error.exception.message)
@@ -177,8 +177,8 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         self._filer.delete.assert_called_once_with('/config/fileservices/share/' + self._share_name)
 
     def test_delete_share_failure(self):
-        self._filer.delete = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._filer.delete = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             shares.Shares(self._filer).delete(self._share_name)
         self.assertEqual('Share deletion failed', error.exception.message)
 
@@ -363,7 +363,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
             ['old']
         )
         self._init_filer(get_response=current_share)
-        with self.assertRaises(exception.CTERAException):
+        with self.assertRaises(exceptions.CTERAException):
             shares.Shares(self._filer).set_screened_file_types(share_name, ['new'])
 
     def test_add_screened_file_types(self):
@@ -385,7 +385,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
             ['old']
         )
         self._init_filer(get_response=current_share)
-        with self.assertRaises(exception.CTERAException):
+        with self.assertRaises(exceptions.CTERAException):
             shares.Shares(self._filer).add_screened_file_types(share_name, ['new'])
 
     def test_remove_screened_file_types(self):
@@ -407,7 +407,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
             ['old']
         )
         self._init_filer(get_response=current_share)
-        with self.assertRaises(exception.CTERAException):
+        with self.assertRaises(exceptions.CTERAException):
             shares.Shares(self._filer).remove_screened_file_types(share_name, ['new'])
 
     @staticmethod

@@ -11,14 +11,13 @@ Subpackages
 
 .. toctree::
 
-    cterasdk.client
+    cterasdk.aio_client
     cterasdk.common
     cterasdk.convert
     cterasdk.core
     cterasdk.edge
     cterasdk.lib
-    cterasdk.object
-    cterasdk.transcript
+    cterasdk.objects
 
 Submodules
 ----------

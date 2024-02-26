@@ -1,4 +1,5 @@
-from cterasdk import config, CTERAException, GlobalAdmin, portal_enum, gateway_enum, gateway_types
+from cterasdk import CTERAException, GlobalAdmin, portal_enum, gateway_enum, gateway_types
+import cterasdk.settings
 
 from sample_base import CTERASDKSampleBase
 
@@ -13,7 +14,6 @@ class PortalSimpleSample(CTERASDKSampleBase):
         self._global_admin = None
 
     def run(self):
-        config.http['ssl'] = 'Trust'
         self._connect_to_portal()
         self._handle_users()
 
@@ -30,6 +30,7 @@ class PortalSimpleSample(CTERASDKSampleBase):
 
     def _connect_to_portal(self):
         gateway_address = CTERASDKSampleBase._get_input(PortalSimpleSample._portal_address_request_string)
+        cterasdk.settings.sessions.management.ssl = False
         self._global_admin = GlobalAdmin(gateway_address)
         username = CTERASDKSampleBase._get_input(PortalSimpleSample._portal_username_request_string)
         password = CTERASDKSampleBase._get_password(username)

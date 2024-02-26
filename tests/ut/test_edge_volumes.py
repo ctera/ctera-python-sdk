@@ -90,7 +90,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
     def test_add_volume_no_devices(self):
         self._init_filer()
         self._filer.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_devices)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             volumes.Volumes(self._filer).add(self._volume_1_name)
         self._filer.get.assert_has_calls(
             [
@@ -103,7 +103,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
     def test_add_volume_invalid_device_name(self):
         self._init_filer()
         self._filer.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_multiple_drive)
-        with self.assertRaises(exception.InputError) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             volumes.Volumes(self._filer).add(self._volume_1_name, device='Invalid device name')
         self._filer.get.assert_has_calls(
             [
@@ -116,7 +116,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
     def test_add_volume_must_specify_device_name(self):
         self._init_filer()
         self._filer.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_multiple_drive)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             volumes.Volumes(self._filer).add(self._volume_1_name)
         self._filer.get.assert_has_calls(
             [
@@ -153,7 +153,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
     def test_add_volume_exceeding_drive_size(self):
         self._init_filer()
         self._filer.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_single_drive)
-        with self.assertRaises(exception.InputError) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             volumes.Volumes(self._filer).add(self._volume_1_name, size=999999999)
         self._filer.get.assert_has_calls(
             [
@@ -176,9 +176,9 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
 
     def test_delete_volume_raise(self):
         self._init_filer()
-        self._filer.delete = mock.MagicMock(side_effect=exception.CTERAException())
+        self._filer.delete = mock.MagicMock(side_effect=exceptions.CTERAException())
         self._filer.tasks.by_name = mock.MagicMock(return_value=[])
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             volumes.Volumes(self._filer).delete(self._volume_1_name)
         self._filer.tasks.by_name.assert_called_once_with(' '.join(['Mounting', self._volume_1_name, 'file system']))
         self._filer.delete.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
@@ -216,8 +216,8 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
 
     def test_modify_volume_not_found(self):
         self._init_filer()
-        self._filer.get = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._filer.get = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             volumes.Volumes(self._filer).modify(self._volume_1_name, 9999)
         self._filer.get.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
         self.assertEqual('Failed to get the volume', error.exception.message)

@@ -8,8 +8,8 @@ from .enum import TaskType, SourceType
 class CTERAMigrate(BaseCommand):
     """Edge Filer Migration Tool APIs """
 
-    def __init__(self, gateway):
-        super().__init__(gateway)
+    def __init__(self, edge):
+        super().__init__(edge)
         self.discovery = Discovery(self)
         self.migration = Migration(self)
 
@@ -17,7 +17,7 @@ class CTERAMigrate(BaseCommand):
         """
         Login to CTERA Migrate
         """
-        return self._gateway._ctera_migrate.login('/migration/rest/v1/auth/user')  # pylint: disable=protected-access
+        return self._edge.migrate.login()  # pylint: disable=protected-access
 
     def list_shares(self, credentials):
         """
@@ -30,7 +30,7 @@ class CTERAMigrate(BaseCommand):
         param.user = credentials.username
         setattr(param, 'pass', credentials.password)
         return [share.name for share in
-                self._gateway._ctera_migrate.post('/migration/rest/v1/inventory/shares', param).shares]  # pylint: disable=protected-access
+                self._edge.migrate.post('/inventory/shares', param).shares]  # pylint: disable=protected-access
 
     def list_tasks(self, deleted=False):
         """
@@ -40,7 +40,7 @@ class CTERAMigrate(BaseCommand):
         :returns: List of tasks
         :rtype: list(cterasdk.common.object.Object)
         """
-        tasks = self._gateway._ctera_migrate.get('/migration/rest/v1/tasks/list', {'deleted': int(deleted)}).tasks  # pylint: disable=W0212
+        tasks = self._edge.migrate.get('/tasks/list', params={'deleted': int(deleted)}).tasks  # pylint: disable=W0212
         return [Task.from_server_object(task) for task in tasks.__dict__.values()] if tasks else []
 
     def delete(self, tasks):
@@ -62,7 +62,7 @@ class CTERAMigrate(BaseCommand):
     def _delete_or_restore(self, tasks, action):
         param = Object()
         param.task_ids = [task.id for task in tasks]
-        return self._gateway._ctera_migrate.post(f'/migration/rest/v1/tasks/{action}', param)  # pylint: disable=protected-access
+        return self._edge.migrate.post(f'/tasks/{action}', param)  # pylint: disable=protected-access
 
     def start(self, task):
         """
@@ -86,13 +86,13 @@ class CTERAMigrate(BaseCommand):
         """
         param = Object()
         param.task_id = task.id
-        return self._gateway._ctera_migrate.post(f'/migration/rest/v1/tasks/{action}', param)  # pylint: disable=protected-access
+        return self._edge.migrate.post(f'/tasks/{action}', param)  # pylint: disable=protected-access
 
     def details(self, task):
         """
         Get task details
         """
-        response = self._gateway._ctera_migrate.get('/migration/rest/v1/tasks/history', {'id': task.id})  # pylint: disable=protected-access
+        response = self._edge.migrate.get('/tasks/history', {'id': task.id})  # pylint: disable=protected-access
         if response.history:
             return Jobs(response.history)
         logging.getLogger().error('Task not found. %s', {'task_id': task.id})
@@ -100,11 +100,11 @@ class CTERAMigrate(BaseCommand):
 
     def results(self, task):
         if task.type == 'discovery':
-            return self._gateway._ctera_migrate.get('/migration/rest/v1/discovery/results',  # pylint: disable=protected-access
-                                                    {'id': task.id}).discovery
+            return self._edge.migrate.get('/discovery/results',  # pylint: disable=protected-access
+                                                    params={'id': task.id}).discovery
         if task.type == 'migration':
-            return self._gateway._ctera_migrate.get('/migration/rest/v1/migration/results',  # pylint: disable=protected-access
-                                                    {'id': task.id}).migration
+            return self._edge.migrate.get('/migration/results',  # pylint: disable=protected-access
+                                                    params={'id': task.id}).migration
         logging.getLogger().error('Could not determine task type. %s', {'id': task.id, 'type': task.type, 'name': task.name})
         return None
 
@@ -135,8 +135,8 @@ class Jobs:
 class TaskManager:
     """Class representing a migration tool task"""
 
-    def __init__(self, migration_tool):
-        self._migration_tool = migration_tool
+    def __init__(self, ctera_migrate):
+        self._ctera_migrate = ctera_migrate
 
     @staticmethod
     def _create_add_parameter(name, credentials, shares, auto_start=False, notes=None):
@@ -158,7 +158,7 @@ class TaskManager:
         return param
 
     def _add(self, param):
-        task = self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/create',  # pylint: disable=protected-access
+        task = self._ctera_migrate._edge.migrate.post('/tasks/create',  # pylint: disable=protected-access
                                                                  param)
         return Task(task.task_id, int(task.type), task.name)
 
@@ -166,7 +166,7 @@ class TaskManager:
 class Discovery(TaskManager):
 
     def list_tasks(self, deleted=False):
-        return [task for task in self._migration_tool.list_tasks(deleted) if task.type == 'discovery']  # pylint: disable=protected-access
+        return [task for task in self._ctera_migrate.list_tasks(deleted) if task.type == 'discovery']  # pylint: disable=protected-access
 
     def add(self, name, credentials, shares, auto_start=False, log_every_file=False, notes=None):
         """
@@ -199,14 +199,14 @@ class Discovery(TaskManager):
             param.name = name
         if notes:
             param.notes = notes
-        return self._migration_tool._gateway._ctera_migrate.post('/migration/rest/v1/tasks/update',  # pylint: disable=protected-access
+        return self._ctera_migrate._edge.ctera_migrate.post('/tasks/update',  # pylint: disable=protected-access
                                                                  param)
 
 
 class Migration(TaskManager):
 
     def list_tasks(self, deleted=False):
-        return [task for task in self._migration_tool.list_tasks(deleted) if task.type == 'migration']  # pylint: disable=protected-access
+        return [task for task in self._ctera_migrate.list_tasks(deleted) if task.type == 'migration']  # pylint: disable=protected-access
 
     def add(self, name, credentials, shares, auto_start=False, access_time=None,  # pylint: disable=too-many-arguments
             winacls=True, cloud_folder=None, create_cloud_folder_per_share=False,

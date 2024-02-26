@@ -254,9 +254,9 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_add_static_routes_raise(self):
-        expected_exception = exception.CTERAException()
+        expected_exception = exceptions.CTERAException()
         self._filer.add = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             network.Network(self._filer).routes.add(
                 self._static_routes[0].GwIP,
                 self._static_routes[0].DestIpMask.replace("_", "/")
@@ -279,9 +279,9 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self.assertEqual(self._static_routes[0], ret)
 
     def test_remove_static_route_raise(self):
-        expected_exception = exception.CTERAException()
+        expected_exception = exceptions.CTERAException()
         self._filer.delete = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             network.Network(self._filer).routes.remove(self._static_routes[0].DestIpMask.replace("_", "/"))
         self.assertEqual('Static route deletion failed', error.exception.message)
 
@@ -297,11 +297,11 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_clean_all_static_routes_raise(self):
-        expected_exception = exception.CTERAException()
+        expected_exception = exceptions.CTERAException()
         self._init_filer(execute_response=expected_exception)
         self._filer.execute = mock.MagicMock(side_effect=expected_exception)
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             network.Network(self._filer).routes.clear()
         self.assertEqual('Failed to clear static routes', error.exception.message)
 

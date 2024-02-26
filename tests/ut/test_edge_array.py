@@ -56,9 +56,9 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
         self.assertEqual(ret, add_response)
 
     def test_add_array_with_members_failure(self):
-        expected_exception = exception.CTERAException()
+        expected_exception = exceptions.CTERAException()
         self._filer.add = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             array.Array(self._filer).add(self._array_name, self._array_level, self._array_members)
         self.assertEqual('Storage array creation failed.', error.exception.message)
 
@@ -70,9 +70,9 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
         self.assertEqual(ret, delete_response)
 
     def test_delete_array_failure(self):
-        expected_exception = exception.CTERAException()
+        expected_exception = exceptions.CTERAException()
         self._filer.delete = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             array.Array(self._filer).delete(self._array_name)
         self.assertEqual('Storage array deletion failed.', error.exception.message)
 

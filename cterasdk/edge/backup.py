@@ -1,7 +1,7 @@
 import logging
 
 from ..common import Object
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .enum import BackupConfStatusID
 from .base_command import BaseCommand
 from .directorytree import DirectoryTree
@@ -68,7 +68,7 @@ class Backup(BaseCommand):
 
     def __init__(self, gateway):
         super().__init__(gateway)
-        self.files = BackupFiles(self._gateway)
+        self.files = BackupFiles(self._edge)
 
     def configure(self, passphrase=None):
         """
@@ -93,23 +93,23 @@ class Backup(BaseCommand):
 
         :return bool: True if backup is configured, else False
         """
-        backup_status = self._gateway.get('/proc/backup/backupStatus')
+        backup_status = self._edge.api.get('/proc/backup/backupStatus')
         return backup_status.serviceStatus.id == BackupConfStatusID.Attached
 
     def start(self):
         """ Start backup """
         logging.getLogger().info("Starting cloud backup.")
-        self._gateway.execute("/status/sync", "start")
+        self._edge.api.execute("/status/sync", "start")
 
     def suspend(self):
         """ Suspend backup """
         logging.getLogger().info("Suspending cloud backup.")
-        self._gateway.execute("/status/sync", "pause")
+        self._edge.api.execute("/status/sync", "pause")
 
     def unsuspend(self):
         """ Unsuspend backup """
         logging.getLogger().info("Suspending cloud backup.")
-        self._gateway.execute("/status/sync", "resume")
+        self._edge.api.execute("/status/sync", "resume")
 
     def _attach(self, sharedSecret):
         try:
@@ -124,7 +124,7 @@ class Backup(BaseCommand):
         return settings
 
     def _attach_folder(self):
-        task = self._gateway.execute('/status/services', 'attachFolder')
+        task = self._edge.api.execute('/status/services', 'attachFolder')
         return self._attach_response(task)
 
     def _attach_encrypted_folder(self, encryptedFolderKey, passPhraseSalt, sharedSecret):
@@ -133,7 +133,7 @@ class Backup(BaseCommand):
         param.passPhraseSalt = passPhraseSalt
         param.sharedSecret = sharedSecret
 
-        task = self._gateway.execute('/status/services', 'attachEncryptedFolder', param)
+        task = self._edge.api.execute('/status/services', 'attachEncryptedFolder', param)
         return self._attach_response(task)
 
     def _attach_response(self, task):
@@ -185,7 +185,7 @@ class Backup(BaseCommand):
             logging.getLogger().debug('Creating a backup folder.')
             param.encryptionMode = EncryptionMode.Recoverable
 
-        task = self._gateway.execute('/status/services', 'createFolder', param)
+        task = self._edge.api.execute('/status/services', 'createFolder', param)
         settings = self._create_response(task)
         settings.encryptionMode = param.encryptionMode
 
@@ -215,13 +215,13 @@ class Backup(BaseCommand):
         raise CTERAException('Failed to create backup folder', None, rc=rc)
 
     def _wait(self, task):
-        task = self._gateway.tasks.wait(task)
+        task = self._edge.tasks.wait(task)
         return task.result
 
     def _configure_backup_settings(self, param):
-        backup_settings = self._gateway.get('/config/backup')
+        backup_settings = self._edge.api.get('/config/backup')
         if not backup_settings:
-            backup_settings = self._gateway.get('/defaults/BackupSettings')
+            backup_settings = self._edge.api.defaults('BackupSettings')
 
         backup_settings.encryptionMode = param.encryptionMode
         backup_settings.sharedSecret = param.sharedSecret
@@ -229,7 +229,7 @@ class Backup(BaseCommand):
 
         logging.getLogger().debug('Configuring backup settings.')
 
-        self._gateway.put('/config/backup', backup_settings)
+        self._edge.api.put('/config/backup', backup_settings)
 
 
 class BackupFiles(BaseCommand):
@@ -246,7 +246,7 @@ class BackupFiles(BaseCommand):
         return self._update_backup_config(backup_config)
 
     def _fetch_backup_config(self, name=None):
-        backup_configs = self._gateway.get('/config/backup/backupPolicy/includeSets')
+        backup_configs = self._edge.api.get('/config/backup/backupPolicy/includeSets')
         if name:
             for backup_config in backup_configs:
                 if backup_config.name == name:
@@ -257,4 +257,4 @@ class BackupFiles(BaseCommand):
         return backup_configs
 
     def _update_backup_config(self, backup_config):
-        return self._gateway.put(f'/config/backup/backupPolicy/includeSets/{backup_config._uuid}', backup_config)  # pylint: disable=W0212
+        return self._edge.api.put(f'/config/backup/backupPolicy/includeSets/{backup_config._uuid}', backup_config)  # pylint: disable=W0212

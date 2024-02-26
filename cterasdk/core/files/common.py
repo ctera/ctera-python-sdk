@@ -1,6 +1,27 @@
+import re
+import logging
+
+from pathlib import PurePosixPath
 from ...common import Object
-from . import ls
-from ...exception import RemoteDirectoryNotFound
+from ...objects import uri
+from ...lib import Iterator, Command
+from ...exceptions import RemoteDirectoryNotFound, CTERAException
+
+
+class ItemExists(CTERAException):
+    """Already exists"""
+
+
+class InvalidPath(CTERAException):
+    """Invalid directory path"""
+
+
+class InvalidName(CTERAException):
+    """Invalid directory name"""
+
+
+class ReservedName(CTERAException):
+    """Reserved name"""
 
 
 class SrcDstParam(Object):
@@ -60,8 +81,156 @@ class CreateShareParam(Object):
         CreateShareParam.__instance = self  # pylint: disable=unused-private-member
 
 
-def get_resource_info(ctera_host, path):
-    response = ls.ls(ctera_host, path, depth=0)
+class FetchResourcesParam(Object):
+
+    def __init__(self):
+        self._classname = 'FetchResourcesParam'
+        self.start = 0
+        self.limit = 100
+
+    def increment(self):
+        self.start = self.start + self.limit
+
+
+class FetchResourcesParamBuilder:
+
+    def __init__(self):
+        self.param = FetchResourcesParam()
+
+    def root(self, root):
+        self.param.root = root  # pylint: disable=attribute-defined-outside-init
+        return self
+
+    def depth(self, depth):
+        self.param.depth = depth  # pylint: disable=attribute-defined-outside-init
+        return self
+
+    def include_deleted(self):
+        self.param.includeDeleted = True  # pylint: disable=attribute-defined-outside-init
+
+    def build(self):
+        return self.param
+    
+
+class Path:
+
+    def __init__(self, param, base):
+        self._base = PurePosixPath(base)
+        self._relative = PurePosixPath()
+        if self._is_server_object(param):
+            self._from_server_object(param)
+        elif isinstance(param, str):
+            self._from_string(param)
+        else:
+            message = 'Invalid directory path specified. Please ensure the directory path is correct and try again.'
+            logging.getLogger().error(message)
+            raise ValueError(message)
+        
+        if self._relative.root == '/' or self._base.joinpath(self._relative) == self._relative:
+            raise ValueError('You must specify a relative path. Omit leading / characters')
+
+    def _is_server_object(self, param):
+        return isinstance(param, Object) and param.__dict__.get('_classname', None) == 'ResourceInfo'
+
+    def _from_server_object(self, param):
+        href = uri.unquote(param.href)
+        match = re.search('^/(ServicesPortal|admin)/webdav', href)
+        start, end = match.span()
+        self._base = self._base.joinpath(href[start: end])
+        self._relative = self._relative.joinpath(href[end + 1:])
+    
+    def _from_string(self, param):
+        self._relative = self._relative.joinpath(param)
+
+    def name(self):
+        return self._relative.name
+    
+    @property
+    def base(self):
+        return str(self._base)
+
+    @property
+    def relative(self):
+        return self._relative
+
+    def parent(self):
+        return Path(str(self._relative.parent), str(self._base))
+
+    def fullpath(self):
+        return str(self._base.joinpath(self._relative))
+
+    def encoded_fullpath(self):
+        return uri.quote(self.fullpath())
+
+    def encoded_parent(self):
+        return uri.quote(str(self.parent()))
+
+    def joinpath(self, path):
+        return Path(str(self._relative.joinpath(path)), str(self._base))
+
+    def parts(self):
+        return self._relative.parts
+
+    def __str__(self):
+        return self.fullpath()
+
+
+def get_objects(core, param):
+    response = execute_fetch_resources(core, param)
+    return (response.hasMore, response.items)
+
+
+def execute_fetch_resources(core, param):
+    return core.api.execute('', 'fetchResources', param)
+
+
+def objects_iterator(core, param):
+    func = Command(get_objects, core)
+    return Iterator(func, param)
+
+
+def get_resource_info(core, path):
+    response = core.files.listdir(str(path.relative), depth=0)
     if response.root is None:
         raise RemoteDirectoryNotFound(path.fullpath())
     return response.root
+
+
+def get_object_path(base, elements):
+    if isinstance(elements, list):
+        return [Path(element, base) for element in elements]
+    return Path(elements, base)
+
+
+def get_create_dir_param(name, parent):
+    param = Object()
+    param.name = name
+    param.parentPath = parent
+    return param
+
+
+def raise_for_status(response, path):
+    error = {
+        "FileWithTheSameNameExist": ItemExists(),
+        "DestinationNotExists": InvalidPath(),
+        "InvalidName": InvalidName(),
+        "ReservedName": ReservedName()
+    }.get(response, None)
+    try:
+        if error:
+            raise error
+    except ItemExists as error:
+        logging.getLogger().warning('A file or folder with the same name already exists. %s', {'path': path})
+        raise error
+    except InvalidPath as error:
+        logging.getLogger().error('Invalid parent directory path. %s', {'path': path})
+        raise error
+    except InvalidName as error:
+        logging.getLogger().error('Directory name contains invalid characters. %s', {'name': path})
+        raise error
+    except ReservedName as error:
+        logging.getLogger().error('Reserved directory name. %s', {'name': path})
+        raise error
+    
+    
+    

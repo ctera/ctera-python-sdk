@@ -1,7 +1,7 @@
 import logging
 
 from ..common import Object
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
@@ -15,7 +15,7 @@ class Telnet(BaseCommand):
 
         logging.getLogger().info("Enabling telnet access.")
 
-        response = self._gateway.execute("/config/device", "startTelnetd", param)
+        response = self._edge.api.execute("/config/device", "startTelnetd", param)
         if response == 'telnetd already running':
             logging.getLogger().info("Telnet access already enabled.")
         elif response != "OK":
@@ -27,5 +27,5 @@ class Telnet(BaseCommand):
     def disable(self):
         """ Disable Telnet """
         logging.getLogger().info("Disabling telnet access.")
-        self._gateway.execute("/config/device", "stopTelnetd")
+        self._edge.api.execute("/config/device", "stopTelnetd")
         logging.getLogger().info("Telnet access disabled.")

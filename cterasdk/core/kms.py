@@ -14,19 +14,19 @@ class KMS(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.servers = KMSServers(self._portal)
+        self.servers = KMSServers(self._core)
 
     def settings(self):
         """
         Get Key Management Service Settings
         """
-        return self._portal.get('/settings/keyManagerSettings')
+        return self._core.api.get('/settings/keyManagerSettings')
 
     def status(self):
         """
         Get Key Management Service Status
         """
-        return self._portal.execute('', 'getKeyManagerGlobalStatus')
+        return self._core.api.execute('', 'getKeyManagerGlobalStatus')
 
     def enable(self, private_key, client_certificate, server_certificate, expiration=None, timeout=None, port=None):
         """
@@ -39,13 +39,13 @@ class KMS(BaseCommand):
         :param int,optional timeout: Connection timeout in seconds, defaults to ``2``
         :param int,optional port: Key server port, defaults to ``5696``
         """
-        param = self._portal.default_class('KeyManagerSettings')
+        param = self._core.api.defaults('KeyManagerSettings')
         param.expiration = expiration if expiration else 365
         param.integration.connectionSettings.timeout = timeout if timeout else 2
         param.integration.connectionSettings.port = port if port else 5696
         param.integration.tlsDetails = self._TLS_details(private_key, client_certificate, server_certificate)
         logging.getLogger().info('Enabling Key Management Service')
-        response = self._portal.put('/settings/keyManagerSettings', param)
+        response = self._core.api.put('/settings/keyManagerSettings', param)
         logging.getLogger().info('Key Management Service enabled')
         return response
 
@@ -65,7 +65,7 @@ class KMS(BaseCommand):
         Disable Key Management Service
         """
         logging.getLogger().info('Disabling Key Management Service')
-        response = self._portal.execute('', 'removeKeyManagementService')
+        response = self._core.api.execute('', 'removeKeyManagementService')
         logging.getLogger().info('Key Management Service disabled')
         return response
 
@@ -96,7 +96,7 @@ class KMS(BaseCommand):
             settings.integration.connectionSettings.port = port
 
         logging.getLogger().info('Updating Key Management Service settings')
-        response = self._portal.put('/settings/keyManagerSettings', settings)
+        response = self._core.api.put('/settings/keyManagerSettings', settings)
         logging.getLogger().info('Updated Key Management Service settings')
         return response
 
@@ -110,14 +110,14 @@ class KMSServers(BaseCommand):
 
         :param str name: Key-server name
         """
-        return self._portal.get(f'/keyManagerServers/{name}')
+        return self._core.api.get(f'/keyManagerServers/{name}')
 
     def all(self):
         """
         List Key Management Servers
         """
         param = query.QueryParamBuilder().startFrom(0).countLimit(25).orFilter(True).build()
-        return query.iterator(self._portal, '/keyManagerServers', param)
+        return query.iterator(self._core, '/keyManagerServers', param)
 
     def add(self, name, ipaddr):
         """
@@ -131,7 +131,7 @@ class KMSServers(BaseCommand):
         param.name = name
         param.host = ipaddr
         logging.getLogger().info('Adding Key Server. %s', {'name': name, 'host': ipaddr})
-        response = self._portal.add('/keyManagerServers', param)
+        response = self._core.api.add('/keyManagerServers', param)
         logging.getLogger().info('Key Server. %s Added', {'name': name, 'host': ipaddr})
         return response
 
@@ -145,7 +145,7 @@ class KMSServers(BaseCommand):
         key_server = self.get(current_name)
         key_server.name = new_name
         logging.getLogger().info("Modifying Key Server. %s", {'name': current_name})
-        response = self._portal.put(f'/keyManagerServers/{current_name}', key_server)
+        response = self._core.api.put(f'/keyManagerServers/{current_name}', key_server)
         logging.getLogger().info("Key Server modified. %s", {'name': current_name})
         return response
 
@@ -156,6 +156,6 @@ class KMSServers(BaseCommand):
         :param str name: Key-server name
         """
         logging.getLogger().info('Deleting Key Server. %s', {'name': name})
-        response = self._portal.delete(f'/keyManagerServers/{name}')
+        response = self._core.api.delete(f'/keyManagerServers/{name}')
         logging.getLogger().info('Key Server deleted. %s', {'name': name})
         return response

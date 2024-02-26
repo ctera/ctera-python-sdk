@@ -8,7 +8,7 @@ def query(CTERAHost, path, key, value):
     param = Object()
     param.key = key
     param.value = value
-    return CTERAHost.db(path, 'query', param)
+    return CTERAHost.api.db(path, 'query', param)
 
 
 def show(CTERAHost, path, key, value):
@@ -17,7 +17,7 @@ def show(CTERAHost, path, key, value):
 
 def query_page(CTERAHost, path, name, param):
     """Query a page"""
-    response = CTERAHost.execute(path, name, param)
+    response = CTERAHost.api.execute(path, name, param)
     return response.hasMore, response.objects
 
 

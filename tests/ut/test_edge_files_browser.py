@@ -1,8 +1,9 @@
 from unittest import mock
 
-from cterasdk import config
 from cterasdk.edge.files.browser import FileBrowser
 from tests.ut import base_edge
+
+import cterasdk.settings
 
 
 class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
@@ -15,7 +16,7 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
         self._fullpath = '/' + self._path
         self._target = 'target/folder'
         self._target_fullpath = f'/{self._target}/{self._filename}'
-        self._default_download_dir = config.filesystem['dl']
+        self._default_download_dir = cterasdk.settings.downloads.location
 
     def test_download_default_dir_success(self):
         openfile_response = 'Stream'

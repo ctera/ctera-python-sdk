@@ -1,7 +1,7 @@
 import logging
 
 from ..lib.task_manager_base import TaskError
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
@@ -18,11 +18,11 @@ class Shell(BaseCommand):
         """
         logging.getLogger().info("Executing shell command. %s", {'shell_command': shell_command})
 
-        task = self._gateway.execute("/config/device", "bgshell", shell_command)
+        task = self._edge.api.execute("/config/device", "bgshell", shell_command)
         if not wait:
             return task
         try:
-            task = self._gateway.tasks.wait(task)
+            task = self._edge.tasks.wait(task)
             logging.getLogger().info("Shell command executed. %s", {'shell_command': shell_command})
             return task.result.result
         except TaskError as error:

@@ -71,7 +71,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
         self._init_filer()
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
         self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.InternalServerError))
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             backup.Backup(self._filer).configure()
         self.assertEqual('Failed to attach to backup folder', error.exception.message)
 
@@ -79,7 +79,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
         self._init_filer()
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
         self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.PermissionDenied))
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             backup.Backup(self._filer).configure()
         self.assertEqual('Failed to attach to backup folder', error.exception.message)
 
@@ -87,7 +87,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
         self._init_filer()
         self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
         self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response('Unknown attach rc'))
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             backup.Backup(self._filer).configure()
         self.assertEqual('Failed to attach to backup folder', error.exception.message)
 

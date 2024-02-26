@@ -107,7 +107,7 @@ class TestCoreUsers(base_core.BaseCoreTest):
     def test_get_user_not_found(self):
         get_multi_response = self._get_user_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._global_admin).get(self._local_user_account)
         self._global_admin.get_multi.assert_called_once_with('/users/' + self._local_user_account.name, mock.ANY)
         expected_include = ['/' + attr for attr in users.Users.default]
@@ -275,7 +275,7 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
     def test_get_user_not_found(self):
         get_multi_response = self._get_admin_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             admins.Administrators(self._global_admin).get(self._local_user_account.name)
         self._global_admin.get_multi.assert_called_once_with(
             '/administrators/' + self._local_user_account.name, mock.ANY)

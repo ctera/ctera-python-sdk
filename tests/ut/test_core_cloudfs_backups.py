@@ -43,9 +43,9 @@ class TestCoreBackups(base_core.BaseCoreTest):   # pylint: disable=too-many-publ
 
     def test_add_backup_folder_failure(self):
         error_message = "Expected Failure"
-        expected_exception = exception.CTERAException(message=error_message)
+        expected_exception = exceptions.CTERAException(message=error_message)
         self._global_admin.add = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.Backups(self._global_admin).add(self._name, self._group, self._owner)
         self._mock_get_user_ref.assert_called_once_with(self._owner, ['baseObjectRef'])
         self._mock_get_group_ref.assert_called_once_with(self._group, ['baseObjectRef'])

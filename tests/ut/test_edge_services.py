@@ -98,7 +98,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
 
     def test_connect_tcp_connect_error(self):
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, False))
-        with self.assertRaises(exception.CTERAConnectionError) as error:
+        with self.assertRaises(exceptions.CTERAConnectionError) as error:
             services.Services(self._filer).connect(self._server, self._user, self._password)
         self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
         self.assertEqual('Unable to establish connection', error.exception.message)
@@ -107,7 +107,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         self._init_filer(execute_response=TestEdgeServices._check_web_sso_require_sso())
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             services.Services(self._filer).connect(self._server, self._user, self._password)
 
         self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
@@ -123,7 +123,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         self._filer.tasks.wait = mock.MagicMock(side_effect=TestEdgeServices._get_task_error())
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             services.Services(self._filer).connect(self._server, self._user, self._password)
 
         self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)

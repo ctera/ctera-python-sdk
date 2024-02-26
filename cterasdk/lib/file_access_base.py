@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from ..common import utf8_decode
 from ..convert import toxmlstr
 from .filesystem import FileSystem
 
@@ -28,11 +29,11 @@ class FileAccessBase(ABC):
     def upload(self, local_file, dest_path):
         local_file_info = self._filesystem.get_local_file_info(local_file)
         with open(local_file, 'rb') as fd:
-            return self._ctera_host.upload(
-                self._get_upload_url(dest_path),
-                self._get_upload_form(local_file_info, fd, dest_path),
-                use_file_url=True
-            )
+            return self._upload_object(local_file_info, fd, dest_path)
+
+    @abstractmethod
+    def _upload_object(self, local_file_info, fd, dest_path):
+        raise NotImplementedError("Subclass must implement _upload_object")
 
     @abstractmethod
     def _get_upload_url(self, dest_path):
@@ -43,18 +44,14 @@ class FileAccessBase(ABC):
         raise NotImplementedError("Subclass must implement _get_upload_form")
 
     def _openfile(self, path):
-        return self._ctera_host.openfile(self._get_single_file_url(path), use_file_url=True)
+        return self._ctera_host.webdav.download(self._get_single_file_url(path))
 
     @abstractmethod
     def _get_single_file_url(self, path):
         raise NotImplementedError("Subclass must implement _get_single_file_url")
 
     def _get_zip_file_handle(self, cloud_directory, files):
-        return self._ctera_host.download_zip(
-            self._get_multi_file_url(cloud_directory, files),
-            self._make_form_data(cloud_directory, files),
-            use_file_url=self._use_file_url_for_multi_file_url
-        )
+        raise NotImplementedError("Subclass must implement _get_zip_file_handle")
 
     @abstractmethod
     def _get_multi_file_url(self, cloud_directory, files):
@@ -66,7 +63,7 @@ class FileAccessBase(ABC):
 
     def _make_form_data(self, cloud_directory, files):
         return dict(
-            inputXML=toxmlstr(self._get_multi_file_object(cloud_directory, files))
+            inputXML=utf8_decode(toxmlstr(self._get_multi_file_object(cloud_directory, files)))
         )
 
     @abstractmethod

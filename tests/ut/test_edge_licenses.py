@@ -33,7 +33,7 @@ class TestEdgeLicenses(base_edge.BaseEdgeTest):
         self._filer.put.assert_has_calls(calls)
 
     def test_apply_license_raise_input_error(self):
-        with self.assertRaises(exception.InputError) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             licenses.Licenses(self._filer).apply('Expected Failure')
         self.assertEqual('Invalid license type', error.exception.message)
 

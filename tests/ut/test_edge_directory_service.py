@@ -87,9 +87,9 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         get_response = self._get_workgroup_param()
         self._init_filer(get_response=get_response)
 
-        expected_exception = exception.CTERAException()
+        expected_exception = exceptions.CTERAException()
         self._filer.execute = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException):
+        with self.assertRaises(exceptions.CTERAException):
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password)
 
     def test_connect_join_failure(self):
@@ -98,7 +98,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
         self._filer.execute = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
 
-        with self.assertRaises(exception.CTERAException):
+        with self.assertRaises(exceptions.CTERAException):
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, check_connection=True)
 
         self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
@@ -122,7 +122,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self._init_filer(get_response=None)
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, False))
 
-        with self.assertRaises(exception.CTERAConnectionError) as error:
+        with self.assertRaises(exceptions.CTERAConnectionError) as error:
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, check_connection=True)
 
         self._filer.get.assert_called_once_with('/config/fileservices/cifs/passwordServer')
@@ -154,7 +154,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
 
     def test_set_advanced_mapping_raise(self):
         self._init_filer(get_response=1)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             directoryservice.DirectoryService(self._filer).set_advanced_mapping([])
         self.assertEqual('Failed to configure advanced mapping. Not connected to directory services.', error.exception.message)
 

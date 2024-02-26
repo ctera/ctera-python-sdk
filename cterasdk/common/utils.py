@@ -1,6 +1,8 @@
-import ipaddress
 import re
+import socket
 import logging
+import ipaddress
+
 from datetime import datetime
 from packaging.version import parse as parse_version
 
@@ -155,7 +157,6 @@ def parse_to_ipaddress(address):
     :param str address: ip (10.0.0.5) or network address (192.168.44.0/28)
     :return: ipaddress.IPV4Address/IPV6Address or ipaddress.IPV4Network/IPV6Network
     """
-
     try:
         try:
             ip_addrr = ipaddress.ip_address(address)
@@ -208,3 +209,20 @@ def utf8_decode(message):
     Decode UTF-8 String
     """
     return message.decode('utf-8')
+
+
+def tcp_connect(host, port):
+    logging.getLogger().debug('Testing connection. %s', {'host': host, 'port': port})
+    message = f"Connection error to remote host {host} on port {port}."
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    rc = None
+    try:
+        rc = sock.connect_ex((host, port))
+    except socket.gaierror:
+        logging.getLogger().debug(message)
+        raise ConnectionError(message)
+
+    if rc != 0:
+        logging.getLogger().debug(message)
+        raise ConnectionError(message)
+    logging.getLogger().debug(f"Connection established to remote host {host} on port {port}")

@@ -10,16 +10,16 @@ File Browser
 List
 ====
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.ls
+.. automethod:: cterasdk.core.files.browser.FileBrowser.listdir
    :noindex:
 
 .. code:: python
 
-   file_browser.ls('')  # List the contents of the Cloud Drive
+   file_browser.listdir('')  # List the contents of the Cloud Drive
 
-   file_browser.ls('My Files')  # List the contents of the 'My Files' folder
+   file_browser.listdir('My Files')  # List the contents of the 'My Files' folder
 
-   file_browser.ls('My Files', True)  # Include deleted files
+   file_browser.listdir('My Files', include_deleted=True)  # Include deleted files
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.walk
    :noindex:
@@ -38,6 +38,13 @@ Download
 
    file_browser.download('My Files/Documents/Sample.docx')
 
+.. automethod:: cterasdk.core.files.browser.FileBrowser.download_as_zip
+   :noindex:
+
+.. code:: python
+
+   file_browser.download('My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
+
 Copy
 ====
 
@@ -46,19 +53,13 @@ Copy
 
 .. code:: python
 
-   file_browser.copy('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
+   file_browser.copy(*['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.xlsx'], destination='The/quick/brown/fox')
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.copy_multi
-   :noindex:
-
-.. code:: python
-
-   file_browser.copy_multi(['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.xlsx'], 'The/quick/brown/fox')
 
 Create Public Link
 ==================
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.mklink
+.. automethod:: cterasdk.core.files.browser.FileBrowser.public_link
    :noindex:
 
 .. code:: python
@@ -72,11 +73,11 @@ Create Public Link
 
    """Create a Read Only public link to a file that expires in 30 days"""
 
-   file_browser.mklink('My Files/Documents/Sample.docx')
+   file_browser.public_link('My Files/Documents/Sample.docx')
 
    """Create a Read Write public link to a folder that expires in 45 days"""
 
-   file_browser.mklink('My Files/Documents/Sample.docx', 'RW', 45)
+   file_browser.public_link('My Files/Documents/Sample.docx', 'RW', 45)
 
 .. warning:: you cannot use this tool to create read write public links to files.
 
@@ -107,9 +108,9 @@ Create Directory
 
 .. code:: python
 
-   file_browser.mkdir('My Files/Documents')
+   file_browser.mkdir('My Files/Documents')  # Create 'Documents'
 
-   file_browser.mkdir('The/quick/brown/fox', recurse = True)
+   file_browser.makedirs('The/quick/brown/fox')  # Create directories recursively
 
 Rename
 ======
@@ -128,14 +129,7 @@ Delete
 
 .. code:: python
 
-   file_browser.delete('My Files/Documents/Sample.docx')
-
-.. automethod:: cterasdk.core.files.browser.CloudDrive.delete_multi
-   :noindex:
-
-.. code:: python
-
-   file_browser.delete_multi('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
+   file_browser.delete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
 
 Undelete
 ========
@@ -145,14 +139,7 @@ Undelete
 
 .. code:: python
 
-   file_browser.undelete('My Files/Documents/Sample.docx')
-
-.. automethod:: cterasdk.core.files.browser.CloudDrive.undelete_multi
-   :noindex:
-
-.. code:: python
-
-   file_browser.undelete_multi('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
+   file_browser.undelete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
 
 Move
 ====
@@ -162,14 +149,8 @@ Move
 
 .. code:: python
 
-   file_browser.move('My Files/Documents/Sample.docx', 'The/quick/brown/fox')
+   file_browser.move(*['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.docx'], destination='The/quick/brown/fox')
 
-.. automethod:: cterasdk.core.files.browser.CloudDrive.move_multi
-   :noindex:
-
-.. code:: python
-
-   file_browser.move_multi(['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.xlsx'], 'The/quick/brown/fox')
 
 Upload
 ======
@@ -221,14 +202,14 @@ Collaboration Shares
    Share with an external recipient
    - Grant the external user with preview only access for 10 days
    """
-   jsmith = portal_types.ShareRecipient.external('jsmith@hotmail.com').expire_in(10).preview_only())
+   jsmith = portal_types.ShareRecipient.external('jsmith@hotmail.com').expire_in(10).preview_only()
    file_browser.share('My Files/Projects/2020/ProjectX', [jsmith])
 
    """
    Share with an external recipient, and require 2 factor authentication
    - Grant the external user with read only access for 5 days, and require 2 factor authentication over e-mail
    """
-   jsmith = portal_types.ShareRecipient.external('jsmith@hotmail.com', True).expire_in(5).read_only())
+   jsmith = portal_types.ShareRecipient.external('jsmith@hotmail.com', True).expire_in(5).read_only()
    file_browser.share('My Files/Projects/2020/ProjectX', [jsmith])
 
 ..

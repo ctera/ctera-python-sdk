@@ -20,12 +20,12 @@ class Session(SessionBase):
         self.local_auth = False
 
     def _do_start_local_session(self, CTERA_Host):
-        tenant = CTERA_Host.get('/currentPortal') or Session.Administration
-        self.set_version(CTERA_Host.get('/version'))
+        tenant = CTERA_Host.api.get('/currentPortal') or Session.Administration
+        self.set_version(CTERA_Host.api.get('/version'))
         if self.local_auth:
             self.user = PortalUser('$admin', tenant=tenant, role=Role.ReadWriteAdmin)
         else:
-            current_session = CTERA_Host.get('/currentSession')
+            current_session = CTERA_Host.api.get('/currentSession')
             self.user = PortalUser(current_session.username, tenant=tenant, role=current_session.role)
 
     def _do_terminate(self):

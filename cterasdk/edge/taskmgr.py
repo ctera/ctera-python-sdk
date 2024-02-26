@@ -2,7 +2,7 @@ import re
 import logging
 
 from ..lib.task_manager_base import TaskBase
-from ..exception import InputError
+from ..exceptions import InputError
 from .base_command import BaseCommand
 
 
@@ -23,7 +23,7 @@ class Task(TaskBase):
         raise InputError('Invalid task id', ref, [64, '64', '/proc/bgtasks/64'])
 
     def get_task_status(self):
-        return self.CTERAHost.get(self.path)
+        return self.CTERAHost.api.get(self.path)
 
 
 class Tasks(BaseCommand):
@@ -35,14 +35,14 @@ class Tasks(BaseCommand):
 
         :param str ref: Task reference
         """
-        task = Task(self._gateway, ref)
+        task = Task(self._edge, ref)
         return task.status()
 
     def running(self):
         """
         Get all running background tasks
         """
-        return self._gateway.query('/proc/bgtasks', 'status', 'running')
+        return self._edge.query('/proc/bgtasks', 'status', 'running')
 
     def by_name(self, name):
         """
@@ -50,7 +50,7 @@ class Tasks(BaseCommand):
 
         :param str name: Task name
         """
-        return self._gateway.query('/proc/bgtasks', 'name', name)
+        return self._edge.query('/proc/bgtasks', 'name', name)
 
     def wait(self, ref, retries=100, seconds=1):
         """
@@ -60,5 +60,5 @@ class Tasks(BaseCommand):
         :param int,optional retries: Number of retries when sampling the task status, defaults to 100
         :param int,optional seconds: Number of seconds to wait between retries, defaults to 1
         """
-        task = Task(self._gateway, ref, retries, seconds)
+        task = Task(self._edge, ref, retries, seconds)
         return task.wait()

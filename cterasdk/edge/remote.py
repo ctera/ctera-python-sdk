@@ -2,7 +2,7 @@ import re
 import logging
 
 from ..common import parse_base_object_ref
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 
 
 def remote_access(device, Portal):
@@ -23,7 +23,7 @@ def create_device_object(device):
 
 def authn_token(Portal, device_tenant, device_name):
     logging.getLogger().debug("Retrieving SSO Ticket. %s", {'tenant': device_tenant, 'device': device_name})
-    token = Portal.execute(f"/portals/{device_tenant}/devices/{device_name}", 'singleSignOn')
+    token = Portal.api.execute(f"/portals/{device_tenant}/devices/{device_name}", 'singleSignOn')
     if not token:
         logging.getLogger().error('Failed to Retrieve SSO Ticket. %s', {'tenant': device_tenant, 'device': device_name})
         raise CTERAException('Failed to Retrieve SSO Ticket.')

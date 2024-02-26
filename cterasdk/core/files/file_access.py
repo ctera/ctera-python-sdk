@@ -1,20 +1,17 @@
-from urllib.parse import urljoin
 
-from .path import CTERAPath
 from . import common
 from ...common import Object
 from ...lib import FileAccessBase
-from ...exception import RemoteFileSystemException
+from ...exceptions import RemoteFileSystemException
 
 
 class FileAccess(FileAccessBase):
 
     def _get_single_file_url(self, path):
-        return path.fullpath()
+        return path.relative
 
     def _get_multi_file_url(self, cloud_directory, files):
-        folder_uid = self._get_cloud_folder_uid(cloud_directory)
-        return f'{self._ctera_host.context}/folders/folders/{folder_uid}'
+        return str(self._get_cloud_folder_uid(cloud_directory))
 
     @property
     def _use_file_url_for_multi_file_url(self):
@@ -30,19 +27,15 @@ class FileAccess(FileAccessBase):
         return files_obj
 
     def _get_upload_url(self, dest_path):
-        folder_uid = self._get_cloud_folder_uid(dest_path)
-        return f'{self._ctera_host.context}/upload/folders/{folder_uid}'
+        return str(self._get_cloud_folder_uid(dest_path))
 
     def _get_upload_form(self, local_file_info, fd, dest_path):
         return dict(
             name=local_file_info['name'],
             Filename=local_file_info['name'],
-            fullpath=urljoin(
-                self._ctera_host.base_file_url,
-                CTERAPath(local_file_info['name'], dest_path.fullpath()).encoded_fullpath()
-            ),
+            fullpath=self._ctera_host.webdav._builder(common.get_object_path(dest_path.relative, local_file_info['name']).encoded_fullpath()),
             fileSize=local_file_info['size'],
-            file=(local_file_info['name'], fd, local_file_info['mimetype'][0])
+            file=fd
         )
 
     def _get_cloud_folder_uid(self, path):
@@ -50,3 +43,15 @@ class FileAccess(FileAccessBase):
         if not resource_info.isFolder:
             raise RemoteFileSystemException('The destination path is not a directory', None, path=path.fullpath())
         return resource_info.cloudFolderInfo.uid
+    
+    def _get_zip_file_handle(self, cloud_directory, files):
+        return self._ctera_host._folders.download_zip(
+            self._get_multi_file_url(cloud_directory, files),
+            self._make_form_data(cloud_directory, files)
+        )
+    
+    def _upload_object(self, local_file_info, fd, dest_path):
+        return self._ctera_host._upload.upload(
+                self._get_upload_url(dest_path),
+                self._get_upload_form(local_file_info, fd, dest_path)
+            )

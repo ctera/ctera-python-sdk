@@ -1,12 +1,10 @@
 import logging
 
-from ..exception import ObjectNotFoundException
+from ..exceptions import ObjectNotFoundException
 from .base_command import BaseCommand
 from ..lib import Iterator, Command
-from ..common import Object
-from ..common import union
-from . import enum
-from . import query
+from ..common import Object, union
+from . import enum, query, decorator
 
 
 class Portals(BaseCommand):
@@ -25,7 +23,7 @@ class Portals(BaseCommand):
         """
         include = union(include or [], Portals.default)
         include = ['/' + attr for attr in include]
-        tenant = self._portal.get_multi('/portals/' + name, include)
+        tenant = self._core.api.get_multi('/portals/' + name, include)
         if tenant.name is None:
             raise ObjectNotFoundException('Could not find tenant', f'/portals/{name}', name=name)
         return tenant
@@ -46,10 +44,10 @@ class Portals(BaseCommand):
             baseurl = '/teamPortals'
         elif portal_type == enum.PortalType.Reseller:
             baseurl = '/resellerPortals'
-        return query.iterator(self._portal, baseurl, param)
+        return query.iterator(self._core, baseurl, param)
 
     def _query_portals(self, param):
-        response = self._portal.execute('', 'getPortalsDisplayInfo', param)
+        response = self._core.api.execute('', 'getPortalsDisplayInfo', param)
         return (response.hasMore, response.objects)
 
     def tenants(self, include_deleted=False):
@@ -78,7 +76,7 @@ class Portals(BaseCommand):
 
         param = Object()
         if plan:
-            param.plan = self._portal.plans.get(plan, include=['baseObjectRef']).baseObjectRef
+            param.plan = self._core.plans.get(plan, include=['baseObjectRef']).baseObjectRef
         param._classname = 'TeamPortal'  # pylint: disable=protected-access
         param.name = name
         param.displayName = display_name
@@ -88,7 +86,7 @@ class Portals(BaseCommand):
 
         logging.getLogger().info('Creating Team Portal. %s', {'name': name})
 
-        response = self._portal.add('/teamPortals', param)
+        response = self._core.api.add('/teamPortals', param)
 
         logging.getLogger().info('Team Portal created. %s', {'name': name})
 
@@ -101,7 +99,7 @@ class Portals(BaseCommand):
         :param str name: Name of the tenant
         :param str,plan: Name of the subscription plan
         """
-        return self._portal.execute('/portals/' + tenant, 'subscribe', plan)
+        return self._core.api.execute('/portals/' + tenant, 'subscribe', plan)
 
     def delete(self, name):
         """
@@ -111,7 +109,7 @@ class Portals(BaseCommand):
         """
         logging.getLogger().info('Deleting Portal. %s', {'name': name})
 
-        response = self._portal.execute('/teamPortals/' + name, 'delete')
+        response = self._core.api.execute('/teamPortals/' + name, 'delete')
 
         logging.getLogger().info('Portal deleted. %s', {'name': name})
 
@@ -125,19 +123,20 @@ class Portals(BaseCommand):
         """
         logging.getLogger().info('Recovering Portal. %s', {'name': name})
 
-        response = self._portal.execute('/teamPortals/' + name, 'moveFromTrashcan')
+        response = self._core.api.execute('/teamPortals/' + name, 'moveFromTrashcan')
 
         logging.getLogger().info('Portal recovered. %s', {'name': name})
 
         return response
 
+    @decorator.update_current_tenant
     def browse(self, tenant):
         """
         Browse a tenant
 
         :param str tenant: Name of the tenant to browse
         """
-        self._portal.put('/currentPortal', tenant)
+        self._core.api.put('/currentPortal', tenant)
 
     def browse_global_admin(self):
         """
@@ -155,7 +154,7 @@ class Portals(BaseCommand):
         param.objectId = None
         param.type = 'portals'
         logging.getLogger().info('Applying provisioning changes.')
-        task = self._portal.execute('', 'updatePortals', param)
+        task = self._core.api.execute('', 'updatePortals', param)
         if wait:
-            task = self._portal.tasks.wait(task)
+            task = self._core.tasks.wait(task)
         return task

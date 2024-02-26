@@ -12,7 +12,7 @@ class Settings(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.global_settings = GlobalSettings(self._portal)
+        self.global_settings = GlobalSettings(self._core)
 
 
 class GlobalSettings(BaseCommand):
@@ -21,7 +21,7 @@ class GlobalSettings(BaseCommand):
         """
         Get timezone
         """
-        return self._portal.get('/settings/timezone')
+        return self._core.api.get('/settings/timezone')
 
     def set_timezone(self, timezone):
         """
@@ -30,6 +30,6 @@ class GlobalSettings(BaseCommand):
         :param str timezone: Timezone
         """
         logging.getLogger().info('Updating timezone. %s', {'timezone': timezone})
-        response = self._portal.put('/settings/timezone', timezone)
+        response = self._core.api.put('/settings/timezone', timezone)
         logging.getLogger().info('Updated timezone. %s', {'timezone': timezone})
         return response

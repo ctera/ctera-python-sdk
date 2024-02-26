@@ -8,9 +8,10 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, PublicFormat, NoEncryption, load_pem_private_key
 
-from .. import config
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .filesystem import FileSystem
+
+import cterasdk.settings
 
 
 class RSAKeyPair:
@@ -52,7 +53,7 @@ class CryptoServices:
     def generate_and_save_key_pair(key_filename, exponent=65537, key_size=2048, dirpath=None):
         key_pair = CryptoServices.generate_rsa_key_pair(exponent, key_size)
         if not dirpath:
-            dirpath = config.filesystem['dl']
+            dirpath = cterasdk.settings.downloads.location
         key_pair.save(dirpath, key_filename)
         return key_pair.public_key.decode('utf-8')
 

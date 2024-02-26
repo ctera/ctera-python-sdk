@@ -17,7 +17,7 @@ class Antivirus(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.servers = AntivirusServers(self._portal)
+        self.servers = AntivirusServers(self._core)
 
     def list_servers(self, include=None):
         """
@@ -27,14 +27,14 @@ class Antivirus(BaseCommand):
         """
         include = union(include or [], Antivirus.default)
         param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._portal, '/antiviruses', param)
+        return query.iterator(self._core, '/antiviruses', param)
 
     def rescan(self):
         """
         Scan all files using the latest antivirus update. This may take a while
         """
         logging.getLogger().info("Starting antivirus rescan.")
-        self._portal.execute('/servers', 'resetAllAVBG')
+        self._core.api.execute('/servers', 'resetAllAVBG')
         logging.getLogger().info("Started antivirus rescan.")
 
     def suspend(self):
@@ -42,7 +42,7 @@ class Antivirus(BaseCommand):
         Suspend antivirus scanning
         """
         logging.getLogger().info("Suspending antivirus scanning.")
-        self._portal.put('/settings/cloudFSSettings/antivirusSettings/isEnabled', False)
+        self._core.api.put('/settings/cloudFSSettings/antivirusSettings/isEnabled', False)
         logging.getLogger().info("Suspended antivirus scanning.")
 
     def unsuspend(self):
@@ -50,7 +50,7 @@ class Antivirus(BaseCommand):
         Unsuspend antivirus scanning
         """
         logging.getLogger().info("Unsuspending antivirus scanning.")
-        self._portal.put('/settings/cloudFSSettings/antivirusSettings/isEnabled', True)
+        self._core.api.put('/settings/cloudFSSettings/antivirusSettings/isEnabled', True)
         logging.getLogger().info("Unsuspended antivirus scanning.")
 
     def status(self):
@@ -59,7 +59,7 @@ class Antivirus(BaseCommand):
         """
         param = Object()
         param.icapService = ICAPServices.Antivirus
-        return self._portal.execute('', 'getIcapGlobalStatus', param)
+        return self._core.api.execute('', 'getIcapGlobalStatus', param)
 
 
 class AntivirusServers(BaseCommand):
@@ -70,7 +70,7 @@ class AntivirusServers(BaseCommand):
 
         :param str name: Server name
         """
-        return self._portal.get(f'/antiviruses/{name}')
+        return self._core.api.get(f'/antiviruses/{name}')
 
     def add(self, name, vendor, url, connection_timeout=5):
         """
@@ -88,7 +88,7 @@ class AntivirusServers(BaseCommand):
         param.serverUrl = url
         param.connectionTimeoutSeconds = connection_timeout
         logging.getLogger().info("Adding antivirus server. %s", {'name': name, 'type': vendor, 'url': url})
-        response = self._portal.add('/antiviruses', param)
+        response = self._core.api.add('/antiviruses', param)
         logging.getLogger().info("Added antivirus server. %s", {'name': name, 'type': vendor, 'url': url})
         return response
 
@@ -96,14 +96,14 @@ class AntivirusServers(BaseCommand):
         """
         Remove an antivirus server
         """
-        return self._portal.delete(f'/antiviruses/{name}')
+        return self._core.api.delete(f'/antiviruses/{name}')
 
     def suspend(self, name):
         """
         Suspend an antivirus server
         """
         logging.getLogger().info("Suspending antivirus server. %s", {'name': name})
-        self._portal.put(f'/antiviruses/{name}/enabled', False)
+        self._core.api.put(f'/antiviruses/{name}/enabled', False)
         logging.getLogger().info("Suspended antivirus server. %s", {'name': name})
 
     def unsuspend(self, name):
@@ -111,5 +111,5 @@ class AntivirusServers(BaseCommand):
         Unsuspend antivirus scanning
         """
         logging.getLogger().info("Unsuspending antivirus server. %s", {'name': name})
-        self._portal.put(f'/antiviruses/{name}/enabled', True)
+        self._core.api.put(f'/antiviruses/{name}/enabled', True)
         logging.getLogger().info("Unsuspended antivirus server. %s", {'name': name})

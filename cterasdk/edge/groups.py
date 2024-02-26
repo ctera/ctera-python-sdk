@@ -1,6 +1,6 @@
 import logging
 
-from ..exception import InputError
+from ..exceptions import InputError
 from .base_command import BaseCommand
 from .types import UserGroupEntry
 
@@ -13,7 +13,7 @@ class Groups(BaseCommand):
 
         :param str,optional name: Name of the group
         """
-        return self._gateway.get('/config/auth/groups' + ('' if name is None else ('/' + name)))
+        return self._edge.api.get('/config/auth/groups' + ('' if name is None else ('/' + name)))
 
     def add_members(self, group, members):
         """
@@ -28,7 +28,7 @@ class Groups(BaseCommand):
             for member in members
         }
 
-        current_members = self._gateway.get('/config/auth/groups/' + group + '/members')
+        current_members = self._edge.api.get('/config/auth/groups/' + group + '/members')
         for current_member in current_members:
             user_group_entry = UserGroupEntry.from_server_object(current_member)
             user_group_entry_key = user_group_entry.principal_type + '#' + user_group_entry.name
@@ -39,7 +39,7 @@ class Groups(BaseCommand):
 
         logging.getLogger().info('Adding group members. %s', {'group': group})
 
-        self._gateway.put('/config/auth/groups/' + group + '/members', members)
+        self._edge.api.put('/config/auth/groups/' + group + '/members', members)
 
         logging.getLogger().info('Group members added. %s', {'group': group})
 
@@ -56,7 +56,7 @@ class Groups(BaseCommand):
             for member in members
         }
 
-        current_members = self._gateway.get('/config/auth/groups/' + group + '/members')
+        current_members = self._edge.api.get('/config/auth/groups/' + group + '/members')
         members = []
         for member in current_members:
             user_group_entry = UserGroupEntry.from_server_object(member)
@@ -65,7 +65,7 @@ class Groups(BaseCommand):
 
         logging.getLogger().info('Removing group members. %s', {'group': group})
 
-        self._gateway.put('/config/auth/groups/' + group + '/members', members)
+        self._edge.api.put('/config/auth/groups/' + group + '/members', members)
 
         logging.getLogger().info('Group members removed. %s', {'group': group})
 

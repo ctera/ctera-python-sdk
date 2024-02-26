@@ -15,7 +15,7 @@ class CLI(BaseCommand):
         """
         logging.getLogger().info("Executing CLI command. %s", {'cli_command': cli_command})
 
-        response = self._gateway.execute('/config/device', 'debugCmd', cli_command)
+        response = self._edge.api.execute('/config/device', 'debugCmd', cli_command)
 
         logging.getLogger().info("CLI command executed. %s", {'cli_command': cli_command})
 

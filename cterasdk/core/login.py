@@ -15,13 +15,13 @@ class Login(BaseCommand):
         :param str username: User name to log in
         :param str password: User password
         """
-        self._portal.form_data('/login', {'j_username': username, 'j_password': password})
-        logging.getLogger().info("User logged in. %s", {'host': self._portal.host(), 'user': username})
+        self._core.api.form_data('/login', {'j_username': username, 'j_password': password})
+        logging.getLogger().info("User logged in. %s", {'host': self._core.host(), 'user': username})
 
     def logout(self):
         """
         Log out of the portal
         """
-        username = self._portal.session().user.name
-        self._portal.form_data('/logout', {})
-        logging.getLogger().info("User logged out. %s", {'host': self._portal.host(), 'user': username})
+        username = self._core.session().user.name
+        self._core.api.form_data('/logout', {})
+        logging.getLogger().info("User logged out. %s", {'host': self._core.host(), 'user': username})

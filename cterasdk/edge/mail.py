@@ -17,7 +17,7 @@ class Mail(BaseCommand):
         :param str,optional password: The password of the SMTP Server, defaults to None
         :param bool,optional use_tls: Use TLS when connecting to the SMTP Server, defaults to True
         """
-        settings = self._gateway.get('/config/logging/alert')
+        settings = self._edge.api.get('/config/logging/alert')
         settings.useCustomServer = True
         settings.SMTPServer = smtp_server
 
@@ -35,7 +35,7 @@ class Mail(BaseCommand):
 
         logging.getLogger().info('Enabling mail server.')
 
-        self._gateway.put('/config/logging/alert', settings)
+        self._edge.api.put('/config/logging/alert', settings)
 
         logging.getLogger().info(
             'Updated mail server settings. %s',
@@ -45,5 +45,5 @@ class Mail(BaseCommand):
     def disable(self):
         """ Disable e-mail delivery using a custom SMTP server """
         logging.getLogger().info('Disabling mail server.')
-        self._gateway.put('/config/logging/alert/useCustomServer', False)
+        self._edge.api.put('/config/logging/alert/useCustomServer', False)
         logging.getLogger().info('Mail server disabled.')

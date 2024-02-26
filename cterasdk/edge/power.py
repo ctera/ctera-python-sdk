@@ -1,7 +1,7 @@
 import logging
 import time
 
-from ..exception import HostUnreachable, ConnectionRetryFailure
+from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
@@ -14,14 +14,14 @@ class Power(BaseCommand):
 
         :param bool,optional wait: Wait for reboot to complete, defaults to False
         """
-        logging.getLogger().info("Rebooting device. %s", {'host': self._gateway.host()})
-        self._gateway.execute("/status/device", "reboot", None)
+        logging.getLogger().info("Rebooting device. %s", {'host': self._edge.host()})
+        self._edge.api.execute("/status/device", "reboot", None)
         if wait:
-            Boot(self._gateway).wait()
+            Boot(self._edge).wait()
 
     def shutdown(self):
         """ Shutdown the Gateway """
-        self._gateway.execute("/status/device", "poweroff", None)
+        self._edge.api.execute("/status/device", "poweroff", None)
 
     def reset(self, wait=False):
         """
@@ -29,16 +29,16 @@ class Power(BaseCommand):
 
         :param bool,optional wait: Wait for reset to complete, defaults to False
         """
-        self._gateway.execute("/status/device", "reset2default", None)
-        logging.getLogger().info("Resetting device to default settings. %s", {'host': self._gateway.host()})
+        self._edge.api.execute("/status/device", "reset2default", None)
+        logging.getLogger().info("Resetting device to default settings. %s", {'host': self._edge.host()})
         if wait:
-            Boot(self._gateway).wait()
+            Boot(self._edge).wait()
 
 
 class Boot:
 
-    def __init__(self, gateway, retries=60, seconds=5):
-        self._gateway = gateway
+    def __init__(self, edge, retries=60, seconds=5):
+        self._edge = edge
         self._retries = retries
         self._seconds = seconds
         self._attempt = 0
@@ -48,10 +48,10 @@ class Boot:
             try:
                 self._increment()
                 logging.getLogger().debug('Checking if device is up and running. %s', {'attempt': self._attempt})
-                self._gateway.test()
+                self._edge.test()
                 logging.getLogger().info("Device is back up and running.")
                 break
-            except (HostUnreachable, ConnectionRetryFailure) as e:
+            except (CTERAException, ConnectionError, TimeoutError) as e:
                 logging.getLogger().debug('Exception. %s', {'exception': e.__class__.__name__, 'message': e.message})
 
     def _increment(self):
@@ -62,9 +62,7 @@ class Boot:
         time.sleep(self._seconds)
 
     def _unreachable(self):
-        scheme = self._gateway.scheme()
-        host = self._gateway.host()
-        port = self._gateway.port()
-
-        logging.getLogger().error('Timed out. Could not reach host. %s', {'scheme': scheme, 'host': host, 'port': port})
-        raise HostUnreachable(None, host, port, scheme)
+        host = self._edge.host()
+        port = self._edge.port()
+        logging.getLogger().error('Timed out. Could not reach host. %s', {'host': host, 'port': port})
+        raise ConnectionError(f'Timed out. Could not reach host {host}:{port}.')

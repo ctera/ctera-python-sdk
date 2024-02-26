@@ -4,8 +4,9 @@ import shutil
 import os
 from pathlib import Path
 
-from .. import config
-from ..exception import RenameException, LocalDirectoryNotFound, LocalFileNotFound, LocalPathNotFound
+from ..exceptions import RenameException, LocalDirectoryNotFound, LocalFileNotFound, LocalPathNotFound
+
+import cterasdk.settings
 
 
 class FileSystem:  # pylint: disable=unused-private-member
@@ -119,7 +120,7 @@ class FileSystem:  # pylint: disable=unused-private-member
         return path.stem + '.zip'
 
     def get_dirpath(self):
-        dirpath = config.filesystem['dl']
+        dirpath = cterasdk.settings.downloads.location
         try:
             self.validate_directory(dirpath)
         except LocalDirectoryNotFound as error:

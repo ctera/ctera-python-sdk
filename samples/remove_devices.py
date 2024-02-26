@@ -1,7 +1,8 @@
 import logging
 import csv
 
-from cterasdk import config, CTERAException, GlobalAdmin
+from cterasdk import CTERAException, GlobalAdmin
+import cterasdk.settings
 
 from sample_base import CTERASDKSampleBase
 
@@ -14,7 +15,7 @@ class PortalRemoveDevicesSample(CTERASDKSampleBase):
         self._global_admin = None
 
     def run(self):
-        config.http['ssl'] = 'Trust'
+        cterasdk.settings.sessions.management.ssl = False
         self._connect_to_portal()
 
         self._global_admin.portals.browse('acme')

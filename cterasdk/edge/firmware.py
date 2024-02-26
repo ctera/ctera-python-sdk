@@ -1,5 +1,5 @@
 from ..lib import FileSystem
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
@@ -29,22 +29,22 @@ class Firmware(BaseCommand):
             raise CTERAException(message='Failed to upload the new firmware', path=file_path)
         self._wait_for_completion(upload_task_info.taskPointer)
         if reboot:
-            self._gateway.power.reboot(wait=wait_for_reboot)
+            self._edge.power.reboot(wait=wait_for_reboot)
 
     def _upload_firmware(self, file_path):
         file_info = self._filesystem.get_local_file_info(file_path)
         with open(file_path, 'rb') as fd:
-            return self._gateway.upload(
+            return self._edge.api.form_data(
                 'proc/firmware',
                 dict(
                     name='upload',
-                    firmware=(file_info['name'], fd, file_info['mimetype'][0])
+                    firmware=fd
                 )
             )
 
     def _wait_for_completion(self, task_pointer):
         while True:
-            task_status = self._gateway.get(task_pointer)
+            task_status = self._edge.api.get(task_pointer)
             is_running = task_status.status == UploadTaskStatus.IN_PROGRESS
             if not is_running:
                 if task_status.status == UploadTaskStatus.COMPLETE:

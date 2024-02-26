@@ -55,7 +55,7 @@ class TestEdgeNFS(base_edge.BaseEdgeTest):
         param = Object()
         param.mode = Mode.Disabled
         self._init_filer(get_response=param)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             nfs.NFS(self._filer).modify()
         self.assertEqual('NFS must be enabled in order to modify its configuration', error.exception.message)
 

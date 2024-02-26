@@ -1,6 +1,6 @@
 import logging
 
-from cterasdk.exception import CTERAException
+from ..exceptions import CTERAException
 from .enum import Mode, IPProtocol, Traffic
 from .types import TCPConnectResult
 from ..lib.task_manager_base import TaskError
@@ -13,15 +13,15 @@ class Network(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.proxy = Proxy(self._gateway)
-        self.mtu = MTU(self._gateway)
-        self.routes = StaticRoutes(self._gateway)
+        self.proxy = Proxy(self._edge)
+        self.mtu = MTU(self._edge)
+        self.routes = StaticRoutes(self._edge)
 
     def get_status(self):
         """
         Retrieve the network interface status
         """
-        return self._gateway.get('/status/network/ports/0')
+        return self._edge.api.get('/status/network/ports/0')
 
     def ifconfig(self):
         """
@@ -33,7 +33,7 @@ class Network(BaseCommand):
         """
         Retrieve the ip configuration
         """
-        return self._gateway.get('/config/network/ports/0')
+        return self._edge.api.get('/config/network/ports/0')
 
     def set_static_ipaddr(self, address, subnet, gateway, primary_dns_server, secondary_dns_server=None):
         """
@@ -45,7 +45,7 @@ class Network(BaseCommand):
         :param str primary_dns_server: The primary DNS server
         :param str,optinal secondary_dns_server: The secondary DNS server, defaults to None
         """
-        ip = self._gateway.get('/config/network/ports/0/ip')
+        ip = self._edge.api.get('/config/network/ports/0/ip')
         ip.DHCPMode = Mode.Disabled
         ip.address = address
         ip.netmask = subnet
@@ -58,7 +58,7 @@ class Network(BaseCommand):
 
         logging.getLogger().info('Configuring a static ip address.')
 
-        self._gateway.put('/config/network/ports/0/ip', ip)
+        self._edge.api.put('/config/network/ports/0/ip', ip)
 
         logging.getLogger().info(
             'Network settings updated. %s',
@@ -72,7 +72,7 @@ class Network(BaseCommand):
         :param str primary_dns_server: The primary DNS server
         :param str,optinal secondary_dns_server: The secondary DNS server, defaults to None
         """
-        ip = self._gateway.get('/config/network/ports/0/ip')
+        ip = self._edge.api.get('/config/network/ports/0/ip')
         ip.autoObtainDNS = False
         ip.DNSServer1 = primary_dns_server
 
@@ -81,7 +81,7 @@ class Network(BaseCommand):
 
         logging.getLogger().info('Configuring nameserver settings.')
 
-        self._gateway.put('/config/network/ports/0/ip', ip)
+        self._edge.api.put('/config/network/ports/0/ip', ip)
 
         logging.getLogger().info('Nameserver settings updated. %s', {'DNS1': primary_dns_server, 'DNS2': secondary_dns_server})
 
@@ -89,13 +89,13 @@ class Network(BaseCommand):
         """
         Enable DHCP
         """
-        ip = self._gateway.get('/config/network/ports/0/ip')
+        ip = self._edge.api.get('/config/network/ports/0/ip')
         ip.DHCPMode = Mode.Enabled
         ip.autoObtainDNS = True
 
         logging.getLogger().info('Enabling DHCP.')
 
-        self._gateway.put('/config/network/ports/0/ip', ip)
+        self._edge.api.put('/config/network/ports/0/ip', ip)
 
         logging.getLogger().info('Network settings updated. Enabled DHCP.')
 
@@ -123,9 +123,9 @@ class Network(BaseCommand):
 
         logging.getLogger().info("Testing connection. %s", {'host': service.host, 'port': service.port})
 
-        task = self._gateway.execute("/status/network", "tcpconnect", param)
+        task = self._edge.api.execute("/status/network", "tcpconnect", param)
         try:
-            task = self._gateway.tasks.wait(task)
+            task = self._edge.tasks.wait(task)
             logging.getLogger().debug("Obtained connection status. %s", {'status': task.result.rc})
             if task.result.rc == "Open":
                 return TCPConnectResult(service.host, service.port, True)
@@ -157,9 +157,9 @@ class Network(BaseCommand):
         param.threads = threads
         param.reverse = direction == Traffic.Download
         param.protocol = None if protocol == IPProtocol.TCP else IPProtocol.UDP
-        task = self._gateway.execute("/status/network", "iperf", param)
+        task = self._edge.api.execute("/status/network", "iperf", param)
         try:
-            task = self._gateway.tasks.wait(task, retries, seconds)
+            task = self._edge.tasks.wait(task, retries, seconds)
             return task.result.res
         except TaskError as error:
             return error.task.result.res
@@ -172,7 +172,7 @@ class Proxy(BaseCommand):
         """
         Get Proxy Configuration
         """
-        return self._gateway.get('/config/network/proxy')
+        return self._edge.api.get('/config/network/proxy')
 
     def is_enabled(self):
         """
@@ -181,7 +181,7 @@ class Proxy(BaseCommand):
         :returns: ``True`` if a proxy server was configured and ``False`` otherwise.
         :rtype: bool
         """
-        return self._gateway.get('/config/network/proxy/configurationMode') != 'NoProxy'
+        return self._edge.api.get('/config/network/proxy/configurationMode') != 'NoProxy'
 
     def modify(self, address, port=None, username=None, password=None):
         """
@@ -209,7 +209,7 @@ class Proxy(BaseCommand):
             if password:
                 param.password = password
         logging.getLogger().info('Updating Proxy Server Configuration.')
-        response = self._gateway.put('/config/network/proxy', param)
+        response = self._edge.api.put('/config/network/proxy', param)
         logging.getLogger().info('Updated Proxy Server Configuration.')
         return response
 
@@ -242,11 +242,11 @@ class MTU(BaseCommand):
         return self._configure(True, mtu)
 
     def _configure(self, jumbo, mtu):
-        settings = self._gateway.get('/config/network/ports/0/ethernet')
+        settings = self._edge.api.get('/config/network/ports/0/ethernet')
         settings.jumbo = jumbo
         settings.mtu = mtu
         logging.getLogger().info('Configuring MTU. %s', {'MTU': mtu})
-        return self._gateway.put('/config/network/ports/0/ethernet', settings)
+        return self._edge.api.put('/config/network/ports/0/ethernet', settings)
 
 
 class StaticRoutes(BaseCommand):
@@ -256,7 +256,7 @@ class StaticRoutes(BaseCommand):
         """
         Get All Static Routes
         """
-        return self._gateway.get('/config/network/static_routes')
+        return self._edge.api.get('/config/network/static_routes')
 
     def add(self, source_ip, destination_ip_mask):
         """
@@ -269,7 +269,7 @@ class StaticRoutes(BaseCommand):
             param = Object()
             param.GwIP = str(parse_to_ipaddress(source_ip))
             param.DestIpMask = str(parse_to_ipaddress(destination_ip_mask)).replace("/", "_")
-            res = self._gateway.add('/config/network/static_routes', param)
+            res = self._edge.api.add('/config/network/static_routes', param)
             logging.getLogger().info(
                 "Static route updated. %s", {'Source': param.GwIP, 'Destination': destination_ip_mask})
             return res
@@ -285,7 +285,7 @@ class StaticRoutes(BaseCommand):
         """
         try:
             dest_ip_mask = str(parse_to_ipaddress(destination_ip_mask)).replace("/", "_")
-            response = self._gateway.delete(f'/config/network/static_routes/{dest_ip_mask}')
+            response = self._edge.api.delete(f'/config/network/static_routes/{dest_ip_mask}')
             logging.getLogger().info(
                 "Static route deleted. %s", {'Destination': dest_ip_mask})
             return response
@@ -298,7 +298,7 @@ class StaticRoutes(BaseCommand):
         Clear All Static routes
         """
         try:
-            self._gateway.execute('/config/network', 'cleanStaticRoutes')
+            self._edge.api.execute('/config/network', 'cleanStaticRoutes')
             logging.getLogger().info('Static routes were deleted successfully')
         except CTERAException as error:
             logging.getLogger().error("Failed to clear static routes")

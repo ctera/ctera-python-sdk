@@ -2,7 +2,7 @@ import logging
 
 from .base_command import BaseCommand
 from ..common import Object
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .enum import PortalAccountType, SearchType, DirectoryServiceType, DirectoryServiceFetchMode, Role, DirectorySearchEntityType
 from .types import AccessControlEntry, AccessControlRule, UserAccount, GroupAccount
 
@@ -13,7 +13,7 @@ class DirectoryService(BaseCommand):
     """
 
     def _get_configuration(self):
-        return self._portal.get('/directoryConnector')
+        return self._core.api.get('/directoryConnector')
 
     def connected(self):
         directory_services_config = self._get_configuration()
@@ -67,7 +67,7 @@ class DirectoryService(BaseCommand):
             param.ipAddresses.ipAddress1 = domain_controllers.primary
             param.ipAddresses.ipAddress2 = domain_controllers.secondary
 
-        tenant = self._portal.session().user.tenant
+        tenant = self._core.session().user.tenant
         logging.getLogger().info('Connecting Portal to directory services. %s', {
             'tenant': tenant,
             'type': type,
@@ -83,7 +83,7 @@ class DirectoryService(BaseCommand):
             self._configure_access_control(acl, default)
 
     def _connect_to_directory_services(self, param):
-        return self._portal.execute('', 'testAndSaveAD', param)
+        return self._core.api.execute('', 'testAndSaveAD', param)
 
     def get_advanced_mapping(self):
         """
@@ -92,7 +92,7 @@ class DirectoryService(BaseCommand):
         :returns: A dictionary of domain mapping objects
         :rtype: dict
         """
-        return {map.domainFlatName: map for map in self._portal.get('/directoryConnector/idMapping/map')}
+        return {map.domainFlatName: map for map in self._core.api.get('/directoryConnector/idMapping/map')}
 
     def set_advanced_mapping(self, mapping):
         """
@@ -112,7 +112,7 @@ class DirectoryService(BaseCommand):
         logging.getLogger().debug('Updating advanced mapping. %s', {
             'domains': [mapping.domainFlatName for mapping in param.map]
         })
-        response = self._portal.put('/directoryConnector/idMapping', param)
+        response = self._core.api.put('/directoryConnector/idMapping', param)
         logging.getLogger().info('Updated advanced mapping.')
         return response
 
@@ -124,7 +124,7 @@ class DirectoryService(BaseCommand):
         :rtype: list[cterasdk.core.types.AccessControlEntry]
         """
         acl = []
-        for ace in self._portal.get('/directoryConnector/accessControlRules'):
+        for ace in self._core.api.get('/directoryConnector/accessControlRules'):
             if ace.group.type == DirectorySearchEntityType.User:
                 acl.append(AccessControlEntry(UserAccount(ace.group.name, ace.group.domain), ace.role))
             elif ace.group.type == DirectorySearchEntityType.Group:
@@ -158,12 +158,12 @@ class DirectoryService(BaseCommand):
             access_control_rules.append(AccessControlRule(account, ace.role))
 
         logging.getLogger().info('Updating access control rules.')
-        response = self._portal.put('/directoryConnector/accessControlRules', access_control_rules)
+        response = self._core.api.put('/directoryConnector/accessControlRules', access_control_rules)
         logging.getLogger().info('Updated access control rules.')
 
         if default is not None:
             logging.getLogger().info('Updating default role.')
-            response = self._portal.put('/directoryConnector/noMatchRole', default)
+            response = self._core.api.put('/directoryConnector/noMatchRole', default)
             logging.getLogger().info('Updated default role')
 
         return response
@@ -172,7 +172,7 @@ class DirectoryService(BaseCommand):
         """
         Retrieve the default role assigned when no access control entry match was found
         """
-        return self._portal.get('/directoryConnector/noMatchRole')
+        return self._core.api.get('/directoryConnector/noMatchRole')
 
     def get_connected_domain(self):
         """
@@ -182,7 +182,7 @@ class DirectoryService(BaseCommand):
         """
         domain = None
         try:
-            domain = self._portal.get('/directoryConnector/domain')
+            domain = self._core.api.get('/directoryConnector/domain')
         except CTERAException:
             pass
         return domain
@@ -193,7 +193,7 @@ class DirectoryService(BaseCommand):
 
         :return list(str): List of names of all discovered domains
         """
-        return self._portal.execute('', 'getADTrustedDomains', False)
+        return self._core.api.execute('', 'getADTrustedDomains', False)
 
     def fetch(self, active_directory_accounts):
         """
@@ -203,7 +203,7 @@ class DirectoryService(BaseCommand):
 
         :return: Response Code
         """
-        domains = self._portal.users.list_domains()
+        domains = self._core.users.list_domains()
         account_types = [v for k, v in PortalAccountType.__dict__.items() if not k.startswith('_')]
 
         param = []
@@ -223,7 +223,7 @@ class DirectoryService(BaseCommand):
                 param.append(self._search_groups(active_directory_account.directory, active_directory_account.name))
 
         logging.getLogger().info('Starting to fetch users and groups.')
-        response = self._portal.execute('', 'syncAD', param)
+        response = self._core.api.execute('', 'syncAD', param)
         logging.getLogger().info('Started fetching users and groups.')
 
         return response
@@ -245,7 +245,7 @@ class DirectoryService(BaseCommand):
             dict(search_type=search_type, info={'domain': domain, 'name': name})
         )
 
-        objects = self._portal.execute('', 'searchAD', param)
+        objects = self._core.api.execute('', 'searchAD', param)
         if not objects:
             logging.getLogger().info('Could not find results that match your search criteria. %s', {'domain': domain, 'name': name})
             raise CTERAException(
@@ -273,4 +273,4 @@ class DirectoryService(BaseCommand):
         """
         Disconnect a Portal tenant from directory services
         """
-        return self._portal.put('/directoryConnector', None)
+        return self._core.api.put('/directoryConnector', None)

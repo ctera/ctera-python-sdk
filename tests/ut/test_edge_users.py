@@ -85,9 +85,9 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self.assertEqual(ret, add_response)
 
     def test_add_user_raise(self):
-        expected_exception = exception.CTERAException()
+        expected_exception = exceptions.CTERAException()
         self._filer.add = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).add(self._username, self._password)
         self.assertEqual('User creation failed', error.exception.message)
 
@@ -107,8 +107,8 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self.assertEqual(ret, put_response)
 
     def test_modify_user_not_found(self):
-        self._filer.get = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._filer.get = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).modify(self._username)
         self._filer.get.assert_called_once_with('/config/auth/users/' + self._username)
         self.assertEqual('Failed to get the user', error.exception.message)
@@ -117,8 +117,8 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         get_response = Object()
         get_response.username = self._username
         self._init_filer(get_response=get_response)
-        self._filer.put = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._filer.put = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).modify(self._username, self._password, self._full_name, self._email, self._uid)
 
         self._filer.get.assert_called_once_with('/config/auth/users/' + self._username)
@@ -138,9 +138,9 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self.assertEqual(user.username, ret.username)
 
     def test_delete_user_raise(self):
-        expected_exception = exception.CTERAException()
+        expected_exception = exceptions.CTERAException()
         self._filer.delete = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).delete(self._username)
         self.assertEqual('User deletion failed', error.exception.message)
 

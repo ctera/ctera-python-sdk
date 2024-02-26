@@ -1,7 +1,7 @@
 import logging
 
 from ..common import union
-from ..exception import CTERAException, ObjectNotFoundException
+from ..exceptions import CTERAException, ObjectNotFoundException
 from .base_command import BaseCommand
 from . import query
 
@@ -15,12 +15,12 @@ class Buckets(BaseCommand):
 
     def _get_entire_object(self, name):
         try:
-            return self._portal.get(f'/locations/{name}')
+            return self._core.api.get(f'/locations/{name}')
         except CTERAException as error:
             raise CTERAException('Failed to get bucket', error)
 
     def _get_tenant_base_object_ref(self, name):
-        return self._portal.portals.get(name, include=['baseObjectRef']).baseObjectRef
+        return self._core.portals.get(name, include=['baseObjectRef']).baseObjectRef
 
     def get(self, name, include=None):
         """
@@ -31,7 +31,7 @@ class Buckets(BaseCommand):
         """
         include = union(include or [], Buckets.default)
         include = ['/' + attr for attr in include]
-        bucket = self._portal.get_multi('/locations/' + name, include)
+        bucket = self._core.api.get_multi('/locations/' + name, include)
         if bucket.name is None:
             raise ObjectNotFoundException('Could not find bucket', f'/locations/{name}', name=name)
         return bucket
@@ -52,7 +52,7 @@ class Buckets(BaseCommand):
         param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
 
         logging.getLogger().info('Adding bucket. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
-        response = self._portal.add('/locations', param)
+        response = self._core.api.add('/locations', param)
         logging.getLogger().info('Bucket added. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
         return response
 
@@ -82,7 +82,7 @@ class Buckets(BaseCommand):
                 param.dedicated = True
                 param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
         logging.getLogger().info("Modifying bucket. %s", {'name': current_name})
-        response = self._portal.put(f'/locations/{current_name}', param)
+        response = self._core.api.put(f'/locations/{current_name}', param)
         logging.getLogger().info("Bucket modified. %s", {'name': current_name})
         return response
 
@@ -95,7 +95,7 @@ class Buckets(BaseCommand):
         """
         include = union(include or [], Buckets.default)
         param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._portal, '/locations', param)
+        return query.iterator(self._core, '/locations', param)
 
     def delete(self, name):
         """
@@ -104,7 +104,7 @@ class Buckets(BaseCommand):
         :param str name: Name of the bucket
         """
         logging.getLogger().info('Deleting bucket. %s', {'name': name})
-        response = self._portal.delete(f'/locations/{name}')
+        response = self._core.api.delete(f'/locations/{name}')
         logging.getLogger().info('Bucket deleted. %s', {'name': name})
         return response
 
@@ -127,4 +127,4 @@ class Buckets(BaseCommand):
         return self._read_only(name, True)
 
     def _read_only(self, name, enabled):
-        return self._portal.put(f'/locations/{name}/readOnly', enabled)
+        return self._core.api.put(f'/locations/{name}/readOnly', enabled)

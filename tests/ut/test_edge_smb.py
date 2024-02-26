@@ -53,14 +53,14 @@ class TestEdgeSMB(base_edge.BaseEdgeTest):
         self._filer.put.assert_called_once_with('/config/fileservices/cifs/packetSigning', CIFSPacketSigning.Required)
 
     def test_set_packet_signing_raise_input_error(self):
-        with self.assertRaises(exception.InputError) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             smb.SMB(self._filer).set_packet_signing('Invalid argument')
         self.assertEqual('Invalid packet signing option', error.exception.message)
 
     def test_set_packet_signing_raise_error(self):
-        expected_exception = exception.CTERAException()
+        expected_exception = exceptions.CTERAException()
         self._filer.put = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             smb.SMB(self._filer).set_packet_signing(CIFSPacketSigning.Disabled)
         self.assertEqual('Invalid packet signing co', error.exception.message)
 
@@ -81,8 +81,8 @@ class TestEdgeSMB(base_edge.BaseEdgeTest):
 
     def test_modify_raise(self):
         self._init_filer(get_response=TestEdgeSMB._get_cifs_configuration_response())
-        self._filer.put = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._filer.put = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             smb.SMB(self._filer).modify(CIFSPacketSigning.Required, 20, True, False, False)
         self._filer.get.assert_called_once_with('/config/fileservices/cifs')
         self._filer.put.assert_called_once_with('/config/fileservices/cifs', mock.ANY)
@@ -95,7 +95,7 @@ class TestEdgeSMB(base_edge.BaseEdgeTest):
         param = Object()
         param.mode = Mode.Disabled
         self._init_filer(get_response=param)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             smb.SMB(self._filer).modify(CIFSPacketSigning.Required)
         self.assertEqual('SMB must be enabled in order to modify its configuration', error.exception.message)
 

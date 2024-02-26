@@ -41,7 +41,7 @@ class TestCoreGroups(base_core.BaseCoreTest):
     def test_get_group_not_found(self):
         get_multi_response = self._get_group_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             groups.Groups(self._global_admin).get(self._local_group)
         self._global_admin.get_multi.assert_called_once_with(f'/localGroups/{self._groupname}', mock.ANY)
         expected_include = ['/' + attr for attr in groups.Groups.default]

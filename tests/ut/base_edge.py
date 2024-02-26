@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk.object import Gateway
+from cterasdk.object import Edge
 from tests.ut import base
 
 
@@ -8,7 +8,7 @@ class BaseEdgeTest(base.BaseTest):
 
     def setUp(self):
         super().setUp()
-        self._filer = Gateway("")
+        self._filer = Edge("")
 
     def _init_filer(self, get_response=None, put_response=None, post_response=None,  # pylint: disable=too-many-arguments
                     form_data_response=None, add_response=None, execute_response=None,

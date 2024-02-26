@@ -1,7 +1,7 @@
 import logging
 
 from ..common import Object
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
@@ -14,7 +14,7 @@ class Array(BaseCommand):
 
         :param str,optional name: Name of the array
         """
-        return self._gateway.get('/config/storage/arrays' + ('' if name is None else ('/' + name)))
+        return self._edge.api.get('/config/storage/arrays' + ('' if name is None else ('/' + name)))
 
     def add(self, array_name, level, members=None):
         """
@@ -27,11 +27,11 @@ class Array(BaseCommand):
         param = Object()
         param.name = array_name
         param.level = level
-        param.members = [drive.name for drive in self._gateway.drive.get_status()] if members is None else members
+        param.members = [drive.name for drive in self._edge.drive.get_status()] if members is None else members
 
         try:
             logging.getLogger().info("Creating a storage array.")
-            response = self._gateway.add("/config/storage/arrays", param)
+            response = self._edge.api.add("/config/storage/arrays", param)
             logging.getLogger().info("Storage array created.")
             return response
         except CTERAException as error:
@@ -46,7 +46,7 @@ class Array(BaseCommand):
         """
         try:
             logging.getLogger().info("Deleting a storage array.")
-            response = self._gateway.delete("/config/storage/arrays/" + array_name)
+            response = self._edge.api.delete("/config/storage/arrays/" + array_name)
             logging.getLogger().info("Storage array deleted. %s", {'array_name': array_name})
             return response
         except CTERAException as error:
@@ -57,6 +57,6 @@ class Array(BaseCommand):
         """
         Delete all arrays
         """
-        arrays = self._gateway.get('/config/storage/arrays')
+        arrays = self._edge.api.get('/config/storage/arrays')
         for array in arrays:
             self.delete(array.name)

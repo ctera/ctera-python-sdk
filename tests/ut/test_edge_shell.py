@@ -27,7 +27,7 @@ class TestEdgeShell(base_edge.BaseEdgeTest):
         execute_response = self._task_id
         self._init_filer(execute_response=execute_response)
         self._filer.tasks.wait = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             shell.Shell(self._filer).run_command(self._shell_command)
         self._filer.tasks.wait.assert_called_once_with(self._task_id)
         self.assertEqual('An error occurred while executing task', error.exception.message)

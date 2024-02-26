@@ -1,7 +1,7 @@
 import logging
 
 from .enum import Mode
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
@@ -14,7 +14,7 @@ class FTP(BaseCommand):
 
         :return cterasdk.common.object.Object:
         """
-        return self._gateway.get('/config/fileservices/ftp')
+        return self._edge.api.get('/config/fileservices/ftp')
 
     def enable(self):
         """ Enable FTP """
@@ -26,11 +26,11 @@ class FTP(BaseCommand):
 
     def is_disabled(self):
         """ Check if the FTP server is disabled """
-        return self._gateway.get('/config/fileservices/ftp/mode') == Mode.Disabled
+        return self._edge.api.get('/config/fileservices/ftp/mode') == Mode.Disabled
 
     def _set_mode(self, enabled):
         logging.getLogger().info('%s FTP server.', ('Enabling' if enabled else 'Disabling'))
-        self._gateway.put('/config/fileservices/ftp/mode', Mode.Enabled if enabled else Mode.Disabled)
+        self._edge.api.put('/config/fileservices/ftp/mode', Mode.Enabled if enabled else Mode.Disabled)
         logging.getLogger().info('FTP server %s.', ('enabled' if enabled else 'disabled'))
 
     def modify(
@@ -67,4 +67,4 @@ class FTP(BaseCommand):
             config.MaxConnectionsPerIP = max_connections_per_ip
         if require_ssl is not None:
             config.RequireSSL = require_ssl
-        self._gateway.put('/config/fileservices/ftp', config)
+        self._edge.api.put('/config/fileservices/ftp', config)

@@ -6,7 +6,7 @@ from .base_command import BaseCommand
 from .enum import ServerMode, SetupWizardStage, SetupWizardStatus, SlaveAuthenticaionMethod
 from ..common import Object
 from ..convert import toxmlstr
-from ..exception import CTERAException, HostUnreachable, ConnectionRetryFailure
+from ..exceptions import CTERAException
 
 
 class Setup(BaseCommand):
@@ -54,18 +54,18 @@ class Setup(BaseCommand):
             params.settings = Setup.default_settings()
             params.settings.dnsSuffix = domain
             logging.getLogger().info('Initializing Portal. %s', {'domain': domain, 'user': name})
-            self._portal.execute(f'/{self._portal.context}/public', 'init', params, use_file_url=True)
-            SetupWizardStatusMonitor(self._portal).wait(SetupWizardStage.Portal)
+            self._core.ctera.execute(f'/public', 'init', params)
+            SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Portal)
             logging.getLogger().info('Portal initialized.')
         elif self.stage == SetupWizardStage.Finish:
-            logging.getLogger().warning('Portal already initialized. %s', {'host': self._portal.host()})
-        self._portal.startup.wait()
+            logging.getLogger().warning('Portal already initialized. %s', {'host': self._core.host()})
+        self._core.startup.wait()
 
     def _init_slave(self, ipaddr, secret):
         self._get_current_stage()
 
-        response = self._portal.execute(f'/{self._portal.context}/setup/authenticaionMethod',
-                                        'askMasterForSlaveAuthenticaionMethod', ipaddr, use_file_url=True)
+        response = self._core.ctera.execute(f'/setup/authenticaionMethod',
+                                        'askMasterForSlaveAuthenticaionMethod', ipaddr)
 
         params = Setup._init_server_params(ServerMode.Slave)
         params.slaveSettings.masterIpAddr = ipaddr
@@ -80,20 +80,19 @@ class Setup(BaseCommand):
 
     def _init_server(self, params, wait=False):
         if self.stage == SetupWizardStage.Server:
-            ref = f'/{self._portal.context}/setup'
             form_data = {'inputXml': toxmlstr(params).decode('utf-8'), 'serverMode': params.serverMode}
 
             if params.serverMode == ServerMode.Slave:
                 form_data['masterIpAddr'] = params.slaveSettings.masterIpAddr
 
-            logging.getLogger().info('Initializing server. %s', {'host': self._portal.host(), 'mode': params.serverMode})
-            self._portal.multipart(ref, form_data, use_file_url=True)
+            logging.getLogger().info('Initializing server. %s', {'host': self._core.host(), 'mode': params.serverMode})
+            self._core.ctera.multipart('/setup', form_data)
             if wait:
-                status = SetupWizardStatusMonitor(self._portal).wait(SetupWizardStage.Server)
+                status = SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Server)
                 self.stage = status.wizard
-                logging.getLogger().info('Server initialized. %s', {'host': self._portal.host(), 'mode': params.serverMode})
+                logging.getLogger().info('Server initialized. %s', {'host': self._core.host(), 'mode': params.serverMode})
         else:
-            logging.getLogger().warning('Server already initialized. %s', {'host': self._portal.host()})
+            logging.getLogger().warning('Server already initialized. %s', {'host': self._core.host()})
 
     def init_application_server(self, ipaddr, secret):
         """
@@ -107,7 +106,7 @@ class Setup(BaseCommand):
             logging.getLogger().info('Initializing an Application Server. %s', {'host': ipaddr})
             params = Setup._init_replication_param()
             self._init_role(params)
-        self._portal.startup.wait()
+        self._core.startup.wait()
 
     def init_replication_server(self, ipaddr, secret, replicate_from=None):
         """
@@ -140,16 +139,16 @@ class Setup(BaseCommand):
                                          None, target=replicate_from, options=replication_candidates)
             else:
                 logging.getLogger().error('Could not find database replication candidates.')
-        self._portal.startup.wait()
+        self._core.startup.wait()
 
     def _init_role(self, params):
-        response = self._portal.execute(f'/{self._portal.context}/public/servers', 'setReplication', params, use_file_url=True)
-        status = SetupWizardStatusMonitor(self._portal).wait(SetupWizardStage.Replication)
+        response = self._core.ctera.execute(f'/public/servers', 'setReplication', params)
+        status = SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Replication)
         self.stage = status.wizard
         return response
 
     def get_replication_candidates(self):
-        return self._portal.execute(f'/{self._portal.context}/public/servers', 'getReplicaitonCandidates', None, use_file_url=True)
+        return self._core.ctera.execute(f'/public/servers', 'getReplicaitonCandidates', None)
 
     @staticmethod
     def _init_replication_param(replicate_from=None):
@@ -173,7 +172,7 @@ class Setup(BaseCommand):
         return params
 
     def get_setup_status(self):
-        return self._portal.get(f'/{self._portal.context}/setup/status', use_file_url=True)
+        return self._core.ctera.get(f'/setup/status')
 
     @staticmethod
     def default_settings():
@@ -196,7 +195,7 @@ class Setup(BaseCommand):
 class SetupWizardStatusMonitor:
 
     def __init__(self, portal, retries=60, seconds=5):
-        self._portal = portal
+        self._core = portal
         self._retries = retries
         self._seconds = seconds
         self._attempt = 0
@@ -208,7 +207,7 @@ class SetupWizardStatusMonitor:
             try:
                 self._increment()
                 logging.getLogger().debug('Obtaining wizard status. %s', {'attempt': self._attempt})
-                status = self._portal.setup.get_setup_status()
+                status = self._core.setup.get_setup_status()
                 logging.getLogger().debug('Current wizard status. %s', {
                     'stage': status.wizard,
                     'status': status.currentWizardProgress,
@@ -217,7 +216,7 @@ class SetupWizardStatusMonitor:
                 if status.currentWizardProgress == SetupWizardStatus.Failed:
                     raise CTERAException('Initialization failed.', status)
                 current_stage = status.wizard
-            except (HostUnreachable, ConnectionRetryFailure) as e:
+            except (ConnectionError, TimeoutError) as e:
                 logging.getLogger().debug('Exception. %s', e.__dict__)
         logging.getLogger().debug('Wizard update. %s', {'previous_stage': stage, 'current_stage': current_stage})
         return status

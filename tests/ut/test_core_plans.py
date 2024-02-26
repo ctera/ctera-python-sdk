@@ -30,7 +30,7 @@ class TestCorePlans(base_core.BaseCoreTest):
     def test_get_plan_not_found(self):
         get_multi_response = self._get_plan_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             plans.Plans(self._global_admin).get(self._plan_name)
         self._global_admin.get_multi.assert_called_once_with('/plans/' + self._plan_name, mock.ANY)
         expected_include = ['/' + attr for attr in plans.Plans.default]
@@ -69,24 +69,24 @@ class TestCorePlans(base_core.BaseCoreTest):
         self.assertEqual(ret, delete_response)
 
     def test_delete_failure(self):
-        self._global_admin.delete = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._global_admin.delete = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             plans.Plans(self._global_admin).delete(self._plan_name)
         self._global_admin.delete.assert_called_once_with(f'/plans/{self._plan_name}')
         self.assertEqual('Plan deletion failed', error.exception.message)
 
     def test_modify_plan_not_found(self):
         self._init_global_admin()
-        self._global_admin.get = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._global_admin.get = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             plans.Plans(self._global_admin).modify(self._plan_name)
         self._global_admin.get.assert_called_once_with(f'/plans/{self._plan_name}')
         self.assertEqual('Could not find subscription plan', error.exception.message)
 
     def test_modify_update_failure(self):
         self._init_global_admin()
-        self._global_admin.put = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._global_admin.put = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             plans.Plans(self._global_admin).modify(self._plan_name)
         self._global_admin.get.assert_called_once_with(f'/plans/{self._plan_name}')
         self._global_admin.put.assert_called_once_with(f'/plans/{self._plan_name}', mock.ANY)

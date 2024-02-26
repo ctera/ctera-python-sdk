@@ -6,7 +6,7 @@ from ..convert import tojsonstr
 
 
 def query(CTERAHost, path, name, param):
-    response = CTERAHost.execute(path, name, param) if name is not None else CTERAHost.db(path, 'query', param)
+    response = CTERAHost.api.execute(path, name, param) if name is not None else CTERAHost.api.database(path, 'query', param)
     return (response.hasMore, response.objects)
 
 

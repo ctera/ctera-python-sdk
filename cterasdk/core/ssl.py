@@ -21,7 +21,7 @@ class SSL(BaseCommand):
         :return cterasdk.common.object.Object: An object including the SSL certificate details
         """
         logging.getLogger().info('Retrieving SSL certificate')
-        response = self._portal.get('/settings/ca')
+        response = self._core.api.get('/settings/ca')
         logging.getLogger().info('Retrieved SSL certificate')
         return response
 
@@ -41,7 +41,7 @@ class SSL(BaseCommand):
         """
         directory, filename = self._filesystem.split_file_directory_with_defaults(destination, 'certificate.zip')
         logging.getLogger().info('Exporting SSL certificate.')
-        handle = self._portal.openfile('/admin/preview/exportCertificate', use_file_url=True)
+        handle = self._core.ctera.chunks('/admin/preview/exportCertificate')
         filepath = self._filesystem.save(directory, filename, handle)
         logging.getLogger().info('Exported SSL certificate. %s', {'filepath': filepath})
         return filepath
@@ -99,14 +99,14 @@ class SSL(BaseCommand):
         info = self._filesystem.get_local_file_info(zipfile)
         logging.getLogger().info('Uploading SSL certificate.')
         with open(zipfile, 'rb') as fd:
-            response = self._portal.upload(
+            response = self._core.api.form_data(
                 '/settings/importCertificate',
                 dict(
                     name='upload',
-                    certificate=(info['name'], fd, info['mimetype'][0])
+                    certificate=fd
                 )
             )
             if not isinstance(response, str):
                 logging.getLogger().error('Failed uploading SSL certificate. %s', {'reason': response.msg})
             logging.getLogger().info('Uploaded SSL certificate.')
-            self._portal.startup.wait()
+            self._core.startup.wait()

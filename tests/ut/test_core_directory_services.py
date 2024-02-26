@@ -39,7 +39,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         self.assertEqual(ret, get_response)
 
     def test_get_connected_domain_failure(self):
-        self._global_admin.get = mock.MagicMock(side_effect=exception.CTERAException())
+        self._global_admin.get = mock.MagicMock(side_effect=exceptions.CTERAException())
         ret = directoryservice.DirectoryService(self._global_admin).get_connected_domain()
         self._global_admin.get.assert_called_once_with('/directoryConnector/domain')
         self.assertEqual(ret, None)
@@ -79,7 +79,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
     def test_connected_failure(self):
         get_response = 'settings'
         self._init_global_admin(get_response=get_response)
-        self._global_admin.execute = mock.MagicMock(side_effect=exception.CTERAException())
+        self._global_admin.execute = mock.MagicMock(side_effect=exceptions.CTERAException())
         ret = directoryservice.DirectoryService(self._global_admin).connected()
         self._global_admin.get.assert_called_once_with('/directoryConnector')
         self._global_admin.execute.assert_called_once_with('', 'testAndSaveAD', get_response)

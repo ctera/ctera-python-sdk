@@ -1,6 +1,6 @@
 import logging
 
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from ..common import Object
 from . import enum
 from .base_command import BaseCommand
@@ -16,7 +16,7 @@ class SNMP(BaseCommand):
         :return: True is SNMP is enabled, else False
         :rtype: bool
         """
-        return self._gateway.get('/config/snmp/mode') == enum.Mode.Enabled
+        return self._edge.api.get('/config/snmp/mode') == enum.Mode.Enabled
 
     def enable(self, port=161, community_str=None, username=None, auth_password=None, privacy_password=None):
         """
@@ -40,17 +40,17 @@ class SNMP(BaseCommand):
             param.snmpV3.privacyPassword = privacy_password
 
         logging.getLogger().info("Enabling SNMP.")
-        self._gateway.put('/config/snmp', param)
+        self._edge.api.put('/config/snmp', param)
         logging.getLogger().info("Enabled SNMP.")
 
     def disable(self):
         """ Disable SNMP """
         logging.getLogger().info("Disabling SNMP.")
-        self._gateway.put('/config/snmp/mode', enum.Mode.Disabled)
+        self._edge.api.put('/config/snmp/mode', enum.Mode.Disabled)
         logging.getLogger().info("Disabled SNMP.")
 
     def get_configuration(self):
-        return self._gateway.get('/config/snmp')
+        return self._edge.api.get('/config/snmp')
 
     def modify(self, port=None, community_str=None, username=None, auth_password=None, privacy_password=None):
         """
@@ -77,5 +77,5 @@ class SNMP(BaseCommand):
             current_config.snmpV3.privacyPassword = privacy_password
 
         logging.getLogger().info("Updating SNMP configuration.")
-        self._gateway.put('/config/snmp', current_config)
+        self._edge.api.put('/config/snmp', current_config)
         logging.getLogger().info("SNMP configured.")

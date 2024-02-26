@@ -1,12 +1,12 @@
-***************
-End User Portal
-***************
+******************************
+Tenant User and Administration
+******************************
 
 .. contents:: Table of Contents
 
-Instantiate a Services Portal object
-------------------------------------
-.. autoclass:: cterasdk.object.Portal.ServicesPortal
+Create a Services Portal Session
+--------------------------------
+.. autoclass:: cterasdk.objects.core.ServicesPortal
    :special-members: __init__
    :noindex:
 
@@ -16,23 +16,24 @@ Instantiate a Services Portal object
 
 .. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure `chopin-core` to automatically trust the server's certificate, using: ``config.http['ssl'] = 'Trust'``
 
+
 Logging in
 ==========
-.. automethod:: cterasdk.object.Portal.ServicesPortal.test
+.. automethod:: cterasdk.objects.core.ServicesPortal.test
    :noindex:
 
 .. code-block:: python
 
    user.test()
 
-.. automethod:: cterasdk.object.Portal.ServicesPortal.login
+.. automethod:: cterasdk.objects.core.ServicesPortal.login
    :noindex:
 
 .. code-block:: python
 
    user.login('walice', 'G3neralZ0d!')
 
-.. automethod:: cterasdk.object.Portal.ServicesPortal.logout
+.. automethod:: cterasdk.objects.core.ServicesPortal.logout
    :noindex:
 
 .. code-block:: python

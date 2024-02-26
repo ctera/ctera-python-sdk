@@ -3,7 +3,7 @@ import logging
 from .base_command import BaseCommand
 from ..common import Object
 from ..core.enum import Severity, Mode, IPProtocol
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 
 
 class Syslog(BaseCommand):
@@ -18,13 +18,13 @@ class Syslog(BaseCommand):
         """
         Check if forwarding log messages over syslog is enabled
         """
-        return self._portal.get('/settings/logsSettings/syslogConfig/mode') == Mode.Enabled
+        return self._core.api.get('/settings/logsSettings/syslogConfig/mode') == Mode.Enabled
 
     def get_configuration(self):
         """
         Retrieve the syslog server configuration
         """
-        return self._portal.get('/settings/logsSettings/syslogConfig')
+        return self._core.api.get('/settings/logsSettings/syslogConfig')
 
     def enable(self, server, port=514, protocol=IPProtocol.UDP, min_severity=Severity.INFO):
         """
@@ -44,7 +44,7 @@ class Syslog(BaseCommand):
         param.protocol = protocol
         param.useClientCertificate = False
         logging.getLogger().info('Enabling syslog.')
-        response = self._portal.put('/settings/logsSettings/syslogConfig', param)
+        response = self._core.api.put('/settings/logsSettings/syslogConfig', param)
         logging.getLogger().info('Syslog enabled.')
         return response
 
@@ -70,7 +70,7 @@ class Syslog(BaseCommand):
             current_config.minSeverity = min_severity
 
         logging.getLogger().info("Updating syslog server configuration.")
-        self._portal.put('/settings/logsSettings/syslogConfig', current_config)
+        self._core.api.put('/settings/logsSettings/syslogConfig', current_config)
         logging.getLogger().info(
             "Syslog server configured. %s",
             {
@@ -83,6 +83,6 @@ class Syslog(BaseCommand):
 
     def disable(self):
         logging.getLogger().info('Disabling syslog.')
-        response = self._portal.put('/settings/logsSettings/syslogConfig/mode', Mode.Disabled)
+        response = self._core.api.put('/settings/logsSettings/syslogConfig/mode', Mode.Disabled)
         logging.getLogger().info('Syslog disabled.')
         return response

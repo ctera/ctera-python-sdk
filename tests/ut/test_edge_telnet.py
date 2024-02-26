@@ -35,7 +35,7 @@ class TestEdgeTelnet(base_edge.BaseEdgeTest):
     def test_enable_telnet_raise(self):
         execute_response = 'Expected Failure'
         self._init_filer(execute_response=execute_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             telnet.Telnet(self._filer).enable(self._telnet_code)
 
         self._filer.execute.assert_called_once_with('/config/device', 'startTelnetd', mock.ANY)

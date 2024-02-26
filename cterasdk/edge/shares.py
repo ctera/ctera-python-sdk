@@ -1,9 +1,9 @@
 import logging
 
 from . import enum
-from .files import path
+from .files import common
 from ..common import Object
-from ..exception import CTERAException, InputError
+from ..exceptions import CTERAException, InputError
 from .base_command import BaseCommand
 from .types import NFSv3AccessControlEntry, RemoveNFSv3AccessControlEntry, ShareAccessControlEntry, RemoveShareAccessControlEntry
 
@@ -15,7 +15,7 @@ class Shares(BaseCommand):
         Get Share. If a share name was not passed as an argument, a list of all shares will be retrieved
         :param str,optional name: Name of the share
         """
-        return self._gateway.get('/config/fileservices/share' + ('' if name is None else ('/' + name)))
+        return self._edge.api.get('/config/fileservices/share' + ('' if name is None else ('/' + name)))
 
     def add(self,
             name,
@@ -57,7 +57,7 @@ class Shares(BaseCommand):
         param = Object()
         param.name = name
 
-        parts = path.CTERAPath(directory, '/').parts()
+        parts = common.Path(directory, '/').parts()
         volume = parts[0]
         self._validate_root_directory(volume)
         param.volume = volume
@@ -82,7 +82,7 @@ class Shares(BaseCommand):
             param._uuid = uuid  # pylint: disable=protected-access
 
         try:
-            self._gateway.add('/config/fileservices/share', param)
+            self._edge.api.add('/config/fileservices/share', param)
             logging.getLogger().info("Share created. %s", {'name': name})
         except Exception as error:
             logging.getLogger().error("Share creation failed.")
@@ -95,7 +95,7 @@ class Shares(BaseCommand):
         :param str name: The share name
         """
         logging.getLogger().error("Updating Windows file sharing access mode. %s", {'share': name, 'access': enum.Acl.WindowsNT})
-        self._gateway.put('/config/fileservices/share/' + name + '/access', enum.Acl.WindowsNT)
+        self._edge.api.put('/config/fileservices/share/' + name + '/access', enum.Acl.WindowsNT)
 
     def get_access_type(self, name):
         """
@@ -103,7 +103,7 @@ class Shares(BaseCommand):
 
         :param str name: The share name
         """
-        return self._gateway.get('/config/fileservices/share/' + name + '/access')
+        return self._edge.api.get('/config/fileservices/share/' + name + '/access')
 
     def set_access_type(self, name, access):
         """
@@ -113,7 +113,7 @@ class Shares(BaseCommand):
         :param cterasdk.edge.enum.Acl access: The Windows File Sharing authentication mode
         """
         logging.getLogger().info("Updating Windows file sharing access mode. %s", {'share': name, 'access': access})
-        self._gateway.put('/config/fileservices/share/' + name + '/access', access)
+        self._edge.api.put('/config/fileservices/share/' + name + '/access', access)
 
     def block_files(self, name, extensions):
         """
@@ -127,7 +127,7 @@ class Shares(BaseCommand):
             raise CTERAException('Cannot block file types on non Windows-ACL enabled shares', None, share=share.name, access=share.access)
         logging.getLogger().error("Updating the list of blocked file extensions. %s",
                                   {'share': name, 'extensions': extensions, 'access': enum.Acl.WindowsNT})
-        self._gateway.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', extensions)
+        self._edge.api.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', extensions)
 
     def set_acl(self, name, acl):
         """
@@ -141,7 +141,7 @@ class Shares(BaseCommand):
         Shares._validate_acl(acl)
 
         param = [acl_entry.to_server_object() for acl_entry in acl]
-        self._gateway.put('/config/fileservices/share/' + name + '/acl', param)
+        self._edge.api.put('/config/fileservices/share/' + name + '/acl', param)
 
     def add_acl(self, name, acl):
         """
@@ -166,7 +166,7 @@ class Shares(BaseCommand):
                 new_acl_dict[entry_key] = entry
 
         acls_array = [v for k, v in new_acl_dict.items()]
-        self._gateway.put('/config/fileservices/share/' + name + '/acl', acls_array)
+        self._edge.api.put('/config/fileservices/share/' + name + '/acl', acls_array)
 
     def remove_acl(self, name, acl):
         """
@@ -190,7 +190,7 @@ class Shares(BaseCommand):
             if not remove_acl_dict.get(ace.principal_type + '#' + ace.name, False):
                 new_acl.append(entry)
 
-        self._gateway.put('/config/fileservices/share/' + name + '/acl', new_acl)
+        self._edge.api.put('/config/fileservices/share/' + name + '/acl', new_acl)
 
     def get_acl(self, name):
         """
@@ -198,7 +198,7 @@ class Shares(BaseCommand):
 
         :param str name: The share name
         """
-        return self._gateway.get('/config/fileservices/share/' + name + '/acl')
+        return self._edge.api.get('/config/fileservices/share/' + name + '/acl')
 
     def modify(
             self,
@@ -237,7 +237,7 @@ class Shares(BaseCommand):
         """
         share = self.get(name=name)
         if directory is not None:
-            parts = path.CTERAPath(directory, '/').parts()
+            parts = common.Path(directory, '/').parts()
             volume = parts[0]
             self._validate_root_directory(volume)
             share.volume = volume
@@ -270,7 +270,7 @@ class Shares(BaseCommand):
             share.trustedNFSClients = [client.to_server_object() for client in trusted_nfs_clients]
 
         try:
-            self._gateway.put('/config/fileservices/share/' + name, share)
+            self._edge.api.put('/config/fileservices/share/' + name, share)
             logging.getLogger().info("Share modified. %s", {'name': name})
         except Exception as error:
             msg = f'Failed to modify the share {name}'
@@ -284,7 +284,7 @@ class Shares(BaseCommand):
         :param str name: The share name
         """
         try:
-            self._gateway.delete('/config/fileservices/share/' + name)
+            self._edge.api.delete('/config/fileservices/share/' + name)
             logging.getLogger().info("Share deleted. %s", {'name': name})
         except Exception as error:
             logging.getLogger().error("Share deletion failed.")
@@ -296,7 +296,7 @@ class Shares(BaseCommand):
 
         :param str name: The share name
         """
-        return self._gateway.get('/config/fileservices/share/' + name + '/trustedNFSClients')
+        return self._edge.api.get('/config/fileservices/share/' + name + '/trustedNFSClients')
 
     def set_trusted_nfs_clients(self, name, trusted_nfs_clients):
         """
@@ -310,7 +310,7 @@ class Shares(BaseCommand):
         Shares._validate_trusted_nfs_clients(trusted_nfs_clients)
 
         param = [client.to_server_object() for client in (trusted_nfs_clients or [])]
-        self._gateway.put('/config/fileservices/share/' + name + '/trustedNFSClients', param)
+        self._edge.api.put('/config/fileservices/share/' + name + '/trustedNFSClients', param)
 
     def add_trusted_nfs_clients(self, name, trusted_nfs_clients):
         """
@@ -333,7 +333,7 @@ class Shares(BaseCommand):
 
         param = list(new_trusted_nfs_clients_dict.values()) + list(filter(entry_not_in_new, self.get_trusted_nfs_clients(name)))
 
-        self._gateway.put('/config/fileservices/share/' + name + '/trustedNFSClients', param)
+        self._edge.api.put('/config/fileservices/share/' + name + '/trustedNFSClients', param)
 
     def remove_trusted_nfs_clients(self, name, trusted_nfs_clients):
         """
@@ -355,7 +355,7 @@ class Shares(BaseCommand):
             return entry_key not in remove_trusted_nfs_clients_dict
 
         param = list(filter(entry_not_removed, self.get_trusted_nfs_clients(name)))
-        self._gateway.put('/config/fileservices/share/' + name + '/trustedNFSClients', param)
+        self._edge.api.put('/config/fileservices/share/' + name + '/trustedNFSClients', param)
 
     def get_screened_file_types(self, name):
         """
@@ -363,7 +363,7 @@ class Shares(BaseCommand):
 
         :param str name: The share name
         """
-        return self._gateway.get('/config/fileservices/share/' + name + '/screenedFileTypes')
+        return self._edge.api.get('/config/fileservices/share/' + name + '/screenedFileTypes')
 
     def set_screened_file_types(self, name, extensions):
         """
@@ -379,7 +379,7 @@ class Shares(BaseCommand):
             "Updating the list of blocked file extensions. %s",
             {'share': name, 'extensions': extensions, 'access': enum.Acl.WindowsNT}
         )
-        self._gateway.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', extensions)
+        self._edge.api.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', extensions)
 
     def add_screened_file_types(self, name, extensions):
         """
@@ -398,7 +398,7 @@ class Shares(BaseCommand):
             "Updating the list of blocked file extensions. %s",
             {'share': name, 'extensions': new_list, 'access': enum.Acl.WindowsNT}
         )
-        self._gateway.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', new_list)
+        self._edge.api.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', new_list)
 
     def remove_screened_file_types(self, name, extensions):
         """
@@ -417,13 +417,13 @@ class Shares(BaseCommand):
             "Updating the list of blocked file extensions. %s",
             {'share': name, 'extensions': new_list, 'access': enum.Acl.WindowsNT}
         )
-        self._gateway.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', new_list)
+        self._edge.api.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', new_list)
 
     def _validate_root_directory(self, name):
         param = Object()
         param.path = '/'
 
-        response = self._gateway.execute('/status/fileManager', 'listPhysicalFolders', param)
+        response = self._edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
         for root in response:
             if root.fullpath == f'/{name}':
                 logging.getLogger().debug("Found root directory. %s", {'name': root.name, 'type': root.type, 'fullpath': root.fullpath})

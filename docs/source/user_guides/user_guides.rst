@@ -10,13 +10,13 @@ User Guides
    :caption: Edge Filer
    :maxdepth: 2
 
-   Gateway/EdgeFiler
+   Edge/EdgeFiler
 
 .. toctree::
    :caption: Drive App
    :maxdepth: 2
 
-   Agent/Agent
+   Drive/Drive
 
 .. toctree::
    :caption: Miscellaneous

@@ -61,7 +61,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
     def test_pin_invalid_root_directory(self):
         get_response = self._get_dir_entry(self._root, False)
         self._init_filer(get_response=get_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cache.Cache(self._filer).pin(self._pin_invalid_folder_path)
         self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
         self.assertEqual('Invalid root directory', error.exception.message)

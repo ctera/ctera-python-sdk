@@ -1,7 +1,7 @@
 import functools
 import logging
 
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 
 
 def authenticated(function):

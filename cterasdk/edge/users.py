@@ -1,7 +1,7 @@
 import logging
 
 from ..common import Object
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
@@ -14,7 +14,7 @@ class Users(BaseCommand):
 
         :param str,optional name: Name of the user
         """
-        return self._gateway.get('/config/auth/users' + ('' if name is None else ('/' + name)))
+        return self._edge.api.get('/config/auth/users' + ('' if name is None else ('/' + name)))
 
     def add_first_user(self, username, password, email=''):
         """
@@ -24,16 +24,16 @@ class Users(BaseCommand):
         :param str password: Password for the new user
         :param str,optional email: E-mail address of the new user, defaults to an empty string
         """
-        if not self._gateway.initialized:
+        if not self._edge.api.initialized:
             user = Object()
             user.username = username
             user.password = password
             user.email = email
-            self._gateway.post('/nosession/createfirstuser', user)
+            self._edge.api.post('/nosession/createfirstuser', user)
             logging.getLogger().info('User created. %s', {'user': username})
         else:
             logging.getLogger().info('Skipping. root account already exists.')
-        self._gateway.login(username, password)
+        self._edge.login(username, password)
 
     def add(self, username, password, full_name=None, email=None, uid=None):
         """
@@ -52,7 +52,7 @@ class Users(BaseCommand):
         user.email = email
         user.uid = uid
         try:
-            response = self._gateway.add('/config/auth/users', user)
+            response = self._edge.api.add('/config/auth/users', user)
             logging.getLogger().info("User created. %s", {'username': user.username})
             return response
         except CTERAException as error:
@@ -70,7 +70,7 @@ class Users(BaseCommand):
         :param str,optional uid: The uid of the user, defaults to None
         """
         try:
-            user = self._gateway.get('/config/auth/users/' + username)
+            user = self._edge.api.get('/config/auth/users/' + username)
         except CTERAException as error:
             raise CTERAException('Failed to get the user', error)
 
@@ -83,7 +83,7 @@ class Users(BaseCommand):
         if uid:
             user.uid = uid
         try:
-            response = self._gateway.put('/config/auth/users/' + username, user)
+            response = self._edge.api.put('/config/auth/users/' + username, user)
             logging.getLogger().info("User modified. %s", {'username': user.username})
             return response
         except CTERAException as error:
@@ -97,7 +97,7 @@ class Users(BaseCommand):
         :param str username: User name of the user to delete
         """
         try:
-            response = self._gateway.delete('/config/auth/users/' + username)
+            response = self._edge.api.delete('/config/auth/users/' + username)
             logging.getLogger().info("User deleted. %s", {'username': username})
             return response
         except Exception as error:

@@ -1,6 +1,6 @@
 import logging
 
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from ..common import Object
 from . import enum
 from .base_command import BaseCommand
@@ -28,7 +28,7 @@ class Syslog(BaseCommand):
         obj.minSeverity = min_severity
 
         logging.getLogger().info("Configuring syslog server.")
-        self._gateway.put('/config/logging/syslog', obj)
+        self._edge.api.put('/config/logging/syslog', obj)
         logging.getLogger().info(
             "Syslog server configured. %s",
             {'server': server, 'port': port, 'protocol': proto, 'minSeverity': min_severity}
@@ -37,11 +37,11 @@ class Syslog(BaseCommand):
     def disable(self):
         """ Disable Syslog """
         logging.getLogger().info("Disabling syslog server.")
-        self._gateway.put('/config/logging/syslog/mode', enum.Mode.Disabled)
+        self._edge.api.put('/config/logging/syslog/mode', enum.Mode.Disabled)
         logging.getLogger().info("Syslog server disabled.")
 
     def get_configuration(self):
-        return self._gateway.get('/config/logging/syslog')
+        return self._edge.api.get('/config/logging/syslog')
 
     def modify(self, server=None, port=None, proto=None, min_severity=None):
         """
@@ -65,7 +65,7 @@ class Syslog(BaseCommand):
             current_config.minSeverity = min_severity
 
         logging.getLogger().info("Updating syslog server configuration.")
-        self._gateway.put('/config/logging/syslog', current_config)
+        self._edge.api.put('/config/logging/syslog', current_config)
         logging.getLogger().info(
             "Syslog server configured. %s",
             {

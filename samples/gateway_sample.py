@@ -1,6 +1,6 @@
 import logging
 
-from cterasdk import Gateway, gateway_enum, config, CTERAException, gateway_types
+from cterasdk import Edge, gateway_enum, config, CTERAException, gateway_types
 
 from sample_base import CTERASDKSampleBase
 
@@ -36,7 +36,7 @@ class GatewaySample(CTERASDKSampleBase):
 
     def _connect_to_gateway(self):
         gateway_address = GatewaySample._get_input(GatewaySample._gateway_address_request_string)
-        self._device = Gateway(gateway_address)
+        self._device = Edge(gateway_address)
 
     def _create_first_user(self):
         print("Creating the Gateway's first user")
@@ -77,7 +77,7 @@ class GatewaySample(CTERASDKSampleBase):
 
     def _set_dns_server(self):
         print("Setting the Gateway's DNS Server to 8.8.8.8")
-        ipaddr = self._device.get('/status/network/ports/0/ip')
+        ipaddr = self._device.api.get('/status/network/ports/0/ip')
         self._device.network.set_static_ipaddr(ipaddr.address, ipaddr.netmask, ipaddr.gateway, '8.8.8.8')
         print("DNS Server was set to 8.8.8.8")
 
@@ -98,7 +98,7 @@ class GatewaySample(CTERASDKSampleBase):
 
     def _disable_first_time_wizard(self):
         print("Disabling the First Time Wizard")
-        self._device.put('/config/gui/openFirstTimeWizard', False)
+        self._device.api.put('/config/gui/openFirstTimeWizard', False)
 
     def _create_share(self):
         print("Creating a new share")

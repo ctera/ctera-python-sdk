@@ -55,7 +55,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         execute_response = TestCoreZones._get_zones_display_info_empty_response()
         self._init_global_admin(execute_response=execute_response)
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.Zones(self._global_admin).get(self._zone_name)
 
         self._global_admin.execute.assert_called_once_with('', 'getZonesDisplayInfo', mock.ANY)
@@ -78,7 +78,7 @@ class TestCoreZones(base_core.BaseCoreTest):
     def test_add_zone_raise(self):
         execute_response = TestCoreZones._get_add_zone_response('Expected Failure')
         self._init_global_admin(execute_response=execute_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.Zones(self._global_admin).add(self._zone_name)
         self._global_admin.execute.assert_called_once_with('', 'addZone', mock.ANY)
         expected_param = self._get_zone_param()
@@ -119,7 +119,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         find_cloud_folder_mock = self.patch_call("cterasdk.core.cloudfs.CloudDrives.find")
         find_cloud_folder_mock.side_effect = mock.MagicMock(side_effect=TestCoreZones._find_cloud_folder)
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.Zones(self._global_admin).add_folders(self._zone_name, self._find_folder_helpers)
 
         self._global_admin.cloudfs.zones.get.assert_called_once_with(self._zone_name)
@@ -168,7 +168,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         query_devices_mock = self.patch_call("cterasdk.core.cloudfs.devices.Devices.by_name")
         query_devices_mock.return_value = self._get_device_objects()
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.Zones(self._global_admin).add_devices(self._zone_name, self._device_names)
 
         self._global_admin.cloudfs.zones.get.assert_called_once_with(self._zone_name)

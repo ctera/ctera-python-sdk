@@ -1,7 +1,7 @@
 import logging
 
 from ..common import parse_base_object_ref
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 
 
 def api(Gateway):

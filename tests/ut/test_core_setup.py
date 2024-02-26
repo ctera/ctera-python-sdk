@@ -172,7 +172,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         self._global_admin.get = get_function
         self._global_admin.execute = execute_function
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             setup.Setup(self._global_admin).init_replication_server(self._master_ipaddr, self._master_secret, self._replicate_from)
         self.assertEqual('Could not find database replication target.', error.exception.message)
 

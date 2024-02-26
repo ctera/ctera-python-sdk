@@ -2,7 +2,7 @@ import re
 import logging
 
 from ..common import Object
-from ..exception import CTERAException, CTERAConnectionError
+from ..exceptions import CTERAException
 from .base_command import BaseCommand
 from .types import TCPService
 
@@ -16,7 +16,7 @@ class DirectoryService(BaseCommand):
         """
         Get the Active Directory join status
         """
-        return self._gateway.get('/status/fileservices/cifs/joinStatus') == 0
+        return self._edge.api.get('/status/fileservices/cifs/joinStatus') == 0
 
     def connect(self, domain, username, password, ou=None, check_connection=False):
         """
@@ -31,11 +31,11 @@ class DirectoryService(BaseCommand):
         if check_connection:
             self._check_domain_connectivity(domain)
 
-        cifs = self._gateway.get('/config/fileservices/cifs')
+        cifs = self._edge.api.get('/config/fileservices/cifs')
         cifs.type = "domain"
         cifs.domain = domain
         cifs.workgroup = None
-        self._gateway.put('/config/fileservices/cifs', cifs)
+        self._edge.api.put('/config/fileservices/cifs', cifs)
 
         param = Object()
         param.username = username
@@ -45,7 +45,7 @@ class DirectoryService(BaseCommand):
         logging.getLogger().info("Connecting to Active Directory. %s", {'domain': domain, 'user': username})
 
         try:
-            self._gateway.execute("/status/fileservices/cifs", "joinDomain", param)
+            self._edge.api.execute("/status/fileservices/cifs", "joinDomain", param)
         except CTERAException as error:
             logging.getLogger().error("Failed connecting to Active Directory.")
             raise error
@@ -55,12 +55,11 @@ class DirectoryService(BaseCommand):
         port = 389
         domain_controllers = self.get_static_domain_controller()
         domain_controllers = re.findall(r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b', domain_controllers) if domain_controllers else [domain]
-        connection_results = self._gateway.network.diagnose([TCPService(host, port) for host in domain_controllers])
+        connection_results = self._edge.network.diagnose([TCPService(host, port) for host in domain_controllers])
         for connection_result in connection_results:
             if not connection_result.is_open:
                 logging.getLogger().error("Connection failed. No traffic allowed over port %(port)s", dict(port=connection_result.port))
-                raise CTERAConnectionError('Unable to establish connection', None, host=connection_result.host,
-                                           port=connection_result.port, protocol='LDAP')
+                raise ConnectionError(f'Unable to establish LDAP connection {connection_result.host}:{connection_result.port}')
 
     def get_static_domain_controller(self):
         """
@@ -69,7 +68,7 @@ class DirectoryService(BaseCommand):
         :return: A FQDN, hostname or ip address of the domain controller
         :rtype: str
         """
-        return self._gateway.get('/config/fileservices/cifs/passwordServer')
+        return self._edge.api.get('/config/fileservices/cifs/passwordServer')
 
     def set_static_domain_controller(self, dc):
         """
@@ -79,13 +78,13 @@ class DirectoryService(BaseCommand):
         :return: The FQDN, hostname or ip address of the domain controller
         :rtype: str
         """
-        return self._gateway.put('/config/fileservices/cifs/passwordServer', dc)
+        return self._edge.api.put('/config/fileservices/cifs/passwordServer', dc)
 
     def remove_static_domain_controller(self):
         """
         Delete the static domain controller configuration
         """
-        self._gateway.put('/config/fileservices/cifs/passwordServer', None)
+        self._edge.api.put('/config/fileservices/cifs/passwordServer', None)
 
     def get_advanced_mapping(self):
         """
@@ -94,7 +93,7 @@ class DirectoryService(BaseCommand):
         :returns: A dictionary of domain mapping objects
         :rtype: dict
         """
-        return {mapping.domainFlatName: mapping for mapping in self._gateway.get('/config/fileservices/cifs/idMapping/map')}
+        return {mapping.domainFlatName: mapping for mapping in self._edge.api.get('/config/fileservices/cifs/idMapping/map')}
 
     def set_advanced_mapping(self, mappings):
         """
@@ -106,7 +105,7 @@ class DirectoryService(BaseCommand):
             raise CTERAException('Failed to configure advanced mapping. Not connected to directory services.')
 
         domains = self.domains()
-        advanced_mapping = self._gateway.get('/config/fileservices/cifs/idMapping/map')
+        advanced_mapping = self._edge.api.get('/config/fileservices/cifs/idMapping/map')
         advanced_mapping = []
         for mapping in mappings:
             if mapping.domainFlatName in domains:
@@ -117,7 +116,7 @@ class DirectoryService(BaseCommand):
         logging.getLogger().debug('Updating advanced mapping. %s', {
             'domains': [mapping.domainFlatName for mapping in advanced_mapping]
         })
-        response = self._gateway.put('/config/fileservices/cifs/idMapping/map', advanced_mapping)
+        response = self._edge.api.put('/config/fileservices/cifs/idMapping/map', advanced_mapping)
         logging.getLogger().info('Updated advanced mapping.')
 
         return response
@@ -128,7 +127,7 @@ class DirectoryService(BaseCommand):
 
         :return cterasdk.common.object.Object:
         """
-        cifs = self._gateway.get('/config/fileservices/cifs')
+        cifs = self._edge.api.get('/config/fileservices/cifs')
         obj = Object()
         obj.type = cifs.type
         obj.domain = cifs.domain
@@ -141,7 +140,7 @@ class DirectoryService(BaseCommand):
 
         :return list(str): List of names of all discovered domains
         """
-        return [domain.flatName for domain in self._gateway.execute('/status/fileservices/cifs', 'enumDiscoveredDomains')]
+        return [domain.flatName for domain in self._edge.api.execute('/status/fileservices/cifs', 'enumDiscoveredDomains')]
 
     def disconnect(self):
         """
@@ -149,10 +148,10 @@ class DirectoryService(BaseCommand):
         """
         logging.getLogger().info("Disconnecting from Active Directory.")
 
-        cifs = self._gateway.get('/config/fileservices/cifs')
+        cifs = self._edge.api.get('/config/fileservices/cifs')
         cifs.type = "workgroup"
         cifs.workgroup = "CTERA"
         cifs.domain = None
 
-        self._gateway.put('/config/fileservices/cifs', cifs)
+        self._edge.api.put('/config/fileservices/cifs', cifs)
         logging.getLogger().info("Disconnected from Active Directory.")

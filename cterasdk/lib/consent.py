@@ -1,4 +1,4 @@
-from ..exception import ConsentException
+from ..exceptions import ConsentException
 
 
 def ask(question):

@@ -2,7 +2,7 @@ import re
 import logging
 
 from ..lib.task_manager_base import TaskBase
-from ..exception import InputError
+from ..exceptions import InputError
 from .base_command import BaseCommand
 
 
@@ -17,8 +17,8 @@ class Task(TaskBase):
 
     def get_task_status(self):
         if self.CTERAHost.session().in_tenant_context():
-            return self.CTERAHost.execute('', 'getTaskStatus', self.path)
-        return self.CTERAHost.get('/' + self.path)
+            return self.CTERAHost.api.execute('', 'getTaskStatus', self.path)
+        return self.CTERAHost.api.get('/' + self.path)
 
 
 class Tasks(BaseCommand):
@@ -30,7 +30,7 @@ class Tasks(BaseCommand):
 
         :param str ref: Task reference
         """
-        task = Task(self._portal, ref)
+        task = Task(self._core, ref)
         return task.status()
 
     def wait(self, ref, retries=100, seconds=1):
@@ -41,5 +41,5 @@ class Tasks(BaseCommand):
         :param int,optional retries: Number of retries when sampling the task status, defaults to 100
         :param int,optional seconds: Number of seconds to wait between retries, defaults to 1
         """
-        task = Task(self._portal, ref, retries, seconds)
+        task = Task(self._core, ref, retries, seconds)
         return task.wait()

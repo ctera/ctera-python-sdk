@@ -5,7 +5,7 @@ from cterasdk.common import Object
 from tests.ut import base_edge
 
 
-class TestObjectGateway(base_edge.BaseEdgeTest):
+class TestObjectEdge(base_edge.BaseEdgeTest):
 
     def setUp(self):
         super().setUp()
@@ -30,7 +30,7 @@ class TestObjectGateway(base_edge.BaseEdgeTest):
         self._init_filer(get_response=get_response)
         self._socket_connect_mock.side_effect = socket.gaierror()
 
-        with self.assertRaises(exception.HostUnreachable) as error:
+        with self.assertRaises(exceptions.HostUnreachable) as error:
             self._filer.test()
 
         self._socket_connect_mock.assert_called_once_with((self._host, self._port))
@@ -42,7 +42,7 @@ class TestObjectGateway(base_edge.BaseEdgeTest):
         self._init_filer(get_response=get_response)
         self._socket_connect_mock.return_value = 1
 
-        with self.assertRaises(exception.HostUnreachable) as error:
+        with self.assertRaises(exceptions.HostUnreachable) as error:
             self._filer.test()
 
         self._socket_connect_mock.assert_called_once_with((self._host, self._port))

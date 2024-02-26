@@ -2,7 +2,7 @@ from .base_command import BaseCommand
 from .enum import DeviceType
 from . import remote, query
 from ..common import union
-from ..exception import CTERAException, ObjectNotFoundException
+from ..exceptions import CTERAException, ObjectNotFoundException
 
 
 class Devices(BaseCommand):
@@ -13,11 +13,11 @@ class Devices(BaseCommand):
     default = ['name', 'portal', 'deviceType', 'version', 'remoteAccessUrl']
 
     def _create_device_resource_uri(self, device_name, tenant):
-        session = self._portal.session()
+        session = self._core.session()
         if not tenant:
             if not session.in_tenant_context():
                 raise CTERAException('You must specify a tenant name or browse the tenant first.')
-            tenant = self._portal.session().tenant()
+            tenant = self._core.session().tenant()
         if session.is_local_auth():
             resource_uri = '/devices/' + device_name  # local auth: auto appends /portals/{tenant_name}
         else:
@@ -40,11 +40,11 @@ class Devices(BaseCommand):
 
         resource_uri = self._create_device_resource_uri(device_name, tenant)
 
-        dev = self._portal.get_multi(resource_uri, include)
+        dev = self._core.api.get_multi(resource_uri, include)
         if dev.name is None:
             raise ObjectNotFoundException('Device not found', resource_uri, tenant=tenant, name=device_name)
 
-        return remote.remote_command(self._portal, dev)
+        return remote.remote_command(self._core, dev)
 
     def filers(self, include=None, allPortals=False, deviceTypes=None):
         """
@@ -135,14 +135,14 @@ class Devices(BaseCommand):
         for query_filter in filters:
             builder.addFilter(query_filter)
         if user:
-            uid = self._portal.users.get(user, ['uid']).uid
+            uid = self._core.users.get(user, ['uid']).uid
             builder.ownedBy(uid)
         builder.orFilter((len(filters) > 1))
         param = builder.build()
         # Check if the _all attribute conflicts with the current tenant
-        iterator = query.iterator(self._portal, '/devices', param)
+        iterator = query.iterator(self._core, '/devices', param)
         for dev in iterator:
-            yield remote.remote_command(self._portal, dev)
+            yield remote.remote_command(self._core, dev)
 
     def get_comment(self, device_name, tenant=None):
         """
@@ -152,7 +152,7 @@ class Devices(BaseCommand):
         :returns: Comment
         :rtype: str
         """
-        return self._portal.get(f'{self._create_device_resource_uri(device_name, tenant)}/comment')
+        return self._core.api.get(f'{self._create_device_resource_uri(device_name, tenant)}/comment')
 
     def set_comment(self, device_name, comment, tenant=None):
         """
@@ -161,4 +161,4 @@ class Devices(BaseCommand):
         :param str device: Device name
         :param str comment: Comment
         """
-        return self._portal.put(f'{self._create_device_resource_uri(device_name, tenant)}/comment', comment)
+        return self._core.api.put(f'{self._create_device_resource_uri(device_name, tenant)}/comment', comment)

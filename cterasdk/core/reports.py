@@ -41,4 +41,4 @@ class Reports(BaseCommand):
         return self._get_report('devicesStatisticsReport')
 
     def _get_report(self, report_name):
-        return self._portal.get(f'/reports/{report_name}')
+        return self._core.api.get(f'/reports/{report_name}')

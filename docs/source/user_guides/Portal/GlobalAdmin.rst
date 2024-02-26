@@ -4,10 +4,10 @@ Global Administration
 
 .. contents:: Table of Contents
 
-Instantiate a Global Admin object
----------------------------------
+Create a Global Administrator Session
+-------------------------------------
 
-.. autoclass:: cterasdk.object.Portal.GlobalAdmin
+.. autoclass:: cterasdk.objects.core.GlobalAdmin
    :special-members: __init__
    :noindex:
 
@@ -48,28 +48,28 @@ Setup
 Logging in
 ----------
 
-.. automethod:: cterasdk.object.Portal.GlobalAdmin.test
+.. automethod:: cterasdk.objects.core.GlobalAdmin.test
    :noindex:
 
 .. code-block:: python
 
    admin.test()
 
-.. automethod:: cterasdk.object.Portal.GlobalAdmin.login
+.. automethod:: cterasdk.objects.core.GlobalAdmin.login
    :noindex:
 
 .. code-block:: python
 
    admin.login('admin', 'G3neralZ0d!')
 
-.. automethod:: cterasdk.object.Portal.GlobalAdmin.logout
+.. automethod:: cterasdk.objects.core.GlobalAdmin.logout
    :noindex:
 
 .. code-block:: python
 
    admin.logout()
 
-.. automethod:: cterasdk.object.Portal.GlobalAdmin.whoami
+.. automethod:: cterasdk.objects.core.GlobalAdmin.whoami
    :noindex:
 
 .. code-block:: python
@@ -92,24 +92,6 @@ Navigating
 .. code-block:: python
 
    admin.portals.browse('portal')
-
-Core Methods
-------------
-
-.. automethod:: cterasdk.object.Portal.GlobalAdmin.show
-   :noindex:
-.. automethod:: cterasdk.object.Portal.GlobalAdmin.show_multi
-   :noindex:
-.. automethod:: cterasdk.object.Portal.GlobalAdmin.get
-   :noindex:
-.. automethod:: cterasdk.object.Portal.GlobalAdmin.put
-   :noindex:
-.. automethod:: cterasdk.object.Portal.GlobalAdmin.execute
-   :noindex:
-.. automethod:: cterasdk.object.Portal.GlobalAdmin.query
-   :noindex:
-.. automethod:: cterasdk.object.Portal.GlobalAdmin.show_query
-   :noindex:
 
 
 Licenses

@@ -2,7 +2,7 @@ import logging
 
 from .base_command import BaseCommand
 from .types import GroupAccount
-from ..exception import CTERAException, ObjectNotFoundException
+from ..exceptions import CTERAException, ObjectNotFoundException
 from ..common import Object
 from ..common import union
 from . import query
@@ -23,7 +23,7 @@ class Groups(BaseCommand):
     def _get_entire_object(self, group_account):
         ref = Groups._build_resource_url(group_account)
         try:
-            return self._portal.get(ref)
+            return self._core.api.get(ref)
         except CTERAException as error:
             raise CTERAException('Failed to retrieve group', error)
 
@@ -38,7 +38,7 @@ class Groups(BaseCommand):
         baseurl = Groups._build_resource_url(group_account)
         include = union(include or [], Groups.default)
         include = ['/' + attr for attr in include]
-        group_object = self._portal.get_multi(baseurl, include)
+        group_object = self._core.api.get_multi(baseurl, include)
         if group_object.name is None:
             raise ObjectNotFoundException('Could not find group', baseurl, group_directory=group_account.directory, name=group_account.name)
         return group_object
@@ -53,7 +53,7 @@ class Groups(BaseCommand):
         """
         include = union(include or [], Groups.default)
         param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._portal, '/localGroups', param)
+        return query.iterator(self._core, '/localGroups', param)
 
     def list_domain_groups(self, domain, include=None):
         """
@@ -66,10 +66,10 @@ class Groups(BaseCommand):
         """
         include = union(include or [], Groups.default)
         param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._portal, f'/domains/{domain}/adGroups', param)
+        return query.iterator(self._core, f'/domains/{domain}/adGroups', param)
 
     def _members_reference(self, users):
-        return [self._portal.users.get(user, include=['baseObjectRef']).baseObjectRef for user in users]
+        return [self._core.users.get(user, include=['baseObjectRef']).baseObjectRef for user in users]
 
     def add(self, name, description=None, members=None):
         """
@@ -89,7 +89,7 @@ class Groups(BaseCommand):
             param.members = self._members_reference(members)
 
         logging.getLogger().info('Creating group. %s', {'group': name})
-        response = self._portal.execute('', 'addGroup', param)
+        response = self._core.api.execute('', 'addGroup', param)
         logging.getLogger().info('Group created. %s', {'group': name})
 
         return response
@@ -117,7 +117,7 @@ class Groups(BaseCommand):
         param.membersToDelete = []
 
         try:
-            response = self._portal.execute(f'/localGroups/{current_groupname}', 'updateGroup', param)
+            response = self._core.api.execute(f'/localGroups/{current_groupname}', 'updateGroup', param)
             logging.getLogger().info("Group modified. %s", {'group_name': group.name})
             return response
         except CTERAException as error:
@@ -131,7 +131,7 @@ class Groups(BaseCommand):
         :param cterasdk.core.types.GroupAccount group_account: Group account
         """
         param = query.QueryParamBuilder().startFrom(0).build()
-        return list(query.iterator(self._portal, Groups._build_resource_url(group_account), param, 'getMembers'))
+        return list(query.iterator(self._core, Groups._build_resource_url(group_account), param, 'getMembers'))
 
     def add_members(self, group_account, members):
         """
@@ -146,7 +146,7 @@ class Groups(BaseCommand):
         param.groupData = self._get_entire_object(group_account)
         param.membersToAdd = list(set(new_members) - set(current_members))
         param.membersToDelete = []
-        return self._portal.execute(f'/localGroups/{group_account.name}', 'updateGroup', param)
+        return self._core.api.execute(f'/localGroups/{group_account.name}', 'updateGroup', param)
 
     def remove_members(self, group_account, members):
         """
@@ -161,7 +161,7 @@ class Groups(BaseCommand):
         param.groupData = self._get_entire_object(group_account)
         param.membersToAdd = []
         param.membersToDelete = list(set(current_members).intersection(set(to_remove)))
-        return self._portal.execute(f'/localGroups/{group_account.name}', 'updateGroup', param)
+        return self._core.api.execute(f'/localGroups/{group_account.name}', 'updateGroup', param)
 
     def delete(self, group_account):
         """
@@ -172,7 +172,7 @@ class Groups(BaseCommand):
         logging.getLogger().info('Deleting group. %s', {'group': str(group_account.name)})
         baseurl = f'/localGroups/{group_account.name}' if group_account.is_local \
             else f'/domains/{group_account.directory}/adGroups/{group_account.name}'
-        response = self._portal.execute(baseurl, 'delete', True)
+        response = self._core.api.execute(baseurl, 'delete', True)
         logging.getLogger().info('Group deleted. %s', {'group': str(group_account.name)})
 
         return response

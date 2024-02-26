@@ -10,7 +10,7 @@ class Dedup(BaseCommand):
 
     def __init__(self, gateway):
         super().__init__(gateway)
-        self.regen = Regeneration(self._gateway)
+        self.regen = Regeneration(self._edge)
 
     def enable(self, reboot=False, wait=False):
         """
@@ -20,7 +20,7 @@ class Dedup(BaseCommand):
         :param bool,optional wait: Wait for reboot to complete, defaults to False
         """
         logging.getLogger().info("Enabling local deduplication.")
-        response = self._gateway.put('/config/dedup/useLocalMapFileDedup', True)
+        response = self._edge.api.put('/config/dedup/useLocalMapFileDedup', True)
         self._wait_for_reboot(reboot, wait)
         return response
 
@@ -32,7 +32,7 @@ class Dedup(BaseCommand):
         :param bool,optional wait: Wait for reboot to complete, defaults to False
         """
         logging.getLogger().info("Disabling local deduplication.")
-        response = self._gateway.put('/config/dedup/useLocalMapFileDedup', False)
+        response = self._edge.api.put('/config/dedup/useLocalMapFileDedup', False)
         self._wait_for_reboot(reboot, wait)
         return response
 
@@ -43,13 +43,13 @@ class Dedup(BaseCommand):
         :returns: An object including the deduplication status
         :rtype: cterasdk.edge.types.DeduplicationStatus
         """
-        size = self._gateway.execute('/config/cloudsync/cloudExtender', 'allFilesTotalUsedBytes')
-        usage = self._gateway.execute('/config/cloudsync/cloudExtender', 'storageUsedBytes')
+        size = self._edge.api.execute('/config/cloudsync/cloudExtender', 'allFilesTotalUsedBytes')
+        usage = self._edge.api.execute('/config/cloudsync/cloudExtender', 'storageUsedBytes')
         return DeduplicationStatus(size, usage)
 
     def _wait_for_reboot(self, reboot, wait):
         if reboot:
-            self._gateway.power.reboot(wait)
+            self._edge.power.reboot(wait)
 
 
 class Regeneration(BaseCommand):
@@ -60,10 +60,10 @@ class Regeneration(BaseCommand):
         Run the regeneration process
         """
         logging.getLogger().info("Executing the dedup regeneration process.")
-        return self._gateway.execute('/config/dedup', 'regenerate', Object())
+        return self._edge.api.execute('/config/dedup', 'regenerate', Object())
 
     def status(self):
         """
         Get the regeneration process statistics
         """
-        return self._gateway.get('/proc/dedup/regenerate/general')
+        return self._edge.api.get('/proc/dedup/regenerate/general')

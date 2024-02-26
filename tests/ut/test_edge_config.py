@@ -1,9 +1,10 @@
 import datetime
 from unittest import mock
 
-from cterasdk import config as sdkconfig
 from cterasdk.edge import config
 from tests.ut import base_edge
+
+import cterasdk.settings
 
 
 class TestEdgeConfig(base_edge.BaseEdgeTest):
@@ -14,7 +15,7 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
         self._location = '205 E. 42nd St. New York, NY. 10017'
         self._filename = 'file.xml'
         self._target_directory = '/path/to/folder'
-        self._default_download_directory = sdkconfig.filesystem['dl']
+        self._default_download_directory = cterasdk.settings.downloads.location
         self._current_datetime = datetime.datetime.now()
 
     def test_get_hostname(self):

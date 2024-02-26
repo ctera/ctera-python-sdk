@@ -26,15 +26,15 @@ class SSH(BaseCommand):
                 with open(public_key_file, 'r', encoding='utf-8') as f:
                     public_key = f.read()
             else:
-                public_key = CryptoServices.generate_and_save_key_pair(self._gateway.host(), exponent=exponent, key_size=key_size)
+                public_key = CryptoServices.generate_and_save_key_pair(self._edge.host(), exponent=exponent, key_size=key_size)
 
         param.publicKey = public_key
 
         logging.getLogger().info("Enabling SSH daemon.")
-        self._gateway.execute('/config/device', 'startSSHD', param)
+        self._edge.api.execute('/config/device', 'startSSHD', param)
         logging.getLogger().info("SSH daemon enabled.")
 
     def disable(self):
         logging.getLogger().info("Disabling SSH daemon.")
-        self._gateway.execute('/config/device', 'stopSSHD')
+        self._edge.api.execute('/config/device', 'stopSSHD')
         logging.getLogger().info("SSH daemon disabled.")

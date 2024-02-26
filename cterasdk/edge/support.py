@@ -1,10 +1,11 @@
 from datetime import datetime
 import logging
 
-from ..exception import InputError
 from ..lib import FileSystem
-from .. import config
+from ..exceptions import InputError
 from .base_command import BaseCommand
+
+import cterasdk.settings
 
 
 class DebugLevel:
@@ -55,13 +56,12 @@ class Support(BaseCommand):
             if level not in options:
                 raise InputError('Invalid debug level', level, options)
             cli_command = cli_command + ' ' + level
-        return self._gateway.cli.run_command(cli_command)
+        return self._edge.cli.run_command(cli_command)
 
     def get_support_report(self):
         """ Download support report """
-        dirpath = config.filesystem['dl']
-        filename = 'Support-' + self._gateway.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.zip'
-        logging.getLogger().info('Downloading support report. %s', {'host': self._gateway.host()})
-        handle = self._gateway.openfile('/supportreport')
-        filepath = FileSystem.instance().save(dirpath, filename, handle)
+        filename = 'Support-' + self._edge.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.zip'
+        logging.getLogger().info('Downloading support report. %s', {'host': self._edge.host()})
+        handle = self._edge.api.handle('/supportreport')
+        filepath = FileSystem.instance().save(cterasdk.settings.downloads.location, filename, handle)
         logging.getLogger().info('Support report downloaded. %s', {'filepath': filepath})

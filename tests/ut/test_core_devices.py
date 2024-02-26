@@ -42,7 +42,7 @@ class TestCoreDevices(base_core.BaseCoreTest):
         o = Object()
         o.name = None
         self._init_global_admin(get_multi_response=o)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             devices.Devices(self._global_admin).device(o.name)
         self.assertEqual('Device not found', error.exception.message)
 

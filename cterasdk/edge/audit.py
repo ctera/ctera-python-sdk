@@ -55,7 +55,7 @@ class Audit(BaseCommand):
         settings.humanReadableAuditLog = humanReadableAuditLog
 
         logging.getLogger().info('Enabling SMB audit logs')
-        self._gateway.put('/config/logging/files', settings)
+        self._edge.api.put('/config/logging/files', settings)
         logging.getLogger().info('Audit logs enabled')
 
     def disable(self):
@@ -63,5 +63,5 @@ class Audit(BaseCommand):
         Disable Gateway Audit log
         """
         logging.getLogger().info('Disabling SMB audit logs')
-        self._gateway.put('/config/logging/files/mode', enum.Mode.Disabled)
+        self._edge.api.put('/config/logging/files/mode', enum.Mode.Disabled)
         logging.getLogger().info('Audit logs disabled')

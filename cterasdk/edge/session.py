@@ -34,8 +34,8 @@ class Session(SessionBase):
         self.connection = SessionConnection(SessionType.Local)
 
     def _do_start_local_session(self, CTERA_Host):
-        user = CTERA_Host.get('/currentuser').username
-        self.set_version(CTERA_Host.get('/status/device/runningFirmware'))
+        user = CTERA_Host.api.get('/currentuser').username
+        self.set_version(CTERA_Host.api.get('/status/device/runningFirmware'))
         self.user = LocalUser(user)
         self.connection = SessionConnection(SessionType.Local)
 
