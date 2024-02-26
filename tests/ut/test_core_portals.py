@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.common import Object
 from cterasdk.core.enum import PortalType
 from cterasdk.core import portals

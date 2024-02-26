@@ -33,7 +33,8 @@ class FileAccess(FileAccessBase):
         return dict(
             name=local_file_info['name'],
             Filename=local_file_info['name'],
-            fullpath=self._ctera_host.webdav._builder(common.get_object_path(dest_path.relative, local_file_info['name']).encoded_fullpath()),
+            fullpath=self._ctera_host.webdav._builder(common.get_object_path(dest_path.relative, 
+                                                                             local_file_info['name']).encoded_fullpath()),
             fileSize=local_file_info['size'],
             file=fd
         )
@@ -43,13 +44,13 @@ class FileAccess(FileAccessBase):
         if not resource_info.isFolder:
             raise RemoteFileSystemException('The destination path is not a directory', None, path=path.fullpath())
         return resource_info.cloudFolderInfo.uid
-    
+
     def _get_zip_file_handle(self, cloud_directory, files):
         return self._ctera_host._folders.download_zip(
             self._get_multi_file_url(cloud_directory, files),
             self._make_form_data(cloud_directory, files)
         )
-    
+
     def _upload_object(self, local_file_info, fd, dest_path):
         return self._ctera_host._upload.upload(
                 self._get_upload_url(dest_path),

@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import licenses
 from cterasdk.edge.enum import License
 from tests.ut import base_edge

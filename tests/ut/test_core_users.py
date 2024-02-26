@@ -2,7 +2,7 @@
 import datetime
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.common import Object
 from cterasdk.core.types import UserAccount
 from cterasdk.core import users, admins

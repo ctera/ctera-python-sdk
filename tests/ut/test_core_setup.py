@@ -1,7 +1,7 @@
 from unittest import mock
 
 from cterasdk import toxmlstr
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.core import setup
 from cterasdk.core.enum import ServerMode, SlaveAuthenticaionMethod, SetupWizardStage, SetupWizardStatus
 from cterasdk.common import Object

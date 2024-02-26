@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import cache
 from cterasdk.common import Object
 from cterasdk.edge.enum import OperationMode

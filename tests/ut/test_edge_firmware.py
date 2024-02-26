@@ -1,7 +1,7 @@
 from pathlib import Path
 from unittest import mock
 
-from cterasdk.exception import CTERAException
+from cterasdk.exceptions import CTERAException
 from cterasdk.common import Object
 from cterasdk.edge import firmware
 from tests.ut import base_edge

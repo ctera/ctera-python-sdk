@@ -41,6 +41,7 @@ def makedirs(core, path):
         except common.ItemExists:
             pass
 
+
 def rename(core, path, name):
     param = common.ActionResourcesParam.instance()
     logging.getLogger().info('Renaming item. %s', {'path': str(path.relative), 'name': name})
@@ -50,7 +51,7 @@ def rename(core, path, name):
 
 def remove(core, *paths):
     param = common.ActionResourcesParam.instance()
-    paths = [path] if not isinstance(paths, tuple) else paths
+    paths = [paths] if not isinstance(paths, tuple) else paths
     for path in paths:
         logging.getLogger().info('Deleting item. %s', {'path': str(path.relative)})
         param.add(common.SrcDstParam.instance(src=path.fullpath()))
@@ -59,7 +60,7 @@ def remove(core, *paths):
 
 def recover(core, *paths):
     param = common.ActionResourcesParam.instance()
-    paths = [path] if not isinstance(paths, tuple) else paths
+    paths = [paths] if not isinstance(paths, tuple) else paths
     for path in paths:
         logging.getLogger().info('Recovering item. %s', {'path': str(path.relative)})
         param.add(common.SrcDstParam.instance(src=path.fullpath()))
@@ -68,7 +69,7 @@ def recover(core, *paths):
 
 def copy(core, *paths, destination=None):
     param = common.ActionResourcesParam.instance()
-    paths = [path] if not isinstance(paths, tuple) else paths
+    paths = [paths] if not isinstance(paths, tuple) else paths
     for path in paths:
         logging.getLogger().info('Copying item. %s', {'path': str(path.relative), 'to': str(destination.relative)})
         param.add(common.SrcDstParam.instance(src=path.fullpath(), dest=destination.joinpath(path.name()).fullpath()))
@@ -77,7 +78,7 @@ def copy(core, *paths, destination=None):
 
 def move(core, *paths, destination=None):
     param = common.ActionResourcesParam.instance()
-    paths = [path] if not isinstance(paths, tuple) else paths
+    paths = [paths] if not isinstance(paths, tuple) else paths
     for path in paths:
         logging.getLogger().info('Copying item. %s', {'path': str(path.relative), 'to': str(destination.relative)})
         param.add(common.SrcDstParam.instance(src=path.fullpath(), dest=destination.joinpath(path.name()).fullpath()))

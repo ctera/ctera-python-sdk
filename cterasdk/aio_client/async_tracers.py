@@ -4,7 +4,7 @@ import logging
 
 
 def default():
-    
+
     async def on_request_start(session, context, params):
         param = {
             'request': {
@@ -45,7 +45,7 @@ def default():
     trace_config.on_request_end.append(on_request_end)
 
     return trace_config
-    
+
 
 def serialize(param):
     return json.dumps(param, indent=5)

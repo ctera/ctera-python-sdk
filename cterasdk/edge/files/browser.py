@@ -1,16 +1,13 @@
-import logging
-
 from ..base_command import BaseCommand
 from . import io, common, file_access
 
 
-class FileBrowser:
+class FileBrowser(BaseCommand):
     """ Edge Filer File Browser APIs """
 
     def __init__(self, edge):
         self._edge = edge
         self._file_access = file_access.FileAccess(edge)
-
 
     def download(self, path, destination=None):
         """

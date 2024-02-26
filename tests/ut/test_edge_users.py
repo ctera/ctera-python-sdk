@@ -2,7 +2,7 @@ import sys
 
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import users
 from cterasdk.common import Object
 from tests.ut import base_edge

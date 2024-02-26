@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import directoryservice
 from cterasdk.edge.types import TCPService, TCPConnectResult
 from cterasdk.common import Object

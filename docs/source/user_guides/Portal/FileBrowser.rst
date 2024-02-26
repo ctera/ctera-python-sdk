@@ -109,7 +109,6 @@ Create Directory
 .. code:: python
 
    file_browser.mkdir('My Files/Documents')  # Create 'Documents'
-
    file_browser.makedirs('The/quick/brown/fox')  # Create directories recursively
 
 Rename

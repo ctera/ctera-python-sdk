@@ -1,7 +1,7 @@
 from unittest import mock
 import munch
 
-from cterasdk import exception, portal_enum
+from cterasdk import exceptions, portal_enum
 from cterasdk.core import cloudfs
 from cterasdk.core.types import UserAccount
 from cterasdk.core import query

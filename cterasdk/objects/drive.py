@@ -2,8 +2,6 @@ from ..aio_client import clients
 from .services import CTERA
 from .endpoints import EndpointBuilder
 
-from . import authenticators
-
 from ..edge import backup
 from ..edge import cli
 from ..edge import logs
@@ -20,7 +18,7 @@ class Drive(CTERA):
         super().__init__(host, port, https, base=base)
         async_session = self._generic._async_session
         self._ctera_session = session.Session(self.host())
-        self._management = clients.Management(EndpointBuilder.new(self.base, '/admingui/api'), async_session, self._authenticator)
+        self._management = clients.Management(EndpointBuilder.new(self.base, '/admingui/api'), async_session, lambda *_: True)
 
         self.backup = backup.Backup(self)
         self.cli = cli.CLI(self)
@@ -32,14 +30,11 @@ class Drive(CTERA):
     @property
     def management(self):
         return self._management
-    
+
     @property
     def _session_id_key(self):
         return '_cteraSessionId_'
-    
-    def _authenticator(self, url):
-        return True
-    
+
     @property
     def _login_object(self):
         raise NotImplementedError("Logins to the 'Drive App' are not enabled.")

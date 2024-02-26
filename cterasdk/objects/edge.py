@@ -1,5 +1,4 @@
 from ..aio_client import clients
-from ..exceptions import CTERAException
 from .services import CTERA
 from .endpoints import EndpointBuilder
 
@@ -16,7 +15,6 @@ from ..edge import cli
 from ..edge import config
 from ..edge import connection
 from ..edge import ctera_migrate
-from ..edge import decorator
 from ..edge import dedup
 from ..edge import directoryservice
 from ..edge import drive
@@ -50,7 +48,6 @@ from ..edge import syslog
 from ..edge import taskmgr
 from ..edge import telnet
 from ..edge import timezone
-from ..edge import uri
 from ..edge import users
 from ..edge import volumes
 
@@ -115,29 +112,29 @@ class Edge(CTERA):
             self._migrate = clients.Migrate(EndpointBuilder.new(self.base, '/migration/rest/v1'), async_session, self._authenticator)
             self._webdav = clients.Dav(EndpointBuilder.new(self.base, '/localFiles'), async_session, self._authenticator)
             self._api = clients.API(EndpointBuilder.new(self.base, '/admingui/api'), async_session, self._authenticator)
-    
+
     @property
     def migrate(self):
         return self._migrate
-    
+
     @property
     def _session_id_key(self):
         return '_cteraSessionId_'
-    
+
     def _authenticator(self, url):
         return authenticators.edge(self.session(), url)
-    
+
     @property
     def _login_object(self):
         return login.Login(self)
-    
+
     @property
     def initialized(self):
         return not self._login_object.info().isfirstlogin
-    
+
     def test(self):
         return connection.test(self)
-    
+
     def sso(self, ticket):
         """ Login using Single Sign On"""
         self._login_object.sso(ticket)
@@ -153,6 +150,6 @@ class Edge(CTERA):
                                        'network', 'nfs', 'ntp', 'power', 'ransom_protect', 'rsync', 'services', 'shares', 'shell', 
                                        'smb', 'snmp', 'ssh', 'ssl', 'support', 'sync', 'syslog', 'tasks', 'telnet', 'timezone', 
                                        'users', 'volumes']
-    
+
     def query(self, path, key, value):
         return query.query(self, path, key, value)

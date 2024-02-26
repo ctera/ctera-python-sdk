@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import backup
 from cterasdk.edge.enum import BackupConfStatusID
 from cterasdk.common import Object

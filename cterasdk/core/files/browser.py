@@ -7,7 +7,7 @@ from . import io, common, shares, file_access
 
 
 class FileBrowser(BaseCommand):
-    
+
     def __init__(self, core):
         super().__init__(core)
         self._base = f'/{self._core.context}/webdav'
@@ -22,7 +22,7 @@ class FileBrowser(BaseCommand):
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
         return self._file_access.download(self.get_object_path(path), destination=destination)
-    
+
     def download_as_zip(self, cloud_directory, files, destination=None):
         """
         Download a list of files and/or directories from a cloud folder as a ZIP file
@@ -35,7 +35,7 @@ class FileBrowser(BaseCommand):
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
         self._file_access.download_as_zip(self.get_object_path(cloud_directory), files, destination=destination)
-    
+
     def listdir(self, path, depth=None, include_deleted=False):
         """
         List Directory
@@ -93,7 +93,7 @@ class CloudDrive(FileBrowser):
         :param str destination: Remote path
         """
         self._file_access.upload(path, self.get_object_path(destination))
-    
+
     def mkdir(self, path):
         """
         Create a new directory
@@ -101,7 +101,7 @@ class CloudDrive(FileBrowser):
         :param str path: Directory path
         """
         return io.mkdir(self._core, self.get_object_path(path))
-    
+
     def makedirs(self, path):
         """
         Create a directory recursively

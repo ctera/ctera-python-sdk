@@ -14,7 +14,7 @@ class ClientError(Object):
         self.response = Object()
         self.response.status = error.status
         self.response.message = message or fromxmlstr(message) or fromjsonstr(message)
-    
+
 
 def accept_response(response):
     message = response.text if response.status > 400 else None
@@ -23,6 +23,4 @@ def accept_response(response):
     except aiohttp.ClientResponseError as error:
         error_object = ClientError(error, message)
         raise ClientResponseException(error_object)
-    return response
-
-        
+    return response        

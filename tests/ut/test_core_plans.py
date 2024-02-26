@@ -1,8 +1,8 @@
 from unittest import mock
 
-from cterasdk.exception import InputError
+from cterasdk.exceptions import InputError
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.common import Object
 from cterasdk.core import plans
 from tests.ut import base_core

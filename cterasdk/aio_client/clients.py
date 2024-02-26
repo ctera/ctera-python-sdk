@@ -25,7 +25,7 @@ class CookieJar:
     @property
     def all(self):
         return {v.key: v.value for v in self._cookies.filter_cookies(self._response_url).values()}
-    
+
     def update(self, cookies):
         self._cookies.update_cookies(cookies, self._response_url)
 
@@ -79,7 +79,7 @@ class Client:
     def post(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=data_serializer(data), **kwargs)
         return self._request(request, on_response=on_response)
-    
+
     @decorators.authenticated
     def form_data(self, path, data, *, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=Serializers.FormData(data), **kwargs)
@@ -94,22 +94,22 @@ class Client:
         request.kwargs['headers'] = utils.merge(request.kwargs.get('headers', None), self.headers.all)
         on_response = on_response if on_response else Response.new()
         return execute_request(self._async_session, request, on_response=on_response)
-    
+
     @property
     def cookies(self):
         return CookieJar(self._async_session.cookies, self._builder())
-    
+
     @property
     def headers(self):
         return self._headers
-    
+
     @property
     def baseurl(self):
         return self._builder()
 
     def shutdown(self):
         return asyncio.get_event_loop().run_until_complete(self._async_session.shutdown())
-    
+
     def __str__(self):
         return f"({self.__class__.__name__} client at {hex(hash(self))}, baseurl={self._builder()})"
 
@@ -131,12 +131,12 @@ class Dav(Client):
 
     def download(self, path, **kwargs):
         return super().handle(path, **kwargs)
-                             
+
     def mkcol(self, path):
         request = async_requests.MkcolRequest(self._builder(path))
         response = self._request(request, on_response=Response.new())
         return response.text
-    
+
     def copy(self, source, destination, *, overwrite=False):
         request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
         response = self._request(request, on_response=Response.new(Deserializers.XML))
@@ -146,11 +146,11 @@ class Dav(Client):
         request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
         response = self._request(request, on_response=Response.new(Deserializers.XML))
         return response.deserialize()
-    
+
     def delete(self, path):
         response = super().delete(path, on_response=Response.new())
         return response.text
-    
+
     def _webdav_headers(self, destination, overwrite):
         return {
             'Destination': self._builder(destination),
@@ -172,7 +172,7 @@ class XML(Client):
     def post(self, path, data, **kwargs):
         response = super().post(path, data, data_serializer=Serializers.XML, on_response=Response.new(Deserializers.XML), **kwargs)
         return response.deserialize()
-    
+
     def form_data(self, path, data, **kwargs):
         response = super().form_data(path, data, on_response=Response.new(Deserializers.XML), **kwargs)
         return response.deserialize()
@@ -200,7 +200,7 @@ class JSON(Client):
     def delete(self, path, **kwargs):
         response = super().delete(path, on_response=Response.new(Deserializers.JSON), **kwargs)
         return response.deserialize()
-    
+
     def _request(self, request, *, on_response=None):
         return super()._request(request, on_response=on_response)
 
@@ -210,7 +210,7 @@ class Extended(XML):
 
     def get_multi(self, path, paths):
         return self.database(path, 'get-multi', paths)
-    
+
     def show_multi(self, path, paths):
         print(Serializers.JSON(self.get_multi(path, paths), no_log=False))
 
@@ -219,7 +219,7 @@ class Extended(XML):
 
     def database(self, path, name, param=None):  # schema method
         return self._execute(path, 'db', name, param)
-    
+
     def add(self, path, param=None):
         return self.database(path, 'add', param)
 

@@ -1,7 +1,7 @@
 # pylint: disable=protected-access
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.common import Object
 from cterasdk.core.types import GroupAccount
 from cterasdk.core import groups

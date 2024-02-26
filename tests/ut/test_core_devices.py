@@ -2,7 +2,7 @@ from unittest import mock
 import uuid
 import munch
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.common import Object, union
 from cterasdk.core.types import UserAccount
 from cterasdk.core import enum, query

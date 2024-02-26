@@ -75,8 +75,8 @@ class Config(BaseCommand):
         return self._import_configuration(path)
 
     def _import_configuration(self, path):
+        self._filesystem.get_local_file_info(path)
         logging.getLogger().info('Importing Edge Filer configuration.')
-        info = self._filesystem.get_local_file_info(path)
         with open(path, 'rb') as fd:
             response = self._edge.api.form_data(
                 '/config',

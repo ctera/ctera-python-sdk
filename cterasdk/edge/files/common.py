@@ -17,7 +17,7 @@ class Path:
     @property
     def base(self):
         return self._base
-    
+
     @property
     def relative(self):
         return self._relative
@@ -50,8 +50,10 @@ class Path:
 class ItemExists(CTERAException):
     """Already exists"""
 
+
 class Forbidden(CTERAException):
     """Forbidden"""
+
 
 def raise_for_status(response, path):
     error = {
@@ -67,7 +69,7 @@ def raise_for_status(response, path):
     except Forbidden as error:
         logging.getLogger().error('Creating a folder in this location is forbidden. %s', {'name': path})
         raise error
-    
+
 
 def get_object_path(base, relative):
     return Path(relative, base)

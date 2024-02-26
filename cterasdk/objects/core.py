@@ -14,7 +14,6 @@ from ..core import cli
 from ..core import cloudfs
 from ..core import connection
 from ..core import credentials
-from ..core import decorator
 from ..core import devices
 from ..core import directoryservice
 from ..core import domains
@@ -28,7 +27,6 @@ from ..core import logs
 from ..core import messaging
 from ..core import plans
 from ..core import portals
-from ..core import query
 from ..core import reports
 from ..core import roles
 from ..core import servers
@@ -41,7 +39,6 @@ from ..core import storage_classes
 from ..core import syslog
 from ..core import taskmgr
 from ..core import templates
-from ..core import uri
 from ..core import users
 
 
@@ -51,7 +48,8 @@ class Portal(CTERA):
         super().__init__(host, port, https, base=None)
         async_session = self._generic._async_session
         self._ctera_session = session.Session(self.host(), self.context)
-        self._folders = clients.Folders(EndpointBuilder.new(self.base, self.context, '/folders/folders'), async_session, self._authenticator)
+        self._folders = clients.Folders(EndpointBuilder.new(self.base, self.context, '/folders/folders'), 
+                                        async_session, self._authenticator)
         self._upload = clients.Upload(EndpointBuilder.new(self.base, self.context, '/upload/folders'), async_session, self._authenticator)
         self._webdav = clients.Dav(EndpointBuilder.new(self.base, self.context, '/webdav'), async_session, self._authenticator)
         self._ctera = clients.Extended(EndpointBuilder.new(self.base, self.context), async_session, self._authenticator)
@@ -86,24 +84,24 @@ class Portal(CTERA):
     @abstractmethod
     def context(self):
         return NotImplementedError("Subclass must implement the 'context' property")
-    
+
     @property
     def _session_id_key(self):
         return 'JSESSIONID'
-    
+
     def _authenticator(self, url):
         return authenticators.core(self.session(), url, self.context)
-    
+
     @property
     def _login_object(self):
         return login.Login(self)
-    
+
     def test(self):
         return connection.test(self)
-    
+
     def public_info(self):
         return self.ctera.get('/public/publicInfo')
-    
+
     @property
     def _omit_fields(self):
         return super()._omit_fields + ['activation', 'admins', 'cloudfs', 'credentials', 'devices', 'directoryservice', 'domains', 'files',
@@ -131,7 +129,7 @@ class GlobalAdmin(Portal):
     @property
     def context(self):
         return 'admin'
-    
+
     @property
     def _omit_fields(self):
         return super()._omit_fields + ['antivirus', 'buckets', 'cli', 'kms', 'licenses', 'messaging', 'portals', 'servers', 'setup', 

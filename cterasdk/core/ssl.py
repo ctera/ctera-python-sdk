@@ -96,7 +96,7 @@ class SSL(BaseCommand):
         return self.import_from_zip(zipflie)
 
     def _import_certificate(self, zipfile):
-        info = self._filesystem.get_local_file_info(zipfile)
+        self._filesystem.get_local_file_info(zipfile)
         logging.getLogger().info('Uploading SSL certificate.')
         with open(zipfile, 'rb') as fd:
             response = self._core.api.form_data(

@@ -25,7 +25,7 @@ class CTERAException(Exception):
 
 
 class ClientResponseException(CTERAException):
-    
+
     def __init__(self, error_object):
         super().__init__('An error occurred while processing the HTTP request.', error_object)
 

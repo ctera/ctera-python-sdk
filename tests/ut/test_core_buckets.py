@@ -3,7 +3,7 @@ import munch
 
 from cterasdk.core import buckets, portals
 from cterasdk.core.types import AmazonS3
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.common import Object
 from tests.ut import base_core
 

@@ -110,7 +110,7 @@ class FetchResourcesParamBuilder:
 
     def build(self):
         return self.param
-    
+
 
 class Path:
 
@@ -125,7 +125,7 @@ class Path:
             message = 'Invalid directory path specified. Please ensure the directory path is correct and try again.'
             logging.getLogger().error(message)
             raise ValueError(message)
-        
+
         if self._relative.root == '/' or self._base.joinpath(self._relative) == self._relative:
             raise ValueError('You must specify a relative path. Omit leading / characters')
 
@@ -138,13 +138,13 @@ class Path:
         start, end = match.span()
         self._base = self._base.joinpath(href[start: end])
         self._relative = self._relative.joinpath(href[end + 1:])
-    
+
     def _from_string(self, param):
         self._relative = self._relative.joinpath(param)
 
     def name(self):
         return self._relative.name
-    
+
     @property
     def base(self):
         return str(self._base)
@@ -231,6 +231,3 @@ def raise_for_status(response, path):
     except ReservedName as error:
         logging.getLogger().error('Reserved directory name. %s', {'name': path})
         raise error
-    
-    
-    

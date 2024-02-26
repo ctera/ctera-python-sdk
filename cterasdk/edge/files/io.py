@@ -18,12 +18,13 @@ def makedirs(edge, path):
         except common.ItemExists:
             pass
 
+
 def copy(edge, path, destination=None, overwrite=False):
     destination = destination.joinpath(path.name()).fullpath()
     logging.getLogger().info('Copying. %s', {'from': path.fullpath(), 'to': destination})
     edge.webdav.copy(path.fullpath(), destination, overwrite=overwrite)
     logging.getLogger().info('Copied. %s', {'from': path.fullpath(), 'to': destination})
-    
+
 
 def move(edge, path, destination=None, overwrite=False):
     destination = destination.joinpath(path.name()).fullpath()

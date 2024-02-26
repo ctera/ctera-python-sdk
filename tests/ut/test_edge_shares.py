@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import shares
 from cterasdk.edge.enum import Acl, ClientSideCaching, PrincipalType, FileAccessMode
 from cterasdk.edge.types import ShareAccessControlEntry, NFSv3AccessControlEntry, RemoveNFSv3AccessControlEntry

@@ -12,7 +12,7 @@ class Service:
         return self
 
     def __init__(self, host, port, https, base):
-        self._base = base if base else str(URI.instance(f'http' + ("s" if https else ""), host, port or 443 if https else 80))
+        self._base = base if base else str(URI.instance(f'http{"s" if https else ""}', host, port or 443 if https else 80))
         self._generic = clients.Client(endpoints.EndpointBuilder.new(self.base), authenticator=self._authenticator)
 
     @property
@@ -22,23 +22,23 @@ class Service:
     @property
     def base(self):
         return self._base
-    
+
     def host(self):
         return uri.components(self._base).hostname
 
     def port(self):
         components = uri.components(self._base)
         return components.port or 443 if components.scheme == 'https' else 80
-    
+
     @property
     def _omit_fields(self):
         return []
-    
+
     def __str__(self):
         x = Object()
         x.__dict__ = {k: v for k, v in self.__dict__.items() if not (k.startswith('_') or k in self._omit_fields)}
         return tojsonstr(x)
-    
+
     def __exit__(self, exc_type, exc_value, exc_tb):
         self._generic.shutdown()
     
@@ -50,11 +50,11 @@ class CTERA(Service):
         self._ctera_session = None
         self._webdav = None
         self._api = None
-    
+
     @property
     def webdav(self):
         return self._webdav
-    
+
     @property
     def api(self):
         return self._api
@@ -64,7 +64,7 @@ class CTERA(Service):
         raise NotImplementedError(
             "Implementing class must implement the login_object property by returning an object with login and logout methods"
         )
-    
+
     def login(self, username, password):
         """
         Log in
@@ -84,12 +84,12 @@ class CTERA(Service):
 
     def session(self):
         return self._ctera_session
-    
+
     @property
     @abstractmethod
     def _session_id_key(self):
         return NotImplementedError("Subclass must implement the '_session_id_key' property")
-    
+
     def get_session_id(self):
         """
         Get Session Identifier
@@ -97,14 +97,14 @@ class CTERA(Service):
         :return str: Session ID
         """
         return self.management.cookies.all.get(self._session_id_key, None)
-    
+
     def set_session_id(self, session_id):
         return self.management.cookies.update({self._session_id_key: session_id})
-    
+
     @abstractmethod
     def _authenticator(self, function, *args, **kwargs):
         raise NotImplementedError("Subclass must implement the '_authenticator' function")
-    
+
     @abstractmethod
     def test(self):
         return NotImplementedError("Subclass must implement the 'test' function")

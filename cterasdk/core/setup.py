@@ -54,7 +54,7 @@ class Setup(BaseCommand):
             params.settings = Setup.default_settings()
             params.settings.dnsSuffix = domain
             logging.getLogger().info('Initializing Portal. %s', {'domain': domain, 'user': name})
-            self._core.ctera.execute(f'/public', 'init', params)
+            self._core.ctera.execute('/public', 'init', params)
             SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Portal)
             logging.getLogger().info('Portal initialized.')
         elif self.stage == SetupWizardStage.Finish:
@@ -63,10 +63,7 @@ class Setup(BaseCommand):
 
     def _init_slave(self, ipaddr, secret):
         self._get_current_stage()
-
-        response = self._core.ctera.execute(f'/setup/authenticaionMethod',
-                                        'askMasterForSlaveAuthenticaionMethod', ipaddr)
-
+        response = self._core.ctera.execute('/setup/authenticaionMethod', 'askMasterForSlaveAuthenticaionMethod', ipaddr)
         params = Setup._init_server_params(ServerMode.Slave)
         params.slaveSettings.masterIpAddr = ipaddr
         if response == SlaveAuthenticaionMethod.Password:
@@ -75,7 +72,6 @@ class Setup(BaseCommand):
             params.slaveSettings.masterKey = secret
         else:
             logging.getLogger().error('Unknown authentication method. %s', {'method': response})
-
         self._init_server(params, True)
 
     def _init_server(self, params, wait=False):
@@ -142,13 +138,13 @@ class Setup(BaseCommand):
         self._core.startup.wait()
 
     def _init_role(self, params):
-        response = self._core.ctera.execute(f'/public/servers', 'setReplication', params)
+        response = self._core.ctera.execute('/public/servers', 'setReplication', params)
         status = SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Replication)
         self.stage = status.wizard
         return response
 
     def get_replication_candidates(self):
-        return self._core.ctera.execute(f'/public/servers', 'getReplicaitonCandidates', None)
+        return self._core.ctera.execute('/public/servers', 'getReplicaitonCandidates', None)
 
     @staticmethod
     def _init_replication_param(replicate_from=None):
@@ -172,7 +168,7 @@ class Setup(BaseCommand):
         return params
 
     def get_setup_status(self):
-        return self._core.ctera.get(f'/setup/status')
+        return self._core.ctera.get('/setup/status')
 
     @staticmethod
     def default_settings():

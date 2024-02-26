@@ -101,10 +101,10 @@ class CTERAMigrate(BaseCommand):
     def results(self, task):
         if task.type == 'discovery':
             return self._edge.migrate.get('/discovery/results',  # pylint: disable=protected-access
-                                                    params={'id': task.id}).discovery
+                                          params={'id': task.id}).discovery
         if task.type == 'migration':
             return self._edge.migrate.get('/migration/results',  # pylint: disable=protected-access
-                                                    params={'id': task.id}).migration
+                                          params={'id': task.id}).migration
         logging.getLogger().error('Could not determine task type. %s', {'id': task.id, 'type': task.type, 'name': task.name})
         return None
 
@@ -158,8 +158,7 @@ class TaskManager:
         return param
 
     def _add(self, param):
-        task = self._ctera_migrate._edge.migrate.post('/tasks/create',  # pylint: disable=protected-access
-                                                                 param)
+        task = self._ctera_migrate._edge.migrate.post('/tasks/create', param)  # pylint: disable=protected-access
         return Task(task.task_id, int(task.type), task.name)
 
 
@@ -199,8 +198,7 @@ class Discovery(TaskManager):
             param.name = name
         if notes:
             param.notes = notes
-        return self._ctera_migrate._edge.ctera_migrate.post('/tasks/update',  # pylint: disable=protected-access
-                                                                 param)
+        return self._ctera_migrate._edge.ctera_migrate.post('/tasks/update', param)  # pylint: disable=protected-access
 
 
 class Migration(TaskManager):

@@ -33,7 +33,7 @@ class FileAccess(FileAccessBase):
             fullpath=f'{dest_path.fullpath()}/{local_file_info["name"]}',
             filedata=fd
         )
-    
+
     def _get_zip_file_handle(self, cloud_directory, files):
         return self._ctera_host.generic.form_data(
             self._get_multi_file_url(cloud_directory, files),

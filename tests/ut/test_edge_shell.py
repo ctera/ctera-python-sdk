@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import shell
 from cterasdk.lib import task_manager_base
 from cterasdk.common import Object

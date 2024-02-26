@@ -19,7 +19,7 @@ class Session:
 
     def __init__(self, **kwargs):
         self._session = aiohttp.ClientSession(trace_configs=[async_tracers.default()], **kwargs)
-        
+
     @property
     def cookies(self):
         return CookieJar(self._session.cookie_jar)
@@ -54,7 +54,7 @@ class Session:
     @staticmethod
     def new(**kwargs):
         return Session(**kwargs)
-    
+
     async def shutdown(self):
         await self._session.close()
 
@@ -127,7 +127,7 @@ class MoveRequest(BaseRequest):
 
     def __init__(self, url, **kwargs):
         super().__init__('MOVE', url, **kwargs)
-    
+
 
 class FormData(aiohttp.FormData):
     """Class representing URL-encoded form data"""

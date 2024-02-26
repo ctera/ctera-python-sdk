@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import syslog
 from cterasdk.edge.enum import IPProtocol, Severity, Mode
 from cterasdk.common import Object

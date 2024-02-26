@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.common import Object
 from cterasdk.edge import smb
 from cterasdk.edge.enum import Mode, CIFSPacketSigning

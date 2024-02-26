@@ -18,7 +18,7 @@ class Startup(BaseCommand):
         """
         response = None
         try:
-            response = self._core.ctera.get(f'/startup')
+            response = self._core.ctera.get('/startup')
         except ClientResponseException as error:
             return error.response.body.status
         return response.status

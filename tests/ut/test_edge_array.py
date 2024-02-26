@@ -1,7 +1,7 @@
 from unittest import mock
 import munch
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import array
 from cterasdk.edge.enum import RAIDLevel
 from cterasdk.common import Object

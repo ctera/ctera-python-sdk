@@ -4,7 +4,7 @@ import munch
 from cterasdk.core import directoryservice
 from cterasdk.common.types import ADDomainIDMapping
 from cterasdk.common.object import Object
-from cterasdk import exception
+from cterasdk import exceptions
 from tests.ut import base_core
 
 

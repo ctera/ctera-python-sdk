@@ -1,6 +1,5 @@
 import os
 import sys
-import yaml
 import logging
 
 
@@ -68,8 +67,4 @@ logconf = dict(
     fmt='%(asctime)s,%(msecs)3d %(levelname)7s [%(filename)s:%(lineno)d] [%(funcName)s] - %(message)s',
     df='%Y-%m-%d %H:%M:%S',
     filename=os.environ.get('CTERASDK_LOG_FILE')
-)
-
-filesystem = dict(
-    dl='~/Downloads'
 )
