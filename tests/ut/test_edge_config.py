@@ -72,7 +72,7 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
         with mock.patch.object(datetime, 'datetime', mock.Mock(wraps=datetime.datetime)) as patched:
             patched.now.return_value = self._current_datetime
             config.Config(self._filer).export()
-            self._filer.openfile.assert_called_once_with('/export')
+            self._filer.api.handle.assert_called_once_with('/export')
             mock_get_dirpath.assert_called_once()
             mock_save_file.assert_called_once_with(self._default_download_directory,
                                                    self._current_datetime.strftime('_%Y-%m-%dT%H_%M_%S.xml'), handle_response)
@@ -86,7 +86,7 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
         with mock.patch.object(datetime, 'datetime', mock.Mock(wraps=datetime.datetime)) as patched:
             patched.now.return_value = self._current_datetime
             config.Config(self._filer).export(self._target_directory)
-            self._filer.handle.assert_called_once_with('/export')
+            self._filer.api.handle.assert_called_once_with('/export')
             mock_get_dirpath.assert_called_once()
             mock_save_file.assert_called_once_with(self._target_directory,
                                                    self._current_datetime.strftime('_%Y-%m-%dT%H_%M_%S.xml'), handle_response)

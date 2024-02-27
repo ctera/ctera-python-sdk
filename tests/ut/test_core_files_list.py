@@ -15,11 +15,11 @@ class BaseCoreServicesFilesList(base_core_services.BaseCoreServicesTest):
 
     def test_list_directory_str_arg(self):
         self._init_services()
-        self._services.execute = mock.MagicMock(side_effect=BaseCoreServicesFilesList._fetch_resources_side_effect)
+        self._services.api.execute = mock.MagicMock(side_effect=BaseCoreServicesFilesList._fetch_resources_side_effect)
         iterator = self._services.files.listdir(self._path)
         files = BaseCoreServicesFilesList.files[0] + BaseCoreServicesFilesList.files[1]
         for item in iterator:
-            self.assertEqual(item.href, self._services.cloud_drive_base_path + '/' + files.pop(0))
+            self.assertEqual(item.href, f'{self._base}/{files.pop(0)}')
         self._services.api.execute.assert_has_calls(
             [
                 mock.call('', 'fetchResources', mock.ANY),

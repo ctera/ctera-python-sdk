@@ -33,7 +33,7 @@ class TestObjectEdge(base_edge.BaseEdgeTest):
             self._filer.test()
 
         self._socket_connect_mock.assert_called_once_with((self._host, self._port))
-        self.assertEqual('Unable to reach host', str(error))
+        self.assertEqual(f'Connection error to remote host {self._host} on port {self._port}.', str(error.exception))
 
     def test_connection_socket_connect_error_none_zero_rc(self):
         get_response = Object()
@@ -45,4 +45,4 @@ class TestObjectEdge(base_edge.BaseEdgeTest):
             self._filer.test()
 
         self._socket_connect_mock.assert_called_once_with((self._host, self._port))
-        self.assertEqual('Unable to reach host', error.exception.message)
+        self.assertEqual(f'Connection error to remote host {self._host} on port {self._port}.', error.exception.message)

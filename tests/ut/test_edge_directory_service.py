@@ -127,7 +127,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
 
         self._filer.api.get.assert_called_once_with('/config/fileservices/cifs/passwordServer')
         self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
-        self.assertEqual('Unable to establish LDAP connection {self._domain}:{self._ldap_port}', str(error))
+        self.assertEqual(f'Unable to establish LDAP connection {self._domain}:{self._ldap_port}', str(error.exception))
 
     def test_get_advanced_mapping(self):
         get_response = [TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, 0, 0)]
