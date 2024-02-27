@@ -12,8 +12,7 @@ class BaseEdgeTest(base.BaseTest):
 
     def _init_filer(self, get_response=None, put_response=None, post_response=None,  # pylint: disable=too-many-arguments
                     form_data_response=None, add_response=None, execute_response=None,
-                    delete_response=None, upload_response=None, handle_response=None,
-                    mkcol_response=None, copy_response=None, move_response=None):
+                    delete_response=None, handle_response=None):
         self._filer.api.handle = mock.MagicMock(return_value=handle_response)
         self._filer.api.get = mock.MagicMock(return_value=get_response)
         self._filer.api.put = mock.MagicMock(return_value=put_response)
