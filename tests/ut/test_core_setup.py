@@ -36,7 +36,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         setup.Setup(self._global_admin).init_master(self._admin_username, self._admin_email,
                                                     self._admin_first_name, self._admin_last_name, self._admin_password, self._domain)
 
-        setup_status_url = f'/{self._global_admin.context}/setup/status'
+        setup_status_url = '/setup/status'
         self._global_admin.ctera.get.assert_has_calls(
             [
                 mock.call(setup_status_url),
@@ -44,7 +44,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
                 mock.call(setup_status_url)
             ]
         )
-        self._global_admin.ctera.execute.assert_called_once_with(f'/{self._global_admin.context}/public',
+        self._global_admin.ctera.execute.assert_called_once_with('/public',
                                                            'init', mock.ANY)
         expected_param = self._get_init_portal_param()
         actual_param = self._global_admin.ctera.execute.call_args[0][2]
@@ -52,7 +52,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Master)
         form_data = TestCoreSetup._get_form_data(params)
-        self._global_admin.multipart.assert_called_once_with(f'/{self._global_admin.context}/setup', form_data)
+        self._global_admin.multipart.assert_called_once_with('/setup', form_data)
 
         mock_startup_wait.assert_called_once()
 
@@ -67,7 +67,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
                                                     self._admin_first_name, self._admin_last_name, self._admin_password, self._domain)
         self._global_admin.ctera.get.assert_has_calls(
             [
-                mock.call(f'/{self._global_admin.context}/setup/status')
+                mock.call('/setup/status')
             ]
         )
         mock_startup_wait.assert_called_once()
@@ -91,7 +91,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
 
         setup.Setup(self._global_admin).init_application_server(self._master_ipaddr, self._master_secret)
 
-        setup_status_url = f'/{self._global_admin.context}/setup/status'
+        setup_status_url = '/setup/status'
         self._global_admin.ctera.get.assert_has_calls(
             [
                 mock.call(setup_status_url),
@@ -101,9 +101,9 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         )
         self._global_admin.ctera.execute.assert_has_calls(
             [
-                mock.call(f'/{self._global_admin.context}/setup/authenticaionMethod',
+                mock.call('/setup/authenticaionMethod',
                           'askMasterForSlaveAuthenticaionMethod', self._master_ipaddr),
-                mock.call(f'/{self._global_admin.context}/public/servers', 'setReplication', mock.ANY)
+                mock.call('/public/servers', 'setReplication', mock.ANY)
             ]
         )
         expected_param = TestCoreSetup._get_init_replication_param()
@@ -112,7 +112,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Slave, authentication_method, self._master_ipaddr, self._master_secret)
         form_data = TestCoreSetup._get_form_data(params)
-        self._global_admin.multipart.assert_called_once_with(f'/{self._global_admin.context}/setup', form_data)
+        self._global_admin.multipart.assert_called_once_with('/setup', form_data)
         mock_startup_wait.assert_called_once()
 
     def test_init_replication_server_success_password(self):
@@ -136,7 +136,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
 
         setup.Setup(self._global_admin).init_replication_server(self._master_ipaddr, self._master_secret, self._replicate_from)
 
-        setup_status_url = f'/{self._global_admin.context}/setup/status'
+        setup_status_url = '/setup/status'
         self._global_admin.ctera.get.assert_has_calls(
             [
                 mock.call(setup_status_url),
@@ -146,10 +146,10 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         )
         self._global_admin.ctera.execute.assert_has_calls(
             [
-                mock.call(f'/{self._global_admin.context}/setup/authenticaionMethod',
+                mock.call('/setup/authenticaionMethod',
                           'askMasterForSlaveAuthenticaionMethod', self._master_ipaddr),
-                mock.call(f'/{self._global_admin.context}/public/servers', 'getReplicaitonCandidates', None),
-                mock.call(f'/{self._global_admin.context}/public/servers', 'setReplication', mock.ANY)
+                mock.call('/public/servers', 'getReplicaitonCandidates', None),
+                mock.call('/public/servers', 'setReplication', mock.ANY)
             ]
         )
         expected_param = TestCoreSetup._get_init_replication_param(self._replication_candidates[1])
@@ -158,7 +158,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Slave, authentication_method, self._master_ipaddr, self._master_secret)
         form_data = TestCoreSetup._get_form_data(params)
-        self._global_admin.multipart.assert_called_once_with(f'/{self._global_admin.context}/setup', form_data)
+        self._global_admin.multipart.assert_called_once_with('/setup', form_data)
         mock_startup_wait.assert_called_once()
 
     def test_no_replication_target(self):

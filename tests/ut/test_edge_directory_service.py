@@ -122,12 +122,12 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self._init_filer(get_response=None)
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, False))
 
-        with self.assertRaises(exceptions.CTERAConnectionError) as error:
+        with self.assertRaises(ConnectionError) as error:
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, check_connection=True)
 
         self._filer.api.get.assert_called_once_with('/config/fileservices/cifs/passwordServer')
         self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
-        self.assertEqual('Unable to establish connection', error.exception.message)
+        self.assertEqual('Unable to establish LDAP connection {self._domain}:{self._ldap_port}', str(error))
 
     def test_get_advanced_mapping(self):
         get_response = [TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, 0, 0)]

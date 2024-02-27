@@ -21,7 +21,7 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
     def _test_upgrade_success(self, reboot, wait_for_reboot):
         self._init_filer(
             get_response=self._get_task_status_cmd_response(firmware.UploadTaskStatus.COMPLETE),
-            upload_response=self._get_upgrade_cmd_response(0)
+            form_data_response=self._get_upgrade_cmd_response(0)
         )
         self._filer.power.reboot = mock.MagicMock()
         firmware.Firmware(self._filer).upgrade(TestEdgeFirmware._file_path, reboot=reboot, wait_for_reboot=wait_for_reboot)
@@ -40,7 +40,7 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
 
     def test_upgrade_upload_failed(self):
         self._init_filer(
-            upload_response=self._get_upgrade_cmd_response(1)
+            form_data_response=self._get_upgrade_cmd_response(1)
         )
         with self.assertRaises(CTERAException) as error:
             firmware.Firmware(self._filer).upgrade(TestEdgeFirmware._file_path)
@@ -58,7 +58,7 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
     def test_upgrade_process_failed(self):
         self._init_filer(
             get_response=self._get_task_status_cmd_response(firmware.UploadTaskStatus.FAIL),
-            upload_response=self._get_upgrade_cmd_response(0)
+            form_data_response=self._get_upgrade_cmd_response(0)
         )
         with self.assertRaises(CTERAException) as error:
             firmware.Firmware(self._filer).upgrade(TestEdgeFirmware._file_path)

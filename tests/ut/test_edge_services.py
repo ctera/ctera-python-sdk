@@ -101,6 +101,8 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         with self.assertRaises(ConnectionError) as error:
             services.Services(self._filer).connect(self._server, self._user, self._password)
         self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
+        print(error)
+        print(dir(error))
         self.assertEqual(f'Unable to establish CTTP connection {self._server}:995', str(error))
 
     def test_connect_require_sso_failure(self):

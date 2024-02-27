@@ -24,7 +24,8 @@ class Service:
         return self._base
 
     def host(self):
-        return uri.components(self._base).hostname
+        hostname = uri.components(self._base).hostname
+        return hostname if hostname else ''
 
     def port(self):
         components = uri.components(self._base)
