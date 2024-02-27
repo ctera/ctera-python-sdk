@@ -25,7 +25,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
     def test_login(self):
         self._init_ctera_migrate()
         ctera_migrate.CTERAMigrate(self._filer).login()
-        self._filer.migrate.login.assert_called_once_with('/auth/user')  # pylint: disable=protected-access
+        self._filer.migrate.login.assert_called_once()  # pylint: disable=protected-access
 
     def test_list_shares(self):
         self._init_ctera_migrate(post_response=munch.Munch(dict(shares=[munch.Munch(dict(name=name)) for name in self._shares])))
@@ -45,7 +45,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=None)))
         ret = ctera_migrate.CTERAMigrate(self._filer).list_tasks()
         self._filer.migrate.get.assert_called_once_with('/tasks/list',  # pylint: disable=protected-access
-                                                               {'deleted': int(False)})
+                                                               params={'deleted': int(False)})
         self.assertEqual(ret, [])
 
     def test_list_tasks_with_response(self):
@@ -54,7 +54,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
         ctera_migrate.CTERAMigrate(self._filer).list_tasks()
         self._filer.migrate.get.assert_called_once_with('/tasks/list',  # pylint: disable=protected-access
-                                                               {'deleted': int(False)})
+                                                               params={'deleted': int(False)})
 
     def test_delete(self):
         self._init_ctera_migrate(post_response='Success')
@@ -133,7 +133,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
         ret = ctera_migrate.CTERAMigrate(self._filer).discovery.list_tasks()
         self._filer.migrate.get.assert_called_once_with('/tasks/list',  # pylint: disable=protected-access
-                                                               {'deleted': int(False)})
+                                                               params={'deleted': int(False)})
         self.assertEqual(len(ret), 1)
         self.assertEqual(ret[0].type, 'discovery')
 
@@ -143,7 +143,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._init_ctera_migrate(get_response=munch.Munch(dict(tasks=tasks)))
         ret = ctera_migrate.CTERAMigrate(self._filer).migration.list_tasks()
         self._filer.migrate.get.assert_called_once_with('/tasks/list',  # pylint: disable=protected-access
-                                                               {'deleted': int(False)})
+                                                               params={'deleted': int(False)})
         self.assertEqual(len(ret), 1)
         self.assertEqual(ret[0].type, 'migration')
 

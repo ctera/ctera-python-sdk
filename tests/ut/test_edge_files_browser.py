@@ -47,28 +47,28 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
         self._files.move(self._path, self._target, False)
         self._filer.webdav.move.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
                                                  TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                 False)
+                                                 overwrite=False)
 
     def test_move_overwrite_success(self):
         self._init_filer()
         self._files.move(self._path, self._target, True)
         self._filer.webdav.move.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
                                                  TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                 True)
+                                                 overwrite=True)
 
     def test_copy_dont_overwrite_success(self):
         self._init_filer()
         self._files.copy(self._path, self._target, False)
         self._filer.webdav.copy.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
                                                  TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                 False)
+                                                 overwrite=False)
 
     def test_copy_overwrite_success(self):
         self._init_filer()
         self._files.copy(self._path, self._target, True)
         self._filer.webdav.copy.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
                                                  TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                 True)
+                                                 overwrite=True)
 
     def test_delete_success(self):
         self._filer.rm = mock.MagicMock()
@@ -92,4 +92,4 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
 
     @staticmethod
     def make_local_files_dir(full_path):
-        return f'localFiles/{full_path}'
+        return full_path
