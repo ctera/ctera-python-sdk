@@ -55,7 +55,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
 
     def test_delete(self):
         path = 'cloud/Users'
-        rm_mock = self.patch_call('cterasdk.core.files.io.delete')
+        rm_mock = self.patch_call('cterasdk.core.files.io.remove')
         self.files.delete(path)
         rm_mock.assert_called_once_with(self._global_admin, mock.ANY)
         actual_ctera_path = rm_mock.call_args[0][1]
@@ -63,7 +63,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
 
     def test_undelete(self):
         path = 'cloud/Users'
-        recover_mock = self.patch_call('cterasdk.core.files.io.undelete')
+        recover_mock = self.patch_call('cterasdk.core.files.io.recover')
         self.files.undelete(path)
         recover_mock.assert_called_once_with(self._global_admin, mock.ANY)
         actual_ctera_path = recover_mock.call_args[0][1]

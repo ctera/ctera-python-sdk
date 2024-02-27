@@ -10,10 +10,11 @@ class BaseCoreServicesTest(base.BaseTest):
     def setUp(self):
         super().setUp()
         self._services = ServicesPortal("")
+        self._base = '/ServicesPortal/webdav'
 
     def _init_services(self, execute_response=None, form_data_response=None):
-        self._services.execute = mock.MagicMock(return_value=execute_response)
-        self._services.form_data = mock.MagicMock(return_value=form_data_response)
+        self._services.api.execute = mock.MagicMock(return_value=execute_response)
+        self._services.api.form_data = mock.MagicMock(return_value=form_data_response)
 
     def _create_action_resource_param(self, sources, destinations=None):
         action_resource_param = Object()
@@ -22,9 +23,9 @@ class BaseCoreServicesTest(base.BaseTest):
         for idx, source in enumerate(sources):
             param = Object()
             param._classname = 'SrcDstParam'  # pylint: disable=protected-access
-            param.src = self._services.cloud_drive_base_path + '/' + source
+            param.src = f'{self._base}/{source}'
             if destinations:
-                param.dest = self._services.cloud_drive_base_path + '/' + destinations[idx]
+                param.dest = f'{self._base}/{destinations[idx]}'
             else:
                 param.dest = None
             action_resource_param.urls.append(param)
