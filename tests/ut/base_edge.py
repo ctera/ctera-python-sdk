@@ -22,7 +22,7 @@ class BaseEdgeTest(base.BaseTest):
         self._filer.api.add = mock.MagicMock(return_value=add_response)
         self._filer.api.execute = mock.MagicMock(return_value=execute_response)
         self._filer.api.delete = mock.MagicMock(return_value=delete_response)
-    
+
     def _init_webdav(self, upload_response=None, mkcol_response=None, copy_response=None, move_response=None, delete_response=None):
         self._filer.webdav.upload = mock.MagicMock(return_value=upload_response)
         self._filer.webdav.mkcol = mock.MagicMock(return_value=mkcol_response)

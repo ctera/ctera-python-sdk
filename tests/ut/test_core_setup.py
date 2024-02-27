@@ -44,8 +44,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
                 mock.call(setup_status_url)
             ]
         )
-        self._global_admin.ctera.execute.assert_called_once_with('/public',
-                                                           'init', mock.ANY)
+        self._global_admin.ctera.execute.assert_called_once_with('/public', 'init', mock.ANY)
         expected_param = self._get_init_portal_param()
         actual_param = self._global_admin.ctera.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)

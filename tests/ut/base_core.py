@@ -27,7 +27,6 @@ class BaseCoreTest(base.BaseTest):
         self._global_admin.ctera.execute = mock.MagicMock(return_value=execute_response)
         self._global_admin.ctera.multipart = mock.MagicMock(return_value=multipart_response)
 
-
     @staticmethod
     def _create_filter(filter_type, field, restriction, value):
         query_filter = Object()

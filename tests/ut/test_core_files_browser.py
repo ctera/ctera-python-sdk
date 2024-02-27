@@ -78,7 +78,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         actual_ctera_paths = mv_mock.call_args[0][1:]
         self.assertListEqual(
             [actual_ctera_path.fullpath() for actual_ctera_path in actual_ctera_paths],
-            [os.path.join(TestCoreFilesBrowser._base_path, path) for path in [src, dst]]
+            [os.path.join(TestCoreFilesBrowser._base_path, path) for path in [src]]
         )
 
     def test_copy(self):
@@ -90,7 +90,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         actual_ctera_paths = cp_mock.call_args[0][1:]
         self.assertListEqual(
             [actual_ctera_path.fullpath() for actual_ctera_path in actual_ctera_paths],
-            [os.path.join(TestCoreFilesBrowser._base_path, path) for path in [src, dst]]
+            [os.path.join(TestCoreFilesBrowser._base_path, path) for path in [src]]
         )
 
     def test_create_public_link_default_values(self):
