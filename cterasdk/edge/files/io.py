@@ -5,7 +5,10 @@ from . import common
 def mkdir(edge, path):
     logging.getLogger().info('Creating directory. %s', {'path': path.fullpath()})
     response = edge.webdav.mkcol(path.fullpath())
-    common.raise_for_status(response, str(path.fullpath()))
+    try:
+        common.raise_for_status(response, str(path.fullpath()))
+    except common.ItemExists:
+        logging.getLogger().info('Directory already exists. %s', {'path': path.fullpath()})    
     logging.getLogger().info('Directory created. %s', {'path': path.fullpath()})
 
 
@@ -15,7 +18,7 @@ def makedirs(edge, path):
         path = common.get_object_path(path.base, '/'.join(directories[:i]))
         try:
             mkdir(edge, path)
-        except (common.ItemExists, common.Forbidden):
+        except common.Forbidden:
             pass
 
 
