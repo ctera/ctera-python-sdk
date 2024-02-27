@@ -51,7 +51,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Master)
         form_data = TestCoreSetup._get_form_data(params)
-        self._global_admin.multipart.assert_called_once_with('/setup', form_data)
+        self._global_admin.ctera.multipart.assert_called_once_with('/setup', form_data)
 
         mock_startup_wait.assert_called_once()
 
@@ -112,7 +112,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Slave, authentication_method, self._master_ipaddr, self._master_secret)
         form_data = TestCoreSetup._get_form_data(params)
-        self._global_admin.multipart.assert_called_once_with('/setup', form_data)
+        self._global_admin.ctera.multipart.assert_called_once_with('/setup', form_data)
         mock_startup_wait.assert_called_once()
 
     def test_init_replication_server_success_password(self):
@@ -158,7 +158,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Slave, authentication_method, self._master_ipaddr, self._master_secret)
         form_data = TestCoreSetup._get_form_data(params)
-        self._global_admin.multipart.assert_called_once_with('/setup', form_data)
+        self._global_admin.ctera.multipart.assert_called_once_with('/setup', form_data)
         mock_startup_wait.assert_called_once()
 
     def test_no_replication_target(self):

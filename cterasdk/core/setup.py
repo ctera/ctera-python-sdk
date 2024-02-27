@@ -4,8 +4,9 @@ import re
 
 from .base_command import BaseCommand
 from .enum import ServerMode, SetupWizardStage, SetupWizardStatus, SlaveAuthenticaionMethod
-from ..common import Object
+from ..common import Object, utf8_decode
 from ..convert import toxmlstr
+from ..aio_client import MultipartForm
 from ..exceptions import CTERAException
 
 
@@ -75,14 +76,16 @@ class Setup(BaseCommand):
         self._init_server(params, True)
 
     def _init_server(self, params, wait=False):
+        form = MultipartForm()
         if self.stage == SetupWizardStage.Server:
-            form_data = {'inputXml': toxmlstr(params).decode('utf-8'), 'serverMode': params.serverMode}
+            form.add('inputXML', utf8_decode(toxmlstr(params)))
+            form.add('serverMode', params.serverMode)
 
             if params.serverMode == ServerMode.Slave:
-                form_data['masterIpAddr'] = params.slaveSettings.masterIpAddr
+                form.add('masterIpAddr', params.slaveSettings.masterIpAddr)
 
             logging.getLogger().info('Initializing server. %s', {'host': self._core.host(), 'mode': params.serverMode})
-            self._core.ctera.multipart('/setup', form_data)
+            self._core.ctera.multipart('/setup', form)
             if wait:
                 status = SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Server)
                 self.stage = status.wizard
