@@ -12,36 +12,36 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         super().setUp()
         self.files = CloudDrive(self._global_admin)
 
-    def test_ls(self):
+    def test_listdir(self):
         path = 'cloud/Users'
-        ls_mock = self.patch_call('cterasdk.core.files.browser.ls')
-        self.files.ls(path)
-        ls_mock.ls.assert_called_once_with(self._global_admin, mock.ANY, include_deleted=False)
-        actual_ctera_path = ls_mock.ls.call_args[0][1]
+        listdir_mock = self.patch_call('cterasdk.core.files.io.listdir')
+        self.files.listdir(path)
+        listdir_mock.assert_called_once_with(self._global_admin, mock.ANY, depth=None, include_deleted=False)
+        actual_ctera_path = listdir_mock.call_args[0][1]
         self.assertEqual(actual_ctera_path.fullpath(), os.path.join(TestCoreFilesBrowser._base_path, path))
 
-    def test_ls_deleted_files(self):
+    def test_listdir_deleted_files(self):
         path = 'cloud/Users'
-        ls_mock = self.patch_call('cterasdk.core.files.browser.ls')
+        listdir_mock = self.patch_call('cterasdk.core.files.io.listdir')
         self.files.ls(path, True)
-        ls_mock.ls.assert_called_once_with(self._global_admin, mock.ANY, include_deleted=True)
-        actual_ctera_path = ls_mock.ls.call_args[0][1]
+        listdir_mock.assert_called_once_with(self._global_admin, mock.ANY, depth=None, include_deleted=True)
+        actual_ctera_path = listdir_mock.call_args[0][1]
         self.assertEqual(actual_ctera_path.fullpath(), os.path.join(TestCoreFilesBrowser._base_path, path))
 
     def test_mkdir(self):
         path = 'cloud/Users'
-        directory_mock = self.patch_call('cterasdk.core.files.browser.directory')
+        mkdir_mock = self.patch_call('cterasdk.core.files.io.mkdir')
         self.files.mkdir(path)
-        directory_mock.mkdir.assert_called_once_with(self._global_admin, mock.ANY)
-        actual_ctera_path = directory_mock.mkdir.call_args[0][1]
+        mkdir_mock.assert_called_once_with(self._global_admin, mock.ANY)
+        actual_ctera_path = mkdir_mock.call_args[0][1]
         self.assertEqual(actual_ctera_path.fullpath(), os.path.join(TestCoreFilesBrowser._base_path, path))
 
     def test_makedirs(self):
         path = 'cloud/Users'
-        directory_mock = self.patch_call('cterasdk.core.files.browser.directory')
+        makedirs_mock = self.patch_call('cterasdk.core.files.io.makedirs')
         self.files.makedirs(path)
-        directory_mock.mkdir.assert_called_once_with(self._global_admin, mock.ANY)
-        actual_ctera_path = directory_mock.mkdir.call_args[0][1]
+        makedirs_mock.assert_called_once_with(self._global_admin, mock.ANY)
+        actual_ctera_path = makedirs_mock.makedirs_mockcall_args[0][1]
         self.assertEqual(actual_ctera_path.fullpath(), os.path.join(TestCoreFilesBrowser._base_path, path))
 
     def test_rename(self):

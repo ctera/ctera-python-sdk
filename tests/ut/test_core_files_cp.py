@@ -26,9 +26,9 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         o._classname = 'ActionResourcesParam'  # pylint: disable=protected-access
         src_dst_obj = Object()
         src_dst_obj._classname = 'SrcDstParam'  # pylint: disable=protected-access
-        src_path = self._mkpath(src)
+        src_path = self._get_object_path(src)
         src_dst_obj.src = src_path.fullpath()
-        src_dst_obj.dest = os.path.join(self._mkpath(dst).fullpath(), src_path.name())
+        src_dst_obj.dest = os.path.join(self._get_object_path(dst).fullpath(), src_path.name())
         o.urls = [src_dst_obj]
         return o
 
