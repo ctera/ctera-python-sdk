@@ -73,7 +73,7 @@ class FileBrowser(BaseCommand):
         """
         if destination is None:
             raise ValueError('Copy destination was not specified.')
-        return io.copy(self._core, self.get_object_path(destination), *[self.get_object_path(path) for path in paths])
+        return io.copy(self._core, *[self.get_object_path(path) for path in paths], destination=self.get_object_path(destination))
 
     def get_object_path(self, elements):
         return common.get_object_path(self.base, elements)
@@ -144,7 +144,7 @@ class CloudDrive(FileBrowser):
         """
         if destination is None:
             raise ValueError('Move destination was not specified.')
-        return io.move(self._core, self.get_object_path(destination), *[self.get_object_path(path) for path in paths])
+        return io.move(self._core, *[self.get_object_path(path) for path in paths], destination=self.get_object_path(destination))
 
     def get_share_info(self, path):
         """

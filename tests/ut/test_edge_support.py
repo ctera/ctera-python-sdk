@@ -29,11 +29,11 @@ class TestEdgeSupport(base_edge.BaseEdgeTest):
 
     def test_get_support_report(self):
         current_datetime = datetime.datetime.now()
-        openfile_response = 'Stream'
-        self._init_filer(openfile_response=openfile_response)
+        handle_response = 'Stream'
+        self._init_filer(handle_response=handle_response)
         mock_save_file = self.patch_call("cterasdk.lib.filesystem.FileSystem.save")
         with freeze_time(current_datetime):
             support.Support(self._filer).get_support_report()
-            self._filer.openfile.assert_called_once_with('/supportreport')
+            self._filer.handle.assert_called_once_with('/supportreport')
             filename = 'Support-' + current_datetime.strftime('_%Y-%m-%dT%H_%M_%S') + '.zip'
-            mock_save_file.assert_called_once_with(cterasdk.settings.downloads.location, filename, openfile_response)
+            mock_save_file.assert_called_once_with(cterasdk.settings.downloads.location, filename, handle_response)

@@ -21,7 +21,12 @@ class BaseCoreTest(base.BaseTest):
         self._global_admin.api.form_data = mock.MagicMock(return_value=form_data_response)
         self._global_admin.api.add = mock.MagicMock(return_value=add_response)
         self._global_admin.api.delete = mock.MagicMock(return_value=delete_response)
-        self._global_admin.multipart = mock.MagicMock(return_value=multipart_response)
+
+    def _init_setup(self, get_response=None, execute_response=None, multipart_response=None):
+        self._global_admin.ctera.get = mock.MagicMock(return_value=get_response)
+        self._global_admin.ctera.execute = mock.MagicMock(return_value=execute_response)
+        self._global_admin.ctera.multipart = mock.MagicMock(return_value=multipart_response)
+
 
     @staticmethod
     def _create_filter(filter_type, field, restriction, value):
