@@ -10,7 +10,7 @@ class TestObjectEdge(base_edge.BaseEdgeTest):
         super().setUp()
         self._host = ''
         self._port = 80
-        self._socket_connect_mock = self.patch_call("cterasdk.common.utils.socket.connect_ex")
+        self._socket_connect_mock = self.patch_call("cterasdk.common.utils.socket.socket.connect_ex")
 
     def test_connection_success(self):
         get_response = Object()
