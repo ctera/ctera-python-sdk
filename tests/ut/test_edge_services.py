@@ -98,10 +98,10 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
 
     def test_connect_tcp_connect_error(self):
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, False))
-        with self.assertRaises(exceptions.CTERAConnectionError) as error:
+        with self.assertRaises(ConnectionError) as error:
             services.Services(self._filer).connect(self._server, self._user, self._password)
         self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
-        self.assertEqual('Unable to establish connection', error.exception.message)
+        self.assertEqual(f'Unable to establish CTTP connection {self._server}:995', str(error))
 
     def test_connect_require_sso_failure(self):
         self._init_filer(execute_response=TestEdgeServices._check_web_sso_require_sso())

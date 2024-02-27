@@ -64,8 +64,8 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
         self.assertEqual(ret, put_response)
 
     def test_edge_config_export_default_dest(self):
-        openfile_response = 'Stream'
-        self._init_filer(openfile_response=openfile_response)
+        handle_response = 'Stream'
+        self._init_filer(handle_response=handle_response)
         mock_get_dirpath = self.patch_call("cterasdk.lib.filesystem.FileSystem.get_dirpath",
                                            return_value=self._default_download_directory)
         mock_save_file = self.patch_call("cterasdk.lib.filesystem.FileSystem.save")
@@ -75,11 +75,11 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
             self._filer.openfile.assert_called_once_with('/export')
             mock_get_dirpath.assert_called_once()
             mock_save_file.assert_called_once_with(self._default_download_directory,
-                                                   self._current_datetime.strftime('_%Y-%m-%dT%H_%M_%S.xml'), openfile_response)
+                                                   self._current_datetime.strftime('_%Y-%m-%dT%H_%M_%S.xml'), handle_response)
 
     def test_edge_config_export_target_directory_default_filename(self):
-        openfile_response = 'Stream'
-        self._init_filer(openfile_response=openfile_response)
+        handle_response = 'Stream'
+        self._init_filer(handle_response=handle_response)
         mock_get_dirpath = self.patch_call("cterasdk.lib.filesystem.FileSystem.split_file_directory",
                                            return_value=(self._target_directory, None))
         mock_save_file = self.patch_call("cterasdk.lib.filesystem.FileSystem.save")
@@ -89,4 +89,4 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
             self._filer.openfile.assert_called_once_with('/export')
             mock_get_dirpath.assert_called_once()
             mock_save_file.assert_called_once_with(self._target_directory,
-                                                   self._current_datetime.strftime('_%Y-%m-%dT%H_%M_%S.xml'), openfile_response)
+                                                   self._current_datetime.strftime('_%Y-%m-%dT%H_%M_%S.xml'), handle_response)

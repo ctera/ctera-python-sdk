@@ -16,7 +16,7 @@ class BaseCoreServicesFilesPublicLink(base_core_services.BaseCoreServicesTest):
     def test_create_public_link_defaults_args(self):
         execute_response = self._create_public_link_response()
         self._init_services(execute_response=execute_response)
-        public_link = self._services.files.create_public_link(self._path)
+        public_link = self._services.files.public_link(self._path)
         self._services.api.execute.assert_called_once_with('', 'createShare', mock.ANY)
         expected_param = self._create_public_link_param(FileAccessMode.RO, 30)
         actual_param = self._services.api.execute.call_args[0][2]

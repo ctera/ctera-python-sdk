@@ -12,8 +12,9 @@ class BaseEdgeTest(base.BaseTest):
 
     def _init_filer(self, get_response=None, put_response=None, post_response=None,  # pylint: disable=too-many-arguments
                     form_data_response=None, add_response=None, execute_response=None,
-                    delete_response=None, upload_response=None,
+                    delete_response=None, upload_response=None, handle_response=None,
                     mkcol_response=None, copy_response=None, move_response=None):
+        self._filer.handle = mock.MagicMock(return_value=handle_response)
         self._filer.api.get = mock.MagicMock(return_value=get_response)
         self._filer.api.put = mock.MagicMock(return_value=put_response)
         self._filer.api.post = mock.MagicMock(return_value=post_response)
@@ -25,6 +26,7 @@ class BaseEdgeTest(base.BaseTest):
         self._filer.webdav.mkcol = mock.MagicMock(return_value=mkcol_response)
         self._filer.webdav.copy = mock.MagicMock(return_value=copy_response)
         self._filer.webdav.move = mock.MagicMock(return_value=move_response)
+        self._filer.webdav.delete = mock.MagicMock(return_value=move_response)
 
     def _init_ctera_migrate(self, get_response=None, put_response=None, post_response=None, delete_response=None):
         self._filer.migrate.get = mock.MagicMock(return_value=get_response)  # pylint: disable=protected-access

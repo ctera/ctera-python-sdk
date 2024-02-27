@@ -19,22 +19,22 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
         self._default_download_dir = cterasdk.settings.downloads.location
 
     def test_download_default_dir_success(self):
-        openfile_response = 'Stream'
-        self._init_filer(openfile_response=openfile_response)
+        handle_response = 'Stream'
+        self._init_filer(handle_response=handle_response)
         mock_save_file = self.patch_call("cterasdk.lib.filesystem.FileSystem.save")
         mock_get_dirpath = self.patch_call("cterasdk.lib.filesystem.FileSystem.get_dirpath",
                                            return_value=self._default_download_dir)
         self._files.download(self._path)
         self._filer.openfile.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath))
         mock_get_dirpath.assert_called_once()
-        mock_save_file.assert_called_once_with(self._default_download_dir, self._filename, openfile_response)
+        mock_save_file.assert_called_once_with(self._default_download_dir, self._filename, handle_response)
 
     def test_openfile_success(self):
-        openfile_response = 'Stream'
-        self._init_filer(openfile_response=openfile_response)
+        handle_response = 'Stream'
+        self._init_filer(handle_response=handle_response)
         ret = self._files.openfile(self._path)
         self._filer.openfile.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath))
-        self.assertEqual(ret, openfile_response)
+        self.assertEqual(ret, handle_response)
 
     def test_download_as_zip_success(self):
         pass  # self._files.download_as_zip()

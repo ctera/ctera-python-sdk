@@ -73,7 +73,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         src = 'cloud/Users'
         dst = 'public'
         mv_mock = self.patch_call('cterasdk.core.files.io.move')
-        self.files.move(src, dst)
+        self.files.move(src, destination=dst)
         mv_mock.assert_called_once_with(self._global_admin, mock.ANY, mock.ANY)
         actual_ctera_paths = mv_mock.call_args[0][1:]
         self.assertListEqual(
@@ -85,7 +85,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         src = 'cloud/Users'
         dst = 'public'
         cp_mock = self.patch_call('cterasdk.core.files.io.copy')
-        self.files.copy(src, dst)
+        self.files.copy(src, destination=dst)
         cp_mock.assert_called_once_with(self._global_admin, mock.ANY, mock.ANY)
         actual_ctera_paths = cp_mock.call_args[0][1:]
         self.assertListEqual(
@@ -93,7 +93,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
             [os.path.join(TestCoreFilesBrowser._base_path, path) for path in [src, dst]]
         )
 
-    def test_mklink_default_values(self):
+    def test_create_public_link_default_values(self):
         for access in [None, 'RW', 'RO']:
             for expire_in in [None, 15, 30, 0]:
                 params = {}

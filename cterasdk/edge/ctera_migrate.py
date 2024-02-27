@@ -92,7 +92,7 @@ class CTERAMigrate(BaseCommand):
         """
         Get task details
         """
-        response = self._edge.migrate.get('/tasks/history', {'id': task.id})  # pylint: disable=protected-access
+        response = self._edge.migrate.get('/tasks/history', params={'id': task.id})  # pylint: disable=protected-access
         if response.history:
             return Jobs(response.history)
         logging.getLogger().error('Task not found. %s', {'task_id': task.id})
