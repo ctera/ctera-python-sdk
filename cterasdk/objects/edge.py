@@ -139,7 +139,7 @@ class Edge(CTERA):  # pylint: disable=too-many-instance-attributes
     def sso(self, ticket):
         """ Login using Single Sign On"""
         self._login_object.sso(ticket)
-        self._session.start_local_session(self)
+        self.session().start_local_session(self)
 
     def remote_access(self):
         return remote.remote_access(self, self._Portal)

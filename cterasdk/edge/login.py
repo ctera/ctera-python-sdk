@@ -29,7 +29,7 @@ class Login(BaseCommand):
         :param str ticket: SSO Ticket.
         """
         logging.getLogger().info("Performing Single Sign On.")
-        self._edge.api.get('/ssologin', {'ticket': ticket})
+        self._edge.api.get('/ssologin', params={'ticket': ticket})
         self._edge.ctera_migrate.login()
 
     def logout(self):

@@ -17,7 +17,7 @@ def remote_access(device, Portal):
 
 
 def create_device_object(device):
-    device_object = device.__class__(url=re.sub(r'^http(?=:)', 'https', device.remoteAccessUrl))
+    device_object = device.__class__(base=re.sub(r'^http(?=:)', 'https', device.remoteAccessUrl))
     return device_object
 
 
