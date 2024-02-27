@@ -42,6 +42,7 @@ class TestCoreRemote(base_core.BaseCoreTest):
     def test_filer_remote_access(self):
         self.patch_call("cterasdk.lib.session_base.SessionBase.start_local_session")
         remote_session = self.patch_call("cterasdk.edge.session.Session.start_remote_session")
+        patch_migrate_login = self.patch_call("cterasdk.edge.ctera_migrate.CTERAMigrate.login")
         remote_session.return_value = munch.Munch({'user': munch.Munch({'name': 'mickey', 'tenant': 'tenant'})})
         get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
                                                                  'vGateway', self._device_remote_access_url)
