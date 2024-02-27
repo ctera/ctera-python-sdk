@@ -16,9 +16,9 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         self._init_global_admin(execute_response=expected_response)
         actual_response = io.copy(self._global_admin, self._get_object_path(src), destination=self._get_object_path(dst))
         self.assertEqual(expected_response, actual_response)
-        self._global_admin.execute.assert_called_once_with('', 'copyResources', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'copyResources', mock.ANY)
         expected_copy_param = self._get_expected_copy_params(src, dst)
-        actual_copy_param = self._global_admin.execute.call_args[0][2]
+        actual_copy_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_copy_param, expected_copy_param)
 
     def _get_expected_copy_params(self, src, dst):

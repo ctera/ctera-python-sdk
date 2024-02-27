@@ -1,6 +1,5 @@
 import socket
 
-from cterasdk import exceptions
 from cterasdk.common import Object
 from tests.ut import base_edge
 
@@ -22,7 +21,7 @@ class TestObjectEdge(base_edge.BaseEdgeTest):
         self._filer.test()
 
         self._socket_connect_mock.assert_called_once_with((self._host, self._port))
-        self._filer.get.assert_called_once_with('/nosession/logininfo')
+        self._filer.api.get.assert_called_once_with('/nosession/logininfo')
 
     def test_connection_socket_connect_error(self):
         get_response = Object()
@@ -30,11 +29,11 @@ class TestObjectEdge(base_edge.BaseEdgeTest):
         self._init_filer(get_response=get_response)
         self._socket_connect_mock.side_effect = socket.gaierror()
 
-        with self.assertRaises(exceptions.HostUnreachable) as error:
+        with self.assertRaises(ConnectionError) as error:
             self._filer.test()
 
         self._socket_connect_mock.assert_called_once_with((self._host, self._port))
-        self.assertEqual('Unable to reach host', error.exception.message)
+        self.assertEqual('Unable to reach host', str(error))
 
     def test_connection_socket_connect_error_none_zero_rc(self):
         get_response = Object()
@@ -42,7 +41,7 @@ class TestObjectEdge(base_edge.BaseEdgeTest):
         self._init_filer(get_response=get_response)
         self._socket_connect_mock.return_value = 1
 
-        with self.assertRaises(exceptions.HostUnreachable) as error:
+        with self.assertRaises(ConnectionError) as error:
             self._filer.test()
 
         self._socket_connect_mock.assert_called_once_with((self._host, self._port))

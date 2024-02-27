@@ -23,9 +23,9 @@ class TestCoreBuckets(base_core.BaseCoreTest):
         get_multi_response = munch.Munch({'name': self._bucket_name})
         self._init_global_admin(get_multi_response=get_multi_response)
         ret = buckets.Buckets(self._global_admin).get(self._bucket_name)
-        self._global_admin.get_multi.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
+        self._global_admin.api.get_multi.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
         expected_include = ['/' + attr for attr in buckets.Buckets.default]
-        actual_include = self._global_admin.get_multi.call_args[0][1]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self._assert_equal_objects(actual_include, expected_include)
         self.assertEqual(ret.name, self._bucket_name)
 
@@ -34,7 +34,7 @@ class TestCoreBuckets(base_core.BaseCoreTest):
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exceptions.CTERAException) as error:
             buckets.Buckets(self._global_admin).get(self._bucket_name)
-        self._global_admin.get_multi.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
+        self._global_admin.api.get_multi.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
         self.assertEqual('Could not find bucket', error.exception.message)
 
     def test_add_bucket(self):
@@ -43,17 +43,17 @@ class TestCoreBuckets(base_core.BaseCoreTest):
         self._init_global_admin(get_multi_response=get_multi_response, add_response=add_response)
         bucket = AmazonS3(self._bucket_name, self._access_key, self._secret_key)
         ret = buckets.Buckets(self._global_admin).add(self._bucket_name, bucket, read_only=True, dedicated_to=self._tenant_name)
-        self._global_admin.get_multi.assert_called_once_with(f'/portals/{self._tenant_name}', mock.ANY)
+        self._global_admin.api.get_multi.assert_called_once_with(f'/portals/{self._tenant_name}', mock.ANY)
         expected_include = ['/' + attr for attr in portals.Portals.default + ['baseObjectRef']]
-        actual_include = self._global_admin.get_multi.call_args[0][1]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
-        self._global_admin.add.assert_called_once_with('/locations', mock.ANY)
+        self._global_admin.api.add.assert_called_once_with('/locations', mock.ANY)
         expected_param = TestCoreBuckets._customize_bucket(bucket.to_server_object(), name=self._bucket_name,
                                                            readOnly=True, dedicated=True,
                                                            dedicatedPortal=self._tenant_base_object_ref)
-        actual_param = self._global_admin.add.call_args[0][1]
+        actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
@@ -61,10 +61,10 @@ class TestCoreBuckets(base_core.BaseCoreTest):
         get_response = munch.Munch({'name': self._bucket_name})
         self._init_global_admin(get_response=get_response)
         buckets.Buckets(self._global_admin).modify(self._bucket_name, self._bucket_new_name, read_only=True, dedicated_to=False)
-        self._global_admin.get.assert_called_once_with(f'/locations/{self._bucket_name}')
-        self._global_admin.put.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
+        self._global_admin.api.get.assert_called_once_with(f'/locations/{self._bucket_name}')
+        self._global_admin.api.put.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
         expected_param = TestCoreBuckets._get_bucket_param(name=self._bucket_new_name, readOnly=True, dedicated=False, dedicatedPortal=None)
-        actual_param = self._global_admin.put.call_args[0][1]
+        actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_modify_bucket_value_error(self):
@@ -78,14 +78,14 @@ class TestCoreBuckets(base_core.BaseCoreTest):
         get_multi_response = munch.Munch({'name': self._tenant_name, 'baseObjectRef': self._tenant_base_object_ref})
         self._init_global_admin(get_response=get_response, get_multi_response=get_multi_response, put_response=put_response)
         ret = buckets.Buckets(self._global_admin).modify(self._bucket_name, dedicated_to=self._tenant_name)
-        self._global_admin.put.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
+        self._global_admin.api.put.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
         expected_param = TestCoreBuckets._get_bucket_param(dedicated=True, dedicatedPortal=self._tenant_base_object_ref)
-        actual_param = self._global_admin.put.call_args[0][1]
+        actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
 
     def test_modify_bucket_not_found(self):
-        self._global_admin.get = mock.MagicMock(side_effect=exceptions.CTERAException())
+        self._global_admin.api.get = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
             buckets.Buckets(self._global_admin).modify(self._bucket_name)
         self.assertEqual('Failed to get bucket', error.exception.message)
@@ -107,7 +107,7 @@ class TestCoreBuckets(base_core.BaseCoreTest):
         delete_response = 'Success'
         self._init_global_admin(delete_response=delete_response)
         ret = buckets.Buckets(self._global_admin).delete(self._bucket_name)
-        self._global_admin.delete.assert_called_once_with(f'/locations/{self._bucket_name}')
+        self._global_admin.api.delete.assert_called_once_with(f'/locations/{self._bucket_name}')
         self.assertEqual(ret, delete_response)
 
     def test_change_bucket_mode(self):
@@ -119,7 +119,7 @@ class TestCoreBuckets(base_core.BaseCoreTest):
                 ret = buckets.Buckets(self._global_admin).read_only(self._bucket_name)
             else:
                 ret = buckets.Buckets(self._global_admin).read_write(self._bucket_name)
-            self._global_admin.put.assert_called_once_with(f'/locations/{self._bucket_name}/readOnly', ro)
+            self._global_admin.api.put.assert_called_once_with(f'/locations/{self._bucket_name}/readOnly', ro)
             self.assertEqual(ret, put_response)
 
     def test_list_buckets(self):

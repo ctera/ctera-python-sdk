@@ -17,38 +17,38 @@ class TestCoreAntivirus(base_core.BaseCoreTest):
     def test_rescan(self):
         self._init_global_admin()
         antivirus.Antivirus(self._global_admin).rescan()
-        self._global_admin.execute.assert_called_once_with('/servers', 'resetAllAVBG')
+        self._global_admin.api.execute.assert_called_once_with('/servers', 'resetAllAVBG')
 
     def test_suspend(self):
         self._init_global_admin()
         antivirus.Antivirus(self._global_admin).suspend()
-        self._global_admin.put.assert_called_once_with('/settings/cloudFSSettings/antivirusSettings/isEnabled', False)
+        self._global_admin.api.put.assert_called_once_with('/settings/cloudFSSettings/antivirusSettings/isEnabled', False)
 
     def test_unsuspend(self):
         self._init_global_admin()
         antivirus.Antivirus(self._global_admin).unsuspend()
-        self._global_admin.put.assert_called_once_with('/settings/cloudFSSettings/antivirusSettings/isEnabled', True)
+        self._global_admin.api.put.assert_called_once_with('/settings/cloudFSSettings/antivirusSettings/isEnabled', True)
 
     def test_status(self):
         self._init_global_admin()
         antivirus.Antivirus(self._global_admin).status()
-        self._global_admin.execute.assert_called_once_with('', 'getIcapGlobalStatus', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'getIcapGlobalStatus', mock.ANY)
         expected_param = Object()
         expected_param.icapService = ICAPServices.Antivirus
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_get_server(self):
         self._init_global_admin()
         antivirus.AntivirusServers(self._global_admin).get(self._name)
-        self._global_admin.get.assert_called_once_with(f'/antiviruses/{self._name}')
+        self._global_admin.api.get.assert_called_once_with(f'/antiviruses/{self._name}')
 
     def test_add_server(self):
         self._init_global_admin()
         antivirus.AntivirusServers(self._global_admin).add(self._name, self._type, self._url)
-        self._global_admin.add.assert_called_once_with('/antiviruses', mock.ANY)
+        self._global_admin.api.add.assert_called_once_with('/antiviruses', mock.ANY)
         expected_param = self._create_antivirus_param()
-        actual_param = self._global_admin.add.call_args[0][1]
+        actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def _create_antivirus_param(self, connection_timeout=5):
@@ -63,14 +63,14 @@ class TestCoreAntivirus(base_core.BaseCoreTest):
     def test_delete_server(self):
         self._init_global_admin()
         antivirus.AntivirusServers(self._global_admin).delete(self._name)
-        self._global_admin.delete.assert_called_once_with(f'/antiviruses/{self._name}')
+        self._global_admin.api.delete.assert_called_once_with(f'/antiviruses/{self._name}')
 
     def test_suspend_server(self):
         self._init_global_admin()
         antivirus.AntivirusServers(self._global_admin).suspend(self._name)
-        self._global_admin.put.assert_called_once_with(f'/antiviruses/{self._name}/enabled', False)
+        self._global_admin.api.put.assert_called_once_with(f'/antiviruses/{self._name}/enabled', False)
 
     def test_unsuspend_server(self):
         self._init_global_admin()
         antivirus.AntivirusServers(self._global_admin).unsuspend(self._name)
-        self._global_admin.put.assert_called_once_with(f'/antiviruses/{self._name}/enabled', True)
+        self._global_admin.api.put.assert_called_once_with(f'/antiviruses/{self._name}/enabled', True)

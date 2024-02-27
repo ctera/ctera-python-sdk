@@ -30,9 +30,9 @@ class TestCoreDevices(base_core.BaseCoreTest):
         o.name = "unit-test"
         self._init_global_admin(get_multi_response=o)
         devices.Devices(self._global_admin).device(o.name)
-        self._global_admin.get_multi.assert_called_once_with('/portals/None/devices/unit-test', mock.ANY)
+        self._global_admin.api.get_multi.assert_called_once_with('/portals/None/devices/unit-test', mock.ANY)
         expected_include = ['/' + attr for attr in devices.Devices.default]
-        actual_include = self._global_admin.get_multi.call_args[0][1]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
@@ -119,13 +119,13 @@ class TestCoreDevices(base_core.BaseCoreTest):
 
     def test_get_device_comment(self):
         ret = devices.Devices(self._global_admin).get_comment(self._device_name)
-        self._global_admin.get.assert_called_once_with(f'/portals/None/devices/{self._device_name}/comment')
+        self._global_admin.api.get.assert_called_once_with(f'/portals/None/devices/{self._device_name}/comment')
         self.assertEqual(ret.code, self._expected_code)
 
     def test_set_device_comment(self):
         self._init_global_admin(put_response=munch.Munch(dict(code=self._expected_code)))
         ret = devices.Devices(self._global_admin).set_comment(self._device_name, self._comment)
-        self._global_admin.put.assert_called_once_with(f'/portals/None/devices/{self._device_name}/comment', self._comment)
+        self._global_admin.api.put.assert_called_once_with(f'/portals/None/devices/{self._device_name}/comment', self._comment)
         self.assertEqual(ret.code, self._expected_code)
 
     def _test_devices(self, filters=None, user=None):

@@ -26,7 +26,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
     def test_init_master(self):
         self.patch_call("time.sleep")
         self._init_global_admin()
-        self._global_admin.get = mock.MagicMock(side_effect=[
+        self._global_admin.api.get = mock.MagicMock(side_effect=[
             TestCoreSetup._generate_status_response(SetupWizardStage.Server, SetupWizardStatus.NA, ''),
             TestCoreSetup._generate_status_response(SetupWizardStage.Portal, SetupWizardStatus.NA, ''),
             TestCoreSetup._generate_status_response(SetupWizardStage.Finish, SetupWizardStatus.NA, '')
@@ -37,17 +37,17 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
                                                     self._admin_first_name, self._admin_last_name, self._admin_password, self._domain)
 
         setup_status_url = f'/{self._global_admin.context}/setup/status'
-        self._global_admin.get.assert_has_calls(
+        self._global_admin.api.get.assert_has_calls(
             [
                 mock.call(setup_status_url, use_file_url=True),
                 mock.call(setup_status_url, use_file_url=True),
                 mock.call(setup_status_url, use_file_url=True)
             ]
         )
-        self._global_admin.execute.assert_called_once_with(f'/{self._global_admin.context}/public',
+        self._global_admin.api.execute.assert_called_once_with(f'/{self._global_admin.context}/public',
                                                            'init', mock.ANY, use_file_url=True)
         expected_param = self._get_init_portal_param()
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Master)
@@ -58,14 +58,14 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
 
     def test_init_master_already_finished(self):
         self._init_global_admin()
-        self._global_admin.get = mock.MagicMock(side_effect=[
+        self._global_admin.api.get = mock.MagicMock(side_effect=[
             TestCoreSetup._generate_status_response(SetupWizardStage.Finish, SetupWizardStatus.NA, '')
         ])
         mock_startup_wait = self.patch_call("cterasdk.core.startup.Startup.wait")
 
         setup.Setup(self._global_admin).init_master(self._admin_username, self._admin_email,
                                                     self._admin_first_name, self._admin_last_name, self._admin_password, self._domain)
-        self._global_admin.get.assert_has_calls(
+        self._global_admin.api.get.assert_has_calls(
             [
                 mock.call(f'/{self._global_admin.context}/setup/status', use_file_url=True)
             ]
@@ -81,25 +81,25 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
     def _test_init_application_server_success(self, authentication_method):
         self.patch_call("time.sleep")
         self._init_global_admin()
-        self._global_admin.get = mock.MagicMock(side_effect=[
+        self._global_admin.api.get = mock.MagicMock(side_effect=[
             TestCoreSetup._generate_status_response(SetupWizardStage.Server, SetupWizardStatus.NA, ''),
             TestCoreSetup._generate_status_response(SetupWizardStage.Replication, SetupWizardStatus.NA, ''),
             TestCoreSetup._generate_status_response(SetupWizardStage.Finish, SetupWizardStatus.NA, '')
         ])
-        self._global_admin.execute = mock.MagicMock(side_effect=TestCoreSetup._create_init_slave_execute_function(authentication_method))
+        self._global_admin.api.execute = mock.MagicMock(side_effect=TestCoreSetup._create_init_slave_execute_function(authentication_method))
         mock_startup_wait = self.patch_call("cterasdk.core.startup.Startup.wait")
 
         setup.Setup(self._global_admin).init_application_server(self._master_ipaddr, self._master_secret)
 
         setup_status_url = f'/{self._global_admin.context}/setup/status'
-        self._global_admin.get.assert_has_calls(
+        self._global_admin.api.get.assert_has_calls(
             [
                 mock.call(setup_status_url, use_file_url=True),
                 mock.call(setup_status_url, use_file_url=True),
                 mock.call(setup_status_url, use_file_url=True)
             ]
         )
-        self._global_admin.execute.assert_has_calls(
+        self._global_admin.api.execute.assert_has_calls(
             [
                 mock.call(f'/{self._global_admin.context}/setup/authenticaionMethod',
                           'askMasterForSlaveAuthenticaionMethod', self._master_ipaddr, use_file_url=True),
@@ -107,7 +107,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
             ]
         )
         expected_param = TestCoreSetup._get_init_replication_param()
-        actual_param = self._global_admin.execute.call_args_list[1][0][2]  # Access setReplication call param
+        actual_param = self._global_admin.api.execute.call_args_list[1][0][2]  # Access setReplication call param
         self._assert_equal_objects(actual_param, expected_param)
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Slave, authentication_method, self._master_ipaddr, self._master_secret)
@@ -124,27 +124,27 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
     def _test_init_replication_server_success(self, authentication_method):
         self.patch_call("time.sleep")
         self._init_global_admin()
-        self._global_admin.get = mock.MagicMock(side_effect=[
+        self._global_admin.api.get = mock.MagicMock(side_effect=[
             TestCoreSetup._generate_status_response(SetupWizardStage.Server, SetupWizardStatus.NA, ''),
             TestCoreSetup._generate_status_response(SetupWizardStage.Replication, SetupWizardStatus.NA, ''),
             TestCoreSetup._generate_status_response(SetupWizardStage.Finish, SetupWizardStatus.NA, '')
         ])
         candidates = self._replication_candidates
-        self._global_admin.execute = mock.MagicMock(side_effect=TestCoreSetup._create_init_slave_execute_function(authentication_method,
+        self._global_admin.api.execute = mock.MagicMock(side_effect=TestCoreSetup._create_init_slave_execute_function(authentication_method,
                                                                                                                   candidates))
         mock_startup_wait = self.patch_call("cterasdk.core.startup.Startup.wait")
 
         setup.Setup(self._global_admin).init_replication_server(self._master_ipaddr, self._master_secret, self._replicate_from)
 
         setup_status_url = f'/{self._global_admin.context}/setup/status'
-        self._global_admin.get.assert_has_calls(
+        self._global_admin.api.get.assert_has_calls(
             [
                 mock.call(setup_status_url, use_file_url=True),
                 mock.call(setup_status_url, use_file_url=True),
                 mock.call(setup_status_url, use_file_url=True)
             ]
         )
-        self._global_admin.execute.assert_has_calls(
+        self._global_admin.api.execute.assert_has_calls(
             [
                 mock.call(f'/{self._global_admin.context}/setup/authenticaionMethod',
                           'askMasterForSlaveAuthenticaionMethod', self._master_ipaddr, use_file_url=True),
@@ -153,7 +153,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
             ]
         )
         expected_param = TestCoreSetup._get_init_replication_param(self._replication_candidates[1])
-        actual_param = self._global_admin.execute.call_args_list[2][0][2]  # Access setReplication call param
+        actual_param = self._global_admin.api.execute.call_args_list[2][0][2]  # Access setReplication call param
         self._assert_equal_objects(actual_param, expected_param)
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Slave, authentication_method, self._master_ipaddr, self._master_secret)
@@ -169,8 +169,8 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         candidates = ['objs/8//Server/server4']
         execute_side_effect_function = TestCoreSetup._create_init_slave_execute_function(SlaveAuthenticaionMethod.Password, candidates)
         execute_function = mock.MagicMock(side_effect=execute_side_effect_function)
-        self._global_admin.get = get_function
-        self._global_admin.execute = execute_function
+        self._global_admin.api.get = get_function
+        self._global_admin.api.execute = execute_function
 
         with self.assertRaises(exceptions.CTERAException) as error:
             setup.Setup(self._global_admin).init_replication_server(self._master_ipaddr, self._master_secret, self._replicate_from)

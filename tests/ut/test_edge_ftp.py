@@ -12,38 +12,38 @@ class TestEdgeFTP(base_edge.BaseEdgeTest):
     def test_get_configuration(self):
         self._init_filer(get_response=TestEdgeFTP._get_ftp_configuration_response())
         ret = ftp.FTP(self._filer).get_configuration()
-        self._filer.get.assert_called_once_with('/config/fileservices/ftp')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/ftp')
         self._assert_equal_objects(ret, TestEdgeFTP._get_ftp_configuration_response())
 
     def test_ftp_is_disabled(self):
         self._init_filer(get_response=Mode.Disabled)
         ret = ftp.FTP(self._filer).is_disabled()
-        self._filer.get.assert_called_once_with('/config/fileservices/ftp/mode')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/ftp/mode')
         self.assertEqual(ret, True)
 
     def test_ftp_is_not_disabled(self):
         self._init_filer(get_response=Mode.Enabled)
         ret = ftp.FTP(self._filer).is_disabled()
-        self._filer.get.assert_called_once_with('/config/fileservices/ftp/mode')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/ftp/mode')
         self.assertEqual(ret, False)
 
     def test_enable_ftp(self):
         self._init_filer()
         ftp.FTP(self._filer).enable()
-        self._filer.put.assert_called_once_with('/config/fileservices/ftp/mode', Mode.Enabled)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/ftp/mode', Mode.Enabled)
 
     def test_disable_ftp(self):
         self._init_filer()
         ftp.FTP(self._filer).disable()
-        self._filer.put.assert_called_once_with('/config/fileservices/ftp/mode', Mode.Disabled)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/ftp/mode', Mode.Disabled)
 
     def test_modify_success(self):
         self._init_filer(get_response=TestEdgeFTP._get_ftp_configuration_response())
         ftp.FTP(self._filer).modify(True, 5, 'folder', 'Welcome to Gotham City FTP.', 10, True)
-        self._filer.get.assert_called_once_with('/config/fileservices/ftp')
-        self._filer.put.assert_called_once_with('/config/fileservices/ftp', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/fileservices/ftp')
+        self._filer.api.put.assert_called_once_with('/config/fileservices/ftp', mock.ANY)
         expected_param = TestEdgeFTP._get_ftp_configuration_response(True, 5, 'folder', 'Welcome to Gotham City FTP.', 10, True)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_modify_raise(self):

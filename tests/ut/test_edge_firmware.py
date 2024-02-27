@@ -32,7 +32,7 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
                 firmware=(Path(__file__).name, mock.ANY, 'text/x-python')
             )
         )
-        self._filer.get.assert_called_with(TestEdgeFirmware._task_pointer)
+        self._filer.api.get.assert_called_with(TestEdgeFirmware._task_pointer)
         if reboot:
             self._filer.power.reboot.assert_called_with(wait=wait_for_reboot)
         else:
@@ -51,7 +51,7 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
                 firmware=(Path(__file__).name, mock.ANY, 'text/x-python')
             )
         )
-        self._filer.get.assert_not_called()
+        self._filer.api.get.assert_not_called()
         self.assertEqual(error.exception.message, 'Failed to upload the new firmware')
         self.assertEqual(error.exception.path, TestEdgeFirmware._file_path)
 
@@ -69,7 +69,7 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
                 firmware=(Path(__file__).name, mock.ANY, 'text/x-python')
             )
         )
-        self._filer.get.assert_called_with(TestEdgeFirmware._task_pointer)
+        self._filer.api.get.assert_called_with(TestEdgeFirmware._task_pointer)
         self.assertEqual(error.exception.message, 'Filer failed to receive the new firmware - Failure')
 
     @staticmethod

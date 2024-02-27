@@ -19,7 +19,7 @@ class TestEdgeSupport(base_edge.BaseEdgeTest):
     def test_set_debug_level(self):
         self._init_filer()
         support.Support(self._filer).set_debug_level(*self._levels)
-        self._filer.execute.assert_called_once_with('/config/device', 'debugCmd', self._debug_command)
+        self._filer.api.execute.assert_called_once_with('/config/device', 'debugCmd', self._debug_command)
 
     def test_set_debug_level_input_error(self):
         self._init_filer()

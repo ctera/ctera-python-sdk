@@ -12,10 +12,10 @@ class TestEdgeTimezone(base_edge.BaseEdgeTest):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = timezone.Timezone(self._filer).get_timezone()
-        self._filer.get.assert_called_once_with('/config/time/TimeZone')
+        self._filer.api.get.assert_called_once_with('/config/time/TimeZone')
         self.assertEqual(ret, get_response)
 
     def test_set_timezone(self):
         self._init_filer()
         timezone.Timezone(self._filer).set_timezone(self._timezone)
-        self._filer.put.assert_called_once_with('/config/time/TimeZone', self._timezone)
+        self._filer.api.put.assert_called_once_with('/config/time/TimeZone', self._timezone)

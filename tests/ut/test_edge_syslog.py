@@ -24,57 +24,57 @@ class TestEdgeSyslog(base_edge.BaseEdgeTest):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = syslog.Syslog(self._filer).get_configuration()
-        self._filer.get.assert_called_once_with('/config/logging/syslog')
+        self._filer.api.get.assert_called_once_with('/config/logging/syslog')
         self._assert_equal_objects(ret, get_response)
 
     def test_enable_syslog_default_params(self):
         self._init_filer()
         syslog.Syslog(self._filer).enable(self._syslog_server)
-        self._filer.put.assert_called_once_with('/config/logging/syslog', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/logging/syslog', mock.ANY)
 
         expected_param = self._get_syslog_object()
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_syslog_custom_port(self):
         self._init_filer()
         syslog.Syslog(self._filer).enable(self._syslog_server, self._custom_syslog_port)
-        self._filer.put.assert_called_once_with('/config/logging/syslog', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/logging/syslog', mock.ANY)
 
         expected_param = self._get_syslog_object(port=self._custom_syslog_port)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_syslog_custom_port_use_tcp_default_severity(self):
         self._init_filer()
         syslog.Syslog(self._filer).enable(self._syslog_server, self._custom_syslog_port, self._tcp)
-        self._filer.put.assert_called_once_with('/config/logging/syslog', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/logging/syslog', mock.ANY)
 
         expected_param = self._get_syslog_object(port=self._custom_syslog_port, protocol=self._tcp)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_syslog_custom_port_use_tcp_severity_error(self):
         self._init_filer()
         syslog.Syslog(self._filer).enable(self._syslog_server, self._custom_syslog_port, self._tcp, self._min_severity)
-        self._filer.put.assert_called_once_with('/config/logging/syslog', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/logging/syslog', mock.ANY)
 
         expected_param = self._get_syslog_object(port=self._custom_syslog_port, protocol=self._tcp, min_severity=self._min_severity)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_disable_syslog(self):
         self._init_filer()
         syslog.Syslog(self._filer).disable()
-        self._filer.put.assert_called_once_with('/config/logging/syslog/mode', Mode.Disabled)
+        self._filer.api.put.assert_called_once_with('/config/logging/syslog/mode', Mode.Disabled)
 
     def test_modify_success(self):
         self._init_filer(get_response=self._get_syslog_object())
         syslog.Syslog(self._filer).modify(self._custom_syslog_server, self._custom_syslog_port, self._tcp, self._min_severity)
-        self._filer.get.assert_called_once_with('/config/logging/syslog')
-        self._filer.put.assert_called_once_with('/config/logging/syslog', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/logging/syslog')
+        self._filer.api.put.assert_called_once_with('/config/logging/syslog', mock.ANY)
         expected_param = self._get_syslog_object(self._custom_syslog_server, self._custom_syslog_port, self._tcp, self._min_severity)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_modify_raise(self):

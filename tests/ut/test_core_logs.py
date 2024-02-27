@@ -25,7 +25,7 @@ class TestCoreLogs(base_core.BaseCoreTest):
         expected_query_params = base_core.BaseCoreTest._create_query_params(filters=[origin_type_filter],
                                                                             start_from=0, count_limit=50, topic=LogTopic.System,
                                                                             minSeverity=Severity.INFO)
-        actual_query_params = self._global_admin.execute.call_args[0][2]
+        actual_query_params = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_query_params, expected_query_params)
 
     def test_get_error_logs_from_yesterday(self):
@@ -47,23 +47,23 @@ class TestCoreLogs(base_core.BaseCoreTest):
         expected_query_params = base_core.BaseCoreTest._create_query_params(filters=[origin_type_filter, before_filter, after_filter],
                                                                             start_from=0, count_limit=50, topic=LogTopic.System,
                                                                             minSeverity=Severity.ERROR)
-        actual_query_params = self._global_admin.execute.call_args[0][2]
+        actual_query_params = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_query_params, expected_query_params)
 
     def test_logs_alerts_add(self):
         self._init_global_admin(get_response=[])
         logs.Logs(self._global_admin).alerts.add(self._alert_name)
-        self._global_admin.get.assert_called_once_with('/alerts')
-        self._global_admin.put.assert_called_once_with('/alerts', mock.ANY)
+        self._global_admin.api.get.assert_called_once_with('/alerts')
+        self._global_admin.api.put.assert_called_once_with('/alerts', mock.ANY)
         expected_param = TestCoreLogs._create_alert(self._alert_name)
-        actual_param = self._global_admin.put.call_args[0][1]
+        actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param[0], expected_param)
 
     def test_logs_alerts_delete(self):
         self._init_global_admin(get_response=[TestCoreLogs._create_alert(self._alert_name)])
         logs.Logs(self._global_admin).alerts.delete(self._alert_name)
-        self._global_admin.get.assert_called_once_with('/alerts')
-        self._global_admin.put.assert_called_once_with('/alerts', [])
+        self._global_admin.api.get.assert_called_once_with('/alerts')
+        self._global_admin.api.put.assert_called_once_with('/alerts', [])
 
     @staticmethod
     def format_input_date(date_object, time):

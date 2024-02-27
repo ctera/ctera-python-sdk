@@ -66,10 +66,10 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
         self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
-        self._global_admin.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
 
         expected_param = self._get_add_cloud_drive_object()
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, 'Success')
@@ -83,10 +83,10 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
         self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
-        self._global_admin.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
 
         expected_param = self._get_add_cloud_drive_object(description=self._description)
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, 'Success')
@@ -101,10 +101,10 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
         self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
-        self._global_admin.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
 
         expected_param = self._get_add_cloud_drive_object()
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, 'Success')
@@ -119,10 +119,10 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
         self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
-        self._global_admin.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
 
         expected_param = self._get_add_cloud_drive_object(winacls=False)
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, 'Success')
@@ -135,7 +135,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
 
         error_message = "Expected Failure"
         expected_exception = exceptions.CTERAException(message=error_message)
-        self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
+        self._global_admin.api.execute = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.CloudDrives(self._global_admin).add(self._name, self._group, self._local_user_account)
 
@@ -207,13 +207,13 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._init_global_admin(execute_response=execute_response)
         ret = cloudfs.CloudDrives(self._global_admin).setfacl(self._nt_acl_folders.foldersPath, self._nt_acl_folders.sddlString,
                                                               self._nt_acl_folders.isRecursive)
-        self._global_admin.execute.assert_called_once_with('', 'setFoldersACL', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'setFoldersACL', mock.ANY)
         self.assertEqual(ret, execute_response)
 
     def test_set_folders_acl_raise(self):
         expected_exception = exceptions.CTERAException()
         self._init_global_admin(execute_response=expected_exception)
-        self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
+        self._global_admin.api.execute = mock.MagicMock(side_effect=expected_exception)
 
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.CloudDrives(self._global_admin).setfacl(self._nt_acl_folders.foldersPath, self._nt_acl_folders.sddlString,
@@ -225,13 +225,13 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._init_global_admin(execute_response=execute_response)
         ret = cloudfs.CloudDrives(self._global_admin).setoacl(self._nt_acl_owner.foldersPath, self._nt_acl_owner.ownerSid,
                                                               self._nt_acl_owner.isRecursive)
-        self._global_admin.execute.assert_called_once_with('', 'setOwnerACL', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'setOwnerACL', mock.ANY)
         self.assertEqual(ret, execute_response)
 
     def test_set_owner_acl_raise(self):
         expected_exception = exceptions.CTERAException()
         self._init_global_admin(execute_response=expected_exception)
-        self._global_admin.execute = mock.MagicMock(side_effect=expected_exception)
+        self._global_admin.api.execute = mock.MagicMock(side_effect=expected_exception)
 
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.CloudDrives(self._global_admin).setoacl(self._nt_acl_owner.foldersPath, self._nt_acl_owner.ownerSid,

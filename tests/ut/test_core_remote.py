@@ -50,7 +50,7 @@ class TestCoreRemote(base_core.BaseCoreTest):
         portal_device = devices.Devices(self._global_admin).device(self._device_name)
         portal_device.get = mock.MagicMock()
         portal_device.remote_access()
-        self._global_admin.execute.assert_called_once_with(f'/portals/{self._tenant_name}/devices/{self._device_name}',
+        self._global_admin.api.execute.assert_called_once_with(f'/portals/{self._tenant_name}/devices/{self._device_name}',
                                                            'singleSignOn')
         # portal_device.get.assert_called_once_with('/ssologin', {'ticket': self._sso_ticket})
 
@@ -61,7 +61,7 @@ class TestCoreRemote(base_core.BaseCoreTest):
         self.assertIsInstance(portal_device, instance_type)
 
     def _activate_portal_session(self):
-        self._global_admin.get = mock.MagicMock(side_effect=['team-portal-name', '7.5.182.16',
+        self._global_admin.api.get = mock.MagicMock(side_effect=['team-portal-name', '7.5.182.16',
                                                 TestCoreRemote._create_current_session_object()])
         self._global_admin.session().start_local_session(self._global_admin)
 

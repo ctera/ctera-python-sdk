@@ -34,22 +34,22 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
     def test_get_services_status(self):
         self._init_filer(get_response=self._get_services_status_response())
         ret = services.Services(self._filer).get_status()
-        self._filer.get.assert_called_once_with('/status/services')
+        self._filer.api.get.assert_called_once_with('/status/services')
         expected_return_value = self._get_services_connection_status()
         self._assert_equal_objects(ret, expected_return_value)
 
     def test_activate_default_args_success(self):
         self._init_filer()
-        self._filer.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
         self._filer.tasks.wait = mock.MagicMock()
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
         services.Services(self._filer).activate(self._server, self._user, self._code)
 
         self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
-        self._filer.execute.assert_called_once_with('/status/services', 'attachAndSave', mock.ANY)
+        self._filer.api.execute.assert_called_once_with('/status/services', 'attachAndSave', mock.ANY)
         self._filer.tasks.wait.assert_called_once_with(TestEdgeServices._background_task_id)
         expected_param = self._get_attach_and_save_param(False, use_activation_code=True)
-        actual_param = self._filer.execute.call_args[0][2]
+        actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self._tracker_mock.assert_called_once_with(
             self._filer,
@@ -64,14 +64,14 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
 
     def test_connect_default_args_success(self):
         self._init_filer()
-        self._filer.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
         self._filer.tasks.wait = mock.MagicMock()
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
 
         services.Services(self._filer).connect(self._server, self._user, self._password)
 
         self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
-        self._filer.execute.assert_has_calls(
+        self._filer.api.execute.assert_has_calls(
             [
                 mock.call('/status/services', 'isWebSsoEnabled', mock.ANY),
                 mock.call('/status/services', 'attachAndSave', mock.ANY)
@@ -79,11 +79,11 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         )
         self._filer.tasks.wait.assert_called_once_with(TestEdgeServices._background_task_id)
         expected_param = self._get_is_web_sso_param(trust_certificate=False)
-        actual_param = self._filer.execute.call_args_list[0][0][2]  # Access isWebSSOEnabled call param
+        actual_param = self._filer.api.execute.call_args_list[0][0][2]  # Access isWebSSOEnabled call param
 
         self._assert_equal_objects(actual_param, expected_param)
         expected_param = self._get_attach_and_save_param(False, use_activation_code=False)
-        actual_param = self._filer.execute.call_args_list[1][0][2]  # Access attachAndSave call param
+        actual_param = self._filer.api.execute.call_args_list[1][0][2]  # Access attachAndSave call param
         self._assert_equal_objects(actual_param, expected_param)
         self._tracker_mock.assert_called_once_with(
             self._filer,
@@ -111,15 +111,15 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
             services.Services(self._filer).connect(self._server, self._user, self._password)
 
         self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
-        self._filer.execute.assert_called_once_with('/status/services', 'isWebSsoEnabled', mock.ANY)
+        self._filer.api.execute.assert_called_once_with('/status/services', 'isWebSsoEnabled', mock.ANY)
         expected_param = self._get_is_web_sso_param(False)
-        actual_param = self._filer.execute.call_args[0][2]
+        actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual('Connection failed. You must activate this Gateway using an activation code.', error.exception.message)
 
     def test_connect_default_args_task_failure(self):
         self._init_filer()
-        self._filer.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
         self._filer.tasks.wait = mock.MagicMock(side_effect=TestEdgeServices._get_task_error())
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
 
@@ -127,7 +127,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
             services.Services(self._filer).connect(self._server, self._user, self._password)
 
         self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
-        self._filer.execute.assert_has_calls(
+        self._filer.api.execute.assert_has_calls(
             [
                 mock.call('/status/services', 'isWebSsoEnabled', mock.ANY),
                 mock.call('/status/services', 'attachAndSave', mock.ANY)
@@ -136,40 +136,40 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         self._filer.tasks.wait.assert_called_once_with(TestEdgeServices._background_task_id)
 
         expected_param = self._get_is_web_sso_param(trust_certificate=False)
-        actual_param = self._filer.execute.call_args_list[0][0][2]  # Access isWebSSOEnabled call param
+        actual_param = self._filer.api.execute.call_args_list[0][0][2]  # Access isWebSSOEnabled call param
         self._assert_equal_objects(actual_param, expected_param)
 
         expected_param = self._get_attach_and_save_param(False, use_activation_code=False)
-        actual_param = self._filer.execute.call_args_list[1][0][2]  # Access attachAndSave call param
+        actual_param = self._filer.api.execute.call_args_list[1][0][2]  # Access attachAndSave call param
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual('Connection failed', error.exception.message)
 
     def test_reconnect(self):
         self._init_filer()
         services.Services(self._filer).reconnect()
-        self._filer.execute.assert_called_once_with('/status/services', 'reconnect', None)
+        self._filer.api.execute.assert_called_once_with('/status/services', 'reconnect', None)
 
     def test_disconnect(self):
         self._init_filer()
         services.Services(self._filer).disconnect()
-        self._filer.put.assert_called_once_with('/config/services', None)
+        self._filer.api.put.assert_called_once_with('/config/services', None)
 
     def test_sso_enabled(self):
         get_response = True
         self._init_filer(get_response=get_response)
         ret = services.Services(self._filer).sso_enabled()
-        self._filer.get.assert_called_once_with('/config/gui/adminRemoteAccessSSO')
+        self._filer.api.get.assert_called_once_with('/config/gui/adminRemoteAccessSSO')
         self.assertEqual(ret, get_response)
 
     def test_enable_sso(self):
         self._init_filer()
         services.Services(self._filer).enable_sso()
-        self._filer.put.assert_called_once_with('/config/gui/adminRemoteAccessSSO', True)
+        self._filer.api.put.assert_called_once_with('/config/gui/adminRemoteAccessSSO', True)
 
     def test_disable_sso(self):
         self._init_filer()
         services.Services(self._filer).disable_sso()
-        self._filer.put.assert_called_once_with('/config/gui/adminRemoteAccessSSO', False)
+        self._filer.api.put.assert_called_once_with('/config/gui/adminRemoteAccessSSO', False)
 
     def _get_services_connection_status(self):
         param = Object()

@@ -27,23 +27,23 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = volumes.Volumes(self._filer).get()
-        self._filer.get.assert_called_once_with('/config/storage/volumes')
+        self._filer.api.get.assert_called_once_with('/config/storage/volumes')
         self.assertEqual(ret, get_response)
 
     def test_get_volume(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = volumes.Volumes(self._filer).get(self._volume_1_name)
-        self._filer.get.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
+        self._filer.api.get.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
         self.assertEqual(ret, get_response)
 
     def test_add_volume_default_args_single_device_success(self):
         add_response = 'Success'
         self._init_filer(add_response=add_response)
-        self._filer.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_single_drive)
+        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_single_drive)
         track_volume_creation_status_mock = self.patch_call("cterasdk.edge.volumes.track")
         ret = volumes.Volumes(self._filer).add(self._volume_1_name)
-        self._filer.get.assert_has_calls(
+        self._filer.api.get.assert_has_calls(
             [
                 mock.call('/status/storage/arrays'),
                 mock.call('/status/storage/disks')
@@ -55,19 +55,19 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
                                                                   [VolumeStatus.Formatting],
                                                                   [VolumeStatus.Mounting, VolumeStatus.Checking, VolumeStatus.Repairing],
                                                                   [VolumeStatus.Corrupted, VolumeStatus.Unknown])
-        self._filer.add.assert_called_once_with('/config/storage/volumes', mock.ANY)
+        self._filer.api.add.assert_called_once_with('/config/storage/volumes', mock.ANY)
         expected_param = self._get_add_volume_param(device=TestEdgeVolumes._drive_1, size=TestEdgeVolumes._drive_size)
-        actual_param = self._filer.add.call_args[0][1]
+        actual_param = self._filer.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
     def test_add_encrypted_volume_default_args_single_device_success(self):
         add_response = 'Success'
         self._init_filer(add_response=add_response)
-        self._filer.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_single_drive)
+        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_single_drive)
         track_volume_creation_status_mock = self.patch_call("cterasdk.edge.volumes.track")
         ret = volumes.Volumes(self._filer).add(self._volume_1_name, passphrase=self._volume_passphrase)
-        self._filer.get.assert_has_calls(
+        self._filer.api.get.assert_has_calls(
             [
                 mock.call('/status/storage/arrays'),
                 mock.call('/status/storage/disks')
@@ -79,20 +79,20 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
                                                                   [VolumeStatus.Formatting],
                                                                   [VolumeStatus.Mounting, VolumeStatus.Checking, VolumeStatus.Repairing],
                                                                   [VolumeStatus.Corrupted, VolumeStatus.Unknown])
-        self._filer.add.assert_called_once_with('/config/storage/volumes', mock.ANY)
+        self._filer.api.add.assert_called_once_with('/config/storage/volumes', mock.ANY)
         expected_param = self._get_add_volume_param(device=TestEdgeVolumes._drive_1,
                                                     size=TestEdgeVolumes._drive_size,
                                                     passphrase=self._volume_passphrase)
-        actual_param = self._filer.add.call_args[0][1]
+        actual_param = self._filer.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
     def test_add_volume_no_devices(self):
         self._init_filer()
-        self._filer.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_devices)
+        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_devices)
         with self.assertRaises(exceptions.CTERAException) as error:
             volumes.Volumes(self._filer).add(self._volume_1_name)
-        self._filer.get.assert_has_calls(
+        self._filer.api.get.assert_has_calls(
             [
                 mock.call('/status/storage/arrays'),
                 mock.call('/status/storage/disks')
@@ -102,10 +102,10 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
 
     def test_add_volume_invalid_device_name(self):
         self._init_filer()
-        self._filer.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_multiple_drive)
+        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_multiple_drive)
         with self.assertRaises(exceptions.InputError) as error:
             volumes.Volumes(self._filer).add(self._volume_1_name, device='Invalid device name')
-        self._filer.get.assert_has_calls(
+        self._filer.api.get.assert_has_calls(
             [
                 mock.call('/status/storage/arrays'),
                 mock.call('/status/storage/disks')
@@ -115,10 +115,10 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
 
     def test_add_volume_must_specify_device_name(self):
         self._init_filer()
-        self._filer.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_multiple_drive)
+        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_multiple_drive)
         with self.assertRaises(exceptions.CTERAException) as error:
             volumes.Volumes(self._filer).add(self._volume_1_name)
-        self._filer.get.assert_has_calls(
+        self._filer.api.get.assert_has_calls(
             [
                 mock.call('/status/storage/arrays'),
                 mock.call('/status/storage/disks')
@@ -129,10 +129,10 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
     def test_add_volume_with_device_success(self):
         add_response = 'Success'
         self._init_filer(add_response=add_response)
-        self._filer.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_multiple_drive)
+        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_multiple_drive)
         track_volume_creation_status_mock = self.patch_call("cterasdk.edge.volumes.track")
         ret = volumes.Volumes(self._filer).add(self._volume_1_name, device=TestEdgeVolumes._drive_1)
-        self._filer.get.assert_has_calls(
+        self._filer.api.get.assert_has_calls(
             [
                 mock.call('/status/storage/arrays'),
                 mock.call('/status/storage/disks')
@@ -144,18 +144,18 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
                                                                   [VolumeStatus.Formatting],
                                                                   [VolumeStatus.Mounting, VolumeStatus.Checking, VolumeStatus.Repairing],
                                                                   [VolumeStatus.Corrupted, VolumeStatus.Unknown])
-        self._filer.add.assert_called_once_with('/config/storage/volumes', mock.ANY)
+        self._filer.api.add.assert_called_once_with('/config/storage/volumes', mock.ANY)
         expected_param = self._get_add_volume_param(device=TestEdgeVolumes._drive_1, size=TestEdgeVolumes._drive_size)
-        actual_param = self._filer.add.call_args[0][1]
+        actual_param = self._filer.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
     def test_add_volume_exceeding_drive_size(self):
         self._init_filer()
-        self._filer.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_single_drive)
+        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_single_drive)
         with self.assertRaises(exceptions.InputError) as error:
             volumes.Volumes(self._filer).add(self._volume_1_name, size=999999999)
-        self._filer.get.assert_has_calls(
+        self._filer.api.get.assert_has_calls(
             [
                 mock.call('/status/storage/arrays'),
                 mock.call('/status/storage/disks')
@@ -171,17 +171,17 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
         ret = volumes.Volumes(self._filer).delete(self._volume_1_name)
         self._filer.tasks.by_name.assert_called_once_with(' '.join(['Mounting', self._volume_1_name, 'file system']))
         self._filer.tasks.wait.assert_called_once_with(self._mount_id)
-        self._filer.delete.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
+        self._filer.api.delete.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
         self.assertEqual(ret, delete_response)
 
     def test_delete_volume_raise(self):
         self._init_filer()
-        self._filer.delete = mock.MagicMock(side_effect=exceptions.CTERAException())
+        self._filer.api.delete = mock.MagicMock(side_effect=exceptions.CTERAException())
         self._filer.tasks.by_name = mock.MagicMock(return_value=[])
         with self.assertRaises(exceptions.CTERAException) as error:
             volumes.Volumes(self._filer).delete(self._volume_1_name)
         self._filer.tasks.by_name.assert_called_once_with(' '.join(['Mounting', self._volume_1_name, 'file system']))
-        self._filer.delete.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
+        self._filer.api.delete.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
         self.assertEqual('Volume deletion falied', error.exception.message)
 
     def test_delete_all_volume_success(self):
@@ -191,9 +191,9 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
         self._filer.tasks.by_name = mock.MagicMock()
         self._filer.tasks.wait = mock.MagicMock()
         volumes.Volumes(self._filer).delete_all()
-        self._filer.get.assert_called_once_with('/config/storage/volumes')
+        self._filer.api.get.assert_called_once_with('/config/storage/volumes')
         self._filer.tasks.running.assert_called_once()
-        self._filer.delete.assert_has_calls(
+        self._filer.api.delete.assert_has_calls(
             [
                 mock.call('/config/storage/volumes/' + self._volume_1_name),
                 mock.call('/config/storage/volumes/' + self._volume_2_name)
@@ -207,19 +207,19 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
         self._init_filer(get_response=TestEdgeVolumes._get_volume_response(self._volume_1_name, before_volume_size),
                          put_response=put_response)
         ret = volumes.Volumes(self._filer).modify(self._volume_1_name, 9999)
-        self._filer.get.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
-        self._filer.put.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name, mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
+        self._filer.api.put.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name, mock.ANY)
         expected_param = TestEdgeVolumes._get_volume_response(self._volume_1_name, after_volume_size)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
 
     def test_modify_volume_not_found(self):
         self._init_filer()
-        self._filer.get = mock.MagicMock(side_effect=exceptions.CTERAException())
+        self._filer.api.get = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
             volumes.Volumes(self._filer).modify(self._volume_1_name, 9999)
-        self._filer.get.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
+        self._filer.api.get.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
         self.assertEqual('Failed to get the volume', error.exception.message)
 
     @staticmethod
@@ -241,7 +241,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
         self._init_filer(get_response=[])
         self._filer.tasks.running = mock.MagicMock(return_value=[])
         volumes.Volumes(self._filer).delete_all()
-        self._filer.get.assert_called_once_with('/config/storage/volumes')
+        self._filer.api.get.assert_called_once_with('/config/storage/volumes')
 
     @staticmethod
     def _get_pending_mount_tasks():

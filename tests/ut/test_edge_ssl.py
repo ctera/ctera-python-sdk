@@ -21,39 +21,39 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
         get_response = True
         self._init_filer(get_response=get_response)
         ret = ssl.SSL(self._filer).is_http_disabled()
-        self._filer.get.assert_called_once_with('/config/fileservices/webdav/forceHttps')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/webdav/forceHttps')
         self._assert_equal_objects(ret, get_response)
 
     def test_is_http_disabled_false(self):
         get_response = False
         self._init_filer(get_response=get_response)
         ret = ssl.SSL(self._filer).is_http_disabled()
-        self._filer.get.assert_called_once_with('/config/fileservices/webdav/forceHttps')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/webdav/forceHttps')
         self._assert_equal_objects(ret, get_response)
 
     def test_is_http_enabled_true(self):
         get_response = False
         self._init_filer(get_response=get_response)
         ret = ssl.SSL(self._filer).is_http_enabled()
-        self._filer.get.assert_called_once_with('/config/fileservices/webdav/forceHttps')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/webdav/forceHttps')
         self._assert_equal_objects(ret, True)
 
     def test_is_http_enabled_false(self):
         get_response = True
         self._init_filer(get_response=get_response)
         ret = ssl.SSL(self._filer).is_http_enabled()
-        self._filer.get.assert_called_once_with('/config/fileservices/webdav/forceHttps')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/webdav/forceHttps')
         self._assert_equal_objects(ret, False)
 
     def test_enable_http(self):
         self._init_filer()
         ssl.SSL(self._filer).enable_http()
-        self._filer.put.assert_called_once_with('/config/fileservices/webdav/forceHttps', False)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/webdav/forceHttps', False)
 
     def test_disable_http(self):
         self._init_filer()
         ssl.SSL(self._filer).disable_http()
-        self._filer.put.assert_called_once_with('/config/fileservices/webdav/forceHttps', True)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/webdav/forceHttps', True)
 
     def test_import_certificate(self):
         put_response = 'Success'
@@ -77,14 +77,14 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
             self._certificate_contents,
             self._certificate_contents
         ])
-        self._filer.put.assert_called_once_with('/config/certificate', f'\n{expected_param}')
+        self._filer.api.put.assert_called_once_with('/config/certificate', f'\n{expected_param}')
         self.assertEqual(ret, put_response)
 
     def test_get_storage_ca(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = ssl.SSL(self._filer).get_storage_ca()
-        self._filer.get.assert_called_once_with('/status/extStorageTrustedCA')
+        self._filer.api.get.assert_called_once_with('/status/extStorageTrustedCA')
         self.assertEqual(ret, get_response)
 
     def test_import_storage_ca(self):
@@ -97,8 +97,8 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
         expected_param._classname = 'ExtTrustedCA'  # pylint: disable=protected-access
         expected_param.certificate = self._certificate_contents
         mock_load_certificate.assert_called_once_with(self._domain_cert)
-        self._filer.put.assert_called_once_with('/config/extStorageTrustedCA', mock.ANY)
-        actual_param = self._filer.put.call_args[0][1]
+        self._filer.api.put.assert_called_once_with('/config/extStorageTrustedCA', mock.ANY)
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
 
@@ -106,7 +106,7 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
         put_response = 'Success'
         self._init_filer(put_response=put_response)
         ssl.SSL(self._filer).remove_storage_ca()
-        self._filer.put.assert_called_once_with('/config/extStorageTrustedCA', None)
+        self._filer.api.put.assert_called_once_with('/config/extStorageTrustedCA', None)
 
     @staticmethod
     def _get_secret(secret):

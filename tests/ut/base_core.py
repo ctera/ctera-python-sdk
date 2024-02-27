@@ -14,13 +14,13 @@ class BaseCoreTest(base.BaseTest):
     def _init_global_admin(self, get_response=None, get_multi_response=None, put_response=None,
                            execute_response=None, form_data_response=None, add_response=None,
                            delete_response=None, multipart_response=None):
-        self._global_admin.get = mock.MagicMock(return_value=get_response)
-        self._global_admin.get_multi = mock.MagicMock(return_value=get_multi_response)
-        self._global_admin.put = mock.MagicMock(return_value=put_response)
-        self._global_admin.execute = mock.MagicMock(return_value=execute_response)
-        self._global_admin.form_data = mock.MagicMock(return_value=form_data_response)
-        self._global_admin.add = mock.MagicMock(return_value=add_response)
-        self._global_admin.delete = mock.MagicMock(return_value=delete_response)
+        self._global_admin.api.get = mock.MagicMock(return_value=get_response)
+        self._global_admin.api.get_multi = mock.MagicMock(return_value=get_multi_response)
+        self._global_admin.api.put = mock.MagicMock(return_value=put_response)
+        self._global_admin.api.execute = mock.MagicMock(return_value=execute_response)
+        self._global_admin.api.form_data = mock.MagicMock(return_value=form_data_response)
+        self._global_admin.api.add = mock.MagicMock(return_value=add_response)
+        self._global_admin.api.delete = mock.MagicMock(return_value=delete_response)
         self._global_admin.multipart = mock.MagicMock(return_value=multipart_response)
 
     @staticmethod

@@ -20,7 +20,7 @@ class TestEdgeShell(base_edge.BaseEdgeTest):
         self._filer.tasks.wait = mock.MagicMock(return_value=self._get_task_manager_result_object())
         ret = shell.Shell(self._filer).run_command(self._shell_command)
         self._filer.tasks.wait.assert_called_once_with(self._task_id)
-        self._filer.execute.assert_called_once_with('/config/device', 'bgshell', self._shell_command)
+        self._filer.api.execute.assert_called_once_with('/config/device', 'bgshell', self._shell_command)
         self.assertEqual(ret, self._task_result)
 
     def test_run_shell_command_task_error(self):

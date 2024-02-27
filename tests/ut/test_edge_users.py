@@ -23,14 +23,14 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = users.Users(self._filer).get()
-        self._filer.get.assert_called_once_with('/config/auth/users')
+        self._filer.api.get.assert_called_once_with('/config/auth/users')
         self.assertEqual(ret, get_response)
 
     def test_get_user(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = users.Users(self._filer).get(self._username)
-        self._filer.get.assert_called_once_with('/config/auth/users/' + self._username)
+        self._filer.api.get.assert_called_once_with('/config/auth/users/' + self._username)
         self.assertEqual(ret, get_response)
 
     def test_add_first_user(self):
@@ -39,11 +39,11 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._init_filer(get_response=info)
 
         users.Users(self._filer).add_first_user(self._username, self._password)
-        self._filer.get.assert_called_once_with('/nosession/logininfo')
-        self._filer.post.assert_called_once_with('/nosession/createfirstuser', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/nosession/logininfo')
+        self._filer.api.post.assert_called_once_with('/nosession/createfirstuser', mock.ANY)
 
         expected_param = self._get_first_user_object('')
-        actual_param = self._filer.post.call_args[0][1]
+        actual_param = self._filer.api.post.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self._login_mock.assert_called_once_with(self._username, self._password)
 
@@ -53,11 +53,11 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._init_filer(get_response=info)
 
         users.Users(self._filer).add_first_user(self._username, self._password, self._email)
-        self._filer.get.assert_called_once_with('/nosession/logininfo')
-        self._filer.post.assert_called_once_with('/nosession/createfirstuser', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/nosession/logininfo')
+        self._filer.api.post.assert_called_once_with('/nosession/createfirstuser', mock.ANY)
 
         expected_param = self._get_first_user_object(self._email)
-        actual_param = self._filer.post.call_args[0][1]
+        actual_param = self._filer.api.post.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self._login_mock.assert_called_once_with(self._username, self._password)
 
@@ -67,8 +67,8 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._init_filer(get_response=info)
 
         users.Users(self._filer).add_first_user(self._username, self._password)
-        self._filer.get.assert_called_once_with('/nosession/logininfo')
-        self._filer.post.assert_not_called()
+        self._filer.api.get.assert_called_once_with('/nosession/logininfo')
+        self._filer.api.post.assert_not_called()
         self._login_mock.assert_called_once_with(self._username, self._password)
 
     def test_add_user(self):
@@ -76,17 +76,17 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._init_filer(add_response=add_response)
 
         ret = users.Users(self._filer).add(self._username, self._password)
-        self._filer.add.assert_called_once_with('/config/auth/users', mock.ANY)
+        self._filer.api.add.assert_called_once_with('/config/auth/users', mock.ANY)
 
         expected_param = self._get_user_object()
-        actual_param = self._filer.add.call_args[0][1]
+        actual_param = self._filer.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, add_response)
 
     def test_add_user_raise(self):
         expected_exception = exceptions.CTERAException()
-        self._filer.add = mock.MagicMock(side_effect=expected_exception)
+        self._filer.api.add = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).add(self._username, self._password)
         self.assertEqual('User creation failed', error.exception.message)
@@ -98,33 +98,33 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._init_filer(get_response=get_response, put_response=put_response)
         ret = users.Users(self._filer).modify(self._username, self._password, self._full_name, self._email, self._uid)
 
-        self._filer.get.assert_called_once_with('/config/auth/users/' + self._username)
-        self._filer.put.assert_called_once_with('/config/auth/users/' + self._username, mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/auth/users/' + self._username)
+        self._filer.api.put.assert_called_once_with('/config/auth/users/' + self._username, mock.ANY)
         expected_param = self._get_user_object(self._full_name, self._email, self._uid)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, put_response)
 
     def test_modify_user_not_found(self):
-        self._filer.get = mock.MagicMock(side_effect=exceptions.CTERAException())
+        self._filer.api.get = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).modify(self._username)
-        self._filer.get.assert_called_once_with('/config/auth/users/' + self._username)
+        self._filer.api.get.assert_called_once_with('/config/auth/users/' + self._username)
         self.assertEqual('Failed to get the user', error.exception.message)
 
     def test_modify_user_update_failed(self):
         get_response = Object()
         get_response.username = self._username
         self._init_filer(get_response=get_response)
-        self._filer.put = mock.MagicMock(side_effect=exceptions.CTERAException())
+        self._filer.api.put = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).modify(self._username, self._password, self._full_name, self._email, self._uid)
 
-        self._filer.get.assert_called_once_with('/config/auth/users/' + self._username)
-        self._filer.put.assert_called_once_with('/config/auth/users/' + self._username, mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/auth/users/' + self._username)
+        self._filer.api.put.assert_called_once_with('/config/auth/users/' + self._username, mock.ANY)
         expected_param = self._get_user_object(self._full_name, self._email, self._uid)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual('Failed to modify user', error.exception.message)
 
@@ -133,13 +133,13 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._init_filer(delete_response=user)
 
         ret = users.Users(self._filer).delete(self._username)
-        self._filer.delete.assert_called_once_with('/config/auth/users/' + self._username)
+        self._filer.api.delete.assert_called_once_with('/config/auth/users/' + self._username)
 
         self.assertEqual(user.username, ret.username)
 
     def test_delete_user_raise(self):
         expected_exception = exceptions.CTERAException()
-        self._filer.delete = mock.MagicMock(side_effect=expected_exception)
+        self._filer.api.delete = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).delete(self._username)
         self.assertEqual('User deletion failed', error.exception.message)
