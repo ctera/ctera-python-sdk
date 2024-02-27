@@ -5,7 +5,7 @@ from ..common import parse_base_object_ref
 
 def remote_command(Portal, device):
     tenant = parse_base_object_ref(device.portal).name
-    base = f'{Portal.ctera.baseurl()}/devicecmdnew/{tenant}/{device.name}'
+    base = f'{Portal.ctera.baseurl}/devicecmdnew/{tenant}/{device.name}'
 
     ManagedDevice = None
     if device.deviceType in DeviceType.Gateways:

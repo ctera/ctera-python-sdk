@@ -14,7 +14,7 @@ class BaseEdgeTest(base.BaseTest):
                     form_data_response=None, add_response=None, execute_response=None,
                     delete_response=None, upload_response=None, handle_response=None,
                     mkcol_response=None, copy_response=None, move_response=None):
-        self._filer.handle = mock.MagicMock(return_value=handle_response)
+        self._filer.api.handle = mock.MagicMock(return_value=handle_response)
         self._filer.api.get = mock.MagicMock(return_value=get_response)
         self._filer.api.put = mock.MagicMock(return_value=put_response)
         self._filer.api.post = mock.MagicMock(return_value=post_response)

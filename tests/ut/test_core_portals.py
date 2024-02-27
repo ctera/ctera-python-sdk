@@ -1,4 +1,5 @@
 from unittest import mock
+import munch
 
 from cterasdk import exceptions
 from cterasdk.common import Object
@@ -23,6 +24,8 @@ class TestCorePortals(base_core.BaseCoreTest):
         self._billing_id = 'billing-id'
         self._company = 'The Acme Corporation'
         self._tenant_attrs = ['externalPortalId', 'companyName']
+        mock_session = self.patch_call("cterasdk.objects.services.CTERA.session")
+        mock_session.return_value = munch.Munch({'update_tenant': lambda x: x})
 
     def test_get_tenant(self):
         get_multi_response = self._get_portal_object(name=self._name, externalPortalId=self._billing_id, companyName=self._company)

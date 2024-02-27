@@ -74,7 +74,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         dst = 'public'
         mv_mock = self.patch_call('cterasdk.core.files.io.move')
         self.files.move(src, destination=dst)
-        mv_mock.assert_called_once_with(self._global_admin, mock.ANY, mock.ANY)
+        mv_mock.assert_called_once_with(self._global_admin, mock.ANY, destination=mock.ANY)
         actual_ctera_paths = mv_mock.call_args[0][1:]
         self.assertListEqual(
             [actual_ctera_path.fullpath() for actual_ctera_path in actual_ctera_paths],
@@ -86,7 +86,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         dst = 'public'
         cp_mock = self.patch_call('cterasdk.core.files.io.copy')
         self.files.copy(src, destination=dst)
-        cp_mock.assert_called_once_with(self._global_admin, mock.ANY, mock.ANY)
+        cp_mock.assert_called_once_with(self._global_admin, mock.ANY, destination=mock.ANY)
         actual_ctera_paths = cp_mock.call_args[0][1:]
         self.assertListEqual(
             [actual_ctera_path.fullpath() for actual_ctera_path in actual_ctera_paths],

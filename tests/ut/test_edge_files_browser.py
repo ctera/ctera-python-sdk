@@ -1,5 +1,4 @@
 from unittest import mock
-import munch
 
 from cterasdk.edge.files.browser import FileBrowser
 from tests.ut import base_edge
@@ -18,8 +17,6 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
         self._target = 'target/folder'
         self._target_fullpath = f'/{self._target}/{self._filename}'
         self._default_download_dir = cterasdk.settings.downloads.location
-        mock_session = self.patch_call("cterasdk.objects.services.CTERA.session")
-        mock_session.return_value = munch.Munch({'update_tenant': lambda x: x})
 
     def test_download_as_zip_success(self):
         pass  # self._files.download_as_zip()
