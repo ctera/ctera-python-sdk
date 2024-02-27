@@ -78,7 +78,7 @@ class Setup(BaseCommand):
     def _init_server(self, params, wait=False):
         form = MultipartForm()
         if self.stage == SetupWizardStage.Server:
-            form.add('inputXML', utf8_decode(toxmlstr(params)))
+            form.add('inputXml', utf8_decode(toxmlstr(params)))
             form.add('serverMode', params.serverMode)
 
             if params.serverMode == ServerMode.Slave:
