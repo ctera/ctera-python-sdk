@@ -85,7 +85,8 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
             TestCoreSetup._generate_status_response(SetupWizardStage.Replication, SetupWizardStatus.NA, ''),
             TestCoreSetup._generate_status_response(SetupWizardStage.Finish, SetupWizardStatus.NA, '')
         ])
-        self._global_admin.ctera.execute = mock.MagicMock(side_effect=TestCoreSetup._create_init_slave_execute_function(authentication_method))
+        execute_side_effect = TestCoreSetup._create_init_slave_execute_function(authentication_method)
+        self._global_admin.ctera.execute = mock.MagicMock(side_effect=execute_side_effect)
         mock_startup_wait = self.patch_call("cterasdk.core.startup.Startup.wait")
 
         setup.Setup(self._global_admin).init_application_server(self._master_ipaddr, self._master_secret)
@@ -129,8 +130,8 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
             TestCoreSetup._generate_status_response(SetupWizardStage.Finish, SetupWizardStatus.NA, '')
         ])
         candidates = self._replication_candidates
-        self._global_admin.ctera.execute = mock.MagicMock(side_effect=TestCoreSetup._create_init_slave_execute_function(authentication_method,
-                                                                                                                  candidates))
+        execute_side_effect = TestCoreSetup._create_init_slave_execute_function(authentication_method, candidates)
+        self._global_admin.ctera.execute = mock.MagicMock(side_effect=execute_side_effect)
         mock_startup_wait = self.patch_call("cterasdk.core.startup.Startup.wait")
 
         setup.Setup(self._global_admin).init_replication_server(self._master_ipaddr, self._master_secret, self._replicate_from)
