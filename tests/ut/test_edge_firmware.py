@@ -25,11 +25,11 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
         )
         self._filer.power.reboot = mock.MagicMock()
         firmware.Firmware(self._filer).upgrade(TestEdgeFirmware._file_path, reboot=reboot, wait_for_reboot=wait_for_reboot)
-        self._filer.upload.assert_called_with(
+        self._filer.api.form_data.assert_called_with(
             'proc/firmware',
             dict(
                 name='upload',
-                firmware=(Path(__file__).name, mock.ANY, 'text/x-python')
+                firmware=mock.ANY
             )
         )
         self._filer.api.get.assert_called_with(TestEdgeFirmware._task_pointer)
@@ -44,11 +44,11 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
         )
         with self.assertRaises(CTERAException) as error:
             firmware.Firmware(self._filer).upgrade(TestEdgeFirmware._file_path)
-        self._filer.upload.assert_called_with(
+        self._filer.api.form_data.assert_called_with(
             'proc/firmware',
             dict(
                 name='upload',
-                firmware=(Path(__file__).name, mock.ANY, 'text/x-python')
+                firmware=mock.ANY
             )
         )
         self._filer.api.get.assert_not_called()
@@ -62,11 +62,11 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
         )
         with self.assertRaises(CTERAException) as error:
             firmware.Firmware(self._filer).upgrade(TestEdgeFirmware._file_path)
-        self._filer.upload.assert_called_with(
+        self._filer.api.form_data.assert_called_with(
             'proc/firmware',
             dict(
                 name='upload',
-                firmware=(Path(__file__).name, mock.ANY, 'text/x-python')
+                firmware=mock.ANY
             )
         )
         self._filer.api.get.assert_called_with(TestEdgeFirmware._task_pointer)
