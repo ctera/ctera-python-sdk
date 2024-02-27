@@ -38,7 +38,8 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
 
     def test_connect(self):
         self._init_filer()
-        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeDirectoryService._get_response_side_effect(self._get_workgroup_param(), None))
+        get_response_side_effect = TestEdgeDirectoryService._get_response_side_effect(self._get_workgroup_param(), None)
+        self._filer.api.get = mock.MagicMock(side_effect=get_response_side_effect)
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
 
         directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, check_connection=True)
@@ -62,7 +63,8 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
     def test_connect_with_ou_path(self):
         self._init_filer()
         ou_path = "ou=North America,DC=ctera,DC=local"
-        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeDirectoryService._get_response_side_effect(self._get_workgroup_param(), None))
+        get_response_side_effect = TestEdgeDirectoryService._get_response_side_effect(self._get_workgroup_param(), None)
+        self._filer.api.get = mock.MagicMock(side_effect=get_response_side_effect)
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
 
         directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, ou_path, check_connection=True)
@@ -94,7 +96,8 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
 
     def test_connect_join_failure(self):
         self._init_filer()
-        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeDirectoryService._get_response_side_effect(self._get_workgroup_param(), None))
+        get_response_side_effect = TestEdgeDirectoryService._get_response_side_effect(self._get_workgroup_param(), None)
+        self._filer.api.get = mock.MagicMock(side_effect=get_response_side_effect)
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
         self._filer.api.execute = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
 

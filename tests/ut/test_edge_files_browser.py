@@ -28,29 +28,29 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
         self._init_webdav()
         self._files.move(self._path, self._target, False)
         self._filer.webdav.move.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
-                                                 TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                 overwrite=False)
+                                                        TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
+                                                        overwrite=False)
 
     def test_move_overwrite_success(self):
         self._init_webdav()
         self._files.move(self._path, self._target, True)
         self._filer.webdav.move.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
-                                                 TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                 overwrite=True)
+                                                        TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
+                                                        overwrite=True)
 
     def test_copy_dont_overwrite_success(self):
         self._init_webdav()
         self._files.copy(self._path, self._target, False)
         self._filer.webdav.copy.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
-                                                 TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                 overwrite=False)
+                                                        TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
+                                                        overwrite=False)
 
     def test_copy_overwrite_success(self):
         self._init_webdav()
         self._files.copy(self._path, self._target, True)
         self._filer.webdav.copy.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
-                                                 TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                 overwrite=True)
+                                                        TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
+                                                        overwrite=True)
 
     def test_delete_success(self):
         self._init_webdav()
