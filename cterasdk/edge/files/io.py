@@ -15,7 +15,7 @@ def makedirs(edge, path):
         path = common.get_object_path(path.base, '/'.join(directories[:i]))
         try:
             mkdir(edge, path)
-        except common.ItemExists:
+        except (common.ItemExists, common.Forbidden):
             pass
 
 
