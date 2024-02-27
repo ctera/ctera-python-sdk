@@ -25,7 +25,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
 
     def test_init_master(self):
         self.patch_call("time.sleep")
-        self._init_global_admin()
+        self._init_setup()
         self._global_admin.ctera.get = mock.MagicMock(side_effect=[
             TestCoreSetup._generate_status_response(SetupWizardStage.Server, SetupWizardStatus.NA, ''),
             TestCoreSetup._generate_status_response(SetupWizardStage.Portal, SetupWizardStatus.NA, ''),
@@ -123,7 +123,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
 
     def _test_init_replication_server_success(self, authentication_method):
         self.patch_call("time.sleep")
-        self._init_global_admin()
+        self._init_setup()
         self._global_admin.ctera.get = mock.MagicMock(side_effect=[
             TestCoreSetup._generate_status_response(SetupWizardStage.Server, SetupWizardStatus.NA, ''),
             TestCoreSetup._generate_status_response(SetupWizardStage.Replication, SetupWizardStatus.NA, ''),
@@ -162,7 +162,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         mock_startup_wait.assert_called_once()
 
     def test_no_replication_target(self):
-        self._init_global_admin()
+        self._init_setup()
         get_function = mock.MagicMock(side_effect=[
             TestCoreSetup._generate_status_response(SetupWizardStage.Replication, SetupWizardStatus.NA, '')
         ])

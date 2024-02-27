@@ -50,9 +50,9 @@ class MultipartForm:
         self._data = async_requests.FormData()
 
     def add(self, name, value, filename=None, content_transfer_encoding=None):
-        self._data.add_field(name=name, value=value, filename=filename, 
+        self._data.add_field(name=name, value=value, filename=filename,
                              content_type='multipart/form-data', content_transfer_encoding=content_transfer_encoding)
-        
+
     @property
     def data(self):
         return self._data
@@ -98,7 +98,7 @@ class Client:
     def form_data(self, path, data, *, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=Serializers.FormData(data), **kwargs)
         return self._request(request, on_response=on_response)
-    
+
     @decorators.authenticated
     def multipart(self, path, form, *, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=form.data, **kwargs)
