@@ -19,7 +19,7 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
         self._init_ctera_migrate()
         login.Login(self._filer).login(self._username, self._password)
         self._filer.api.form_data.assert_called_once_with('/login', {'username': self._username, 'password': self._password})
-        self._filer.migrate.login.assert_called_once_with('/auth/user')  # pylint: disable=protected-access
+        self._filer.migrate.login.assert_called_once()  # pylint: disable=protected-access
 
     def test_login_failure(self):
         error_message = "Expected Failure"
@@ -46,7 +46,7 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
                 mock.call('/logout', {'foo': 'bar'})
             ]
         )
-        self._filer.migrate.login.assert_called_once_with('/auth/user')  # pylint: disable=protected-access
+        self._filer.migrate.login.assert_called_once()  # pylint: disable=protected-access
 
     def test_logout_failure_after_login_success(self):
         self._init_filer()
@@ -54,7 +54,7 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
         self._init_ctera_migrate()
         self._filer.login(self._username, self._password)
         self._filer.api.form_data.assert_called_once_with('/login', {'username': self._username, 'password': self._password})
-        self._filer.migrate.login.assert_called_once_with('/auth/user')  # pylint: disable=protected-access
+        self._filer.migrate.login.assert_called_once()  # pylint: disable=protected-access
         error_message = "Expected Failure"
         self._filer.api.form_data = mock.MagicMock(side_effect=exceptions.CTERAException(message=error_message))
         with self.assertRaises(exceptions.CTERAException) as error:

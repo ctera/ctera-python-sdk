@@ -24,7 +24,7 @@ class Users(BaseCommand):
         :param str password: Password for the new user
         :param str,optional email: E-mail address of the new user, defaults to an empty string
         """
-        if not self._edge.api.initialized:
+        if not self._edge.initialized:
             user = Object()
             user.username = username
             user.password = password

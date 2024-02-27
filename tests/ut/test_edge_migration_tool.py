@@ -98,7 +98,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._init_ctera_migrate(get_response=munch.Munch(dict(history=self._jobs)))
         jobs = ctera_migrate.CTERAMigrate(self._filer).details(munch.Munch(id=self._task_id))
         self._filer.migrate.get.assert_called_once_with('/tasks/history',  # pylint: disable=protected-access
-                                                               {'id': self._task_id})
+                                                               params={'id': self._task_id})
         self.assertEqual(jobs.all, self._jobs)
         self.assertEqual(jobs.latest, self._jobs[0])
 
@@ -106,7 +106,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._init_ctera_migrate(get_response=munch.Munch(dict(history=None)))
         ctera_migrate.CTERAMigrate(self._filer).details(munch.Munch(id=self._task_id))
         self._filer.migrate.get.assert_called_once_with('/tasks/history',  # pylint: disable=protected-access
-                                                               {'id': self._task_id})
+                                                               params={'id': self._task_id})
 
     def test_results(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(discovery='discovery', migration='migration')))
@@ -115,13 +115,13 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
             if i == 'discovery':
                 self._filer.migrate.get.assert_called_with(  # pylint: disable=protected-access
                                                                   '/discovery/results',
-                                                                  {'id': i}
+                                                                  params={'id': i}
                                                                  )
                 self.assertEqual(ret, 'discovery')
             elif i == 'migration':
                 self._filer.migrate.get.assert_called_with(  # pylint: disable=protected-access
                                                                   '/migration/results',
-                                                                  {'id': i}
+                                                                  params={'id': i}
                                                                  )
                 self.assertEqual(ret, 'migration')
             else:

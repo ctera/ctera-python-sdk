@@ -23,7 +23,7 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
     def test_listdir_deleted_files(self):
         path = 'cloud/Users'
         listdir_mock = self.patch_call('cterasdk.core.files.io.listdir')
-        self.files.listdir(path, True)
+        self.files.listdir(path, include_deleted=True)
         listdir_mock.assert_called_once_with(self._global_admin, mock.ANY, depth=None, include_deleted=True)
         actual_ctera_path = listdir_mock.call_args[0][1]
         self.assertEqual(actual_ctera_path.fullpath(), os.path.join(TestCoreFilesBrowser._base_path, path))

@@ -198,7 +198,7 @@ class Discovery(TaskManager):
             param.name = name
         if notes:
             param.notes = notes
-        return self._ctera_migrate._edge.ctera_migrate.post('/tasks/update', param)  # pylint: disable=protected-access
+        return self._ctera_migrate._edge.migrate.post('/tasks/update', param)  # pylint: disable=protected-access
 
 
 class Migration(TaskManager):
