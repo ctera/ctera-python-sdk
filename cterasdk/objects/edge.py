@@ -103,9 +103,10 @@ class Edge(CTERA):  # pylint: disable=too-many-instance-attributes
 
     def _initialize(self, Portal):
         if Portal:
+            self._Portal = Portal
             self._generic.shutdown()
-            async_session = Portal.generic._async_session  # pylint: disable=protected-access
-            self._ctera_session.start_remote_session(Portal.session())
+            async_session = self._Portal.generic._async_session  # pylint: disable=protected-access
+            self._ctera_session.start_remote_session(self._Portal.session())
             self._api = clients.API(EndpointBuilder.new(self.base), async_session, lambda *_: True)
         else:
             async_session = self._generic._async_session  # pylint: disable=protected-access
