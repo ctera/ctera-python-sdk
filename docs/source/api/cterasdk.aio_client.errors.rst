@@ -1,7 +1,7 @@
-cterasdk.convert.exception module
+cterasdk.aio_client.errors module
 =================================
 
-.. automodule:: cterasdk.convert.exception
+.. automodule:: cterasdk.aio_client.errors
     :members:
     :undoc-members:
     :show-inheritance:

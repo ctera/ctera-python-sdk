@@ -1,7 +1,7 @@
-cterasdk.object package
-=======================
+cterasdk.objects package
+========================
 
-.. automodule:: cterasdk.object
+.. automodule:: cterasdk.objects
     :members:
     :undoc-members:
     :show-inheritance:
@@ -11,7 +11,7 @@ Submodules
 
 .. toctree::
 
-   cterasdk.object.Agent
-   cterasdk.object.Gateway
-   cterasdk.object.Portal
+   cterasdk.object.drive
+   cterasdk.object.edge
+   cterasdk.object.core
 

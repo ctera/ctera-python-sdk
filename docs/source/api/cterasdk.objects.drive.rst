@@ -1,7 +1,7 @@
-cterasdk.object.Portal module
+cterasdk.objects.drive module
 =============================
 
-.. automodule:: cterasdk.object.Portal
+.. automodule:: cterasdk.objects.drive
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,7 +1,7 @@
-cterasdk.object.Agent module
+cterasdk.objects.core module
 ============================
 
-.. automodule:: cterasdk.object.Agent
+.. automodule:: cterasdk.objects.core
     :members:
     :undoc-members:
     :show-inheritance:

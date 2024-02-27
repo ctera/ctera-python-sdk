@@ -1223,7 +1223,7 @@ The Devices APIs retrieve a handle that can be used to query and update the conf
 However, the handle retrieved from the Portal does not provide full access to the Edge Filer or Drive Agent APIs.
 To obtain full access to the remote Edge Filer or Drive Agent APIs, use the ``remote_access`` function.
 
-.. automethod:: cterasdk.object.Gateway.Gateway.remote_access
+.. automethod:: cterasdk.objects.edge.Edge.remote_access
    :noindex:
 
 .. code-block:: python

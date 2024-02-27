@@ -56,7 +56,7 @@ Formatting
 
 The following formatting functions are included in this library:
 
-.. autofunction:: cterasdk.convert.format.tojsonstr
+.. autofunction:: cterasdk.convert.serializers.tojsonstr
    :noindex:
 
 .. code-block:: python
@@ -78,7 +78,7 @@ The following formatting functions are included in this library:
    print(tojsonstr(user, False))
    {"lastName": "Wonderland", "password": "Passw0rd1!", "name": "alice", "firstName": "Alice", "email": "alice@adventures.com"}
 
-.. autofunction:: cterasdk.convert.format.toxmlstr
+.. autofunction:: cterasdk.convert.serializers.toxmlstr
    :noindex:
 
 .. code-block:: python

@@ -1420,7 +1420,7 @@ CTERA Migrate
 Discovery Tasks
 ^^^^^^^^^^^^^^^
 
-.. automethod:: cterasdk.edge.migration_tool.Discovery.list_tasks
+.. automethod:: cterasdk.edge.ctera_migrate.Discovery.list_tasks
    :noindex:
 
 .. code-block:: python
@@ -1429,7 +1429,7 @@ Discovery Tasks
    for task in filer.ctera_migrate.discovery.list_tasks(deleted=False):
        print(task)
 
-.. automethod:: cterasdk.edge.migration_tool.Discovery.add
+.. automethod:: cterasdk.edge.ctera_migrate.Discovery.add
    :noindex:
 
 .. code-block:: python
@@ -1445,14 +1445,14 @@ Discovery Tasks
    """Run the task"""
    filer.ctera_migrate.start(task)
 
-.. automethod:: cterasdk.edge.migration_tool.Discovery.update
+.. automethod:: cterasdk.edge.ctera_migrate.Discovery.update
    :noindex:
 
 
 Migration Tasks
 ^^^^^^^^^^^^^^^
 
-.. automethod:: cterasdk.edge.migration_tool.Migration.list_tasks
+.. automethod:: cterasdk.edge.ctera_migrate.Migration.list_tasks
    :noindex:
 
 .. code-block:: python
@@ -1461,7 +1461,7 @@ Migration Tasks
    for task in filer.ctera_migrate.migration.list_tasks(deleted=False):
        print(task)
 
-.. automethod:: cterasdk.edge.migration_tool.Migration.add
+.. automethod:: cterasdk.edge.ctera_migrate.Migration.add
    :noindex:
 
 .. code-block:: python

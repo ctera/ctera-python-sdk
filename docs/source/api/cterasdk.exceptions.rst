@@ -1,7 +1,7 @@
-cterasdk.client.ssl module
+cterasdk.exceptions module
 ==========================
 
-.. automodule:: cterasdk.client.ssl
+.. automodule:: cterasdk.exceptions
     :members:
     :undoc-members:
     :show-inheritance:
