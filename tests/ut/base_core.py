@@ -13,7 +13,7 @@ class BaseCoreTest(base.BaseTest):
 
     def _init_global_admin(self, get_response=None, get_multi_response=None, put_response=None,
                            execute_response=None, form_data_response=None, add_response=None,
-                           delete_response=None, multipart_response=None):
+                           delete_response=None):
         self._global_admin.api.get = mock.MagicMock(return_value=get_response)
         self._global_admin.api.get_multi = mock.MagicMock(return_value=get_multi_response)
         self._global_admin.api.put = mock.MagicMock(return_value=put_response)

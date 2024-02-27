@@ -53,14 +53,14 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         expected_params = TestCoreSetup._get_form_data(params)
         actual_param = TestCoreSetup._format_actual_parameters_to_dict(self._global_admin.ctera.multipart.call_args[0][1])
         self._global_admin.ctera.multipart.assert_called_once_with('/setup', mock.ANY)
-        for key in actual_param.keys():
+        for key in actual_param.keys():  # pylint: disable=consider-using-dict-items, consider-iterating-dictionary
             self._assert_equal_objects(actual_param[key], expected_params[key])
         mock_startup_wait.assert_called_once()
 
     @staticmethod
     def _format_actual_parameters_to_dict(actual_param):
         d = {}
-        for multi_dict, content_type, value in actual_param.data._fields:  # pylint: disable=protected-access
+        for multi_dict, content_type, value in actual_param.data._fields:  # pylint: disable=protected-access, unused-variable
             d[multi_dict['name']] = value
         return d
 
@@ -123,7 +123,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         expected_params = TestCoreSetup._get_form_data(params)
         actual_param = TestCoreSetup._format_actual_parameters_to_dict(self._global_admin.ctera.multipart.call_args[0][1])
         self._global_admin.ctera.multipart.assert_called_once_with('/setup', mock.ANY)
-        for key in actual_param.keys():
+        for key in actual_param.keys():  # pylint: disable=consider-using-dict-items, consider-iterating-dictionary
             self._assert_equal_objects(actual_param[key], expected_params[key])
         mock_startup_wait.assert_called_once()
 
@@ -172,7 +172,7 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         expected_params = TestCoreSetup._get_form_data(params)
         actual_param = TestCoreSetup._format_actual_parameters_to_dict(self._global_admin.ctera.multipart.call_args[0][1])
         self._global_admin.ctera.multipart.assert_called_once_with('/setup', mock.ANY)
-        for key in actual_param.keys():
+        for key in actual_param.keys():  # pylint: disable=consider-using-dict-items, consider-iterating-dictionary
             self._assert_equal_objects(actual_param[key], expected_params[key])
         mock_startup_wait.assert_called_once()
 
