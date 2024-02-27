@@ -71,7 +71,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self._filer.api.add.assert_called_once_with('/config/fileservices/share', mock.ANY)  # no verification call param _add_share_acl_rule()
+        self._filer.api.add.assert_called_once_with('/config/fileservices/share', mock.ANY)
 
     def test_add_nfs_v3_share_success(self):
         execute_response = self._get_list_physical_folders_response_object()
