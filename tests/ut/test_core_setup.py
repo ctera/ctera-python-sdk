@@ -120,8 +120,11 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         self._assert_equal_objects(actual_param, expected_param)
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Slave, authentication_method, self._master_ipaddr, self._master_secret)
-        form_data = TestCoreSetup._get_form_data(params)
-        self._global_admin.ctera.multipart.assert_called_once_with('/setup', form_data)
+        expected_params = TestCoreSetup._get_form_data(params)
+        actual_param = TestCoreSetup._format_actual_parameters_to_dict(self._global_admin.ctera.multipart.call_args[0][1])
+        self._global_admin.ctera.multipart.assert_called_once_with('/setup', mock.ANY)
+        for key in actual_param.keys():
+            self._assert_equal_objects(actual_param[key], expected_params[key])
         mock_startup_wait.assert_called_once()
 
     def test_init_replication_server_success_password(self):
@@ -166,8 +169,11 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         self._assert_equal_objects(actual_param, expected_param)
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Slave, authentication_method, self._master_ipaddr, self._master_secret)
-        form_data = TestCoreSetup._get_form_data(params)
-        self._global_admin.ctera.multipart.assert_called_once_with('/setup', form_data)
+        expected_params = TestCoreSetup._get_form_data(params)
+        actual_param = TestCoreSetup._format_actual_parameters_to_dict(self._global_admin.ctera.multipart.call_args[0][1])
+        self._global_admin.ctera.multipart.assert_called_once_with('/setup', mock.ANY)
+        for key in actual_param.keys():
+            self._assert_equal_objects(actual_param[key], expected_params[key])
         mock_startup_wait.assert_called_once()
 
     def test_no_replication_target(self):
