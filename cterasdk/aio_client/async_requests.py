@@ -47,6 +47,9 @@ class Session:
         except aiohttp.ClientConnectorError as error:
             logging.getLogger().error(error)
             raise ConnectionError(error)
+        except aiohttp.ServerDisconnectedError as error:
+            logging.getLogger().error(error)
+            raise ConnectionError(error)
         except asyncio.TimeoutError as error:
             logging.getLogger().error('Request timed out while making an HTTP request.')
             raise TimeoutError(error)

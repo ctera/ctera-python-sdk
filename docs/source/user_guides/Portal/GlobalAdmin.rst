@@ -25,7 +25,7 @@ Setup
 
 .. code-block:: python
 
-   admin.init_master('admin', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'password1!', 'ctera.me')
+   admin.setup.init_master('admin', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'password1!', 'ctera.me')
 
 .. automethod:: cterasdk.core.setup.Setup.init_application_server
    :noindex:
@@ -35,12 +35,12 @@ Setup
    """Connect a secondary Portal server using a password"""
    master_ipaddr = '172.31.53.246'
    master_password = 'secret'
-   admin.init_application_server(master_ipaddr, master_password)
+   admin.setup.init_application_server(master_ipaddr, master_password)
 
    """Connect a secondary Portal server using a private key"""
    master_ipaddr = '172.31.53.246'
    master_pk = """...PEM-encoded private key..."""
-   admin.init_application_server(master_ipaddr, master_pk)
+   admin.setup.init_application_server(master_ipaddr, master_pk)
 
 .. automethod:: cterasdk.core.setup.Setup.init_replication_server
    :noindex:
