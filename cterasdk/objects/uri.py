@@ -19,7 +19,8 @@ def create(base, *segments):
     for segment in segments:
         segment = segment[1:] if Path(segment).is_relative_to(root) else segment
         url = url.joinpath(segment)
-    return urllib.parse.urljoin(base, url.as_posix())
+    url = urllib.parse.urljoin(base, url.as_posix())
+    return f'{url}{root}' if segments[-1] == root else url
 
 
 def components(url):
