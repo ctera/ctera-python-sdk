@@ -8,7 +8,7 @@ def mkdir(edge, path):
     try:
         common.raise_for_status(response, str(path.fullpath()))
     except common.ItemExists:
-        logging.getLogger().info('Directory already exists. %s', {'path': path.fullpath()})    
+        logging.getLogger().info('Directory already exists. %s', {'path': path.fullpath()})
     logging.getLogger().info('Directory created. %s', {'path': path.fullpath()})
 
 
