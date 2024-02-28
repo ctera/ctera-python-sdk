@@ -42,8 +42,10 @@ class Session:
             return asyncio.create_task(on_response(response))
         except aiohttp.ClientSSLError as error:
             logging.getLogger().warning(error)
+            raise
         except aiohttp.ClientProxyConnectionError as error:
             logging.getLogger().error(error)
+            raise
         except aiohttp.ClientConnectorError as error:
             logging.getLogger().error(error)
             raise ConnectionError(error)
