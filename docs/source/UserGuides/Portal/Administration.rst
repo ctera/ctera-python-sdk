@@ -1,59 +1,9 @@
-*********************
+=====================
 Global Administration
-*********************
+=====================
 
-.. contents:: Table of Contents
-
-Create a Global Administrator Session
--------------------------------------
-
-.. autoclass:: cterasdk.objects.core.GlobalAdmin
-   :special-members: __init__
-   :noindex:
-
-.. code-block:: python
-
-   admin = GlobalAdmin('portal.ctera.com') # will use HTTPS over port 443
-
-.. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure this library to automatically trust the server's certificate, using: ``config.http['ssl'] = 'Trust'``
-
-Setup
------
-
-.. automethod:: cterasdk.core.setup.Setup.init_master
-   :noindex:
-
-.. code-block:: python
-
-   admin.setup.init_master('admin', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'password1!', 'ctera.me')
-
-.. automethod:: cterasdk.core.setup.Setup.init_application_server
-   :noindex:
-
-.. code-block:: python
-
-   """Connect a secondary Portal server using a password"""
-   master_ipaddr = '172.31.53.246'
-   master_password = 'secret'
-   admin.setup.init_application_server(master_ipaddr, master_password)
-
-   """Connect a secondary Portal server using a private key"""
-   master_ipaddr = '172.31.53.246'
-   master_pk = """...PEM-encoded private key..."""
-   admin.setup.init_application_server(master_ipaddr, master_pk)
-
-.. automethod:: cterasdk.core.setup.Setup.init_replication_server
-   :noindex:
-
-Logging in
-----------
-
-.. automethod:: cterasdk.objects.core.GlobalAdmin.test
-   :noindex:
-
-.. code-block:: python
-
-   admin.test()
+Logging In
+==========
 
 .. automethod:: cterasdk.objects.core.GlobalAdmin.login
    :noindex:
@@ -69,15 +19,8 @@ Logging in
 
    admin.logout()
 
-.. automethod:: cterasdk.objects.core.GlobalAdmin.whoami
-   :noindex:
-
-.. code-block:: python
-
-   admin.whoami()
-
-Navigating
-----------
+Browsing Tenants
+================
 
 .. automethod:: cterasdk.core.portals.Portals.browse_global_admin
    :noindex:
@@ -93,9 +36,8 @@ Navigating
 
    admin.portals.browse('portal')
 
-
-Licenses
---------
+Managing Licenses
+=================
 
 .. automethod:: cterasdk.core.licenses.Licenses.all
    :noindex:
@@ -116,7 +58,7 @@ Licenses
 
 
 Storage Classes
----------------
+===============
 
 .. automethod:: cterasdk.core.storage_classes.StorageClasses.add
    :noindex:
@@ -142,8 +84,9 @@ Storage Classes
    print(admin.storage_classes.get('Archive'))
 
 
-Storage Nodes
--------------
+Managing Storage Nodes
+======================
+
 .. automethod:: cterasdk.core.buckets.Buckets.get
    :noindex:
 
@@ -210,11 +153,12 @@ Storage Nodes
    admin.buckets.read_only('MainStorage')
 
 
-Portals
--------
+Managing Portals
+================
 
-Retrieve Portals
-^^^^^^^^^^^^^^^^
+Querying
+--------
+
 .. automethod:: cterasdk.core.portals.Portals.list_tenants
    :noindex:
 
@@ -236,8 +180,9 @@ Retrieve Portals
    for tenant in admin.portals.tenants():
        print(tenant.name, tenant.usedStorageQuota, tenant.totalStorageQuota)
 
-Create a Team Portal
-^^^^^^^^^^^^^^^^^^^^
+Creating a Team Portal
+----------------------
+
 .. automethod:: cterasdk.core.portals.Portals.add
    :noindex:
 
@@ -254,8 +199,8 @@ Create a Team Portal
    """Create a Team Portal and assign it to a pre-configured subscription plan"""
    admin.portals.add('ctera', plan = 'Default')
 
-Subscribe a Team Portal to a Plan
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Subcribing a Portal to a Plan
+-----------------------------
 
 .. automethod:: cterasdk.core.portals.Portals.subscribe
    :noindex:
@@ -281,7 +226,8 @@ Apply Provisioning Changes
    admin.users.apply_changes(wait=True)  # wait for all changes to apply
 
 Delete a Team Portal
-^^^^^^^^^^^^^^^^^^^^
+--------------------
+
 .. automethod:: cterasdk.core.portals.Portals.delete
    :noindex:
 
@@ -290,7 +236,8 @@ Delete a Team Portal
    admin.portals.delete_tenant('acme')
 
 Recover a Team Portal
-^^^^^^^^^^^^^^^^^^^^^
+---------------------
+
 .. automethod:: cterasdk.core.portals.Portals.undelete
    :noindex:
 
@@ -298,8 +245,9 @@ Recover a Team Portal
 
    admin.portals.undelete_tenant('acme')
 
-Plans
------
+Subscription Plans
+==================
+
 .. automethod:: cterasdk.core.plans.Plans.get
    :noindex:
 
@@ -391,7 +339,7 @@ Plans
    admin.plan.delete(name)
 
 Plan Auto Assignment Rules
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------
 
 .. automethod:: cterasdk.core.plans.PlanAutoAssignPolicy.get_policy
    :noindex:
@@ -438,7 +386,7 @@ Plan Auto Assignment Rules
    admin.plans.auto_assign.set_policy([], True, 'Default')
 
 Configuration Templates
------------------------
+=======================
 
 .. automethod:: cterasdk.core.templates.Templates.get
    :noindex:
@@ -547,7 +495,7 @@ Configuration Templates
    admin.templates.auto_assign.apply_changes(wait=True)  # wait for template changes to apply
 
 Template Auto Assignment Rules
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------
 
 .. automethod:: cterasdk.core.templates.TemplateAutoAssignPolicy.get_policy
    :noindex:
@@ -589,8 +537,9 @@ Template Auto Assignment Rules
    """Assign 'Default' if no match applies"""
    admin.templates.auto_assign.set_policy([], True, 'Default')
 
-Servers
--------
+Portal Servers
+==============
+
 .. automethod:: cterasdk.core.servers.Servers.get
    :noindex:
 
@@ -628,7 +577,7 @@ Servers
    admin.servers.modify('server2', enable_public_ip=True, public_ip='33.191.55.2')  # configure a public NAT ip address
 
 Server Tasks
-^^^^^^^^^^^^
+------------
 
 .. automethod:: cterasdk.core.servers.Tasks.background
    :noindex:
@@ -647,7 +596,8 @@ Server Tasks
       print(task.name)
 
 Messaging Service
------------------
+=================
+
 .. automethod:: cterasdk.core.messaging.Messaging.get_status
    :noindex:
 
@@ -677,7 +627,8 @@ Messaging Service
    admin.messaging.add(servers)
 
 Key Management Service
-----------------------
+======================
+
 .. automethod:: cterasdk.core.kms.KMS.settings
    :noindex:
 
@@ -714,7 +665,8 @@ Key Management Service
    :noindex:
 
 Key Management Service Servers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------
+
 .. automethod:: cterasdk.core.kms.KMSServers.get
    :noindex:
 
@@ -753,7 +705,7 @@ Key Management Service Servers
 
 
 Antivirus
----------
+=========
 
 .. automethod:: cterasdk.core.antivirus.Antivirus.list_servers
    :noindex:
@@ -771,7 +723,7 @@ Antivirus
    :noindex:
 
 Antivirus Servers
-^^^^^^^^^^^^^^^^^
+-----------------
 
 .. automethod:: cterasdk.core.antivirus.AntivirusServers.get
    :noindex:
@@ -790,7 +742,7 @@ Antivirus Servers
 
 
 Global Administrators
----------------------
+=====================
 
 .. automethod:: cterasdk.core.admins.Administrators.list_admins
    :noindex:
@@ -830,8 +782,8 @@ Global Administrators
    admin.admins.delete('alice')
 
 
-Roles
------
+User Roles
+==========
 
 .. automethod:: cterasdk.core.roles.Roles.types
    :noindex:
@@ -859,7 +811,7 @@ Roles
    admin.roles.modify(portal_enum.Role.Support, support_admin_settings)
 
 Users
------
+=====
 
 .. automethod:: cterasdk.core.users.Users.delete
    :noindex:
@@ -877,7 +829,8 @@ Users
    admin.users.delete(bruce)
 
 Local Users
-^^^^^^^^^^^
+-----------
+
 .. automethod:: cterasdk.core.users.Users.list_local_users
    :noindex:
 
@@ -912,7 +865,7 @@ Local Users
    admin.users.modify('bruce', 'bwayne@we.com', 'Bruce', 'Wayne', 'Str0ngP@ssword!', 'Wayne Enterprises')
 
 Domain Users
-^^^^^^^^^^^^
+------------
 
 .. automethod:: cterasdk.core.users.Users.list_domain_users
    :noindex:
@@ -929,6 +882,7 @@ Domain Users
 
 Fetch Users & Groups
 ^^^^^^^^^^^^^^^^^^^^
+
 .. automethod:: cterasdk.core.directoryservice.DirectoryService.fetch
    :noindex:
 
@@ -942,7 +896,8 @@ Fetch Users & Groups
    admin.directoryservice.fetch([alice, bruce])
 
 Directory Services
-------------------
+==================
+
 .. automethod:: cterasdk.core.directoryservice.DirectoryService.connect
    :noindex:
 
@@ -1030,8 +985,9 @@ Directory Services
    admin.directoryservice.disconnect()
 
 
-Credentials
------------
+Managing S3 Credentials
+=======================
+
 .. automethod:: cterasdk.core.credentials.S3.all
    :noindex:
 
@@ -1061,8 +1017,8 @@ Credentials
    access_key_id = 'ABCDEFGHIJKLMOP'
    user.credentials.s3.delete(access_key_id, user_account)
 
-Groups
-------
+Managing Groups
+===============
 
 .. automethod:: cterasdk.core.groups.Groups.delete
    :noindex:
@@ -1079,7 +1035,8 @@ Groups
    admin.groups.delete(group)
 
 Local Groups
-^^^^^^^^^^^^
+------------
+
 .. automethod:: cterasdk.core.groups.Groups.list_local_groups
    :noindex:
 
@@ -1132,7 +1089,8 @@ Local Groups
 
 
 Devices
--------
+=======
+
 .. automethod:: cterasdk.core.devices.Devices.device
    :noindex:
 
@@ -1207,21 +1165,20 @@ Devices
 
 
 Remote Access
-^^^^^^^^^^^^^
+=============
 
 The Devices APIs retrieve a handle that can be used to query and update the configuration of remote Edge Filers or Drive Agents.
 
 .. code-block:: python
 
-   """Retrieving a List of Shares from an Edge Filer"""
+    """Retrieving a List of Shares from an Edge Filer"""
+    edge = admin.devices.device('edge-hostname')
+    shares = edge.shares.get()
+    for share in shares:
+        print(share.name)
 
-   filer = admin.devices.device('edge-hostname')
-   shares = filer.shares.get()
-   for share in shares:
-       print(share.name)
-
-However, the handle retrieved from the Portal does not provide full access to the Edge Filer or Drive Agent APIs.
-To obtain full access to the remote Edge Filer or Drive Agent APIs, use the ``remote_access`` function.
+The handle retrieved from the Portal provides limited access to the Edge Filer or Drive Agent APIs.
+To obtain access to the full set of APIs, use the ``remote_access`` function.
 
 .. automethod:: cterasdk.objects.edge.Edge.remote_access
    :noindex:
@@ -1230,15 +1187,15 @@ To obtain full access to the remote Edge Filer or Drive Agent APIs, use the ``re
 
    """Retrieving a List of Shares from an Edge Filer"""
 
-   filer = admin.devices.device('edge-hostname')
-   remote_session = filer.remote_access()  # Returns an authenticated remote access session
+   edge = admin.devices.device('edge-hostname')
+   remote_session = edge.remote_access()  # Returns an authenticated remote access session
 
    """Downloading a File via a Remote Access Edge Filer Session"""
    remote_session.files.download('cloud/users/Service Account/My Files/docs/document.docx')
 
 
-Generate Activation Codes
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Device Activation Codes
+=======================
 .. automethod:: cterasdk.core.activation.Activation.generate_code
    :noindex:
 
@@ -1251,24 +1208,12 @@ Generate Activation Codes
 
 .. note:: Read Write Administrator, granted with the "Super User" role permission, can generate 200 codes every 5 minutes
 
-Code Snippets
-^^^^^^^^^^^^^
-
-Generate activation codes for all domain users
-
-.. code-block:: python
-
-   users = admin.users.list_domain_users('dc.ctera.local') # obtain a list of domain users
-   for user in users:
-       activation_code = admin.activation.generate_code(user.name) # generate activation code
-       print((user.name, activation_code))
-
-CloudFS
--------
-You must be a Read Write Administrator to manage the Cloud File System, folder groups, backup folders, cloud drive folders, and zones.
+Managing the CTERA Global Namespace
+===================================
 
 Folder Groups
-^^^^^^^^^^^^^
+-------------
+
 .. automethod:: cterasdk.core.cloudfs.FolderGroups.all
    :noindex:
 
@@ -1317,7 +1262,8 @@ Folder Groups
    admin.cloudfs.groups.delete('FG-001')
 
 Backup Folders
-^^^^^^^^^^^^^^
+--------------
+
 .. automethod:: cterasdk.core.cloudfs.Backups.all
    :noindex:
 
@@ -1355,7 +1301,8 @@ Backup Folders
    admin.cloudfs.backups.modify('my-backup')
 
 Cloud Drive Folders
-^^^^^^^^^^^^^^^^^^^
+-------------------
+
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.all
    :noindex:
 
@@ -1471,7 +1418,7 @@ Cloud Drive Folders
    admin.cloudfs.drives.setoacl(folders_paths, owner_sid, True)
 
 Zones
-^^^^^
+-----
 
 To manage zones, you must be a Read Write Administrator
 
@@ -1554,7 +1501,7 @@ To manage zones, you must be a Read Write Administrator
    admin.cloudfs.zones.delete('ZN-001')
 
 Timezone
---------
+========
 
 .. automethod:: cterasdk.core.settings.GlobalSettings.get_timezone
    :noindex:
@@ -1570,8 +1517,8 @@ Timezone
 
    admin.settings.global_settings.set_timzeone('(GMT-05:00) Eastern Time (US , Canada)')
 
-SSL Certificate
----------------
+TLS Certificate
+===============
 
 .. automethod:: cterasdk.core.ssl.SSL.get
    :noindex:
@@ -1616,8 +1563,8 @@ SSL Certificate
        r'C:\Users\jsmith\Downloads\root.crt'
    )
 
-Logs
-----
+Logging
+=======
 
 .. automethod:: cterasdk.core.logs.Logs.get
    :noindex:
@@ -1632,7 +1579,7 @@ Logs
 
 
 Log Based Alerts
-^^^^^^^^^^^^^^^^
+================
 
 .. automethod:: cterasdk.core.logs.Alerts.get
    :noindex:
@@ -1674,7 +1621,7 @@ Log Based Alerts
 
 
 Syslog
-------
+======
 
 .. automethod:: cterasdk.core.syslog.Syslog.is_enabled
    :noindex:
@@ -1690,7 +1637,7 @@ Syslog
 
 
 CLI Execution
--------------
+=============
 
 .. automethod:: cterasdk.core.cli.CLI.run_command
   :noindex:
@@ -1699,3 +1646,50 @@ CLI Execution
 
    result = admin.cli.run_command('show /settings')
    print(result)
+
+
+Setup
+=====
+
+.. automethod:: cterasdk.core.setup.Setup.init_master
+   :noindex:
+
+.. code-block:: python
+
+   admin.setup.init_master('admin', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'password1!', 'ctera.me')
+
+.. automethod:: cterasdk.core.setup.Setup.init_application_server
+   :noindex:
+
+.. code-block:: python
+
+   """Connect a secondary Portal server using a password"""
+   master_ipaddr = '172.31.53.246'
+   master_password = 'secret'
+   admin.setup.init_application_server(master_ipaddr, master_password)
+
+   """Connect a secondary Portal server using a private key"""
+   master_ipaddr = '172.31.53.246'
+   master_pk = """...PEM-encoded private key..."""
+   admin.setup.init_application_server(master_ipaddr, master_pk)
+
+.. automethod:: cterasdk.core.setup.Setup.init_replication_server
+   :noindex:
+
+
+Miscellaneous
+=============
+
+.. automethod:: cterasdk.objects.core.GlobalAdmin.test
+   :noindex:
+
+.. code-block:: python
+
+   admin.test()
+
+.. automethod:: cterasdk.objects.core.GlobalAdmin.whoami
+   :noindex:
+
+.. code-block:: python
+
+   admin.whoami()

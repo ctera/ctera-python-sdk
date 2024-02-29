@@ -1,30 +1,9 @@
-******************************
-Tenant User and Administration
-******************************
+===============
+Services Portal
+===============
 
-.. contents:: Table of Contents
-
-Create a Services Portal Session
---------------------------------
-.. autoclass:: cterasdk.objects.core.ServicesPortal
-   :special-members: __init__
-   :noindex:
-
-.. code-block:: python
-
-   user = ServicesPortal('portal.ctera.com') # will use HTTPS over port 443
-
-.. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure `chopin-core` to automatically trust the server's certificate, using: ``config.http['ssl'] = 'Trust'``
-
-
-Logging in
+Logging In
 ==========
-.. automethod:: cterasdk.objects.core.ServicesPortal.test
-   :noindex:
-
-.. code-block:: python
-
-   user.test()
 
 .. automethod:: cterasdk.objects.core.ServicesPortal.login
    :noindex:
@@ -68,3 +47,21 @@ Managing S3 Credentials
    """Delete an S3 credentials"""
    access_key_id = 'ABCDEFGHIJKLMOP'
    user.credentials.s3.delete(access_key_id)
+
+
+Miscellaneous
+=============
+
+.. automethod:: cterasdk.objects.core.GlobalAdmin.test
+   :noindex:
+
+.. code-block:: python
+
+   admin.test()
+
+.. automethod:: cterasdk.objects.core.GlobalAdmin.whoami
+   :noindex:
+
+.. code-block:: python
+
+   admin.whoami()

@@ -1,8 +1,9 @@
-*************
+=============
 Miscellaneous
-*************
+=============
+
 Logging
-#######
+=======
 
 The library includes a built-in console logger. The logger's configuration is controlled by the ``config.Logging.get()`` class object.
 

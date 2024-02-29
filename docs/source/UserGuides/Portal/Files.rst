@@ -1,11 +1,6 @@
-************
+============
 File Browser
-************
-
-.. contents:: Table of Contents
-
-File Browser
-------------
+============
 
 List
 ====
@@ -251,7 +246,7 @@ Collaboration Shares
    file_browser.unshare('Cloud/Albany')
 
 Backups
--------
+=======
 
 The Backups class is a subclass to :py:class:`cterasdk.common.files.browser.FileBrowser` providing access to files stored in backup folders
 
@@ -269,8 +264,8 @@ The Backups class is a subclass to :py:class:`cterasdk.common.files.browser.File
    user.login('bwayne', getpass())
    file_browser = user.backups  # the field is an instance of Backups class object
 
-CTERA Fusion (S3)
------------------
+Managing S3 Credentials
+=======================
 
 Starting CTERA 8.0, CTERA Portal features programmatic access via the S3 protocol, also known as *CTERA Fusion*
 For more information on how to enable CTERA Fusion and the supported extensions of the S3 protocol, please refer to the following `article <https://kb.ctera.com/v1/docs/en/setting-up-access-from-an-s3-browser>`.
