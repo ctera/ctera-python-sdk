@@ -17,7 +17,7 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._full_name = 'Alice Wonderland'
         self._uid = 516
         self._email = 'alice.wonderland@microsoft.com'
-        self._login_mock = self.patch_call(f'cterasdk.objects.edge{".Edge" if sys.version_info.minor > 11 else ""}.login')
+        self._login_mock = self.patch_call(f'cterasdk.objects.edge{".Edge" if sys.version_info.minor > 9 else ""}.login')
 
     def test_get_all_users(self):
         get_response = 'Success'
