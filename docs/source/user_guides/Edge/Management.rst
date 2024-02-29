@@ -1,147 +1,23 @@
-***********************************
-Edge Filer Configuration Management
-***********************************
+=====================
+Edge Filer Management
+=====================
 
-.. contents:: Table of Contents
-
-Create an Edge Filer Session
-----------------------------
-
-.. autoclass:: cterasdk.objects.edge.Edge
-   :special-members: __init__
-   :noindex:
-
-.. code-block:: python
-
-   filer = Edge('10.100.102.4') # will use HTTP over port 80
-   filer = Edge('10.100.102.4', 8080) # will use HTTP over port 8080
-   filer = Edge('vGateway-0dbc', 443, True) # will use HTTPS over port 443
-
-.. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure `chopin-core` to automatically trust the server's certificate, using: ``config.http['ssl'] = 'Trust'``
-
-Logging in
+Logging In
 ==========
-
-.. automethod:: cterasdk.objects.edge.Edge.test
-   :noindex:
-
-.. code-block:: python
-
-   filer.test()
 
 .. automethod:: cterasdk.objects.edge.Edge.login
    :noindex:
 
 .. code-block:: python
 
-   filer.login('admin', 'G3neralZ0d!')
+   edge.login('admin', 'G3neralZ0d!')
 
 .. automethod:: cterasdk.objects.edge.Edge.logout
    :noindex:
 
 .. code-block:: python
 
-   filer.logout()
-
-.. automethod:: cterasdk.objects.edge.Edge.whoami
-   :noindex:
-
-.. code-block:: python
-
-   filer.whoami()
-
-Core Methods
-============
-
-
-.. automethod:: cterasdk.aio_client.clients.API.get
-   :noindex:
-
-.. code:: python
-
-   """Retrieve the device configuration and print it as JSON string"""
-   config = filer.api.get('/config')
-   print(config)
-
-   """Retrieve the device settings and print the hostname and location settings"""
-   settings = filer.api.get('/config/device')
-   print(settings.hostname)
-   print(settings.location)
-
-   """Retrieve a list of volumes and print the name of the first volume"""
-   volumes  = filer.api.get('/status/storage/volumes') # returns a list of volumes
-   print(volumes[0].name) # will print the name of the first volume
-
-   """Retrieve the network settings and print the MTU setting"""
-   network  = filer.api.get('/config/network') # returns network settings
-   print(network.ports[0].ethernet.mtu) # will print the MTU setting
-
-.. automethod:: cterasdk.aio_client.clients.API.get_multi
-   :noindex:
-
-.. code:: python
-
-   """Retrieve '/config/cloudsync' and '/proc/cloudsync' at once"""
-   device = filer.api.get_multi(['/config/cloudsync', '/proc/cloudsync'])
-   print(device.config.cloudsync.cloudExtender.operationMode)
-   print(device.proc.cloudsync.serviceStatus.uploadingFiles)
-
-.. automethod:: cterasdk.aio_client.clients.API.put
-   :noindex:
-
-.. code:: python
-
-   """Disable the first time wizard"""
-   filer.api.put('/config/gui/openFirstTimeWizard', False)
-
-   """Turn off FTP access on all shares"""
-   shares = filer.api.get('/config/fileservices/share')
-   for share in shares:
-       share.exportToFTP = False
-       filer.api.put('/config/fileservices/share/' + share.name, share)
-
-.. automethod:: cterasdk.aio_client.clients.API.execute
-   :noindex:
-
-.. code:: python
-
-   """Execute the file-eviction process"""
-   filer.api.execute('/config/cloudsync', 'forceExecuteEvictor') # doesn't require a param
-
-   """Reboot the Edge Filer"""
-   filer.api.execute('/statuc/device', 'reboot') # doesn't require a param
-
-   """TCP Connect"""
-   param = Object()
-   param.address = 'chopin.ctera.com'
-   param.port = 995 # CTTP
-   bgTask = filer.execute('/status/network', 'tcpconnect', param)
-   print(bgTask)
-
-.. seealso:: Execute the file-eviction process: :py:func:`cterasdk.edge.cache.Cache.force_eviction()`, Reboot the Edge Filer: :py:func:`cterasdk.edge.power.Power.reboot()`, Execute tcp connect: :py:func:`cterasdk.edge.network.Network.tcp_connect()`
-
-.. automethod:: cterasdk.aio_client.clients.API.add
-   :noindex:
-
-.. code:: python
-
-   """Add a user account"""
-   user = Object()
-   user.username = 'mickey'
-   user.fullName = 'Mickey Mouse'
-   user.email = 'm.mouse@disney.com'
-   user.uid = 1940
-   user.password = 'M!niM0us3'
-   filer.api.add('/config/auth/users', user)
-
-.. automethod:: cterasdk.aio_client.clients.API.delete
-   :noindex:
-
-.. code:: python
-
-   """Delete a user account"""
-   user = 'mickey'
-   filer.api.delete('/config/auth/users/' + user)
+   edge.logout()
 
 Device Configuration
 ====================
@@ -151,42 +27,42 @@ Device Configuration
 
 .. code-block:: python
 
-   hostname = filer.config.hostname()
+   hostname = edge.config.get_hostname()
 
 .. automethod:: cterasdk.edge.config.Config.set_hostname
    :noindex:
 
 .. code-block:: python
 
-   filer.config.set_hostname('Chopin')
+   edge.config.set_hostname('Chopin')
 
 .. automethod:: cterasdk.edge.config.Config.get_location
    :noindex:
 
 .. code-block:: python
 
-   location = filer.config.location()
+   location = edge.config.get_location()
 
 .. automethod:: cterasdk.edge.config.Config.set_location
    :noindex:
 
 .. code-block:: python
 
-   filer.config.set_location('Jupiter')
+   edge.config.set_location('Jupiter')
 
 .. automethod:: cterasdk.edge.config.Config.disable_wizard
    :noindex:
 
 .. code-block:: python
 
-   filer.config.disable_wizard()
+   edge.config.disable_wizard()
 
 .. automethod:: cterasdk.edge.config.Config.export
    :noindex:
 
 .. code-block:: python
 
-   filer.config.export()
+   edge.config.export()
 
 .. automethod:: cterasdk.edge.config.Config.import_config
    :noindex:
@@ -194,77 +70,66 @@ Device Configuration
 .. code-block:: python
 
    """Import Edge Filer configuration from file"""
-   filer.config.import_config(r'C:\Users\bwayne\Downloads\EdgeFiler.xml')
+   edge.config.import_config(r'C:\Users\bwayne\Downloads\EdgeFiler.xml')
 
    """Import configuration without network settings"""
-   filer.config.import_config(r'C:\Users\bwayne\Downloads\EdgeFiler.xml', exclude=[
+   edge.config.import_config(r'C:\Users\bwayne\Downloads\EdgeFiler.xml', exclude=[
        '/config/network'
    ])
 
    """Import configuration without the 'logs' and 'public' shares"""
-   filer.config.import_config(r'C:\Users\bwayne\Downloads\EdgeFiler.xml', exclude=[
+   edge.config.import_config(r'C:\Users\bwayne\Downloads\EdgeFiler.xml', exclude=[
        '/config/fileservices/share/logs',
        '/config/fileservices/share/public'
    ])
 
-Code Snippets
-=============
-
-.. code-block:: python
-
-   filer.get('/status/device/runningFirmware')  # Get firmware version
-
-   """Get the entire device status object"""
-   status = filer.get('/status/device')
-   print(status.runningFirmware, status.MacAddress)
-
 Storage
 =======
 
-Format
-^^^^^^
+Format Drives
+-------------
 
 .. automethod:: cterasdk.edge.drive.Drive.format
    :noindex:
 
 .. code-block:: python
 
-   filer.drive.format('SATA1')
+   edge.drive.format('SATA1')
 
 .. automethod:: cterasdk.edge.drive.Drive.format_all
    :noindex:
 
 .. code-block:: python
 
-   filer.drive.format_all()
+   edge.drive.format_all()
 
-Volumes
-^^^^^^^
+Volume Management
+-----------------
 
 .. automethod:: cterasdk.edge.volumes.Volumes.add
    :noindex:
 
 .. code-block:: python
 
-   filer.volumes.add('localcache')
+   edge.volumes.add('localcache')
 
 .. automethod:: cterasdk.edge.volumes.Volumes.delete
    :noindex:
 
 .. code-block:: python
 
-   filer.volumes.delete('localcache')
+   edge.volumes.delete('localcache')
 
 .. automethod:: cterasdk.edge.volumes.Volumes.delete_all
    :noindex:
 
 .. code-block:: python
 
-   filer.volumes.delete_all()
+   edge.volumes.delete_all()
 
 
-Local Deduplication
-^^^^^^^^^^^^^^^^^^^
+Deduplication
+-------------
 
 .. automethod:: cterasdk.edge.dedup.Dedup.enable
    :noindex:
@@ -272,10 +137,10 @@ Local Deduplication
 .. code-block:: python
 
    """Enable local de-duplication without rebooting the Edge Filer"""
-   filer.dedup.enable()
+   edge.dedup.enable()
 
    """Enable local de-duplication and wait for reboot to complete"""
-   filer.dedup.enable(reboot=True, wait=True)
+   edge.dedup.enable(reboot=True, wait=True)
 
 .. automethod:: cterasdk.edge.dedup.Dedup.disable
    :noindex:
@@ -283,10 +148,10 @@ Local Deduplication
 .. code-block:: python
 
    """Disable local de-duplication without rebooting the Edge Filer"""
-   filer.dedup.disable()
+   edge.dedup.disable()
 
    """Disable local de-duplication and wait for reboot to complete"""
-   filer.dedup.disable(reboot=True, wait=True)
+   edge.dedup.disable(reboot=True, wait=True)
 
 
 .. automethod:: cterasdk.edge.dedup.Dedup.status
@@ -294,25 +159,25 @@ Local Deduplication
 
 .. code-block:: python
 
-   print(filer.dedup.status())
+   print(edge.dedup.status())
 
 .. automethod:: cterasdk.edge.dedup.Regeneration.run
    :noindex:
 
 .. code-block:: python
 
-   filer.dedup.regen.run()
+   edge.dedup.regen.run()
 
 .. automethod:: cterasdk.edge.dedup.Regeneration.status
    :noindex:
 
 .. code-block:: python
 
-   print(filer.dedup.regen.status())
+   print(edge.dedup.regen.status())
 
 
-Shares
-======
+Network Shares
+==============
 
 .. automethod:: cterasdk.edge.shares.Shares.add
    :noindex:
@@ -344,7 +209,7 @@ Shares
    domain_admins = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\Domain Admins', gateway_enum.FileAccessMode.RO)
    bruce_wayne = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'bruce.wayne@ctera.com', gateway_enum.FileAccessMode.RW)
 
-   filer.shares.add('Accounting', 'cloud/users/Service Account/Accounting', acl = [ \
+   edge.shares.add('Accounting', 'cloud/users/Service Account/Accounting', acl = [ \
        everyone, local_admin, domain_admins, bruce_wayne \
    ])
 
@@ -352,12 +217,12 @@ Shares
 
    everyone = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.LG, 'Everyone', gateway_enum.FileAccessMode.RW)
 
-   filer.shares.add('FTP', 'cloud/users/Service Account/FTP', acl = [everyone], export_to_ftp = True)
+   edge.shares.add('FTP', 'cloud/users/Service Account/FTP', acl = [everyone], export_to_ftp = True)
 
    """Add an NFS share and enable access to two hosts"""
    nfs_client_1 = gateway_types.NFSv3AccessControlEntry('192.168.0.1', '255.255.255.0', gateway_enum.FileAccessMode.RW)  # read write
    nfs_client_2 = gateway_types.NFSv3AccessControlEntry('192.168.0.2', '255.255.255.0', gateway_enum.FileAccessMode.RO)  # read only
-   filer.shares.add('NFS', 'cloud/users/Service Account/NFS', export_to_nfs=True, trusted_nfs_clients=[nfs_client_1, nfs_client_2])
+   edge.shares.add('NFS', 'cloud/users/Service Account/NFS', export_to_nfs=True, trusted_nfs_clients=[nfs_client_1, nfs_client_2])
 
 
 .. automethod:: cterasdk.edge.shares.Shares.add_acl
@@ -370,7 +235,7 @@ Shares
    domain_group = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\leadership', gateway_enum.FileAccessMode.RW)
    domain_user = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'clark.kent@ctera.com', gateway_enum.FileAccessMode.RO)
 
-   filer.shares.add_acl('Accounting', [domain_group, domain_user])
+   edge.shares.add_acl('Accounting', [domain_group, domain_user])
 
 .. automethod:: cterasdk.edge.shares.Shares.set_acl
    :noindex:
@@ -382,7 +247,7 @@ Shares
    domain_group = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\leadership', gateway_enum.FileAccessMode.RW)
    domain_user = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'clark.kent@ctera.com', gateway_enum.FileAccessMode.RO)
 
-   filer.shares.set_acl('Accounting', [domain_group, domain_user])
+   edge.shares.set_acl('Accounting', [domain_group, domain_user])
 
 .. automethod:: cterasdk.edge.shares.Shares.remove_acl
    :noindex:
@@ -394,21 +259,21 @@ Shares
    domain_group = gateway_types.RemoveShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\leadership')
    domain_user = gateway_types.RemoveShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'clark.kent@ctera.com')
 
-   filer.shares.remove_acl('Accounting', [domain_group, domain_user])
+   edge.shares.remove_acl('Accounting', [domain_group, domain_user])
 
 .. automethod:: cterasdk.edge.shares.Shares.set_share_winacls
    :noindex:
 
 .. code-block:: python
 
-   filer.shares.set_share_winacls('cloud')
+   edge.shares.set_share_winacls('cloud')
 
 .. automethod:: cterasdk.edge.shares.Shares.block_files
    :noindex:
 
 .. code-block:: python
 
-   filer.shares.block_files('Accounting', ['exe', 'cmd', 'bat'])
+   edge.shares.block_files('Accounting', ['exe', 'cmd', 'bat'])
 
 .. automethod:: cterasdk.edge.shares.Shares.modify
    :noindex:
@@ -416,10 +281,10 @@ Shares
 .. code-block:: python
 
    """ Disable all file-access protocols on all shares """
-   shares = filer.shares.get() # obtain a list of all shares
+   shares = edge.shares.get() # obtain a list of all shares
 
    for share in shares:
-      filer.share.modify(
+      edge.share.modify(
          share.name,
          export_to_afp=False,       # Apple File Sharing
          export_to_ftp=False,       # FTP
@@ -434,46 +299,46 @@ Shares
 
 .. code-block:: python
 
-   filer.shares.delete('Accounting')
+   edge.shares.delete('Accounting')
 
-Users
-=====
+Local Users
+===========
 
 .. automethod:: cterasdk.edge.users.Users.add
    :noindex:
 
 .. code-block:: python
 
-   filer.users.add('Clark', 'Kryptonite1!') # without a full name, email or custom uid
+   edge.users.add('Clark', 'Kryptonite1!') # without a full name, email or custom uid
 
-   filer.users.add('alice', 'W!z4rd0fOz!', 'Alice Wonderland') # including a full name
+   edge.users.add('alice', 'W!z4rd0fOz!', 'Alice Wonderland') # including a full name
 
-   filer.users.add('Bruce', 'GothamCity1!', 'Bruce Wayne', 'bruce.wayne@we.com', uid = 1940) # all
+   edge.users.add('Bruce', 'GothamCity1!', 'Bruce Wayne', 'bruce.wayne@we.com', uid = 1940) # all
 
 .. automethod:: cterasdk.edge.users.Users.modify
    :noindex:
 
 .. code-block:: python
 
-   filer.users.modify('Clark', 'Passw0rd1!') # Change a user's password
-   filer.users.modify('Clark', email='clark.kent@krypton.com') # Change a user's email
+   edge.users.modify('Clark', 'Passw0rd1!') # Change a user's password
+   edge.users.modify('Clark', email='clark.kent@krypton.com') # Change a user's email
 
 .. automethod:: cterasdk.edge.users.Users.delete
    :noindex:
 
 .. code-block:: python
 
-   filer.users.delete('alice')
+   edge.users.delete('alice')
 
 .. automethod:: cterasdk.edge.users.Users.add_first_user
    :noindex:
 
 .. code-block:: python
 
-   filer.users.add_first_user('admin', 'L3tsG3tR34dyT0Rumbl3!')
+   edge.users.add_first_user('admin', 'L3tsG3tR34dyT0Rumbl3!')
 
-Groups
-======
+Local Groups
+============
 
 .. automethod:: cterasdk.edge.groups.Groups.add_members
    :noindex:
@@ -482,13 +347,13 @@ Groups
 
    """Add Bruce Wayne to the local Administrators group"""
    member = gateway_types.UserGroupEntry(gateway_enum.PrincipalType.DU, 'bruce.wayne@we.com')
-   filer.groups.add_members('Administrators', [member])
+   edge.groups.add_members('Administrators', [member])
 
    """Add Bruce Wayne and Domain Admins to the local Administrators group"""
 
    domain_user = gateway_types.UserGroupEntry(gateway_enum.PrincipalType.DU, 'bruce.wayne@we.com')
    domain_group = gateway_types.UserGroupEntry(gateway_enum.PrincipalType.DG, 'WE\Domain Admins')
-   filer.groups.add_members('Administrators', [domain_user, domain_group])
+   edge.groups.add_members('Administrators', [domain_user, domain_group])
 
 .. automethod:: cterasdk.edge.groups.Groups.remove_members
    :noindex:
@@ -497,11 +362,11 @@ Groups
 
    """Remove Bruce Wayne from the local Administrators group"""
 
-   filer.groups.remove_members('Administrators', [('DU', 'bruce.wayne@we.com')])
+   edge.groups.remove_members('Administrators', [('DU', 'bruce.wayne@we.com')])
 
    """Remove Bruce Wayne and Domain Admins from the local Administrators group"""
 
-   filer.groups.remove_members('Administrators', [('DU', 'bruce.wayne@we.com'), ('DG', 'WE\Domain Admins')])
+   edge.groups.remove_members('Administrators', [('DU', 'bruce.wayne@we.com'), ('DG', 'WE\Domain Admins')])
 
 Active Directory
 ================
@@ -511,11 +376,11 @@ Active Directory
 
 .. code-block:: python
 
-   filer.directoryservice.connect('ctera.local', 'administrator', 'B4tMob!l3')
+   edge.directoryservice.connect('ctera.local', 'administrator', 'B4tMob!l3')
 
    """Connect to the EMEA Organizational Unit"""
 
-   filer.directoryservice.connect('ctera.local', 'administrator', 'B4tMob!l3', 'ou=EMEA, dc=ctera, dc=local')
+   edge.directoryservice.connect('ctera.local', 'administrator', 'B4tMob!l3', 'ou=EMEA, dc=ctera, dc=local')
 
 .. note:: the `ou` parameter must specify the distinguished name of the organizational unit
 
@@ -524,7 +389,7 @@ Active Directory
 
 .. code-block:: python
 
-   for domain, mapping in filer.directoryservice.get_advanced_mapping().items():
+   for domain, mapping in edge.directoryservice.get_advanced_mapping().items():
        print(domain)
        print(mapping)
 
@@ -543,7 +408,7 @@ Active Directory
        common_types.ADDomainIDMapping('CTERA-LDR', 3000001, 4000000)
    ]
 
-   filer.directoryservice.set_advanced_mapping(advanced_mapping)  # this function will skip domains that are not found
+   edge.directoryservice.set_advanced_mapping(advanced_mapping)  # this function will skip domains that are not found
 
 .. note:: to retrieve a list of domain flat names, use :py:func:`cterasdk.edge.directoryservice.domains()`
 
@@ -552,14 +417,14 @@ Active Directory
 
 .. code-block:: python
 
-   filer.directoryservice.disconnect()
+   edge.directoryservice.disconnect()
 
 .. automethod:: cterasdk.edge.directoryservice.DirectoryService.domains
    :noindex:
 
 .. code-block:: python
 
-   domains = filer.directoryservice.domains()
+   domains = edge.directoryservice.domains()
 
    print(domains)
 
@@ -568,14 +433,14 @@ Active Directory
 
 .. code-block:: python
 
-   filer.directoryservice.set_static_domain_controller('192.168.90.1')
+   edge.directoryservice.set_static_domain_controller('192.168.90.1')
 
 .. automethod:: cterasdk.edge.directoryservice.DirectoryService.get_static_domain_controller
    :noindex:
 
 .. code-block:: python
 
-   domain_controller = filer.directoryservice.get_static_domain_controller()
+   domain_controller = edge.directoryservice.get_static_domain_controller()
    print(domain_controller)
 
 .. automethod:: cterasdk.edge.directoryservice.DirectoryService.remove_static_domain_controller
@@ -583,10 +448,10 @@ Active Directory
 
 .. code-block:: python
 
-   filer.directoryservice.remove_static_domain_controller()
+   edge.directoryservice.remove_static_domain_controller()
 
-Cloud Services
-==============
+Connecting to CTERA Portal
+==========================
 
 .. automethod:: cterasdk.edge.services.Services.connect
    :noindex:
@@ -596,13 +461,13 @@ Cloud Services
 
 .. code-block:: python
 
-   filer.services.connect('chopin.ctera.com', 'svc_account', 'Th3AmazingR4ce!', 'EV32') # activate as an EV32
+   edge.services.connect('chopin.ctera.com', 'svc_account', 'Th3AmazingR4ce!', 'EV32') # activate as an EV32
 
 ..
 
 .. code-block:: python
 
-   filer.services.connect('52.204.15.122', 'svc_account', 'Th3AmazingR4ce!', 'EV64') # activate as an EV64
+   edge.services.connect('52.204.15.122', 'svc_account', 'Th3AmazingR4ce!', 'EV64') # activate as an EV64
 
 ..
 
@@ -613,51 +478,53 @@ Cloud Services
 
 .. code-block:: python
 
-   filer.services.activate('chopin.ctera.com', 'svc_account', 'fd3a-301b-88d5-e1a9-cbdb') # activate as an EV16
+   edge.services.activate('chopin.ctera.com', 'svc_account', 'fd3a-301b-88d5-e1a9-cbdb') # activate as an EV16
 
 .. automethod:: cterasdk.edge.services.Services.reconnect
    :noindex:
 
 .. code-block:: python
 
-   filer.services.reconnect()
+   edge.services.reconnect()
 
 .. automethod:: cterasdk.edge.services.Services.disconnect
    :noindex:
 
 .. code-block:: python
 
-   filer.services.disconnect()
+   edge.services.disconnect()
 
 .. automethod:: cterasdk.edge.services.Services.enable_sso
    :noindex:
 
-Applying a License
-==================
+Configuring a License
+=====================
+
 .. automethod:: cterasdk.edge.licenses.Licenses.apply
    :noindex:
 
 .. code-block:: python
 
-   filer.license.apply('EV32')
+   edge.license.apply('EV32')
 
 .. note:: you can specify a license upon connecting the Edge Filer to CTERA Portal. See :py:func:`cterasdk.edge.services.Services.connect()`
 
-Caching
-=======
+Cache Management
+================
+
 .. automethod:: cterasdk.edge.cache.Cache.enable
    :noindex:
 
 .. code-block:: python
 
-   filer.cache.enable()
+   edge.cache.enable()
 
 .. automethod:: cterasdk.edge.cache.Cache.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.cache.disable()
+   edge.cache.disable()
 
 .. warning:: all data synchronized from the cloud will be deleted and all unsynchronized changes will be lost.
 
@@ -666,7 +533,10 @@ Caching
 
 .. code-block:: python
 
-   filer.cache.force_eviction()
+   edge.cache.force_eviction()
+
+Subfolder Pinning
+-----------------
 
 .. automethod:: cterasdk.edge.cache.Cache.pin
    :noindex:
@@ -674,7 +544,7 @@ Caching
 .. code-block:: python
 
    """ Pin a cloud folder named 'data' owned by 'Service Account' """
-   filer.cache.pin('users/Service Account/data')
+   edge.cache.pin('users/Service Account/data')
 
 .. automethod:: cterasdk.edge.cache.Cache.pin_exclude
    :noindex:
@@ -682,7 +552,7 @@ Caching
 .. code-block:: python
 
    """ Exclude a subfolder from a pinned cloud folder """
-   filer.cache.pin_exclude('users/Service Account/data/accounting')
+   edge.cache.pin_exclude('users/Service Account/data/accounting')
 
 .. automethod:: cterasdk.edge.cache.Cache.remove_pin
    :noindex:
@@ -690,7 +560,7 @@ Caching
 .. code-block:: python
 
    """ Remove a pin from a previously pinned folder """
-   filer.cache.remove_pin('users/Service Account/data')
+   edge.cache.remove_pin('users/Service Account/data')
 
 .. automethod:: cterasdk.edge.cache.Cache.pin_all
    :noindex:
@@ -698,7 +568,7 @@ Caching
 .. code-block:: python
 
    """ Pin all folders """
-   filer.cache.pin_all()
+   edge.cache.pin_all()
 
 .. automethod:: cterasdk.edge.cache.Cache.unpin_all
    :noindex:
@@ -706,7 +576,7 @@ Caching
 .. code-block:: python
 
    """ Remove all folder pins """
-   filer.cache.unpin_all()
+   edge.cache.unpin_all()
 
 Cloud Backup
 ============
@@ -718,66 +588,67 @@ Cloud Backup
 
    """Configure backup without a passphrase"""
 
-   filer.backup.configure()
+   edge.backup.configure()
 
 .. automethod:: cterasdk.edge.backup.Backup.start
    :noindex:
 
 .. code-block:: python
 
-   filer.backup.start()
+   edge.backup.start()
 
 .. automethod:: cterasdk.edge.backup.Backup.suspend
    :noindex:
 
 .. code-block:: python
 
-   filer.backup.suspend()
+   edge.backup.suspend()
 
 .. automethod:: cterasdk.edge.backup.Backup.unsuspend
    :noindex:
 
 .. code-block:: python
 
-   filer.backup.unsuspend()
+   edge.backup.unsuspend()
 
-Cloud Backup Files
-^^^^^^^^^^^^^^^^^^
+Backup Selection
+----------------
 
 .. automethod:: cterasdk.edge.backup.BackupFiles.unselect_all
    :noindex:
 
 .. code-block:: python
 
-   filer.backup.files.unselect_all()
+   edge.backup.files.unselect_all()
 
-Cloud Sync
-==========
+Cloud Synchronization
+=====================
+
 .. automethod:: cterasdk.edge.sync.Sync.suspend
    :noindex:
 
 .. code-block:: python
 
-   filer.sync.suspend()
+   edge.sync.suspend()
 
 .. automethod:: cterasdk.edge.sync.Sync.unsuspend
    :noindex:
 
 .. code-block:: python
 
-   filer.sync.unsuspend()
+   edge.sync.unsuspend()
 
 .. automethod:: cterasdk.edge.sync.Sync.exclude_files
    :noindex:
 
 .. code-block:: python
 
-   filer.sync.exclude_files(['exe', 'cmd', 'bat'])  # exclude file extensions
+   edge.sync.exclude_files(['exe', 'cmd', 'bat'])  # exclude file extensions
 
-   filer.sync.exclude_files(filenames=['Cloud Sync.lnk', 'The quick brown fox.docx'])  # exclude file names
+   edge.sync.exclude_files(filenames=['Cloud Sync.lnk', 'The quick brown fox.docx'])  # exclude file names
 
    """Exclude file extensions and file names"""
-   filer.sync.exclude_files(['exe', 'cmd'], ['Cloud Sync.lnk'])
+   edge.sync.exclude_files(['exe', 'cmd'], ['Cloud Sync.lnk'])
 
    """
    Create a custom exclusion rule
@@ -788,14 +659,14 @@ Cloud Sync
    size_filter_rule = common_types.FileFilterBuilder.size().less_than(1048576)
    exclusion_rule = common_types.FilterBackupSet('Custom exclusion rule', filter_rules=[name_filter_rule, size_filter_rule])
 
-   filer.sync.exclude_files(custom_exclusion_rules=[exclusion_rule])
+   edge.sync.exclude_files(custom_exclusion_rules=[exclusion_rule])
 
 .. automethod:: cterasdk.edge.sync.Sync.remove_file_exclusion_rules
     :noindex:
 
 .. code-block:: python
 
-   filer.sync.remove_file_exclusion_rules()
+   edge.sync.remove_file_exclusion_rules()
 
 .. automethod:: cterasdk.edge.sync.Sync.evict
    :noindex:
@@ -803,15 +674,15 @@ Cloud Sync
 .. code-block:: python
 
    """Evict a directory"""
-   background_task_ref = filer.sync.evict('/Share/path/to/sub/directory')  # non-blocking call
+   background_task_ref = edge.sync.evict('/Share/path/to/sub/directory')  # non-blocking call
    print(background_task_ref)
 
    """Evict a directory and wait for eviction to complete - blocking"""
-   filer.sync.evict('/Share/path/to/sub/directory', wait=True)  # blocking call
+   edge.sync.evict('/Share/path/to/sub/directory', wait=True)  # blocking call
 
 
-Cloud Sync Bandwidth Throttling
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Bandwidth Throttling
+--------------------
 
 .. automethod:: cterasdk.edge.sync.CloudSyncBandwidthThrottling.get_policy
    :noindex:
@@ -833,128 +704,130 @@ Cloud Sync Bandwidth Throttling
    schedule3 = common_types.TimeRange().start('00:00:00').end('23:59:00').days(common_enum.DayOfWeek.Weekend).build()
    rule3 = common_types.ThrottlingRuleBuilder().upload(500).download(500).schedule(schedule3).build()
 
-   filer.sync.throttling.set_policy([rule1, rule2, rule3])
+   edge.sync.throttling.set_policy([rule1, rule2, rule3])
 
 
 File Access Protocols
 =====================
+
 .. automethod:: cterasdk.edge.ftp.FTP.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.ftp.disable()
+   edge.ftp.disable()
 
 .. automethod:: cterasdk.edge.afp.AFP.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.afp.disable()
+   edge.afp.disable()
 
 .. automethod:: cterasdk.edge.nfs.NFS.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.nfs.disable()
+   edge.nfs.disable()
 
 .. automethod:: cterasdk.edge.rsync.RSync.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.rsync.disable()
+   edge.rsync.disable()
 
 Windows File Sharing (CIFS/SMB)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------
 
 .. automethod:: cterasdk.edge.smb.SMB.enable
    :noindex:
 
 .. code-block:: python
 
-   filer.smb.enable()
+   edge.smb.enable()
 
 .. automethod:: cterasdk.edge.smb.SMB.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.smb.disable()
+   edge.smb.disable()
 
 .. automethod:: cterasdk.edge.smb.SMB.set_packet_signing
    :noindex:
 
 .. code-block:: python
 
-   filer.smb.set_packet_signing('If client agrees')
+   edge.smb.set_packet_signing('If client agrees')
 
 .. automethod:: cterasdk.edge.smb.SMB.enable_abe
    :noindex:
 
 .. code-block:: python
 
-   filer.smb.enable_abe()
+   edge.smb.enable_abe()
 
 .. automethod:: cterasdk.edge.smb.SMB.disable_abe
    :noindex:
 
 .. code-block:: python
 
-   filer.smb.disable_abe()
+   edge.smb.disable_abe()
 
 .. automethod:: cterasdk.edge.aio.AIO.enable
    :noindex:
 
 .. code-block:: python
 
-   filer.aio.enable()
+   edge.aio.enable()
 
 .. automethod:: cterasdk.edge.aio.AIO.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.aio.disable()
+   edge.aio.disable()
 
 
 Network
 =======
+
 .. automethod:: cterasdk.edge.network.Network.set_static_ipaddr
    :noindex:
 
 .. code-block:: python
 
-   filer.network.set_static_ipaddr('10.100.102.4', '255.255.255.0', '10.100.102.1', '10.100.102.1')
+   edge.network.set_static_ipaddr('10.100.102.4', '255.255.255.0', '10.100.102.1', '10.100.102.1')
 
-   filer.show('/status/network/ports/0/ip') # will print the IP configuration
+   edge.show('/status/network/ports/0/ip') # will print the IP configuration
 
 .. automethod:: cterasdk.edge.network.Network.set_static_nameserver
    :noindex:
 
 .. code-block:: python
 
-   filer.network.set_static_nameserver('10.100.102.1') # to set the primary name server
+   edge.network.set_static_nameserver('10.100.102.1') # to set the primary name server
 
-   filer.network.set_static_nameserver('10.100.102.1', '10.100.102.254') # to set both primary and secondary
+   edge.network.set_static_nameserver('10.100.102.1', '10.100.102.254') # to set both primary and secondary
 
 .. automethod:: cterasdk.edge.network.Network.enable_dhcp
    :noindex:
 
 .. code-block:: python
 
-   filer.network.enable_dhcp()
+   edge.network.enable_dhcp()
 
-Proxy Server
-^^^^^^^^^^^^
+Proxy Settings
+--------------
 
 .. automethod:: cterasdk.edge.network.Proxy.get_configuration
    :noindex:
 
 .. code-block:: python
 
-   configuration = filer.network.proxy.get_configuration()
+   configuration = edge.network.proxy.get_configuration()
    print(configuration)
 
 .. automethod:: cterasdk.edge.network.Proxy.is_enabled
@@ -962,7 +835,7 @@ Proxy Server
 
 .. code-block:: python
 
-   if filer.network.proxy.is_enabled():
+   if edge.network.proxy.is_enabled():
        print('Proxy Server is Enabled')
 
 .. automethod:: cterasdk.edge.network.Proxy.modify
@@ -970,36 +843,36 @@ Proxy Server
 
 .. code-block:: python
 
-   filer.network.proxy.modify('192.168.11.11', 8081, 'proxy-user', 'proxy-user-password')
+   edge.network.proxy.modify('192.168.11.11', 8081, 'proxy-user', 'proxy-user-password')
 
 .. automethod:: cterasdk.edge.network.Proxy.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.network.proxy.disable()
+   edge.network.proxy.disable()
 
 MTU
-^^^
+---
 
 .. automethod:: cterasdk.edge.network.MTU.modify
    :noindex:
 
 .. code-block:: python
 
-   filer.network.mtu.modify(1320)  # set the maximum transmission unit (MTU) to 1320
+   edge.network.mtu.modify(1320)  # set the maximum transmission unit (MTU) to 1320
 
-   filer.network.mtu.modify(9000)  # configure 'jumbo' frames (MTU: 9000)
+   edge.network.mtu.modify(9000)  # configure 'jumbo' frames (MTU: 9000)
 
 .. automethod:: cterasdk.edge.network.MTU.reset
    :noindex:
 
 .. code-block:: python
 
-   filer.network.mtu.reset()  # disable custom mtu configuration and restore default setting (1500)
+   edge.network.mtu.reset()  # disable custom mtu configuration and restore default setting (1500)
 
 Static Routes
-^^^^^^^^^^^^^
+-------------
 
 .. automethod:: cterasdk.edge.network.StaticRoutes.get
    :noindex:
@@ -1007,7 +880,7 @@ Static Routes
 .. code-block:: python
 
    # get static routes
-   filer.network.routes.get()
+   edge.network.routes.get()
 
 .. automethod:: cterasdk.edge.network.StaticRoutes.add
    :noindex:
@@ -1015,10 +888,10 @@ Static Routes
 .. code-block:: python
 
    # add static route from 10.10.12.1 to 192.168.55.7/32
-   filer.network.routes.add('10.10.12.1', '192.168.55.7/32')
+   edge.network.routes.add('10.10.12.1', '192.168.55.7/32')
 
    # add static route from 10.100.102.4 to 172.18.100.0/24
-   filer.network.routes.add('10.100.102.4', '172.18.100.0/24')
+   edge.network.routes.add('10.100.102.4', '172.18.100.0/24')
 
 .. automethod:: cterasdk.edge.network.StaticRoutes.remove
    :noindex:
@@ -1026,7 +899,7 @@ Static Routes
 .. code-block:: python
 
    # remove static route 192.168.55.7/32
-   filer.network.routes.remove('192.168.55.7/32')
+   edge.network.routes.remove('192.168.55.7/32')
 
 .. automethod:: cterasdk.edge.network.StaticRoutes.clear
    :noindex:
@@ -1034,11 +907,11 @@ Static Routes
 .. code-block:: python
 
    # remove all static routes -  (clean)
-   filer.network.routes.clear()
+   edge.network.routes.clear()
 
 
-Network Diagnostics
-^^^^^^^^^^^^^^^^^^^
+Diagnostics
+-----------
 
 .. automethod:: cterasdk.edge.network.Network.tcp_connect
    :noindex:
@@ -1046,7 +919,7 @@ Network Diagnostics
 .. code-block:: python
 
    cttp_service = gateway_types.TCPService('chopin.ctera.com', 995)
-   result = filer.network.tcp_connect(cttp_service)
+   result = edge.network.tcp_connect(cttp_service)
    if result.is_open:
        print('Success')
        # do something...
@@ -1054,7 +927,7 @@ Network Diagnostics
        print('Failure')
 
    ldap_service = gateway_types.TCPService('dc.ctera.com', 389)
-   filer.network.tcp_connect(ldap_service)
+   edge.network.tcp_connect(ldap_service)
 
 .. automethod:: cterasdk.edge.network.Network.diagnose
    :noindex:
@@ -1065,7 +938,7 @@ Network Diagnostics
    services.append(gateway_types.TCPService('192.168.90.1', 389))  # LDAP
    services.append(gateway_types.TCPService('ctera.portal.com', 995))  # CTTP
    services.append(gateway_types.TCPService('ctera.portal.com', 443))  # HTTPS
-   result = filer.network.diagnose(services)
+   result = edge.network.diagnose(services)
    for result in results:
        print(result.host, result.port, result.is_open)
 
@@ -1075,13 +948,13 @@ Network Diagnostics
 
 .. code-block:: python
 
-   filer.network.iperf('192.168.1.145')  # iperf server: 192.168.1.145, threads: 1, measure upload over TCP port 5201
+   edge.network.iperf('192.168.1.145')  # iperf server: 192.168.1.145, threads: 1, measure upload over TCP port 5201
 
-   filer.network.iperf('192.168.1.145', port=85201, threads=5)  # Customized port and number of threads
+   edge.network.iperf('192.168.1.145', port=85201, threads=5)  # Customized port and number of threads
 
-   filer.network.iperf('192.168.1.145', direction=gateway_enum.Traffic.Download)  # Measure download speed
+   edge.network.iperf('192.168.1.145', direction=gateway_enum.Traffic.Download)  # Measure download speed
 
-   filer.network.iperf('192.168.1.145', protocol=gateway_enum.IPProtocol.UDP)  # Use UDP
+   edge.network.iperf('192.168.1.145', protocol=gateway_enum.IPProtocol.UDP)  # Use UDP
 
 Mail Server
 ===========
@@ -1091,20 +964,20 @@ Mail Server
 
 .. code-block:: python
 
-   filer.mail.enable('smtp.ctera.com') # default settings
+   edge.mail.enable('smtp.ctera.com') # default settings
 
-   filer.mail.enable('smtp.ctera.com', 465) # custom port number
+   edge.mail.enable('smtp.ctera.com', 465) # custom port number
 
    """Use default port number, use authentication and require TLS"""
 
-   filer.mail.enable('smtp.ctera.com', username = 'user', password = 'secret', useTLS = True)
+   edge.mail.enable('smtp.ctera.com', username = 'user', password = 'secret', useTLS = True)
 
 .. automethod:: cterasdk.edge.mail.Mail.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.mail.disable()
+   edge.mail.disable()
 
 Logging
 =======
@@ -1120,78 +993,79 @@ Logging
 
 .. code-block:: python
 
-   filer.syslog.enable('syslog.ctera.com') # default settings
+   edge.syslog.enable('syslog.ctera.com') # default settings
 
-   filer.syslog.enable('syslog.ctera.com', proto = 'TCP') # use TCP
+   edge.syslog.enable('syslog.ctera.com', proto = 'TCP') # use TCP
 
-   filer.syslog.enable('syslog.ctera.com', 614, minSeverity = 'error') # use 614 UDP, severity >= error
+   edge.syslog.enable('syslog.ctera.com', 614, minSeverity = 'error') # use 614 UDP, severity >= error
 
 .. automethod:: cterasdk.edge.syslog.Syslog.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.syslog.disable()
+   edge.syslog.disable()
 
-SMB Audit Logs
-^^^^^^^^^^^^^^
+CIFS/SMB Audit Logs
+-------------------
 
 .. automethod:: cterasdk.edge.audit.Audit.enable
    :noindex:
 
 .. code-block:: python
 
-   filer.audit.enable('/logs')
+   edge.audit.enable('/logs')
 
 .. automethod:: cterasdk.edge.audit.Audit.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.audit.disable()
+   edge.audit.disable()
 
-Reset
-=====
+Reset to Defaults
+=================
+
 .. automethod:: cterasdk.edge.power.Power.reset
    :noindex:
 
 .. code-block:: python
 
-   filer.power.reset() # will reset and immediately return
-   filer.power.reset(True) # will reset and wait for the Edge Filer to boot
+   edge.power.reset() # will reset and immediately return
+   edge.power.reset(wait=True) # will reset and wait for the Edge Filer to boot
 
-.. seealso:: create the first admin account after resetting the Edge Filer to its default settings: :py:func:`cterasdk.edge.users.Users.add_first_user()`
+.. seealso:: Create the first admin account after resetting the Edge Filer to its default settings: :py:func:`cterasdk.edge.users.Users.add_first_user()`
 
-SSL
-===
+SSL Certificate 
+===============
 
 .. automethod:: cterasdk.edge.ssl.SSL.disable_http
    :noindex:
 
 .. code-block:: python
 
-   filer.ssl.disable_http()
+   edge.ssl.disable_http()
 
 .. automethod:: cterasdk.edge.ssl.SSL.enable_http
    :noindex:
 
 .. code-block:: python
 
-   filer.ssl.enable_http()
+   edge.ssl.enable_http()
 
 .. automethod:: cterasdk.edge.ssl.SSL.is_http_disabled
    :noindex:
 
 .. code-block:: python
 
-   filer.ssl.is_http_disabled()
+   edge.ssl.is_http_disabled()
 
 .. automethod:: cterasdk.edge.ssl.SSL.is_http_enabled
    :noindex:
 
 .. code-block:: python
 
-   filer.ssl.is_http_enabled()
+   edge.ssl.is_http_enabled()
 
 .. automethod:: cterasdk.edge.ssl.SSL.get_storage_ca
    :noindex:
@@ -1215,7 +1089,7 @@ SSL
    Specify certificates in the following order: domain cert, intermediary certs, CA cert
    You may include as many intermediate certificates as needed
    """
-   filer.ssl.import_certificate(private_key, certificate, intermediate_cert, ca_certificate)
+   edge.ssl.import_certificate(private_key, certificate, intermediate_cert, ca_certificate)
 
 .. danger: Exercise caution. Test thoroughly prior to implementing in production. Ensure the integrity of the PEM encoded private key and certificates. Supplying an invalid private key or certificate will disable administrative access to the filer and would require CTERA Support to re-enable it.
 
@@ -1227,16 +1101,17 @@ Power Management
 
 .. code-block:: python
 
-   filer.power.reboot() # will reboot and immediately return
+   edge.power.reboot() # will reboot and immediately return
 
-   filer.power.reboot(True) # will reboot and wait
+   edge.power.reboot(wait=True) # will reboot and wait
 
 .. automethod:: cterasdk.edge.power.Power.shutdown
    :noindex:
 
 .. code-block:: python
 
-   filer.power.shutdown()
+   edge.power.shutdown()
+
 
 SNMP
 ====
@@ -1246,84 +1121,83 @@ SNMP
 
 .. code-block:: python
 
-   filer.snmp.is_enabled()
+   edge.snmp.is_enabled()
 
 .. automethod:: cterasdk.edge.snmp.SNMP.enable
    :noindex:
 
 .. code-block:: python
 
-   filer.snmp.enable(community_str='MpPcKl2sArSdTLZ4URj4')  # enable SNMP v2c
-   filer.snmp.enable(username='snmp_user', auth_password='gVQBaHSOGV', privacy_password='VG0zbn5aJ')  # enable SNMP v3
+   edge.snmp.enable(community_str='MpPcKl2sArSdTLZ4URj4')  # enable SNMP v2c
+   edge.snmp.enable(username='snmp_user', auth_password='gVQBaHSOGV', privacy_password='VG0zbn5aJ')  # enable SNMP v3
 
 .. automethod:: cterasdk.edge.snmp.SNMP.disable
    :noindex:
 
-   filer.snmp.disable()
+   edge.snmp.disable()
 
 .. automethod:: cterasdk.edge.snmp.SNMP.modify
    :noindex:
 
-   filer.snmp.modify(community_str='L0K2zGpgmOQH2CXaUSuB', username='snmp_user', auth_password='gVQBaHSOGV', privacy_password='VG0zbn5aJ')
+   edge.snmp.modify(community_str='L0K2zGpgmOQH2CXaUSuB', username='snmp_user', auth_password='gVQBaHSOGV', privacy_password='VG0zbn5aJ')
 
 .. automethod:: cterasdk.edge.snmp.SNMP.get_configuration
    :noindex:
 
-   filer.snmp.get_configuration()
+   edge.snmp.get_configuration()
 
-Support
-=======
+Troubleshooting
+===============
 
 Support Report
-^^^^^^^^^^^^^^
+--------------
 
 .. automethod:: cterasdk.edge.support.Support.get_support_report
    :noindex:
 
-Debug
-^^^^^
+Debug Level
+-----------
 
 .. automethod:: cterasdk.edge.support.Support.set_debug_level
    :noindex:
 
 .. code-block:: python
 
-   filer.support.set_debug_level('backup', 'process', 'cttp', 'samba')
+   edge.support.set_debug_level('backup', 'process', 'cttp', 'samba')
+   edge.support.set_debug_level('info')
+   edge.support.set_debug_level('caching', 'evictor')
 
-   filer.support.set_debug_level('info')
+Telnet
+------
 
-   filer.support.set_debug_level('caching', 'evictor')
-
-Telnet Access
-^^^^^^^^^^^^^
 .. automethod:: cterasdk.edge.telnet.Telnet.enable
    :noindex:
 
 .. code-block:: python
 
-   filer.telnet.enable('a7df639a')
+   edge.telnet.enable('a7df639a')
 
 .. automethod:: cterasdk.edge.telnet.Telnet.disable
    :noindex:
 
 .. code-block:: python
 
-   filer.telnet.disable()
+   edge.telnet.disable()
 
+SSH
+---
 
-SSH Access
-^^^^^^^^^^
 .. automethod:: cterasdk.edge.ssh.SSH.enable
    :noindex:
 
 .. code-block:: python
 
    """Enable SSH access"""
-   filer.ssh.enable()
+   edge.ssh.enable()
 
    """Enable SSH access using a public key file"""
-   filer.ssh.enable(public_key_file='./public_key.pub')  # relative to the current directory
-   filer.ssh.enable(public_key_file='C:\\Users\\jsmith\\Desktop\\public_key.pub')  # full path
+   edge.ssh.enable(public_key_file='./public_key.pub')  # relative to the current directory
+   edge.ssh.enable(public_key_file='C:\\Users\\jsmith\\Desktop\\public_key.pub')  # full path
 
    """Generate an RSA key pair and enable SSH access"""
 
@@ -1333,7 +1207,7 @@ SSH Access
    private_key = rsa.generate_private_key(public_exponent=exponent, key_size=key_size)
    public_key = private_key.public_key().public_bytes(Encoding.OpenSSH, PublicFormat.OpenSSH).decode('utf-8')
 
-   filer.ssh.enable(public_key)
+   edge.ssh.enable(public_key)
 
    """Print PEM-encoded RSA private key"""
    print(private_key.private_bytes(Encoding.PEM, PrivateFormat.OpenSSH, NoEncryption()).decode('utf-8'))
@@ -1346,128 +1220,21 @@ SSH Access
 
 .. code-block:: python
 
-   filer.ssh.disable()
+   edge.ssh.disable()
 
+Miscellaneous
+-------------
 
-CTERA Migrate
-=============
-
-.. automethod:: cterasdk.edge.ctera_migrate.CTERAMigrate.list_shares
+.. automethod:: cterasdk.objects.edge.Edge.test
    :noindex:
 
 .. code-block:: python
 
-   """ List all shares available on a source host """
-   credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
-   filer.ctera_migrate.list_shares(credentials)
+   edge.test()
 
-   """ List all shares available on the current Edge Filer """
-   credentials = gateway_types.HostCredentials.localhost()
-   filer.ctera_migrate.list_shares(credentials)
-
-.. automethod:: cterasdk.edge.ctera_migrate.CTERAMigrate.list_tasks
+.. automethod:: cterasdk.objects.edge.Edge.whoami
    :noindex:
 
 .. code-block:: python
 
-   """ Print all tasks, optional flag to list deleted tasks """
-   for task in filer.ctera_migrate.list_tasks(deleted=False):
-       print(task)
-
-.. automethod:: cterasdk.edge.ctera_migrate.CTERAMigrate.start
-   :noindex:
-
-.. code-block:: python
-
-   filer.ctera_migrate.start(task)
-
-.. automethod:: cterasdk.edge.ctera_migrate.CTERAMigrate.stop
-   :noindex:
-
-.. code-block:: python
-
-   filer.ctera_migrate.stop(task)
-
-.. automethod:: cterasdk.edge.ctera_migrate.CTERAMigrate.delete
-   :noindex:
-
-.. code-block:: python
-
-   filer.ctera_migrate.delete(filer.ctera_migrate.list_tasks())  # delete all tasks
-
-.. automethod:: cterasdk.edge.ctera_migrate.CTERAMigrate.restore
-   :noindex:
-
-.. code-block:: python
-
-   filer.ctera_migrate.restore(filer.ctera_migrate.list_tasks(deleted=True))  # recover all deleted tasks
-
-.. automethod:: cterasdk.edge.ctera_migrate.CTERAMigrate.details
-   :noindex:
-
-.. code-block:: python
-
-   filer.ctera_migrate.details(task)
-
-.. automethod:: cterasdk.edge.ctera_migrate.CTERAMigrate.results
-   :noindex:
-
-.. code-block:: python
-
-   filer.ctera_migrate.results(task)
-
-
-Discovery Tasks
-^^^^^^^^^^^^^^^
-
-.. automethod:: cterasdk.edge.ctera_migrate.Discovery.list_tasks
-   :noindex:
-
-.. code-block:: python
-
-   """ Print all discovery tasks, optional flag to list deleted tasks """
-   for task in filer.ctera_migrate.discovery.list_tasks(deleted=False):
-       print(task)
-
-.. automethod:: cterasdk.edge.ctera_migrate.Discovery.add
-   :noindex:
-
-.. code-block:: python
-
-   credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
-   task = filer.ctera_migrate.discovery.add('my-discovery', credentials, ['share1', 'share2'], auto_start=False, log_every_file=True, notes='job 1')
-
-
-   """Add a local discovery task"""
-   credentials = gateway_types.HostCredentials.localhost()
-   task = filer.ctera_migrate.discovery.add('my-discovery', credentials, ['share1', 'share2'], log_every_file=True, notes='local discovery job')
-
-   """Run the task"""
-   filer.ctera_migrate.start(task)
-
-.. automethod:: cterasdk.edge.ctera_migrate.Discovery.update
-   :noindex:
-
-
-Migration Tasks
-^^^^^^^^^^^^^^^
-
-.. automethod:: cterasdk.edge.ctera_migrate.Migration.list_tasks
-   :noindex:
-
-.. code-block:: python
-
-   """ Print all migration tasks, optional flag to list deleted tasks """
-   for task in filer.ctera_migrate.migration.list_tasks(deleted=False):
-       print(task)
-
-.. automethod:: cterasdk.edge.ctera_migrate.Migration.add
-   :noindex:
-
-.. code-block:: python
-
-   credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
-   task = filer.ctera_migrate.migration.add('my-discovery', credentials, ['share1', 'share2'], auto_start=False, winacls=True, cloud_folder='my_cloud_folder', create_cloud_folder_per_share=False, compute_checksum=False, exclude=['*.pdf', '*.jpg'], include=['*.png', '*.avi'], notes='migration job 1')
-
-   """Run the task"""
-   filer.ctera_migrate.start(task)
+   edge.whoami()
