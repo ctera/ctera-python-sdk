@@ -1,3 +1,6 @@
+====
+Edge
+====
 .. toctree::
    :caption: CTERA Edge Filer
    :maxdepth: 5

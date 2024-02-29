@@ -8,7 +8,6 @@ First, make sure that aiohttp is :ref:`installed<cterasdk-installation>` and up-
 
 Let’s get started with some simple examples.
 
-
 Logging In
 ----------
 Begin by importing the cterasdk module:
