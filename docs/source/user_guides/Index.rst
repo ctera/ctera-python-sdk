@@ -2,7 +2,6 @@ Edge
 ====
 
 .. toctree::
-   :caption: Edge Filer
-   :maxdepth: 2
+   :maxdepth: 5
 
    Edge/Index
