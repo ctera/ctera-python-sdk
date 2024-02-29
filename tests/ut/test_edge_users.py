@@ -1,5 +1,3 @@
-import sys
-
 from unittest import mock
 
 from cterasdk import exceptions
@@ -17,7 +15,7 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._full_name = 'Alice Wonderland'
         self._uid = 516
         self._email = 'alice.wonderland@microsoft.com'
-        self._login_mock = self.patch_call(f'cterasdk.objects.edge.Edge.login')
+        self._login_mock = self.patch_call('cterasdk.objects.edge.Edge.login')
 
     def test_get_all_users(self):
         get_response = 'Success'
