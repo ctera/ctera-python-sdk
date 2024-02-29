@@ -1,4 +1,4 @@
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from ..common import Object
 
 

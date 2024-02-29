@@ -22,7 +22,7 @@ class TestCoreCredentialsS3(base_core.BaseCoreTest):
         self._init_global_admin(execute_response=execute_response)
         ret = credentials.S3(self._global_admin).all(self._user_account)
         self._mock_get_user_uid.assert_called_once_with(self._user_account, ['uid'])
-        self._global_admin.execute.assert_called_once_with('', 'getApiKeys', self._uid)
+        self._global_admin.api.execute.assert_called_once_with('', 'getApiKeys', self._uid)
         self.assertEqual(ret, execute_response)
 
     def test_create_s3_credential(self):
@@ -30,7 +30,7 @@ class TestCoreCredentialsS3(base_core.BaseCoreTest):
         self._init_global_admin(execute_response=execute_response)
         ret = credentials.S3(self._global_admin).create(self._user_account)
         self._mock_get_user_uid.assert_called_once_with(self._user_account, ['uid'])
-        self._global_admin.execute.assert_called_once_with('', 'createApiKey', self._uid)
+        self._global_admin.api.execute.assert_called_once_with('', 'createApiKey', self._uid)
         self.assertEqual(ret, execute_response)
 
     def test_delete_s3_credential_success(self):
@@ -40,7 +40,7 @@ class TestCoreCredentialsS3(base_core.BaseCoreTest):
         self._init_global_admin(execute_response=execute_response)
         ret = credentials.S3(self._global_admin).delete(self._access_key_id, self._user_account)
         mock_get_s3_credentials.assert_called_once_with(self._user_account)
-        self._global_admin.execute.assert_called_once_with('', 'deleteApiKey', self._access_key_uid)
+        self._global_admin.api.execute.assert_called_once_with('', 'deleteApiKey', self._access_key_uid)
         self.assertEqual(ret, execute_response)
 
     def test_delete_s3_credential_not_found(self):
@@ -49,5 +49,5 @@ class TestCoreCredentialsS3(base_core.BaseCoreTest):
         mock_get_s3_credentials.return_value = [munch.Munch({'accessKey': self._access_key_id, 'uid': self._access_key_uid})]
         ret = credentials.S3(self._global_admin).delete('not_found', self._user_account)
         mock_get_s3_credentials.assert_called_once_with(self._user_account)
-        self._global_admin.execute.assert_not_called()
+        self._global_admin.api.execute.assert_not_called()
         self.assertEqual(ret, None)

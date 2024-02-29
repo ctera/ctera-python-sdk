@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import backup
 from cterasdk.edge.enum import BackupConfStatusID
 from cterasdk.common import Object
@@ -19,8 +19,8 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
 
     def test_configure_attach_recoverable_encryption_no_backup_folder_no_backup_settings(self):
         self._init_filer()
-        self._filer.get = mock.MagicMock(side_effect=TestEdgeBackup._mock_get_no_backup_settings)
-        self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
+        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeBackup._mock_get_no_backup_settings)
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
         self._filer.tasks.wait = mock.MagicMock(side_effect=TestEdgeBackup._mock_recoverable_enc_attach_folder_not_found_create_folder_ok)
         backup.Backup(self._filer).configure()
         self._filer.tasks.wait.assert_has_calls(
@@ -29,31 +29,31 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
                 mock.call(TestEdgeBackup._task_create_folder)
             ]
         )
-        self._filer.execute.assert_has_calls(
+        self._filer.api.execute.assert_has_calls(
             [
                 mock.call('/status/services', 'attachFolder'),
                 mock.call('/status/services', 'createFolder', mock.ANY)
             ]
         )
         expected_param = self._get_create_folder_param()
-        actual_param = self._filer.execute.call_args_list[1][0][2]
+        actual_param = self._filer.api.execute.call_args_list[1][0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self._filer.get.assert_has_calls(
+        self._filer.api.get.assert_has_calls(
             [
                 mock.call('/config/backup'),
                 mock.call('/defaults/BackupSettings')
             ]
         )
-        self._filer.put.assert_called_once_with('/config/backup', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/backup', mock.ANY)
         expected_param = self._get_default_backup_settings(backup.EncryptionMode.Recoverable,
                                                            TestEdgeBackup._shared_secret,
                                                            TestEdgeBackup._passphrase_salt)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_attach_incorrect_passphrase(self):
         self._init_filer()
-        self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
         self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.CheckCodeInCorrect))
         with self.assertRaises(backup.IncorrectPassphrase) as error:
             backup.Backup(self._filer).configure()
@@ -61,7 +61,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
 
     def test_attach_clocks_out_of_sync(self):
         self._init_filer()
-        self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
         self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.ClocksOutOfSync))
         with self.assertRaises(backup.ClocksOutOfSync) as error:
             backup.Backup(self._filer).configure()
@@ -69,25 +69,25 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
 
     def test_attach_internal_server_error(self):
         self._init_filer()
-        self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
         self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.InternalServerError))
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             backup.Backup(self._filer).configure()
         self.assertEqual('Failed to attach to backup folder', error.exception.message)
 
     def test_attach_permission_denied(self):
         self._init_filer()
-        self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
         self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response(backup.AttachRC.PermissionDenied))
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             backup.Backup(self._filer).configure()
         self.assertEqual('Failed to attach to backup folder', error.exception.message)
 
     def test_attach_unknown_error(self):
         self._init_filer()
-        self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
         self._filer.tasks.wait = mock.MagicMock(return_value=TestEdgeBackup._get_attach_response('Unknown attach rc'))
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             backup.Backup(self._filer).configure()
         self.assertEqual('Failed to attach to backup folder', error.exception.message)
 
@@ -131,8 +131,8 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
 
     def test_configure_attach_secret_encryption_no_backup_folder_no_backup_settings(self):
         self._init_filer()
-        self._filer.get = mock.MagicMock(side_effect=TestEdgeBackup._mock_get_no_backup_settings)
-        self._filer.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
+        self._filer.api.get = mock.MagicMock(side_effect=TestEdgeBackup._mock_get_no_backup_settings)
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeBackup._mock_execute)
         self._filer.tasks.wait = mock.MagicMock(side_effect=TestEdgeBackup._mock_secret_enc_attach_enc_folder_not_found_create_folder_ok)
         backup.Backup(self._filer).configure(TestEdgeBackup._passphrase)
         self._filer.tasks.wait.assert_has_calls(
@@ -142,7 +142,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
                 mock.call(TestEdgeBackup._task_create_folder)
             ]
         )
-        self._filer.execute.assert_has_calls(
+        self._filer.api.execute.assert_has_calls(
             [
                 mock.call('/status/services', 'attachFolder'),
                 mock.call('/status/services', 'attachEncryptedFolder', mock.ANY),
@@ -150,23 +150,23 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
             ]
         )
         expected_param = self._get_attach_encrypted_folder_param()
-        actual_param = self._filer.execute.call_args_list[1][0][2]
+        actual_param = self._filer.api.execute.call_args_list[1][0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
         expected_param = self._get_create_folder_param(TestEdgeBackup._passphrase)
-        actual_param = self._filer.execute.call_args_list[2][0][2]
+        actual_param = self._filer.api.execute.call_args_list[2][0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self._filer.get.assert_has_calls(
+        self._filer.api.get.assert_has_calls(
             [
                 mock.call('/config/backup'),
                 mock.call('/defaults/BackupSettings')
             ]
         )
-        self._filer.put.assert_called_once_with('/config/backup', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/backup', mock.ANY)
         expected_param = self._get_default_backup_settings(backup.EncryptionMode.Secret,
                                                            TestEdgeBackup._shared_secret,
                                                            TestEdgeBackup._passphrase_salt)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     @staticmethod
@@ -232,7 +232,7 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
     def test_is_configured(self):
         self._init_filer(get_response=TestEdgeBackup._get_backup_status_response())
         backup.Backup(self._filer).is_configured()
-        self._filer.get.assert_called_once_with('/proc/backup/backupStatus')
+        self._filer.api.get.assert_called_once_with('/proc/backup/backupStatus')
 
     @staticmethod
     def _get_backup_status_response():
@@ -244,17 +244,17 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
     def test_start_backup(self):
         self._init_filer()
         backup.Backup(self._filer).start()
-        self._filer.execute.assert_called_once_with('/status/sync', 'start')
+        self._filer.api.execute.assert_called_once_with('/status/sync', 'start')
 
     def test_suspend_backup(self):
         self._init_filer()
         backup.Backup(self._filer).suspend()
-        self._filer.execute.assert_called_once_with('/status/sync', 'pause')
+        self._filer.api.execute.assert_called_once_with('/status/sync', 'pause')
 
     def test_unsuspend_backup(self):
         self._init_filer()
         backup.Backup(self._filer).unsuspend()
-        self._filer.execute.assert_called_once_with('/status/sync', 'resume')
+        self._filer.api.execute.assert_called_once_with('/status/sync', 'resume')
 
     def test_unselect_all_files_from_backup(self):
         uuid = 'test'
@@ -262,10 +262,10 @@ class TestEdgeBackup(base_edge.BaseEdgeTest):
         get_response = [TestEdgeBackup._create_backup_set(uuid, all_files, True)]
         self._init_filer(get_response=get_response)
         backup.Backup(self._filer).files.unselect_all()
-        self._filer.get.assert_called_once_with('/config/backup/backupPolicy/includeSets')
-        self._filer.put.assert_called_once_with(f'/config/backup/backupPolicy/includeSets/{uuid}', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/backup/backupPolicy/includeSets')
+        self._filer.api.put.assert_called_once_with(f'/config/backup/backupPolicy/includeSets/{uuid}', mock.ANY)
         expected_param = TestEdgeBackup._create_backup_set(uuid, all_files, False)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     @staticmethod

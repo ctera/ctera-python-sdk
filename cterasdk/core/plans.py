@@ -1,6 +1,6 @@
 import logging
 from .base_command import BaseCommand
-from ..exception import CTERAException, InputError, ObjectNotFoundException
+from ..exceptions import CTERAException, InputError, ObjectNotFoundException
 from .enum import PlanItem, PlanRetention
 from ..common import union, convert_size, DataUnit, PolicyRuleConverter
 from . import query
@@ -17,7 +17,7 @@ class Plans(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.auto_assign = PlanAutoAssignPolicy(self._portal)
+        self.auto_assign = PlanAutoAssignPolicy(self._core)
 
     def _get_entire_object(self, name):
         """
@@ -26,7 +26,7 @@ class Plans(BaseCommand):
         :param str name: Name of the subscription plan
         """
         try:
-            return self._portal.get('/plans/' + name)
+            return self._core.api.get('/plans/' + name)
         except CTERAException as error:
             raise CTERAException('Could not find subscription plan', error)
 
@@ -61,9 +61,7 @@ class Plans(BaseCommand):
             builder.addFilter(query_filter)
         builder.orFilter((len(filters) > 1))
         param = builder.build()
-        iterator = query.iterator(self._portal, '/plans', param)
-        for plan in iterator:
-            yield plan
+        yield from query.iterator(self._core, '/plans', param)
 
     def get(self, name, include=None):
         """
@@ -75,7 +73,7 @@ class Plans(BaseCommand):
         """
         include = union(include or [], Plans.default)
         include = ['/' + attr for attr in include]
-        plan = self._portal.get_multi('/plans/' + name, include)
+        plan = self._core.api.get_multi('/plans/' + name, include)
         if plan.name is None:
             raise ObjectNotFoundException('Could not find subscription plan', f'/plans/{name}', name=name)
         return plan
@@ -87,12 +85,12 @@ class Plans(BaseCommand):
         :param dict,optional retention: The data retention policy
         :param dict,optional quotas: The items included in the plan and their respective quota
         """
-        plan = self._portal.default_class('Plan')
+        plan = self._core.api.defaults('Plan')
         plan.name = name
         Plans._assign_retention(plan, retention)
         Plans._assign_quotas(plan, quotas)
         try:
-            response = self._portal.add('/plans', plan)
+            response = self._core.api.add('/plans', plan)
             logging.getLogger().info("Plan created. %s", {'plan': name})
             return response
         except CTERAException as error:
@@ -111,13 +109,13 @@ class Plans(BaseCommand):
         Plans._assign_retention(plan, retention)
         Plans._assign_quotas(plan, quotas)
         try:
-            response = self._portal.put('/plans/' + name, plan)
+            response = self._core.api.put('/plans/' + name, plan)
             logging.getLogger().info("Plan modified. %s", {'plan': name})
             if apply_changes:
-                if self._portal.session().in_tenant_context():
-                    self._portal.users.apply_changes(True)
+                if self._core.session().in_tenant_context():
+                    self._core.users.apply_changes(True)
                 else:
-                    self._portal.portals.apply_changes(True)
+                    self._core.portals.apply_changes(True)
             return response
         except CTERAException as error:
             logging.getLogger().error("Could not modify subscription plan.")
@@ -179,7 +177,7 @@ class Plans(BaseCommand):
         :param str username: The name of the subscription plan
         """
         try:
-            response = self._portal.delete('/plans/' + name)
+            response = self._core.api.delete('/plans/' + name)
             logging.getLogger().info("Plan deleted. %s", {'name': name})
             return response
         except CTERAException as error:
@@ -193,7 +191,7 @@ class PlanAutoAssignPolicy(BaseCommand):
         """
         Get plans auto assignment policy
         """
-        return self._portal.execute('', 'getPlanAutoAssignmentRules')
+        return self._core.api.execute('', 'getPlanAutoAssignmentRules')
 
     def set_policy(self, rules, apply_default=None, default=None, apply_changes=True):
         """
@@ -208,7 +206,7 @@ class PlanAutoAssignPolicy(BaseCommand):
         if default:
             plans.add(default)
         plans = list(plans)
-        portal_plans = {plan.name: plan for plan in self._portal.plans.by_name(plans, ['baseObjectRef'])}
+        portal_plans = {plan.name: plan for plan in self._core.plans.by_name(plans, ['baseObjectRef'])}
 
         not_found = [plan for plan in plans if plan not in portal_plans.keys()]
         if not_found:
@@ -226,10 +224,10 @@ class PlanAutoAssignPolicy(BaseCommand):
                         portal_plans.get(rule.assignment).baseObjectRef) for rule in rules]
         policy.planAutoAssignmentRules = policy_rules
 
-        response = self._portal.execute('', 'setPlanAutoAssignmentRules', policy)
+        response = self._core.api.execute('', 'setPlanAutoAssignmentRules', policy)
         logging.getLogger().info('Set plans auto assignment rules.')
 
         if apply_changes:
-            self._portal.users.apply_changes(True)
+            self._core.users.apply_changes(True)
 
         return response

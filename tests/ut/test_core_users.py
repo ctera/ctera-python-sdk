@@ -2,7 +2,7 @@
 import datetime
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.common import Object
 from cterasdk.core.types import UserAccount
 from cterasdk.core import users, admins
@@ -29,9 +29,9 @@ class TestCoreUsers(base_core.BaseCoreTest):
         get_multi_response = self._get_user_object(name=self._local_user_account.name)
         self._init_global_admin(get_multi_response=get_multi_response)
         ret = users.Users(self._global_admin).get(self._local_user_account)
-        self._global_admin.get_multi.assert_called_once_with('/users/' + self._local_user_account.name, mock.ANY)
+        self._global_admin.api.get_multi.assert_called_once_with('/users/' + self._local_user_account.name, mock.ANY)
         expected_include = ['/' + attr for attr in users.Users.default]
-        actual_include = self._global_admin.get_multi.call_args[0][1]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
@@ -42,11 +42,11 @@ class TestCoreUsers(base_core.BaseCoreTest):
         self._init_global_admin(add_response=add_response)
         ret = users.Users(self._global_admin).add(self._username, self._email, self._first_name,
                                                   self._last_name, self._password, self._role)
-        self._global_admin.add.assert_called_once_with('/users', mock.ANY)
+        self._global_admin.api.add.assert_called_once_with('/users', mock.ANY)
         expected_param = self._get_user_object(name=self._username, email=self._email, firstName=self._first_name,
                                                lastName=self._last_name, password=self._password,
                                                role=self._role, company=None, comment=None)
-        actual_param = self._global_admin.add.call_args[0][1]
+        actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
@@ -61,7 +61,7 @@ class TestCoreUsers(base_core.BaseCoreTest):
         ret = users.Users(self._global_admin).add(self._username, self._email, self._first_name,
                                                   self._last_name, self._password, self._role,
                                                   password_change=password_change)
-        self._global_admin.add.assert_called_once_with('/users', mock.ANY)
+        self._global_admin.api.add.assert_called_once_with('/users', mock.ANY)
         if password_change:
             if isinstance(password_change, bool):
                 expiration_date = datetime.date.today() - datetime.timedelta(days=1)
@@ -81,7 +81,7 @@ class TestCoreUsers(base_core.BaseCoreTest):
             comment=None,
             requirePasswordChangeOn=expected_requirePasswordChangeOn
         )
-        actual_param = self._global_admin.add.call_args[0][1]
+        actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
@@ -107,11 +107,11 @@ class TestCoreUsers(base_core.BaseCoreTest):
     def test_get_user_not_found(self):
         get_multi_response = self._get_user_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._global_admin).get(self._local_user_account)
-        self._global_admin.get_multi.assert_called_once_with('/users/' + self._local_user_account.name, mock.ANY)
+        self._global_admin.api.get_multi.assert_called_once_with('/users/' + self._local_user_account.name, mock.ANY)
         expected_include = ['/' + attr for attr in users.Users.default]
-        actual_include = self._global_admin.get_multi.call_args[0][1]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
@@ -143,16 +143,16 @@ class TestCoreUsers(base_core.BaseCoreTest):
                                                new_user_object.firstName, new_user_object.lastName,
                                                new_user_object.password,
                                                new_user_object.role, new_user_object.company, new_user_object.comment)
-        self._global_admin.get.assert_called_once_with('/users/' + self._username)
-        self._global_admin.put.assert_called_once_with('/users/' + self._username, mock.ANY)
-        actual_param = self._global_admin.put.call_args[0][1]
+        self._global_admin.api.get.assert_called_once_with('/users/' + self._username)
+        self._global_admin.api.put.assert_called_once_with('/users/' + self._username, mock.ANY)
+        actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, new_user_object)
 
     def test_delete_local_user(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
         ret = users.Users(self._global_admin).delete(self._local_user_account)
-        self._global_admin.execute.assert_called_once_with('/users/' + self._local_user_account.name, 'delete', True)
+        self._global_admin.api.execute.assert_called_once_with('/users/' + self._local_user_account.name, 'delete', True)
         self.assertEqual(ret, execute_response)
 
     def test_delete_domain_user(self):
@@ -160,16 +160,16 @@ class TestCoreUsers(base_core.BaseCoreTest):
         self._init_global_admin(execute_response=execute_response)
         ret = users.Users(self._global_admin).delete(self._domain_user_account)
         baseurl = f'/domains/{self._domain_user_account.directory}/adUsers/{self._domain_user_account.name}'
-        self._global_admin.execute.assert_called_once_with(baseurl, 'delete', True)
+        self._global_admin.api.execute.assert_called_once_with(baseurl, 'delete', True)
         self.assertEqual(ret, execute_response)
 
     def test_apply_changes(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
         ret = users.Users(self._global_admin).apply_changes()
-        self._global_admin.execute.assert_called_once_with('', 'updateAccounts', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'updateAccounts', mock.ANY)
         expected_param = TestCoreUsers._get_apply_changes_param()
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, execute_response)
 
@@ -206,10 +206,10 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
         get_multi_response = self._get_admin_object(name=self._local_user_account.name)
         self._init_global_admin(get_multi_response=get_multi_response)
         ret = admins.Administrators(self._global_admin).get(self._local_user_account.name)
-        self._global_admin.get_multi.assert_called_once_with(
+        self._global_admin.api.get_multi.assert_called_once_with(
             '/administrators/' + self._local_user_account.name, mock.ANY)
         expected_include = ['/' + attr for attr in admins.Administrators.default]
-        actual_include = self._global_admin.get_multi.call_args[0][1]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
@@ -220,11 +220,11 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
         self._init_global_admin(add_response=add_response)
         ret = admins.Administrators(self._global_admin).add(self._username, self._email, self._first_name,
                                                             self._last_name, self._password, self._role)
-        self._global_admin.add.assert_called_once_with('/administrators', mock.ANY)
+        self._global_admin.api.add.assert_called_once_with('/administrators', mock.ANY)
         expected_param = self._get_admin_object(name=self._username, email=self._email, firstName=self._first_name,
                                                 lastName=self._last_name, password=self._password,
                                                 role=self._role, company=None, comment=None)
-        actual_param = self._global_admin.add.call_args[0][1]
+        actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
@@ -239,7 +239,7 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
         ret = admins.Administrators(self._global_admin).add(self._username, self._email, self._first_name,
                                                             self._last_name, self._password, self._role,
                                                             password_change=password_change)
-        self._global_admin.add.assert_called_once_with('/administrators', mock.ANY)
+        self._global_admin.api.add.assert_called_once_with('/administrators', mock.ANY)
         if password_change:
             if isinstance(password_change, bool):
                 expiration_date = datetime.date.today() - datetime.timedelta(days=1)
@@ -259,7 +259,7 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
             comment=None,
             requirePasswordChangeOn=expected_requirePasswordChangeOn
         )
-        actual_param = self._global_admin.add.call_args[0][1]
+        actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
@@ -275,12 +275,12 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
     def test_get_user_not_found(self):
         get_multi_response = self._get_admin_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             admins.Administrators(self._global_admin).get(self._local_user_account.name)
-        self._global_admin.get_multi.assert_called_once_with(
+        self._global_admin.api.get_multi.assert_called_once_with(
             '/administrators/' + self._local_user_account.name, mock.ANY)
         expected_include = ['/' + attr for attr in admins.Administrators.default]
-        actual_include = self._global_admin.get_multi.call_args[0][1]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
@@ -312,16 +312,16 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
                                                          new_user_object.firstName, new_user_object.lastName,
                                                          new_user_object.password, new_user_object.role,
                                                          new_user_object.company, new_user_object.comment)
-        self._global_admin.get.assert_called_once_with('/administrators/' + self._username)
-        self._global_admin.put.assert_called_once_with('/administrators/' + self._username, mock.ANY)
-        actual_param = self._global_admin.put.call_args[0][1]
+        self._global_admin.api.get.assert_called_once_with('/administrators/' + self._username)
+        self._global_admin.api.put.assert_called_once_with('/administrators/' + self._username, mock.ANY)
+        actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, new_user_object)
 
     def test_delete_admin_user(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
         ret = admins.Administrators(self._global_admin).delete(self._local_user_account.name)
-        self._global_admin.execute.assert_called_once_with(
+        self._global_admin.api.execute.assert_called_once_with(
             '/administrators/' + self._local_user_account.name, 'delete', True)
         self.assertEqual(ret, execute_response)
 

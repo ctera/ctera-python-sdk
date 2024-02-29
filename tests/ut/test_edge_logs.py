@@ -21,16 +21,16 @@ class TestEdgeLogs(base_edge.BaseEdgeTest):
         for actual_log in error_log_iterator:
             expected_log = error_logs.pop(0)
             self.assertEqual(expected_log, actual_log)
-        self._filer.execute.assert_called_once_with('/config/logging/general', 'pagedQuery', mock.ANY)
+        self._filer.api.execute.assert_called_once_with('/config/logging/general', 'pagedQuery', mock.ANY)
 
     def test_modify_log_settings(self):
         get_response = TestEdgeLogs._get_log_settings(7, Severity.INFO)
         self._init_filer(get_response=get_response)
         logs.Logs(self._filer).settings(self._days, min_severity=Severity.CRITICAL)
-        self._filer.get.assert_called_once_with('/config/logging/general')
-        self._filer.put.assert_called_once_with('/config/logging/general', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/logging/general')
+        self._filer.api.put.assert_called_once_with('/config/logging/general', mock.ANY)
         expected_param = TestEdgeLogs._get_log_settings(self._days, Severity.CRITICAL)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     @staticmethod

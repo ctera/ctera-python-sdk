@@ -12,4 +12,4 @@ class Domains(BaseCommand):
 
         :return list: List of all domains
         """
-        return self._portal.get('/domains')
+        return self._core.api.get('/domains')

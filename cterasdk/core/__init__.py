@@ -5,7 +5,6 @@ __all__ = [
     'buckets',
     'cloudfs',
     'connection',
-    'decorator',
     'devices',
     'directoryservice',
     'enum',

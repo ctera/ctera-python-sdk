@@ -3,7 +3,7 @@ import munch
 
 from cterasdk.core import devices
 from cterasdk.common import Object
-from cterasdk.object import Gateway, Agent
+from cterasdk.objects import Edge, Drive
 from tests.ut import base_core
 
 
@@ -29,11 +29,11 @@ class TestCoreRemote(base_core.BaseCoreTest):
         for filer_type in filer_types:
             get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
                                                                      filer_type, self._device_remote_access_url)
-            self._call_and_assert_instance_type(get_multi_response, Gateway)
+            self._call_and_assert_instance_type(get_multi_response, Edge)
         for agent_type in agent_types:
             get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
                                                                      agent_type, self._device_remote_access_url)
-            self._call_and_assert_instance_type(get_multi_response, Agent)
+            self._call_and_assert_instance_type(get_multi_response, Drive)
         for other_type in other_types:
             get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
                                                                      other_type, self._device_remote_access_url)
@@ -42,6 +42,7 @@ class TestCoreRemote(base_core.BaseCoreTest):
     def test_filer_remote_access(self):
         self.patch_call("cterasdk.lib.session_base.SessionBase.start_local_session")
         remote_session = self.patch_call("cterasdk.edge.session.Session.start_remote_session")
+        self.patch_call("cterasdk.edge.ctera_migrate.CTERAMigrate.login")
         remote_session.return_value = munch.Munch({'user': munch.Munch({'name': 'mickey', 'tenant': 'tenant'})})
         get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
                                                                  'vGateway', self._device_remote_access_url)
@@ -50,8 +51,8 @@ class TestCoreRemote(base_core.BaseCoreTest):
         portal_device = devices.Devices(self._global_admin).device(self._device_name)
         portal_device.get = mock.MagicMock()
         portal_device.remote_access()
-        self._global_admin.execute.assert_called_once_with(f'/portals/{self._tenant_name}/devices/{self._device_name}',
-                                                           'singleSignOn')
+        self._global_admin.api.execute.assert_called_once_with(f'/portals/{self._tenant_name}/devices/{self._device_name}',
+                                                               'singleSignOn')
         # portal_device.get.assert_called_once_with('/ssologin', {'ticket': self._sso_ticket})
 
     def _call_and_assert_instance_type(self, get_multi_response, instance_type):
@@ -61,8 +62,8 @@ class TestCoreRemote(base_core.BaseCoreTest):
         self.assertIsInstance(portal_device, instance_type)
 
     def _activate_portal_session(self):
-        self._global_admin.get = mock.MagicMock(side_effect=['team-portal-name', '7.5.182.16',
-                                                TestCoreRemote._create_current_session_object()])
+        self._global_admin.api.get = mock.MagicMock(side_effect=['team-portal-name', '7.5.182.16',
+                                                                 TestCoreRemote._create_current_session_object()])
         self._global_admin.session().start_local_session(self._global_admin)
 
     @staticmethod

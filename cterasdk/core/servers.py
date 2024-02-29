@@ -4,7 +4,7 @@ from ..common import union, Object
 from .base_command import BaseCommand
 from .types import ScheduledTask, BackgroundTask
 from . import query
-from ..exception import CTERAException, ObjectNotFoundException
+from ..exceptions import CTERAException, ObjectNotFoundException
 
 
 class Servers(BaseCommand):
@@ -16,11 +16,11 @@ class Servers(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.tasks = Tasks(self._portal)
+        self.tasks = Tasks(self._core)
 
     def _get_entire_object(self, server):
         try:
-            return self._portal.get(f'/servers/{server}')
+            return self._core.api.get(f'/servers/{server}')
         except CTERAException as error:
             raise CTERAException('Failed to retreive server', error)
 
@@ -34,7 +34,7 @@ class Servers(BaseCommand):
         """
         include = union(include or [], Servers.default)
         include = ['/' + attr for attr in include]
-        server = self._portal.get_multi(f'/servers/{name}', include)
+        server = self._core.api.get_multi(f'/servers/{name}', include)
         if server.name is None:
             raise ObjectNotFoundException('Could not find server', f'/servers/{name}', name=name)
         return server
@@ -49,7 +49,7 @@ class Servers(BaseCommand):
         # browse administration
         include = union(include or [], Servers.default)
         param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._portal, '/servers', param)
+        return query.iterator(self._core, '/servers', param)
 
     def modify(self, name, server_name=None, app=None, preview=None, enable_public_ip=None, public_ip=None,
                allow_user_login=None, enable_replication=None, replica_of=None):
@@ -88,7 +88,7 @@ class Servers(BaseCommand):
             server.allowUserLogin = allow_user_login
 
         try:
-            response = self._portal.put(f'/servers/{name}', server)
+            response = self._core.api.put(f'/servers/{name}', server)
             logging.getLogger().info("Server modified. %s", {'server': name})
             return response
         except CTERAException as error:
@@ -106,7 +106,7 @@ class Tasks(BaseCommand):
         :return: List of tasks
         """
         return [BackgroundTask.from_server_object(task, f'servers/{name}/bgTasks/{task.id}')
-                for task in self._portal.get(f'/servers/{name}/bgTasks')]
+                for task in self._core.api.get(f'/servers/{name}/bgTasks')]
 
     def scheduled(self, name):
         """
@@ -115,4 +115,4 @@ class Tasks(BaseCommand):
         :param str name: Name of the server
         :return: List of tasks
         """
-        return [ScheduledTask.from_server_object(task) for task in self._portal.get(f'/servers/{name}/schedTasks')]
+        return [ScheduledTask.from_server_object(task) for task in self._core.api.get(f'/servers/{name}/schedTasks')]

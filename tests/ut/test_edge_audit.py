@@ -15,9 +15,9 @@ class TestEdgeAudit(base_edge.BaseEdgeTest):
     def test_enable_smb_audit_log_default_params(self):
         self._init_filer()
         audit.Audit(self._filer).enable(self._path)
-        self._filer.put.assert_called_once_with('/config/logging/files', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/logging/files', mock.ANY)
         expected_param = TestEdgeAudit._get_smb_audit_log_settings_param(self._path)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     @staticmethod
@@ -43,4 +43,4 @@ class TestEdgeAudit(base_edge.BaseEdgeTest):
     def test_disable_smb_audit_log(self):
         self._init_filer()
         audit.Audit(self._filer).disable()
-        self._filer.put.assert_called_once_with('/config/logging/files/mode', Mode.Disabled)
+        self._filer.api.put.assert_called_once_with('/config/logging/files/mode', Mode.Disabled)

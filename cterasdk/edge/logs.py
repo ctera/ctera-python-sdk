@@ -23,12 +23,12 @@ class Logs(BaseCommand):
         :param int retention: Log retention period in days
         :param cterasdk.edge.enum.Severity,optional min_severity: Minimal log severity
         """
-        log_config = self._gateway.get('/config/logging/general')
+        log_config = self._edge.api.get('/config/logging/general')
         log_config.LogKeepPeriod = retention
         if min_severity:
             log_config.minSeverity = min_severity
         logging.getLogger().info('Updating log settings. %s', {'retention': retention, 'min_severity': log_config.minSeverity})
-        self._gateway.put('/config/logging/general', log_config)
+        self._edge.api.put('/config/logging/general', log_config)
         logging.getLogger().info('Log settings updated. %s', {'retention': retention, 'min_severity': log_config.minSeverity})
 
     def logs(self, topic, include=None, minSeverity=enum.Severity.INFO):
@@ -48,5 +48,5 @@ class Logs(BaseCommand):
         return Iterator(function, param)
 
     def _query_logs(self, param):
-        response = self._gateway.execute('/config/logging/general', 'pagedQuery', param)
+        response = self._edge.api.execute('/config/logging/general', 'pagedQuery', param)
         return (response.hasMore, response.logs)

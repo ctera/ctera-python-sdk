@@ -68,22 +68,3 @@ logconf = dict(
     df='%Y-%m-%d %H:%M:%S',
     filename=os.environ.get('CTERASDK_LOG_FILE')
 )
-
-http = dict(
-    timeout=10,  # http client or server timeout (seconds)
-    retries=3,  # handle client or server timeout
-    ssl='Consent',  # ['Consent', 'Trust']
-    verbose=False  # include request info on error
-)
-
-connect = dict(
-    ssl='Consent'  # ['Consent', 'Trust']
-)
-
-filesystem = dict(
-    dl='~/Downloads'
-)
-
-transcript = dict(
-    disabled=True
-)

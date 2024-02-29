@@ -13,5 +13,5 @@ class Firmwares(BaseCommand):
         if self.session().in_tenant_context():
             param = Object()
             param._classname = 'FirmwareParam'  # pylint: disable=protected-access
-            return self._portal.execute('', 'getFirmwares', param)
-        return self._portal.get('/firmwares')
+            return self._core.api.execute('', 'getFirmwares', param)
+        return self._core.api.get('/firmwares')

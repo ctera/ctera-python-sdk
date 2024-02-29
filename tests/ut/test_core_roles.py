@@ -27,7 +27,7 @@ class TestCoreRoles(base_core.BaseCoreTest):
     def test_get_role_success(self):
         self._init_global_admin(get_response=TestCoreRoles._role_settings(self._role))
         ret = roles.Roles(self._global_admin).get(self._role)
-        self._global_admin.get.assert_called_once_with(f'/rolesSettings/{self._role_settings_resource}')
+        self._global_admin.api.get.assert_called_once_with(f'/rolesSettings/{self._role_settings_resource}')
         self._assert_equal_objects(ret.to_server_object(), TestCoreRoles._role_settings(self._role))
 
     def test_modify_role_not_found(self):
@@ -38,7 +38,7 @@ class TestCoreRoles(base_core.BaseCoreTest):
         role_settings = RoleSettings.from_server_object(TestCoreRoles._role_settings(self._role))
         self._init_global_admin(put_response=role_settings.to_server_object())
         ret = roles.Roles(self._global_admin).modify(self._role, role_settings)
-        self._global_admin.put.assert_called_once_with(f'/rolesSettings/{self._role_settings_resource}', mock.ANY)
+        self._global_admin.api.put.assert_called_once_with(f'/rolesSettings/{self._role_settings_resource}', mock.ANY)
         self._assert_equal_objects(ret, role_settings)
 
     @staticmethod

@@ -8,11 +8,11 @@ class NTP(BaseCommand):
     """ Gateway NTP configuration """
 
     def get_configuration(self):
-        return self._gateway.get('/config/time')
+        return self._edge.api.get('/config/time')
 
     @property
     def servers(self):
-        return self._gateway.get('/config/time/NTPServer')
+        return self._edge.api.get('/config/time/NTPServer')
 
     def enable(self, servers=None):
         """
@@ -21,16 +21,16 @@ class NTP(BaseCommand):
         :param list[str] servers: List of NTP servers address
         """
         logging.getLogger().info("Enabling time synchronization with ntp servers.")
-        self._gateway.put('/config/time/NTPMode', Mode.Enabled)
+        self._edge.api.put('/config/time/NTPMode', Mode.Enabled)
         logging.getLogger().info("Time synchronization enabled.")
 
         if servers:
             logging.getLogger().info("Updating time servers. %s", {'servers': servers})
-            self._gateway.put('/config/time/NTPServer', servers)
+            self._edge.api.put('/config/time/NTPServer', servers)
             logging.getLogger().info("Time servers updated. %s", {'servers': servers})
 
     def disable(self):
         """ Disable NTP """
         logging.getLogger().info("Disabling time synchronization with ntp servers.")
-        self._gateway.put('/config/time/NTPMode', Mode.Disabled)
+        self._edge.api.put('/config/time/NTPMode', Mode.Disabled)
         logging.getLogger().info("Time synchronization disabled.")

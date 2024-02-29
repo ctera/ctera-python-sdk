@@ -1,7 +1,7 @@
 import logging
 import time
 
-from ..exception import CTERAException, CTERAClientException, HostUnreachable, ConnectionRetryFailure
+from ..exceptions import CTERAException, ClientResponseException
 from .base_command import BaseCommand
 
 
@@ -18,8 +18,8 @@ class Startup(BaseCommand):
         """
         response = None
         try:
-            response = self._portal.get(f'/{self._portal.context}/startup', use_file_url=True)
-        except CTERAClientException as error:
+            response = self._core.ctera.get('/startup')
+        except ClientResponseException as error:
             return error.response.body.status
         return response.status
 
@@ -40,7 +40,7 @@ class Startup(BaseCommand):
                     logging.getLogger().error('Timed out. Server did not start in a timely manner.')
                     raise CTERAException('Timed out. Server did not start in a timely manner')
                 time.sleep(seconds)
-            except (HostUnreachable, ConnectionRetryFailure) as e:
+            except (ConnectionError, TimeoutError) as e:
                 logging.getLogger().debug('Exception. %s', e.__dict__)
                 attempt = attempt + 1
                 time.sleep(seconds)

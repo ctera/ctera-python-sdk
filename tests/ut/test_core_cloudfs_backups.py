@@ -1,7 +1,7 @@
 from unittest import mock
 import munch
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.core import cloudfs
 from cterasdk.core.types import UserAccount
 from tests.ut import base_core
@@ -35,23 +35,23 @@ class TestCoreBackups(base_core.BaseCoreTest):   # pylint: disable=too-many-publ
         ret = cloudfs.Backups(self._global_admin).add(self._name, self._group, self._owner)
         self._mock_get_user_ref.assert_called_once_with(self._owner, ['baseObjectRef'])
         self._mock_get_group_ref.assert_called_once_with(self._group, ['baseObjectRef'])
-        self._global_admin.add.assert_called_once_with('/backups', mock.ANY)
+        self._global_admin.api.add.assert_called_once_with('/backups', mock.ANY)
         expected_param = TestCoreBackups._get_backup_folder_object(self._name, self._group_ref, self._user_ref, True)
-        actual_param = self._global_admin.add.call_args[0][1]
+        actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
     def test_add_backup_folder_failure(self):
         error_message = "Expected Failure"
-        expected_exception = exception.CTERAException(message=error_message)
-        self._global_admin.add = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        expected_exception = exceptions.CTERAException(message=error_message)
+        self._global_admin.api.add = mock.MagicMock(side_effect=expected_exception)
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.Backups(self._global_admin).add(self._name, self._group, self._owner)
         self._mock_get_user_ref.assert_called_once_with(self._owner, ['baseObjectRef'])
         self._mock_get_group_ref.assert_called_once_with(self._group, ['baseObjectRef'])
-        self._global_admin.add.assert_called_once_with('/backups', mock.ANY)
+        self._global_admin.api.add.assert_called_once_with('/backups', mock.ANY)
         expected_param = TestCoreBackups._get_backup_folder_object(self._name, self._group_ref, self._user_ref, True)
-        actual_param = self._global_admin.add.call_args[0][1]
+        actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(error_message, error.exception.message)
 
@@ -64,10 +64,10 @@ class TestCoreBackups(base_core.BaseCoreTest):   # pylint: disable=too-many-publ
         ret = cloudfs.Backups(self._global_admin).modify(self._name, self._new_name, self._new_owner, self._new_group, False)
         self._mock_get_user_ref.assert_called_once_with(self._new_owner, ['baseObjectRef'])
         self._mock_get_group_ref.assert_called_once_with(self._new_group, include=['baseObjectRef'])
-        self._global_admin.get.assert_called_once_with(f'/backups/{self._name}')
-        self._global_admin.put.assert_called_once_with(f'/backups/{self._name}', mock.ANY)
+        self._global_admin.api.get.assert_called_once_with(f'/backups/{self._name}')
+        self._global_admin.api.put.assert_called_once_with(f'/backups/{self._name}', mock.ANY)
         expected_param = TestCoreBackups._get_backup_folder_object(self._new_name, self._new_group_ref, self._new_owner_ref, True)
-        actual_param = self._global_admin.put.call_args[0][1]
+        actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
 
@@ -75,7 +75,7 @@ class TestCoreBackups(base_core.BaseCoreTest):   # pylint: disable=too-many-publ
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
         ret = cloudfs.Backups(self._global_admin).delete(self._name)
-        self._global_admin.execute.assert_called_once_with(f'/backups/{self._name}', 'delete')
+        self._global_admin.api.execute.assert_called_once_with(f'/backups/{self._name}', 'delete')
         self.assertEqual(ret, execute_response)
 
     @staticmethod

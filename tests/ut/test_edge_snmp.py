@@ -21,52 +21,52 @@ class TestEdgeSNMP(base_edge.BaseEdgeTest):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = snmp.SNMP(self._filer).get_configuration()
-        self._filer.get.assert_called_once_with('/config/snmp')
+        self._filer.api.get.assert_called_once_with('/config/snmp')
         self._assert_equal_objects(ret, get_response)
 
     def test_enable_snmp_default_params(self):
         self._init_filer()
         snmp.SNMP(self._filer).enable()
-        self._filer.put.assert_called_once_with('/config/snmp', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/snmp', mock.ANY)
 
         expected_param = self._get_snmp_object()
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_snmp_with_port_and_community_str(self):
         self._init_filer()
         snmp.SNMP(self._filer).enable(self._snmp_custom_port, self._snmp_community_str)
-        self._filer.put.assert_called_once_with('/config/snmp', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/snmp', mock.ANY)
 
         expected_param = self._get_snmp_object(port=self._snmp_custom_port, community_str=self._snmp_community_str)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_snmp_v3(self):
         self._init_filer()
         snmp.SNMP(self._filer).enable(username=self._snmp_v3_user, auth_password=self._snmp_v3_auth_pass,
                                       privacy_password=self._snmp_v3_privacy_pass)
-        self._filer.put.assert_called_once_with('/config/snmp', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/snmp', mock.ANY)
 
         expected_param = self._get_snmp_object(username=self._snmp_v3_user, auth_password=self._snmp_v3_auth_pass,
                                                privacy_password=self._snmp_v3_privacy_pass)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_disable_snmp(self):
         self._init_filer()
         snmp.SNMP(self._filer).disable()
-        self._filer.put.assert_called_once_with('/config/snmp/mode', Mode.Disabled)
+        self._filer.api.put.assert_called_once_with('/config/snmp/mode', Mode.Disabled)
 
     def test_modify_success(self):
         self._init_filer(get_response=self._get_snmp_object())
         snmp.SNMP(self._filer).modify(self._snmp_custom_port, self._snmp_community_str,
                                       self._snmp_v3_user, self._snmp_v3_auth_pass, self._snmp_v3_privacy_pass)
-        self._filer.get.assert_called_once_with('/config/snmp')
-        self._filer.put.assert_called_once_with('/config/snmp', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/snmp')
+        self._filer.api.put.assert_called_once_with('/config/snmp', mock.ANY)
         expected_param = self._get_snmp_object(self._snmp_custom_port, self._snmp_community_str,
                                                self._snmp_v3_user, self._snmp_v3_auth_pass, self._snmp_v3_privacy_pass)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def _get_snmp_object(self, port=None, community_str=None, username=None, auth_password=None, privacy_password=None):

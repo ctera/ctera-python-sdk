@@ -17,9 +17,9 @@ class TestCoreTemplates(base_core.BaseCoreTest):
         get_multi_response = self._get_template_object(name=self._template)
         self._init_global_admin(get_multi_response=get_multi_response)
         ret = templates.Templates(self._global_admin).get(self._template)
-        self._global_admin.get_multi.assert_called_once_with('/deviceTemplates/' + self._template, mock.ANY)
+        self._global_admin.api.get_multi.assert_called_once_with('/deviceTemplates/' + self._template, mock.ANY)
         expected_include = ['/' + attr for attr in templates.Templates.default]
-        actual_include = self._global_admin.get_multi.call_args[0][1]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
@@ -38,14 +38,14 @@ class TestCoreTemplates(base_core.BaseCoreTest):
         delete_response = 'Success'
         self._init_global_admin(delete_response=delete_response)
         ret = templates.Templates(self._global_admin).delete(self._template)
-        self._global_admin.delete.assert_called_once_with('/deviceTemplates/' + self._template)
+        self._global_admin.api.delete.assert_called_once_with('/deviceTemplates/' + self._template)
         self.assertEqual(ret, delete_response)
 
     def test_set_default_template_no_wait(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
         ret = templates.Templates(self._global_admin).set_default(self._template)
-        self._global_admin.execute.assert_has_calls([
+        self._global_admin.api.execute.assert_has_calls([
             mock.call('/deviceTemplates/' + self._template, 'setAsDefault'),
             mock.call('', 'applyAutoAssignmentRules')
         ])
@@ -56,8 +56,8 @@ class TestCoreTemplates(base_core.BaseCoreTest):
         get_multi_response = self._get_template_object(name=self._template, isDefault=True)
         self._init_global_admin(get_multi_response=get_multi_response, execute_response=execute_response)
         ret = templates.Templates(self._global_admin).remove_default(self._template)
-        self._global_admin.get_multi.assert_called_once_with(f'/deviceTemplates/{self._template}', mock.ANY)
-        self._global_admin.execute.assert_has_calls([
+        self._global_admin.api.get_multi.assert_called_once_with(f'/deviceTemplates/{self._template}', mock.ANY)
+        self._global_admin.api.execute.assert_has_calls([
             mock.call('', 'removeDefaultDeviceTemplate'),
             mock.call('', 'applyAutoAssignmentRules')
         ])

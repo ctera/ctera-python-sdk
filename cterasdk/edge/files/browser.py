@@ -1,26 +1,13 @@
-from .path import CTERAPath
-from . import copy, move, mkdir, rm, file_access
-from . import open as openfile
+from ..base_command import BaseCommand
+from . import io, common, file_access
 
 
-class FileBrowser:
-    """ Gateway File Browser APIs """
+class FileBrowser(BaseCommand):
+    """ Edge Filer File Browser APIs """
 
-    def __init__(self, Gateway):
-        self._CTERAHost = Gateway
-        self._file_access = file_access.FileAccess(Gateway)
-
-    @staticmethod
-    def ls(_path):
-        return
-
-    def openfile(self, path):
-        """
-        Obtain a file handle
-
-        :param str path: The file path on the Edge Filer
-        """
-        return openfile.openfile(self._CTERAHost, self.mkpath(path))
+    def __init__(self, edge):
+        super().__init__(edge)
+        self._file_access = file_access.FileAccess(edge)
 
     def download(self, path, destination=None):
         """
@@ -30,7 +17,7 @@ class FileBrowser:
         :param str,optional destination:
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
-        return self._file_access.download(self.mkpath(path), destination=destination)
+        return self._file_access.download(self.get_object_path(path), destination=destination)
 
     def download_as_zip(self, cloud_directory, files, destination=None):
         """
@@ -43,45 +30,56 @@ class FileBrowser:
         :param str,optional destination:
          File destination, if it is a directory, the filename will be calculated, defaults to the default directory
         """
-        return self._file_access.download_as_zip(self.mkpath(cloud_directory), files, destination=destination)
+        return self._file_access.download_as_zip(self.get_object_path(cloud_directory), files, destination=destination)
 
-    def upload(self, file_path, server_path):
+    def upload(self, path, destination):
         """
         Upload a file
 
-        :param str file_path: Path to the local file to upload
-        :param str server_path: Path to the directory to upload the file to
+        :param str path: Local path
+        :param str destination: Remote path
         """
-        self._file_access.upload(file_path, self.mkpath(server_path))
+        self._file_access.upload(path, self.get_object_path(destination))
 
-    def mkdir(self, path, recurse=False):
+    def mkdir(self, path):
         """
         Create a new directory
 
-        :param str path: The path of the new directory
-        :param bool,optional recurse: Create subdirectories if missing, defaults to False
+        :param str path: Directory path
         """
-        return mkdir.mkdir(self._CTERAHost, self.mkpath(path), recurse)
+        return io.mkdir(self._edge, self.get_object_path(path))
 
-    def copy(self, src, dest, overwrite=False):
+    def makedirs(self, path):
+        """
+        Create a directory recursively
+
+        :param str path: Directory path
+        """
+        return io.makedirs(self._edge, self.get_object_path(path))
+
+    def copy(self, path, destination=None, overwrite=False):
         """
         Copy a file or a folder
 
-        :param str src: Source file or folder path
-        :param str dest: Destination folder path
+        :param str path: Source file or folder path
+        :param str destination: Destination folder path
         :param bool,optional overwrite: Overwrite on conflict, defaults to False
         """
-        return copy.copy(self._CTERAHost, self.mkpath(src), self.mkpath(dest), overwrite)
+        if destination is None:
+            raise ValueError('Copy destination was not specified.')
+        return io.copy(self._edge, self.get_object_path(path), self.get_object_path(destination), overwrite)
 
-    def move(self, src, dest, overwrite=False):
+    def move(self, path, destination=None, overwrite=False):
         """
         Move a file or a folder
 
-        :param str src: Source file or folder path
-        :param str dest: Destination folder path
+        :param str path: Source file or folder path
+        :param str destination: Destination folder path
         :param bool,optional overwrite: Overwrite on conflict, defaults to False
         """
-        return move.move(self._CTERAHost, self.mkpath(src), self.mkpath(dest), overwrite)
+        if destination is None:
+            raise ValueError('Move destination was not specified.')
+        return io.move(self._edge, self.get_object_path(path), self.get_object_path(destination), overwrite)
 
     def delete(self, path):
         """
@@ -89,8 +87,8 @@ class FileBrowser:
 
         :param str path: The file's path on the gateway
         """
-        return rm.delete(self._CTERAHost, self.mkpath(path))
+        return io.remove(self._edge, self.get_object_path(path))
 
     @staticmethod
-    def mkpath(path):
-        return CTERAPath(path, '/')
+    def get_object_path(path):
+        return common.get_object_path('/', path)

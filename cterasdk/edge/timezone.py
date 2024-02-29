@@ -11,7 +11,7 @@ class Timezone(BaseCommand):
 
         :return str: The timezone of the gateway
         """
-        return self._gateway.get('/config/time/TimeZone')
+        return self._edge.api.get('/config/time/TimeZone')
 
     def set_timezone(self, timezone):
         """
@@ -21,6 +21,6 @@ class Timezone(BaseCommand):
         """
         logging.getLogger().info("Updating timezone. %s", {'timezone': timezone})
 
-        self._gateway.put('/config/time/TimeZone', timezone)
+        self._edge.api.put('/config/time/TimeZone', timezone)
 
         logging.getLogger().info("Timezone updated. %s", {'timezone': timezone})

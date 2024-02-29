@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import shares
 from cterasdk.edge.enum import Acl, ClientSideCaching, PrincipalType, FileAccessMode
 from cterasdk.edge.types import ShareAccessControlEntry, NFSv3AccessControlEntry, RemoveNFSv3AccessControlEntry
@@ -34,14 +34,14 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = shares.Shares(self._filer).get()
-        self._filer.get.assert_called_once_with('/config/fileservices/share')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share')
         self.assertEqual(ret, get_response)
 
     def test_get_share(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = shares.Shares(self._filer).get(self._share_name)
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
         self.assertEqual(ret, get_response)
 
     def test_add_cifs_share_default_config_without_acls(self):
@@ -50,14 +50,14 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
 
         shares.Shares(self._filer).add(self._share_name, self._share_fullpath, [])
 
-        self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
+        self._filer.api.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()
-        actual_param = self._filer.execute.call_args[0][2]
+        actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self._filer.add.assert_called_once_with('/config/fileservices/share', mock.ANY)
+        self._filer.api.add.assert_called_once_with('/config/fileservices/share', mock.ANY)
         expected_param = self._get_share_object(acl=[])
-        actual_param = self._filer.add.call_args[0][1]
+        actual_param = self._filer.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_add_cifs_share_default_config_with_acls(self):
@@ -66,12 +66,12 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
 
         shares.Shares(self._filer).add(self._share_name, self._share_fullpath, self._share_acl)
 
-        self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
+        self._filer.api.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()
-        actual_param = self._filer.execute.call_args[0][2]
+        actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self._filer.add.assert_called_once_with('/config/fileservices/share', mock.ANY)  # no verification call param _add_share_acl_rule()
+        self._filer.api.add.assert_called_once_with('/config/fileservices/share', mock.ANY)
 
     def test_add_nfs_v3_share_success(self):
         execute_response = self._get_list_physical_folders_response_object()
@@ -80,15 +80,15 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         shares.Shares(self._filer).add(self._share_name, self._share_fullpath, export_to_nfs=True,
                                        trusted_nfs_clients=self._trusted_nfs_clients)
 
-        self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
+        self._filer.api.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()
-        actual_param = self._filer.execute.call_args[0][2]
+        actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self._filer.add.assert_called_once_with('/config/fileservices/share', mock.ANY)
+        self._filer.api.add.assert_called_once_with('/config/fileservices/share', mock.ANY)
 
         expected_param = self._get_share_object(acl=[], export_to_nfs=True,
                                                 trusted_nfs_clients=[client.to_server_object() for client in self._trusted_nfs_clients])
-        actual_param = self._filer.add.call_args[0][1]
+        actual_param = self._filer.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_modify_nfs_v3_share_success(self):
@@ -97,39 +97,39 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
 
         shares.Shares(self._filer).modify(self._share_name, export_to_nfs=True, trusted_nfs_clients=self._trusted_nfs_clients)
 
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
-        self._filer.put.assert_called_once_with('/config/fileservices/share/' + self._share_name, mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/share/' + self._share_name, mock.ANY)
 
         expected_param = self._get_share_object(export_to_nfs=True,
                                                 trusted_nfs_clients=[client.to_server_object() for client in self._trusted_nfs_clients])
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_add_cifs_share_invalid_principal_type(self):
-        with self.assertRaises(exception.InputError) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             ShareAccessControlEntry(principal_type='Expected Failure', name='Everyone', perm=FileAccessMode.RO)
         self.assertEqual('Invalid principal type', error.exception.message)
 
     def test_add_cifs_share_invalid_permission(self):
-        with self.assertRaises(exception.InputError) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             ShareAccessControlEntry(principal_type=PrincipalType.LG, name='Everyone', perm='Expected Failure')
         self.assertEqual('Invalid permissions', error.exception.message)
 
     def test_add_share_failure(self):
         execute_response = self._get_list_physical_folders_response_object()
         self._init_filer(execute_response=execute_response)
-        self._filer.add = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._filer.api.add = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             shares.Shares(self._filer).add(self._share_name, self._share_fullpath, [])
 
-        self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
+        self._filer.api.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()
-        actual_param = self._filer.execute.call_args[0][2]
+        actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self._filer.add.assert_called_once_with('/config/fileservices/share', mock.ANY)
+        self._filer.api.add.assert_called_once_with('/config/fileservices/share', mock.ANY)
         expected_param = self._get_share_object(acl=[])
-        actual_param = self._filer.add.call_args[0][1]
+        actual_param = self._filer.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual('Share creation failed', error.exception.message)
@@ -137,12 +137,12 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
     def test_list_physical_folders_input_error(self):
         execute_response = []
         self._init_filer(execute_response=execute_response)
-        with self.assertRaises(exception.InputError) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             shares.Shares(self._filer).add(self._share_name, self._share_fullpath, [])
 
-        self._filer.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
+        self._filer.api.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()
-        actual_param = self._filer.execute.call_args[0][2]
+        actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual('Invalid root directory.', error.exception.message)
@@ -151,14 +151,14 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         put_response = 'Success'
         self._init_filer(put_response=put_response)
         shares.Shares(self._filer).set_share_winacls(self._share_name)
-        self._filer.put.assert_called_once_with('/config/fileservices/share/' + self._share_name + '/access', Acl.WindowsNT)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/share/' + self._share_name + '/access', Acl.WindowsNT)
 
     def test_block_files_success(self):
         get_response = self._get_share_object()
         self._init_filer(get_response=get_response)
         shares.Shares(self._filer).block_files(self._share_name, self._share_block_files)
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
-        self._filer.put.assert_called_once_with(
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
+        self._filer.api.put.assert_called_once_with(
             '/config/fileservices/share/' + self._share_name + '/screenedFileTypes',
             self._share_block_files
         )
@@ -166,19 +166,19 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
     def test_block_files_invalid_share_access_type(self):
         get_response = self._get_share_object(access='Expected Failure')
         self._init_filer(get_response=get_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             shares.Shares(self._filer).block_files(self._share_name, self._share_block_files)
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
         self.assertEqual('Cannot block file types on non Windows-ACL enabled shares', error.exception.message)
 
     def test_delete_share_success(self):
         self._init_filer()
         shares.Shares(self._filer).delete(self._share_name)
-        self._filer.delete.assert_called_once_with('/config/fileservices/share/' + self._share_name)
+        self._filer.api.delete.assert_called_once_with('/config/fileservices/share/' + self._share_name)
 
     def test_delete_share_failure(self):
-        self._filer.delete = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._filer.api.delete = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             shares.Shares(self._filer).delete(self._share_name)
         self.assertEqual('Share deletion failed', error.exception.message)
 
@@ -200,9 +200,9 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         )
         expected_param = self._get_share_object(**modify_command_dict)
         shares.Shares(self._filer).modify(self._share_name, **modify_command_dict)
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
-        self._filer.put.assert_called_once_with('/config/fileservices/share/' + self._share_name, mock.ANY)
-        actual_param = self._filer.put.call_args[0][1]
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + self._share_name)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/share/' + self._share_name, mock.ANY)
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def _get_share_object(self, directory=None, volume=None, acl=None,  # pylint: disable=too-many-arguments,too-many-locals
@@ -245,7 +245,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         get_response = self._get_acl_object()
         self._init_filer(get_response=[get_response.to_server_object()])
         acl = shares.Shares(self._filer).get_acl(share_name)
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/acl')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/acl')
         self._assert_equal_objects(ShareAccessControlEntry.from_server_object(acl[0]), get_response)
 
     @staticmethod
@@ -257,7 +257,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         get_response = self._get_get_trusted_nfs_client_object()
         self._init_filer(get_response=[get_response.to_server_object()])
         trusted_nfs_clients = shares.Shares(self._filer).get_trusted_nfs_clients(share_name)
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients')
         self._assert_equal_objects(NFSv3AccessControlEntry.from_server_object(trusted_nfs_clients[0]), get_response)
 
     def test_set_trusted_nfs_clients(self):
@@ -265,9 +265,9 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         new_trusted_nfs_clients = self._get_get_trusted_nfs_client_object()
         self._init_filer()
         shares.Shares(self._filer).set_trusted_nfs_clients(share_name, [new_trusted_nfs_clients])
-        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients', mock.ANY)
         expected_param = new_trusted_nfs_clients.to_server_object()
-        actual_param = self._filer.put.call_args[0][1][0]
+        actual_param = self._filer.api.put.call_args[0][1][0]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_add_trusted_nfs_clients(self):
@@ -277,12 +277,12 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
 
         new_trusted_nfs_clients = self._get_get_trusted_nfs_client_object(address="192.168.0.0")
         shares.Shares(self._filer).add_trusted_nfs_clients(share_name, [new_trusted_nfs_clients])
-        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients', mock.ANY)
 
         def get_address(elem):
             return elem.address
 
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         actual_param.sort(key=get_address)
 
         expected_param = [current_trusted_nfs_clients.to_server_object(), new_trusted_nfs_clients.to_server_object()]
@@ -305,10 +305,10 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
                 RemoveNFSv3AccessControlEntry(trusted_nfs_client_to_remove.address, trusted_nfs_client_to_remove.netmask)
             ]
         )
-        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients', mock.ANY)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/trustedNFSClients', mock.ANY)
 
         expected_param = trusted_nfs_client_to_keep.to_server_object()
-        actual_param = self._filer.put.call_args[0][1][0]
+        actual_param = self._filer.api.put.call_args[0][1][0]
         self._assert_equal_objects(actual_param, expected_param)
 
     @staticmethod
@@ -319,7 +319,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         share_name = 'share'
         self._init_filer(get_response=expected_access)
         actual_access = shares.Shares(self._filer).get_access_type(share_name)
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/access')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/access')
         self.assertEqual(actual_access, expected_access)
 
     def test_get_access_type(self):
@@ -330,7 +330,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         share_name = 'share'
         self._init_filer()
         shares.Shares(self._filer).set_access_type(share_name, access)
-        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/access', access)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/access', access)
 
     def test_set_access_type(self):
         for access in [k for k in Acl.__dict__ if not k.startswith('_')]:
@@ -341,7 +341,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         get_response = ['exe', 'sh']
         self._init_filer(get_response=get_response)
         screened_file_types = shares.Shares(self._filer).get_screened_file_types(share_name)
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes')
         self.assertListEqual(get_response, screened_file_types)
 
     def test_set_screened_file_types(self):
@@ -351,9 +351,9 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         self._init_filer(get_response=current_share)
         new_screened_file_type = ['new']
         shares.Shares(self._filer).set_screened_file_types(share_name, new_screened_file_type)
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name)
-        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes', mock.ANY)
-        self.assertListEqual(new_screened_file_type, self._filer.put.call_args[0][1])
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + share_name)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes', mock.ANY)
+        self.assertListEqual(new_screened_file_type, self._filer.api.put.call_args[0][1])
 
     def test_set_screened_file_types_invalid_access(self):
         share_name = 'share'
@@ -363,7 +363,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
             ['old']
         )
         self._init_filer(get_response=current_share)
-        with self.assertRaises(exception.CTERAException):
+        with self.assertRaises(exceptions.CTERAException):
             shares.Shares(self._filer).set_screened_file_types(share_name, ['new'])
 
     def test_add_screened_file_types(self):
@@ -373,9 +373,9 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         self._init_filer(get_response=current_share)
         new_screened_file_type = ['new']
         shares.Shares(self._filer).add_screened_file_types(share_name, new_screened_file_type)
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name)
-        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes', mock.ANY)
-        self.assertListEqual(sorted(current_screened_file_type + new_screened_file_type), sorted(self._filer.put.call_args[0][1]))
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + share_name)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes', mock.ANY)
+        self.assertListEqual(sorted(current_screened_file_type + new_screened_file_type), sorted(self._filer.api.put.call_args[0][1]))
 
     def test_add_screened_file_types_invalid_access(self):
         share_name = 'share'
@@ -385,7 +385,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
             ['old']
         )
         self._init_filer(get_response=current_share)
-        with self.assertRaises(exception.CTERAException):
+        with self.assertRaises(exceptions.CTERAException):
             shares.Shares(self._filer).add_screened_file_types(share_name, ['new'])
 
     def test_remove_screened_file_types(self):
@@ -395,9 +395,9 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         self._init_filer(get_response=current_share)
         removed_screened_file_type = 'new'
         shares.Shares(self._filer).remove_screened_file_types(share_name, [removed_screened_file_type])
-        self._filer.get.assert_called_once_with('/config/fileservices/share/' + share_name)
-        self._filer.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes', mock.ANY)
-        self.assertListEqual(['old'], sorted(self._filer.put.call_args[0][1]))
+        self._filer.api.get.assert_called_once_with('/config/fileservices/share/' + share_name)
+        self._filer.api.put.assert_called_once_with('/config/fileservices/share/' + share_name + '/screenedFileTypes', mock.ANY)
+        self.assertListEqual(['old'], sorted(self._filer.api.put.call_args[0][1]))
 
     def test_remove_screened_file_types_invalid_access(self):
         share_name = 'share'
@@ -407,7 +407,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
             ['old']
         )
         self._init_filer(get_response=current_share)
-        with self.assertRaises(exception.CTERAException):
+        with self.assertRaises(exceptions.CTERAException):
             shares.Shares(self._filer).remove_screened_file_types(share_name, ['new'])
 
     @staticmethod

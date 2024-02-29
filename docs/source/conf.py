@@ -26,7 +26,7 @@ import cterasdk
 # -- Project information -----------------------------------------------------
 
 project = u'CTERA SDK for Python'
-copyright = u'2020, CTERA Networks'
+copyright = u'2024, CTERA Networks'
 author = u'CTERA Networks'
 
 # The short X.Y version

@@ -1,59 +1,27 @@
 import logging
-from .path import CTERAPath
 
-from ... import config
-from ...exception import CTERAException
+import cterasdk.settings
+from ...exceptions import CTERAException
 from ..base_command import BaseCommand
-from . import ls, directory, rename, rm, recover, mv, cp, ln, collaboration, file_access
+from . import io, common, shares, file_access
 
 
 class FileBrowser(BaseCommand):
 
-    """
-    Portal File Browser APIs
-    """
-
-    def __init__(self, portal, base_path):
-        super().__init__(portal)
-        self._base_path = base_path
-        self._file_access = file_access.FileAccess(portal)
-
-    def ls(self, path, include_deleted=False):
-        """
-        Execute ls on the provided path
-
-        :param str path: Path to list
-        :param bool,optional include_deleted: Include deleted files, defaults to False
-        """
-        return ls.ls(self._portal, self.mkpath(path), include_deleted=include_deleted)
-
-    def walk(self, path, include_deleted=False):
-        """
-        Perform walk on the provided path
-
-        :param str path: Path to perform walk on
-        :param bool,optional include_deleted: Include deleted files, defaults to False
-        """
-        paths = [self.mkpath(path)]
-
-        while len(paths) > 0:
-            path = paths.pop(0)
-            items = ls.ls(self._portal, path, include_deleted=include_deleted)
-            for item in items:
-                if item.isFolder:
-                    paths.append(self.mkpath(item))
-                yield item
+    def __init__(self, core):
+        super().__init__(core)
+        self._base = f'/{self._core.context}/webdav'
+        self._file_access = file_access.FileAccess(self._core)
 
     def download(self, path, destination=None):
         """
         Download a file
 
-        :param str path: Path of the file to download
+        :param str path: Path
         :param str,optional destination:
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
-        path = self.mkpath(path)
-        return self._file_access.download(path, destination=destination)
+        return self._file_access.download(self.get_object_path(path), destination=destination)
 
     def download_as_zip(self, cloud_directory, files, destination=None):
         """
@@ -66,59 +34,81 @@ class FileBrowser(BaseCommand):
         :param str,optional destination:
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
-        self._file_access.download_as_zip(self.mkpath(cloud_directory), files, destination=destination)
+        self._file_access.download_as_zip(self.get_object_path(cloud_directory), files, destination=destination)
 
-    def copy(self, src, dest):
+    def listdir(self, path, depth=None, include_deleted=False):
         """
-        Copy a file or directory
+        List Directory
 
-        :param str src: The source path of the file or directory
-        :param str dst: The destination path of the file or directory
+        :param str path: Path
+        :param bool,optional include_deleted: Include deleted files, defaults to False
         """
-        return cp.copy(self._portal, self.mkpath(src), self.mkpath(dest))
+        return io.listdir(self._core, self.get_object_path(path), depth=depth, include_deleted=include_deleted)
 
-    def copy_multi(self, src, dest):
-        return cp.copy_multi(self._portal, self.mkpath(src), self.mkpath(dest))
-
-    def mklink(self, path, access='RO', expire_in=30):
+    def walk(self, path, include_deleted=False):
         """
-        Create a link to a file
+        Walk Directory Contents
+
+        :param str path: Path to walk
+        :param bool,optional include_deleted: Include deleted files, defaults to False
+        """
+        return io.walk(self._core, self._base, path, include_deleted=include_deleted)
+
+    def public_link(self, path, access='RO', expire_in=30):
+        """
+        Create a public link to a file or a folder
 
         :param str path: The path of the file to create a link to
         :param str,optional access: Access policy of the link, defaults to 'RO'
         :param int,optional expire_in: Number of days until the link expires, defaults to 30
         """
-        return ln.mklink(self._portal, self.mkpath(path), access, expire_in)
+        return shares.create_public_link(self._core, self.get_object_path(path), access, expire_in)
 
-    def mkpath(self, array):
-        if isinstance(array, list):
-            return [CTERAPath(item, self._base_path) for item in array]
-        return CTERAPath(array, self._base_path)
+    def copy(self, *paths, destination=None):
+        """
+        Copy one or more files or folders
+
+        :param list[str] paths: List of paths
+        :param str destination: Destination
+        """
+        if destination is None:
+            raise ValueError('Copy destination was not specified.')
+        return io.copy(self._core, *[self.get_object_path(path) for path in paths], destination=self.get_object_path(destination))
+
+    def get_object_path(self, elements):
+        return common.get_object_path(self.base, elements)
+
+    @property
+    def base(self):
+        return self._base
 
 
 class CloudDrive(FileBrowser):
 
-    """
-    Cloud Drive File Browser APIs
-    """
-
-    def upload(self, file_path, server_path):
+    def upload(self, path, destination):
         """
         Upload a file
 
-        :param str file_path: Path to the local file to upload
-        :param str server_path: Path to the directory to upload the file to
+        :param str path: Local path
+        :param str destination: Remote path
         """
-        self._file_access.upload(file_path, self.mkpath(server_path))
+        self._file_access.upload(path, self.get_object_path(destination))
 
-    def mkdir(self, path, recurse=False):
+    def mkdir(self, path):
         """
         Create a new directory
 
-        :param str path: Path of the directory to create
-        :param bool,optional recurse: Whether to create the path recursivly, defaults to False
+        :param str path: Directory path
         """
-        directory.mkdir(self._portal, self.mkpath(path), recurse)
+        return io.mkdir(self._core, self.get_object_path(path))
+
+    def makedirs(self, path):
+        """
+        Create a directory recursively
+
+        :param str path: Directory path
+        """
+        return io.makedirs(self._core, self.get_object_path(path))
 
     def rename(self, path, name):
         """
@@ -127,57 +117,42 @@ class CloudDrive(FileBrowser):
         :param str path: Path of the file or directory to rename
         :param str name: The name to rename to
         """
-        return rename.rename(self._portal, self.mkpath(path), name)
+        return io.rename(self._core, self.get_object_path(path), name)
 
-    def delete(self, path):
+    def delete(self, *paths):
         """
-        Delete a file
+        Delete one or more files or folders
 
-        :param str path: Path of the file or directory to delete
+        :param str path: Path
         """
-        return rm.delete(self._portal, self.mkpath(path))
+        return io.remove(self._core, *[self.get_object_path(path) for path in paths])
 
-    def delete_multi(self, *args):
+    def undelete(self, *paths):
         """
-        Delete multiple files and/or directories
+        Recover one or more files or folders
 
-        :param `*args`: Variable lengthed list of paths of files and/or directories to delete
+        :param str path: Path
         """
-        return rm.delete_multi(self._portal, *self.mkpath(list(args)))
+        return io.recover(self._core, *[self.get_object_path(path) for path in paths])
 
-    def undelete(self, path):
+    def move(self, *paths, destination=None):
         """
-        Restore a previously deleted file or directory
+        Move one or more files or folders
 
-        :param str path: Path of the file or directory to restore
+        :param list[str] paths: List of paths
+        :param str destination: Destination
         """
-        return recover.undelete(self._portal, self.mkpath(path))
-
-    def undelete_multi(self, *args):
-        """
-        Restore previously deleted multiple files and/or directories
-
-        :param `*args`: Variable length list of paths of files and/or directories to restore
-        """
-        return recover.undelete_multi(self._portal, *self.mkpath(list(args)))
-
-    def move(self, src, dest):
-        """
-        Move a file or directory
-
-        :param str src: The source path of the file or directory
-        :param str dst: The destination path of the file or directory
-        """
-        return mv.move(self._portal, self.mkpath(src), self.mkpath(dest))
-
-    def move_multi(self, src, dest):
-        return mv.move_multi(self._portal, self.mkpath(src), self.mkpath(dest))
+        if destination is None:
+            raise ValueError('Move destination was not specified.')
+        return io.move(self._core, *[self.get_object_path(path) for path in paths], destination=self.get_object_path(destination))
 
     def get_share_info(self, path):
         """
         Get share settings and recipients
+
+        :param str path: Path
         """
-        return collaboration.get_share_info(self._portal, self.mkpath(path))
+        return shares.get_share_info(self._core, self.get_object_path(path))
 
     def share(self, path, recipients, as_project=True, allow_reshare=True, allow_sync=True):
         """
@@ -191,7 +166,7 @@ class CloudDrive(FileBrowser):
         :return: A list of all recipients added to the collaboration share
         :rtype: list[cterasdk.core.types.ShareRecipient]
         """
-        return collaboration.share(self._portal, self.mkpath(path), recipients, as_project, allow_reshare, allow_sync)
+        return shares.share(self._core, self.get_object_path(path), recipients, as_project, allow_reshare, allow_sync)
 
     def add_share_recipients(self, path, recipients):
         """
@@ -202,7 +177,7 @@ class CloudDrive(FileBrowser):
         :return: A list of all recipients added
         :rtype: list[cterasdk.core.types.ShareRecipient]
         """
-        return collaboration.add_share_recipients(self._portal, self.mkpath(path), recipients)
+        return shares.add_share_recipients(self._core, self.get_object_path(path), recipients)
 
     def remove_share_recipients(self, path, accounts):
         """
@@ -213,20 +188,16 @@ class CloudDrive(FileBrowser):
         :return: A list of all share recipients removed
         :rtype: list[cterasdk.core.types.PortalAccount]
         """
-        return collaboration.remove_share_recipients(self._portal, self.mkpath(path), accounts)
+        return shares.remove_share_recipients(self._core, self.get_object_path(path), accounts)
 
     def unshare(self, path):
         """
         Unshare a file or a folder
         """
-        return collaboration.unshare(self._portal, self.mkpath(path))
+        return shares.unshare(self._core, self.get_object_path(path))
 
 
 class Backups(FileBrowser):
-
-    """
-    Backups File Browser APIs
-    """
 
     def device_config(self, device, destination=None):
         """
@@ -237,8 +208,12 @@ class Backups(FileBrowser):
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
         try:
-            destination = destination if destination is not None else f'{config.filesystem["dl"]}/{device}.xml'
-            return self.download(f'{device}/Device Configuration/db.xml', destination)
+            destination = destination if destination is not None else f'{cterasdk.settings.downloads.location}/{device}.xml'
+            return self.download(f'backups/{device}/Device Configuration/db.xml', destination)
         except CTERAException as error:
             logging.getLogger().error('Failed downloading configuration file. %s', {'device': device, 'error': error.response.reason})
             raise error
+
+    @property
+    def base(self):
+        return f'{super().base}/backups'

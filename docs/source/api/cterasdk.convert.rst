@@ -11,8 +11,7 @@ Submodules
 
 .. toctree::
 
-   cterasdk.convert.exception
-   cterasdk.convert.format
-   cterasdk.convert.parse
-   cterasdk.convert.xml_types
+   cterasdk.convert.serializers
+   cterasdk.convert.deserializers
+   cterasdk.convert.types
 

@@ -1,7 +1,7 @@
 import logging
 
 from .enum import Mode
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
@@ -14,7 +14,7 @@ class NFS(BaseCommand):
 
         :return cterasdk.common.object.Object:
         """
-        return self._gateway.get('/config/fileservices/nfs')
+        return self._edge.api.get('/config/fileservices/nfs')
 
     def enable(self):
         """ Enable NFS """
@@ -26,11 +26,11 @@ class NFS(BaseCommand):
 
     def is_disabled(self):
         """ Check if the NFS server is disabled """
-        return self._gateway.get('/config/fileservices/nfs/mode') == Mode.Disabled
+        return self._edge.api.get('/config/fileservices/nfs/mode') == Mode.Disabled
 
     def _set_mode(self, enabled):
         logging.getLogger().info('%s NFS server.', ('Enabling' if enabled else 'Disabling'))
-        self._gateway.put('/config/fileservices/nfs/mode', Mode.Enabled if enabled else Mode.Disabled)
+        self._edge.api.put('/config/fileservices/nfs/mode', Mode.Enabled if enabled else Mode.Disabled)
         logging.getLogger().info('NFS server %s.', ('enabled' if enabled else 'disabled'))
 
     def modify(
@@ -72,4 +72,4 @@ class NFS(BaseCommand):
             config.krb5 = krb5_enabled
         if nfsd_host is not None:
             config.nfsHost = nfsd_host
-        self._gateway.put('/config/fileservices/nfs', config)
+        self._edge.api.put('/config/fileservices/nfs', config)

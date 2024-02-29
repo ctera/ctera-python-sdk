@@ -8,7 +8,6 @@ __all__ = [
     'cli',
     'config',
     'connection',
-    'decorator',
     'directoryservice',
     'drive',
     'enum',
@@ -37,7 +36,6 @@ __all__ = [
     'syslog',
     'telnet',
     'timezone',
-    'uri',
     'users',
     'volumes',
 ]

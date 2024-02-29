@@ -1,7 +1,7 @@
 import logging
 
 from .enum import Mode
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
@@ -14,7 +14,7 @@ class RSync(BaseCommand):
 
         :return cterasdk.common.object.Object:
         """
-        return self._gateway.get('/config/fileservices/rsync')
+        return self._edge.api.get('/config/fileservices/rsync')
 
     def enable(self):
         """ Enable FTP """
@@ -26,12 +26,12 @@ class RSync(BaseCommand):
 
     def is_disabled(self):
         """ Check if the Rsync server is disabled """
-        return self._gateway.get('/config/fileservices/rsync/server') == Mode.Disabled
+        return self._edge.api.get('/config/fileservices/rsync/server') == Mode.Disabled
 
     def _set_mode(self, enabled):
         """ Disable RSync """
         logging.getLogger().info('%s RSync server.', ('Enabling' if enabled else 'Disabling'))
-        self._gateway.put('/config/fileservices/rsync/server', Mode.Enabled if enabled else Mode.Disabled)
+        self._edge.api.put('/config/fileservices/rsync/server', Mode.Enabled if enabled else Mode.Disabled)
         logging.getLogger().info('RSync server %s.', ('enabled' if enabled else 'disabled'))
 
     def modify(
@@ -51,4 +51,4 @@ class RSync(BaseCommand):
             config.port = port
         if max_connections is not None:
             config.maxConnections = max_connections
-        self._gateway.put('/config/fileservices/rsync', config)
+        self._edge.api.put('/config/fileservices/rsync', config)

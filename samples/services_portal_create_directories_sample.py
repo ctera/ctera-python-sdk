@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-from cterasdk import config, ServicesPortal, CTERAException
+from cterasdk import ServicesPortal, CTERAException
+import cterasdk.settings
 
 from sample_base import CTERASDKSampleBase
 
@@ -13,7 +14,7 @@ class ServicesPortalCreateDirectoriesSample(CTERASDKSampleBase):
         self._services_portal = None
 
     def run(self):
-        config.http['ssl'] = 'Trust'
+        cterasdk.settings.sessions.management.ssl = False
         self._connect_to_portal()
 
         self._create_directories()

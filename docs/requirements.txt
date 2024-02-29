@@ -1,5 +1,4 @@
-requests>=2.23
-requests-toolbelt
+aiohttp
 cryptography
 packaging
 sphinx>=3.0.4

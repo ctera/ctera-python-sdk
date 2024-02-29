@@ -2,7 +2,7 @@
 import re
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.common import Object
 from cterasdk.core.enum import PolicyType
 from cterasdk.core.types import CloudFSFolderFindingHelper, UserAccount
@@ -43,11 +43,11 @@ class TestCoreZones(base_core.BaseCoreTest):
         execute_response = self._get_zones_display_info_response()
         self._init_global_admin(execute_response=execute_response)
         ret = cloudfs.Zones(self._global_admin).get(self._zone_name)
-        self._global_admin.execute.assert_called_once_with('', 'getZonesDisplayInfo', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'getZonesDisplayInfo', mock.ANY)
         query_filter = base_core.BaseCoreTest._create_filter(query.FilterType.String, 'name', query.Restriction.EQUALS, self._zone_name)
         expected_param = base_core.BaseCoreTest._create_query_params(include_classname=True, start_from=0, count_limit=1,
                                                                      filters=[query_filter], or_filter=False)
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret.zoneId, self._zone_id)
 
@@ -55,14 +55,14 @@ class TestCoreZones(base_core.BaseCoreTest):
         execute_response = TestCoreZones._get_zones_display_info_empty_response()
         self._init_global_admin(execute_response=execute_response)
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.Zones(self._global_admin).get(self._zone_name)
 
-        self._global_admin.execute.assert_called_once_with('', 'getZonesDisplayInfo', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'getZonesDisplayInfo', mock.ANY)
         query_filter = base_core.BaseCoreTest._create_filter(query.FilterType.String, 'name', query.Restriction.EQUALS, self._zone_name)
         expected_param = base_core.BaseCoreTest._create_query_params(include_classname=True, start_from=0, count_limit=1,
                                                                      filters=[query_filter], or_filter=False)
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual('Zone not found', error.exception.message)
 
@@ -70,26 +70,26 @@ class TestCoreZones(base_core.BaseCoreTest):
         execute_response = TestCoreZones._get_add_zone_response('OK')
         self._init_global_admin(execute_response=execute_response)
         cloudfs.Zones(self._global_admin).add(self._zone_name)
-        self._global_admin.execute.assert_called_once_with('', 'addZone', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'addZone', mock.ANY)
         expected_param = self._get_zone_param()
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_add_zone_raise(self):
         execute_response = TestCoreZones._get_add_zone_response('Expected Failure')
         self._init_global_admin(execute_response=execute_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.Zones(self._global_admin).add(self._zone_name)
-        self._global_admin.execute.assert_called_once_with('', 'addZone', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'addZone', mock.ANY)
         expected_param = self._get_zone_param()
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual('Zone creation failed', error.exception.message)
 
     def test_add_folders_success(self):
         self._init_global_admin()
         zone = self._get_zones_display_info_response().objects.pop()
-        self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._mock_execute)
+        self._global_admin.api.execute = mock.MagicMock(side_effect=TestCoreZones._mock_execute)
         self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
         find_cloud_folder_mock = self.patch_call("cterasdk.core.cloudfs.CloudDrives.find")
         find_cloud_folder_mock.side_effect = mock.MagicMock(side_effect=TestCoreZones._find_cloud_folder)
@@ -101,25 +101,25 @@ class TestCoreZones(base_core.BaseCoreTest):
         for find_folder_helper in self._find_folder_helpers:
             find_folder_calls.append(mock.call(find_folder_helper.name, find_folder_helper.owner, include=['uid', 'owner']))
         find_cloud_folder_mock.assert_has_calls(find_folder_calls)
-        self._global_admin.execute.assert_has_calls(
+        self._global_admin.api.execute.assert_has_calls(
             [
                 mock.call('', 'getZoneBasicInfo', self._zone_id),
                 mock.call('', 'saveZone', mock.ANY)
             ]
         )
         expected_param = self._get_add_folders_param()
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_add_folders_raise(self):
         self._init_global_admin()
         zone = self._get_zones_display_info_response().objects.pop()
-        self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._save_zone_side_effect)
+        self._global_admin.api.execute = mock.MagicMock(side_effect=TestCoreZones._save_zone_side_effect)
         self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
         find_cloud_folder_mock = self.patch_call("cterasdk.core.cloudfs.CloudDrives.find")
         find_cloud_folder_mock.side_effect = mock.MagicMock(side_effect=TestCoreZones._find_cloud_folder)
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.Zones(self._global_admin).add_folders(self._zone_name, self._find_folder_helpers)
 
         self._global_admin.cloudfs.zones.get.assert_called_once_with(self._zone_name)
@@ -127,21 +127,21 @@ class TestCoreZones(base_core.BaseCoreTest):
         for find_folder_helper in self._find_folder_helpers:
             find_folder_calls.append(mock.call(find_folder_helper.name, find_folder_helper.owner, include=['uid', 'owner']))
         find_cloud_folder_mock.assert_has_calls(find_folder_calls)
-        self._global_admin.execute.assert_has_calls(
+        self._global_admin.api.execute.assert_has_calls(
             [
                 mock.call('', 'getZoneBasicInfo', self._zone_id),
                 mock.call('', 'saveZone', mock.ANY)
             ]
         )
         expected_param = self._get_add_folders_param()
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual('Failed adding folders to zone', error.exception.message)
 
     def test_add_devices_success(self):
         self._init_global_admin()
         zone = self._get_zones_display_info_response().objects.pop()
-        self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._mock_execute)
+        self._global_admin.api.execute = mock.MagicMock(side_effect=TestCoreZones._mock_execute)
         self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
         query_devices_mock = self.patch_call("cterasdk.core.cloudfs.devices.Devices.by_name")
         query_devices_mock.return_value = self._get_device_objects()
@@ -150,37 +150,37 @@ class TestCoreZones(base_core.BaseCoreTest):
 
         self._global_admin.cloudfs.zones.get.assert_called_once_with(self._zone_name)
         query_devices_mock.assert_called_once_with(include=['uid'], names=self._device_names)
-        self._global_admin.execute.assert_has_calls(
+        self._global_admin.api.execute.assert_has_calls(
             [
                 mock.call('', 'getZoneBasicInfo', self._zone_id),
                 mock.call('', 'saveZone', mock.ANY)
             ]
         )
         expected_param = self._get_add_devices_param()
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_add_devices_raise(self):
         self._init_global_admin()
         zone = self._get_zones_display_info_response().objects.pop()
-        self._global_admin.execute = mock.MagicMock(side_effect=TestCoreZones._save_zone_side_effect)
+        self._global_admin.api.execute = mock.MagicMock(side_effect=TestCoreZones._save_zone_side_effect)
         self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
         query_devices_mock = self.patch_call("cterasdk.core.cloudfs.devices.Devices.by_name")
         query_devices_mock.return_value = self._get_device_objects()
 
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.Zones(self._global_admin).add_devices(self._zone_name, self._device_names)
 
         self._global_admin.cloudfs.zones.get.assert_called_once_with(self._zone_name)
         query_devices_mock.assert_called_once_with(include=['uid'], names=self._device_names)
-        self._global_admin.execute.assert_has_calls(
+        self._global_admin.api.execute.assert_has_calls(
             [
                 mock.call('', 'getZoneBasicInfo', self._zone_id),
                 mock.call('', 'saveZone', mock.ANY)
             ]
         )
         expected_param = self._get_add_devices_param()
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual('Failed adding devices to zone', error.exception.message)
 
@@ -251,7 +251,7 @@ class TestCoreZones(base_core.BaseCoreTest):
         self._global_admin.cloudfs.zones.get = mock.MagicMock(return_value=zone)
         cloudfs.Zones(self._global_admin).delete(self._zone_name)
         self._global_admin.cloudfs.zones.get.assert_called_once_with(self._zone_name)
-        self._global_admin.execute.assert_called_once_with('', 'deleteZones', [self._zone_id])
+        self._global_admin.api.execute.assert_called_once_with('', 'deleteZones', [self._zone_id])
 
     @staticmethod
     def _get_add_zone_response(rc):

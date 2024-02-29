@@ -22,14 +22,14 @@ class Cache(BaseCommand):
     def force_eviction(self):
         """ Force eviction """
         logging.getLogger().info("Starting file eviction.")
-        self._gateway.execute("/config/cloudsync", "forceExecuteEvictor", None)
+        self._edge.api.execute("/config/cloudsync", "forceExecuteEvictor", None)
         logging.getLogger().info("Eviction started.")
 
     def is_enabled(self):
-        return self._gateway.get('/config/cloudsync/cloudExtender/operationMode') == OperationMode.CachingGateway
+        return self._edge.api.get('/config/cloudsync/cloudExtender/operationMode') == OperationMode.CachingGateway
 
     def _set_operation_mode(self, mode):
-        self._gateway.put('/config/cloudsync/cloudExtender/operationMode', mode)
+        self._edge.api.put('/config/cloudsync/cloudExtender/operationMode', mode)
         logging.getLogger().info('Device opreation mode changed. %s', {'mode': mode})
 
     def pin(self, path):
@@ -80,8 +80,8 @@ class Cache(BaseCommand):
         self._update_pinning_config(directory_tree)
 
     def _fetch_pinning_config(self):
-        root = self._gateway.get('/config/cloudsync/cloudExtender/selectedFolders')
+        root = self._edge.api.get('/config/cloudsync/cloudExtender/selectedFolders')
         return DirectoryTree(root)
 
     def _update_pinning_config(self, directory_tree):
-        self._gateway.put('/config/cloudsync/cloudExtender/selectedFolders', directory_tree.root)
+        self._edge.api.put('/config/cloudsync/cloudExtender/selectedFolders', directory_tree.root)

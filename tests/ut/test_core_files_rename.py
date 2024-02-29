@@ -15,9 +15,9 @@ class BaseCoreServicesFilesRename(base_core_services.BaseCoreServicesTest):
         execute_response = 'Success'
         self._init_services(execute_response=execute_response)
         ret = self._services.files.rename(self._parent_directory + '/' + self._current_filename, self._new_filename)
-        self._services.execute.assert_called_once_with('', 'moveResources', mock.ANY)
+        self._services.api.execute.assert_called_once_with('', 'moveResources', mock.ANY)
         expected_param = self._create_rename_resource_param()
-        actual_param = self._services.execute.call_args[0][2]
+        actual_param = self._services.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, execute_response)
 

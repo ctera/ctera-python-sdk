@@ -13,20 +13,20 @@ class Messaging(BaseCommand):
         """
         Check if messaging service is Active
         """
-        return self._portal.get('/microservices/messaging/globalStatus').status == 'Active'
+        return self._core.api.get('/microservices/messaging/globalStatus').status == 'Active'
 
     def get_status(self):
         """
         Retrieve the global status of messaging service
         """
-        res = self._portal.get('/microservices/messaging/globalStatus')
+        res = self._core.api.get('/microservices/messaging/globalStatus')
         return res
 
     def get_servers_status(self):
         """
         Retrieve the status of the messaging servers
         """
-        return {f'{srv.server.name}: "{srv.serverStatus.status}"' for srv in self._portal.get('/microservices/messaging').currentNodes}
+        return {f'{srv.server.name}: "{srv.serverStatus.status}"' for srv in self._core.api.get('/microservices/messaging').currentNodes}
 
     def add(self, servers):
         """
@@ -36,7 +36,7 @@ class Messaging(BaseCommand):
 
         """
         nodes = []
-        messaging_obj = self._portal.get('/microservices/messaging')
+        messaging_obj = self._core.api.get('/microservices/messaging')
         if messaging_obj.globalStatus.canAddServers:
             for node in messaging_obj.availableNodes:
                 if node.server.name in servers and node.canAssignAsMessaging.allowed:
@@ -45,7 +45,7 @@ class Messaging(BaseCommand):
                     param.server = node.server
                     nodes.append(param)
             if len(nodes) in messaging_obj.globalStatus.validServerNumber:
-                response = self._portal.put('microservices/messaging/currentNodes', nodes)
+                response = self._core.api.put('microservices/messaging/currentNodes', nodes)
                 logging.getLogger().info('Nodes added to cluster successfully')
                 return response
             logging.getLogger().error('Wrong number of servers. expected:"1" or "3", %s', {'given': len(servers)})

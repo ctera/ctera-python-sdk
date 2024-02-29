@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import telnet
 from cterasdk.common import Object
 from tests.ut import base_edge
@@ -16,31 +16,31 @@ class TestEdgeTelnet(base_edge.BaseEdgeTest):
         execute_response = 'OK'
         self._init_filer(execute_response=execute_response)
         telnet.Telnet(self._filer).enable(self._telnet_code)
-        self._filer.execute.assert_called_once_with('/config/device', 'startTelnetd', mock.ANY)
+        self._filer.api.execute.assert_called_once_with('/config/device', 'startTelnetd', mock.ANY)
 
         expected_param = self._get_telnet_object()
-        actual_param = self._filer.execute.call_args[0][2]
+        actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_telnet_already_running(self):
         execute_response = 'telnetd already running'
         self._init_filer(execute_response=execute_response)
         telnet.Telnet(self._filer).enable(self._telnet_code)
-        self._filer.execute.assert_called_once_with('/config/device', 'startTelnetd', mock.ANY)
+        self._filer.api.execute.assert_called_once_with('/config/device', 'startTelnetd', mock.ANY)
 
         expected_param = self._get_telnet_object()
-        actual_param = self._filer.execute.call_args[0][2]
+        actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_telnet_raise(self):
         execute_response = 'Expected Failure'
         self._init_filer(execute_response=execute_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             telnet.Telnet(self._filer).enable(self._telnet_code)
 
-        self._filer.execute.assert_called_once_with('/config/device', 'startTelnetd', mock.ANY)
+        self._filer.api.execute.assert_called_once_with('/config/device', 'startTelnetd', mock.ANY)
         expected_param = self._get_telnet_object()
-        actual_param = self._filer.execute.call_args[0][2]
+        actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual('Failed enabling telnet access', error.exception.message)
@@ -48,7 +48,7 @@ class TestEdgeTelnet(base_edge.BaseEdgeTest):
     def test_disable_telnet(self):
         self._init_filer()
         telnet.Telnet(self._filer).disable()
-        self._filer.execute.assert_called_once_with('/config/device', 'stopTelnetd')
+        self._filer.api.execute.assert_called_once_with('/config/device', 'stopTelnetd')
 
     def _get_telnet_object(self):
         telnet_param = Object()

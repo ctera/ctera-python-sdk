@@ -16,19 +16,19 @@ class Sync(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.throttling = CloudSyncBandwidthThrottling(self._gateway)
+        self.throttling = CloudSyncBandwidthThrottling(self._edge)
 
     def get_status(self):
         """ Retrieve the Cloud Sync status """
-        return self._gateway.get('/proc/cloudsync/serviceStatus')
+        return self._edge.api.get('/proc/cloudsync/serviceStatus')
 
     def is_disabled(self):
         """ Check if Cloud Sync is disabled """
-        return self._gateway.get('/config/cloudsync/mode') == Mode.Disabled
+        return self._edge.api.get('/config/cloudsync/mode') == Mode.Disabled
 
     def is_enabled(self):
         """ Check if Cloud Sync is enabled """
-        return self._gateway.get('/config/cloudsync/mode') == Mode.Enabled
+        return self._edge.api.get('/config/cloudsync/mode') == Mode.Enabled
 
     def suspend(self, wait=True):
         """
@@ -37,7 +37,7 @@ class Sync(BaseCommand):
         :param bool wait: Wait for synchronization to stop
         """
         logging.getLogger().info("Suspending cloud sync.")
-        self._gateway.put('/config/cloudsync/mode', Mode.Disabled)
+        self._edge.api.put('/config/cloudsync/mode', Mode.Disabled)
         if wait:
             self._track_status(
                 [
@@ -69,13 +69,14 @@ class Sync(BaseCommand):
     def unsuspend(self):
         """ Unsuspend Cloud Sync """
         logging.getLogger().info("Unsuspending cloud sync.")
-        self._gateway.put('/config/cloudsync/mode', Mode.Enabled)
+        self._edge.api.put('/config/cloudsync/mode', Mode.Enabled)
         try:
             self._track_status(
                 [
                     SyncStatus.Synced,
                     SyncStatus.Syncing,
-                    SyncStatus.Scanning
+                    SyncStatus.Scanning,
+                    SyncStatus.UpgradingDataBase
                 ],
                 [
                     SyncStatus.ConnectingFolders,
@@ -99,18 +100,18 @@ class Sync(BaseCommand):
         except ErrorStatus as error:
             if error.status == SyncStatus.ShouldSupportWinNtAcl:
                 logging.getLogger().warning('Windows ACL enabled folder cannot be synchronized to this device.')
-                self._gateway.put('/config/fileservices/share/cloud/access', Acl.WindowsNT)
+                self._edge.api.put('/config/fileservices/share/cloud/access', Acl.WindowsNT)
                 logging.getLogger().info('Updated network share access. %s', {'share': 'cloud', 'access': Acl.WindowsNT})
             else:
                 logging.getLogger().error("An error occurred while unsuspendeding sync. %s", {'status': error.status})
 
     def _track_status(self, success, progress, transient, failure):
-        track(self._gateway, '/proc/cloudsync/serviceStatus/id', success, progress, transient, failure)
+        track(self._edge, '/proc/cloudsync/serviceStatus/id', success, progress, transient, failure)
 
     def refresh(self):
         """ Refresh Cloud Folders """
         logging.getLogger().info("Refreshing cloud folders.")
-        self._gateway.execute("/config/cloudsync/cloudExtender", "refreshPaths", None)
+        self._edge.api.execute("/config/cloudsync/cloudExtender", "refreshPaths", None)
         logging.getLogger().info("Completed refreshing cloud folders.")
 
     def exclude_files(self, extensions=None, filenames=None, paths=None, custom_exclusion_rules=None):
@@ -141,7 +142,7 @@ class Sync(BaseCommand):
 
         if rules:
             logging.getLogger().info('Setting sync exclusion rules')
-            self._gateway.put('/config/cloudsync/excludeFiles', rules)
+            self._edge.api.put('/config/cloudsync/excludeFiles', rules)
             logging.getLogger().info('Sync exclusion rules set')
 
     def remove_file_exclusion_rules(self):
@@ -149,16 +150,16 @@ class Sync(BaseCommand):
         Remove previously configured sync exclusion rules
         """
         logging.getLogger().info('Removing sync exclusion rules')
-        self._gateway.put('/config/cloudsync/excludeFiles', None)
+        self._edge.api.put('/config/cloudsync/excludeFiles', None)
         logging.getLogger().info('Sync exclusion rules removed')
 
     def get_linux_avoid_using_fanotify(self):
         logging.getLogger().info('Getting LinuxAvoidUsingFAnotify')
-        return self._gateway.get('/config/cloudsync/LinuxAvoidUsingFAnotify')
+        return self._edge.api.get('/config/cloudsync/LinuxAvoidUsingFAnotify')
 
     def set_linux_avoid_using_fanotify(self, avoid):
         logging.getLogger().info('Setting LinuxAvoidUsingFAnotify to %s', avoid)
-        self._gateway.put('/config/cloudsync/LinuxAvoidUsingFAnotify', avoid)
+        self._edge.api.put('/config/cloudsync/LinuxAvoidUsingFAnotify', avoid)
 
     def evict(self, path, wait=False):
         """
@@ -171,9 +172,9 @@ class Sync(BaseCommand):
         """
         param = Object()
         param.path = path
-        ref = self._gateway.execute('/config/cloudsync', 'evictFolder', param)
+        ref = self._edge.api.execute('/config/cloudsync', 'evictFolder', param)
         if wait:
-            Task(self._gateway, ref).wait()
+            Task(self._edge, ref).wait()
         return ref
 
 
@@ -187,7 +188,7 @@ class CloudSyncBandwidthThrottling(BaseCommand):
         :returns: a list of bandwidth throttling rules
         :rtype: list[cterasdk.common.types.ThrottlingRule]
         """
-        rules = self._gateway.get('/config/cloudsync/syncThrottlingTopic/multiThrottling')
+        rules = self._edge.api.get('/config/cloudsync/syncThrottlingTopic/multiThrottling')
         return [ThrottlingRule.from_server_object(rule) for rule in rules]
 
     def set_policy(self, rules):
@@ -196,4 +197,4 @@ class CloudSyncBandwidthThrottling(BaseCommand):
 
         :param list[cterasdk.common.types.ThrottlingRule] rules: List of bandwidth throttling rules
         """
-        return self._gateway.put('/config/cloudsync/syncThrottlingTopic/multiThrottling', [rule.to_server_object() for rule in rules])
+        return self._edge.api.put('/config/cloudsync/syncThrottlingTopic/multiThrottling', [rule.to_server_object() for rule in rules])

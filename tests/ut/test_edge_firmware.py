@@ -1,7 +1,7 @@
 from pathlib import Path
 from unittest import mock
 
-from cterasdk.exception import CTERAException
+from cterasdk.exceptions import CTERAException
 from cterasdk.common import Object
 from cterasdk.edge import firmware
 from tests.ut import base_edge
@@ -21,18 +21,18 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
     def _test_upgrade_success(self, reboot, wait_for_reboot):
         self._init_filer(
             get_response=self._get_task_status_cmd_response(firmware.UploadTaskStatus.COMPLETE),
-            upload_response=self._get_upgrade_cmd_response(0)
+            form_data_response=self._get_upgrade_cmd_response(0)
         )
         self._filer.power.reboot = mock.MagicMock()
         firmware.Firmware(self._filer).upgrade(TestEdgeFirmware._file_path, reboot=reboot, wait_for_reboot=wait_for_reboot)
-        self._filer.upload.assert_called_with(
+        self._filer.api.form_data.assert_called_with(
             'proc/firmware',
             dict(
                 name='upload',
-                firmware=(Path(__file__).name, mock.ANY, 'text/x-python')
+                firmware=mock.ANY
             )
         )
-        self._filer.get.assert_called_with(TestEdgeFirmware._task_pointer)
+        self._filer.api.get.assert_called_with(TestEdgeFirmware._task_pointer)
         if reboot:
             self._filer.power.reboot.assert_called_with(wait=wait_for_reboot)
         else:
@@ -40,36 +40,36 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
 
     def test_upgrade_upload_failed(self):
         self._init_filer(
-            upload_response=self._get_upgrade_cmd_response(1)
+            form_data_response=self._get_upgrade_cmd_response(1)
         )
         with self.assertRaises(CTERAException) as error:
             firmware.Firmware(self._filer).upgrade(TestEdgeFirmware._file_path)
-        self._filer.upload.assert_called_with(
+        self._filer.api.form_data.assert_called_with(
             'proc/firmware',
             dict(
                 name='upload',
-                firmware=(Path(__file__).name, mock.ANY, 'text/x-python')
+                firmware=mock.ANY
             )
         )
-        self._filer.get.assert_not_called()
+        self._filer.api.get.assert_not_called()
         self.assertEqual(error.exception.message, 'Failed to upload the new firmware')
         self.assertEqual(error.exception.path, TestEdgeFirmware._file_path)
 
     def test_upgrade_process_failed(self):
         self._init_filer(
             get_response=self._get_task_status_cmd_response(firmware.UploadTaskStatus.FAIL),
-            upload_response=self._get_upgrade_cmd_response(0)
+            form_data_response=self._get_upgrade_cmd_response(0)
         )
         with self.assertRaises(CTERAException) as error:
             firmware.Firmware(self._filer).upgrade(TestEdgeFirmware._file_path)
-        self._filer.upload.assert_called_with(
+        self._filer.api.form_data.assert_called_with(
             'proc/firmware',
             dict(
                 name='upload',
-                firmware=(Path(__file__).name, mock.ANY, 'text/x-python')
+                firmware=mock.ANY
             )
         )
-        self._filer.get.assert_called_with(TestEdgeFirmware._task_pointer)
+        self._filer.api.get.assert_called_with(TestEdgeFirmware._task_pointer)
         self.assertEqual(error.exception.message, 'Filer failed to receive the new firmware - Failure')
 
     @staticmethod

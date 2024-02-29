@@ -1,7 +1,7 @@
 # pylint: disable=protected-access
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.common import Object
 from cterasdk.core.types import GroupAccount
 from cterasdk.core import groups
@@ -26,9 +26,9 @@ class TestCoreGroups(base_core.BaseCoreTest):
             get_multi_response = self._get_group_object(name=group_account.name)
             self._init_global_admin(get_multi_response=get_multi_response)
             ret = groups.Groups(self._global_admin).get(group_account)
-            self._global_admin.get_multi.assert_called_once_with(TestCoreGroups._get_group_url(group_account), mock.ANY)
+            self._global_admin.api.get_multi.assert_called_once_with(TestCoreGroups._get_group_url(group_account), mock.ANY)
             expected_include = ['/' + attr for attr in groups.Groups.default]
-            actual_include = self._global_admin.get_multi.call_args[0][1]
+            actual_include = self._global_admin.api.get_multi.call_args[0][1]
             self.assertEqual(len(expected_include), len(actual_include))
             for attr in expected_include:
                 self.assertIn(attr, actual_include)
@@ -41,11 +41,11 @@ class TestCoreGroups(base_core.BaseCoreTest):
     def test_get_group_not_found(self):
         get_multi_response = self._get_group_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             groups.Groups(self._global_admin).get(self._local_group)
-        self._global_admin.get_multi.assert_called_once_with(f'/localGroups/{self._groupname}', mock.ANY)
+        self._global_admin.api.get_multi.assert_called_once_with(f'/localGroups/{self._groupname}', mock.ANY)
         expected_include = ['/' + attr for attr in groups.Groups.default]
-        actual_include = self._global_admin.get_multi.call_args[0][1]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
@@ -78,9 +78,9 @@ class TestCoreGroups(base_core.BaseCoreTest):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
         ret = groups.Groups(self._global_admin).add(self._groupname, self._description)
-        self._global_admin.execute.assert_called_once_with('', 'addGroup', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with('', 'addGroup', mock.ANY)
         expected_param = self._get_add_group_object(name=self._groupname, description=self._description)
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, execute_response)
 
@@ -89,9 +89,9 @@ class TestCoreGroups(base_core.BaseCoreTest):
         get_response = self._get_group_object(name=self._groupname)
         self._init_global_admin(get_response=get_response, execute_response=execute_response)
         ret = groups.Groups(self._global_admin).modify(self._groupname, self._new_groupname, self._description)
-        self._global_admin.execute.assert_called_once_with(f'/localGroups/{self._groupname}', 'updateGroup', mock.ANY)
+        self._global_admin.api.execute.assert_called_once_with(f'/localGroups/{self._groupname}', 'updateGroup', mock.ANY)
         expected_param = self._get_update_group_object(name=self._new_groupname, description=self._description)
-        actual_param = self._global_admin.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, execute_response)
 
@@ -130,5 +130,5 @@ class TestCoreGroups(base_core.BaseCoreTest):
         for group_account in [self._local_group, self._domain_group]:
             self._init_global_admin(execute_response=execute_response)
             ret = groups.Groups(self._global_admin).delete(group_account)
-            self._global_admin.execute.assert_called_once_with(TestCoreGroups._get_group_url(group_account), 'delete', True)
+            self._global_admin.api.execute.assert_called_once_with(TestCoreGroups._get_group_url(group_account), 'delete', True)
             self.assertEqual(ret, execute_response)

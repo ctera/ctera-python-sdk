@@ -35,16 +35,16 @@ class TestCoreLogin(base_core.BaseCoreTest):
 
     def test_login_success(self):
         self._init_global_admin()
-        self._global_admin.get = mock.MagicMock(side_effect=TestCoreLogin._obtain_session_info)
+        self._global_admin.api.get = mock.MagicMock(side_effect=TestCoreLogin._obtain_session_info)
         login.Login(self._global_admin).login(self._username, self._password)
-        self._global_admin.form_data.assert_called_once_with('/login', {'j_username': self._username, 'j_password': self._password})
+        self._global_admin.api.form_data.assert_called_once_with('/login', {'j_username': self._username, 'j_password': self._password})
 
     def test_logout_success_after_login(self):
         self._init_global_admin()
-        self._global_admin.get = mock.MagicMock(side_effect=TestCoreLogin._obtain_session_info)
+        self._global_admin.api.get = mock.MagicMock(side_effect=TestCoreLogin._obtain_session_info)
         self._global_admin.login(self._username, self._password)
         self._global_admin.logout()
-        self._global_admin.form_data.assert_has_calls(
+        self._global_admin.api.form_data.assert_has_calls(
             [
                 mock.call('/login', {'j_username': self._username, 'j_password': self._password}),
                 mock.call('/logout', {})

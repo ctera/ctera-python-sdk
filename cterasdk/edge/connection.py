@@ -1,22 +1,13 @@
 import logging
+from ..exceptions import CTERAException
+from ..common.utils import tcp_connect
 
 
-def test(CTERAHost):
-    test_network(CTERAHost)
-    test_application(CTERAHost)
-
-
-def test_network(CTERAHost):
-    CTERAHost.test_conn()
-
-
-def test_application(CTERAHost):
-    ref = '/nosession/logininfo'
-
-    logging.getLogger().debug('Trying to obtain login info. %s', {'ref': ref})
-
-    response = CTERAHost.get(ref)
-
-    logging.getLogger().debug('Successfully obtained login info. %s', {'ref': ref, 'hostname': response.hostname})
-
-    return response
+def test(Edge):
+    tcp_connect(Edge.host(), Edge.port())
+    logging.getLogger().debug('Trying to obtain login info.')
+    response = Edge.api.get('/nosession/logininfo')
+    if response is not None:
+        logging.getLogger().debug('Successfully obtained login info. %s', {'hostname': response.hostname})
+        return response
+    raise CTERAException('Could not obtain login info for device {host}:{port}.')

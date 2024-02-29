@@ -7,7 +7,7 @@ from . import query, devices
 from .enum import ListFilter, PolicyType
 from .types import ComplianceSettingsBuilder
 from ..common import union, Object
-from ..exception import CTERAException, ObjectNotFoundException
+from ..exceptions import CTERAException, ObjectNotFoundException
 
 
 class CloudFS(BaseCommand):
@@ -23,11 +23,11 @@ class CloudFS(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.groups = FolderGroups(self._portal)
-        self.drives = CloudDrives(self._portal)
-        self.backups = Backups(self._portal)
-        self.zones = Zones(self._portal)
-        self.exports = Exports(self._portal)
+        self.groups = FolderGroups(self._core)
+        self.drives = CloudDrives(self._core)
+        self.backups = Backups(self._core)
+        self.zones = Zones(self._core)
+        self.exports = Exports(self._core)
 
 
 class FolderGroups(BaseCommand):
@@ -37,7 +37,7 @@ class FolderGroups(BaseCommand):
 
     def _get_entire_object(self, name):
         try:
-            return self._portal.get(f'/foldersGroups/{name}')
+            return self._core.api.get(f'/foldersGroups/{name}')
         except CTERAException as error:
             raise CTERAException('Failed to get folder group', error)
 
@@ -50,7 +50,7 @@ class FolderGroups(BaseCommand):
         """
         include = union(include or [], FolderGroups.default)
         include = ['/' + attr for attr in include]
-        folder_group = self._portal.get_multi(f'/foldersGroups/{name}', include)
+        folder_group = self._core.api.get_multi(f'/foldersGroups/{name}', include)
         if folder_group.name is None:
             raise ObjectNotFoundException('Could not find folder group', f'/foldersGroups/{name}', name=name)
         return folder_group
@@ -66,10 +66,10 @@ class FolderGroups(BaseCommand):
         include = union(include or [], FolderGroups.default)
         builder = query.QueryParamBuilder().include(include)
         if user:
-            uid = self._portal.users.get(user, ['uid']).uid
+            uid = self._core.users.get(user, ['uid']).uid
             builder.ownedBy(uid)
         param = builder.build()
-        return query.iterator(self._portal, '/foldersGroups', param)
+        return query.iterator(self._core, '/foldersGroups', param)
 
     def add(self, name, user=None, deduplication_method_type=None, storage_class=None):
         """
@@ -85,13 +85,13 @@ class FolderGroups(BaseCommand):
         param = Object()
         param.name = name
         param.disabled = False
-        param.owner = self._portal.users.get(user, ['baseObjectRef']).baseObjectRef if user is not None else None
+        param.owner = self._core.users.get(user, ['baseObjectRef']).baseObjectRef if user is not None else None
         param.deduplicationMethodType = deduplication_method_type
         if storage_class:
-            param.storageClass = self._portal.storage_classes.get(storage_class).baseObjectRef
+            param.storageClass = self._core.storage_classes.get(storage_class).baseObjectRef
 
         try:
-            response = self._portal.execute('', 'createFolderGroup', param)
+            response = self._core.api.execute('', 'createFolderGroup', param)
             logging.getLogger().info('Folder group created. %s', {'name': name, 'owner': param.owner})
             return response
         except CTERAException as error:
@@ -110,7 +110,7 @@ class FolderGroups(BaseCommand):
             param.name = new_name
 
         try:
-            response = self._portal.put(f'/foldersGroups/{current_name}', param)
+            response = self._core.api.put(f'/foldersGroups/{current_name}', param)
             logging.getLogger().info('Folder group updated. %s', {'name': current_name})
             return response
         except CTERAException as error:
@@ -125,7 +125,7 @@ class FolderGroups(BaseCommand):
         """
 
         logging.getLogger().info('Deleting folder group. %s', {'name': name})
-        self._portal.execute('/foldersGroups/' + name, 'deleteGroup', True)
+        self._core.api.execute('/foldersGroups/' + name, 'deleteGroup', True)
         logging.getLogger().info('Folder group deleted. %s', {'name': name})
 
 
@@ -135,7 +135,7 @@ class CloudDrives(BaseCommand):
     default = ['name', 'group', 'owner']
 
     def _get_entire_object(self, name, owner):
-        return self._portal.get(f'{self.find(name, owner, include=["baseObjectRef"]).baseObjectRef}')
+        return self._core.api.get(f'{self.find(name, owner, include=["baseObjectRef"]).baseObjectRef}')
 
     def add(self, name, group, owner, winacls=True, description=None, quota=None, compliance_settings=None):
         """
@@ -152,8 +152,8 @@ class CloudDrives(BaseCommand):
         """
         param = Object()
         param.name = name
-        param.owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
-        param.group = self._portal.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
+        param.owner = self._core.users.get(owner, ['baseObjectRef']).baseObjectRef
+        param.group = self._core.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
         param.enableSyncWinNtExtendedAttributes = winacls
         param.folderQuota = quota
         if description:
@@ -161,7 +161,7 @@ class CloudDrives(BaseCommand):
         param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
 
         try:
-            response = self._portal.execute('', 'addCloudDrive', param)
+            response = self._core.api.execute('', 'addCloudDrive', param)
             logging.getLogger().info(
                 'Cloud drive folder created. %s',
                 {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls}
@@ -194,9 +194,9 @@ class CloudDrives(BaseCommand):
         if new_name:
             param.name = new_name
         if new_owner:
-            param.owner = self._portal.users.get(new_owner, ['baseObjectRef']).baseObjectRef
+            param.owner = self._core.users.get(new_owner, ['baseObjectRef']).baseObjectRef
         if new_group:
-            param.group = self._portal.cloudfs.groups.get(new_group, include=['baseObjectRef']).baseObjectRef
+            param.group = self._core.cloudfs.groups.get(new_group, include=['baseObjectRef']).baseObjectRef
         if description:
             param.description = description
         if winacls:
@@ -206,7 +206,7 @@ class CloudDrives(BaseCommand):
         if compliance_settings:
             param.wormSettings = compliance_settings
         try:
-            response = self._portal.put(f'/{param.baseObjectRef}', param)
+            response = self._core.api.put(f'/{param.baseObjectRef}', param)
             logging.getLogger().info('Cloud drive folder updated. %s', {'name': current_name})
             return response
         except CTERAException as error:
@@ -230,10 +230,10 @@ class CloudDrives(BaseCommand):
                 query_filter = query.FilterBuilder('isDeleted').eq(True)
                 builder.addFilter(query_filter)
         if user:
-            uid = self._portal.users.get(user, ['uid']).uid
+            uid = self._core.users.get(user, ['uid']).uid
             builder.ownedBy(uid)
         param = builder.build()
-        return query.iterator(self._portal, '/cloudDrives', param)
+        return query.iterator(self._core, '/cloudDrives', param)
 
     def find(self, name, owner, include=None):
         """
@@ -246,13 +246,13 @@ class CloudDrives(BaseCommand):
         :returns: A Cloud Drive Folder
         """
 
-        uid = self._portal.users.get(owner, ['uid']).uid
+        uid = self._core.users.get(owner, ['uid']).uid
         include = union(include or [], CloudDrives.default)
         builder = query.QueryParamBuilder().include(include).ownedBy(uid)
         builder.addFilter(query.FilterBuilder('name').eq(name))
         param = builder.build()
 
-        iterator = query.iterator(self._portal, '/cloudDrives', param)
+        iterator = query.iterator(self._core, '/cloudDrives', param)
         try:
             return next(iterator)
         except StopIteration:
@@ -269,7 +269,7 @@ class CloudDrives(BaseCommand):
 
         path = self._get_directory_path(name, owner)
         logging.getLogger().info('Deleting cloud drive folder. %s', {'path': path})
-        self._portal.files.delete(path)
+        self._core.files.delete(path)
 
     def recover(self, name, owner):
         """
@@ -280,7 +280,7 @@ class CloudDrives(BaseCommand):
         """
         path = self._get_directory_path(name, owner)
         logging.getLogger().info('Recovering cloud drive folder. %s', {'path': path})
-        self._portal.files.undelete(path)
+        self._core.files.undelete(path)
 
     def setfacl(self, paths, acl, recursive=False):
         """
@@ -296,7 +296,7 @@ class CloudDrives(BaseCommand):
         param.sddlString = acl
         param.isRecursive = recursive
         try:
-            return self._portal.execute('', 'setFoldersACL', param)
+            return self._core.api.execute('', 'setFoldersACL', param)
         except CTERAException as error:
             logging.getLogger().error('setFoldersACL failed. %s', {'error': error})
             raise CTERAException('Failed to setFoldersACL', error)
@@ -315,13 +315,13 @@ class CloudDrives(BaseCommand):
         param.ownerSid = owner_sid
         param.isRecursive = recursive
         try:
-            return self._portal.execute('', 'setOwnerACL', param)
+            return self._core.api.execute('', 'setOwnerACL', param)
         except CTERAException as error:
             logging.getLogger().error('setOwnerACL failed. %s', {'error': error})
             raise CTERAException('Failed to setOwnerACL', error)
 
     def _get_directory_path(self, name, owner):
-        owner = self._portal.users.get(owner, ['displayName']).displayName
+        owner = self._core.users.get(owner, ['displayName']).displayName
         path = owner + '/' + name
         return path
 
@@ -332,7 +332,7 @@ class Backups(BaseCommand):
     default = ['name', 'group', 'owner']
 
     def _get_entire_object(self, name):
-        return self._portal.get(f'/backups/{name}')
+        return self._core.api.get(f'/backups/{name}')
 
     def add(self, name, group, owner, xattr=True):
         """
@@ -346,11 +346,11 @@ class Backups(BaseCommand):
         param = Object()
         param._classname = 'Backup'  # pylint: disable=protected-access
         param.name = name
-        param.owner = self._portal.users.get(owner, ['baseObjectRef']).baseObjectRef
-        param.group = self._portal.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
+        param.owner = self._core.users.get(owner, ['baseObjectRef']).baseObjectRef
+        param.group = self._core.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
         param.enableBackupExtendedAttributes = xattr
         try:
-            response = self._portal.add('/backups', param)
+            response = self._core.api.add('/backups', param)
             logging.getLogger().info(
                 'Backup folder created. %s',
                 {'name': name, 'owner': param.owner, 'folder_group': group, 'xattr': xattr}
@@ -378,13 +378,13 @@ class Backups(BaseCommand):
         if new_name:
             param.name = new_name
         if new_owner:
-            param.owner = self._portal.users.get(new_owner, ['baseObjectRef']).baseObjectRef
+            param.owner = self._core.users.get(new_owner, ['baseObjectRef']).baseObjectRef
         if new_group:
-            param.group = self._portal.cloudfs.groups.get(new_group, include=['baseObjectRef']).baseObjectRef
+            param.group = self._core.cloudfs.groups.get(new_group, include=['baseObjectRef']).baseObjectRef
         if xattr:
             param.enableBackupExtendedAttributes = xattr
         try:
-            response = self._portal.put(f'/backups/{current_name}', param)
+            response = self._core.api.put(f'/backups/{current_name}', param)
             logging.getLogger().info('Backup folder updated. %s', {'name': current_name})
             return response
         except CTERAException as error:
@@ -408,10 +408,10 @@ class Backups(BaseCommand):
                 query_filter = query.FilterBuilder('isDeleted').eq(True)
                 builder.addFilter(query_filter)
         if user:
-            uid = self._portal.users.get(user, ['uid']).uid
+            uid = self._core.users.get(user, ['uid']).uid
             builder.ownedBy(uid)
         param = builder.build()
-        return query.iterator(self._portal, '/backups', param)
+        return query.iterator(self._core, '/backups', param)
 
     def delete(self, name):
         """
@@ -420,7 +420,7 @@ class Backups(BaseCommand):
         :param str name: Name of the Backup Folder to delete
         """
         logging.getLogger().info('Deleting Backup folder. %s', {'name': name})
-        response = self._portal.execute(f'/backups/{name}', 'delete')
+        response = self._core.api.execute(f'/backups/{name}', 'delete')
         logging.getLogger().info('Backup folder deleted. %s', {'name': name})
         return response
 
@@ -444,7 +444,7 @@ class Zones(BaseCommand):
 
         logging.getLogger().info('Retrieving zone. %s', {'name': name})
 
-        response = self._portal.execute('', 'getZonesDisplayInfo', param)
+        response = self._core.api.execute('', 'getZonesDisplayInfo', param)
 
         objects = response.objects
         if len(objects) < 1:
@@ -469,7 +469,7 @@ class Zones(BaseCommand):
             builder.addFilter(query_filter)
         builder.orFilter((len(filters) > 1))
         param = builder.build()
-        return query.iterator(self._portal, '', param, 'getZonesDisplayInfo')
+        return query.iterator(self._core, '', param, 'getZonesDisplayInfo')
 
     def search(self, name):
         """
@@ -495,7 +495,7 @@ class Zones(BaseCommand):
 
         logging.getLogger().info('Adding zone. %s', {'name': name})
 
-        response = self._portal.execute('', 'addZone', param)
+        response = self._core.api.execute('', 'addZone', param)
         try:
             self._process_response(response)
             logging.getLogger().info('Zone added. %s', {'name': name})
@@ -509,9 +509,9 @@ class Zones(BaseCommand):
 
         :param str name: The name of the zone to delete
         """
-        zone = self._portal.cloudfs.zones.get(name)
+        zone = self._core.cloudfs.zones.get(name)
         logging.getLogger().info('Deleting zone. %s', {'zone': name})
-        response = self._portal.execute('', 'deleteZones', [zone.zoneId])
+        response = self._core.api.execute('', 'deleteZones', [zone.zoneId])
         if response == 'ok':
             logging.getLogger().info('Zone deleted. %s', {'zone': name})
 
@@ -522,8 +522,8 @@ class Zones(BaseCommand):
         :param str name: The name of the zone to add devices to
         :param list[str] device_names: The names of the devices to add to the zone
         """
-        zone = self._portal.cloudfs.zones.get(name)
-        portal_devices = devices.Devices(self._portal).by_name(include=['uid'], names=device_names)
+        zone = self._core.cloudfs.zones.get(name)
+        portal_devices = devices.Devices(self._core).by_name(include=['uid'], names=device_names)
         info = self._zone_info(zone.zoneId)
         description = (info.description if hasattr(info, 'description') else None)
 
@@ -546,7 +546,7 @@ class Zones(BaseCommand):
         :param str name: The name of the zone
         :param list[cterasdk.core.types.CloudFSFolderFindingHelper] folder_finding_helpers: List of folder names and owners
         """
-        zone = self._portal.cloudfs.zones.get(name)
+        zone = self._core.cloudfs.zones.get(name)
         folders = self._find_folders(folder_finding_helpers)
         info = self._zone_info(zone.zoneId)
         description = info.description if hasattr(info, 'description') else None
@@ -572,14 +572,14 @@ class Zones(BaseCommand):
 
     def _zone_info(self, zid):
         logging.getLogger().debug('Obtaining zone info. %s', {'id': zid})
-        response = self._portal.execute('', 'getZoneBasicInfo', zid)
+        response = self._core.api.execute('', 'getZoneBasicInfo', zid)
         logging.getLogger().debug('Obtained zone info. %s', {'id': zid})
         return response
 
     def _find_folders(self, folder_finding_helpers):
         folders = {}
         for folder_finding_helper in folder_finding_helpers:
-            cloud_folder = CloudDrives(self._portal).find(
+            cloud_folder = CloudDrives(self._core).find(
                 folder_finding_helper.name,
                 folder_finding_helper.owner,
                 include=['uid', 'owner']
@@ -599,7 +599,7 @@ class Zones(BaseCommand):
 
         logging.getLogger().debug('Applying changes to zone. %s', {'zone': param.basicInfo.name})
 
-        response = self._portal.execute('', 'saveZone', param)
+        response = self._core.api.execute('', 'saveZone', param)
         try:
             self._process_response(response)
         except CTERAException as error:
@@ -641,7 +641,7 @@ class Exports(BaseCommand):
 
         :param str name: Bucket name
         """
-        return self._portal.get(f'/buckets/{name}')
+        return self._core.api.get(f'/buckets/{name}')
 
     def get_endpoint(self, name):
         """
@@ -658,7 +658,7 @@ class Exports(BaseCommand):
         List Buckets
         """
         param = query.QueryParamBuilder().startFrom(0).countLimit(25).orFilter(True).build()
-        return query.iterator(self._portal, '/buckets', param)
+        return query.iterator(self._core, '/buckets', param)
 
     def add(self, name, drive_name, drive_owner, description=None):
         """
@@ -673,9 +673,9 @@ class Exports(BaseCommand):
         param._classname = 'Bucket'  # pylint: disable=protected-access
         param.description = description
         param.name = name
-        param.cloudDrive = self._portal.cloudfs.drives.find(drive_name, drive_owner, include=['baseObjectRef']).baseObjectRef
+        param.cloudDrive = self._core.cloudfs.drives.find(drive_name, drive_owner, include=['baseObjectRef']).baseObjectRef
         logging.getLogger().info('Adding Bucket. %s', {'name': name})
-        response = self._portal.add('/buckets', param)
+        response = self._core.api.add('/buckets', param)
         logging.getLogger().info('Bucket Added. %s', {'name': name})
         return response
 
@@ -690,7 +690,7 @@ class Exports(BaseCommand):
         bucket = self.get(name)
         bucket.description = description
         logging.getLogger().info("Modifying Bucket. %s", {'name': name})
-        response = self._portal.put(f'/buckets/{name}', bucket)
+        response = self._core.api.put(f'/buckets/{name}', bucket)
         logging.getLogger().info("Bucket modified. %s", {'name': name})
         return response
 
@@ -701,6 +701,6 @@ class Exports(BaseCommand):
         :param str name: Bucket name
         """
         logging.getLogger().info('Deleting Bucket. %s', {'name': name})
-        response = self._portal.delete(f'/buckets/{name}')
+        response = self._core.api.delete(f'/buckets/{name}')
         logging.getLogger().info('Bucket deleted. %s', {'name': name})
         return response

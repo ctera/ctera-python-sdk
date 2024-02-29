@@ -12,5 +12,5 @@ class TestCoreDomains(base_core.BaseCoreTest):
         get_response = self._domains
         self._init_global_admin(get_response=get_response)
         ret = domains.Domains(self._global_admin).list_domains()
-        self._global_admin.get.assert_called_once_with('/domains')
+        self._global_admin.api.get.assert_called_once_with('/domains')
         self.assertEqual(ret, get_response)

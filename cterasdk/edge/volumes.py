@@ -3,7 +3,7 @@ import logging
 from ..lib.task_manager_base import TaskError
 from .enum import VolumeStatus
 from ..common import Object
-from ..exception import CTERAException, InputError
+from ..exceptions import CTERAException, InputError
 from ..lib import track
 from .base_command import BaseCommand
 
@@ -16,7 +16,7 @@ class Volumes(BaseCommand):
         Get Volume. If a volume name was not passed as an argument, a list of all storage volumes will be retrieved
         :param str,optional name: Name of the volume
         """
-        return self._gateway.get('/config/storage/volumes' + ('' if name is None else ('/' + name)))
+        return self._edge.api.get('/config/storage/volumes' + ('' if name is None else ('/' + name)))
 
     def add(self, name, size=None, filesystem='xfs', device=None, passphrase=None):
         """
@@ -52,10 +52,10 @@ class Volumes(BaseCommand):
 
         ref = '/status/storage/volumes/' + param.name + '/status'
 
-        response = self._gateway.add('/config/storage/volumes', param)
+        response = self._edge.api.add('/config/storage/volumes', param)
 
         status = track(
-            self._gateway,
+            self._edge,
             ref,
             [VolumeStatus.Ok],
             [VolumeStatus.Formatting],
@@ -83,7 +83,7 @@ class Volumes(BaseCommand):
 
         volume.size = size
         try:
-            response = self._gateway.put('/config/storage/volumes/' + name, volume)
+            response = self._edge.api.put('/config/storage/volumes/' + name, volume)
             logging.getLogger().info("Volume modified. %s", {'volume': volume.name})
             return response
         except CTERAException as error:
@@ -101,7 +101,7 @@ class Volumes(BaseCommand):
         try:
             logging.getLogger().info('Deleting volume. %s', {'name': name})
 
-            response = self._gateway.delete('/config/storage/volumes/' + name)
+            response = self._edge.api.delete('/config/storage/volumes/' + name)
 
             logging.getLogger().info("Volume deleted. %s", {'name': name})
 
@@ -114,7 +114,7 @@ class Volumes(BaseCommand):
         """ Delete all volumes """
         self._wait_pending_filesystem_mounts()
 
-        volumes = self._gateway.get('/config/storage/volumes')
+        volumes = self._edge.api.get('/config/storage/volumes')
         volume_count = len(volumes)
         if volume_count > 0:
             for volume in volumes:
@@ -123,8 +123,8 @@ class Volumes(BaseCommand):
             logging.getLogger().info('No volumes found.')
 
     def _devices(self):
-        arrays = self._gateway.get('/status/storage/arrays')
-        drives = self._gateway.get('/status/storage/disks')
+        arrays = self._edge.api.get('/status/storage/arrays')
+        drives = self._edge.api.get('/status/storage/disks')
 
         ctera_devices = {}
         for array in arrays:
@@ -187,7 +187,7 @@ class Volumes(BaseCommand):
     def _wait_pending_filesystem_mounts(self):
         logging.getLogger().debug('Checking for pending mount tasks.')
 
-        tasks = self._gateway.tasks.running()
+        tasks = self._edge.tasks.running()
         for mount in tasks:
             if mount.name.startswith('Mounting'):
                 self._wait_mount(mount.id)
@@ -195,12 +195,12 @@ class Volumes(BaseCommand):
     def _wait_pending_mount(self, volume):
         logging.getLogger().debug('Checking for pending mount tasks. %s', {'volume': volume})
 
-        tasks = self._gateway.tasks.by_name(' '.join(['Mounting', volume, 'file system']))
+        tasks = self._edge.tasks.by_name(' '.join(['Mounting', volume, 'file system']))
         for mount in tasks:
             self._wait_mount(mount.id)
 
     def _wait_mount(self, tid):
         try:
-            self._gateway.tasks.wait(tid)
+            self._edge.tasks.wait(tid)
         except TaskError:
             logging.getLogger().debug('Failed mounting volume. %s', {'tid': tid})

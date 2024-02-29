@@ -1,6 +1,6 @@
 import logging
 
-from ..exception import InputError
+from ..exceptions import InputError
 from .enum import License
 from .base_command import BaseCommand
 
@@ -10,7 +10,7 @@ class Licenses(BaseCommand):
 
     def __init__(self, gateway):
         super().__init__(gateway)
-        self.local = LocalLicenses(self._gateway)
+        self.local = LocalLicenses(self._edge)
 
     @staticmethod
     def infer(ctera_license):
@@ -32,7 +32,7 @@ class Licenses(BaseCommand):
 
         logging.getLogger().info('Applying license. %s', {'license': ctera_license})
 
-        self._gateway.put('/config/device/activeLicenseType', inferred_license)
+        self._edge.api.put('/config/device/activeLicenseType', inferred_license)
 
         logging.getLogger().info('License applied. %s', {'license': ctera_license})
 
@@ -40,7 +40,7 @@ class Licenses(BaseCommand):
         """
         Get the current Gateway License
         """
-        inferred_license = self._gateway.get('/config/device/activeLicenseType')
+        inferred_license = self._edge.api.get('/config/device/activeLicenseType')
         if inferred_license == 'NA':
             return inferred_license
         if len(inferred_license) == 8:
@@ -55,7 +55,7 @@ class LocalLicenses(BaseCommand):
         """
         Retrieve a list of local licenses installed
         """
-        return self._gateway.get('/config/device/licenses')
+        return self._edge.api.get('/config/device/licenses')
 
     def add(self, code):
         """
@@ -64,7 +64,7 @@ class LocalLicenses(BaseCommand):
         :param str code: License code
         """
         logging.getLogger().info('Installing license. %s', {'code': code})
-        response = self._gateway.add('/config/device/licenses', code)
+        response = self._edge.api.add('/config/device/licenses', code)
         logging.getLogger().info("License added. %s", {'code': code})
         return response
 
@@ -72,4 +72,4 @@ class LocalLicenses(BaseCommand):
         """
         Remove all local licenses
         """
-        self._gateway.put('/config/device/licenses', [])
+        self._edge.api.put('/config/device/licenses', [])

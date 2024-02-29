@@ -5,10 +5,10 @@ from ...lib import FileAccessBase
 class FileAccess(FileAccessBase):
 
     def _get_single_file_url(self, path):
-        return self._ctera_host.make_local_files_dir(path.fullpath())
+        return path.fullpath()
 
     def _get_multi_file_url(self, cloud_directory, files):
-        return 'status/fileManager/zip'
+        return '/admingui/api/status/fileManager/zip'
 
     @property
     def _use_file_url_for_multi_file_url(self):
@@ -31,5 +31,17 @@ class FileAccess(FileAccessBase):
         return dict(
             name=local_file_info['name'],
             fullpath=f'{dest_path.fullpath()}/{local_file_info["name"]}',
-            filedata=(local_file_info['name'], fd, local_file_info['mimetype'][0])
+            filedata=fd
         )
+
+    def _get_zip_file_handle(self, cloud_directory, files):
+        return self._ctera_host.generic.form_data(
+            self._get_multi_file_url(cloud_directory, files),
+            self._make_form_data(cloud_directory, files)
+        )
+
+    def _upload_object(self, local_file_info, fd, dest_path):
+        return self._ctera_host.generic.form_data(
+                self._get_upload_url(dest_path),
+                self._get_upload_form(local_file_info, fd, dest_path)
+            )

@@ -1,7 +1,7 @@
 import time
 import logging
 from abc import ABC, abstractmethod
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from ..convert import tojsonstr
 
 

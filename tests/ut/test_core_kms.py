@@ -28,14 +28,14 @@ class TestCoreKMS(base_core.BaseCoreTest):  # pylint: disable=too-many-instance-
         get_response = 'Success'
         self._init_global_admin(get_response=get_response)
         ret = kms.KMS(self._global_admin).settings()
-        self._global_admin.get.assert_called_once_with('/settings/keyManagerSettings')
+        self._global_admin.api.get.assert_called_once_with('/settings/keyManagerSettings')
         self.assertEqual(ret, get_response)
 
     def test_get_status(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
         ret = kms.KMS(self._global_admin).status()
-        self._global_admin.execute.assert_called_once_with('', 'getKeyManagerGlobalStatus')
+        self._global_admin.api.execute.assert_called_once_with('', 'getKeyManagerGlobalStatus')
         self.assertEqual(ret, execute_response)
 
     def test_enable_kms(self):
@@ -56,10 +56,10 @@ class TestCoreKMS(base_core.BaseCoreTest):  # pylint: disable=too-many-instance-
                 mock.call(self._kms_server_certificate_file)
             ]
         )
-        self._global_admin.get.assert_called_once_with('/defaults/KeyManagerSettings')
-        self._global_admin.put.assert_called_once_with('/settings/keyManagerSettings', mock.ANY)
+        self._global_admin.api.get.assert_called_once_with('/defaults/KeyManagerSettings')
+        self._global_admin.api.put.assert_called_once_with('/settings/keyManagerSettings', mock.ANY)
         expected_param = self._create_enable_kms_parameter(True)
-        actual_param = self._global_admin.put.call_args[0][1]
+        actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
 
@@ -107,10 +107,10 @@ class TestCoreKMS(base_core.BaseCoreTest):  # pylint: disable=too-many-instance-
                 mock.call(self._kms_server_certificate_file)
             ]
         )
-        self._global_admin.get.assert_called_once_with('/settings/keyManagerSettings')
-        self._global_admin.put.assert_called_once_with('/settings/keyManagerSettings', mock.ANY)
+        self._global_admin.api.get.assert_called_once_with('/settings/keyManagerSettings')
+        self._global_admin.api.put.assert_called_once_with('/settings/keyManagerSettings', mock.ANY)
         expected_param = self._create_enable_kms_parameter()
-        actual_param = self._global_admin.put.call_args[0][1]
+        actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
 
@@ -118,14 +118,14 @@ class TestCoreKMS(base_core.BaseCoreTest):  # pylint: disable=too-many-instance-
         get_response = None
         self._init_global_admin(get_response=get_response)
         ret = kms.KMS(self._global_admin).disable()
-        self._global_admin.execute.assert_called_once_with('', 'removeKeyManagementService')
+        self._global_admin.api.execute.assert_called_once_with('', 'removeKeyManagementService')
         self.assertEqual(ret, get_response)
 
     def test_get_kms_server(self):
         get_response = 'Success'
         self._init_global_admin(get_response=get_response)
         ret = kms.KMS(self._global_admin).servers.get(self._kms_server_name)
-        self._global_admin.get.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}')
+        self._global_admin.api.get.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}')
         self.assertEqual(ret, get_response)
 
     def test_list_all_kms_servers(self):
@@ -141,10 +141,10 @@ class TestCoreKMS(base_core.BaseCoreTest):  # pylint: disable=too-many-instance-
         add_response = 'Success'
         self._init_global_admin(add_response=add_response)
         ret = kms.KMS(self._global_admin).servers.add(self._kms_server_name, self._kms_server_ipaddr)
-        self._global_admin.add.assert_called_once_with('/keyManagerServers', mock.ANY)
+        self._global_admin.api.add.assert_called_once_with('/keyManagerServers', mock.ANY)
         expected_param = munch.Munch({'name': self._kms_server_name,
                                       'host': self._kms_server_ipaddr, '_classname': self._kms_server_classname})
-        actual_param = self._global_admin.add.call_args[0][1]
+        actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
@@ -152,10 +152,10 @@ class TestCoreKMS(base_core.BaseCoreTest):  # pylint: disable=too-many-instance-
         put_response = 'Success'
         self._init_global_admin(put_response=put_response, get_response=munch.Munch())
         ret = kms.KMS(self._global_admin).servers.modify(self._kms_server_name, self._kms_server_new_name)
-        self._global_admin.get.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}')
-        self._global_admin.put.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}', mock.ANY)
+        self._global_admin.api.get.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}')
+        self._global_admin.api.put.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}', mock.ANY)
         expected_param = munch.Munch({'name': self._kms_server_new_name})
-        actual_param = self._global_admin.put.call_args[0][1]
+        actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
 
@@ -163,5 +163,5 @@ class TestCoreKMS(base_core.BaseCoreTest):  # pylint: disable=too-many-instance-
         delete_response = 'Success'
         self._init_global_admin(delete_response=delete_response)
         ret = kms.KMS(self._global_admin).servers.delete(self._kms_server_name)
-        self._global_admin.delete.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}')
+        self._global_admin.api.delete.assert_called_once_with(f'/keyManagerServers/{self._kms_server_name}')
         self.assertEqual(ret, delete_response)

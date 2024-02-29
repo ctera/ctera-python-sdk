@@ -39,7 +39,7 @@ class TestCoreServers(base_core.BaseCoreTest):
                                                                                   progstring=self._task_message
                                                                                   )])
         ret = servers.Servers(self._global_admin).tasks.background(self._server)
-        self._global_admin.get.assert_called_once_with(f'/servers/{self._server}/bgTasks')
+        self._global_admin.api.get.assert_called_once_with(f'/servers/{self._server}/bgTasks')
         self.assertEqual(ret[0].ref, self._task_ref)
 
     def test_get_server_scheduled_tasks(self):
@@ -48,7 +48,7 @@ class TestCoreServers(base_core.BaseCoreTest):
                                                                                   startTime=self._task_start_time
                                                                                   )])
         servers.Servers(self._global_admin).tasks.scheduled(self._server)
-        self._global_admin.get.assert_called_once_with(f'/servers/{self._server}/schedTasks')
+        self._global_admin.api.get.assert_called_once_with(f'/servers/{self._server}/schedTasks')
 
     @staticmethod
     def _create_task_object(**kwargs):

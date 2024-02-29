@@ -33,21 +33,21 @@ class TestCoreMessaging(base_core.BaseCoreTest):
     def test_status(self):
         self._init_global_admin(get_response=self._messaging.globalStatus)
         ret = messaging.Messaging(self._global_admin).get_status()
-        self._global_admin.get.assert_called_once_with('/microservices/messaging/globalStatus')
+        self._global_admin.api.get.assert_called_once_with('/microservices/messaging/globalStatus')
         self.assertEqual(ret, self._messaging.globalStatus)
 
     def test_is_active(self):
         self._init_global_admin(get_response=self._messaging.globalStatus)
         messaging.Messaging(self._global_admin).is_active()
-        self._global_admin.get.assert_called_once_with('/microservices/messaging/globalStatus')
+        self._global_admin.api.get.assert_called_once_with('/microservices/messaging/globalStatus')
 
     def test_add_server(self):
         self._init_global_admin(get_response=self._messaging)
         messaging.Messaging(self._global_admin).add(self._servers)
-        self._global_admin.get.assert_called_once_with('/microservices/messaging')
-        self._global_admin.put.assert_called_once_with('microservices/messaging/currentNodes', mock.ANY)
+        self._global_admin.api.get.assert_called_once_with('/microservices/messaging')
+        self._global_admin.api.put.assert_called_once_with('microservices/messaging/currentNodes', mock.ANY)
         expected_param = self._get_current_node_objects()
-        actual_param = self._global_admin.put.call_args[0][1]
+        actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def _get_current_node_objects(self):

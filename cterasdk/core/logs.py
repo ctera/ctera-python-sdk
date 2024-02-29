@@ -17,7 +17,7 @@ class Logs(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.alerts = Alerts(self._portal)
+        self.alerts = Alerts(self._core)
 
     def device(self,
                name,
@@ -83,7 +83,7 @@ class Logs(BaseCommand):
         return Iterator(function, param)
 
     def _query_logs(self, param):
-        response = self._portal.execute('', 'queryLogs', param)
+        response = self._core.api.execute('', 'queryLogs', param)
         return (response.hasMore, response.logs)
 
     @staticmethod
@@ -140,7 +140,7 @@ class Alerts(BaseCommand):
         :param list[cterasdk.core.types.Alert] alerts: List of alerts
         """
         logging.getLogger().info('Updating log based alerts.')
-        response = self._portal.put(self._context, alerts)
+        response = self._core.api.put(self._context, alerts)
         logging.getLogger().info('Log based alerts updated.')
         return response
 
@@ -151,7 +151,7 @@ class Alerts(BaseCommand):
         :returns: A list of alerts
         :rtype: list[cterasdk.common.object.Object]
         """
-        return self._portal.get(self._context)
+        return self._core.api.get(self._context)
 
     def delete(self, name):
         """
@@ -164,4 +164,4 @@ class Alerts(BaseCommand):
 
     @property
     def _context(self):
-        return f'{"" if self._portal.session().in_tenant_context() else "/settings"}/alerts'
+        return f'{"" if self._core.session().in_tenant_context() else "/settings"}/alerts'

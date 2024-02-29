@@ -1,7 +1,7 @@
 import logging
 import time
 
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 
 
 class ErrorStatus(CTERAException):
@@ -29,7 +29,7 @@ class StatusTracker:
         running = True
         while running:
             logging.getLogger().debug('Retrieving status. %s', {'ref': self.ref, 'attempt': (self.attempt + 1)})
-            self.status = self.CTERAHost.get(self.ref)
+            self.status = self.CTERAHost.api.get(self.ref)
             logging.getLogger().debug('Current status. %s', {'ref': self.ref, 'status': self.status})
             self.increment()
             running = self.running()

@@ -9,7 +9,7 @@ class AFP(BaseCommand):
 
     def is_disabled(self):
         """ Check if the AFP server is disabled """
-        return self._gateway.get('/config/fileservices/afp/mode') == Mode.Disabled
+        return self._edge.api.get('/config/fileservices/afp/mode') == Mode.Disabled
 
     def disable(self):
         """
@@ -17,6 +17,6 @@ class AFP(BaseCommand):
         """
         logging.getLogger().info('Disabling AFP server.')
 
-        self._gateway.put('/config/fileservices/afp/mode', Mode.Disabled)
+        self._edge.api.put('/config/fileservices/afp/mode', Mode.Disabled)
 
         logging.getLogger().info('AFP server disabled.')

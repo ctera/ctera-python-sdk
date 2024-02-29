@@ -2,8 +2,8 @@ from datetime import datetime
 import logging
 import copy
 
-from ..exception import CTERAException
-from ..convert import fromxmlstr, toxmlstr, ParseException
+from ..exceptions import CTERAException
+from ..convert import fromxmlstr, toxmlstr
 from ..common import Device, delete_attrs
 from ..lib import FileSystem, TempfileServices
 from .base_command import BaseCommand
@@ -22,7 +22,7 @@ class Config(BaseCommand):
 
         :return str: The location of the gateway
         """
-        return self._gateway.get('/config/device/location')
+        return self._edge.api.get('/config/device/location')
 
     def set_location(self, location):
         """
@@ -32,7 +32,7 @@ class Config(BaseCommand):
         :return str: The new location
         """
         logging.getLogger().info('Configuring device location. %s', {'location': location})
-        return self._gateway.put('/config/device/location', location)
+        return self._edge.api.put('/config/device/location', location)
 
     def get_hostname(self):
         """
@@ -40,7 +40,7 @@ class Config(BaseCommand):
 
         :return str: The hostname of the gateway
         """
-        return self._gateway.get('/config/device/hostname')
+        return self._edge.api.get('/config/device/hostname')
 
     def set_hostname(self, hostname):
         """
@@ -50,7 +50,7 @@ class Config(BaseCommand):
         :return str: The new hostname
         """
         logging.getLogger().info('Configuring device hostname. %s', {'hostname': hostname})
-        return self._gateway.put('/config/device/hostname', hostname)
+        return self._edge.api.put('/config/device/hostname', hostname)
 
     def import_config(self, config, exclude=None):
         """
@@ -69,21 +69,21 @@ class Config(BaseCommand):
         if exclude:
             delete_attrs(database, exclude)
 
-        path = self._filesystem.join(TempfileServices.mkdir(), f'{self._gateway.session().host}.xml')
+        path = self._filesystem.join(TempfileServices.mkdir(), f'{self._edge.session().host}.xml')
         self._filesystem.write(path, toxmlstr(database, True).encode('utf-8'))
 
         return self._import_configuration(path)
 
     def _import_configuration(self, path):
+        self._filesystem.get_local_file_info(path)
         logging.getLogger().info('Importing Edge Filer configuration.')
-        info = self._filesystem.get_local_file_info(path)
         with open(path, 'rb') as fd:
-            response = self._gateway.upload(
+            response = self._edge.api.form_data(
                 '/config',
                 dict(
                     name='import',
                     type='db',
-                    config=(info['name'], fd, info['mimetype'][0])
+                    config=fd
                 )
             )
             logging.getLogger().info('Imported Edge Filer configuration.')
@@ -103,13 +103,12 @@ class Config(BaseCommand):
         else:
             data = config
 
-        try:
-            database = fromxmlstr(data)
+        database = fromxmlstr(data)
+        if database:
             logging.getLogger().info('Completed parsing the Edge Filer configuration. %s', {'firmware': database.firmware})
             return database
-        except ParseException:
-            logging.getLogger().error("Failed parsing the Edge Filer's configuration.")
-            raise CTERAException("Failed parsing the Edge Filer's configuration")
+        logging.getLogger().error("Failed parsing the Edge Filer's configuration.")
+        raise CTERAException("Failed parsing the Edge Filer's configuration")
 
     def export(self, destination=None):
         """
@@ -118,10 +117,10 @@ class Config(BaseCommand):
         :param str,optional destination:
          File destination, defaults to the default directory
         """
-        default_filename = self._gateway.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.xml'
+        default_filename = self._edge.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.xml'
         directory, filename = self._filesystem.split_file_directory_with_defaults(destination, default_filename)
-        logging.getLogger().info('Exporting configuration. %s', {'host': self._gateway.host()})
-        handle = self._gateway.openfile('/export')
+        logging.getLogger().info('Exporting configuration. %s', {'host': self._edge.host()})
+        handle = self._edge.api.handle('/export')
         filepath = FileSystem.instance().save(directory, filename, handle)
         logging.getLogger().info('Exported configuration. %s', {'filepath': filepath})
 
@@ -131,7 +130,7 @@ class Config(BaseCommand):
 
         :return bool: True if the first time wizard is enabled, else False
         """
-        return self._gateway.get('/config/gui/openFirstTimeWizard')
+        return self._edge.api.get('/config/gui/openFirstTimeWizard')
 
     def enable_wizard(self):
         """
@@ -147,4 +146,4 @@ class Config(BaseCommand):
 
     def _set_wizard(self, state):
         logging.getLogger().info('Disabling first time wizard')
-        return self._gateway.put('/config/gui/openFirstTimeWizard', state)
+        return self._edge.api.put('/config/gui/openFirstTimeWizard', state)

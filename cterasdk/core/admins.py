@@ -1,7 +1,7 @@
 import logging
 
 from .base_command import BaseCommand
-from ..exception import CTERAException, ObjectNotFoundException
+from ..exceptions import CTERAException, ObjectNotFoundException
 from ..common import Object, DateTimeUtils
 from ..common import union
 from . import query
@@ -17,7 +17,7 @@ class Administrators(BaseCommand):
     def _get_entire_object(self, name):
         ref = f'/administrators/{name}'
         try:
-            return self._portal.get(ref)
+            return self._core.api.get(ref)
         except CTERAException as error:
             raise CTERAException('Failed to get the user', error)
 
@@ -32,7 +32,7 @@ class Administrators(BaseCommand):
         baseurl = f'/administrators/{name}'
         include = union(include or [], Administrators.default)
         include = ['/' + attr for attr in include]
-        user_object = self._portal.get_multi(baseurl, include)
+        user_object = self._core.api.get_multi(baseurl, include)
         if user_object.name is None:
             raise ObjectNotFoundException('Could not find user', baseurl, username=name)
         return user_object
@@ -47,7 +47,7 @@ class Administrators(BaseCommand):
         """
         include = union(include or [], Administrators.default)
         param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._portal, '/administrators', param)
+        return query.iterator(self._core, '/administrators', param)
 
     def add(self, name, email, first_name, last_name, password, role, company=None, comment=None, password_change=False):
         """
@@ -79,7 +79,7 @@ class Administrators(BaseCommand):
             param.requirePasswordChangeOn = DateTimeUtils.get_expiration_date(password_change).strftime('%Y-%m-%d')
 
         logging.getLogger().info('Creating a global administrator. %s', {'user': name})
-        response = self._portal.add('/administrators', param)
+        response = self._core.api.add('/administrators', param)
         logging.getLogger().info('Global administrator created. %s', {'user': name, 'email': email, 'role': role})
 
         return response
@@ -118,7 +118,7 @@ class Administrators(BaseCommand):
             user.comment = comment
 
         try:
-            response = self._portal.put('/administrators/' + current_username, user)
+            response = self._core.api.put('/administrators/' + current_username, user)
             logging.getLogger().info("User modified. %s", {'username': user.name})
             return response
         except CTERAException as error:
@@ -133,7 +133,7 @@ class Administrators(BaseCommand):
         """
         logging.getLogger().info('Deleting user. %s', {'user': name})
         baseurl = f'/administrators/{name}'
-        response = self._portal.execute(baseurl, 'delete', True)
+        response = self._core.api.execute(baseurl, 'delete', True)
         logging.getLogger().info('User deleted. %s', {'user': name})
 
         return response

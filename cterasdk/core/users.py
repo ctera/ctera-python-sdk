@@ -2,7 +2,7 @@ import logging
 
 from .base_command import BaseCommand
 from .types import UserAccount
-from ..exception import CTERAException, ObjectNotFoundException
+from ..exceptions import CTERAException, ObjectNotFoundException
 from ..common import Object, DateTimeUtils
 from ..common import union
 from . import query
@@ -19,13 +19,13 @@ class Users(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.credentials = Credentials(self._portal)
+        self.credentials = Credentials(self._core)
 
     def _get_entire_object(self, user_account):
         ref = f'/users/{user_account.name}' if user_account.is_local \
             else f'/domains/{user_account.directory}/adUsers/{user_account.name}'
         try:
-            return self._portal.get(ref)
+            return self._core.api.get(ref)
         except CTERAException as error:
             raise CTERAException('Failed to get the user', error)
 
@@ -41,7 +41,7 @@ class Users(BaseCommand):
             else f'/domains/{user_account.directory}/adUsers/{user_account.name}'
         include = union(include or [], Users.default)
         include = ['/' + attr for attr in include]
-        user_object = self._portal.get_multi(baseurl, include)
+        user_object = self._core.api.get_multi(baseurl, include)
         if user_object.name is None:
             raise ObjectNotFoundException('Could not find user', baseurl, user_directory=user_account.directory, username=user_account.name)
         return user_object
@@ -56,7 +56,7 @@ class Users(BaseCommand):
         """
         include = union(include or [], Users.default)
         param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._portal, '/users', param)
+        return query.iterator(self._core, '/users', param)
 
     def list_domain_users(self, domain, include=None):
         """
@@ -69,7 +69,7 @@ class Users(BaseCommand):
         """
         include = union(include or [], Users.default)
         param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._portal, '/domains/' + domain + '/adUsers', param)
+        return query.iterator(self._core, '/domains/' + domain + '/adUsers', param)
 
     def add(self, name, email, first_name, last_name, password, role, company=None, comment=None, password_change=False):
         """
@@ -101,7 +101,7 @@ class Users(BaseCommand):
             param.requirePasswordChangeOn = DateTimeUtils.get_expiration_date(password_change).strftime('%Y-%m-%d')
 
         logging.getLogger().info('Creating user. %s', {'user': name})
-        response = self._portal.add('/users', param)
+        response = self._core.api.add('/users', param)
         logging.getLogger().info('User created. %s', {'user': name, 'email': email, 'role': role})
 
         return response
@@ -141,7 +141,7 @@ class Users(BaseCommand):
             user.comment = comment
 
         try:
-            response = self._portal.put('/users/' + current_username, user)
+            response = self._core.api.put('/users/' + current_username, user)
             logging.getLogger().info("User modified. %s", {'username': user.name})
             return response
         except CTERAException as error:
@@ -158,9 +158,9 @@ class Users(BaseCommand):
         param.objectId = None
         param.type = 'users'
         logging.getLogger().info('Applying provisioning changes.')
-        task = self._portal.execute('', 'updateAccounts', param)
+        task = self._core.api.execute('', 'updateAccounts', param)
         if wait:
-            task = self._portal.tasks.wait(task)
+            task = self._core.tasks.wait(task)
         return task
 
     def delete(self, user):
@@ -171,7 +171,7 @@ class Users(BaseCommand):
         """
         logging.getLogger().info('Deleting user. %s', {'user': str(user)})
         baseurl = f'/users/{user.name}' if user.is_local else f'/domains/{user.directory}/adUsers/{user.name}'
-        response = self._portal.execute(baseurl, 'delete', True)
+        response = self._core.api.execute(baseurl, 'delete', True)
         logging.getLogger().info('User deleted. %s', {'user': str(user)})
 
         return response
@@ -186,7 +186,7 @@ class Credentials(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self.s3 = S3(self._portal)
+        self.s3 = S3(self._core)
 
 
 class S3(BaseCommand):
@@ -200,7 +200,7 @@ class S3(BaseCommand):
 
         :param cterasdk.core.types.UserAccount user_account: User account
         """
-        return self._portal.credentials.s3.all(user_account)
+        return self._core.credentials.s3.all(user_account)
 
     def create(self, user_account):
         """
@@ -208,7 +208,7 @@ class S3(BaseCommand):
 
         :param cterasdk.core.types.UserAccount user_account: User account
         """
-        return self._portal.credentials.s3.create(user_account)
+        return self._core.credentials.s3.create(user_account)
 
     def delete(self, access_key_id, user_account):
         """
@@ -217,4 +217,4 @@ class S3(BaseCommand):
         :param str access_key_id: Access Key ID
         :param cterasdk.core.types.UserAccount user_account: User account
         """
-        return self._portal.credentials.s3.delete(access_key_id, user_account)
+        return self._core.credentials.s3.delete(access_key_id, user_account)

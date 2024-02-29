@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import cache
 from cterasdk.common import Object
 from cterasdk.edge.enum import OperationMode
@@ -20,64 +20,64 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
     def test_enable_caching(self):
         self._init_filer()
         cache.Cache(self._filer).enable()
-        self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/operationMode', OperationMode.CachingGateway)
+        self._filer.api.put.assert_called_once_with('/config/cloudsync/cloudExtender/operationMode', OperationMode.CachingGateway)
 
     def test_disable_caching(self):
         self._init_filer()
         cache.Cache(self._filer).disable()
-        self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/operationMode', OperationMode.Disabled)
+        self._filer.api.put.assert_called_once_with('/config/cloudsync/cloudExtender/operationMode', OperationMode.Disabled)
 
     def test_force_eviction(self):
         self._init_filer()
         cache.Cache(self._filer).force_eviction()
-        self._filer.execute.assert_called_once_with('/config/cloudsync', 'forceExecuteEvictor', None)
+        self._filer.api.execute.assert_called_once_with('/config/cloudsync', 'forceExecuteEvictor', None)
 
     def test_is_enabled_true(self):
         get_response = OperationMode.CachingGateway
         self._init_filer(get_response=get_response)
         ret = cache.Cache(self._filer).is_enabled()
-        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/operationMode')
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/operationMode')
         self.assertEqual(ret, True)
 
     def test_is_enabled_false(self):
         get_response = OperationMode.Disabled
         self._init_filer(get_response=get_response)
         ret = cache.Cache(self._filer).is_enabled()
-        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/operationMode')
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/operationMode')
         self.assertEqual(ret, False)
 
     def test_pin_folder(self):
         get_response = self._get_dir_entry(self._root, False)
         self._init_filer(get_response=get_response)
         cache.Cache(self._filer).pin(self._pin_valid_folder_path)
-        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
-        self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.api.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
 
         expected_param = self._create_dir_tree(self._pin_valid_folder_path, True)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         TestEdgeCaching._remove_parent_attrs(actual_param)
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_pin_invalid_root_directory(self):
         get_response = self._get_dir_entry(self._root, False)
         self._init_filer(get_response=get_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             cache.Cache(self._filer).pin(self._pin_invalid_folder_path)
-        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
         self.assertEqual('Invalid root directory', error.exception.message)
 
     def test_pin_exclude_subfolder(self):
         get_response = self._create_dir_tree(self._pin_valid_folder_path, True)
         self._init_filer(get_response=get_response)
         cache.Cache(self._filer).pin_exclude(self._pin_exclude_subfolder_path)
-        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
-        self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.api.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
 
         expected_param = self._create_dir_tree(self._pin_valid_folder_path, True)
         descendant = self._get_dir_entry(self._pin_exclude_subfolder_path.rsplit('/', maxsplit=1)[-1], False)
         TestEdgeCaching._add_descendant(expected_param, descendant)
 
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         TestEdgeCaching._remove_parent_attrs(actual_param)
         self._assert_equal_objects(actual_param, expected_param)
 
@@ -85,11 +85,11 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         get_response = self._create_dir_tree(self._pin_exclude_subfolder_path, True)
         self._init_filer(get_response=get_response)
         cache.Cache(self._filer).remove_pin(self._pin_exclude_subfolder_path)
-        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
-        self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.api.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
 
         expected_param = self._create_dir_tree(self._pin_valid_folder_path, False)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         TestEdgeCaching._remove_parent_attrs(actual_param)
         self._assert_equal_objects(actual_param, expected_param)
 
@@ -97,11 +97,11 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         get_response = self._get_dir_entry(self._root, False)
         self._init_filer(get_response=get_response)
         cache.Cache(self._filer).pin_all()
-        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
-        self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.api.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
 
         expected_param = self._get_dir_entry(self._root, True)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         TestEdgeCaching._remove_parent_attrs(actual_param)
         self._assert_equal_objects(actual_param, expected_param)
 
@@ -109,11 +109,11 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         get_response = self._get_dir_entry(self._root, True)
         self._init_filer(get_response=get_response)
         cache.Cache(self._filer).unpin_all()
-        self._filer.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
-        self._filer.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.api.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
 
         expected_param = self._get_dir_entry(self._root, False)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         TestEdgeCaching._remove_parent_attrs(actual_param)
         self._assert_equal_objects(actual_param, expected_param)
 

@@ -1,6 +1,6 @@
 import logging
 
-from ..exception import CTERAException
+from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
@@ -10,14 +10,14 @@ class Login(BaseCommand):
         """
         Get login info
         """
-        return self._gateway.get('/nosession/logininfo')
+        return self._edge.api.get('/nosession/logininfo')
 
     def login(self, username, password):
-        host = self._gateway.host()
+        host = self._edge.host()
         try:
-            self._gateway.form_data('/login', {'username': username, 'password': password})
+            self._edge.api.form_data('/login', {'username': username, 'password': password})
             logging.getLogger().info("User logged in. %s", {'host': host, 'user': username})
-            self._gateway.ctera_migrate.login()
+            self._edge.ctera_migrate.login()
         except CTERAException as error:
             logging.getLogger().error("Login failed. %s", {'host': host, 'user': username})
             raise error
@@ -29,14 +29,14 @@ class Login(BaseCommand):
         :param str ticket: SSO Ticket.
         """
         logging.getLogger().info("Performing Single Sign On.")
-        self._gateway.get('/ssologin', {'ticket': ticket})
-        self._gateway.ctera_migrate.login()
+        self._edge.api.get('/ssologin', params={'ticket': ticket})
+        self._edge.ctera_migrate.login()
 
     def logout(self):
-        host = self._gateway.host()
-        user = self._gateway.session().user.name
+        host = self._edge.host()
+        user = self._edge.session().user.name
         try:
-            self._gateway.form_data('/logout', {'foo': 'bar'})
+            self._edge.api.form_data('/logout', {'foo': 'bar'})
             logging.getLogger().info("User logged out. %s", {'host': host, 'user': user})
         except CTERAException as error:
             logging.getLogger().error("Logout failed. %s", {'host': host, 'user': user})

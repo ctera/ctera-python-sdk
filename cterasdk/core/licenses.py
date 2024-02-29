@@ -16,7 +16,7 @@ class Licenses(BaseCommand):
         :returns: A list of licenses
         :rtype: list[cterasdk.common.object.Object]
         """
-        return self._portal.get('/portalLicenses')
+        return self._core.api.get('/portalLicenses')
 
     def add(self, *keys):
         """
@@ -27,7 +27,7 @@ class Licenses(BaseCommand):
         logging.getLogger().info('Adding license(s)')
         param = Object()
         param.keys = list(keys)
-        self._portal.execute('', 'addLicenses', param)
+        self._core.api.execute('', 'addLicenses', param)
         logging.getLogger().info('License(s) added')
 
     def remove(self, *keys):
@@ -41,7 +41,7 @@ class Licenses(BaseCommand):
         param = [license for license in licenses if license.key not in keys and license.originalKey not in keys]
         if len(param) != len(licenses):
             logging.getLogger().info('Updating licenses.')
-            response = self._portal.put('/portalLicenses', param)
+            response = self._core.api.put('/portalLicenses', param)
             logging.getLogger().info('Licenses updated.')
             return response
         return None

@@ -15,7 +15,7 @@ class Drive(BaseCommand):
 
         :param str,optional name: Name of the drive
         """
-        return self._gateway.get('/config/storage/disks' + ('' if name is None else ('/' + name)))
+        return self._edge.api.get('/config/storage/disks' + ('' if name is None else ('/' + name)))
 
     def get_status(self, name=None):
         """
@@ -23,7 +23,7 @@ class Drive(BaseCommand):
 
         :param str name: Name of the drive
         """
-        return self._gateway.get('/status/storage/disks' + ('' if name is None else ('/' + name)))
+        return self._edge.api.get('/status/storage/disks' + ('' if name is None else ('/' + name)))
 
     def format(self, name):
         """
@@ -34,13 +34,13 @@ class Drive(BaseCommand):
         param = Object()
         param.name = name
 
-        self._gateway.execute("/proc/storage", "format", param)
+        self._edge.api.execute("/proc/storage", "format", param)
 
         logging.getLogger().info('Formatting drive. %s', {'drive': name})
 
     def format_all(self):
         """ Format all drives """
-        drives = self._gateway.get('/status/storage/disks')
+        drives = self._edge.api.get('/status/storage/disks')
 
         for drive in drives:
             self.format(drive.name)

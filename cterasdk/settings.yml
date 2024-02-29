@@ -1,0 +1,10 @@
+---
+sessions:
+  management:
+    allow_unsafe: true
+    ssl: true
+    edge:
+      services:
+        ssl: prompt
+downloads:
+  location: ~/Downloads

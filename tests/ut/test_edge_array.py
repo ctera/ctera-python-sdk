@@ -1,7 +1,7 @@
 from unittest import mock
 import munch
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.edge import array
 from cterasdk.edge.enum import RAIDLevel
 from cterasdk.common import Object
@@ -20,24 +20,24 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = array.Array(self._filer).get()
-        self._filer.get.assert_called_once_with('/config/storage/arrays')
+        self._filer.api.get.assert_called_once_with('/config/storage/arrays')
         self.assertEqual(ret, get_response)
 
     def test_get_array(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
         ret = array.Array(self._filer).get(self._array_name)
-        self._filer.get.assert_called_once_with('/config/storage/arrays/' + self._array_name)
+        self._filer.api.get.assert_called_once_with('/config/storage/arrays/' + self._array_name)
         self.assertEqual(ret, get_response)
 
     def test_add_array_with_members_success(self):
         add_response = 'Success'
         self._init_filer(add_response=add_response)
         ret = array.Array(self._filer).add(self._array_name, self._array_level, self._array_members)
-        self._filer.add.assert_called_once_with('/config/storage/arrays', mock.ANY)
+        self._filer.api.add.assert_called_once_with('/config/storage/arrays', mock.ANY)
 
         expected_param = self._get_array_object()
-        actual_param = self._filer.add.call_args[0][1]
+        actual_param = self._filer.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, add_response)
@@ -46,19 +46,19 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
         add_response = 'Success'
         self._init_filer(get_response=[munch.Munch(dict(name=drive)) for drive in self._array_members], add_response=add_response)
         ret = array.Array(self._filer).add(self._array_name, self._array_level)
-        self._filer.get.assert_called_once_with('/status/storage/disks')
-        self._filer.add.assert_called_once_with('/config/storage/arrays', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/status/storage/disks')
+        self._filer.api.add.assert_called_once_with('/config/storage/arrays', mock.ANY)
 
         expected_param = self._get_array_object()
-        actual_param = self._filer.add.call_args[0][1]
+        actual_param = self._filer.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
         self.assertEqual(ret, add_response)
 
     def test_add_array_with_members_failure(self):
-        expected_exception = exception.CTERAException()
-        self._filer.add = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        expected_exception = exceptions.CTERAException()
+        self._filer.api.add = mock.MagicMock(side_effect=expected_exception)
+        with self.assertRaises(exceptions.CTERAException) as error:
             array.Array(self._filer).add(self._array_name, self._array_level, self._array_members)
         self.assertEqual('Storage array creation failed.', error.exception.message)
 
@@ -66,13 +66,13 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
         delete_response = 'Success'
         self._init_filer(delete_response=delete_response)
         ret = array.Array(self._filer).delete(self._array_name)
-        self._filer.delete.assert_called_once_with('/config/storage/arrays/' + self._array_name)
+        self._filer.api.delete.assert_called_once_with('/config/storage/arrays/' + self._array_name)
         self.assertEqual(ret, delete_response)
 
     def test_delete_array_failure(self):
-        expected_exception = exception.CTERAException()
-        self._filer.delete = mock.MagicMock(side_effect=expected_exception)
-        with self.assertRaises(exception.CTERAException) as error:
+        expected_exception = exceptions.CTERAException()
+        self._filer.api.delete = mock.MagicMock(side_effect=expected_exception)
+        with self.assertRaises(exceptions.CTERAException) as error:
             array.Array(self._filer).delete(self._array_name)
         self.assertEqual('Storage array deletion failed.', error.exception.message)
 
@@ -81,7 +81,7 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
         arrays = self._get_arrays_param()
         self._init_filer(get_response=arrays)
         array.Array(self._filer).delete_all()
-        self._filer.get.assert_called_once_with('/config/storage/arrays')
+        self._filer.api.get.assert_called_once_with('/config/storage/arrays')
 
     def _get_array_object(self):
         array_param = Object()

@@ -16,36 +16,36 @@ class TestEdgeAIO(base_edge.BaseEdgeTest):
         get_response = self._get_cifs_object(True)
         self._init_filer(get_response=get_response)
         ret = aio.AIO(self._filer).is_enabled()
-        self._filer.get.assert_called_once_with('/config/fileservices/cifs')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/cifs')
         self.assertEqual(ret, True)
 
     def test_is_enabled_false(self):
         get_response = self._get_cifs_object(False)
         self._init_filer(get_response=get_response)
         ret = aio.AIO(self._filer).is_enabled()
-        self._filer.get.assert_called_once_with('/config/fileservices/cifs')
+        self._filer.api.get.assert_called_once_with('/config/fileservices/cifs')
         self.assertEqual(ret, False)
 
     def test_disable_aio(self):
         get_response = self._get_cifs_object(enable_aio=True)
         self._init_filer(get_response=get_response)
         aio.AIO(self._filer).disable()
-        self._filer.get.assert_called_once_with('/config/fileservices/cifs')
-        self._filer.put.assert_called_once_with('/config/fileservices/cifs', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/fileservices/cifs')
+        self._filer.api.put.assert_called_once_with('/config/fileservices/cifs', mock.ANY)
 
         expected_param = self._get_cifs_object(enable_aio=False)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def test_enable_aio(self):
         get_response = self._get_cifs_object(enable_aio=False)
         self._init_filer(get_response=get_response)
         aio.AIO(self._filer).enable()
-        self._filer.get.assert_called_once_with('/config/fileservices/cifs')
-        self._filer.put.assert_called_once_with('/config/fileservices/cifs', mock.ANY)
+        self._filer.api.get.assert_called_once_with('/config/fileservices/cifs')
+        self._filer.api.put.assert_called_once_with('/config/fileservices/cifs', mock.ANY)
 
         expected_param = self._get_cifs_object(enable_aio=True)
-        actual_param = self._filer.put.call_args[0][1]
+        actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def _get_cifs_object(self, enable_aio):

@@ -1,7 +1,7 @@
 from collections import namedtuple
 from . import enum
 from ..common import Object
-from ..exception import InputError
+from ..exceptions import InputError
 
 
 TCPService = namedtuple('TCPService', ('host', 'port'))

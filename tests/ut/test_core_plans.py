@@ -1,8 +1,8 @@
 from unittest import mock
 
-from cterasdk.exception import InputError
+from cterasdk.exceptions import InputError
 
-from cterasdk import exception
+from cterasdk import exceptions
 from cterasdk.common import Object
 from cterasdk.core import plans
 from tests.ut import base_core
@@ -19,9 +19,9 @@ class TestCorePlans(base_core.BaseCoreTest):
         get_multi_response = self._get_plan_object(name=self._plan_name)
         self._init_global_admin(get_multi_response=get_multi_response)
         ret = plans.Plans(self._global_admin).get(self._plan_name)
-        self._global_admin.get_multi.assert_called_once_with('/plans/' + self._plan_name, mock.ANY)
+        self._global_admin.api.get_multi.assert_called_once_with('/plans/' + self._plan_name, mock.ANY)
         expected_include = ['/' + attr for attr in plans.Plans.default]
-        actual_include = self._global_admin.get_multi.call_args[0][1]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
@@ -30,11 +30,11 @@ class TestCorePlans(base_core.BaseCoreTest):
     def test_get_plan_not_found(self):
         get_multi_response = self._get_plan_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
-        with self.assertRaises(exception.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             plans.Plans(self._global_admin).get(self._plan_name)
-        self._global_admin.get_multi.assert_called_once_with('/plans/' + self._plan_name, mock.ANY)
+        self._global_admin.api.get_multi.assert_called_once_with('/plans/' + self._plan_name, mock.ANY)
         expected_include = ['/' + attr for attr in plans.Plans.default]
-        actual_include = self._global_admin.get_multi.call_args[0][1]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
@@ -65,31 +65,31 @@ class TestCorePlans(base_core.BaseCoreTest):
         delete_response = 'Success'
         self._init_global_admin(delete_response=delete_response)
         ret = plans.Plans(self._global_admin).delete(self._plan_name)
-        self._global_admin.delete.assert_called_once_with(f'/plans/{self._plan_name}')
+        self._global_admin.api.delete.assert_called_once_with(f'/plans/{self._plan_name}')
         self.assertEqual(ret, delete_response)
 
     def test_delete_failure(self):
-        self._global_admin.delete = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._global_admin.api.delete = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             plans.Plans(self._global_admin).delete(self._plan_name)
-        self._global_admin.delete.assert_called_once_with(f'/plans/{self._plan_name}')
+        self._global_admin.api.delete.assert_called_once_with(f'/plans/{self._plan_name}')
         self.assertEqual('Plan deletion failed', error.exception.message)
 
     def test_modify_plan_not_found(self):
         self._init_global_admin()
-        self._global_admin.get = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._global_admin.api.get = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             plans.Plans(self._global_admin).modify(self._plan_name)
-        self._global_admin.get.assert_called_once_with(f'/plans/{self._plan_name}')
+        self._global_admin.api.get.assert_called_once_with(f'/plans/{self._plan_name}')
         self.assertEqual('Could not find subscription plan', error.exception.message)
 
     def test_modify_update_failure(self):
         self._init_global_admin()
-        self._global_admin.put = mock.MagicMock(side_effect=exception.CTERAException())
-        with self.assertRaises(exception.CTERAException) as error:
+        self._global_admin.api.put = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
             plans.Plans(self._global_admin).modify(self._plan_name)
-        self._global_admin.get.assert_called_once_with(f'/plans/{self._plan_name}')
-        self._global_admin.put.assert_called_once_with(f'/plans/{self._plan_name}', mock.ANY)
+        self._global_admin.api.get.assert_called_once_with(f'/plans/{self._plan_name}')
+        self._global_admin.api.put.assert_called_once_with(f'/plans/{self._plan_name}', mock.ANY)
         self.assertEqual('Could not modify subscription plan', error.exception.message)
 
     def test_modify_success_without_apply_changes(self):
@@ -156,10 +156,10 @@ class TestCorePlans(base_core.BaseCoreTest):
             Storage=4096
         )
         plans.Plans(self._global_admin).modify(self._plan_name, retention, quotas, False)
-        self._global_admin.get.assert_called_once_with(f'/plans/{self._plan_name}')
-        self._global_admin.put.assert_called_once_with(f'/plans/{self._plan_name}', mock.ANY)
+        self._global_admin.api.get.assert_called_once_with(f'/plans/{self._plan_name}')
+        self._global_admin.api.put.assert_called_once_with(f'/plans/{self._plan_name}', mock.ANY)
         expected_param = self._get_plan_object(retention, licenses)
-        actual_param = self._global_admin.put.call_args[0][1]
+        actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
     def _get_plan_object(self, retention=None, quotas=None, **kwargs):
