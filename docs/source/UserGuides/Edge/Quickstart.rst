@@ -36,7 +36,7 @@ Now, let's login to the CTERA Edge Filer:
     if __name__ == '__main__':
         main()
 
-.. note:: to ignore SSL errors, or log in using an IP address, use: ``cterasdk.settings.sessions.management.ssl = False``
+.. note:: To ignore SSL errors, or log in using an IP address, use: ``cterasdk.settings.sessions.management.ssl = False``
 
 Now we have an authenticated ``edge`` session. We can now proceed to access the Edge Filer API's.
 
@@ -169,11 +169,6 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
 
     edge.users.delete(username)  # Recommended
 
-
-Supported Modules
------------------
-
-
 Data Types and Enumerators
 --------------------------
 Certain modules require input parameters comprising of complex data types or values selected from predefined lists. 
@@ -194,7 +189,7 @@ This access control entry is then used to create a share.
     """Create a CIFS/SMB network share allowing access to the ACME domain administrators group."""
     edge.shares.add('acme-project', 'cloud/users/Service Account/acme-project', acl=[domain_admins])
 
-Complex types and predefined lists that are common to the CTERA Drive, Edge, and Portal are in ``common_types`` and ``common_enum``.
+Complex types and predefined lists that are shared across CTERA Drive, Edge, and Portal are in ``common_types`` and ``common_enum``.
 
 
 File Access
@@ -205,8 +200,8 @@ The SDK features a file browser module for managing files.
 
     edge.files.mkdir('The/quick/brown/fox')  # Creates the dir 'fox' in the following path: 'The/quick/brown'
     edge.files.makedirs('The/quick/brown/fox')  # Creates the entire directory path recursively
-    edge.files.copy('', destination=)
-    edge.files.move('', destination=)
+    edge.files.copy('cloud/users/Bruce Wayne/My Files/Documents', destination='cloud/users/Alice Wonderland/My Files')
+    edge.files.move('cloud/users/Bruce Wayne/My Files/Documents', destination='cloud/users/Alice Wonderland/My Files')
     edge.files.delete('The/quick/brown/fox/document.docx')
     edge.files.download('The/quick/brown/fox/document.docx')
     edge.files.download_as_zip('The/quick/brown/fox', ['document.docx', 'chart.xlsx', 'deck.pptx'])
