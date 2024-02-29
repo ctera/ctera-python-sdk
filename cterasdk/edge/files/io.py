@@ -13,8 +13,8 @@ def mkdir(edge, path):
             common.raise_for_status(error.response.message.msg, directory)
         except common.ItemExists:
             logging.getLogger().info('Directory already exists. %s', {'path': directory})
-            return directory
     logging.getLogger().info('Directory created. %s', {'path': directory})
+    return directory
 
 
 def makedirs(edge, path):
