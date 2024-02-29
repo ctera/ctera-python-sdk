@@ -1,6 +1,6 @@
-===============
-Edge Quickstart
-===============
+==========
+Quickstart
+==========
 
 Eager to get started? This page gives a good introduction in how to get started with the CTERA SDK and the Edge Filer APIs.
 

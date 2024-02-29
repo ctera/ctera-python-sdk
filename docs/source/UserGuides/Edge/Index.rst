@@ -3,6 +3,6 @@
    :maxdepth: 5
 
    Quickstart
-   Management
-   Migrate
+   Configuration
+   Migration
    Files
