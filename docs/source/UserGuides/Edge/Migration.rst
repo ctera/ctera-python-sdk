@@ -1,6 +1,6 @@
-=============
-CTERA Migrate
-=============
+=========
+Migration
+=========
 
 .. automethod:: cterasdk.edge.ctera_migrate.CTERAMigrate.list_shares
    :noindex:

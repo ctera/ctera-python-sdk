@@ -1,6 +1,6 @@
-==========
-Management
-==========
+========================
+Configuration Management
+========================
 
 Logging In
 ==========
