@@ -144,3 +144,6 @@ Table of Contents
    :caption: Navigation
 
    UserGuides/Edge/Index
+   UserGuides/Portal/Index
+   UserGuides/Miscellaneous/Index
+   
