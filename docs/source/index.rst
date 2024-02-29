@@ -54,7 +54,14 @@ Edge
         main()
 
 This prints:
+
 .. code-block:: text
+
+    Hostname:  vGateway-01ad
+    Location:  None
+    Location:  1234 Sycamore Lane, Humorville, NY 12345
+
+..
 
 
 Portal
@@ -80,25 +87,28 @@ Portal
         main()
 
 This prints:
+
 .. code-block:: text
 
-{
-     "_classname": "PortalUser",
-     "email": "alice.wonderland@acme.com",
-     "firstName": "Alice",
-     "lastName": "Wonderland",
-     "name": "alice"
-}
-{
-     "_classname": "PortalAdmin",
-     "email": "matt@ctera.com",
-     "name": "matt"
-}
-{
-     "_classname": "PortalAdmin",
-     "email": "saimon@ctera.com",
-     "name": "saimon"
-}
+    {
+        "_classname": "PortalUser",
+        "email": "alice.wonderland@acme.com",
+        "firstName": "Alice",
+        "lastName": "Wonderland",
+        "name": "alice"
+    }
+    {
+        "_classname": "PortalAdmin",
+        "email": "matt@ctera.com",
+        "name": "matt"
+    }
+    {
+        "_classname": "PortalAdmin",
+        "email": "saimon@ctera.com",
+        "name": "saimon"
+    }
+
+..
 
 Source Code
 ===========
