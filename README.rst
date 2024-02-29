@@ -21,11 +21,11 @@ CTERA SDK for Python
    :target: https://opensource.org/licenses/Apache-2.0
    :alt: [Latest Release License]
 .. image:: https://img.shields.io/pypi/pyversions/cterasdk
-    :target: https://pypi.org/pypi/cterasdk
-    :alt: [Latest Release Supported Python Versions]
+   :target: https://pypi.org/pypi/cterasdk
+   :alt: [Latest Release Supported Python Versions]
 .. image:: https://img.shields.io/pypi/status/cterasdk
-    :target: https://pypi.org/pypi/cterasdk
-    :alt: [Latest Release Development Stage]
+   :target: https://pypi.org/pypi/cterasdk
+   :alt: [Latest Release Development Stage]
 
 The CTERA SDK for Python provides developers with powerful tools to automate the deployment and configuration 
 of the CTERA Global File System, streamline data management tasks, 
@@ -39,13 +39,13 @@ Installation
 ------------
 Installing via `pip <https://pip.pypa.io/>`_:
 
-.. code-block:: bash
+.. code-block:: console
+
     $ pip install cterasdk
-..
 
 Install from Source:
 
-.. code-block:: bash
+.. code-block:: console
 
    $ git clone https://github.com/ctera/ctera-python-sdk.git
    $ cd ctera-python-sdk
@@ -70,6 +70,6 @@ We use the `tox <https://tox.readthedocs.org/>`_ package to run tests in Python
 3. To install, use :code:`pip install tox`. Once installed, run `tox` from the
 root directory.
 
-.. code-block:: bash
+.. code-block:: console
 
    $ tox
