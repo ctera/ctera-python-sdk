@@ -31,7 +31,6 @@ Library Installation
 
 Getting Started
 ===============
-
 Edge
 ----
 
@@ -141,6 +140,7 @@ Table of Contents
 =================
 
 .. toctree::
+   :name: MasterTableOfContents
    :maxdepth: 4
    :caption:
 
