@@ -1,6 +1,7 @@
-****************
-CTERA for Python
-****************
+====================
+CTERA SDK for Python
+====================
+
 .. image:: https://travis-ci.com/ctera/ctera-python-sdk.svg?branch=master
    :target: https://travis-ci.com/ctera/ctera-python-sdk
 .. image:: https://github.com/ctera/ctera-python-sdk/workflows/CI/badge.svg
@@ -26,8 +27,9 @@ CTERA for Python
     :target: https://pypi.org/pypi/cterasdk
     :alt: [Latest Release Development Stage]
 
-A Python SDK for integrating with the CTERA Global File System API. Compatible with Python
-3.5+.
+The CTERA SDK for Python provides developers with powerful tools to automate the deployment and configuration 
+of the CTERA Global File System, streamline data management tasks, 
+and seamlessly integrate CTERA's global namespace with their applications.
 
 Documentation
 -------------
@@ -37,31 +39,13 @@ Installation
 ------------
 Installing via `pip <https://pip.pypa.io/>`_:
 
-.. code-block:: console
-
+.. code-block:: bash
     $ pip install cterasdk
-
 ..
 
-If you receive a certificate error, add the following trusted hosts:
+Install from Source:
 
-.. code-block:: console
-
-    $ pip install cterasdk --trusted-host pypi.org --trusted-host files.pythonhosted.org  # [SSL: CERTIFICATE_VERIFY_FAILED]
-
-..
-
-Installation via proxy:
-
-.. code-block:: console
-
-    $ pip install cterasdk --proxy http://user:password@proxyserver:port  # use proxy
-
-..
-
-Install from source:
-
-.. code-block:: console
+.. code-block:: bash
 
    $ git clone https://github.com/ctera/ctera-python-sdk.git
    $ cd ctera-python-sdk
@@ -69,14 +53,14 @@ Install from source:
 
 Importing the Library
 ---------------------
-After installation, to get started, open a Python console:
+To get started, open a Python console:
 
 .. code-block:: python
-
-    >>> from cterasdk import *
+   
+   from cterasdk import *
 
 Building Documentation
--------------------------
+----------------------
 Documentation can be compiled by running ``make html`` from the ``docs``
 folder. After compilation, open ``docs/build/html/index.html``.
 
@@ -86,6 +70,6 @@ We use the `tox <https://tox.readthedocs.org/>`_ package to run tests in Python
 3. To install, use :code:`pip install tox`. Once installed, run `tox` from the
 root directory.
 
-.. code-block:: console
+.. code-block:: bash
 
    $ tox
