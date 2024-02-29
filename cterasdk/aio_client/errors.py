@@ -13,7 +13,7 @@ class ClientError(Object):
         self.request.url = str(error.request_info.real_url)
         self.response = Object()
         self.response.status = error.status
-        self.response.message = message or fromxmlstr(message) or fromjsonstr(message)
+        self.response.message = fromxmlstr(message) or fromjsonstr(message) or message
 
 
 def accept_response(response):

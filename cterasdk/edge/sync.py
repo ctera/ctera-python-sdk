@@ -75,7 +75,8 @@ class Sync(BaseCommand):
                 [
                     SyncStatus.Synced,
                     SyncStatus.Syncing,
-                    SyncStatus.Scanning
+                    SyncStatus.Scanning,
+                    SyncStatus.UpgradingDataBase
                 ],
                 [
                     SyncStatus.ConnectingFolders,
