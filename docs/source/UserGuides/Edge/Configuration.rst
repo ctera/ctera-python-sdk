@@ -204,10 +204,10 @@ Network Shares
    - NA: No Access
    """
 
-   everyone = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.LG, 'Everyone', gateway_enum.FileAccessMode.RO)
-   local_admin = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.LU, 'admin', gateway_enum.FileAccessMode.RW)
-   domain_admins = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\Domain Admins', gateway_enum.FileAccessMode.RO)
-   bruce_wayne = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'bruce.wayne@ctera.com', gateway_enum.FileAccessMode.RW)
+   everyone = edge_types.ShareAccessControlEntry(edge_enum.PrincipalType.LG, 'Everyone', edge_enum.FileAccessMode.RO)
+   local_admin = edge_types.ShareAccessControlEntry(edge_enum.PrincipalType.LU, 'admin', edge_enum.FileAccessMode.RW)
+   domain_admins = edge_types.ShareAccessControlEntry(edge_enum.PrincipalType.DG, 'CTERA\Domain Admins', edge_enum.FileAccessMode.RO)
+   bruce_wayne = edge_types.ShareAccessControlEntry(edge_enum.PrincipalType.DU, 'bruce.wayne@ctera.com', edge_enum.FileAccessMode.RW)
 
    edge.shares.add('Accounting', 'cloud/users/Service Account/Accounting', acl = [ \
        everyone, local_admin, domain_admins, bruce_wayne \
@@ -215,13 +215,13 @@ Network Shares
 
    """Create an 'Only Authenticated Users' cloud share called 'FTP' and enable FTP access to everyone"""
 
-   everyone = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.LG, 'Everyone', gateway_enum.FileAccessMode.RW)
+   everyone = edge_types.ShareAccessControlEntry(edge_enum.PrincipalType.LG, 'Everyone', edge_enum.FileAccessMode.RW)
 
    edge.shares.add('FTP', 'cloud/users/Service Account/FTP', acl = [everyone], export_to_ftp = True)
 
    """Add an NFS share and enable access to two hosts"""
-   nfs_client_1 = gateway_types.NFSv3AccessControlEntry('192.168.0.1', '255.255.255.0', gateway_enum.FileAccessMode.RW)  # read write
-   nfs_client_2 = gateway_types.NFSv3AccessControlEntry('192.168.0.2', '255.255.255.0', gateway_enum.FileAccessMode.RO)  # read only
+   nfs_client_1 = edge_types.NFSv3AccessControlEntry('192.168.0.1', '255.255.255.0', edge_enum.FileAccessMode.RW)  # read write
+   nfs_client_2 = edge_types.NFSv3AccessControlEntry('192.168.0.2', '255.255.255.0', edge_enum.FileAccessMode.RO)  # read only
    edge.shares.add('NFS', 'cloud/users/Service Account/NFS', export_to_nfs=True, trusted_nfs_clients=[nfs_client_1, nfs_client_2])
 
 
@@ -232,8 +232,8 @@ Network Shares
 
    """Add two access control entries to the 'Accounting' share"""
 
-   domain_group = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\leadership', gateway_enum.FileAccessMode.RW)
-   domain_user = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'clark.kent@ctera.com', gateway_enum.FileAccessMode.RO)
+   domain_group = edge_types.ShareAccessControlEntry(edge_enum.PrincipalType.DG, 'CTERA\leadership', edge_enum.FileAccessMode.RW)
+   domain_user = edge_types.ShareAccessControlEntry(edge_enum.PrincipalType.DU, 'clark.kent@ctera.com', edge_enum.FileAccessMode.RO)
 
    edge.shares.add_acl('Accounting', [domain_group, domain_user])
 
@@ -244,8 +244,8 @@ Network Shares
 
    """Set the access control entries of the 'Accounting' share"""
 
-   domain_group = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\leadership', gateway_enum.FileAccessMode.RW)
-   domain_user = gateway_types.ShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'clark.kent@ctera.com', gateway_enum.FileAccessMode.RO)
+   domain_group = edge_types.ShareAccessControlEntry(edge_enum.PrincipalType.DG, 'CTERA\leadership', edge_enum.FileAccessMode.RW)
+   domain_user = edge_types.ShareAccessControlEntry(edge_enum.PrincipalType.DU, 'clark.kent@ctera.com', edge_enum.FileAccessMode.RO)
 
    edge.shares.set_acl('Accounting', [domain_group, domain_user])
 
@@ -256,8 +256,8 @@ Network Shares
 
    """Remove access control entries from the 'Accounting' share"""
 
-   domain_group = gateway_types.RemoveShareAccessControlEntry(gateway_enum.PrincipalType.DG, 'CTERA\leadership')
-   domain_user = gateway_types.RemoveShareAccessControlEntry(gateway_enum.PrincipalType.DU, 'clark.kent@ctera.com')
+   domain_group = edge_types.RemoveShareAccessControlEntry(edge_enum.PrincipalType.DG, 'CTERA\leadership')
+   domain_user = edge_types.RemoveShareAccessControlEntry(edge_enum.PrincipalType.DU, 'clark.kent@ctera.com')
 
    edge.shares.remove_acl('Accounting', [domain_group, domain_user])
 
@@ -346,13 +346,13 @@ Local Groups
 .. code-block:: python
 
    """Add Bruce Wayne to the local Administrators group"""
-   member = gateway_types.UserGroupEntry(gateway_enum.PrincipalType.DU, 'bruce.wayne@we.com')
+   member = edge_types.UserGroupEntry(edge_enum.PrincipalType.DU, 'bruce.wayne@we.com')
    edge.groups.add_members('Administrators', [member])
 
    """Add Bruce Wayne and Domain Admins to the local Administrators group"""
 
-   domain_user = gateway_types.UserGroupEntry(gateway_enum.PrincipalType.DU, 'bruce.wayne@we.com')
-   domain_group = gateway_types.UserGroupEntry(gateway_enum.PrincipalType.DG, 'WE\Domain Admins')
+   domain_user = edge_types.UserGroupEntry(edge_enum.PrincipalType.DU, 'bruce.wayne@we.com')
+   domain_group = edge_types.UserGroupEntry(edge_enum.PrincipalType.DG, 'WE\Domain Admins')
    edge.groups.add_members('Administrators', [domain_user, domain_group])
 
 .. automethod:: cterasdk.edge.groups.Groups.remove_members
@@ -918,7 +918,7 @@ Diagnostics
 
 .. code-block:: python
 
-   cttp_service = gateway_types.TCPService('chopin.ctera.com', 995)
+   cttp_service = edge_types.TCPService('chopin.ctera.com', 995)
    result = edge.network.tcp_connect(cttp_service)
    if result.is_open:
        print('Success')
@@ -926,7 +926,7 @@ Diagnostics
    else:
        print('Failure')
 
-   ldap_service = gateway_types.TCPService('dc.ctera.com', 389)
+   ldap_service = edge_types.TCPService('dc.ctera.com', 389)
    edge.network.tcp_connect(ldap_service)
 
 .. automethod:: cterasdk.edge.network.Network.diagnose
@@ -935,9 +935,9 @@ Diagnostics
 .. code-block:: python
 
    services = []
-   services.append(gateway_types.TCPService('192.168.90.1', 389))  # LDAP
-   services.append(gateway_types.TCPService('ctera.portal.com', 995))  # CTTP
-   services.append(gateway_types.TCPService('ctera.portal.com', 443))  # HTTPS
+   services.append(edge_types.TCPService('192.168.90.1', 389))  # LDAP
+   services.append(edge_types.TCPService('ctera.portal.com', 995))  # CTTP
+   services.append(edge_types.TCPService('ctera.portal.com', 443))  # HTTPS
    result = edge.network.diagnose(services)
    for result in results:
        print(result.host, result.port, result.is_open)
@@ -952,9 +952,9 @@ Diagnostics
 
    edge.network.iperf('192.168.1.145', port=85201, threads=5)  # Customized port and number of threads
 
-   edge.network.iperf('192.168.1.145', direction=gateway_enum.Traffic.Download)  # Measure download speed
+   edge.network.iperf('192.168.1.145', direction=edge_enum.Traffic.Download)  # Measure download speed
 
-   edge.network.iperf('192.168.1.145', protocol=gateway_enum.IPProtocol.UDP)  # Use UDP
+   edge.network.iperf('192.168.1.145', protocol=edge_enum.IPProtocol.UDP)  # Use UDP
 
 Mail Server
 ===========

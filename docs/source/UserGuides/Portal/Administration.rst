@@ -104,15 +104,15 @@ Managing Storage Nodes
 .. code-block:: python
 
    """Add an Amazon S3 bucket called 'mybucket'"""
-   bucket = portal_types.AmazonS3('mybucket', 'access-key', 'secret-key')
+   bucket = core_types.AmazonS3('mybucket', 'access-key', 'secret-key')
    admin.buckets.add('cterabucket', bucket)
 
    """Add an Amazon S3 bucket called 'mybucket', dedicated to a tenant called 'mytenant'"""
-   bucket = portal_types.AmazonS3('mybucket', 'access-key', 'secret-key')
+   bucket = core_types.AmazonS3('mybucket', 'access-key', 'secret-key')
    admin.buckets.add('cterabucket', bucket, dedicated_to='mytenant')
 
    """Add a bucket in read-delete only mode"""
-   bucket = portal_types.AmazonS3('mybucket', 'access-key', 'secret-key')
+   bucket = core_types.AmazonS3('mybucket', 'access-key', 'secret-key')
    admin.buckets.add('cterabucket', bucket, read_only=True)
 
 .. automethod:: cterasdk.core.buckets.Buckets.modify
@@ -169,7 +169,7 @@ Querying
        print(tenant)
 
    """List Team Portals. For each tenant, retrieve its creation date, subscription plan and activation status"""
-   for tenant in admin.portals.list_tenants(include=['createDate', 'plan', 'activationStatus'], portal_type=portal_enum.PortalType.Team):
+   for tenant in admin.portals.list_tenants(include=['createDate', 'plan', 'activationStatus'], portal_type=core_enum.PortalType.Team):
        print(tenant)
 
 .. automethod:: cterasdk.core.portals.Portals.tenants
@@ -279,7 +279,7 @@ Subscription Plans
 .. code-block:: python
 
    """
-   Retention Policy (portal_enum.PlanRetention):
+   Retention Policy (core_enum.PlanRetention):
    - All: All Versions
    - Hourly: Hourly Versions
    - Daily: Daily Versions
@@ -289,7 +289,7 @@ Subscription Plans
    - Yearly: Yearly Versions
    - Deleted: Recycle Bin
 
-   Quotas (portal_enum.PlanItem):
+   Quotas (core_enum.PlanItem):
    - Storage: Storage Quota, in Gigabytes
    - EV4: CTERA Edge Filer, Up to 4 TB of Local Cache
    - EV8: CTERA Edge Filer, Up to 8 TB of Local Cache
@@ -310,8 +310,8 @@ Subscription Plans
    """
 
    name = 'good_plan'
-   retention = {portal_enum.PlanRetention.Daily: 7, portal_enum.PlanRetention.Monthly: 12}
-   quotas = {portal_enum.PlanItem.EV16: 10, portal_enum.PlanItem.EV32: 5, portal_enum.PlanItem.Share: 100}
+   retention = {core_enum.PlanRetention.Daily: 7, core_enum.PlanRetention.Monthly: 12}
+   quotas = {core_enum.PlanItem.EV16: 10, core_enum.PlanItem.EV32: 5, core_enum.PlanItem.Share: 100}
    admin.plans.add(name, retention, quotas)
 
 .. automethod:: cterasdk.core.plans.Plans.modify
@@ -326,8 +326,8 @@ Subscription Plans
    """
 
    name = 'good_plan'
-   retention = {portal_enum.PlanRetention.Daily: 30, portal_enum.PlanRetention.Monthly: 36}
-   quotas = {portal_enum.PlanItem.EV16: 20, portal_enum.PlanItem.EV32: 10, portal_enum.PlanItem.Share: 200}
+   retention = {core_enum.PlanRetention.Daily: 30, core_enum.PlanRetention.Monthly: 36}
+   quotas = {core_enum.PlanItem.EV16: 20, core_enum.PlanItem.EV32: 10, core_enum.PlanItem.Share: 200}
    admin.plans.modify(name, retention, quotas)
 
 .. automethod:: cterasdk.core.plans.Plans.delete
@@ -350,28 +350,28 @@ Plan Auto Assignment Rules
 .. code-block:: python
 
    """Apply the '100GB' plan to all user names that start with 'adm'"""
-   c1 = portal_types.PlanCriteriaBuilder.username().startswith('adm').build()
+   c1 = core_types.PlanCriteriaBuilder.username().startswith('adm').build()
    r1 = PolicyRule('100GB', c1)
 
    """Apply the '200GB' plan to all user names that end with 'inc'"""
-   c2 = portal_types.PlanCriteriaBuilder.username().endswith('inc').build()
+   c2 = core_types.PlanCriteriaBuilder.username().endswith('inc').build()
    r2 = PolicyRule('200GB', c2)
 
    """Apply the 'Bingo' plan to all user names that contain 'bing'"""
-   c3 = portal_types.PlanCriteriaBuilder.username().contains('bing').build()
+   c3 = core_types.PlanCriteriaBuilder.username().contains('bing').build()
    r3 = PolicyRule('Bingo', c3)
 
    """Apply the 'ABC' plan to 'alice', 'bob' and 'charlie'"""
-   c4 = portal_types.PlanCriteriaBuilder.username().isoneof(['alice', 'bob', 'charlie']).build()
+   c4 = core_types.PlanCriteriaBuilder.username().isoneof(['alice', 'bob', 'charlie']).build()
    r4 = PolicyRule('ABC', c4)
 
    """Apply the '10TB' plan to read write, read only and support administrators"""
-   roles = [portal_enum.Role.ReadWriteAdmin, portal_enum.Role.ReadOnlyAdmin, portal_enum.Role.Support]
-   c5 = portal_types.PlanCriteriaBuilder.role().include(roles).build()
+   roles = [core_enum.Role.ReadWriteAdmin, core_enum.Role.ReadOnlyAdmin, core_enum.Role.Support]
+   c5 = core_types.PlanCriteriaBuilder.role().include(roles).build()
    r5 = PolicyRule('10TB', c5)
 
    """Apply the 'TechStaff' plan to the 'Product' and 'Support' groups"""
-   c6 = portal_types.PlanCriteriaBuilder.user_groups().include(['Product', 'Support']).build()
+   c6 = core_types.PlanCriteriaBuilder.user_groups().include(['Product', 'Support']).build()
    r6 = PolicyRule('TechStaff', c6)
 
    admin.plans.auto_assign.set_policy([r1, r2, r3, r4, r5, r6])
@@ -420,12 +420,12 @@ Configuration Templates
    """Include all 'pptx', 'xlsx' and 'docx' file types for all users"""
    docs = common_types.FileFilterBuilder.extensions().include(['pptx', 'xlsx', 'docx']).build()
    include_sets = common_types.FilterBackupSet('Documents', filter_rules=[docs],
-                                                         template_dirs=[portal_enum.EnvironmentVariables.ALLUSERSPROFILE])
+                                                         template_dirs=[core_enum.EnvironmentVariables.ALLUSERSPROFILE])
 
    """Exclude all 'cmd', 'exe' and 'bat' file types for all users"""
    programs = common_types.FileFilterBuilder.extensions().include(['cmd', 'exe', 'bat']).build()
    exclude_sets = common_types.FilterBackupSet('Programs', filter_rules=[programs],
-                                                           template_dirs=[portal_enum.EnvironmentVariables.ALLUSERSPROFILE])
+                                                           template_dirs=[core_enum.EnvironmentVariables.ALLUSERSPROFILE])
 
    """Schedule backup to run periodically"""
    backup_schedule = common_types.BackupScheduleBuilder.interval(hours=6)  # periodically, every 6 hours
@@ -440,7 +440,7 @@ Configuration Templates
    apps = common_enum.Application.All  # back up all applications
 
    """Configure software versions"""
-   versions = [portal_types.PlatformVersion(portal_enum.Platform.Edge_7, '7.0.981.7')]  # use 7.0.981.7 for v7 Edge Filers
+   versions = [core_types.PlatformVersion(core_enum.Platform.Edge_7, '7.0.981.7')]  # use 7.0.981.7 for v7 Edge Filers
 
    """Configure software update schedule"""
    schedule = common_types.TimeRange().start('01:00:00').end('02:00:00').days(common_enum.DayOfWeek.Weekdays).build()
@@ -449,9 +449,9 @@ Configuration Templates
 
    """Configure Scripts"""
    scripts = [
-       portal_types.TemplateScript.windows().after_logon('echo Current directory: %cd%'),
-       portal_types.TemplateScript.linux().before_backup('./mysqldump -u admin website > /mnt/backup/backup.sql'),
-       portal_types.TemplateScript.linux().after_backup('rm /mnt/backup/backup.sql')
+       core_types.TemplateScript.windows().after_logon('echo Current directory: %cd%'),
+       core_types.TemplateScript.linux().before_backup('./mysqldump -u admin website > /mnt/backup/backup.sql'),
+       core_types.TemplateScript.linux().after_backup('rm /mnt/backup/backup.sql')
    ]
 
    """Configure CLI Commands"""
@@ -506,24 +506,24 @@ Template Auto Assignment Rules
 .. code-block:: python
 
    """Apply the 'ESeries' template to devices of type: C200, C400, C800, C800P"""
-   device_types = [portal_enum.DeviceType.C200, portal_enum.DeviceType.C400, portal_enum.DeviceType.C800, portal_enum.DeviceType.C800P]
-   c1 = portal_types.TemplateCriteriaBuilder.type().include(device_types).build()
+   device_types = [core_enum.DeviceType.C200, core_enum.DeviceType.C400, core_enum.DeviceType.C800, core_enum.DeviceType.C800P]
+   c1 = core_types.TemplateCriteriaBuilder.type().include(device_types).build()
    r1 = PolicyRule('ESeries', c1)
 
    """Apply the 'Windows' template to devices that use a 'Windows' operating system"""
-   c2 = portal_types.TemplateCriteriaBuilder.os().contains('Windows').build()
+   c2 = core_types.TemplateCriteriaBuilder.os().contains('Windows').build()
    r2 = PolicyRule('Windows', c2)
 
    """Apply the 'CTERA7' template to devices running version 7"""
-   c3 = portal_types.TemplateCriteriaBuilder.version().startswith('7.0').build()
+   c3 = core_types.TemplateCriteriaBuilder.version().startswith('7.0').build()
    r3 = PolicyRule('CTERA7', c3)
 
    """Apply the 'WD5' template to devices that their hostname ends with 'WD5'"""
-   c4 = portal_types.TemplateCriteriaBuilder.hostname().endswith('WD5').build()
+   c4 = core_types.TemplateCriteriaBuilder.hostname().endswith('WD5').build()
    r4 = PolicyRule('WD5', c4)
 
    """Apply the 'Beta' template to devices that their name is one of"""
-   c5 = portal_types.TemplateCriteriaBuilder.name().isoneof(['DEV1', 'DEV2', 'DEV3']).build()
+   c5 = core_types.TemplateCriteriaBuilder.name().isoneof(['DEV1', 'DEV2', 'DEV3']).build()
    r5 = PolicyRule('Beta', c5)
 
    admin.templates.auto_assign.set_policy([r1, r2, r3, r4, r5])
@@ -797,18 +797,18 @@ User Roles
 
 .. code-block:: python
 
-   rw_admin_settings = admin.roles.get(portal_enum.Role.ReadWriteAdmin)
-   ro_admin_settings = admin.roles.get(portal_enum.Role.ReadOnlyAdmin)
-   support_admin_settings = admin.roles.get(portal_enum.Role.Support)
+   rw_admin_settings = admin.roles.get(core_enum.Role.ReadWriteAdmin)
+   ro_admin_settings = admin.roles.get(core_enum.Role.ReadOnlyAdmin)
+   support_admin_settings = admin.roles.get(core_enum.Role.Support)
 
 .. automethod:: cterasdk.core.roles.Roles.modify
    :noindex:
 
 .. code-block:: python
 
-   support_admin_settings = admin.roles.get(portal_enum.Role.Support)
+   support_admin_settings = admin.roles.get(core_enum.Role.Support)
    support_admin_settings.manage_logs = True
-   admin.roles.modify(portal_enum.Role.Support, support_admin_settings)
+   admin.roles.modify(core_enum.Role.Support, support_admin_settings)
 
 Users
 =====
@@ -820,12 +820,12 @@ Users
 
    """Delete a local user"""
 
-   alice = portal_types.UserAccount('alice')
+   alice = core_types.UserAccount('alice')
    admin.users.delete(alice)
 
    """Delete a domain user"""
 
-   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
+   bruce = core_types.UserAccount('bruce', 'domain.ctera.local')
    admin.users.delete(bruce)
 
 Local Users
@@ -890,8 +890,8 @@ Fetch Users & Groups
 
    """Fetch domain users"""
 
-   alice = portal_types.UserAccount('alice', 'domain.ctera.local')
-   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
+   alice = core_types.UserAccount('alice', 'domain.ctera.local')
+   bruce = core_types.UserAccount('bruce', 'domain.ctera.local')
 
    admin.directoryservice.fetch([alice, bruce])
 
@@ -904,16 +904,16 @@ Directory Services
 .. code-block:: python
 
    """Connect to Active Directory using a primary domain controller, configure domain UID/GID mapping and access control"""
-   mapping = [portal_types.ADDomainIDMapping('demo.local', 200001, 5000000), portal_types.ADDomainIDMapping('trusted.local', 5000001, 10000000)]
-   rw_admin_group = portal_types.AccessControlEntry(
-       portal_types.GroupAccount('ctera_admins', 'demo.local'),
-       portal_enum.Role.ReadWriteAdmin
+   mapping = [core_types.ADDomainIDMapping('demo.local', 200001, 5000000), core_types.ADDomainIDMapping('trusted.local', 5000001, 10000000)]
+   rw_admin_group = core_types.AccessControlEntry(
+       core_types.GroupAccount('ctera_admins', 'demo.local'),
+       core_enum.Role.ReadWriteAdmin
    )
-   ro_admin_user = portal_types.AccessControlEntry(
-       portal_types.UserAccount('jsmith', 'demo.local'),
-       portal_enum.Role.ReadOnlyAdmin
+   ro_admin_user = core_types.AccessControlEntry(
+       core_types.UserAccount('jsmith', 'demo.local'),
+       core_enum.Role.ReadOnlyAdmin
    )
-   admin.directoryservice.connect('demo.local', 'svc_account', 'P@ssw0rd1', mapping=mapping, domain_controllers=portal_types.DomainControllers('172.54.3.52'), acl=[rw_admin, ro_admin])
+   admin.directoryservice.connect('demo.local', 'svc_account', 'P@ssw0rd1', mapping=mapping, domain_controllers=core_types.DomainControllers('172.54.3.52'), acl=[rw_admin, ro_admin])
 
 .. automethod:: cterasdk.core.directoryservice.DirectoryService.domains
    :noindex:
@@ -944,7 +944,7 @@ Directory Services
 .. code-block:: python
 
    """Configure UID/GID mapping"""
-   mapping = [portal_types.ADDomainIDMapping('demo.local', 200001, 5000000), portal_types.ADDomainIDMapping('trusted.local', 5000001, 10000000)]
+   mapping = [core_types.ADDomainIDMapping('demo.local', 200001, 5000000), core_types.ADDomainIDMapping('trusted.local', 5000001, 10000000)]
    admin.directoryservice.set_advanced_mapping(mapping)
 
 .. automethod:: cterasdk.core.directoryservice.DirectoryService.get_access_control
@@ -961,15 +961,15 @@ Directory Services
 .. code-block:: python
 
    """Configure access control for a domain group and a domain user. Set the default role to 'Disabled'"""
-   rw_admin_group = portal_types.AccessControlEntry(
-       portal_types.GroupAccount('ctera_admins', 'demo.local'),
-       portal_enum.Role.ReadWriteAdmin
+   rw_admin_group = core_types.AccessControlEntry(
+       core_types.GroupAccount('ctera_admins', 'demo.local'),
+       core_enum.Role.ReadWriteAdmin
    )
-   ro_admin_user = portal_types.AccessControlEntry(
-       portal_types.UserAccount('jsmith', 'demo.local'),
-       portal_enum.Role.ReadOnlyAdmin
+   ro_admin_user = core_types.AccessControlEntry(
+       core_types.UserAccount('jsmith', 'demo.local'),
+       core_enum.Role.ReadOnlyAdmin
    )
-   admin.directoryservice.set_access_control([rw_admin_group, ro_admin_user], portal_enum.Role.Disabled)
+   admin.directoryservice.set_access_control([rw_admin_group, ro_admin_user], core_enum.Role.Disabled)
 
 .. automethod:: cterasdk.core.directoryservice.DirectoryService.get_default_role
 
@@ -994,7 +994,7 @@ Managing S3 Credentials
 .. code-block:: python
 
    """List all of 'jsmith@demo.local' S3 credentials"""
-   jsmith = portal_types.UserAccount('jsmith', 'demo.local')
+   jsmith = core_types.UserAccount('jsmith', 'demo.local')
    for credential in user.credentials.s3.all(jsmith):
        print(credential.accessKey, credential.activated)
 
@@ -1004,7 +1004,7 @@ Managing S3 Credentials
 .. code-block:: python
 
    """Create an S3 credential for a service account"""
-   service_account = portal_types.UserAccount('service_account')
+   service_account = core_types.UserAccount('service_account')
    credential = user.credentials.s3.create(service_account)
 
 .. automethod:: cterasdk.core.credentials.S3.delete
@@ -1013,7 +1013,7 @@ Managing S3 Credentials
 .. code-block:: python
 
    """Delete an S3 credentials associated with a user account"""
-   user_account = portal_types.UserAccount('jsmith', 'demo.local')
+   user_account = core_types.UserAccount('jsmith', 'demo.local')
    access_key_id = 'ABCDEFGHIJKLMOP'
    user.credentials.s3.delete(access_key_id, user_account)
 
@@ -1026,12 +1026,12 @@ Managing Groups
 .. code-block:: python
 
    """Delete a local group"""
-   group = portal_types.GroupAccount('local_group')
+   group = core_types.GroupAccount('local_group')
    admin.groups.delete(group)
 
    """Delete a domain group"""
 
-   group = portal_types.GroupAccount('domain_group', 'domain.ctera.local')
+   group = core_types.GroupAccount('domain_group', 'domain.ctera.local')
    admin.groups.delete(group)
 
 Local Groups
@@ -1058,7 +1058,7 @@ Local Groups
    """Create a local group"""
    admin.groups.add('Users')
    admin.groups.add('Users', 'A group of users')  # with description
-   admin.groups.add('Users', members=[portal_types.UserAccount('alice'), portal_types.UserAccount('bruce', 'domain.ctera.local')])  # with members
+   admin.groups.add('Users', members=[core_types.UserAccount('alice'), core_types.UserAccount('bruce', 'domain.ctera.local')])  # with members
 
 .. automethod:: cterasdk.core.groups.Groups.modify
    :noindex:
@@ -1075,8 +1075,8 @@ Local Groups
 .. code-block:: python
 
    """Get group members"""
-   admin.groups.get_members(portal_types.GroupAccount('Users'))  # get members of a local group
-   admin.groups.get_members(portal_types.GroupAccount('Users', 'domain.ctera.local'))  # get members of a domain group
+   admin.groups.get_members(core_types.GroupAccount('Users'))  # get members of a local group
+   admin.groups.get_members(core_types.GroupAccount('Users', 'domain.ctera.local'))  # get members of a domain group
 
 .. automethod:: cterasdk.core.groups.Groups.add_members
    :noindex:
@@ -1084,8 +1084,8 @@ Local Groups
 .. code-block:: python
 
    """Add group members"""
-   admin.groups.add_members(portal_types.GroupAccount('Users'), [portal_types.UserAccount('alice')])  # add local users to a local group
-   admin.groups.add_members(portal_types.GroupAccount('Users'), [portal_types.UserAccount('bruce', 'domain.ctera.local')])  # add domain users to a local group
+   admin.groups.add_members(core_types.GroupAccount('Users'), [core_types.UserAccount('alice')])  # add local users to a local group
+   admin.groups.add_members(core_types.GroupAccount('Users'), [core_types.UserAccount('bruce', 'domain.ctera.local')])  # add domain users to a local group
 
 
 Devices
@@ -1225,7 +1225,7 @@ Folder Groups
        print(folder_group.name, folder_group.owner)
 
    """List folder groups owned by a domain user"""
-   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
+   bruce = core_types.UserAccount('bruce', 'domain.ctera.local')
    folder_groups = admin.cloudfs.groups.all(user=bruce)
 
 .. automethod:: cterasdk.core.cloudfs.FolderGroups.add
@@ -1234,17 +1234,17 @@ Folder Groups
 .. code:: python
 
    """Create a Folder Group, owned by a local user account 'svc_account'"""
-   svc_account = portal_types.UserAccount('svc_account')
+   svc_account = core_types.UserAccount('svc_account')
    admin.cloudfs.groups.add('FG-001', svc_account)
 
    """Create a Folder Group, owned by the domain user 'ctera.local\wbruce'"""
-   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   wbruce = core_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.groups.add('FG-002', wbruce)
 
    admin.cloudfs.groups.add('FG-003') # without an owner
 
    """Create a Folder Group, assigned to an 'Archive' storage class"""
-   admin.cloudfs.groups.add('Archive', portal_types.UserAccount('svc_account'), storage_class='Archive')
+   admin.cloudfs.groups.add('Archive', core_types.UserAccount('svc_account'), storage_class='Archive')
 
 .. automethod:: cterasdk.core.cloudfs.FolderGroups.modify
    :noindex:
@@ -1280,7 +1280,7 @@ Backup Folders
 
    """Create a backup folder"""
    folder_group = 'backup-fg'
-   owner = portal_types.UserAccount('bwayne', 'domain.ctera.local')
+   owner = core_types.UserAccount('bwayne', 'domain.ctera.local')
    admin.cloudfs.backups.add('my-backup', folder_group, owner)
 
 .. automethod:: cterasdk.core.cloudfs.Backups.modify
@@ -1289,7 +1289,7 @@ Backup Folders
 .. code:: python
 
    """Change backup folder owner"""
-   bwayne = portal_types.UserAccount('bwayne', 'domain.ctera.local')
+   bwayne = core_types.UserAccount('bwayne', 'domain.ctera.local')
    admin.cloudfs.backups.modify('my-backup', new_owner=bwayne)
 
 .. automethod:: cterasdk.core.cloudfs.Backups.delete
@@ -1314,14 +1314,14 @@ Cloud Drive Folders
        print(cloud_drive_folder)
 
    """List cloud drive folders owned by a domain user"""
-   bruce = portal_types.UserAccount('bruce', 'domain.ctera.local')
+   bruce = core_types.UserAccount('bruce', 'domain.ctera.local')
    cloud_drive_folders = admin.cloudfs.drives.all(user=bruce)
 
    """List both deleted and non-deleted cloud drive folders"""
-   cloud_drive_folders = admin.cloudfs.drives.all(list_filter=portal_enum.ListFilter.All)
+   cloud_drive_folders = admin.cloudfs.drives.all(list_filter=core_enum.ListFilter.All)
 
    """List deleted cloud drive folders"""
-   cloud_drive_folders = admin.cloudfs.drives.all(list_filter=portal_enum.ListFilter.Deleted)
+   cloud_drive_folders = admin.cloudfs.drives.all(list_filter=core_enum.ListFilter.Deleted)
 
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.add
    :noindex:
@@ -1329,18 +1329,18 @@ Cloud Drive Folders
 .. code:: python
 
    """Create a Cloud Drive folder, owned by a local user account 'svc_account'"""
-   svc_account = portal_types.UserAccount('svc_account')
+   svc_account = core_types.UserAccount('svc_account')
    admin.cloudfs.drives.add('DIR-001', 'FG-001', svc_account)
    admin.cloudfs.drives.add('DIR-003', 'FG-003', svc_account, winacls = False) # disable Windows ACL's
    admin.cloudfs.drives.add('DIR-003', 'FG-003', svc_account, quota = 1024) # Set folder quota, in GB
 
    """Create a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
-   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   wbruce = core_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.drives.add('DIR-002', 'FG-002', wbruce)
 
    """Create immutable Cloud Drive folders"""
 
-   svc_account = portal_types.UserAccount('svc_account')
+   svc_account = core_types.UserAccount('svc_account')
 
    """
    Mode: Enterprise (i.e., allow privileged delete by the CTERA Compliance Officer role)
@@ -1348,7 +1348,7 @@ Cloud Drive Folders
    Grace Period: 30 Minutes.
    """
    admin.cloudfs.groups.add('FG-Enterprise', svc_account)
-   settings = portal_types.ComplianceSettingsBuilder.enterprise(7, portal_enum.Duration.Years).grace_period(30, portal_enum.Duration.Minutes).build()
+   settings = core_types.ComplianceSettingsBuilder.enterprise(7, core_enum.Duration.Years).grace_period(30, core_enum.Duration.Minutes).build()
    admin.cloudfs.drives.add('Enterprise', 'FG-Enterprise', svc_account, compliance_settings=settings)
 
    """
@@ -1357,7 +1357,7 @@ Cloud Drive Folders
    Grace Period: 1 Hour.
    """
    admin.cloudfs.groups.add('FG-Compliance', svc_account)
-   settings = portal_types.ComplianceSettingsBuilder.enterprise(1, portal_enum.Duration.Years).grace_period(1, portal_enum.Duration.Hours).build()
+   settings = core_types.ComplianceSettingsBuilder.enterprise(1, core_enum.Duration.Years).grace_period(1, core_enum.Duration.Hours).build()
    admin.cloudfs.drives.add('Compliance', 'FG-Compliance', svc_account, compliance_settings=settings)
 
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.modify
@@ -1366,7 +1366,7 @@ Cloud Drive Folders
 .. code:: python
 
    """Update Quota of a Cloud Drive Folder"""
-   svc_account = portal_types.UserAccount('svc_account')
+   svc_account = core_types.UserAccount('svc_account')
    admin.cloudfs.drives.modify('DIR-001', svc_account, quota=5120) # Set folder quota to 5 TB
 
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.delete
@@ -1375,11 +1375,11 @@ Cloud Drive Folders
 .. code:: python
 
    """Delete a Cloud Drive folder, owned by the local user account 'svc_account'"""
-   svc_account = portal_types.UserAccount('svc_account')
+   svc_account = core_types.UserAccount('svc_account')
    admin.cloudfs.drives.delete('DIR-001', svc_account)
 
    """Delete a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
-   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   wbruce = core_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.drives.delete('DIR-002', wbruce)
 
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.recover
@@ -1388,11 +1388,11 @@ Cloud Drive Folders
 .. code:: python
 
    """Recover a deleted Cloud Drive folder, owned by the local user account 'svc_account'"""
-   svc_account = portal_types.UserAccount('svc_account')
+   svc_account = core_types.UserAccount('svc_account')
    admin.cloudfs.drives.recover('DIR-001', svc_account)
 
    """Recover a deleted Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
-   wbruce = portal_types.UserAccount('wbruce', 'ctera.local')
+   wbruce = core_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.drives.recover('DIR-002', wbruce)
 
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.setfacl
@@ -1481,8 +1481,8 @@ To manage zones, you must be a Read Write Administrator
    2) 'HR' folder owned by 'Diana'
    """
 
-   accounting = portal_types.CloudFSFolderFindingHelper('Accounting', 'Bruce')
-   hr = portal_types.CloudFSFolderFindingHelper('HR', 'Diana')
+   accounting = core_types.CloudFSFolderFindingHelper('Accounting', 'Bruce')
+   hr = core_types.CloudFSFolderFindingHelper('HR', 'Diana')
 
    admin.cloudfs.zones.add_folders('ZN-001', [accounting, hr])
 
@@ -1604,8 +1604,8 @@ Log Based Alerts
 .. code:: python
 
    """Set alerts. Overrides all existing alerts"""
-   volume_full = portal_types.AlertBuilder.name('volume_full').log('VolumeFull').build()
-   agent_repo = portal_types.AlertBuilder.name('agent_repo').log('AgentRepositoryNotReady').build()
+   volume_full = core_types.AlertBuilder.name('volume_full').log('VolumeFull').build()
+   agent_repo = core_types.AlertBuilder.name('agent_repo').log('AgentRepositoryNotReady').build()
    admin.logs.alerts.put([volume_full, agent_repo])
 
 .. automethod:: cterasdk.core.logs.Alerts.delete

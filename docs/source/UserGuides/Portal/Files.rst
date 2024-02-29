@@ -208,13 +208,13 @@ Collaboration Shares
    - Grant the local group with read write access with no expiration
    """
 
-   alice = portal_types.UserAccount('alice')
-   engineers = portal_types.GroupAccount('Engineers')
+   alice = core_types.UserAccount('alice')
+   engineers = core_types.GroupAccount('Engineers')
 
    recipients = []
 
-   alice_rcpt = portal_types.ShareRecipient.local_user(alice).expire_in(30).read_only()
-   engineers_rcpt = portal_types.ShareRecipient.local_group(engineering).read_write()
+   alice_rcpt = core_types.ShareRecipient.local_user(alice).expire_in(30).read_only()
+   engineers_rcpt = core_types.ShareRecipient.local_group(engineering).read_write()
 
    admin.files.share('Codebase', [alice_rcpt, engineers_rcpt])
 
@@ -226,14 +226,14 @@ Collaboration Shares
    Share with an external recipient
    - Grant the external user with preview only access for 10 days
    """
-   jsmith = portal_types.ShareRecipient.external('jsmith@hotmail.com').expire_in(10).preview_only()
+   jsmith = core_types.ShareRecipient.external('jsmith@hotmail.com').expire_in(10).preview_only()
    admin.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
    """
    Share with an external recipient, and require 2 factor authentication
    - Grant the external user with read only access for 5 days, and require 2 factor authentication over e-mail
    """
-   jsmith = portal_types.ShareRecipient.external('jsmith@hotmail.com', True).expire_in(5).read_only()
+   jsmith = core_types.ShareRecipient.external('jsmith@hotmail.com', True).expire_in(5).read_only()
    admin.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
 ..
@@ -245,11 +245,11 @@ Collaboration Shares
    - Grant the Albany domain group with read write access with no expiration
    - Grant the Cleveland domain group with read only access with no expiration
    """
-   albany_group = portal_types.GroupAccount('Albany', 'ctera.com')
-   cleveland_group = portal_types.GroupAccount('Cleveland', 'ctera.com')
+   albany_group = core_types.GroupAccount('Albany', 'ctera.com')
+   cleveland_group = core_types.GroupAccount('Cleveland', 'ctera.com')
 
-   albany_rcpt = portal_types.ShareRecipient.domain_group(albany_group).read_write()
-   cleveland_rcpt = portal_types.ShareRecipient.domain_group(cleveland_group).read_only()
+   albany_rcpt = core_types.ShareRecipient.domain_group(albany_group).read_write()
+   cleveland_rcpt = core_types.ShareRecipient.domain_group(cleveland_group).read_only()
 
    admin.files.share('Cloud/Albany', [albany_rcpt, cleveland_rcpt])
 
@@ -287,7 +287,7 @@ The following section includes examples on how to instantiate an S3 client using
 .. code:: python
 
    credentials = user.credentials.s3.create()  # if logged in as a user
-   # credentials = admin.credentials.s3.create(portal_types.UserAccount('username', 'domain'))  # if logged in as a Global Admin
+   # credentials = admin.credentials.s3.create(core_types.UserAccount('username', 'domain'))  # if logged in as a Global Admin
 
    """Instantiate the boto3 client"""
    client = boto3.client(

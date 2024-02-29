@@ -1,7 +1,7 @@
 from unittest import mock
 import munch
 
-from cterasdk import exceptions, portal_enum
+from cterasdk import exceptions, core_enum
 from cterasdk.core import cloudfs
 from cterasdk.core.types import UserAccount
 from cterasdk.core import query
@@ -18,7 +18,7 @@ class TestCoreFolderGroups(base_core.BaseCoreTest):   # pylint: disable=too-many
         self._name = 'folderGroup'
         self._new_name = 'folderGroup2'
         self._user_uid = 1337
-        self.fixed_block_size = portal_enum.DeduplicationMethodType.FixedBlockSize
+        self.fixed_block_size = core_enum.DeduplicationMethodType.FixedBlockSize
 
     def test_list_folder_groups_owned_by(self):
         get_user_uid_mock = self._mock_get_user_uid()

@@ -1,4 +1,4 @@
-from cterasdk import CTERAException, GlobalAdmin, portal_enum, gateway_enum, gateway_types
+from cterasdk import CTERAException, GlobalAdmin, core_enum, edge_enum, edge_types
 import cterasdk.settings
 
 from sample_base import CTERASDKSampleBase
@@ -38,7 +38,7 @@ class PortalSimpleSample(CTERASDKSampleBase):
 
     def _handle_users(self):
         print("Creating a new user")
-        self._global_admin.users.add('alice', 'walice@acme.com', 'Alice', 'Wonderland', 'password1!', portal_enum.Role.ReadWriteAdmin)
+        self._global_admin.users.add('alice', 'walice@acme.com', 'Alice', 'Wonderland', 'password1!', core_enum.Role.ReadWriteAdmin)
         print("User was created succussfully")
 
         print("Deleting previously created user")
@@ -60,10 +60,10 @@ class PortalSimpleSample(CTERASDKSampleBase):
             directory_name,
             '/'.join(['main', directory_path]),
             acl=[
-                gateway_types.ShareAccessControlEntry(type='LG', name='Everyone', perm='RW'),
-                gateway_types.ShareAccessControlEntry(type='LG', name='Administrators', perm='RO')
+                edge_types.ShareAccessControlEntry(type='LG', name='Everyone', perm='RW'),
+                edge_types.ShareAccessControlEntry(type='LG', name='Administrators', perm='RO')
             ],
-            access=gateway_enum.Acl.OnlyAuthenticatedUsers
+            access=edge_enum.Acl.OnlyAuthenticatedUsers
         )
         print("New Share was created successfully")
         print("Deleting previosly created share")
@@ -72,7 +72,7 @@ class PortalSimpleSample(CTERASDKSampleBase):
 
     def _print_system_logs(self):
         print("Printing Cloud Sync logs")
-        for log in self._global_admin.logs.logs(topic=portal_enum.LogTopic.CloudSync):
+        for log in self._global_admin.logs.logs(topic=core_enum.LogTopic.CloudSync):
             print(log.msg)
 
 

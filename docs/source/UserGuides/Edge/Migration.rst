@@ -8,11 +8,11 @@ Migration
 .. code-block:: python
 
    """ List all shares available on a source host """
-   credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
+   credentials = edge_types.HostCredentials('source-hostname', 'username', 'password')
    edge.ctera_migrate.list_shares(credentials)
 
    """ List all shares available on the current Edge Filer """
-   credentials = gateway_types.HostCredentials.localhost()
+   credentials = edge_types.HostCredentials.localhost()
    edge.ctera_migrate.list_shares(credentials)
 
 .. automethod:: cterasdk.edge.ctera_migrate.CTERAMigrate.list_tasks
@@ -84,12 +84,12 @@ Discovery
 
 .. code-block:: python
 
-   credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
+   credentials = edge_types.HostCredentials('source-hostname', 'username', 'password')
    task = edge.ctera_migrate.discovery.add('my-discovery', credentials, ['share1', 'share2'], auto_start=False, log_every_file=True, notes='job 1')
 
 
    """Add a local discovery task"""
-   credentials = gateway_types.HostCredentials.localhost()
+   credentials = edge_types.HostCredentials.localhost()
    task = edge.ctera_migrate.discovery.add('my-discovery', credentials, ['share1', 'share2'], log_every_file=True, notes='local discovery job')
 
    """Run the task"""
@@ -116,7 +116,7 @@ Migration
 
 .. code-block:: python
 
-   credentials = gateway_types.HostCredentials('source-hostname', 'username', 'password')
+   credentials = edge_types.HostCredentials('source-hostname', 'username', 'password')
    task = edge.ctera_migrate.migration.add('my-discovery', credentials, ['share1', 'share2'], auto_start=False, winacls=True, cloud_folder='my_cloud_folder', create_cloud_folder_per_share=False, compute_checksum=False, exclude=['*.pdf', '*.jpg'], include=['*.png', '*.avi'], notes='migration job 1')
 
    """Run the task"""
