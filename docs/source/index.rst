@@ -2,8 +2,8 @@
 Welcome to the CTERA Python SDK
 ===============================
 
-The CTERA SDK for Python provides developers with powerful tools to automate the deployment and configuration 
-of the CTERA Global File System, streamline data management tasks, 
+The CTERA SDK for Python provides developers with powerful tools to automate the deployment and configuration
+of the CTERA Global File System, streamline data management tasks,
 and seamlessly integrate CTERA's global namespace with their applications.
 
 Current version is |release|.

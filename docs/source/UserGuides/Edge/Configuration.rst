@@ -1036,7 +1036,7 @@ Reset to Defaults
 
 .. seealso:: Create the first admin account after resetting the Edge Filer to its default settings: :py:func:`cterasdk.edge.users.Users.add_first_user()`
 
-SSL Certificate 
+SSL Certificate
 ===============
 
 .. automethod:: cterasdk.edge.ssl.SSL.disable_http

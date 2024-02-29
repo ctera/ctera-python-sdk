@@ -45,7 +45,7 @@ Download
 
    """When logged in as a Global Administrator"""
    admin.files.download('Users/John Smith/My Files/Documents/Sample.docx')
-   
+
    """When logged in as a tenant user or admin"""
    user.files.download('Users/John Smith/My Files/Documents/Sample.docx')
 
@@ -109,7 +109,7 @@ Create Directories
 
    """When logged in as a Global Administrator"""
    admin.files.mkdir('Users/John Smith/My Files/Documents')
-   
+
    """When logged in as a tenant user or admin"""
    user.files.mkdir('My Files/Documents')
 
@@ -173,7 +173,7 @@ Move
    :noindex:
 
 .. code:: python
-   
+
    """When logged in as a Global Administrator"""
    admin.files.move(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'], destination='Users/John Smith/The/quick/brown/fox')
 

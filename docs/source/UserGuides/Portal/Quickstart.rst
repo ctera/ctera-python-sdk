@@ -26,7 +26,7 @@ Now, let's login to CTERA Portal as a global admin:
     def main():
 
         with GlobalAdmin('tenant.ctera.com') as admin:
-            admin.login('admin-username', 'admin-password')  # equivalent to logging in to '/admin' 
+            admin.login('admin-username', 'admin-password')  # equivalent to logging in to '/admin'
 
     if __name__ == '__main__':
         main()
@@ -40,7 +40,7 @@ Alternatively, we can also login to CTERA Portal as a Team Portal (tenant) user 
     def main():
 
         with ServicesPortal('tenant.ctera.com') as user:
-            user.login('username', 'password')  # equivalent to logging in to '/ServicesPortal' 
+            user.login('username', 'password')  # equivalent to logging in to '/ServicesPortal'
 
     if __name__ == '__main__':
         main()
@@ -82,7 +82,7 @@ If we combine the two examples above, we get the following result:
             admin.login('admin-username', 'admin-password')
             for tenant in admin.portals.list_tenants():
                 print(tenant)
-            
+
             admin.portals.browse('acme')
 
             for drive in admin.cloudfs.drives.all(include=['folderStats']):
@@ -92,7 +92,7 @@ If we combine the two examples above, we get the following result:
 
             for edge in admin.devices.filers(include['deviceConnectionstatus']):
                 print(edge)
-            
+
             admin.portals.browse_global_admin()
 
     if __name__ == '__main__':
@@ -109,12 +109,12 @@ And equivalnent example to the one given above:
     from cterasdk import GlobalAdmin
 
     def main():
-        
+
         admin = GlobalAdmin('tenant.ctera.com')
         admin.login('admin-username', 'admin-password')
         for tenant in admin.portals.list_tenants():
             print(tenant)
-        
+
         admin.portals.browse('acme')
 
         for drive in admin.cloudfs.drives.all(include=['folderStats']):
@@ -124,7 +124,7 @@ And equivalnent example to the one given above:
 
         for edge in admin.devices.filers(include['deviceConnectionstatus']):
             print(edge)
-        
+
         admin.portals.browse_global_admin()
         admin.logout()
 
@@ -158,7 +158,7 @@ The ``GlobalAdmin`` and ``ServicesPortal`` objects feature an ``api`` property u
 
 Data Types and Enumerators
 --------------------------
-Certain modules require input parameters comprising of complex data types or values selected from predefined lists. 
+Certain modules require input parameters comprising of complex data types or values selected from predefined lists.
 Complex data types are available in ``core_types`` module, while ``core_enum`` offers a comprehensive list of options for closed selection.
 In the following example, we represent the compliance settings of a Cloud Drive Folder ``core_types`` and ``core_enum`` modules.
 The compliance settings are then used to create a cloud drive folder.
@@ -166,7 +166,7 @@ The compliance settings are then used to create a cloud drive folder.
 .. code-block:: python
 
     from cterasdk import core_types, core_enum
-    
+
     admin.cloudfs.groups.add('FG-Compliance', svc_account)  # Create a folder-group
     settings = core_types.ComplianceSettingsBuilder.enterprise(1, core_enum.Duration.Years).grace_period(1, core_enum.Duration.Hours).build()
     admin.cloudfs.drives.add('Compliance', 'FG-Compliance', svc_account, compliance_settings=settings)
@@ -189,7 +189,7 @@ The SDK features a file browser module for managing files.
 
 Remote Access to CTERA Edge and Drive
 -------------------------------------
-You can invoke the CTERA Edge and Drive API's through CTERA Portal. 
+You can invoke the CTERA Edge and Drive API's through CTERA Portal.
 
 .. code-block:: python
 

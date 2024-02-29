@@ -46,7 +46,7 @@ Now we have an authenticated ``edge`` session. We can now proceed to access the 
     edge.volumes.add('data')  # create a volume called 'data'
     edge.services.connect('tenant.ctera.com', 'portal-usern', 'portal-user-pass')  # connect to the Portal
     edge.cache.enable()  # enable caching
-    
+
     for share in edge.shares.get():  # get all shares
         print(share.name)  # print share name
 
@@ -69,7 +69,7 @@ If we combine the two examples above, we get the following result:
             edge.volumes.add('data')
             edge.services.connect('tenant.ctera.com', 'portal-user', 'portal-user-pass')
             edge.cache.enable()
-            
+
             for share in edge.shares.get():
                 print(share.name)
 
@@ -97,10 +97,10 @@ And equivalnent example to the one given above:
         edge.volumes.add('data')
         edge.services.connect('tenant.ctera.com', 'portal-user', 'portal-user-pass')
         edge.cache.enable()
-        
+
         for share in edge.shares.get():
             print(share.name)
-        
+
         edge.logout() # logout -- mandatory
 
     if __name__ == '__main__':
@@ -171,7 +171,7 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
 
 Data Types and Enumerators
 --------------------------
-Certain modules require input parameters comprising of complex data types or values selected from predefined lists. 
+Certain modules require input parameters comprising of complex data types or values selected from predefined lists.
 Complex data types are available in ``edge_types`` module, while ``edge_enum`` offers a comprehensive list of options for closed selection.
 In the following example, we construct an access control entry (ACE) object using the ``edge_types`` and ``edge_enum`` modules.
 This access control entry is then used to create a share.
@@ -182,7 +182,7 @@ This access control entry is then used to create a share.
 
     account_type = edge_enum.LG  # LG = Local Group
     file_access = edge_enum.FileAccessMode.RO  # RO = Read Only
-    
+
     """Create an access control entry for the ACME domain administrators group"""
     domain_admins = edge_types.ShareAccessControlEntry(account_type, r'ACME\Domain Admins', file_access)
 
@@ -208,10 +208,10 @@ The SDK features a file browser module for managing files.
 
 Remote Access
 -------------
-If you are not within the same network as your CTERA Edge Filer, 
+If you are not within the same network as your CTERA Edge Filer,
 you can use remote access if the Edge Filer is connected to the Portal.
 
-Once connected to CTERA Portal, every Edge Filer is assigned a fully qualified domain name. 
+Once connected to CTERA Portal, every Edge Filer is assigned a fully qualified domain name.
 The FQDN is comprised of the Edge Filer's hostname and the address of the Portal it's connected to.
 
 To connect to an Edge Filer remotely:
