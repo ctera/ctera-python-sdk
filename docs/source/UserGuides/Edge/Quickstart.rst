@@ -215,12 +215,11 @@ Once connected to CTERA Portal, every Edge Filer is assigned a fully qualified d
 The FQDN is comprised of the Edge Filer's hostname and the address of the Portal it's connected to.
 
 To connect to an Edge Filer remotely:
+
 .. code-block:: python
 
     edge_hostname = 'edge-hostname'
     portal_address = 'tenant.ctera.com'
     with Edge(base=f'{edge_hostname}.{portal_address}') as edge:
         edge.login('edge-admin-username', 'edge-admin-password')
-        # your code
 ..
-
