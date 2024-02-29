@@ -29,7 +29,6 @@ Submodules
    cterasdk.edge.config
    cterasdk.edge.connection
    cterasdk.edge.ctera_migrate
-   cterasdk.edge.decorator
    cterasdk.edge.dedup
    cterasdk.edge.directoryservice
    cterasdk.edge.drive
@@ -64,6 +63,5 @@ Submodules
    cterasdk.edge.telnet
    cterasdk.edge.timezone
    cterasdk.edge.types
-   cterasdk.edge.uri
    cterasdk.edge.users
    cterasdk.edge.volumes

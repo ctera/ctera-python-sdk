@@ -25,5 +25,5 @@ Submodules
 .. toctree::
 
    cterasdk.config
-   cterasdk.exception
+   cterasdk.exceptions
 

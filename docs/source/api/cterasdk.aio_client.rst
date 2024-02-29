@@ -11,10 +11,10 @@ Submodules
 
 .. toctree::
 
-   cterasdk.client.async_requests
-   cterasdk.client.async_responses
-   cterasdk.client.async_tracers
-   cterasdk.client.clients
-   cterasdk.client.decorators
-   cterasdk.client.errors
+   cterasdk.aio_client.async_requests
+   cterasdk.aio_client.async_responses
+   cterasdk.aio_client.async_tracers
+   cterasdk.aio_client.clients
+   cterasdk.aio_client.decorators
+   cterasdk.aio_client.errors
 
