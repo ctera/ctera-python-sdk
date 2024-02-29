@@ -7,7 +7,7 @@ def mkdir(edge, path):
     directory = path.fullpath()
     logging.getLogger().info('Creating directory. %s', {'path': directory})
     try:
-        response = edge.webdav.mkcol(path.fullpath())
+        edge.webdav.mkcol(path.fullpath())
     except CTERAException as error:
         try:
             common.raise_for_status(error.response.message.msg, directory)
