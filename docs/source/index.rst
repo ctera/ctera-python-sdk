@@ -140,8 +140,7 @@ Table of Contents
 =================
 
 .. toctree::
-   :name: MasterTableOfContents
    :maxdepth: 4
-   :caption:
+   :caption: Library Contents
 
    UserGuides/Index
