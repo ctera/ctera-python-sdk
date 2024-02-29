@@ -10,18 +10,30 @@ List
 
 .. code:: python
 
-   file_browser.listdir('')  # List the contents of the Cloud Drive
+   with GlobalAdmin('tenant.ctera.com') as admin:
+      admin.login('admin-user', 'admin-pass')
+      admin.files.listdir('Users/John Smith/My Files')
+      admin.files.listdir('Users/John Smith/My Files', include_deleted=True)  # include deleted files
 
-   file_browser.listdir('My Files')  # List the contents of the 'My Files' folder
-
-   file_browser.listdir('My Files', include_deleted=True)  # Include deleted files
+   with ServicesPortal('tenant.ctera.com') as user:
+      user.login('username', 'user-password')
+      user.files.listdir('My Files/Documents')
+      user.files.listdir('My Files/Documents', include_deleted=True)  # include deleted files
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.walk
    :noindex:
 
 .. code:: python
 
-   file_browser.walk('My Files')
+   with GlobalAdmin('tenant.ctera.com') as admin:
+      admin.login('admin-user', 'admin-pass')
+      for element in admin.files.walk('Users/John Smith/My Files'):
+         print(element.name)  # traverse John Smith's 'My Files' directory and print the name of all files and folders
+
+   with ServicesPortal('tenant.ctera.com') as user:
+      user.login('username', 'user-password')
+      for element in user.files.walk('My Files/Documents'):
+         print(element.name)  # as a user, traverse all and print the name of all files and folders in 'My Files/Documents'
 
 Download
 ========
@@ -31,14 +43,22 @@ Download
 
 .. code:: python
 
-   file_browser.download('My Files/Documents/Sample.docx')
+   """When logged in as a Global Administrator"""
+   admin.files.download('Users/John Smith/My Files/Documents/Sample.docx')
+   
+   """When logged in as a tenant user or admin"""
+   user.files.download('Users/John Smith/My Files/Documents/Sample.docx')
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.download_as_zip
    :noindex:
 
 .. code:: python
 
-   file_browser.download('My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
+   """When logged in as a Global Administrator"""
+   admin.files.download_as_zip('Users/John Smith/My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
+
+   """When logged in as a tenant user or admin"""
+   user.files.download_as_zip('Users/John Smith/My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
 
 Copy
 ====
@@ -48,7 +68,7 @@ Copy
 
 .. code:: python
 
-   file_browser.copy(*['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.xlsx'], destination='The/quick/brown/fox')
+   user.files.copy(*['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.xlsx'], destination='The/quick/brown/fox')
 
 
 Create Public Link
@@ -68,43 +88,41 @@ Create Public Link
 
    """Create a Read Only public link to a file that expires in 30 days"""
 
-   file_browser.public_link('My Files/Documents/Sample.docx')
+   user.files.public_link('My Files/Documents/Sample.docx')
 
    """Create a Read Write public link to a folder that expires in 45 days"""
 
-   file_browser.public_link('My Files/Documents/Sample.docx', 'RW', 45)
+   user.files.public_link('My Files/Documents/Sample.docx', 'RW', 45)
 
 .. warning:: you cannot use this tool to create read write public links to files.
 
 Cloud Drive
 -----------
 
-The CloudDrive class is a subclass to :py:class:`cterasdk.common.files.browser.FileBrowser` providing file access to the user's Cloud Drive
-
-.. code:: python
-
-   from getpass import getpass
-
-   """Accessing Cloud Drive Files and Folders as a Global Administrator"""
-   admin = GlobalAdmin('portal.ctera.com')  # logging in to /admin
-   admin.login('admin', getpass())
-   file_browser = admin.files # the field is an instance of CloudDrive class object
-
-   """Accessing Cloud Drive Files and Folders as a Tenant User Account"""
-   user = ServicesPortal('portal.ctera.com')  # logging in to /ServicesPortal
-   user.login('bwayne', getpass())
-   file_browser = user.files # the field is an instance of CloudDrive class object
-
-Create Directory
-================
+Create Directories
+==================
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.mkdir
    :noindex:
 
 .. code:: python
 
-   file_browser.mkdir('My Files/Documents')  # Create 'Documents'
-   file_browser.makedirs('The/quick/brown/fox')  # Create directories recursively
+   """When logged in as a Global Administrator"""
+   admin.files.mkdir('Users/John Smith/My Files/Documents')
+   
+   """When logged in as a tenant user or admin"""
+   user.files.mkdir('My Files/Documents')
+
+.. automethod:: cterasdk.core.files.browser.CloudDrive.makedirs
+   :noindex:
+
+.. code:: python
+
+   """When logged in as a Global Administrator"""
+   admin.files.makedirs('Users/John Smith/My Files/The/quick/brown/fox')
+
+   """When logged in as a tenant user or admin"""
+   user.files.makedirs('The/quick/brown/fox')
 
 Rename
 ======
@@ -114,16 +132,25 @@ Rename
 
 .. code:: python
 
-   file_browser.rename('My Files/Documents/Sample.docx', 'Wizard Of Oz.docx')
+   """When logged in as a Global Administrator"""
+   admin.files.rename('Users/John Smith/My Files/Documents/Sample.docx', 'Wizard Of Oz.docx')
+
+   """When logged in as a tenant user or admin"""
+   user.files.makedirs('My Files/Documents/Sample.docx', 'Wizard Of Oz.docx')
 
 Delete
 ======
+
 .. automethod:: cterasdk.core.files.browser.CloudDrive.delete
    :noindex:
 
 .. code:: python
 
-   file_browser.delete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
+   """When logged in as a Global Administrator"""
+   admin.files.delete(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'])
+
+   """When logged in as a tenant user or admin"""
+   user.files.delete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
 
 Undelete
 ========
@@ -133,7 +160,11 @@ Undelete
 
 .. code:: python
 
-   file_browser.undelete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
+   """When logged in as a Global Administrator"""
+   admin.files.undelete(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'])
+
+   """When logged in as a tenant user or admin"""
+   user.files.undelete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
 
 Move
 ====
@@ -142,9 +173,12 @@ Move
    :noindex:
 
 .. code:: python
+   
+   """When logged in as a Global Administrator"""
+   admin.files.move(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'], destination='Users/John Smith/The/quick/brown/fox')
 
-   file_browser.move(*['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.docx'], destination='The/quick/brown/fox')
-
+   """When logged in as a tenant user or admin"""
+   user.files.move(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'], destination='The/quick/brown/fox')
 
 Upload
 ======
@@ -153,15 +187,11 @@ Upload
 
 .. code:: python
 
-   """
-   Upload the 'Tree.jpg' file as an End User to 'Forest' directory
-   """
-   file_browser.files.upload(r'C:\Users\BruceWayne\Downloads\Tree.jpg', 'Images/Forest')
+   """When logged in as a Global Administrator"""
+   admin.files.upload(r'C:\Users\admin\Downloads\Tree.jpg', 'Users/John Smith/My Files/Images')
 
-   """
-   Upload the 'Tree.jpg' file as an Administrator to an End User's Cloud Drive
-   """
-   file_browser.files.upload(r'C:\Users\Administrator\Downloads\Tree.jpg', 'Bruce Wayne/Images/Forest')
+   """Uploading as a tenant user or admin"""
+   user.files.upload(r'C:\Users\admin\Downloads\Tree.jpg', 'My Files/Images')
 
 
 Collaboration Shares
@@ -186,7 +216,7 @@ Collaboration Shares
    alice_rcpt = portal_types.ShareRecipient.local_user(alice).expire_in(30).read_only()
    engineers_rcpt = portal_types.ShareRecipient.local_group(engineering).read_write()
 
-   file_browser.share('Codebase', [alice_rcpt, engineers_rcpt])
+   admin.files.share('Codebase', [alice_rcpt, engineers_rcpt])
 
 ..
 
@@ -197,14 +227,14 @@ Collaboration Shares
    - Grant the external user with preview only access for 10 days
    """
    jsmith = portal_types.ShareRecipient.external('jsmith@hotmail.com').expire_in(10).preview_only()
-   file_browser.share('My Files/Projects/2020/ProjectX', [jsmith])
+   admin.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
    """
    Share with an external recipient, and require 2 factor authentication
    - Grant the external user with read only access for 5 days, and require 2 factor authentication over e-mail
    """
    jsmith = portal_types.ShareRecipient.external('jsmith@hotmail.com', True).expire_in(5).read_only()
-   file_browser.share('My Files/Projects/2020/ProjectX', [jsmith])
+   admin.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
 ..
 
@@ -221,7 +251,7 @@ Collaboration Shares
    albany_rcpt = portal_types.ShareRecipient.domain_group(albany_group).read_write()
    cleveland_rcpt = portal_types.ShareRecipient.domain_group(cleveland_group).read_only()
 
-   file_browser.share('Cloud/Albany', [albany_rcpt, cleveland_rcpt])
+   admin.files.share('Cloud/Albany', [albany_rcpt, cleveland_rcpt])
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.add_share_recipients
    :noindex:
@@ -241,28 +271,10 @@ Collaboration Shares
    """
    Unshare a file or a folder
    """
-   file_browser.unshare('Codebase')
-   file_browser.unshare('My Files/Projects/2020/ProjectX')
-   file_browser.unshare('Cloud/Albany')
+   admin.files.unshare('Codebase')
+   admin.files.unshare('My Files/Projects/2020/ProjectX')
+   admin.files.unshare('Cloud/Albany')
 
-Backups
-=======
-
-The Backups class is a subclass to :py:class:`cterasdk.common.files.browser.FileBrowser` providing access to files stored in backup folders
-
-.. code:: python
-
-   from getpass import getpass
-
-   """Accessing Backups as a Global Administrator"""
-   admin = GlobalAdmin('portal.ctera.com')  # logging in to /admin
-   admin.login('admin', getpass())
-   file_browser = admin.files # the field is an instance of Backups class object
-
-   """Accessing Backups as a Tenant User Account"""
-   user = ServicesPortal('portal.ctera.com')  # logging in to /ServicesPortal
-   user.login('bwayne', getpass())
-   file_browser = user.backups  # the field is an instance of Backups class object
 
 Managing S3 Credentials
 =======================
