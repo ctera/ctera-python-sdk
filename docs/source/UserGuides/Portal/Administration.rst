@@ -1378,6 +1378,9 @@ Cloud Drive Folders
    svc_account = core_types.UserAccount('svc_account')
    admin.cloudfs.drives.delete('DIR-001', svc_account)
 
+   """Delete a Cloud Drive folder permanently"""
+   admin.cloudfs.drives.delete('DIR-001', svc_account, permanently=True)
+
    """Delete a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
    wbruce = core_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.drives.delete('DIR-002', wbruce)

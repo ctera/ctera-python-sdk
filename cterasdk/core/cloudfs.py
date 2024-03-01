@@ -259,17 +259,19 @@ class CloudDrives(BaseCommand):
             logging.getLogger().info('Could not find cloud folder. %s', {'folder': name, 'owner': str(owner)})
             raise CTERAException('Could not find cloud folder', None, folder=name, owner=str(owner))
 
-    def delete(self, name, owner):
+    def delete(self, name, owner, *, permanently=False):
         """
         Delete a Cloud Drive Folder
 
         :param str name: Name of the Cloud Drive Folder to delete
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
+        :param bool,optional permanently: Delete permanently
         """
-
-        path = self._get_directory_path(name, owner)
-        logging.getLogger().info('Deleting cloud drive folder. %s', {'path': path})
-        self._core.files.delete(path)
+        drive = self.find(name, owner, include=['uid'])
+        logging.getLogger().info('Deleting cloud drive folder. %s', {'name': name, 'owner': str(owner), 'permanently': permanently})
+        if permanently:
+            return self._core.api.execute(f'/objs/{drive.uid}', 'deleteFolderPermanently')
+        return self._core.api.execute(f'/objs/{drive.uid}', 'delete')
 
     def recover(self, name, owner):
         """
@@ -278,9 +280,9 @@ class CloudDrives(BaseCommand):
         :param str name: Name of the Cloud Drive Folder to un-delete
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
         """
-        path = self._get_directory_path(name, owner)
-        logging.getLogger().info('Recovering cloud drive folder. %s', {'path': path})
-        self._core.files.undelete(path)
+        display_name = self._core.users.get(owner, ['displayName']).displayName
+        logging.getLogger().info('Recovering cloud drive folder. %s', {'name': name, 'owner': str(owner)})
+        return self._core.files.undelete(f'Users/{display_name}/{name}')
 
     def setfacl(self, paths, acl, recursive=False):
         """
@@ -319,11 +321,6 @@ class CloudDrives(BaseCommand):
         except CTERAException as error:
             logging.getLogger().error('setOwnerACL failed. %s', {'error': error})
             raise CTERAException('Failed to setOwnerACL', error)
-
-    def _get_directory_path(self, name, owner):
-        owner = self._core.users.get(owner, ['displayName']).displayName
-        path = owner + '/' + name
-        return path
 
 
 class Backups(BaseCommand):
