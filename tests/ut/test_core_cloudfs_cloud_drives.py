@@ -145,7 +145,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self.assertEqual(error_message, error.exception.message)
 
     def test_delete_with_local_owner(self):
-        self._init_global_admin(get_response=munch.Munch({'uid': self._user_uid, 'name': self._owner}))
+        self._init_global_admin(get_multi_response=munch.Munch({'uid': self._user_uid, 'name': self._owner}))
         with mock.patch("cterasdk.core.cloudfs.query.iterator") as query_iterator_mock:
             cloudfs.CloudDrives(self._global_admin).delete(self._name, self._local_user_account)
             query_iterator_mock.assert_called_once_with(self._global_admin, '/cloudDrives', mock.ANY)
@@ -153,7 +153,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
             self._global_admin.files.execute.assert_called_once_with(f'/objs/{self._user_uid}', 'delete')
 
     def test_delete_permanently_with_local_owner(self):
-        self._init_global_admin(get_response=munch.Munch({'uid': self._user_uid, 'name': self._owner}))
+        self._init_global_admin(get_multi_response=munch.Munch({'uid': self._user_uid, 'name': self._owner}))
         with mock.patch("cterasdk.core.cloudfs.query.iterator") as query_iterator_mock:
             cloudfs.CloudDrives(self._global_admin).delete(self._name, self._local_user_account, permanently=True)
             query_iterator_mock.assert_called_once_with(self._global_admin, '/cloudDrives', mock.ANY)
@@ -165,7 +165,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._mock_get_user_display_name()
         self._global_admin.files.undelete = mock.MagicMock(return_value='Success')
         cloudfs.CloudDrives(self._global_admin).recover(self._name, self._local_user_account)
-        self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['uid'])
+        self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['displayName'])
         self._global_admin.files.undelete.assert_called_once_with(f'{self._owner}/{self._name}')
 
     def _get_add_cloud_drive_object(self, winacls=True, description=None, quota=None, compliance_settings=None):
