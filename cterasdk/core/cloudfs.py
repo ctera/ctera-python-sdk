@@ -270,8 +270,8 @@ class CloudDrives(BaseCommand):
         drive = self.find(name, owner, include=['uid'])
         logging.getLogger().info('Deleting cloud drive folder. %s', {'name': name, 'owner': str(owner), 'permanently': permanently})
         if permanently:
-            return self._core.execute(f'/objs/{drive.uid}', 'deleteFolderPermanently')
-        return self._core.execute(f'/objs/{drive.uid}', 'delete')
+            return self._core.api.execute(f'/objs/{drive.uid}', 'deleteFolderPermanently')
+        return self._core.api.execute(f'/objs/{drive.uid}', 'delete')
 
     def recover(self, name, owner):
         """
@@ -280,9 +280,9 @@ class CloudDrives(BaseCommand):
         :param str name: Name of the Cloud Drive Folder to un-delete
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
         """
-        drive = self.find(name, owner, include=['uid'])
+        display_name = self._core.users.get(owner, ['displayName']).displayName
         logging.getLogger().info('Recovering cloud drive folder. %s', {'name': name, 'owner': str(owner)})
-        return self._core.execute(f'/objs/{drive.uid}', 'undeleteFolder')
+        return self._core.files.undelete(f'Users/{display_name}/{name}')
 
     def setfacl(self, paths, acl, recursive=False):
         """
