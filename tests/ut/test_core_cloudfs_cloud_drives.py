@@ -145,21 +145,19 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self.assertEqual(error_message, error.exception.message)
 
     def test_delete_with_local_owner(self):
-        include = [f'/{attr}' for attr in union(['uid'], users.Users.default)]
-        self._init_global_admin(get_multi_response=munch.Munch({'uid': self._user_uid, 'name': self._owner}))
+        self._init_global_admin()
         with mock.patch("cterasdk.core.cloudfs.query.iterator") as query_iterator_mock:
+            query_iterator_mock.return_value = [munch.Munch({'uid': self._user_uid})]
             cloudfs.CloudDrives(self._global_admin).delete(self._name, self._local_user_account)
             query_iterator_mock.assert_called_once_with(self._global_admin, '/cloudDrives', mock.ANY)
-            self._global_admin.api.get_multi.assert_called_once_with(f'/users/{self._owner}', include)
             self._global_admin.api.execute.assert_called_once_with(f'/objs/{self._user_uid}', 'delete')
 
     def test_delete_permanently_with_local_owner(self):
-        include = [f'/{attr}' for attr in union(['uid'], users.Users.default)]
-        self._init_global_admin(get_multi_response=munch.Munch({'uid': self._user_uid, 'name': self._owner}))
+        self._init_global_admin()
         with mock.patch("cterasdk.core.cloudfs.query.iterator") as query_iterator_mock:
+            query_iterator_mock.return_value = [munch.Munch({'uid': self._user_uid})]
             cloudfs.CloudDrives(self._global_admin).delete(self._name, self._local_user_account, permanently=True)
             query_iterator_mock.assert_called_once_with(self._global_admin, '/cloudDrives', mock.ANY)
-            self._global_admin.api.get_multi.assert_called_once_with(f'/users/{self._owner}', include)
             self._global_admin.api.execute.assert_called_once_with(f'/objs/{self._user_uid}', 'deleteFolderPermanently')
 
     def test_undelete_with_local_owner(self):
