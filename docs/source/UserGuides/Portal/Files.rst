@@ -94,11 +94,6 @@ Create Public Link
 
    user.files.public_link('My Files/Documents/Sample.docx', 'RW', 45)
 
-.. warning:: you cannot use this tool to create read write public links to files.
-
-Cloud Drive
------------
-
 Create Directories
 ==================
 
