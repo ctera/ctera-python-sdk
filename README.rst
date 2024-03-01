@@ -32,18 +32,20 @@ of the CTERA Global File System, streamline data management tasks,
 and seamlessly integrate CTERA's global namespace with their applications.
 
 Documentation
--------------
+=============
+
 User documentation is available on `Read the Docs <http://ctera-python-sdk.readthedocs.org/>`_.
 
 Installation
-------------
+============
+
 Installing via `pip <https://pip.pypa.io/>`_:
 
 .. code-block:: console
 
-    $ pip install cterasdk
+   $ pip install cterasdk
 
-Install from Source:
+Install from source:
 
 .. code-block:: console
 
@@ -52,7 +54,8 @@ Install from Source:
    $ python setup.py install
 
 Importing the Library
----------------------
+======================
+
 To get started, open a Python console:
 
 .. code-block:: python
@@ -60,12 +63,14 @@ To get started, open a Python console:
    from cterasdk import *
 
 Building Documentation
-----------------------
+======================
+
 Documentation can be compiled by running ``make html`` from the ``docs``
 folder. After compilation, open ``docs/build/html/index.html``.
 
 Testing
--------
+=======
+
 We use the `tox <https://tox.readthedocs.org/>`_ package to run tests in Python
 3. To install, use :code:`pip install tox`. Once installed, run `tox` from the
 root directory.
