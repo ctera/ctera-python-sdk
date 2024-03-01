@@ -2,7 +2,7 @@ from unittest import mock
 import munch
 
 from cterasdk import exceptions
-from cterasdk.core import cloudfs, users
+from cterasdk.core import cloudfs
 from cterasdk.core.types import UserAccount, ComplianceSettingsBuilder
 from cterasdk.core import query
 from cterasdk.common import Object, union
