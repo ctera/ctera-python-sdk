@@ -19,6 +19,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._name = 'folderGroup'
         self._description = 'description'
         self._user_uid = 1337
+        self._folder_uid = 7331
 
         self._nt_acl_folders = Object()
         self._nt_acl_folders._classname = 'SDDLFoldersParam'  # pylint: disable=protected-access
@@ -145,20 +146,24 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self.assertEqual(error_message, error.exception.message)
 
     def test_delete_with_local_owner(self):
+        mock_get_user = self.patch_call('cterasdk.core.users.Users.get')
+        mock_get_user.return_value = munch.Munch({'uid': self._user_uid, 'name': self._owner})
         self._init_global_admin()
         with mock.patch("cterasdk.core.cloudfs.query.iterator") as query_iterator_mock:
-            query_iterator_mock.return_value = [munch.Munch({'uid': self._user_uid})]
+            query_iterator_mock.return_value = [munch.Munch({'uid': self._folder_uid})]
             cloudfs.CloudDrives(self._global_admin).delete(self._name, self._local_user_account)
             query_iterator_mock.assert_called_once_with(self._global_admin, '/cloudDrives', mock.ANY)
-            self._global_admin.api.execute.assert_called_once_with(f'/objs/{self._user_uid}', 'delete')
+            self._global_admin.api.execute.assert_called_once_with(f'/objs/{self._folder_uid}', 'delete')
 
     def test_delete_permanently_with_local_owner(self):
+        mock_get_user = self.patch_call('cterasdk.core.users.Users.get')
+        mock_get_user.return_value = munch.Munch({'uid': self._user_uid, 'name': self._owner})
         self._init_global_admin()
         with mock.patch("cterasdk.core.cloudfs.query.iterator") as query_iterator_mock:
-            query_iterator_mock.return_value = [munch.Munch({'uid': self._user_uid})]
+            query_iterator_mock.return_value = [munch.Munch({'uid': self._folder_uid})]
             cloudfs.CloudDrives(self._global_admin).delete(self._name, self._local_user_account, permanently=True)
             query_iterator_mock.assert_called_once_with(self._global_admin, '/cloudDrives', mock.ANY)
-            self._global_admin.api.execute.assert_called_once_with(f'/objs/{self._user_uid}', 'deleteFolderPermanently')
+            self._global_admin.api.execute.assert_called_once_with(f'/objs/{self._folder_uid}', 'deleteFolderPermanently')
 
     def test_undelete_with_local_owner(self):
         self._init_global_admin(get_response=self._owner)
