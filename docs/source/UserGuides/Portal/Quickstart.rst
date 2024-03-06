@@ -65,7 +65,7 @@ Now we have an authenticated ``admin`` or ``user`` session. We can now proceed t
         print('Count: ', drive.folderStats.totalFiles)
 
     """List all the Edge Filers connected to the 'acme' tenant and their connection status"""
-    for edge in admin.devices.filers(include['deviceConnectionstatus']):
+    for edge in admin.devices.filers(include=['deviceConnectionstatus']):
         print(edge)
 
     """To return to the Global Administration"""

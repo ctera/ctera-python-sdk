@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from ..lib import Iterator, Command
+from ..lib import QueryIterator, DefaultResponse, Command
 from ..common import Object
 from ..convert import tojsonstr
 
 
 def query(CTERAHost, path, name, param):
     response = CTERAHost.api.execute(path, name, param) if name is not None else CTERAHost.api.database(path, 'query', param)
-    return (response.hasMore, response.objects)
+    return DefaultResponse(response)
 
 
 def show(CTERAHost, path, name, param):
@@ -18,7 +18,7 @@ def show(CTERAHost, path, name, param):
 
 def iterator(CTERAHost, path, param, name=None):
     function = Command(query, CTERAHost, path, name)
-    return Iterator(function, param)
+    return QueryIterator(function, param)
 
 
 class Restriction:

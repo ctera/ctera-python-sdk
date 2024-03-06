@@ -1,7 +1,7 @@
 # pylint: disable=line-too-long
 import logging
 
-from ..lib import Command, Iterator
+from ..lib import QueryIterator, QueryLogsResponse, Command
 from . import query
 from . import enum
 from .base_command import BaseCommand
@@ -47,6 +47,6 @@ class Logs(BaseCommand):
         function = Command(self._query_logs)
         return Iterator(function, param)
 
-    def _query_logs(self, param):
+    def query(self, param):
         response = self._edge.api.execute('/config/logging/general', 'pagedQuery', param)
-        return (response.hasMore, response.logs)
+        return QueryLogsResponse(response)

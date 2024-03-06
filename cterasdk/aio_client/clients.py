@@ -56,14 +56,15 @@ class MultipartForm:
     @property
     def data(self):
         return self._data
+    
 
 
-class Client:
-    """Synchronous Client"""
+class BaseClient:
+    """Base Client"""
 
     def __init__(self, builder=None, async_session=None, authenticator=None):
         """
-        Initialize a Synchronous Client
+        Initialize a Client
 
         :param builder: Endpoint builder.
         :param ,optional async_session: Re-use an asynchronous session.
@@ -73,6 +74,29 @@ class Client:
         self._authenticator = authenticator
         self._builder = builder
         self._async_session = async_session if async_session else async_requests.Session(**session_settings())
+
+    @property
+    def cookies(self):
+        return CookieJar(self._async_session.cookies, self._builder())
+
+    @property
+    def headers(self):
+        return self._headers
+    
+    def join_headers(self, request):
+        request.kwargs['headers'] = utils.merge(request.kwargs.get('headers', None), self.headers.all)
+        return request
+
+    @property
+    def baseurl(self):
+        return self._builder()
+    
+    def __str__(self):
+        return f"({self.__class__.__name__} client at {hex(hash(self))}, baseurl={self.baseurl})"
+
+
+class Client(BaseClient):
+    """Synchronous Client"""
 
     @decorators.authenticated
     def handle(self, path, *, on_response=None, **kwargs):
@@ -110,27 +134,11 @@ class Client:
         return self._request(request, on_response=on_response)
 
     def _request(self, request, *, on_response):
-        request.kwargs['headers'] = utils.merge(request.kwargs.get('headers', None), self.headers.all)
         on_response = on_response if on_response else Response.new()
-        return execute_request(self._async_session, request, on_response=on_response)
-
-    @property
-    def cookies(self):
-        return CookieJar(self._async_session.cookies, self._builder())
-
-    @property
-    def headers(self):
-        return self._headers
-
-    @property
-    def baseurl(self):
-        return self._builder()
+        return execute_request(self._async_session, self.join_headers(request), on_response=on_response)
 
     def shutdown(self):
         return asyncio.get_event_loop().run_until_complete(self._async_session.shutdown())
-
-    def __str__(self):
-        return f"({self.__class__.__name__} client at {hex(hash(self))}, baseurl={self._builder()})"
 
 
 class Folders(Client):
@@ -203,6 +211,10 @@ class XML(Client):
 
 class JSON(Client):
     """JSON Serializer and Deserializer"""
+
+    def __init__(self, builder=None, async_session=None, authenticator=None):
+        super().__init__(builder, async_session, authenticator)
+        self.headers.update_headers({'Content-Type': 'application/json'})
 
     def get(self, path, **kwargs):
         response = super().get(path, on_response=Response.new(Deserializers.JSON), **kwargs)

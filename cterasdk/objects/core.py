@@ -25,6 +25,7 @@ from ..core import licenses
 from ..core import login
 from ..core import logs
 from ..core import messaging
+from ..core import metadata
 from ..core import plans
 from ..core import portals
 from ..core import reports
@@ -54,6 +55,7 @@ class Portal(CTERA):  # pylint: disable=too-many-instance-attributes
         self._webdav = clients.Dav(EndpointBuilder.new(self.base, self.context, '/webdav'), async_session, self._authenticator)
         self._ctera = clients.Extended(EndpointBuilder.new(self.base, self.context), async_session, self._authenticator)
         self._api = clients.API(EndpointBuilder.new(self.base, self.context, '/api'), async_session, self._authenticator)
+        self._v2api = clients.JSON(EndpointBuilder.new(self.base, self.context, '/v2/api'), async_session, self._authenticator)
 
         self.activation = activation.Activation(self)
         self.admins = admins.Administrators(self)
@@ -67,6 +69,7 @@ class Portal(CTERA):  # pylint: disable=too-many-instance-attributes
         self.firmwares = firmwares.Firmwares(self)
         self.groups = groups.Groups(self)
         self.logs = logs.Logs(self)
+        self.metadata = metadata.Metadata(self)
         self.plans = plans.Plans(self)
         self.reports = reports.Reports(self)
         self.roles = roles.Roles(self)
@@ -79,6 +82,10 @@ class Portal(CTERA):  # pylint: disable=too-many-instance-attributes
     @property
     def ctera(self):
         return self._ctera
+    
+    @property
+    def v2api(self):
+        return self._v2api
 
     @property
     @abstractmethod

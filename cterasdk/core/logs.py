@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from .base_command import BaseCommand
-from ..lib import Iterator, Command
+from ..lib import QueryIterator, QueryLogsResponse, Command
 from ..core import enum
 from ..common import Object
 from . import query
@@ -78,13 +78,13 @@ class Logs(BaseCommand):
                 builder.addFilter(user_filter)
 
         param = builder.build()
-        function = Command(self._query_logs)
+        callback = Command(self.query)
 
-        return Iterator(function, param)
+        return QueryIterator(callback, param)
 
-    def _query_logs(self, param):
+    def query(self, param):
         response = self._core.api.execute('', 'queryLogs', param)
-        return (response.hasMore, response.logs)
+        return QueryLogsResponse(response)
 
     @staticmethod
     def _strptime(datetime_str):

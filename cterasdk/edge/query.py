@@ -1,4 +1,4 @@
-from ..lib import Iterator, Command
+from ..lib import QueryIterator, DefaultResponse, Command
 from ..common import Object
 from ..convert import tojsonstr
 
@@ -15,15 +15,14 @@ def show(CTERAHost, path, key, value):
     print(tojsonstr(query(CTERAHost, path, key, value), no_log=False))
 
 
-def query_page(CTERAHost, path, name, param):
-    """Query a page"""
+def page(CTERAHost, path, name, param):
     response = CTERAHost.api.execute(path, name, param)
-    return response.hasMore, response.objects
+    return DefaultResponse(response)
 
 
 def iterator(CTERAHost, path, param, name=None):
-    function = Command(query_page, CTERAHost, path, name)
-    return Iterator(function, param)
+    function = Command(page, CTERAHost, path, name)
+    return QueryIterator(function, param)
 
 
 class QueryParam(Object):

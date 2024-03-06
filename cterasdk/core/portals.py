@@ -2,7 +2,7 @@ import logging
 
 from ..exceptions import ObjectNotFoundException
 from .base_command import BaseCommand
-from ..lib import Iterator, Command
+from ..lib import QueryIterator, DefaultResponse, Command
 from ..common import Object, union
 from . import enum, query, decorator
 
@@ -46,9 +46,9 @@ class Portals(BaseCommand):
             baseurl = '/resellerPortals'
         return query.iterator(self._core, baseurl, param)
 
-    def _query_portals(self, param):
+    def query(self, param):
         response = self._core.api.execute('', 'getPortalsDisplayInfo', param)
-        return (response.hasMore, response.objects)
+        return DefaultResponse(response)
 
     def tenants(self, include_deleted=False):
         """
@@ -58,8 +58,8 @@ class Portals(BaseCommand):
         """
         # Check if current session is global admin
         param = query.QueryParamBuilder().include_classname().put('isTrashcan', include_deleted).build()
-        function = Command(self._query_portals)
-        return Iterator(function, param)
+        function = Command(self.query)
+        return QueryIterator(function, param)
 
     def add(self, name, display_name=None, billing_id=None, company=None, plan=None, comment=None):
         """
