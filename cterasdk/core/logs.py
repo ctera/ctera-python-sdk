@@ -77,14 +77,7 @@ class Logs(BaseCommand):
             for user_filter in filters:
                 builder.addFilter(user_filter)
 
-        param = builder.build()
-        callback = Command(self.query)
-
-        return QueryIterator(callback, param)
-
-    def query(self, param):
-        response = self._core.api.execute('', 'queryLogs', param)
-        return QueryLogsResponse(response)
+        return query.iterator(self._core, '', builder.build(), 'queryLogs', callback_response=QueryLogsResponse)
 
     @staticmethod
     def _strptime(datetime_str):

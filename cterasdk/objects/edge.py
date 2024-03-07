@@ -30,7 +30,6 @@ from ..edge import network
 from ..edge import nfs
 from ..edge import ntp
 from ..edge import power
-from ..edge import query
 from ..edge import remote
 from ..edge import rsync
 from ..edge import ransom_protect
@@ -151,6 +150,3 @@ class Edge(CTERA):  # pylint: disable=too-many-instance-attributes
                                        'network', 'nfs', 'ntp', 'power', 'ransom_protect', 'rsync', 'services', 'shares', 'shell',
                                        'smb', 'snmp', 'ssh', 'ssl', 'support', 'sync', 'syslog', 'tasks', 'telnet', 'timezone',
                                        'users', 'volumes']
-
-    def query(self, path, key, value):
-        return query.query(self, path, key, value)

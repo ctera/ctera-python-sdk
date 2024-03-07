@@ -57,7 +57,7 @@ class Services(BaseCommand):
         """
         Connect to a Portal.\n
         The connect method will first validate the `license` argument,
-         ensure the Edge Filer can establish a TCP connection over port 995 to `server` using :py:func:`Gateway.tcp_connect()` and
+         ensure the Edge Filer can establish a TCP connection over port 995 to the Portal and
          verify the Portal does not require device activation via code.
          TCP connection verification over port 995 is skipped when the Edge Filer is configured to use a proxy.
 

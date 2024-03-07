@@ -37,6 +37,17 @@ class BaseIterator:
         raise NotImplementedError("Subclass must implemenet the 'page' function")
 
 
+class KeyValueQueryIterator(BaseIterator):
+    """ Key Value Iterator """
+
+    def __init__(self, callback, parameter):
+        super().__init__(callback, parameter)
+
+    def page(self):
+        objects = self._callback(self._parameter)
+        return False, objects
+
+
 class QueryIterator(BaseIterator):
     """ Objects Iterator """
 
@@ -57,7 +68,7 @@ class CursorIterator(BaseIterator):
 
     @property
     def cursor(self):
-        return self._cursor
+        return self._parameter.cursor
 
     def page(self):
         response = self._callback(self._parameter)
@@ -99,7 +110,14 @@ class QueryLogsResponse(DefaultResponse):
     @property
     def objects(self):
         return self._response.logs
-    
+
+
+class FetchResourcesResponse(DefaultResponse):
+
+    @property
+    def objects(self):
+        return self._response.items
+
 
 class CursorResponse(BaseResponse):
 

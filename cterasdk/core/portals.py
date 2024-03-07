@@ -46,10 +46,6 @@ class Portals(BaseCommand):
             baseurl = '/resellerPortals'
         return query.iterator(self._core, baseurl, param)
 
-    def query(self, param):
-        response = self._core.api.execute('', 'getPortalsDisplayInfo', param)
-        return DefaultResponse(response)
-
     def tenants(self, include_deleted=False):
         """
         Get all tenants
@@ -58,8 +54,7 @@ class Portals(BaseCommand):
         """
         # Check if current session is global admin
         param = query.QueryParamBuilder().include_classname().put('isTrashcan', include_deleted).build()
-        function = Command(self.query)
-        return QueryIterator(function, param)
+        return query.iterator(self._core, '', param, 'getPortalsDisplayInfo')
 
     def add(self, name, display_name=None, billing_id=None, company=None, plan=None, comment=None):
         """

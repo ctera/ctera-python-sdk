@@ -1,7 +1,7 @@
 # pylint: disable=line-too-long
 import logging
 
-from ..lib import QueryIterator, QueryLogsResponse, Command
+from ..lib import QueryLogsResponse
 from . import query
 from . import enum
 from .base_command import BaseCommand
@@ -39,14 +39,9 @@ class Logs(BaseCommand):
         :param list[str],optional include: List of fields to include in the response, defailts to Logs.default_include
         :param cterasdk.edge.enum.Severity,optional minSeverity: Minimal log severity to fetch, defaults to cterasdk.edge.enum.Severity.INFO
 
-        :return: Log lines
-        :rtype: cterasdk.lib.iterator.Iterator
+        :return: Log entries
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         param = query.QueryParamBuilder().include(
             include or Logs.default_include).put('topic', topic).put('minSeverity', minSeverity).build()
-        function = Command(self._query_logs)
-        return Iterator(function, param)
-
-    def query(self, param):
-        response = self._edge.api.execute('/config/logging/general', 'pagedQuery', param)
-        return QueryLogsResponse(response)
+        return query.iterator(self._edge, '/config/logging/general', param, 'pagedQuery', QueryLogsResponse)

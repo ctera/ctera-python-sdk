@@ -1,6 +1,8 @@
 import re
 import logging
 
+from . import query
+from ..common import Object
 from ..lib.task_manager_base import TaskBase
 from ..exceptions import InputError
 from .base_command import BaseCommand
@@ -42,7 +44,7 @@ class Tasks(BaseCommand):
         """
         Get all running background tasks
         """
-        return self._edge.query('/proc/bgtasks', 'status', 'running')
+        return self._query('status', 'running')
 
     def by_name(self, name):
         """
@@ -50,7 +52,13 @@ class Tasks(BaseCommand):
 
         :param str name: Task name
         """
-        return self._edge.query('/proc/bgtasks', 'name', name)
+        return self._query('name', name)
+    
+    def _query(self, key, value):
+        param = Object()
+        param.key = key
+        param.value = value
+        return query.iterator(self._edge, '/proc/bgtasks', param)
 
     def wait(self, ref, retries=100, seconds=1):
         """

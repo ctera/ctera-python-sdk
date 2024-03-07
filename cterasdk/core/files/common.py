@@ -2,9 +2,11 @@ import re
 import logging
 
 from pathlib import PurePosixPath
+
+from .. import query
+from ...lib import FetchResourcesResponse
 from ...common import Object
 from ...objects import uri
-from ...lib import QueryIterator, DefaultResponse, Command
 from ...exceptions import RemoteDirectoryNotFound, CTERAException
 
 
@@ -176,25 +178,12 @@ class Path:
         return self.fullpath()
 
 
-class FetchQueryResponse(DefaultResponse):
-
-    @property
-    def objects(self):
-        return self._response.items
-
-
-def get_objects(core, param):
-    response = execute_fetch_resources(core, param)
-    return FetchQueryResponse(response)
-
-
-def execute_fetch_resources(core, param):
+def fetch_resources(core, param):
     return core.api.execute('', 'fetchResources', param)
 
 
 def objects_iterator(core, param):
-    func = Command(get_objects, core)
-    return QueryIterator(func, param)
+    return query.iterator(core, '', param, 'fetchResources', callback_response=FetchResourcesResponse)
 
 
 def get_resource_info(core, path):

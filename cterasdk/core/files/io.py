@@ -10,7 +10,7 @@ def listdir(core, path, depth=None, include_deleted=False):
     param = builder.build()
     if depth > 0:
         return common.objects_iterator(core, param)
-    return common.execute_fetch_resources(core, param)
+    return common.fetch_resources(core, param)
 
 
 def walk(core, base, path, include_deleted=False):

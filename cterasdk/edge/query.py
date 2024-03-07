@@ -1,28 +1,43 @@
-from ..lib import QueryIterator, DefaultResponse, Command
+from ..lib import QueryIterator, DefaultResponse, KeyValueQueryIterator, Command
 from ..common import Object
-from ..convert import tojsonstr
 
 
-def query(CTERAHost, path, key, value):
-    """Query based on key and value"""
-    param = Object()
-    param.key = key
-    param.value = value
-    return CTERAHost.api.db(path, 'query', param)
+def create_callback_function(edge, path, name=None, *, callback_response=None):
+    """
+    Create a query callback function
+
+    :param cterasdk.objects.core.Portal core: Portal object
+    :param cterasdk.edge.query.QueryParam param: Query paramter object
+    :param str,optional name: Schema method name
+
+    :returns: Command object
+    """
+
+    def database(edge, path, name, param):
+        return edge.api.database(path, name, param)
+    
+    def execute(edge, path, name, param):
+        response_consumer = callback_response if callback_response else DefaultResponse
+        return response_consumer(edge.api.execute(path, name, param))
+
+    return Command(execute if name else database, edge, path, name or 'query')
 
 
-def show(CTERAHost, path, key, value):
-    print(tojsonstr(query(CTERAHost, path, key, value), no_log=False))
+def iterator(edge, path, param=None, name=None, callback_response=None):
+    """
+    Create iterator
 
+    :param cterasdk.objects.edge.Edge edge: Edge object
+    :param str path: URL Path
+    :param str,optional name: Schema method name
+    :param cterasdk.edge.query.QueryParam,optional param: Query paramter object
+    :param cterasdk.lib.iterator.BaseResponse callback_response: Class to consume callback response 
 
-def page(CTERAHost, path, name, param):
-    response = CTERAHost.api.execute(path, name, param)
-    return DefaultResponse(response)
-
-
-def iterator(CTERAHost, path, param, name=None):
-    function = Command(page, CTERAHost, path, name)
-    return QueryIterator(function, param)
+    :returns: Query iterator object
+    """
+    object_iterator = QueryIterator if name else KeyValueQueryIterator
+    callback_function = create_callback_function(edge, path, name, callback_response=callback_response)
+    return object_iterator(callback_function, param if param else QueryParam())
 
 
 class QueryParam(Object):
