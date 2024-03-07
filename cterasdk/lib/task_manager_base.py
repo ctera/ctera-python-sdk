@@ -22,12 +22,15 @@ class TaskError(CTERAException):
 class TaskBase(ABC):
 
     def __init__(self, CTERAHost, ref, retries=10, seconds=1):
+        if retries <= 0:
+            raise ValueError("retries must be bigger than 0")
+        if seconds <= 0:
+            raise ValueError("seconds must be bigger than 0")
+
         self.CTERAHost = CTERAHost
         self.path = self._get_task_id(ref)
-        self.attempt = 0
         self.retries = retries
         self.seconds = seconds
-        self.running = True
 
     @abstractmethod
     def _get_task_id(self, ref):
@@ -39,16 +42,22 @@ class TaskBase(ABC):
 
     def wait(self):
         task = None
-        while self.running:
-            logging.getLogger().debug('Obtaining task status. %s', {'path': self.path, 'attempt': (self.attempt + 1)})
+        for i in range(self.retries):
+            logging.getLogger().debug('Obtaining task status. %s', {'path': self.path, 'attempt': (i + 1)})
             task = self.get_task_status()
             logging.getLogger().debug('Task status. %s', tojsonstr(task, False))
-            self.increment()
-            self.running = task.status == TaskRunningStatus.Running
-        return TaskBase.resolve(task)
+            if task.status != TaskRunningStatus.Running:
+                break
+            logging.getLogger().debug('Sleep. %s', {'seconds': self.seconds})
+            time.sleep(self.seconds)
+        return self.resolve(task)
 
-    @staticmethod
-    def resolve(task):
+    def resolve(self, task):
+        if task.status == TaskRunningStatus.Running:
+            duration = time.strftime("%H:%M:%S", time.gmtime(self.retries * self.seconds))
+            logging.getLogger().error('Could not obtain task status in a timely manner. %s', {'duration': duration})
+            raise CTERAException('Timed out. Could not obtain task status in a timely manner', None, duration=duration)
+
         task_info = {'id': task.id, 'name': task.name, 'status': task.status, 'start_time': task.startTime, 'end_time': task.endTime}
         if task.status == TaskRunningStatus.Failed:
             logging.getLogger().error('Task failed. %s', task_info)
@@ -58,12 +67,3 @@ class TaskBase(ABC):
         if task.status == TaskRunningStatus.Completed:
             logging.getLogger().debug('Task completed successfully. %s', task_info)
         return task
-
-    def increment(self):
-        if self.attempt >= self.retries:
-            duration = time.strftime("%H:%M:%S", time.gmtime(self.retries * self.seconds))
-            logging.getLogger().error('Could not obtain task status in a timely manner. %s', {'duration': duration})
-            raise CTERAException('Timed out. Could not obtain task status in a timely manner', None, duration=duration)
-        self.attempt = self.attempt + 1
-        logging.getLogger().debug('Sleep. %s', {'seconds': self.seconds})
-        time.sleep(self.seconds)
