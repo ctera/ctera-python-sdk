@@ -1,5 +1,5 @@
 from ..aio_client import clients
-from .services import CTERA
+from .services import Management
 from .endpoints import EndpointBuilder
 
 from . import authenticators
@@ -51,13 +51,63 @@ from ..edge import users
 from ..edge import volumes
 
 
-class Edge(CTERA):  # pylint: disable=too-many-instance-attributes
+class Clients:
+
+    def __init__(self, edge, Portal):
+        if Portal:
+            edge._Portal = Portal
+            edge._generic.shutdown()
+            session = self._Portal.generic._async_session  # pylint: disable=protected-access
+            edge._ctera_session.start_remote_session(edge._Portal.session())
+            self._api = clients.API(EndpointBuilder.new(edge.base), session, lambda *_: True)
+        else:
+            session = edge._generic._async_session  # pylint: disable=protected-access
+            self._migrate = clients.Migrate(EndpointBuilder.new(edge.base, '/migration/rest/v1'), session, edge._authenticator)
+            self._api = clients.API(EndpointBuilder.new(edge.base, '/admingui/api'), session, edge._authenticator)
+            self._io = IO(edge)
+
+
+class IO:
+
+    def __init__(self, edge):
+        self._edge = edge
+        self._webdav = clients.Dav(EndpointBuilder.new(edge.base, '/localFiles'), edge._generic._async_session, edge._authenticator)
+
+    @property
+    def download(self):
+        return self._webdav.download
+    
+    @property
+    def download_zip(self):
+        return self._edge._generic.form_data
+    
+    @property
+    def upload(self):
+        return self._edge._generic.form_data
+
+    @property
+    def mkdir(self):
+        return self._webdav.mkcol
+    
+    @property
+    def copy(self):
+        return self._webdav.copy
+    
+    @property
+    def move(self):
+        return self._webdav.move
+    
+    @property
+    def delete(self):
+        return self._webdav.delete
+
+
+class Edge(Management):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
         super().__init__(host, port, https, base=base)
         self._ctera_session = session.Session(self.host())
-
-        self._initialize(Portal)
+        self._ctera_clients = Clients(self, Portal)
 
         self.afp = afp.AFP(self)
         self.aio = aio.AIO(self)
@@ -100,22 +150,17 @@ class Edge(CTERA):  # pylint: disable=too-many-instance-attributes
         self.users = users.Users(self)
         self.volumes = volumes.Volumes(self)
 
-    def _initialize(self, Portal):
-        if Portal:
-            self._Portal = Portal
-            self._generic.shutdown()
-            async_session = self._Portal.generic._async_session  # pylint: disable=protected-access
-            self._ctera_session.start_remote_session(self._Portal.session())
-            self._api = clients.API(EndpointBuilder.new(self.base), async_session, lambda *_: True)
-        else:
-            async_session = self._generic._async_session  # pylint: disable=protected-access
-            self._migrate = clients.Migrate(EndpointBuilder.new(self.base, '/migration/rest/v1'), async_session, self._authenticator)
-            self._webdav = clients.Dav(EndpointBuilder.new(self.base, '/localFiles'), async_session, self._authenticator)
-            self._api = clients.API(EndpointBuilder.new(self.base, '/admingui/api'), async_session, self._authenticator)
-
     @property
     def migrate(self):
-        return self._migrate
+        return self._ctera_clients._migrate
+
+    @property
+    def api(self):
+        return self._ctera_clients._api
+    
+    @property
+    def io(self):
+        return self._ctera_clients._io
 
     @property
     def _session_id_key(self):

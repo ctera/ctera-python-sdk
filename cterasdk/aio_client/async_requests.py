@@ -72,8 +72,11 @@ class CookieJar:
     def update_cookies(self, cookies, response_url=None):
         self._cookie_jar.update_cookies(cookies, URL(response_url))
 
-    def filter_cookies(self, request_url):
-        return self._cookie_jar.filter_cookies(request_url)
+    def get(self, key):
+        for cookie in self._cookie_jar:
+            if cookie.key == key:
+                return cookie.value
+        return None
 
 
 class BaseRequest:

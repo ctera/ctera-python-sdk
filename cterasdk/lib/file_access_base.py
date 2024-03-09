@@ -44,7 +44,7 @@ class FileAccessBase(ABC):
         raise NotImplementedError("Subclass must implement _get_upload_form")
 
     def _openfile(self, path):
-        return self._ctera_host.webdav.download(self._get_single_file_url(path))
+        return self._ctera_host.io.download(self._get_single_file_url(path))
 
     @abstractmethod
     def _get_single_file_url(self, path):

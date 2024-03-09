@@ -27,15 +27,19 @@ class Metadata(BaseCommand):
     """
     Portal Metadata Connector APIs
     """
-    def all(self, drives=None):
+    
+    def get(self, cursor=None, drives=None):
         """
         List All Metadata Changes for Selected Cloud Drive Folders
 
+        :param str,optional cursor: Cursor
         :param list[CloudFSFolderFindingHelper],optional drives: List of Cloud Drive folders, defaults to all cloud drive folders.
         """
         param = Object()
         param.max_results = 2000
         param.folder_ids = []
+        if cursor:
+            param.cursor = cursor
         if drives:
             param.folder_ids = [self._core.cloudfs.drives.find(drive.name, drive.owner, include=['uid']).uid for drive in drives]
         return iterator(self._core, '/metadata/list', param)

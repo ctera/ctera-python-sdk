@@ -17,16 +17,14 @@ class Serializers:
 
 class CookieJar:
 
-    def __init__(self, cookies, response_url):
+    def __init__(self, cookies):
         self._cookies = cookies
-        self._response_url = response_url
 
-    @property
-    def all(self):
-        return {v.key: v.value for v in self._cookies.filter_cookies(self._response_url).values()}
+    def get(self, key):
+        return self._cookies.get(key)
 
-    def update(self, cookies):
-        self._cookies.update_cookies(cookies, self._response_url)
+    def update(self, cookies, response_url):
+        self._cookies.update_cookies(cookies, response_url)
 
 
 class PersistentHeaders:
@@ -56,7 +54,6 @@ class MultipartForm:
     @property
     def data(self):
         return self._data
-    
 
 
 class BaseClient:
@@ -77,7 +74,7 @@ class BaseClient:
 
     @property
     def cookies(self):
-        return CookieJar(self._async_session.cookies, self._builder())
+        return CookieJar(self._async_session.cookies)
 
     @property
     def headers(self):
@@ -93,6 +90,24 @@ class BaseClient:
     
     def __str__(self):
         return f"({self.__class__.__name__} client at {hex(hash(self))}, baseurl={self.baseurl})"
+    
+    async def shutdown(self):
+        await self._async_session.shutdown()
+
+
+class AsyncClient(BaseClient):
+    """Asynchronous Client"""
+
+    @decorators.authenticated
+    async def post(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
+        request = async_requests.PostRequest(self._builder(path), data=data_serializer(data), **kwargs)
+        return await self._async_session.await_promise(request, on_response=on_response)
+    
+
+class AsyncJSON(AsyncClient):
+
+    async def post(self, path, data, **kwargs):
+        return await super().post(path, data, data_serializer=Serializers.JSON, on_response=Response.new(Deserializers.JSON), **kwargs)
 
 
 class Client(BaseClient):
@@ -138,7 +153,7 @@ class Client(BaseClient):
         return execute_request(self._async_session, self.join_headers(request), on_response=on_response)
 
     def shutdown(self):
-        return asyncio.get_event_loop().run_until_complete(self._async_session.shutdown())
+        return asyncio.get_event_loop().run_until_complete(super().shutdown())
 
 
 class Folders(Client):

@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from ..aio_client import clients
-from .services import CTERA
+from .services import Management
 from .endpoints import EndpointBuilder
 
 from . import authenticators
@@ -43,19 +43,48 @@ from ..core import templates
 from ..core import users
 
 
-class Portal(CTERA):  # pylint: disable=too-many-instance-attributes
+
+class Clients:
+    
+    def __init__(self, core):
+        session = core._generic._async_session
+        self._ctera = clients.Extended(EndpointBuilder.new(core.base, core.context), session, core._authenticator)
+        self._api = clients.API(EndpointBuilder.new(core.base, core.context, '/api'), session, core._authenticator)
+        self._io = IO(core)
+
+
+class IO:
+
+    def __init__(self, core):
+        session = core._generic._async_session
+        self._folders = clients.Folders(EndpointBuilder.new(core.base, core.context, '/folders/folders'), session, core._authenticator)
+        self._upload = clients.Upload(EndpointBuilder.new(core.base, core.context, '/upload/folders'), session, core._authenticator)
+        self._webdav = clients.Dav(EndpointBuilder.new(core.base, core.context, '/webdav'), session, core._authenticator)
+
+    @property
+    def upload(self):
+        return self._upload.upload
+    
+    @property
+    def download(self):
+        return self._webdav.download
+
+    @property
+    def download_zip(self):
+        return self._folders.download_zip
+    
+    @property
+    def builder(self):
+        return self._webdav._builder
+
+
+class Portal(Management):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https, base=None)
-        async_session = self._generic._async_session
+        
         self._ctera_session = session.Session(self.host(), self.context)
-        self._folders = clients.Folders(EndpointBuilder.new(self.base, self.context, '/folders/folders'),
-                                        async_session, self._authenticator)
-        self._upload = clients.Upload(EndpointBuilder.new(self.base, self.context, '/upload/folders'), async_session, self._authenticator)
-        self._webdav = clients.Dav(EndpointBuilder.new(self.base, self.context, '/webdav'), async_session, self._authenticator)
-        self._ctera = clients.Extended(EndpointBuilder.new(self.base, self.context), async_session, self._authenticator)
-        self._api = clients.API(EndpointBuilder.new(self.base, self.context, '/api'), async_session, self._authenticator)
-        self._v2api = clients.JSON(EndpointBuilder.new(self.base, self.context, '/v2/api'), async_session, self._authenticator)
+        self._ctera_clients = Clients(self)
 
         self.activation = activation.Activation(self)
         self.admins = admins.Administrators(self)
@@ -81,11 +110,15 @@ class Portal(CTERA):  # pylint: disable=too-many-instance-attributes
 
     @property
     def ctera(self):
-        return self._ctera
+        return self._ctera_clients._ctera
+
+    @property
+    def api(self):
+        return self._ctera_clients._api
     
     @property
-    def v2api(self):
-        return self._v2api
+    def io(self):
+        return self._ctera_clients._io
 
     @property
     @abstractmethod

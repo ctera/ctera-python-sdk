@@ -16,10 +16,6 @@ class Service:
         self._generic = clients.Client(endpoints.EndpointBuilder.new(self.base), authenticator=self._authenticator)
 
     @property
-    def generic(self):
-        return self._generic
-
-    @property
     def base(self):
         return self._base
 
@@ -49,18 +45,49 @@ class CTERA(Service):
     def __init__(self, host, port, https, base):
         super().__init__(host, port, https, base)
         self._ctera_session = None
-        self._webdav = None
-        self._api = None
+        self._ctera_clients = None
 
     @property
-    def webdav(self):
-        return self._webdav
+    def clients(self):
+        return self._ctera_clients
+    
+    @property
+    @abstractmethod
+    def _session_id_key(self):
+        return NotImplementedError("Subclass must implement the '_session_id_key' property")
+    
+    def session(self):
+        return self._ctera_session
+
+    def get_session_id(self):
+        """
+        Get Session Identifier
+
+        :return str: Session ID
+        """
+        return self._generic.cookies.get(self._session_id_key)
+
+    def set_session_id(self, session_id):
+        self._generic.cookies.update({self._session_id_key: session_id}, self._generic.baseurl)
+        self._ctera_session.start_local_session(self)
+    
+    @abstractmethod
+    def _authenticator(self, url):
+        raise NotImplementedError("Subclass must implement the '_authenticator' function")
+    
+    def whoami(self):
+        """
+        Return the name of the logged in user.
+
+        :return cterasdk.common.object.Object: The session object of the current user
+        """
+        return self._ctera_session.whoami()
+
+
+class Management(CTERA):
 
     @property
-    def api(self):
-        return self._api
-
-    @property
+    @abstractmethod
     def _login_object(self):
         raise NotImplementedError(
             "Implementing class must implement the login_object property by returning an object with login and logout methods"
@@ -83,37 +110,6 @@ class CTERA(Service):
             self._ctera_session.terminate()
         self._generic.shutdown()
 
-    def session(self):
-        return self._ctera_session
-
-    @property
-    @abstractmethod
-    def _session_id_key(self):
-        return NotImplementedError("Subclass must implement the '_session_id_key' property")
-
-    def get_session_id(self):
-        """
-        Get Session Identifier
-
-        :return str: Session ID
-        """
-        return self.management.cookies.all.get(self._session_id_key, None)
-
-    def set_session_id(self, session_id):
-        return self.management.cookies.update({self._session_id_key: session_id})
-
-    @abstractmethod
-    def _authenticator(self, url):
-        raise NotImplementedError("Subclass must implement the '_authenticator' function")
-
     @abstractmethod
     def test(self):
         return NotImplementedError("Subclass must implement the 'test' function")
-
-    def whoami(self):
-        """
-        Return the name of the logged in user.
-
-        :return cterasdk.common.object.Object: The session object of the current user
-        """
-        return self._ctera_session.whoami()
