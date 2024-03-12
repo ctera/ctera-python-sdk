@@ -45,19 +45,20 @@ from ..core import users
 class Clients:
 
     def __init__(self, core):
-        session = core._generic._async_session
-        self.ctera = clients.Extended(EndpointBuilder.new(core.base, core.context), session, core._authenticator)
-        self.api = clients.API(EndpointBuilder.new(core.base, core.context, '/api'), session, core._authenticator)
+        async_session = core._generic._async_session
+        self.ctera = clients.Extended(EndpointBuilder.new(core.base, core.context), async_session, core._authenticator)
+        self.api = clients.API(EndpointBuilder.new(core.base, core.context, '/api'), async_session, core._authenticator)
         self.io = IO(core)
 
 
 class IO:
 
     def __init__(self, core):
-        session = core._generic._async_session
-        self._folders = clients.Folders(EndpointBuilder.new(core.base, core.context, '/folders/folders'), session, core._authenticator)
-        self._upload = clients.Upload(EndpointBuilder.new(core.base, core.context, '/upload/folders'), session, core._authenticator)
-        self._webdav = clients.Dav(EndpointBuilder.new(core.base, core.context, '/webdav'), session, core._authenticator)
+        async_session = core._generic._async_session
+        self._folders = clients.Folders(EndpointBuilder.new(core.base, core.context, '/folders/folders'), 
+                                        async_session, core._authenticator)
+        self._upload = clients.Upload(EndpointBuilder.new(core.base, core.context, '/upload/folders'), async_session, core._authenticator)
+        self._webdav = clients.Dav(EndpointBuilder.new(core.base, core.context, '/webdav'), async_session, core._authenticator)
 
     @property
     def upload(self):
@@ -73,7 +74,7 @@ class IO:
 
     @property
     def builder(self):
-        return self._webdav._builder
+        return self._webdav._builder  # pylint: disable=protected-access
 
 
 class Portal(Management):  # pylint: disable=too-many-instance-attributes

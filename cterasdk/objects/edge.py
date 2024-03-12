@@ -79,11 +79,11 @@ class IO:
 
     @property
     def download_zip(self):
-        return self._edge._generic.form_data
+        return self._edge._generic.form_data  # pylint: disable=protected-access
 
     @property
     def upload(self):
-        return self._edge._generic.form_data
+        return self._edge._generic.form_data  # pylint: disable=protected-access
 
     @property
     def mkdir(self):

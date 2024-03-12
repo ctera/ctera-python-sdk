@@ -17,9 +17,8 @@ class Clients:
         if Portal:
             drive._Portal = Portal
             drive._generic.shutdown()
-            session = Portal._generic._async_session  # pylint: disable=protected-access
             drive._ctera_session.start_remote_session(Portal.session())
-            self._api = clients.API(EndpointBuilder.new(drive.base), session, lambda *_: True)
+            self._api = clients.API(EndpointBuilder.new(drive.base), Portal._generic._async_session, lambda *_: True)
         else:
             self._api = clients.API(EndpointBuilder.new(drive.base, '/admingui/api'), drive._generic._async_session, drive._authenticator)
 

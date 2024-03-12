@@ -56,7 +56,7 @@ class Client(BaseClient):
         on_response = on_response if on_response else SyncResponse.new()
         return execute_request(self._async_session, self.join_headers(request), on_response=on_response)
 
-    def shutdown(self):
+    def shutdown(self):  # pylint: disable=invalid-overridden-method
         return asyncio.get_event_loop().run_until_complete(super().shutdown())
 
 
@@ -230,13 +230,13 @@ class SyncResponse(AsyncResponse):
             except StopAsyncIteration:
                 break
 
-    def text(self):
+    def text(self):  # pylint: disable=invalid-overridden-method
         return self._consume_response(super().text)
 
-    def json(self):
+    def json(self):  # pylint: disable=invalid-overridden-method
         return self._consume_response(super().json)
 
-    def xml(self):
+    def xml(self):  # pylint: disable=invalid-overridden-method
         return self._consume_response(super().xml)
 
     def _consume_response(self, consumer):
