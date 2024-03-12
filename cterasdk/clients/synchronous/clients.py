@@ -52,7 +52,7 @@ class Client(BaseClient):
         request = async_requests.DeleteRequest(self._builder(path), **kwargs)
         return self._request(request, on_response=on_response)
 
-    def _request(self, request, *, on_response):
+    def _request(self, request, *, on_response=None):
         on_response = on_response if on_response else SyncResponse.new()
         return execute_request(self._async_session, self.join_headers(request), on_response=on_response)
 
