@@ -57,13 +57,12 @@ class Clients:
         if Portal:
             edge._Portal = Portal
             edge._generic.shutdown()
-            session = Portal._generic._async_session  # pylint: disable=protected-access
             edge._ctera_session.start_remote_session(Portal.session())
-            self.api = clients.API(EndpointBuilder.new(edge.base), session, lambda *_: True)
+            self.api = clients.API(EndpointBuilder.new(edge.base), Portal._generic._async_session, lambda *_: True)
         else:
-            session = edge._generic._async_session  # pylint: disable=protected-access
-            self.migrate = clients.Migrate(EndpointBuilder.new(edge.base, '/migration/rest/v1'), session, edge._authenticator)
-            self.api = clients.API(EndpointBuilder.new(edge.base, '/admingui/api'), session, edge._authenticator)
+            async_session = edge._generic._async_session  # pylint: disable=protected-access
+            self.migrate = clients.Migrate(EndpointBuilder.new(edge.base, '/migration/rest/v1'), async_session, edge._authenticator)
+            self.api = clients.API(EndpointBuilder.new(edge.base, '/admingui/api'), async_session, edge._authenticator)
             self.io = IO(edge)
 
 
