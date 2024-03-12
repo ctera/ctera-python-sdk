@@ -11,7 +11,7 @@ Subpackages
 
 .. toctree::
 
-    cterasdk.aio_client
+    cterasdk.clients
     cterasdk.common
     cterasdk.convert
     cterasdk.core

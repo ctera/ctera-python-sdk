@@ -1,4 +1,4 @@
-from ..aio_client import clients
+from ..clients.synchronous import clients
 from .services import Management
 from .endpoints import EndpointBuilder
 
@@ -57,8 +57,8 @@ class Clients:
         if Portal:
             edge._Portal = Portal
             edge._generic.shutdown()
-            session = self._Portal.generic._async_session  # pylint: disable=protected-access
-            edge._ctera_session.start_remote_session(edge._Portal.session())
+            session = Portal._generic._async_session  # pylint: disable=protected-access
+            edge._ctera_session.start_remote_session(Portal.session())
             self._api = clients.API(EndpointBuilder.new(edge.base), session, lambda *_: True)
         else:
             session = edge._generic._async_session  # pylint: disable=protected-access

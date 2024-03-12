@@ -1,7 +1,7 @@
-cterasdk.aio_client.clients module
+cterasdk.clients.decorators module
 ==================================
 
-.. automodule:: cterasdk.aio_client.clients
+.. automodule:: cterasdk.clients.decorators
     :members:
     :undoc-members:
     :show-inheritance:

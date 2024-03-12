@@ -1,8 +1,8 @@
 import aiohttp
 
-from ..common import Object
-from ..convert import fromjsonstr, fromxmlstr
-from ..exceptions import ClientResponseException
+from ...common import Object
+from ...convert import fromjsonstr, fromxmlstr
+from ...exceptions import ClientResponseException
 
 
 class ClientError(Object):

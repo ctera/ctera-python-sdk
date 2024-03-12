@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from ..aio_client import clients
+from ..clients.synchronous import clients
 from .services import Management
 from .endpoints import EndpointBuilder
 

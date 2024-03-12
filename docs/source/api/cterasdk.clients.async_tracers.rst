@@ -1,7 +1,7 @@
-cterasdk.aio_client.decorators module
+cterasdk.clients.async_tracers module
 =====================================
 
-.. automodule:: cterasdk.aio_client.decorators
+.. automodule:: cterasdk.clients.async_tracers
     :members:
     :undoc-members:
     :show-inheritance:

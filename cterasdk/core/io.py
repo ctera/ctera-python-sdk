@@ -1,4 +1,4 @@
-from ..aio_client import clients
+from ..clients.synchronous import clients
 from ..objects.endpoints import EndpointBuilder
 
 

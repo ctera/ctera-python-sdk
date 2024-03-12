@@ -46,7 +46,11 @@ def fromjsonstr(fromstr):
         return fromstr
 
     root = Item()
-    root.node = json.loads(fromstr)
+    try:
+        root.node = json.loads(fromstr)
+    except json.decoder.JSONDecodeError:
+        logging.getLogger().debug('Parsing failed. Expected JSON format but received invalid input.')
+        return None
     root.parent = None
     root.value = None
 
