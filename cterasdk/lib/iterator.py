@@ -18,8 +18,8 @@ class BaseIterator:
         if self._objects:
             return self.object
         if self._more:
-            self._more, self._page = self.page()
-            self._objects.extend(self._page)
+            self._more, page = self.page()
+            self._objects.extend(page)
             if self._objects:
                 return self.object
         logging.getLogger().debug('Stopping iteration.')
@@ -37,9 +37,6 @@ class BaseIterator:
 class KeyValueQueryIterator(BaseIterator):
     """ Key Value Iterator """
 
-    def __init__(self, callback, parameter):
-        super().__init__(callback, parameter)
-
     def page(self):
         objects = self._callback(self._parameter)
         return False, objects
@@ -47,9 +44,6 @@ class KeyValueQueryIterator(BaseIterator):
 
 class QueryIterator(BaseIterator):
     """ Objects Iterator """
-
-    def __init__(self, callback, parameter):
-        super().__init__(callback, parameter)
 
     def page(self):
         response = self._callback(self._parameter)
@@ -92,7 +86,6 @@ class BaseResponse:
 class DefaultResponse(BaseResponse):
 
     @property
-    @abstractmethod
     def more(self):
         return self._response.hasMore
 

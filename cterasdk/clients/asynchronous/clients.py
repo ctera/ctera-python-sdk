@@ -7,7 +7,7 @@ class AsyncClient(BaseClient):
     """Asynchronous Client"""
 
     @decorators.authenticated
-    async def get(self, path, data, *, on_response=None, **kwargs):
+    async def get(self, path, *, on_response=None, **kwargs):
         request = async_requests.GetRequest(self._builder(path), **kwargs)
         return await self._request(request, on_response=on_response)
 
