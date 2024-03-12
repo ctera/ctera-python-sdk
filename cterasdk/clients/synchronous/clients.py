@@ -81,21 +81,21 @@ class Dav(Client):
     def mkcol(self, path):
         request = async_requests.MkcolRequest(self._builder(path))
         response = self._request(request)
-        return response.text
+        return response.text()
 
     def copy(self, source, destination, *, overwrite=False):
         request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
         response = self._request(request)
-        return response.xml
+        return response.xml()
 
     def move(self, source, destination, *, overwrite=False):
         request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
         response = self._request(request)
-        return response.xml
+        return response.xml()
 
     def delete(self, path):  # pylint: disable=arguments-differ
         response = super().delete(path)
-        return response.text
+        return response.text()
 
     def _webdav_headers(self, destination, overwrite):
         return {
@@ -109,23 +109,23 @@ class XML(Client):
 
     def get(self, path, **kwargs):
         response = super().get(path, **kwargs)
-        return response.xml
+        return response.xml()
 
     def put(self, path, data, **kwargs):
         response = super().put(path, data, data_serializer=Serializers.XML, **kwargs)
-        return response.xml
+        return response.xml()
 
     def post(self, path, data, **kwargs):
         response = super().post(path, data, data_serializer=Serializers.XML, **kwargs)
-        return response.xml
+        return response.xml()
 
     def form_data(self, path, data, **kwargs):
         response = super().form_data(path, data, **kwargs)
-        return response.xml
+        return response.xml()
 
     def delete(self, path, **kwargs):
         response = super().delete(path, **kwargs)
-        return response.xml
+        return response.xml()
 
 
 class JSON(Client):
@@ -137,19 +137,19 @@ class JSON(Client):
 
     def get(self, path, **kwargs):
         response = super().get(path, **kwargs)
-        return response.json
+        return response.json()
 
     def put(self, path, data, **kwargs):
         response = super().put(path, data, data_serializer=Serializers.JSON, **kwargs)
-        return response.json
+        return response.json()
 
     def post(self, path, data, **kwargs):
         response = super().post(path, data, data_serializer=Serializers.JSON, **kwargs)
-        return response.json
+        return response.json()
 
     def delete(self, path, **kwargs):
         response = super().delete(path, **kwargs)
-        return response.json
+        return response.json()
 
     def request(self, request):
         return super()._request(request)
@@ -234,15 +234,12 @@ class SyncResponse(AsyncResponse):
             except StopAsyncIteration:
                 break
 
-    @property
     def text(self):
         return self._consume_response(super().text)
 
-    @property
     def json(self):
         return self._consume_response(super().json)
 
-    @property
     def xml(self):
         return self._consume_response(super().xml)
 
