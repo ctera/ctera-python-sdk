@@ -33,7 +33,7 @@ class BaseAsyncIterator:
     @abstractmethod
     async def page(self):
         raise NotImplementedError("Subclass must implemenet the 'page' function")
-    
+
 
 class QueryAsyncIterator(BaseAsyncIterator):
     """ Asynchronous Objects Iterator """
@@ -42,7 +42,7 @@ class QueryAsyncIterator(BaseAsyncIterator):
         response = await self._callback(self._parameter)
         self._parameter.increment()
         return response.more, response.objects
-    
+
 
 class CursorAsyncIterator(BaseAsyncIterator):
 

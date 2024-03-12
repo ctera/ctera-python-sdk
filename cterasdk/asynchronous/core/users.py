@@ -1,5 +1,3 @@
-import logging
-
 from .base_command import BaseCommand
 from ...common import union
 from ...exceptions import ObjectNotFoundException
@@ -18,7 +16,7 @@ class Users(BaseCommand):
 
         :param cterasdk.core.types.UserAccount user_account: User account, including the user directory and user name
         :param list[str] include: List of fields to retrieve, defaults to ['name']
-        
+
         :return: The user account, including the requested fields
         """
         baseurl = f'/users/{user_account.name}' if user_account.is_local \

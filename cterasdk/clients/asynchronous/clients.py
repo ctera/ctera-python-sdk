@@ -59,7 +59,7 @@ class AsyncJSON(AsyncClient):
     async def post(self, path, data, **kwargs):
         response = await super().post(path, data, data_serializer=Serializers.JSON, **kwargs)
         return await response.json()
-    
+
     async def delete(self, path, **kwargs):
         response = await super().delete(path, **kwargs)
         return await response.json()
@@ -78,20 +78,21 @@ class AsyncXML(AsyncClient):
     async def post(self, path, data, **kwargs):
         response = await super().post(path, data, data_serializer=Serializers.XML, **kwargs)
         return await response.xml()
-    
+
     async def delete(self, path, **kwargs):
         response = await super().delete(path, **kwargs)
         return await response.xml()
+
 
 class AsyncExtended(AsyncXML):
     """CTERA Schema"""
 
     async def get_multi(self, path, paths):
         return await self.database(path, 'get-multi', paths)
-    
+
     async def execute(self, path, name, param=None):  # schema method
         return await self._execute(path, 'user-defined', name, param)
-    
+
     async def database(self, path, name, param=None):  # schema method
         return await self._execute(path, 'db', name, param)
 
@@ -101,7 +102,7 @@ class AsyncExtended(AsyncXML):
         data.name = name
         data.param = param
         return await super().post(path, data)
-    
+
 
 class AsyncAPI(AsyncExtended):
     """CTERA Management API"""
@@ -122,7 +123,7 @@ class AsyncResponse(BaseResponse):
 
     async def xml(self):
         return Deserializers.XML(await self._response.read())
-    
+
     @staticmethod
     def new():
         async def new_response(response):

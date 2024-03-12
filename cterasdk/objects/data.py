@@ -47,14 +47,14 @@ class DataServices(CTERA):
     @property
     def v1(self):
         return self.clients.v1
-    
+
     @property
     def v2(self):
         return self.clients.v2
 
     async def login(self, username, password):
         return await self._login_object.login(username, password)
-    
+
     async def logout(self):
         return await self._login_object.logout()
 
@@ -68,6 +68,6 @@ class DataServices(CTERA):
 
     def _authenticator(self, url):
         return True
-    
+
     async def __aexit__(self, exc_type, exc, tb):
         await self._generic.shutdown()

@@ -43,7 +43,7 @@ class CTERA(Service):
     @property
     def clients(self):
         return self._ctera_clients
-    
+
     @property
     @abstractmethod
     def _login_object(self):

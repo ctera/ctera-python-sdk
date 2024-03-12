@@ -1,5 +1,3 @@
-import logging
-
 from .base_command import BaseCommand
 from . import query
 from ...core.query import QueryParamBuilder, FilterBuilder
