@@ -9,7 +9,7 @@ class Serializers:
 
 
 class Deserializers:
-    JSON = fromxmlstr
+    JSON = fromjsonstr
     XML = fromxmlstr
 
 

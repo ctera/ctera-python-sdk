@@ -21,7 +21,7 @@ class Clients:
             drive._ctera_session.start_remote_session(Portal.session())
             self._api = clients.API(EndpointBuilder.new(drive.base), session, lambda *_: True)
         else:
-            self._api = clients.API(EndpointBuilder.new(drive.base, '/admingui/api'), drive._generic._async_session , drive._authenticator)
+            self._api = clients.API(EndpointBuilder.new(drive.base, '/admingui/api'), drive._generic._async_session, drive._authenticator)
 
 
 class Drive(CTERA):

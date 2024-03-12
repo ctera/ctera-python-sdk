@@ -15,7 +15,7 @@ def create_callback_function(edge, path, name=None, *, callback_response=None):
 
     def database(edge, path, name, param):
         return edge.api.database(path, name, param)
-    
+
     def execute(edge, path, name, param):
         response_consumer = callback_response if callback_response else DefaultResponse
         return response_consumer(edge.api.execute(path, name, param))
@@ -31,7 +31,7 @@ def iterator(edge, path, param=None, name=None, callback_response=None):
     :param str path: URL Path
     :param str,optional name: Schema method name
     :param cterasdk.edge.query.QueryParam,optional param: Query paramter object
-    :param cterasdk.lib.iterator.BaseResponse callback_response: Class to consume callback response 
+    :param cterasdk.lib.iterator.BaseResponse callback_response: Class to consume callback response
 
     :returns: Query iterator object
     """

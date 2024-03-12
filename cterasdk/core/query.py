@@ -11,14 +11,14 @@ def create_callback_function(core, path, name=None, *, callback_response=None):
     :param cterasdk.objects.core.Portal core: Portal object
     :param cterasdk.core.query.QueryParams param: Query paramter object
     :param str,optional name: Schema method name
-    :param cterasdk.lib.iterator.BaseResponse callback_response: Class to consume callback response 
+    :param cterasdk.lib.iterator.BaseResponse callback_response: Class to consume callback response
 
     :returns: Command object
     """
 
     def database(core, path, name, param):
         return callback_response(core.api.database(path, name, param))
-    
+
     def execute(core, path, name, param):
         return callback_response(core.api.execute(path, name, param))
 
@@ -33,7 +33,7 @@ def iterator(core, path, param=None, name=None, *, callback_response=None):
     :param str path: URL Path
     :param str,optional name: Schema method name
     :param cterasdk.core.query.QueryParams,optional param: Query paramter object
-    :param cterasdk.lib.iterator.BaseResponse callback_response: Class to consume callback response 
+    :param cterasdk.lib.iterator.BaseResponse callback_response: Class to consume callback response
 
     :returns: Query iterator object
     """

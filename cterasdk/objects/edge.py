@@ -76,11 +76,11 @@ class IO:
     @property
     def download(self):
         return self._webdav.download
-    
+
     @property
     def download_zip(self):
         return self._edge._generic.form_data
-    
+
     @property
     def upload(self):
         return self._edge._generic.form_data
@@ -88,15 +88,15 @@ class IO:
     @property
     def mkdir(self):
         return self._webdav.mkcol
-    
+
     @property
     def copy(self):
         return self._webdav.copy
-    
+
     @property
     def move(self):
         return self._webdav.move
-    
+
     @property
     def delete(self):
         return self._webdav.delete
@@ -157,7 +157,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
     @property
     def api(self):
         return self._ctera_clients._api
-    
+
     @property
     def io(self):
         return self._ctera_clients._io

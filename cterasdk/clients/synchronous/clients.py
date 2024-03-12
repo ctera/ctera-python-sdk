@@ -237,17 +237,17 @@ class SyncResponse(AsyncResponse):
     @property
     def text(self):
         return self._consume_response(super().text)
-    
+
     @property
     def json(self):
         return self._consume_response(super().json)
-    
+
     @property
     def xml(self):
         return self._consume_response(super().xml)
 
     def _consume_response(self, consumer):
-        return self._executor.run_until_complete(consumer()) 
+        return self._executor.run_until_complete(consumer())
 
     @staticmethod
     def new():

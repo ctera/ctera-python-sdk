@@ -1,5 +1,5 @@
 from . import async_requests
-from ..common import Object, utils
+from ..common import utils
 
 
 class CookieJar:
@@ -51,7 +51,7 @@ class BaseClient:
     @property
     def headers(self):
         return self._headers
-    
+
     def join_headers(self, request):
         request.kwargs['headers'] = utils.merge(request.kwargs.get('headers', None), self.headers.all)
         return request
@@ -59,10 +59,10 @@ class BaseClient:
     @property
     def baseurl(self):
         return self._builder()
-    
+
     def __str__(self):
         return f"({self.__class__.__name__} client at {hex(hash(self))}, baseurl={self.baseurl})"
-    
+
     async def shutdown(self):
         await self._async_session.shutdown()
 
@@ -100,6 +100,6 @@ class BaseResponse:
     @property
     def headers(self):
         return self._response.headers
-    
+
     def raise_for_status(self):
         return self._response.raise_for_status()

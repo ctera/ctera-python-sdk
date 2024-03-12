@@ -53,7 +53,7 @@ class Tasks(BaseCommand):
         :param str name: Task name
         """
         return self._query('name', name)
-    
+
     def _query(self, key, value):
         param = Object()
         param.key = key

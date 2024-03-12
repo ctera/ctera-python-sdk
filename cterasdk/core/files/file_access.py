@@ -34,7 +34,7 @@ class FileAccess(FileAccessBase):
             name=local_file_info['name'],
             Filename=local_file_info['name'],
             fullpath=self._ctera_host.io.builder(common.get_object_path(dest_path.relative,  # pylint: disable=protected-access
-                                                                             local_file_info['name']).encoded_fullpath()),
+                                                                        local_file_info['name']).encoded_fullpath()),
             fileSize=local_file_info['size'],
             file=fd
         )

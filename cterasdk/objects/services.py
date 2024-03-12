@@ -43,11 +43,11 @@ class CTERA(Service):
     @property
     def clients(self):
         return self._ctera_clients
-    
+
     @abstractmethod
     def _authenticator(self, url):
         raise NotImplementedError("Subclass must implement the '_authenticator' function")
-    
+
     def whoami(self):
         """
         Return the name of the logged in user.
@@ -93,12 +93,12 @@ class Management(CTERA):
     @abstractmethod
     def test(self):
         return NotImplementedError("Subclass must implement the 'test' function")
-    
+
     @property
     @abstractmethod
     def _session_id_key(self):
         return NotImplementedError("Subclass must implement the '_session_id_key' property")
-    
+
     def session(self):
         return self._ctera_session
 
@@ -113,6 +113,6 @@ class Management(CTERA):
     def set_session_id(self, session_id):
         self._generic.cookies.update({self._session_id_key: session_id}, self._generic.baseurl)
         self._ctera_session.start_local_session(self)
-    
+
     def __exit__(self, exc_type, exc_value, exc_tb):
         self._generic.shutdown()

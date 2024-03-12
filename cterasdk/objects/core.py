@@ -25,7 +25,6 @@ from ..core import licenses
 from ..core import login
 from ..core import logs
 from ..core import messaging
-from ..core import metadata
 from ..core import plans
 from ..core import portals
 from ..core import reports
@@ -43,9 +42,8 @@ from ..core import templates
 from ..core import users
 
 
-
 class Clients:
-    
+
     def __init__(self, core):
         session = core._generic._async_session
         self._ctera = clients.Extended(EndpointBuilder.new(core.base, core.context), session, core._authenticator)
@@ -64,7 +62,7 @@ class IO:
     @property
     def upload(self):
         return self._upload.upload
-    
+
     @property
     def download(self):
         return self._webdav.download
@@ -72,7 +70,7 @@ class IO:
     @property
     def download_zip(self):
         return self._folders.download_zip
-    
+
     @property
     def builder(self):
         return self._webdav._builder
@@ -82,7 +80,7 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https, base=None)
-        
+    
         self._ctera_session = session.Session(self.host(), self.context)
         self._ctera_clients = Clients(self)
 
@@ -98,7 +96,6 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
         self.firmwares = firmwares.Firmwares(self)
         self.groups = groups.Groups(self)
         self.logs = logs.Logs(self)
-        self.metadata = metadata.Metadata(self)
         self.plans = plans.Plans(self)
         self.reports = reports.Reports(self)
         self.roles = roles.Roles(self)
@@ -115,7 +112,7 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
     @property
     def api(self):
         return self._ctera_clients._api
-    
+
     @property
     def io(self):
         return self._ctera_clients._io

@@ -2,7 +2,6 @@ import logging
 
 from ..exceptions import ObjectNotFoundException
 from .base_command import BaseCommand
-from ..lib import QueryIterator, DefaultResponse, Command
 from ..common import Object, union
 from . import enum, query, decorator
 

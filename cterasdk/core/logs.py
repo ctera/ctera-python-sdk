@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from .base_command import BaseCommand
-from ..lib import QueryIterator, QueryLogsResponse, Command
+from ..lib import QueryLogsResponse
 from ..core import enum
 from ..common import Object
 from . import query
