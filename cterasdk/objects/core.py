@@ -80,7 +80,7 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https, base=None)
-    
+
         self._ctera_session = session.Session(self.host(), self.context)
         self._ctera_clients = Clients(self)
 

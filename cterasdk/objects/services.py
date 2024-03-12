@@ -9,7 +9,7 @@ from ..convert import tojsonstr
 class Service:
 
     def __init__(self, host, port, https, base):
-        self._base = base if base else str(URI.instance(f'http{"s" if https else ""}', host, port or 443 if https else 80))        
+        self._base = base if base else str(URI.instance(f'http{"s" if https else ""}', host, port or 443 if https else 80))
 
     @property
     def base(self):
