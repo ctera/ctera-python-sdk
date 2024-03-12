@@ -18,7 +18,6 @@ Download
 .. code:: python
 
    edge.files.download_as_zip('network-share/docs', ['Sample.docx', 'Summary.xlsx'])
-   
 
 Create Directory
 ================
