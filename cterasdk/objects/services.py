@@ -43,6 +43,13 @@ class CTERA(Service):
     @property
     def clients(self):
         return self._ctera_clients
+    
+    @property
+    @abstractmethod
+    def _login_object(self):
+        raise NotImplementedError(
+            "Implementing class must implement the login_object property by returning an object with login and logout methods"
+        )
 
     @abstractmethod
     def _authenticator(self, url):
@@ -65,13 +72,6 @@ class Management(CTERA):
     def __init__(self, host, port, https, base):
         super().__init__(host, port, https, base)
         self._generic = clients.Client(endpoints.EndpointBuilder.new(self.base), authenticator=self._authenticator)
-
-    @property
-    @abstractmethod
-    def _login_object(self):
-        raise NotImplementedError(
-            "Implementing class must implement the login_object property by returning an object with login and logout methods"
-        )
 
     def login(self, username, password):
         """

@@ -46,9 +46,9 @@ class Clients:
 
     def __init__(self, core):
         session = core._generic._async_session
-        self._ctera = clients.Extended(EndpointBuilder.new(core.base, core.context), session, core._authenticator)
-        self._api = clients.API(EndpointBuilder.new(core.base, core.context, '/api'), session, core._authenticator)
-        self._io = IO(core)
+        self.ctera = clients.Extended(EndpointBuilder.new(core.base, core.context), session, core._authenticator)
+        self.api = clients.API(EndpointBuilder.new(core.base, core.context, '/api'), session, core._authenticator)
+        self.io = IO(core)
 
 
 class IO:
@@ -107,15 +107,15 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
 
     @property
     def ctera(self):
-        return self._ctera_clients._ctera
+        return self.clients.ctera
 
     @property
     def api(self):
-        return self._ctera_clients._api
+        return self.clients.api
 
     @property
     def io(self):
-        return self._ctera_clients._io
+        return self.clients.io
 
     @property
     @abstractmethod

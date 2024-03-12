@@ -51,22 +51,6 @@ class QueryIterator(BaseIterator):
         return response.more, response.objects
 
 
-class CursorIterator(BaseIterator):
-
-    def __init__(self, callback, parameter):
-        super().__init__(callback, parameter)
-        self._cursor = None
-
-    @property
-    def cursor(self):
-        return self._parameter.cursor
-
-    def page(self):
-        response = self._callback(self._parameter)
-        self._parameter.cursor = response.cursor
-        return response.more, response.objects
-
-
 class BaseResponse:
 
     def __init__(self, response):

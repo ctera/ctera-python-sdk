@@ -59,12 +59,12 @@ class Clients:
             edge._generic.shutdown()
             session = Portal._generic._async_session  # pylint: disable=protected-access
             edge._ctera_session.start_remote_session(Portal.session())
-            self._api = clients.API(EndpointBuilder.new(edge.base), session, lambda *_: True)
+            self.api = clients.API(EndpointBuilder.new(edge.base), session, lambda *_: True)
         else:
             session = edge._generic._async_session  # pylint: disable=protected-access
-            self._migrate = clients.Migrate(EndpointBuilder.new(edge.base, '/migration/rest/v1'), session, edge._authenticator)
-            self._api = clients.API(EndpointBuilder.new(edge.base, '/admingui/api'), session, edge._authenticator)
-            self._io = IO(edge)
+            self.migrate = clients.Migrate(EndpointBuilder.new(edge.base, '/migration/rest/v1'), session, edge._authenticator)
+            self.api = clients.API(EndpointBuilder.new(edge.base, '/admingui/api'), session, edge._authenticator)
+            self.io = IO(edge)
 
 
 class IO:
@@ -152,15 +152,15 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
 
     @property
     def migrate(self):
-        return self._ctera_clients._migrate
+        return self.clients.migrate
 
     @property
     def api(self):
-        return self._ctera_clients._api
+        return self.clients.api
 
     @property
     def io(self):
-        return self._ctera_clients._io
+        return self.clients.io
 
     @property
     def _session_id_key(self):

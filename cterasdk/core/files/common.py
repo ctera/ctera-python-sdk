@@ -217,7 +217,7 @@ def raise_for_status(response, path):
         if error:
             raise error
     except ItemExists as error:
-        logging.getLogger().warning('A file or folder with the same name already exists. %s', {'path': path})
+        logging.getLogger().info('A file or folder with the same name already exists. %s', {'path': path})
         raise error
     except InvalidPath as error:
         logging.getLogger().error('Invalid parent directory path. %s', {'path': path})

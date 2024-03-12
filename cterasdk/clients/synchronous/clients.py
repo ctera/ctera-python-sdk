@@ -131,10 +131,6 @@ class XML(Client):
 class JSON(Client):
     """JSON Serializer and Deserializer"""
 
-    def __init__(self, builder=None, async_session=None, authenticator=None):
-        super().__init__(builder, async_session, authenticator)
-        self.headers.update_headers({'Content-Type': 'application/json'})
-
     def get(self, path, **kwargs):
         response = super().get(path, **kwargs)
         return response.json()
