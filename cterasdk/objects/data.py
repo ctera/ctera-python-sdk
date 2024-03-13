@@ -56,7 +56,8 @@ class DataServices(CTERA):
         return await self._login_object.login(username, password)
 
     async def logout(self):
-        return await self._login_object.logout()
+        await self._login_object.logout()
+        await self.clients.v1.api.shutdown()
 
     @property
     def _login_object(self):
