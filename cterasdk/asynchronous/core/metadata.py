@@ -5,7 +5,7 @@ import logging
 from .base_command import BaseCommand
 from .iterator import CursorAsyncIterator
 from ...common import Object
-from ...convert import tojsondict
+from ...convert import tojsondict, fromjsondict
 from ...lib import CursorResponse, Command
 
 
@@ -35,7 +35,7 @@ class Metadata(BaseCommand):
 
     async def get(self, drives=None, *, cursor=None):
         """
-        Get Metadata Changes for Selected Cloud Drive Folders
+        List Changes.
 
         :param list[CloudFSFolderFindingHelper],optional drives: List of Cloud Drive folders, defaults to all cloud drive folders.
         :param str,optional cursor: Cursor
@@ -54,7 +54,7 @@ class Metadata(BaseCommand):
 
     async def changes(self, cursor, timeout=None):
         """
-        Check for Changes
+        Check for Changes.
 
         :param str cursor: Cursor
         :param int,optional cursor: Timeout
@@ -67,6 +67,36 @@ class Metadata(BaseCommand):
         param.timeout = timeout if timeout else 10000
         logging.getLogger().info('Checking for updates. %s', {'timeout': timeout})
         return (await self._core.v2.api.post('/metadata/longpoll', param)).changes
+
+    async def ancestors(self, descendant):
+        """
+        Get Ancestors.
+
+        :param dict descendant: Event
+        :returns: Sorted List of Ancestors
+        :rtype: list[cterasdk.common.object.Object]
+        """
+        descendant = fromjsondict(descendant)
+        param = Object()
+        param.folder_id = descendant.folder_id
+        param.guid = descendant.guid
+        logging.getLogger().info('Getting ancestors. %s', {'guid': param.guid, 'folder_id': param.folder_id})
+        ancestors = (await self._core.v2.api.post('/metadata/ancestors', param))
+        return self.ancestry(descendant, ancestors)
+
+    def ancestry(self, descendant, ancestors):
+        """
+        Sorted Ancestry.
+        """
+        ancestry_mapper = {ancestor.guid: ancestor for ancestor in ancestors}
+        ancestry = [descendant]
+
+        current_ancestor = descendant
+        while ancestry_mapper:
+            ancestor = ancestry_mapper.pop(current_ancestor.parent_guid)
+            ancestry.append(ancestor)
+            current_ancestor = ancestor
+        return ancestry
 
 
 class Service(BaseCommand):
