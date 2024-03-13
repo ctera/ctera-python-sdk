@@ -109,4 +109,3 @@ async def run_forever(core, event, cursor, on_event):
                     logging.getLogger().info('Tasks created.')
                 cursor = iterator.cursor
                 logging.getLogger().info('Next Cursor. %s', {'cursor': cursor})
-                

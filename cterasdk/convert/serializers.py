@@ -36,7 +36,7 @@ def _to_protected_dict(o):
 def tojsondict(obj):
     """
     Convert a Python object to a  dict.
-    
+
     :returns: Object fields to a nested dictionary.
     :rtype: dict
     """
