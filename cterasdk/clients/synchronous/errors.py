@@ -17,7 +17,7 @@ class ClientError(Object):
 
 
 def accept_response(response):
-    message = response.text if response.status > 400 else None
+    message = response.text() if response.status > 400 else None
     try:
         response.raise_for_status()
     except aiohttp.ClientResponseError as error:

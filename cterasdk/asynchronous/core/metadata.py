@@ -43,8 +43,7 @@ class Metadata(BaseCommand):
         param = Object()
         param.max_results = 30
         param.folder_ids = []
-        if cursor:
-            param.cursor = cursor
+        param.cursor = cursor
         if drives:
             for drive in drives:
                 async for drive in await self._core.cloudfs.drives.find(drive.name, drive.owner, include=['uid']):
@@ -65,7 +64,7 @@ class Metadata(BaseCommand):
         param = Object()
         param.cursor = cursor
         param.timeout = timeout if timeout else 10000
-        logging.getLogger().info('Checking for updates. %s', {'timeout': timeout})
+        logging.getLogger().info('Checking for updates. %s', {'timeout': param.timeout})
         return (await self._core.v2.api.post('/metadata/longpoll', param)).changes
 
     async def ancestors(self, descendant):
@@ -81,20 +80,24 @@ class Metadata(BaseCommand):
         param.folder_id = descendant.folder_id
         param.guid = descendant.guid
         logging.getLogger().info('Getting ancestors. %s', {'guid': param.guid, 'folder_id': param.folder_id})
-        ancestors = (await self._core.v2.api.post('/metadata/ancestors', param))
-        return self.ancestry(descendant, ancestors)
+        return self._ancestry(descendant, await self._core.v2.api.post('/metadata/ancestors', param))
 
-    def ancestry(self, descendant, ancestors):
+    def _ancestry(self, descendant, ancestors):
         """
         Sorted Ancestry.
         """
+        if not isinstance(ancestors, list):
+            return []
         ancestry_mapper = {ancestor.guid: ancestor for ancestor in ancestors}
         ancestry = [descendant]
 
         current_ancestor = descendant
         while ancestry_mapper:
-            ancestor = ancestry_mapper.pop(current_ancestor.parent_guid)
-            ancestry.append(ancestor)
+            try:
+                ancestor = ancestry_mapper.pop(current_ancestor.parent_guid)
+            except KeyError:
+                break
+            ancestry.insert(0, ancestor)
             current_ancestor = ancestor
         return ancestry
 

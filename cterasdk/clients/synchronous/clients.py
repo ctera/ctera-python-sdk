@@ -195,7 +195,7 @@ class Migrate(JSON):
         token = response.headers.get(Migrate.ID, None)
         if token:
             self.headers.update_headers({Migrate.ID: token})
-        return response.deserialize()
+        return response.json()
 
 
 def execute_request(async_session, request, *, on_response, max_retries=3, backoff_factor=2):
