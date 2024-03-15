@@ -80,9 +80,10 @@ class Metadata(BaseCommand):
         param.folder_id = descendant.folder_id
         param.guid = descendant.guid
         logging.getLogger().info('Getting ancestors. %s', {'guid': param.guid, 'folder_id': param.folder_id})
-        return self._ancestry(descendant, await self._core.v2.api.post('/metadata/ancestors', param))
+        return Metadata._ancestry(descendant, await self._core.v2.api.post('/metadata/ancestors', param))
 
-    def _ancestry(self, descendant, ancestors):
+    @staticmethod
+    def _ancestry(descendant, ancestors):
         """
         Sorted Ancestry.
         """
@@ -99,9 +100,6 @@ class Metadata(BaseCommand):
 
 class Service(BaseCommand):
     """Change Notification Service"""
-
-    def __init__(self, core):
-        super().__init__(core)
 
     def run(self, queue, cursor=None, save_cursor=None):
         """

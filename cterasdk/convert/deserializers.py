@@ -2,7 +2,6 @@ import json
 import queue
 import logging
 from xml.etree.ElementTree import fromstring, ParseError
-from types import SimpleNamespace
 
 from .types import XMLTypes
 from ..common import Item, Object, Device
