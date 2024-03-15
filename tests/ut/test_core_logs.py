@@ -23,7 +23,7 @@ class TestCoreLogs(base_core.BaseCoreTest):
         origin_type_filter = base_core.BaseCoreTest._create_filter(query.FilterType.String, 'originType',
                                                                    query.Restriction.EQUALS, OriginType.Portal)
         expected_query_params = base_core.BaseCoreTest._create_query_params(filters=[origin_type_filter],
-                                                                            start_from=0, count_limit=50, topic=LogTopic.System,
+                                                                            start_from=50, count_limit=50, topic=LogTopic.System,
                                                                             minSeverity=Severity.INFO)
         actual_query_params = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_query_params, expected_query_params)
@@ -45,7 +45,7 @@ class TestCoreLogs(base_core.BaseCoreTest):
         after_filter = base_core.BaseCoreTest._create_filter(query.FilterType.DateTime, 'time',
                                                              query.Restriction.GREATER_THAN, after_t_time)
         expected_query_params = base_core.BaseCoreTest._create_query_params(filters=[origin_type_filter, before_filter, after_filter],
-                                                                            start_from=0, count_limit=50, topic=LogTopic.System,
+                                                                            start_from=50, count_limit=50, topic=LogTopic.System,
                                                                             minSeverity=Severity.ERROR)
         actual_query_params = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_query_params, expected_query_params)
