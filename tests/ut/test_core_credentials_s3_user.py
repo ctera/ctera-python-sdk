@@ -15,7 +15,7 @@ class TestCoreS3Credentials(base_core_services.BaseCoreServicesTest):
         self._uid = 1500
         self._access_key_id = 'ABCD'
         self._access_key_uid = 2500
-        self._mock_get_session = self.patch_call("cterasdk.objects.services.CTERA.session")
+        self._mock_get_session = self.patch_call("cterasdk.objects.services.Management.session")
         self._mock_get_session.return_value = munch.Munch({'user': munch.Munch({'name': self._username})})
         self._mock_get_user_uid = self.patch_call("cterasdk.core.users.Users.get")
         self._mock_get_user_uid.return_value = munch.Munch({'uid': self._uid})

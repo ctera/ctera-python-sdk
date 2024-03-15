@@ -1,5 +1,5 @@
 from ..clients.synchronous import clients
-from .services import CTERA
+from .services import Management
 from .endpoints import EndpointBuilder
 
 from ..edge import backup
@@ -23,7 +23,7 @@ class Clients:
             self._api = clients.API(EndpointBuilder.new(drive.base, '/admingui/api'), drive._generic._async_session, drive._authenticator)
 
 
-class Drive(CTERA):
+class Drive(Management):
 
     def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
         super().__init__(host, port, https, base=base)

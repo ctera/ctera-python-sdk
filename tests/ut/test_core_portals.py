@@ -24,7 +24,7 @@ class TestCorePortals(base_core.BaseCoreTest):
         self._billing_id = 'billing-id'
         self._company = 'The Acme Corporation'
         self._tenant_attrs = ['externalPortalId', 'companyName']
-        mock_session = self.patch_call("cterasdk.objects.services.CTERA.session")
+        mock_session = self.patch_call("cterasdk.objects.services.Management.session")
         mock_session.return_value = munch.Munch({'update_tenant': lambda x: x})
 
     def test_get_tenant(self):
