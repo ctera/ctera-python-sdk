@@ -5,7 +5,7 @@ import logging
 from .base_command import BaseCommand
 from .iterator import CursorAsyncIterator
 from ...common import Object
-from ...convert import tojsondict, fromjsondict
+from ...convert import tojsonstr, fromjsonstr
 from ...lib import CursorResponse, Command
 
 
@@ -71,11 +71,11 @@ class Metadata(BaseCommand):
         """
         Get Ancestors.
 
-        :param dict descendant: Event
+        :param str descendant: Event, formatted as a JSON document
         :returns: Sorted List of Ancestors
         :rtype: list[cterasdk.common.object.Object]
         """
-        descendant = fromjsondict(descendant)
+        descendant = fromjsonstr(descendant)
         param = Object()
         param.folder_id = descendant.folder_id
         param.guid = descendant.guid
@@ -86,17 +86,12 @@ class Metadata(BaseCommand):
         """
         Sorted Ancestry.
         """
-        if not isinstance(ancestors, list):
-            return []
         ancestry_mapper = {ancestor.guid: ancestor for ancestor in ancestors}
         ancestry = [descendant]
 
         current_ancestor = descendant
         while ancestry_mapper:
-            try:
-                ancestor = ancestry_mapper.pop(current_ancestor.parent_guid)
-            except KeyError:
-                break
+            ancestor = ancestry_mapper.pop(current_ancestor.parent_guid)
             ancestry.insert(0, ancestor)
             current_ancestor = ancestor
         return ancestry
@@ -107,38 +102,62 @@ class Service(BaseCommand):
 
     def __init__(self, core):
         super().__init__(core)
-        self._event = asyncio.Event()
 
-    def start(self, cursor=None, on_event=None):
+    def run(self, queue, cursor=None, save_cursor=None):
         """
         Start Service.
 
-        :param str,optional cursor: Start enumerating changes from cursor.
-        :param callback,optional on_event: An asynchronous callback function that to handle incoming events.
-         The callback should accept one argument:
-          - event (dict): The event to be processed
+        :param asyncio.Queue queue: Event Queue.
+        :param str,optional cursor: Cursor.
+        :param callback,optional save_cursor: Asynchronous callback function to persist the cursor.
         """
-        return asyncio.create_task(run_forever(self._core, self._event, cursor, on_event))
-
-    def stop(self):
-        """
-        Stop Service.
-        """
-        self._event.set()
+        return asyncio.create_task(run_forever(self._core, queue, cursor, save_cursor))
 
 
-async def run_forever(core, event, cursor, on_event):
-    while True:
-        if event.is_set():
-            logging.getLogger().info('Shutdown event received.')
-            break
-        else:
+async def run_forever(core, queue, cursor, save_cursor):
+    """
+    Change Notification Service.
+
+    :param cterasdk.objects.data.DataServices core: Data Services object
+    :param asyncio.Queue queue: Queue to process events.
+    :param str cursor: Cursor.
+    :param callback save_cursor: Asynchronous callback function to persist the cursor.
+    """
+    logging.getLogger().info('Running Service.')
+    try:
+        while True:
             if cursor is None or await core.metadata.changes(cursor):
-                iterator = await core.metadata.get(cursor=cursor)
-                tasks = [asyncio.create_task(on_event(tojsondict(event))) async for event in iterator]
-                if tasks:
-                    logging.getLogger().info('Creating tasks. %s', {'events': len(tasks)})
-                    asyncio.gather(*tasks)
-                    logging.getLogger().info('Tasks created.')
-                cursor = iterator.cursor
-                logging.getLogger().info('Next Cursor. %s', {'cursor': cursor})
+                events = await core.metadata.get(cursor=cursor)
+                await enqueue_events(events, queue)
+                logging.getLogger().debug('Joining Queue.')
+                await queue.join()
+                logging.getLogger().debug('Completed Processing.')
+                cursor = events.cursor
+                await persist_cursor(save_cursor, cursor)
+    except asyncio.CancelledError:
+        logging.getLogger().info('Cancelling Task.')
+
+
+async def persist_cursor(save_cursor, cursor):
+    """
+    Persist Cursor.
+
+    :param callback save_cursor: Asynchronous callback function to persist the cursor.
+    :param str cursor: Cursor
+    """
+    logging.getLogger().debug('Saving Cursor.')
+    await save_cursor(cursor)
+    logging.getLogger().debug('Cursor Saved.')
+
+
+async def enqueue_events(events, queue):
+    """
+    Enqueue Events.
+
+    :param cterasdk..Queue queue: Event Queue.
+    :param cterasdk.asynchronous.core.iterator.CursorAsyncIterator events: Event Iterator.
+    """
+    async for event in events:
+        logging.getLogger().debug('Enqueuing Event.')
+        await queue.put(tojsonstr(event, False, False))
+        logging.getLogger().debug('Enqueued Event.')

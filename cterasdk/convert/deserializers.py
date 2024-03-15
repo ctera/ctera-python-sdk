@@ -42,13 +42,6 @@ def SetAppendValue(item, value):
         item.value = value
 
 
-def fromjsondict(d):
-    """
-    Convert a dictionary to a JSON
-    """
-    return fromjsonstr(json.dumps(d))
-
-
 def fromjsonstr(fromstr):
     if not fromstr:
         return fromstr
