@@ -164,7 +164,7 @@ class Services(BaseCommand):
     def _check_web_sso(obj):
         try:
             if obj.result.hasWebSSO:
-                message = "Connection failed. You must activate this Edge Filerusing an activation code."
+                message = "Connection failed. You must activate this Edge Filer using an activation code."
                 logging.getLogger().error(message)
                 raise CTERAException(message)
 

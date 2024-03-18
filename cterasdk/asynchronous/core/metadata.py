@@ -47,7 +47,7 @@ class Metadata(BaseCommand):
         param = await self._create_parameter(drives, cursor)
         logging.getLogger().info('Listing updates.')
         return iterator(self._core, '/metadata/list', param)
-    
+
     async def _create_parameter(self, drives, cursor):
         param = Object()
         param.max_results = 2000
@@ -148,7 +148,7 @@ async def run_forever(core, queue, save_cursor, drives, cursor):
                     await persist_cursor(save_cursor, cursor)
             except ConnectionError as error:
                 await on_connection_error(error)
-            except TimeoutError as error:
+            except TimeoutError:
                 logging.getLogger().warning("Request timed out. Retrying.")
     except asyncio.CancelledError:
         logging.getLogger().info('Cancelling Task.')
@@ -189,7 +189,7 @@ async def persist_cursor(save_cursor, cursor):
     try:
         await save_cursor(cursor)
         logging.getLogger().debug("Called Persist Cursor Function.")
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         logging.getLogger().error("An error occurred while trying to persist cursor. Function: '%s'", save_cursor.__name__)
 
 
