@@ -12,7 +12,7 @@ from .types import TCPService
 
 
 class Services(BaseCommand):
-    """ Gateway Cloud Services configuration APIs """
+    """ Edge Filer Cloud Services configuration APIs """
     _UNTRUSTED_CERTIFICATE_ERRORS = [
         'UntrustedCert',
         'UntrustedCA',
@@ -21,8 +21,8 @@ class Services(BaseCommand):
         'UntrustedCertDNS'
     ]
 
-    def __init__(self, gateway):
-        super().__init__(gateway)
+    def __init__(self, edge):
+        super().__init__(edge)
         self._trust_cert = {}
 
     def get_status(self):
@@ -78,7 +78,7 @@ class Services(BaseCommand):
 
     def activate(self, server, user, code, ctera_license=enum.License.EV16):
         """
-        Activate the gateway using an activation code
+        Enroll the Edge Filer with CTERA Portal using an activation code
 
         :param str server: Address of the Portal
         :param str user: User for  the Portal connection
@@ -164,7 +164,7 @@ class Services(BaseCommand):
     def _check_web_sso(obj):
         try:
             if obj.result.hasWebSSO:
-                message = "Connection failed. You must activate this Gateway using an activation code."
+                message = "Connection failed. You must activate this Edge Filerusing an activation code."
                 logging.getLogger().error(message)
                 raise CTERAException(message)
 

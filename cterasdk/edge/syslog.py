@@ -7,7 +7,7 @@ from .base_command import BaseCommand
 
 
 class Syslog(BaseCommand):
-    """ Gateway Syslog configuration APIs """
+    """ Edge Filer Syslog configuration APIs """
 
     def enable(self, server, port=514, proto=enum.IPProtocol.UDP, min_severity=enum.Severity.INFO):
         """

@@ -9,7 +9,7 @@ from .base_command import BaseCommand
 
 class Logs(BaseCommand):
     """
-    Gateway Logs APIs
+    Edge FilerLogs APIs
 
     :ivar list[str] default_include: Default log fields - 'severity', 'time', 'msg', 'more'
     """
@@ -33,7 +33,7 @@ class Logs(BaseCommand):
 
     def logs(self, topic, include=None, minSeverity=enum.Severity.INFO):
         """
-        Fetch Gateway logs
+        Fetch Edge Filerlogs
 
         :param str topic: Log Topic to fetch
         :param list[str],optional include: List of fields to include in the response, defailts to Logs.default_include

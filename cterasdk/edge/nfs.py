@@ -6,7 +6,7 @@ from .base_command import BaseCommand
 
 
 class NFS(BaseCommand):
-    """ Gateway NFS configuration """
+    """ Edge Filer NFS configuration """
 
     def get_configuration(self):
         """

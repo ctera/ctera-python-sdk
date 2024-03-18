@@ -6,7 +6,7 @@ from .base_command import BaseCommand
 
 
 class Power(BaseCommand):
-    """ Gateway Power APIs """
+    """ Edge Filer Power APIs """
 
     def reboot(self, wait=False):
         """
@@ -20,12 +20,12 @@ class Power(BaseCommand):
             Boot(self._edge).wait()
 
     def shutdown(self):
-        """ Shutdown the Gateway """
+        """ Shutdown the Edge Filer"""
         self._edge.api.execute("/status/device", "poweroff", None)
 
     def reset(self, wait=False):
         """
-        Reset the Gateway setting
+        Reset the Edge Filersetting
 
         :param bool,optional wait: Wait for reset to complete, defaults to False
         """

@@ -6,7 +6,7 @@ from .base_command import BaseCommand
 
 
 class FTP(BaseCommand):
-    """ Gateway FTP configuration APIs """
+    """ Edge Filer FTP configuration APIs """
 
     def get_configuration(self):
         """

@@ -6,7 +6,7 @@ from .base_command import BaseCommand
 
 
 class RSync(BaseCommand):
-    """ Gateway RSync configuration """
+    """ Edge Filer RSync configuration """
 
     def get_configuration(self):
         """

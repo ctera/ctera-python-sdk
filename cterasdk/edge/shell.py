@@ -6,11 +6,11 @@ from .base_command import BaseCommand
 
 
 class Shell(BaseCommand):
-    """ Gateway Shell command """
+    """ Edge Filer Shell command """
 
     def run_command(self, shell_command, wait=True):
         """
-        Execute a shell command on the gateway
+        Execute a Shell Command.
 
         :param str shell_command: The shell command to execute
         :param bool,optional wait: Wait for the command to execute, defaults to ``True``

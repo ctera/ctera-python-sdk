@@ -6,7 +6,7 @@ from .base_command import BaseCommand
 
 
 class Users(BaseCommand):
-    """ Gateway Users configuration APIs """
+    """ Edge Filer Users configuration APIs """
 
     def get(self, name=None):
         """
@@ -18,7 +18,7 @@ class Users(BaseCommand):
 
     def add_first_user(self, username, password, email=''):
         """
-        Add the first user of the Gateway and login
+        Add the first user of the Edge Filerand login
 
         :param str username: User name for the new user
         :param str password: Password for the new user

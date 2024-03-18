@@ -8,8 +8,8 @@ from .base_command import BaseCommand
 class Licenses(BaseCommand):
     """ Edge Filer License Configuration APIs """
 
-    def __init__(self, gateway):
-        super().__init__(gateway)
+    def __init__(self, edge):
+        super().__init__(edge)
         self.local = LocalLicenses(self._edge)
 
     @staticmethod
@@ -38,7 +38,7 @@ class Licenses(BaseCommand):
 
     def get(self):
         """
-        Get the current Gateway License
+        Get the current Edge FilerLicense
         """
         inferred_license = self._edge.api.get('/config/device/activeLicenseType')
         if inferred_license == 'NA':

@@ -29,7 +29,7 @@ class Task(TaskBase):
 
 
 class Tasks(BaseCommand):
-    """ Gateway Background Task APIs """
+    """ Edge Filer Background Task APIs """
 
     def status(self, ref):
         """

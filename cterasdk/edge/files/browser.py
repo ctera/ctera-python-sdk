@@ -85,7 +85,7 @@ class FileBrowser(BaseCommand):
         """
         Delete a file
 
-        :param str path: The file's path on the gateway
+        :param str path: File path
         """
         return io.remove(self._edge, self.get_object_path(path))
 

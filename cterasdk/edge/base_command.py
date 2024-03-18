@@ -1,5 +1,5 @@
 class BaseCommand:
-    """ Base class for all Gateway API classes """
+    """ Base class for all Edge FilerAPI classes """
 
     def __init__(self, edge):
         self._edge = edge

@@ -5,7 +5,7 @@ from .base_command import BaseCommand
 
 
 class NTP(BaseCommand):
-    """ Gateway NTP configuration """
+    """ Edge Filer NTP configuration """
 
     def get_configuration(self):
         return self._edge.api.get('/config/time')

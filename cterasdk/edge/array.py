@@ -6,7 +6,7 @@ from .base_command import BaseCommand
 
 
 class Array(BaseCommand):
-    """ Gateway Array APIs """
+    """ Edge Filer Array APIs """
 
     def get(self, name=None):
         """
