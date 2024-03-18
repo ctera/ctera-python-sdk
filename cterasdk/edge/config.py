@@ -10,23 +10,23 @@ from .base_command import BaseCommand
 
 
 class Config(BaseCommand):
-    """ General gateway configuraion """
+    """ Edge Filer General Configuration APIs """
 
-    def __init__(self, gateway):
-        super().__init__(gateway)
+    def __init__(self, edge):
+        super().__init__(edge)
         self._filesystem = FileSystem.instance()
 
     def get_location(self):
         """
-        Get the location of the gateway
+        Get the location of the Edge Filer
 
-        :return str: The location of the gateway
+        :return str: The location of the Edge Filer
         """
         return self._edge.api.get('/config/device/location')
 
     def set_location(self, location):
         """
-        Set the location of the gateway
+        Set the location of the Edge Filer
 
         :param str location: New location to set
         :return str: The new location
@@ -36,15 +36,15 @@ class Config(BaseCommand):
 
     def get_hostname(self):
         """
-        Get the hostname of the gateway
+        Get the hostname of the Edge Filer
 
-        :return str: The hostname of the gateway
+        :return str: The hostname of the Edge Filer
         """
         return self._edge.api.get('/config/device/hostname')
 
     def set_hostname(self, hostname):
         """
-        Set the hostname of the gateway
+        Set the hostname of the Edge Filer
 
         :param str hostname: New hostname to set
         :return str: The new hostname

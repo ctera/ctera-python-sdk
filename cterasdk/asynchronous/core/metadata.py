@@ -40,6 +40,9 @@ class Metadata(BaseCommand):
 
         :param list[CloudFSFolderFindingHelper],optional drives: List of Cloud Drive folders, defaults to all cloud drive folders.
         :param str,optional cursor: Cursor
+
+        :returns: An asynchronous iterator
+        :rtype: cterasdk.asynchronous.core.iterator.CursorAsyncIterator
         """
         param = await self._create_parameter(drives, cursor)
         logging.getLogger().info('Listing updates.')
