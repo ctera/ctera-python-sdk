@@ -72,7 +72,7 @@ class Backup(BaseCommand):
 
     def configure(self, passphrase=None):
         """
-        Edge Filerbackup configuration
+        Edge Filer backup configuration
 
         :param str,optional passphrase: Passphrase for the backup, defaults to None
         """

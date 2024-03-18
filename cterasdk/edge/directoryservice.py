@@ -9,7 +9,7 @@ from .types import TCPService
 
 class DirectoryService(BaseCommand):
     """
-    Edge FilerActive Directory configuration APIs
+    Edge Filer Active Directory configuration APIs
     """
 
     def connected(self):
@@ -20,7 +20,7 @@ class DirectoryService(BaseCommand):
 
     def connect(self, domain, username, password, ou=None, check_connection=False):
         """
-        Connect the Edge Filerto an Active Directory
+        Connect the Edge Filer to an Active Directory
 
         :param str domain: The active directory domain to connect to
         :param str username: The user name to use when connecting to the active directory services
@@ -72,7 +72,7 @@ class DirectoryService(BaseCommand):
 
     def set_static_domain_controller(self, dc):
         """
-        Configure the Edge Filerto use a static domain controller
+        Configure the Edge Filer to use a static domain controller
 
         :param str dc: The FQDN, hostname or ip address of the domain controller
         :return: The FQDN, hostname or ip address of the domain controller

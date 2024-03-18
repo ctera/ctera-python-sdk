@@ -7,7 +7,7 @@ from .base_command import BaseCommand
 
 class Audit(BaseCommand):
     """
-    Edge FilerAudit configuration APIs
+    Edge Filer Audit configuration APIs
 
     :ivar list[cterasdk.edge.enum.AuditEvents] defaultAuditEvents: Default audit events
     """
@@ -33,7 +33,7 @@ class Audit(BaseCommand):
             includeAuditLogTag=True,
             humanReadableAuditLog=False):
         """
-        Enable Edge FilerAudit log
+        Enable Edge Filer Audit log
 
         :param str path: Path to save the audit log
         :param list[cterasdk.edge.enum.AuditEvents],optional auditEvents:
@@ -60,7 +60,7 @@ class Audit(BaseCommand):
 
     def disable(self):
         """
-        Disable Edge FilerAudit log
+        Disable Edge Filer Audit log
         """
         logging.getLogger().info('Disabling SMB audit logs')
         self._edge.api.put('/config/logging/files/mode', enum.Mode.Disabled)

@@ -18,7 +18,7 @@ class Users(BaseCommand):
 
     def add_first_user(self, username, password, email=''):
         """
-        Add the first user of the Edge Filerand login
+        Add the first user of the Edge Filer and login
 
         :param str username: User name for the new user
         :param str password: Password for the new user

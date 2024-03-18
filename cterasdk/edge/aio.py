@@ -4,7 +4,7 @@ from .base_command import BaseCommand
 
 class AIO(BaseCommand):
     """
-    Edge FilerAIO APIs
+    Edge Filer AIO APIs
     """
     def is_enabled(self):
         """

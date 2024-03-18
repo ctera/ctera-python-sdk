@@ -28,7 +28,7 @@ class Volumes(BaseCommand):
         :param str,optional device: Name of the device to use for the new volume, can be left as None if there's only one device available
         :param str,optional passphrase: Passphrase for the volume
 
-        :return: Edge Filerresponse
+        :return: Edge Filer response
         """
         storage_devices = self._devices()
         device_name, device_size = Volumes._device_volume(device, storage_devices)
@@ -71,7 +71,7 @@ class Volumes(BaseCommand):
         Modify an existing volume
 
         :param int,optional size: New size of the volume, if not set, the size will not change
-        :return: Edge Filerresponse
+        :return: Edge Filer response
         """
         if size is None:
             return Object()

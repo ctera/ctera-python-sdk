@@ -25,7 +25,7 @@ class Power(BaseCommand):
 
     def reset(self, wait=False):
         """
-        Reset the Edge Filersetting
+        Reset the Edge Filer setting
 
         :param bool,optional wait: Wait for reset to complete, defaults to False
         """

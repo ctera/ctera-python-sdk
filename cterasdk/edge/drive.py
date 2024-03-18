@@ -6,7 +6,7 @@ from .base_command import BaseCommand
 
 class Drive(BaseCommand):
     """
-    Edge FilerDrive APIs
+    Edge Filer Drive APIs
     """
 
     def get(self, name=None):

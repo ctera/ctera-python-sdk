@@ -38,7 +38,7 @@ class Licenses(BaseCommand):
 
     def get(self):
         """
-        Get the current Edge FilerLicense
+        Get the current Edge Filer License
         """
         inferred_license = self._edge.api.get('/config/device/activeLicenseType')
         if inferred_license == 'NA':

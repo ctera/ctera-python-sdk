@@ -45,7 +45,7 @@ class Severity:
 
 class VolumeStatus:
     """
-    Edge Filervolume status
+    Edge Filer volume status
 
     :ivar str Ok: Volume is ok
     :ivar str ContainsErrors: Volume contains errors
@@ -95,7 +95,7 @@ class CIFSPacketSigning:
 
 class TaskStatus:
     """
-    Edge Filertask status
+    Edge Filer task status
 
     :ivar str Failed: The task has failed
     :ivar str Running: The task is running
@@ -112,7 +112,7 @@ class TCPConnectRC:
 
 class License:
     """
-    Edge Filerlicense types
+    Edge Filer license types
 
     :ivar str EV4: EV4 license
     :ivar str EV8: EV8 license
@@ -131,10 +131,10 @@ class License:
 
 class OperationMode:
     """
-    Edge Fileroperation mode
+    Edge Filer operation mode
 
-    :ivar str Disabled: Edge Fileris Disabled
-    :ivar str CachingGateway: Edge Fileris in Caching mode
+    :ivar str Disabled: Edge Filer is Disabled
+    :ivar str CachingGateway: Edge Filer is in Caching mode
     """
     Disabled = "Disabled"
     CachingGateway = "CachingGateway"
@@ -208,7 +208,7 @@ class FileAccessMode:
 
 class SyncStatus:
     """
-    Edge Filersync status
+    Edge Filer sync status
 
     :ivar str Off: Off
     :ivar str NotInitialized: Not Initialized
@@ -294,7 +294,7 @@ class AuditEvents:
 
 class ServicesConnectionState:
     """
-    Edge Filerconnection status
+    Edge Filer connection status
 
     :ivar str ResolvingServers: The Edge Filer is resolving CTERA Portal servers
     :ivar str Connecting: The Edge Filer is in connecting to CTERA Portal

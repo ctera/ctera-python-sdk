@@ -81,7 +81,7 @@ For parallel processing of events, the CTERA SDK for Python features an asynchro
         asyncio.run(main())
 
 ..
-   
+
 .. automethod:: cterasdk.asynchronous.core.metadata.Metadata.ancestors
    :noindex:
 
@@ -116,11 +116,12 @@ For parallel processing of events, the CTERA SDK for Python features an asynchro
 Metadata Service
 ----------------
 
-Alternatively, this library includes a background service designed for subscribing to real-time file events and dispatching tasks to consumer threads.
+Alternatively, this library includes a background service designed for subscribing to real-time file events
+and dispatching tasks to consumer threads.
 The service effectively subscribes to file events and enqueues them to an ``asyncio.Queue`` queue.
 All enqueued file events are represeted as `json` strings.
-It blocks active until all events are consumed and the **task_done()** was called to signal .
-After processing all events, the service triggers a callback function supplied by the client to store the cursor. 
+It blocks active until all events are consumed and the **task_done()** was called to signal.
+After processing all events, the service triggers a callback function supplied by the client to store the cursor.
 Recording the cursor enables pausing and resuming the service from the last cursor position.
 
 .. automethod:: cterasdk.asynchronous.core.metadata.Service.run
@@ -144,7 +145,7 @@ Recording the cursor enables pausing and resuming the service from the last curs
     async def consumer(queue):
         """Sample worker thread"""
         while True:
-            event = json.loads(await queue.get())  # 
+            event = json.loads(await queue.get())
             try:
                 await process_event(event)
             except Exception:
