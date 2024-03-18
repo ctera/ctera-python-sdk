@@ -203,7 +203,7 @@ def execute_request(async_session, request, *, on_response, max_retries=3, backo
     while retries < max_retries:
         try:
             response = asyncio.get_event_loop().run_until_complete(async_session.await_promise(request, on_response=on_response))
-            return errors.accept_response(response)
+            return errors.accept(response)
         except (ConnectionError, TimeoutError):
             retries += 1
             if retries < max_retries:

@@ -1,5 +1,6 @@
 import cterasdk.settings
 
+from . import errors
 from ..base import BaseClient, BaseResponse
 from ..common import Serializers, Deserializers
 from .. import async_requests, decorators
@@ -39,7 +40,8 @@ class AsyncClient(BaseClient):
 
     async def _request(self, request, *, on_response=None):
         on_response = on_response if on_response else AsyncResponse.new()
-        return await self._async_session.await_promise(self.join_headers(request), on_response=on_response)
+        response = await self._async_session.await_promise(self.join_headers(request), on_response=on_response)
+        return await errors.accept(response)
 
 
 class AsyncJSON(AsyncClient):
