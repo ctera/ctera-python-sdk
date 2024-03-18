@@ -12,6 +12,13 @@ Download
 
    edge.files.download('cloud/users/Service Account/My Files/Documents/Sample.docx')
 
+.. automethod:: cterasdk.edge.files.browser.FileBrowser.download_as_zip
+   :noindex:
+
+.. code:: python
+
+   edge.files.download_as_zip('network-share/docs', ['Sample.docx', 'Summary.xlsx'])
+
 Create Directory
 ================
 

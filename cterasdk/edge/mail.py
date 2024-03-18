@@ -5,7 +5,7 @@ from .base_command import BaseCommand
 
 
 class Mail(BaseCommand):
-    """ Gateway Mail Server configuration APIs """
+    """ Edge Filer Mail Server configuration APIs """
 
     def enable(self, smtp_server, port=25, username=None, password=None, use_tls=True):
         """

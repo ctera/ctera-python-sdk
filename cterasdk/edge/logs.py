@@ -1,7 +1,7 @@
 # pylint: disable=line-too-long
 import logging
 
-from ..lib import Command, Iterator
+from ..lib import QueryLogsResponse
 from . import query
 from . import enum
 from .base_command import BaseCommand
@@ -9,7 +9,7 @@ from .base_command import BaseCommand
 
 class Logs(BaseCommand):
     """
-    Gateway Logs APIs
+    Edge Filer Logs APIs
 
     :ivar list[str] default_include: Default log fields - 'severity', 'time', 'msg', 'more'
     """
@@ -33,20 +33,15 @@ class Logs(BaseCommand):
 
     def logs(self, topic, include=None, minSeverity=enum.Severity.INFO):
         """
-        Fetch Gateway logs
+        Fetch Edge Filer logs
 
         :param str topic: Log Topic to fetch
         :param list[str],optional include: List of fields to include in the response, defailts to Logs.default_include
         :param cterasdk.edge.enum.Severity,optional minSeverity: Minimal log severity to fetch, defaults to cterasdk.edge.enum.Severity.INFO
 
-        :return: Log lines
-        :rtype: cterasdk.lib.iterator.Iterator
+        :return: Log entries
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         param = query.QueryParamBuilder().include(
             include or Logs.default_include).put('topic', topic).put('minSeverity', minSeverity).build()
-        function = Command(self._query_logs)
-        return Iterator(function, param)
-
-    def _query_logs(self, param):
-        response = self._edge.api.execute('/config/logging/general', 'pagedQuery', param)
-        return (response.hasMore, response.logs)
+        return query.iterator(self._edge, '/config/logging/general', param, 'pagedQuery', QueryLogsResponse)

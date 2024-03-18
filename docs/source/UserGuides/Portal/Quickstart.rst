@@ -65,7 +65,7 @@ Now we have an authenticated ``admin`` or ``user`` session. We can now proceed t
         print('Count: ', drive.folderStats.totalFiles)
 
     """List all the Edge Filers connected to the 'acme' tenant and their connection status"""
-    for edge in admin.devices.filers(include['deviceConnectionstatus']):
+    for edge in admin.devices.filers(include=['deviceConnectionstatus']):
         print(edge)
 
     """To return to the Global Administration"""
@@ -138,22 +138,22 @@ The ``GlobalAdmin`` and ``ServicesPortal`` objects feature an ``api`` property u
 
 .. warning:: For optimal integration, it's advised to utilize the modules provided in this SDK instead of the ``api`` property. In cases where a specific command or module is absent, `please submit a feature request <https://github.com/ctera/ctera-python-sdk/issues>`_.
 
-.. automethod:: cterasdk.aio_client.clients.API.get
+.. automethod:: cterasdk.clients.synchronous.clients.API.get
    :noindex:
 
-.. automethod:: cterasdk.aio_client.clients.API.get_multi
+.. automethod:: cterasdk.clients.synchronous.clients.API.get_multi
    :noindex:
 
-.. automethod:: cterasdk.aio_client.clients.API.put
+.. automethod:: cterasdk.clients.synchronous.clients.API.put
    :noindex:
 
-.. automethod:: cterasdk.aio_client.clients.API.add
+.. automethod:: cterasdk.clients.synchronous.clients.API.add
    :noindex:
 
-.. automethod:: cterasdk.aio_client.clients.API.execute
+.. automethod:: cterasdk.clients.synchronous.clients.API.execute
    :noindex:
 
-.. automethod:: cterasdk.aio_client.clients.API.delete
+.. automethod:: cterasdk.clients.synchronous.clients.API.delete
    :noindex:
 
 Data Types and Enumerators

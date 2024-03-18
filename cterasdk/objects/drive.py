@@ -1,5 +1,5 @@
-from ..aio_client import clients
-from .services import CTERA
+from ..clients.synchronous import clients
+from .services import Management
 from .endpoints import EndpointBuilder
 
 from ..edge import backup
@@ -11,7 +11,19 @@ from ..edge import support
 from ..edge import sync
 
 
-class Drive(CTERA):
+class Clients:
+
+    def __init__(self, drive, Portal):
+        if Portal:
+            drive._Portal = Portal
+            drive._generic.shutdown()
+            drive._ctera_session.start_remote_session(Portal.session())
+            self._api = clients.API(EndpointBuilder.new(drive.base), Portal._generic._async_session, lambda *_: True)
+        else:
+            self._api = clients.API(EndpointBuilder.new(drive.base, '/admingui/api'), drive._generic._async_session, drive._authenticator)
+
+
+class Drive(Management):
 
     def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
         super().__init__(host, port, https, base=base)
@@ -29,7 +41,7 @@ class Drive(CTERA):
     def _initialize(self, Portal):
         if Portal:
             self._generic.shutdown()
-            async_session = Portal.generic._async_session  # pylint: disable=protected-access
+            async_session = Portal._generic._async_session  # pylint: disable=protected-access
             self._ctera_session.start_remote_session(Portal.session())
             self._api = clients.API(EndpointBuilder.new(self.base), async_session, lambda *_: True)
         else:

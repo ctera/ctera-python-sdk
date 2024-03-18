@@ -1,24 +1,46 @@
 from datetime import datetime
 
-from ..lib import Iterator, Command
+from ..lib import QueryIterator, DefaultResponse, Command
 from ..common import Object
-from ..convert import tojsonstr
 
 
-def query(CTERAHost, path, name, param):
-    response = CTERAHost.api.execute(path, name, param) if name is not None else CTERAHost.api.database(path, 'query', param)
-    return (response.hasMore, response.objects)
+def create_callback_function(core, path, name=None, *, callback_response=None):
+    """
+    Create a query callback function
+
+    :param cterasdk.objects.core.Portal core: Portal object
+    :param cterasdk.core.query.QueryParams param: Query paramter object
+    :param str,optional name: Schema method name
+    :param cterasdk.lib.iterator.BaseResponse callback_response: Class to consume callback response
+
+    :returns: Command object
+    """
+
+    def database(core, path, name, param):
+        return callback_response(core.api.database(path, name, param))
+
+    def execute(core, path, name, param):
+        return callback_response(core.api.execute(path, name, param))
+
+    return Command(execute if name else database, core, path, name or 'query')
 
 
-def show(CTERAHost, path, name, param):
-    hasMore, objects = query(CTERAHost, path, name, param)
-    print(tojsonstr(objects, no_log=False))
-    return hasMore
+def iterator(core, path, param=None, name=None, *, callback_response=None):
+    """
+    Create iterator
 
+    :param cterasdk.objects.core.Portal core: Portal object
+    :param str path: URL Path
+    :param str,optional name: Schema method name
+    :param cterasdk.core.query.QueryParams,optional param: Query paramter object
+    :param cterasdk.lib.iterator.BaseResponse callback_response: Class to consume callback response
 
-def iterator(CTERAHost, path, param, name=None):
-    function = Command(query, CTERAHost, path, name)
-    return Iterator(function, param)
+    :returns: Query iterator object
+    """
+
+    callback_response = callback_response if callback_response else DefaultResponse
+    callback_function = create_callback_function(core, path, name, callback_response=callback_response)
+    return QueryIterator(callback_function, param if param else QueryParams())
 
 
 class Restriction:

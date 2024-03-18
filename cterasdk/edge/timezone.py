@@ -3,13 +3,13 @@ from .base_command import BaseCommand
 
 
 class Timezone(BaseCommand):
-    """ Gateway Timezone configuration """
+    """ Edge Filer Timezone configuration """
 
     def get_timezone(self):
         """
-        Get the timezone of the gateway
+        Get the timezone of the Edge Filer
 
-        :return str: The timezone of the gateway
+        :return str: The timezone of the Edge Filer
         """
         return self._edge.api.get('/config/time/TimeZone')
 

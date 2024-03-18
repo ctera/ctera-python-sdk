@@ -115,7 +115,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         expected_param = self._get_is_web_sso_param(False)
         actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual('Connection failed. You must activate this Gateway using an activation code.', error.exception.message)
+        self.assertEqual('Connection failed. You must activate this Edge Filer using an activation code.', error.exception.message)
 
     def test_connect_default_args_task_failure(self):
         self._init_filer()

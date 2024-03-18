@@ -1,6 +1,6 @@
 from abc import abstractmethod
-from ..aio_client import clients
-from .services import CTERA
+from ..clients.synchronous import clients
+from .services import Management
 from .endpoints import EndpointBuilder
 
 from . import authenticators
@@ -42,18 +42,48 @@ from ..core import templates
 from ..core import users
 
 
-class Portal(CTERA):  # pylint: disable=too-many-instance-attributes
+class Clients:
+
+    def __init__(self, core):
+        async_session = core._generic._async_session
+        self.ctera = clients.Extended(EndpointBuilder.new(core.base, core.context), async_session, core._authenticator)
+        self.api = clients.API(EndpointBuilder.new(core.base, core.context, '/api'), async_session, core._authenticator)
+        self.io = IO(core)
+
+
+class IO:
+
+    def __init__(self, core):
+        async_session = core._generic._async_session
+        self._folders = clients.Folders(EndpointBuilder.new(core.base, core.context, '/folders/folders'),
+                                        async_session, core._authenticator)
+        self._upload = clients.Upload(EndpointBuilder.new(core.base, core.context, '/upload/folders'), async_session, core._authenticator)
+        self._webdav = clients.Dav(EndpointBuilder.new(core.base, core.context, '/webdav'), async_session, core._authenticator)
+
+    @property
+    def upload(self):
+        return self._upload.upload
+
+    @property
+    def download(self):
+        return self._webdav.download
+
+    @property
+    def download_zip(self):
+        return self._folders.download_zip
+
+    @property
+    def builder(self):
+        return self._webdav._builder  # pylint: disable=protected-access
+
+
+class Portal(Management):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https, base=None)
-        async_session = self._generic._async_session
+
         self._ctera_session = session.Session(self.host(), self.context)
-        self._folders = clients.Folders(EndpointBuilder.new(self.base, self.context, '/folders/folders'),
-                                        async_session, self._authenticator)
-        self._upload = clients.Upload(EndpointBuilder.new(self.base, self.context, '/upload/folders'), async_session, self._authenticator)
-        self._webdav = clients.Dav(EndpointBuilder.new(self.base, self.context, '/webdav'), async_session, self._authenticator)
-        self._ctera = clients.Extended(EndpointBuilder.new(self.base, self.context), async_session, self._authenticator)
-        self._api = clients.API(EndpointBuilder.new(self.base, self.context, '/api'), async_session, self._authenticator)
+        self._ctera_clients = Clients(self)
 
         self.activation = activation.Activation(self)
         self.admins = admins.Administrators(self)
@@ -78,7 +108,15 @@ class Portal(CTERA):  # pylint: disable=too-many-instance-attributes
 
     @property
     def ctera(self):
-        return self._ctera
+        return self.clients.ctera
+
+    @property
+    def api(self):
+        return self.clients.api
+
+    @property
+    def io(self):
+        return self.clients.io
 
     @property
     @abstractmethod

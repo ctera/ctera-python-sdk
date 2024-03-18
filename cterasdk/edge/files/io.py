@@ -7,7 +7,7 @@ def mkdir(edge, path):
     directory = path.fullpath()
     logging.getLogger().info('Creating directory. %s', {'path': directory})
     try:
-        edge.webdav.mkcol(path.fullpath())
+        edge.io.mkdir(path.fullpath())
     except CTERAException as error:
         try:
             common.raise_for_status(error.response.message.msg, directory)
@@ -30,19 +30,19 @@ def makedirs(edge, path):
 def copy(edge, path, destination=None, overwrite=False):
     destination = destination.joinpath(path.name()).fullpath()
     logging.getLogger().info('Copying. %s', {'from': path.fullpath(), 'to': destination})
-    edge.webdav.copy(path.fullpath(), destination, overwrite=overwrite)
+    edge.io.copy(path.fullpath(), destination, overwrite=overwrite)
     logging.getLogger().info('Copied. %s', {'from': path.fullpath(), 'to': destination})
 
 
 def move(edge, path, destination=None, overwrite=False):
     destination = destination.joinpath(path.name()).fullpath()
     logging.getLogger().info('Moving. %s', {'from': path.fullpath(), 'to': destination})
-    edge.webdav.move(path.fullpath(), destination, overwrite=overwrite)
+    edge.io.move(path.fullpath(), destination, overwrite=overwrite)
     logging.getLogger().info('Moved. %s', {'from': path.fullpath(), 'to': destination})
 
 
 def remove(edge, *paths):
     for path in paths:
         logging.getLogger().info('Deleting object. %s', {'path': path.fullpath()})
-        edge.webdav.delete(path.fullpath())
+        edge.io.delete(path.fullpath())
         logging.getLogger().info('Object deleted. %s', {'path': path.fullpath()})

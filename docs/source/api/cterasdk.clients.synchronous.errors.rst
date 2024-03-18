@@ -1,7 +1,7 @@
-cterasdk.aio_client.async_responses module
+cterasdk.clients.synchronous.errors module
 ==========================================
 
-.. automodule:: cterasdk.aio_client.async_responses
+.. automodule:: cterasdk.clients.synchronous.errors
     :members:
     :undoc-members:
     :show-inheritance:

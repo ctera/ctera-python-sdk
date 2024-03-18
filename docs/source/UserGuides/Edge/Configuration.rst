@@ -456,12 +456,12 @@ Connecting to CTERA Portal
 .. automethod:: cterasdk.edge.services.Services.connect
    :noindex:
 
-.. warning:: for any certificate related error, this library will prompt for your consent in order to proceed. to avoid the prompt, you may configure `chopin-core` to automatically trust the server's certificate, using: ``config.connect['ssl'] = 'Trust'``
+.. warning:: To ignore certificate errors when connecting to CTERA Portal, use: ``cterasdk.settings.sessions.management.edge.services.ssl = False``
 ..
 
 .. code-block:: python
 
-   edge.services.connect('chopin.ctera.com', 'svc_account', 'Th3AmazingR4ce!', 'EV32') # activate as an EV32
+   edge.services.connect('tenant.ctera.com', 'svc_account', 'Th3AmazingR4ce!', 'EV32') # activate as an EV32
 
 ..
 
@@ -478,7 +478,7 @@ Connecting to CTERA Portal
 
 .. code-block:: python
 
-   edge.services.activate('chopin.ctera.com', 'svc_account', 'fd3a-301b-88d5-e1a9-cbdb') # activate as an EV16
+   edge.services.activate('tenant.ctera.com', 'svc_account', 'fd3a-301b-88d5-e1a9-cbdb') # activate as an EV16
 
 .. automethod:: cterasdk.edge.services.Services.reconnect
    :noindex:
@@ -507,7 +507,7 @@ Configuring a License
 
    edge.license.apply('EV32')
 
-.. note:: you can specify a license upon connecting the Edge Filer to CTERA Portal. See :py:func:`cterasdk.edge.services.Services.connect()`
+.. note:: A license can also be specified upon connecting the Edge Filer to the Portal. See :py:func:`cterasdk.edge.services.Services.connect()` for more details.
 
 Cache Management
 ================
@@ -526,7 +526,7 @@ Cache Management
 
    edge.cache.disable()
 
-.. warning:: all data synchronized from the cloud will be deleted and all unsynchronized changes will be lost.
+.. warning:: All data synchronized from the cloud will be deleted and all unsynchronized changes will be lost.
 
 .. automethod:: cterasdk.edge.cache.Cache.force_eviction
    :noindex:
@@ -918,7 +918,7 @@ Diagnostics
 
 .. code-block:: python
 
-   cttp_service = edge_types.TCPService('chopin.ctera.com', 995)
+   cttp_service = edge_types.TCPService('tenant.ctera.com', 995)
    result = edge.network.tcp_connect(cttp_service)
    if result.is_open:
        print('Success')

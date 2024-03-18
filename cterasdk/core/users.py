@@ -69,7 +69,7 @@ class Users(BaseCommand):
         """
         include = union(include or [], Users.default)
         param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._core, '/domains/' + domain + '/adUsers', param)
+        return query.iterator(self._core, f'/domains/{domain}/adUsers', param)
 
     def add(self, name, email, first_name, last_name, password, role, company=None, comment=None, password_change=False):
         """

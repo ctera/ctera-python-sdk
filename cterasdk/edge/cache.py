@@ -7,7 +7,7 @@ from .base_command import BaseCommand
 
 
 class Cache(BaseCommand):
-    """ Gateway cache configuration """
+    """ Edge Filer cache configuration """
 
     def enable(self):
         """ Enable caching """

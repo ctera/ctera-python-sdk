@@ -43,7 +43,7 @@ class DebugLevel:
 
 
 class Support(BaseCommand):
-    """ Gateway Support APIs """
+    """ Edge Filer Support APIs """
 
     def set_debug_level(self, *levels):
         """

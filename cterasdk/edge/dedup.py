@@ -8,8 +8,8 @@ from .base_command import BaseCommand
 class Dedup(BaseCommand):
     """ Edge Filer Local Deduplication APIs """
 
-    def __init__(self, gateway):
-        super().__init__(gateway)
+    def __init__(self, edge):
+        super().__init__(edge)
         self.regen = Regeneration(self._edge)
 
     def enable(self, reboot=False, wait=False):

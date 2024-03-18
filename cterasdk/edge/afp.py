@@ -5,7 +5,7 @@ from .base_command import BaseCommand
 
 
 class AFP(BaseCommand):
-    """ Gateway AFP APIs """
+    """ Edge Filer AFP APIs """
 
     def is_disabled(self):
         """ Check if the AFP server is disabled """

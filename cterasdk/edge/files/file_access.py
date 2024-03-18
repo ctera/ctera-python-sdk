@@ -35,13 +35,13 @@ class FileAccess(FileAccessBase):
         )
 
     def _get_zip_file_handle(self, cloud_directory, files):
-        return self._ctera_host.generic.form_data(
+        return self._ctera_host.io.download_zip(
             self._get_multi_file_url(cloud_directory, files),
             self._make_form_data(cloud_directory, files)
         )
 
     def _upload_object(self, local_file_info, fd, dest_path):
-        return self._ctera_host.generic.form_data(
+        return self._ctera_host.io.upload(
                 self._get_upload_url(dest_path),
                 self._get_upload_form(local_file_info, fd, dest_path)
             )

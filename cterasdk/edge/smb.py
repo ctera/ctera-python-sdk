@@ -7,7 +7,7 @@ from .base_command import BaseCommand
 
 
 class SMB(BaseCommand):
-    """ Gateway SMB configuration APIs """
+    """ Edge Filer SMB configuration APIs """
 
     def enable(self):
         """ Enable SMB """

@@ -1,6 +1,6 @@
-======
-Portal
-======
+============
+CTERA Portal
+============
 .. toctree::
    :caption: CTERA Portal
    :maxdepth: 5

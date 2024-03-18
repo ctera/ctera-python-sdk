@@ -18,9 +18,9 @@ class Login(BaseCommand):
             self._edge.api.form_data('/login', {'username': username, 'password': password})
             logging.getLogger().info("User logged in. %s", {'host': host, 'user': username})
             self._edge.ctera_migrate.login()
-        except CTERAException as error:
+        except CTERAException:
             logging.getLogger().error("Login failed. %s", {'host': host, 'user': username})
-            raise error
+            raise
 
     def sso(self, ticket):
         """
@@ -38,6 +38,6 @@ class Login(BaseCommand):
         try:
             self._edge.api.form_data('/logout', {'foo': 'bar'})
             logging.getLogger().info("User logged out. %s", {'host': host, 'user': user})
-        except CTERAException as error:
+        except CTERAException:
             logging.getLogger().error("Logout failed. %s", {'host': host, 'user': user})
-            raise error
+            raise

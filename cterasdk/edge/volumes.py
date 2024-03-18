@@ -9,7 +9,7 @@ from .base_command import BaseCommand
 
 
 class Volumes(BaseCommand):
-    """ Gateway Volumes configuration APIs """
+    """ Edge Filer Volumes configuration APIs """
 
     def get(self, name=None):
         """
@@ -20,15 +20,15 @@ class Volumes(BaseCommand):
 
     def add(self, name, size=None, filesystem='xfs', device=None, passphrase=None):
         """
-        Add a new volume to the gateway
+        Add a Volume.
 
         :param str name: Name of the new volume
         :param int,optional size: Size of the new volume, defaults to the device's size
         :param str,optional filesystem: Filesystem to use, defaults to xfs
-        :param str,optional device: Name of the device to use for the new volume, can be left as None if there the gateway has only one
+        :param str,optional device: Name of the device to use for the new volume, can be left as None if there's only one device available
         :param str,optional passphrase: Passphrase for the volume
 
-        :return: Gateway response
+        :return: Edge Filer response
         """
         storage_devices = self._devices()
         device_name, device_size = Volumes._device_volume(device, storage_devices)
@@ -71,7 +71,7 @@ class Volumes(BaseCommand):
         Modify an existing volume
 
         :param int,optional size: New size of the volume, if not set, the size will not change
-        :return: Gateway response
+        :return: Edge Filer response
         """
         if size is None:
             return Object()

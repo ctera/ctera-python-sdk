@@ -6,7 +6,7 @@ from .base_command import BaseCommand
 from .enum import ServerMode, SetupWizardStage, SetupWizardStatus, SlaveAuthenticaionMethod
 from ..common import Object, utf8_decode
 from ..convert import toxmlstr
-from ..aio_client import MultipartForm
+from ..clients.common import MultipartForm
 from ..exceptions import CTERAException
 
 

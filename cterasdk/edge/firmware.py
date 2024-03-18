@@ -10,10 +10,10 @@ class UploadTaskStatus():
 
 
 class Firmware(BaseCommand):
-    """ Gateway Firmware upgrade API """
+    """ Edge Filer Firmware upgrade API """
 
-    def __init__(self, gateway):
-        super().__init__(gateway)
+    def __init__(self, edge):
+        super().__init__(edge)
         self._filesystem = FileSystem.instance()
 
     def upgrade(self, file_path, reboot=True, wait_for_reboot=True):

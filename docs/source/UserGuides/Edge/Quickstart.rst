@@ -113,7 +113,7 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
 
 .. warning:: For optimal integration, it's advised to utilize the modules provided in this SDK instead of the ``api`` property. In cases where a specific command or module is absent, `please submit a feature request <https://github.com/ctera/ctera-python-sdk/issues>`_.
 
-.. automethod:: cterasdk.aio_client.clients.API.get
+.. automethod:: cterasdk.clients.synchronous.clients.API.get
    :noindex:
 
 .. code-block:: python
@@ -121,10 +121,10 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
     hostname = edge.api.get('/config/device/hostname')  # Not recommended
     hostname = edge.config.get_hostname()  # Recommended: using the config module and the get_hostname() command
 
-.. automethod:: cterasdk.aio_client.clients.API.get_multi
+.. automethod:: cterasdk.clients.synchronous.clients.API.get_multi
    :noindex:
 
-.. automethod:: cterasdk.aio_client.clients.API.put
+.. automethod:: cterasdk.clients.synchronous.clients.API.put
    :noindex:
 
 .. code-block:: python
@@ -132,7 +132,7 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
     hostname = edge.api.put('/config/device/hostname', 'edge-filesystem')  # Not recommended
     hostname = edge.config.set_hostname('edge-filesystem')  # Recommended: using the config module and the set_hostname() command
 
-.. automethod:: cterasdk.aio_client.clients.API.add
+.. automethod:: cterasdk.clients.synchronous.clients.API.add
    :noindex:
 
 .. code-block:: python
@@ -151,7 +151,7 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
     """Recommended way of adding a local user"""
     edge.users.add('alice', 'secret-password', 'Alice Wonderland', 'alice.wonderland@acme.com', 501)
 
-.. automethod:: cterasdk.aio_client.clients.API.execute
+.. automethod:: cterasdk.clients.synchronous.clients.API.execute
    :noindex:
 
 .. code-block:: python
@@ -159,7 +159,7 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
    edge.api.execute('/config/cloudsync', 'forceExecuteEvictor')  # Not recommended: Start the cache eviction process (force)
    edge.cache.force_eviction()  # Recommended
 
-.. automethod:: cterasdk.aio_client.clients.API.delete
+.. automethod:: cterasdk.clients.synchronous.clients.API.delete
    :noindex:
 
 .. code-block:: python

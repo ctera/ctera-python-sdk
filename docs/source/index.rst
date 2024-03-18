@@ -145,6 +145,7 @@ Table of Contents
 
    UserGuides/Edge/Index
    UserGuides/Portal/Index
+   UserGuides/DataServices/Index
    UserGuides/Miscellaneous/Index
    api/cterasdk
 

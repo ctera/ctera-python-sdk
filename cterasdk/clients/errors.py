@@ -7,20 +7,19 @@ from ..exceptions import ClientResponseException
 
 class ClientError(Object):
 
-    def __init__(self, error, message):
+    def __init__(self, exception, message):
         self.request = Object()
-        self.request.method = error.request_info.method
-        self.request.url = str(error.request_info.real_url)
+        self.request.method = exception.request_info.method
+        self.request.url = str(exception.request_info.real_url)
         self.response = Object()
-        self.response.status = error.status
+        self.response.status = exception.status
         self.response.message = fromxmlstr(message) or fromjsonstr(message) or message
 
 
-def accept_response(response):
-    message = response.text if response.status > 400 else None
+def accept(response, error_message):
     try:
         response.raise_for_status()
-    except aiohttp.ClientResponseError as error:
-        error_object = ClientError(error, message)
+    except aiohttp.ClientResponseError as exception:
+        error_object = ClientError(exception, error_message)
         raise ClientResponseException(error_object)
     return response

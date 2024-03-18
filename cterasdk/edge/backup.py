@@ -64,15 +64,15 @@ class ClocksOutOfSync(CTERAException):
 
 
 class Backup(BaseCommand):
-    """ Gateway backup configuration APIs """
+    """ Edge Filer backup configuration APIs """
 
-    def __init__(self, gateway):
-        super().__init__(gateway)
+    def __init__(self, edge):
+        super().__init__(edge)
         self.files = BackupFiles(self._edge)
 
     def configure(self, passphrase=None):
         """
-        Gateway backup configuration
+        Edge Filer backup configuration
 
         :param str,optional passphrase: Passphrase for the backup, defaults to None
         """

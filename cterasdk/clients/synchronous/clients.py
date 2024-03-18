@@ -3,76 +3,19 @@ import time
 import asyncio
 import logging
 import cterasdk.settings
-from . import async_requests, errors, decorators
-from .async_responses import Response, Deserializers
-from ..convert import tojsonstr, toxmlstr
-from ..common import Object, utils
+from . import errors
+from ..base import BaseClient
+from ..common import Serializers
+from ..asynchronous.clients import AsyncResponse
+from ...common import Object
+from .. import async_requests, decorators
 
 
-class Serializers:
-    JSON = tojsonstr
-    XML = toxmlstr
-    FormData = async_requests.FormData
-
-
-class CookieJar:
-
-    def __init__(self, cookies, response_url):
-        self._cookies = cookies
-        self._response_url = response_url
-
-    @property
-    def all(self):
-        return {v.key: v.value for v in self._cookies.filter_cookies(self._response_url).values()}
-
-    def update(self, cookies):
-        self._cookies.update_cookies(cookies, self._response_url)
-
-
-class PersistentHeaders:
-    """Headers to include in every request"""
-
-    def __init__(self):
-        self._headers = {}
-
-    @property
-    def all(self):
-        return self._headers
-
-    def update_headers(self, headers):
-        self._headers.update(headers)
-
-
-class MultipartForm:
-    """Multipart Request Form"""
-
-    def __init__(self):
-        self._data = async_requests.FormData()
-
-    def add(self, name, value, filename=None, content_transfer_encoding=None):
-        self._data.add_field(name=name, value=value, filename=filename,
-                             content_type='multipart/form-data', content_transfer_encoding=content_transfer_encoding)
-
-    @property
-    def data(self):
-        return self._data
-
-
-class Client:
+class Client(BaseClient):
     """Synchronous Client"""
 
     def __init__(self, builder=None, async_session=None, authenticator=None):
-        """
-        Initialize a Synchronous Client
-
-        :param builder: Endpoint builder.
-        :param ,optional async_session: Re-use an asynchronous session.
-        :param ,optional authenticator: Authenticator function.
-        """
-        self._headers = PersistentHeaders()
-        self._authenticator = authenticator
-        self._builder = builder
-        self._async_session = async_session if async_session else async_requests.Session(**session_settings())
+        super().__init__(builder, async_session, authenticator, **session_settings())
 
     @decorators.authenticated
     def handle(self, path, *, on_response=None, **kwargs):
@@ -109,40 +52,24 @@ class Client:
         request = async_requests.DeleteRequest(self._builder(path), **kwargs)
         return self._request(request, on_response=on_response)
 
-    def _request(self, request, *, on_response):
-        request.kwargs['headers'] = utils.merge(request.kwargs.get('headers', None), self.headers.all)
-        on_response = on_response if on_response else Response.new()
-        return execute_request(self._async_session, request, on_response=on_response)
+    def _request(self, request, *, on_response=None):
+        on_response = on_response if on_response else SyncResponse.new()
+        return execute_request(self._async_session, self.join_headers(request), on_response=on_response)
 
-    @property
-    def cookies(self):
-        return CookieJar(self._async_session.cookies, self._builder())
-
-    @property
-    def headers(self):
-        return self._headers
-
-    @property
-    def baseurl(self):
-        return self._builder()
-
-    def shutdown(self):
-        return asyncio.get_event_loop().run_until_complete(self._async_session.shutdown())
-
-    def __str__(self):
-        return f"({self.__class__.__name__} client at {hex(hash(self))}, baseurl={self._builder()})"
+    def shutdown(self):  # pylint: disable=invalid-overridden-method
+        return asyncio.get_event_loop().run_until_complete(super().shutdown())
 
 
 class Folders(Client):
 
     def download_zip(self, path, data, **kwargs):
-        return super().form_data(path, data, on_response=Response.new(), **kwargs)
+        return super().form_data(path, data, **kwargs)
 
 
 class Upload(Client):
 
     def upload(self, path, data, **kwargs):
-        return super().form_data(path, data, on_response=Response.new(), **kwargs)
+        return super().form_data(path, data, **kwargs)
 
 
 class Dav(Client):
@@ -153,22 +80,22 @@ class Dav(Client):
 
     def mkcol(self, path):
         request = async_requests.MkcolRequest(self._builder(path))
-        response = self._request(request, on_response=Response.new())
-        return response.text
+        response = self._request(request)
+        return response.text()
 
     def copy(self, source, destination, *, overwrite=False):
         request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
-        response = self._request(request, on_response=Response.new(Deserializers.XML))
-        return response.deserialize()
+        response = self._request(request)
+        return response.xml()
 
     def move(self, source, destination, *, overwrite=False):
         request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
-        response = self._request(request, on_response=Response.new(Deserializers.XML))
-        return response.deserialize()
+        response = self._request(request)
+        return response.xml()
 
     def delete(self, path):  # pylint: disable=arguments-differ
-        response = super().delete(path, on_response=Response.new())
-        return response.text
+        response = super().delete(path)
+        return response.text()
 
     def _webdav_headers(self, destination, overwrite):
         return {
@@ -181,47 +108,47 @@ class XML(Client):
     """XML Serializer and Deserializer"""
 
     def get(self, path, **kwargs):
-        response = super().get(path, on_response=Response.new(Deserializers.XML), **kwargs)
-        return response.deserialize()
+        response = super().get(path, **kwargs)
+        return response.xml()
 
     def put(self, path, data, **kwargs):
-        response = super().put(path, data, data_serializer=Serializers.XML, on_response=Response.new(Deserializers.XML), **kwargs)
-        return response.deserialize()
+        response = super().put(path, data, data_serializer=Serializers.XML, **kwargs)
+        return response.xml()
 
     def post(self, path, data, **kwargs):
-        response = super().post(path, data, data_serializer=Serializers.XML, on_response=Response.new(Deserializers.XML), **kwargs)
-        return response.deserialize()
+        response = super().post(path, data, data_serializer=Serializers.XML, **kwargs)
+        return response.xml()
 
     def form_data(self, path, data, **kwargs):
-        response = super().form_data(path, data, on_response=Response.new(Deserializers.XML), **kwargs)
-        return response.deserialize()
+        response = super().form_data(path, data, **kwargs)
+        return response.xml()
 
     def delete(self, path, **kwargs):
-        response = super().delete(path, on_response=Response.new(Deserializers.XML), **kwargs)
-        return response.deserialize()
+        response = super().delete(path, **kwargs)
+        return response.xml()
 
 
 class JSON(Client):
     """JSON Serializer and Deserializer"""
 
     def get(self, path, **kwargs):
-        response = super().get(path, on_response=Response.new(Deserializers.JSON), **kwargs)
-        return response.deserialize()
+        response = super().get(path, **kwargs)
+        return response.json()
 
     def put(self, path, data, **kwargs):
-        response = super().put(path, data, data_serializer=Serializers.JSON, on_response=Response.new(Deserializers.JSON), **kwargs)
-        return response.deserialize()
+        response = super().put(path, data, data_serializer=Serializers.JSON, **kwargs)
+        return response.json()
 
     def post(self, path, data, **kwargs):
-        response = super().post(path, data, data_serializer=Serializers.JSON, on_response=Response.new(Deserializers.JSON), **kwargs)
-        return response.deserialize()
+        response = super().post(path, data, data_serializer=Serializers.JSON, **kwargs)
+        return response.json()
 
     def delete(self, path, **kwargs):
-        response = super().delete(path, on_response=Response.new(Deserializers.JSON), **kwargs)
-        return response.deserialize()
+        response = super().delete(path, **kwargs)
+        return response.json()
 
-    def _request(self, request, *, on_response=None):
-        return super()._request(request, on_response=on_response)
+    def request(self, request):
+        return super()._request(request)
 
 
 class Extended(XML):
@@ -264,11 +191,11 @@ class Migrate(JSON):
 
     def login(self):
         request = async_requests.GetRequest(self._builder('/auth/user'))
-        response = self._request(request, on_response=Response.new(Deserializers.JSON))
+        response = self.request(request)
         token = response.headers.get(Migrate.ID, None)
         if token:
             self.headers.update_headers({Migrate.ID: token})
-        return response.deserialize()
+        return response.json()
 
 
 def execute_request(async_session, request, *, on_response, max_retries=3, backoff_factor=2):
@@ -276,7 +203,7 @@ def execute_request(async_session, request, *, on_response, max_retries=3, backo
     while retries < max_retries:
         try:
             response = asyncio.get_event_loop().run_until_complete(async_session.await_promise(request, on_response=on_response))
-            return errors.accept_response(response)
+            return errors.accept(response)
         except (ConnectionError, TimeoutError):
             retries += 1
             if retries < max_retries:
@@ -287,6 +214,39 @@ def execute_request(async_session, request, *, on_response, max_retries=3, backo
                 logging.getLogger().error("Max retries reached. Request failed.")
                 raise
     return None
+
+
+class SyncResponse(AsyncResponse):
+    """Synchronous Response Object"""
+
+    def __init__(self, response):
+        super().__init__(response)
+        self._executor = asyncio.get_event_loop()
+
+    def iter_content(self, chunk_size=None):
+        while True:
+            try:
+                yield self._executor.run_until_complete(self.chunk(chunk_size).__anext__())
+            except StopAsyncIteration:
+                break
+
+    def text(self):  # pylint: disable=invalid-overridden-method
+        return self._consume_response(super().text)
+
+    def json(self):  # pylint: disable=invalid-overridden-method
+        return self._consume_response(super().json)
+
+    def xml(self):  # pylint: disable=invalid-overridden-method
+        return self._consume_response(super().xml)
+
+    def _consume_response(self, consumer):
+        return self._executor.run_until_complete(consumer())
+
+    @staticmethod
+    def new():
+        async def new_response(response):
+            return SyncResponse(response)
+        return new_response
 
 
 def session_settings():

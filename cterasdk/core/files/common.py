@@ -2,9 +2,11 @@ import re
 import logging
 
 from pathlib import PurePosixPath
+
+from .. import query
+from ...lib import FetchResourcesResponse
 from ...common import Object
 from ...objects import uri
-from ...lib import Iterator, Command
 from ...exceptions import RemoteDirectoryNotFound, CTERAException
 
 
@@ -176,18 +178,12 @@ class Path:
         return self.fullpath()
 
 
-def get_objects(core, param):
-    response = execute_fetch_resources(core, param)
-    return (response.hasMore, response.items)
-
-
-def execute_fetch_resources(core, param):
+def fetch_resources(core, param):
     return core.api.execute('', 'fetchResources', param)
 
 
 def objects_iterator(core, param):
-    func = Command(get_objects, core)
-    return Iterator(func, param)
+    return query.iterator(core, '', param, 'fetchResources', callback_response=FetchResourcesResponse)
 
 
 def get_resource_info(core, path):
@@ -221,7 +217,7 @@ def raise_for_status(response, path):
         if error:
             raise error
     except ItemExists as error:
-        logging.getLogger().warning('A file or folder with the same name already exists. %s', {'path': path})
+        logging.getLogger().info('A file or folder with the same name already exists. %s', {'path': path})
         raise error
     except InvalidPath as error:
         logging.getLogger().error('Invalid parent directory path. %s', {'path': path})

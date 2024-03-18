@@ -111,7 +111,7 @@ class Network(BaseCommand):
 
     def tcp_connect(self, service):
         """
-        Test a TCP connection between the Gateway and the provided host address
+        Test a TCP connection between the Edge Filer and the provided host address
 
         :param cterasdk.edge.types.TCPService service: A service, identified by a host and a port
         :returns: A named-tuple including the host, port and a boolean value indicating whether TCP connection can be established

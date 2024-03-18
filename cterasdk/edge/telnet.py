@@ -6,7 +6,7 @@ from .base_command import BaseCommand
 
 
 class Telnet(BaseCommand):
-    """ Gateway Telnet configuration APIs """
+    """ Edge Filer Telnet configuration APIs """
 
     def enable(self, code):
         """ Enable Telnet """

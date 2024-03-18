@@ -27,40 +27,40 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
     def test_move_dont_overwrite_success(self):
         self._init_webdav()
         self._files.move(self._path, self._target, False)
-        self._filer.webdav.move.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
-                                                        TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                        overwrite=False)
+        self._filer.io.move.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
+                                                    TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
+                                                    overwrite=False)
 
     def test_move_overwrite_success(self):
         self._init_webdav()
         self._files.move(self._path, self._target, True)
-        self._filer.webdav.move.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
-                                                        TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                        overwrite=True)
+        self._filer.io.move.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
+                                                    TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
+                                                    overwrite=True)
 
     def test_copy_dont_overwrite_success(self):
         self._init_webdav()
         self._files.copy(self._path, self._target, False)
-        self._filer.webdav.copy.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
-                                                        TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                        overwrite=False)
+        self._filer.io.copy.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
+                                                    TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
+                                                    overwrite=False)
 
     def test_copy_overwrite_success(self):
         self._init_webdav()
         self._files.copy(self._path, self._target, True)
-        self._filer.webdav.copy.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
-                                                        TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
-                                                        overwrite=True)
+        self._filer.io.copy.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath),
+                                                    TestEdgeFilesBrowser.make_local_files_dir(self._target_fullpath),
+                                                    overwrite=True)
 
     def test_delete_success(self):
         self._init_webdav()
         self._files.delete(self._path)
-        self._filer.webdav.delete.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath))
+        self._filer.io.delete.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath))
 
     def test_mkdir_success(self):
         self._init_webdav()
         self._files.mkdir(self._path)
-        self._filer.webdav.mkcol.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath))
+        self._filer.io.mkdir.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath))
 
     def test_mkdir_recursive_success(self):
         self._init_webdav()
@@ -70,7 +70,7 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
         for item in self._path.split('/'):
             path = path + '/' + item
             calls.append(mock.call(TestEdgeFilesBrowser.make_local_files_dir(path)))
-        self._filer.webdav.mkcol.assert_has_calls(calls)
+        self._filer.io.mkdir.assert_has_calls(calls)
 
     @staticmethod
     def make_local_files_dir(full_path):
