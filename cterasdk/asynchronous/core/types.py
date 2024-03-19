@@ -10,7 +10,7 @@ class Event(Object):
     :ivar bool deleted: Deleted
     :ivar str name: Object Name
     :ivar parent guid: Parent Object Unique Identifier (GUID)
-    :ivar datetime.datetime: Last Modified Timestamp
+    :ivar str: Last Modified Timestamp (ISO 8601)
     :ivar int size: Object Size
     """
     def __init__(self, type, guid, folder_id, deleted, name,  # pylint: disable=redefined-builtin
