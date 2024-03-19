@@ -13,7 +13,8 @@ class Event(Object):
     :ivar datetime.datetime: Last Modified Timestamp
     :ivar int size: Object Size
     """
-    def __init__(self, type, guid, folder_id, deleted, name, modified, size, gvsn=None, parent_guid=None):
+    def __init__(self, type, guid, folder_id, deleted, name,  # pylint: disable=redefined-builtin
+                 modified, size, gvsn=None, parent_guid=None):
         self.type = type
         self.guid = guid
         self.gvsn = gvsn

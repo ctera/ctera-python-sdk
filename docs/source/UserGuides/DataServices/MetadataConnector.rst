@@ -121,7 +121,7 @@ and dispatching tasks to consumer threads.
 
 The service subscribes to file events and enqueues them to an ``asyncio.Queue`` queue.
 Events are instances of the :py:class:`cterasdk.asynchronous.core.types.Event` class.
-The queue blocks until all events were consumed and processed. 
+The queue blocks until all events were consumed and processed.
 Use the `task_done()<https://docs.python.org/3/library/asyncio-queue.html#asyncio.Queue.task_done>` function to signal that formerly enqueued task is complete.
 
 After processing all events, the service will perofrm a callback to a function provided by the client to record the latest cursor.
