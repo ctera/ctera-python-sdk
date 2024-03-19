@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 
+from .types import Event
 from .base_command import BaseCommand
 from .iterator import CursorAsyncIterator
 from ...common import Object
@@ -80,7 +81,7 @@ class Metadata(BaseCommand):
         """
         Get Ancestors.
 
-        :param cterasdk.common.object.Object descendant: Event
+        :param cterasdk.asynchronous.core.types.Event descendant: Event
         :returns: Sorted List of Ancestors
         :rtype: list[cterasdk.common.object.Object]
         """
@@ -162,7 +163,7 @@ async def enqueue_events(events, queue):
     """
     async for event in events:
         logging.getLogger().debug('Enqueuing Event.')
-        await queue.put(event)
+        await queue.put(Event.from_server_object(event))
         logging.getLogger().debug('Enqueued Event.')
 
 
