@@ -118,10 +118,13 @@ Metadata Service
 
 Alternatively, this library includes a background service designed for subscribing to real-time file events
 and dispatching tasks to consumer threads.
-The service effectively subscribes to file events and enqueues them to an ``asyncio.Queue`` queue.
-All enqueued file events are represeted as `json` strings.
-It blocks active until all events are consumed and the **task_done()** was called to signal.
-After processing all events, the service triggers a callback function supplied by the client to store the cursor.
+
+The service subscribes to file events and enqueues them to an ``asyncio.Queue`` queue.
+Events are instances of the :py:class:`cterasdk.asynchronous.core.types.Event` class.
+The queue blocks until all events were consumed and processed.
+Use the `task_done()<https://docs.python.org/3/library/asyncio-queue.html#asyncio.Queue.task_done>` function to signal that formerly enqueued task is complete.
+
+After processing all events, the service will perofrm a callback to a function provided by the client to record the latest cursor.
 Recording the cursor enables pausing and resuming the service from the last cursor position.
 
 .. automethod:: cterasdk.asynchronous.core.metadata.Service.run
@@ -138,14 +141,14 @@ Recording the cursor enables pausing and resuming the service from the last curs
         """Use this function to persist the cursor"""
 
 
-    async def process_event(event)
+    async def process_event(event):
         """Process an event"""
 
 
     async def consumer(queue):
         """Sample worker thread"""
         while True:
-            event = json.loads(await queue.get())
+            event = await queue.get()
             try:
                 await process_event(event)
             except Exception:

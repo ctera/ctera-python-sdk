@@ -2,10 +2,10 @@ import asyncio
 import logging
 
 
+from .types import Event
 from .base_command import BaseCommand
 from .iterator import CursorAsyncIterator
 from ...common import Object
-from ...convert import tojsonstr, fromjsonstr
 from ...lib import CursorResponse, Command
 from ...exceptions import ClientResponseException
 
@@ -34,17 +34,17 @@ class Metadata(BaseCommand):
         super().__init__(core)
         self.service = Service(core)
 
-    async def get(self, drives=None, cursor=None):
+    async def get(self, cloudfolders=None, cursor=None):
         """
         List Changes.
 
-        :param list[CloudFSFolderFindingHelper],optional drives: List of Cloud Drive folders, defaults to all cloud drive folders.
+        :param list[CloudFSFolderFindingHelper],optional cloudfolders: List of Cloud Drive folders, defaults to all cloud drive folders.
         :param str,optional cursor: Cursor
 
         :returns: An asynchronous iterator
         :rtype: cterasdk.asynchronous.core.iterator.CursorAsyncIterator
         """
-        param = await self._create_parameter(drives, cursor)
+        param = await self._create_parameter(cloudfolders, cursor)
         logging.getLogger().info('Listing updates.')
         return iterator(self._core, '/metadata/list', param)
 
@@ -81,11 +81,10 @@ class Metadata(BaseCommand):
         """
         Get Ancestors.
 
-        :param str descendant: Event, formatted as a JSON document
+        :param cterasdk.asynchronous.core.types.Event descendant: Event
         :returns: Sorted List of Ancestors
         :rtype: list[cterasdk.common.object.Object]
         """
-        descendant = fromjsonstr(descendant)
         param = Object()
         param.folder_id = descendant.folder_id
         param.guid = descendant.guid
@@ -115,15 +114,16 @@ class Metadata(BaseCommand):
 class Service(BaseCommand):
     """Change Notification Service"""
 
-    def run(self, queue, save_cursor, *, drives=None, cursor=None):
+    def run(self, queue, save_cursor, *, cloudfolders=None, cursor=None):
         """
         Start Service.
 
         :param asyncio.Queue queue: Event Queue.
+        :param callback save_cursor: Asynchronous callback function to persist the cursor.
+        :param list[CloudFSFolderFindingHelper] cloudfolders: List of Cloud Drive folders.
         :param str,optional cursor: Cursor.
-        :param callback,optional save_cursor: Asynchronous callback function to persist the cursor.
         """
-        return asyncio.create_task(run_forever(self._core, queue, save_cursor, drives, cursor))
+        return asyncio.create_task(run_forever(self._core, queue, save_cursor, cloudfolders, cursor))
 
 
 async def run_forever(core, queue, save_cursor, drives, cursor):
@@ -163,7 +163,7 @@ async def enqueue_events(events, queue):
     """
     async for event in events:
         logging.getLogger().debug('Enqueuing Event.')
-        await queue.put(tojsonstr(event, False, False))
+        await queue.put(Event.from_server_object(event))
         logging.getLogger().debug('Enqueued Event.')
 
 
