@@ -34,23 +34,23 @@ class Metadata(BaseCommand):
         super().__init__(core)
         self.service = Service(core)
 
-    async def get(self, cloudfolders=None, cursor=None):
+    async def get(self, cloudfolders=None, cursor=None, max_results=2000):
         """
         List Changes.
 
         :param list[CloudFSFolderFindingHelper],optional cloudfolders: List of Cloud Drive folders, defaults to all cloud drive folders.
         :param str,optional cursor: Cursor
-
+        :param int,optional max_results: maximum results
         :returns: An asynchronous iterator
         :rtype: cterasdk.asynchronous.core.iterator.CursorAsyncIterator
         """
-        param = await self._create_parameter(cloudfolders, cursor)
+        param = await self._create_parameter(cloudfolders, cursor, max_results)
         logging.getLogger().info('Listing updates.')
         return iterator(self._core, '/metadata/list', param)
 
-    async def _create_parameter(self, drives, cursor):
+    async def _create_parameter(self, drives, cursor, max_results):
         param = Object()
-        param.max_results = 2000
+        param.max_results = max_results if max_results else None
         param.folder_ids = []
         if cursor is not None:
             logging.getLogger().info('Cursor Received. Listing from Cursor.')
@@ -112,7 +112,7 @@ class Metadata(BaseCommand):
 class Service(BaseCommand):
     """Change Notification Service"""
 
-    def run(self, queue, save_cursor, *, cloudfolders=None, cursor=None):
+    def run(self, queue, save_cursor, *, cloudfolders=None, cursor=None, max_results=2000):
         """
         Start Service.
 
@@ -120,11 +120,12 @@ class Service(BaseCommand):
         :param callback save_cursor: Asynchronous callback function to persist the cursor.
         :param list[CloudFSFolderFindingHelper] cloudfolders: List of Cloud Drive folders.
         :param str,optional cursor: Cursor.
+        :param int,optional max_results: maximum results
         """
-        return asyncio.create_task(run_forever(self._core, queue, save_cursor, cloudfolders, cursor))
+        return asyncio.create_task(run_forever(self._core, queue, save_cursor, cloudfolders, cursor, max_results))
 
 
-async def run_forever(core, queue, save_cursor, drives, cursor):
+async def run_forever(core, queue, save_cursor, drives, cursor, max_results):
     """
     Change Notification Service.
 
@@ -133,13 +134,14 @@ async def run_forever(core, queue, save_cursor, drives, cursor):
     :param list[CloudFSFolderFindingHelper] drives: List of Cloud Drive folders.
     :param str cursor: Cursor.
     :param callback save_cursor: Asynchronous callback function to persist the cursor.
+    :param int,optional max_results: maximum results
     """
     logging.getLogger().info('Running Service.')
     try:
         while True:
             try:
                 if cursor is None or await core.metadata.changes(cursor):
-                    events = await core.metadata.get(drives, cursor)
+                    events = await core.metadata.get(drives, cursor, max_results)
                     await enqueue_events(events, queue)
                     await process_events(queue)
                     cursor = events.cursor
