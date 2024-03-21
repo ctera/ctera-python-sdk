@@ -55,25 +55,23 @@ class Metadata(BaseCommand):
         if cursor is not None:
             logging.getLogger().info('Cursor Received. Listing from Cursor.')
         param.cursor = cursor
-        if drives:
-            for drive in drives:
-                async for drive in await self._core.cloudfs.drives.find(drive.name, drive.owner, include=['uid']):
-                    param.folder_ids.append(drive.uid)
+        param.folder_ids = drives
         return param
 
-    async def changes(self, cursor, timeout=None):
+    async def changes(self, cursor, folder_ids=None, timeout=None):
         """
         Check for Changes.
 
         :param str cursor: Cursor
         :param int,optional cursor: Timeout
-
+        :param list folder_ids : List of Cloud Drive folders, defaults to all cloud drive folders.
         :returns: ``True`` if changes are available for this ``cursor``, ``False`` otherwise
         :rtype: bool
         """
         param = Object()
         param.cursor = cursor
         param.timeout = timeout if timeout else 10000
+        # param.folder_ids = folder_ids if folder_ids else None
         logging.getLogger().info('Checking for updates. %s', {'timeout': param.timeout})
         return (await self._core.v2.api.post('/metadata/longpoll', param)).changes
 
