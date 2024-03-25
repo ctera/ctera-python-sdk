@@ -16,5 +16,6 @@ Submodules
    cterasdk.asynchronous.core.login
    cterasdk.asynchronous.core.notifications
    cterasdk.asynchronous.core.query
+   cterasdk.asynchronous.core.types
    cterasdk.asynchronous.core.users
 
