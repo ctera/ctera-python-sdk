@@ -1,7 +1,7 @@
 from ...common import Object
 
 
-class Event(Object):
+class Event(Object):  # pylint: disable=too-many-instance-attributes
     """
     :ivar str type: Object type
     :ivar str guid: Object Unique Identifier (GUID)
@@ -15,8 +15,8 @@ class Event(Object):
     :ivar str,optional gvsn: GVSN
     :ivar str,optional parent_guid: Parent Object Unique Identifier (GUID)
     """
-    def __init__(self, type, guid, folder_id, deleted, name,  # pylint: disable=redefined-builtin
-                 modified, size, id=None, acl=None, gvsn=None, parent_guid=None):
+    def __init__(self, type, guid, folder_id, deleted, name,  # pylint: disable=redefined-builtin, too-many-arguments
+                 modified, size, id=None, acl=None, gvsn=None, parent_guid=None):  # pylint: disable=redefined-builtin
         self.type = type
         self.guid = guid
         self.folder_id = folder_id

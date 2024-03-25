@@ -72,7 +72,7 @@ class Notifications(BaseCommand):
         param.guid = descendant.guid
         logging.getLogger().info('Getting ancestors. %s', {'guid': param.guid, 'folder_id': param.folder_id})
         try:
-            return Metadata._ancestry(descendant, await self._core.v2.api.post('/metadata/ancestors', param))
+            return Notifications._ancestry(descendant, await self._core.v2.api.post('/metadata/ancestors', param))
         except ClientResponseException:
             logging.getLogger().error('Could not retrieve ancestors. %s', {'folder_id': param.folder_id, 'guid': param.guid})
             raise
@@ -121,7 +121,7 @@ class Service(BaseCommand):
             try:
                 await promise
             except asyncio.CancelledError:
-                """Task Cancelled"""
+                pass
         self._promises.clear()
 
 
@@ -140,7 +140,7 @@ async def retrieve_events(server_queue, core, cloudfolders, cursor):
         while True:
             try:
                 if last_response.cursor is None or last_response.more or \
-                    await core.notifications.changes(last_response.cursor):
+                        await core.notifications.changes(last_response.cursor):
                     response = await core.notifications.get(cloudfolders, last_response.cursor)
                     if response.objects:
                         await server_queue.put(response)
