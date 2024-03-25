@@ -5,7 +5,7 @@ from ..clients.asynchronous import clients
 
 from ..asynchronous.core import login
 from ..asynchronous.core import cloudfs
-from ..asynchronous.core import metadata
+from ..asynchronous.core import notifications
 from ..asynchronous.core import users
 
 
@@ -41,7 +41,7 @@ class DataServices(CTERA):
         self._ctera_clients = Clients(self)
 
         self.cloudfs = cloudfs.CloudFS(self)
-        self.metadata = metadata.Metadata(self)
+        self.notifications = notifications.Notifications(self)
         self.users = users.Users(self)
 
     @property

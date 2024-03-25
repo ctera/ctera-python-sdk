@@ -5,24 +5,28 @@ class Event(Object):
     """
     :ivar str type: Object type
     :ivar str guid: Object Unique Identifier (GUID)
-    :ivar str gvsn: GVSN
     :ivar int folder_id: Cloud Drive Folder ID
     :ivar bool deleted: Deleted
     :ivar str name: Object Name
-    :ivar parent guid: Parent Object Unique Identifier (GUID)
-    :ivar str: Last Modified Timestamp (ISO 8601)
+    :ivar str modified: Last Modified Timestamp (ISO 8601)
     :ivar int size: Object Size
+    :ivar int,optional id: File ID
+    :ivar str,optional acl: ACL SDDL
+    :ivar str,optional gvsn: GVSN
+    :ivar str,optional parent_guid: Parent Object Unique Identifier (GUID)
     """
     def __init__(self, type, guid, folder_id, deleted, name,  # pylint: disable=redefined-builtin
-                 modified, size, gvsn=None, parent_guid=None):
+                 modified, size, id=None, acl=None, gvsn=None, parent_guid=None):
         self.type = type
         self.guid = guid
-        self.gvsn = gvsn
         self.folder_id = folder_id
         self.deleted = deleted
         self.name = name
         self.modified = modified
         self.size = size
+        self.id = id
+        self.acl = acl
+        self.gvsn = gvsn
         self.parent_guid = parent_guid
 
     @staticmethod

@@ -4,31 +4,13 @@ import logging
 
 from .types import Event
 from .base_command import BaseCommand
-from .iterator import CursorAsyncIterator
 from ...common import Object
-from ...lib import CursorResponse, Command
+from ...lib import CursorResponse
 from ...exceptions import ClientResponseException
 
 
-def iterator(core, path, param):
-    """
-    Create iterator
-
-    :param cterasdk.objects.core.Portal core: Portal object
-    :param str path: URL Path
-    :param cterasdk.common.object.Object param: Object parameter
-
-    :returns: Iterator
-    """
-    async def execute(core, path, param):
-        return CursorResponse(await core.v2.api.post(path, param))
-
-    callback_function = Command(execute, core, path)
-    return CursorAsyncIterator(callback_function, param)
-
-
-class Metadata(BaseCommand):
-    """CTERA Portal Metadata Connector APIs"""
+class Notifications(BaseCommand):
+    """CTERA Portal Notification Service APIs"""
 
     def __init__(self, core):
         super().__init__(core)
@@ -46,7 +28,7 @@ class Metadata(BaseCommand):
         """
         param = await self._create_parameter(cloudfolders, cursor)
         logging.getLogger().info('Listing updates.')
-        return iterator(self._core, '/metadata/list', param)
+        return CursorResponse(await self._core.v2.api.post('/metadata/list', param))
 
     async def _create_parameter(self, drives, cursor):
         param = Object()
@@ -66,7 +48,7 @@ class Metadata(BaseCommand):
         Check for Changes.
 
         :param str cursor: Cursor
-        :param int,optional cursor: Timeout
+        :param int,optional timeout: Timeout
 
         :returns: ``True`` if changes are available for this ``cursor``, ``False`` otherwise
         :rtype: bool
@@ -114,44 +96,80 @@ class Metadata(BaseCommand):
 class Service(BaseCommand):
     """Change Notification Service"""
 
-    def run(self, queue, save_cursor, *, cloudfolders=None, cursor=None):
+    def __init__(self, core):
+        super().__init__(core)
+        self._promises = []
+
+    def run(self, client_queue, save_cursor, *, cloudfolders=None, cursor=None):
         """
         Start Service.
 
-        :param asyncio.Queue queue: Event Queue.
+        :param asyncio.Queue client_queue: Queue.
         :param callback save_cursor: Asynchronous callback function to persist the cursor.
         :param list[CloudFSFolderFindingHelper] cloudfolders: List of Cloud Drive folders.
         :param str,optional cursor: Cursor.
         """
-        return asyncio.create_task(run_forever(self._core, queue, save_cursor, cloudfolders, cursor))
+        server_queue = asyncio.Queue(maxsize=3)
+        retrieve = asyncio.create_task(retrieve_events(server_queue, self._core, cloudfolders, cursor))
+        forward = asyncio.create_task(forward_events(server_queue, client_queue, save_cursor))
+        self._promises = [retrieve, forward]
+
+    async def stop(self):
+        """Stop Service"""
+        for promise in self._promises:
+            promise.cancel()
+            try:
+                await promise
+            except asyncio.CancelledError:
+                """Task Cancelled"""
+        self._promises.clear()
 
 
-async def run_forever(core, queue, save_cursor, drives, cursor):
+async def retrieve_events(server_queue, core, cloudfolders, cursor):
     """
-    Change Notification Service.
+    Retrieval Service.
 
-    :param cterasdk.objects.data.DataServices core: Data Services object
-    :param asyncio.Queue queue: Queue to process events.
-    :param list[CloudFSFolderFindingHelper] drives: List of Cloud Drive folders.
-    :param str cursor: Cursor.
-    :param callback save_cursor: Asynchronous callback function to persist the cursor.
+    :param asyncio.Queue server_queue: Queue.
+    :param cterasdk.objects.data.DataServices core: Data Services object.
+    :param list[CloudFSFolderFindingHelper] cloudfolders: List of Cloud Drive folders.
+    :param str cursor: Cursor
     """
-    logging.getLogger().info('Running Service.')
+    logging.getLogger().info('Retrieval Service.')
+    last_response = LastResponse(cursor)
     try:
         while True:
             try:
-                if cursor is None or await core.metadata.changes(cursor):
-                    events = await core.metadata.get(drives, cursor)
-                    await enqueue_events(events, queue)
-                    await process_events(queue)
-                    cursor = events.cursor
-                    await persist_cursor(save_cursor, cursor)
+                if last_response.cursor is None or last_response.more or \
+                    await core.notifications.changes(last_response.cursor):
+                    response = await core.notifications.get(cloudfolders, last_response.cursor)
+                    if response.objects:
+                        await server_queue.put(response)
+                    last_response = response
             except ConnectionError as error:
                 await on_connection_error(error)
             except TimeoutError:
-                logging.getLogger().warning("Request timed out. Retrying.")
+                logging.getLogger().debug("Request timed out. Retrying.")
     except asyncio.CancelledError:
-        logging.getLogger().info('Cancelling Task.')
+        logging.getLogger().info('Cancelling Event Retrieval.')
+
+
+async def forward_events(server_queue, client_queue, save_cursor):
+    """
+    Change Notification Service.
+
+    :param asyncio.Queue server_queue: Server queue.
+    :param asyncio.Queue client_queue: Client queue.
+    :param callback save_cursor: Callback function to persist the cursor.
+    """
+    logging.getLogger().info('Forwarder Service.')
+    try:
+        while True:
+            batch = await server_queue.get()
+            await enqueue_events(batch.objects, client_queue)
+            await process_events(client_queue)
+            await persist_cursor(save_cursor, batch.cursor)
+    except asyncio.CancelledError:
+        logging.getLogger().info('Cancelling Event Forwarding.')
 
 
 async def enqueue_events(events, queue):
@@ -161,7 +179,7 @@ async def enqueue_events(events, queue):
     :param asyncio.Queue queue: Event Queue.
     :param cterasdk.asynchronous.core.iterator.CursorAsyncIterator events: Event Iterator.
     """
-    async for event in events:
+    for event in events:
         logging.getLogger().debug('Enqueuing Event.')
         await queue.put(Event.from_server_object(event))
         logging.getLogger().debug('Enqueued Event.')
@@ -198,3 +216,21 @@ async def on_connection_error(error):
     logging.getLogger().error('Connection error. Reason: %s.', str(error))
     logging.getLogger().info("Retrying in %s seconds.", seconds)
     await asyncio.sleep(seconds)
+
+
+class LastResponse:
+
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    @property
+    def more(self):
+        return False
+
+    @property
+    def objects(self):
+        return []
+
+    @property
+    def cursor(self):
+        return self._cursor

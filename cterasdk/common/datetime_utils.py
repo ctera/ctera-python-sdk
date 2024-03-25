@@ -19,3 +19,14 @@ class DateTimeUtils():
         elif isinstance(expiration, datetime.date):
             expiration_date = expiration
         return expiration_date
+
+
+def from_iso_format(time):
+    """
+    Parse datetime object from ISO 8601 format
+
+    :param str time: Timestamp
+    :returns: Datetime object
+    :rtype: datetime.datetime
+    """
+    return datetime.datetime.fromisoformat(time)
