@@ -12,3 +12,4 @@ Submodules
 .. toctree::
 
    cterasdk.clients.asynchronous.clients
+   cterasdk.clients.asynchronous.errors

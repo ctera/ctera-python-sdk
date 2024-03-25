@@ -5,4 +5,4 @@ Data Services
    :caption: CTERA Data Services
    :maxdepth: 5
 
-   MetadataConnector
+   NotificationService
