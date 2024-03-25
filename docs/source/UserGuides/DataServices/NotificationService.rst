@@ -13,7 +13,7 @@ Use the `task_done()` `function <https://docs.python.org/3/library/asyncio-queue
 After processing all events, the service will perform a callback to a function provided by the client to record the latest cursor.
 Recording the cursor enables pausing and resuming the service from the last cursor position.
 
-.. automethod:: cterasdk.asynchronous.core.metadata.Service.run
+.. automethod:: cterasdk.asynchronous.core.notifications.Service.run
    :noindex:
 
 .. code-block:: python
@@ -31,7 +31,7 @@ Recording the cursor enables pausing and resuming the service from the last curs
         """Process an event"""
 
 
-    async def consumer(queue):
+    async def worker(queue):
         """Sample worker thread"""
         while True:
             event = await queue.get()
@@ -49,22 +49,22 @@ Recording the cursor enables pausing and resuming the service from the last curs
         async with DataServices('tenant.ctera.com') as admin:
             await admin.login('admin-username', 'admin-password')
             """Start event producer service."""
-            producer = admin.metadata.service.run(queue, save_cursor, cursor=cursor)
+            admin.notifications.service.run(queue, save_cursor, cursor=cursor)
             """Start event consumer to process events"""
-            consumer = asyncio.create_task(consumer(queue))
-            await producer
+            consumer = asyncio.create_task(worker(queue))
             await consumer
             await admin.logout()
 
+
     if __name__ == '__main__':
-        asyncio.run(main())
+            asyncio.run(main())
 
 ..
 
 Ancestors
 ---------
 
-.. automethod:: cterasdk.asynchronous.core.metadata.Metadata.ancestors
+.. automethod:: cterasdk.asynchronous.core.notifications.Notifications.ancestors
    :noindex:
 
    List ancestors. Returns a sorted list comprised of the file event and all parent directory objects.
@@ -87,12 +87,12 @@ Ancestors
         print(Path(*[ancestor.name for ancestor in ancestors]).as_posix())
 
 
-    async def consumer(admin, queue):
+    async def worker(queue):
         """Sample worker thread"""
         while True:
             event = await queue.get()
             try:
-                await process_event(admin, event)
+                await process_event(event)
             except Exception:
                 logging.getLogger().error('Error Message')
             finally:
@@ -105,14 +105,14 @@ Ancestors
         async with DataServices('tenant.ctera.com') as admin:
             await admin.login('admin-username', 'admin-password')
             """Start event producer service."""
-            producer = admin.metadata.service.run(queue, save_cursor, cursor=cursor)
+            admin.notifications.service.run(queue, save_cursor, cursor=cursor)
             """Start event consumer to process events"""
-            consumer = asyncio.create_task(consumer(queue))
-            await producer
+            consumer = asyncio.create_task(worker(queue))
             await consumer
             await admin.logout()
 
+
     if __name__ == '__main__':
-        asyncio.run(main())
+            asyncio.run(main())
 
 ..

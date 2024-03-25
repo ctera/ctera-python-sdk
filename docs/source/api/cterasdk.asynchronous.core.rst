@@ -14,7 +14,7 @@ Submodules
    cterasdk.asynchronous.core.cloudfs
    cterasdk.asynchronous.core.iterator
    cterasdk.asynchronous.core.login
-   cterasdk.asynchronous.core.metadata
+   cterasdk.asynchronous.core.notifications
    cterasdk.asynchronous.core.query
    cterasdk.asynchronous.core.users
 
