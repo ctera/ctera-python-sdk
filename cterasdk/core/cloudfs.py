@@ -132,7 +132,7 @@ class FolderGroups(BaseCommand):
 class CloudDrives(BaseCommand):
     """ Cloud Drive Folder APIs """
 
-    default = ['name', 'group', 'owner', 'isDeleted']
+    default = ['name', 'group', 'owner']
 
     def _get_entire_object(self, name, owner):
         return self._core.api.get(f'{self.find(name, owner, include=["baseObjectRef"]).baseObjectRef}')
@@ -267,13 +267,13 @@ class CloudDrives(BaseCommand):
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
         :param bool,optional permanently: Delete permanently
         """
-        cloudfolder = self.find(name, owner, include=['uid'])
+        cloudfolder = self.find(name, owner, include=['uid', 'isDeleted'])
         logging.getLogger().info('Deleting cloud drive folder. %s', {'name': name, 'owner': str(owner), 'permanently': permanently})
         if permanently:
-            return self._core.api.execute(f'/objs/{cloudfolder.uid}', 'deleteFolderPermanently')
+            self._core.api.execute(f'/objs/{cloudfolder.uid}', 'deleteFolderPermanently')
         if not cloudfolder.isDeleted:
-            return self._core.api.execute(f'/objs/{cloudfolder.uid}', 'delete')
-        logging.getLogger().info('Cloud Drive folder was already deleted.', {'name': cloudfolder.name})
+            self._core.api.execute(f'/objs/{cloudfolder.uid}', 'delete')
+        logging.getLogger().info('Cloud Drive folder was already deleted. %s', {'name': cloudfolder.name})
 
     def recover(self, name, owner):
         """
