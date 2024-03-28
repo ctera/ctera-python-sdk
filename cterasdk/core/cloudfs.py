@@ -270,10 +270,11 @@ class CloudDrives(BaseCommand):
         cloudfolder = self.find(name, owner, include=['uid', 'isDeleted'])
         logging.getLogger().info('Deleting cloud drive folder. %s', {'name': name, 'owner': str(owner), 'permanently': permanently})
         if permanently:
-            self._core.api.execute(f'/objs/{cloudfolder.uid}', 'deleteFolderPermanently')
+            return self._core.api.execute(f'/objs/{cloudfolder.uid}', 'deleteFolderPermanently')
         if not cloudfolder.isDeleted:
-            self._core.api.execute(f'/objs/{cloudfolder.uid}', 'delete')
+            return self._core.api.execute(f'/objs/{cloudfolder.uid}', 'delete')
         logging.getLogger().info('Cloud Drive folder was already deleted. %s', {'name': cloudfolder.name})
+        return None
 
     def recover(self, name, owner):
         """
