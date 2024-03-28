@@ -147,7 +147,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
 
     def test_delete_with_local_owner(self):
         mock_get_user = self.patch_call('cterasdk.core.users.Users.get')
-        mock_get_user.return_value = munch.Munch({'uid': self._user_uid, 'name': self._owner})
+        mock_get_user.return_value = munch.Munch({'uid': self._user_uid, 'name': self._owner, 'isDeleted': False})
         self._init_global_admin()
         with mock.patch("cterasdk.core.cloudfs.query.iterator") as query_iterator_mock:
             query_iterator_mock.return_value = iter([munch.Munch({'uid': self._folder_uid})])
@@ -157,7 +157,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
 
     def test_delete_permanently_with_local_owner(self):
         mock_get_user = self.patch_call('cterasdk.core.users.Users.get')
-        mock_get_user.return_value = munch.Munch({'uid': self._user_uid, 'name': self._owner})
+        mock_get_user.return_value = munch.Munch({'uid': self._user_uid, 'name': self._owner, 'isDeleted': False})
         self._init_global_admin()
         with mock.patch("cterasdk.core.cloudfs.query.iterator") as query_iterator_mock:
             query_iterator_mock.return_value = iter([munch.Munch({'uid': self._folder_uid})])
