@@ -1385,6 +1385,8 @@ Cloud Drive Folders
    wbruce = core_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.drives.delete('DIR-002', wbruce)
 
+.. seealso:: Non-permanent deletion of Cloud Drive folders will transfer the Cloud Drive folder to the Trash Can.
+
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.recover
    :noindex:
 
