@@ -240,16 +240,16 @@ class CloudDrives(BaseCommand):
         Find a Cloud Drive Folder
 
         :param str name: Name of the Cloud Drive Folder to find
-        :param cterasdk.core.types.UserAccount owner: User account of the folder group owner
+        :param cterasdk.core.types.UserAccount owner: Cloud drive folder owner
         :param list[str] include: List of metadata fields to include in the response
 
         :returns: A Cloud Drive Folder
         """
-
-        uid = self._core.users.get(owner, ['uid']).uid
         include = union(include or [], CloudDrives.default)
-        builder = query.QueryParamBuilder().include(include).ownedBy(uid)
+        builder = query.QueryParamBuilder().include(include)
         builder.addFilter(query.FilterBuilder('name').eq(name))
+        builder.addFilter(query.FilterBuilder('owner', True).eq(owner.name))
+        builder.put('includeDeleted', True)
         param = builder.build()
 
         iterator = query.iterator(self._core, '/cloudDrives', param)
@@ -267,11 +267,14 @@ class CloudDrives(BaseCommand):
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
         :param bool,optional permanently: Delete permanently
         """
-        drive = self.find(name, owner, include=['uid'])
+        cloudfolder = self.find(name, owner, include=['uid', 'isDeleted'])
         logging.getLogger().info('Deleting cloud drive folder. %s', {'name': name, 'owner': str(owner), 'permanently': permanently})
         if permanently:
-            return self._core.api.execute(f'/objs/{drive.uid}', 'deleteFolderPermanently')
-        return self._core.api.execute(f'/objs/{drive.uid}', 'delete')
+            return self._core.api.execute(f'/objs/{cloudfolder.uid}', 'deleteFolderPermanently')
+        if not cloudfolder.isDeleted:
+            return self._core.api.execute(f'/objs/{cloudfolder.uid}', 'delete')
+        logging.getLogger().info('Cloud Drive folder was already deleted. %s', {'name': cloudfolder.name})
+        return None
 
     def recover(self, name, owner):
         """
