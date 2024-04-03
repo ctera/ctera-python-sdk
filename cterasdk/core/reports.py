@@ -1,6 +1,6 @@
 import logging
 from .base_command import BaseCommand
-from .enum import Reports
+from . import enum
 from ..exceptions import InputError
 
 
@@ -42,12 +42,11 @@ class Reports(BaseCommand):
 
         :param cterasdk.core.enum.reports report: Report
         """
-        options = {k: v for k,v in Reports.__dict__.items() if not k.startswith('_')}
-        report = options.get(name, None)
-        if report is None:
-            raise InputError('Invalid report type.', name, options.keys())
-        logging.gerLogger().info('Running Portal Report. %s', {'name': name})
-        self._core.execute('', 'generateReport', report)
+        options = {v: k for k,v in enum.Reports.__dict__.items() if not k.startswith('_')}
+        if options.get(name, None) is None:
+            raise InputError('Invalid report type.', name, list(options.values()))
+        logging.getLogger().info('Running Portal Report. %s', {'name': name})
+        self._core.api.execute('', 'generateReport', name)
 
     def _get_report(self, report_name):
         return self._core.api.get(f'/reports/{report_name}')
