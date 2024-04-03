@@ -28,6 +28,7 @@ class Notifications(BaseCommand):
         """
         param = await self._create_parameter(cloudfolders, cursor)
         logging.getLogger().info('Listing updates.')
+        print(param)
         return CursorResponse(await self._core.v2.api.post('/metadata/list', param))
 
     async def _create_parameter(self, drives, cursor):
@@ -142,6 +143,8 @@ async def retrieve_events(server_queue, core, cloudfolders, cursor):
                 if last_response.cursor is None or last_response.more or \
                         await core.notifications.changes(last_response.cursor):
                     response = await core.notifications.get(cloudfolders, last_response.cursor)
+                    print(response)
+                    print(response.objects)
                     if response.objects:
                         await server_queue.put(response)
                     last_response = response

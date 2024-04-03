@@ -1208,6 +1208,45 @@ Device Activation Codes
 
 .. note:: Read Write Administrator, granted with the "Super User" role permission, can generate 200 codes every 5 minutes
 
+Reports
+=======
+
+Generate a Report
+-----------------
+
+.. automethod:: cterasdk.core.reports.Reports.generate
+   :noindex:
+
+Reports may take a while to generate, use the following commands to trigger the execution of the reports.
+
+.. code-block:: python
+
+   """Global Administration"""
+   admin.reports.generate(core_enum.Reports.Storage)
+   admin.reports.generate(core_enum.Reports.Portals)
+
+   """Team Portal"""
+   admin.reports.generate(core_enum.Reports.Folders)
+   admin.reports.generate(core_enum.Reports.FolderGroups)
+
+Retrieve a Report
+-----------------
+
+Once a report was generated, use the following commands to retrieve the report.
+
+.. automethod:: cterasdk.core.reports.Reports.storage
+   :noindex:
+
+.. automethod:: cterasdk.core.reports.Reports.portals
+   :noindex:
+
+.. automethod:: cterasdk.core.reports.Reports.folders
+   :noindex:
+
+.. automethod:: cterasdk.core.reports.Reports.folder_groups
+   :noindex:
+
+
 Managing the CTERA Global Namespace
 ===================================
 
