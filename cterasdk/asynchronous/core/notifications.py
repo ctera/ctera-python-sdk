@@ -28,7 +28,6 @@ class Notifications(BaseCommand):
         """
         param = await self._create_parameter(cloudfolders, cursor)
         logging.getLogger().info('Listing updates.')
-        print(param)
         return CursorResponse(await self._core.v2.api.post('/metadata/list', param))
 
     async def _create_parameter(self, drives, cursor):
@@ -77,21 +76,6 @@ class Notifications(BaseCommand):
         except ClientResponseException:
             logging.getLogger().error('Could not retrieve ancestors. %s', {'folder_id': param.folder_id, 'guid': param.guid})
             raise
-
-    @staticmethod
-    def _ancestry(descendant, ancestors):
-        """
-        Sorted Ancestry.
-        """
-        ancestry_mapper = {ancestor.guid: ancestor for ancestor in ancestors}
-        ancestry = [descendant]
-
-        current_ancestor = descendant
-        while ancestry_mapper:
-            ancestor = ancestry_mapper.pop(current_ancestor.parent_guid)
-            ancestry.insert(0, ancestor)
-            current_ancestor = ancestor
-        return ancestry
 
 
 class Service(BaseCommand):
@@ -143,8 +127,6 @@ async def retrieve_events(server_queue, core, cloudfolders, cursor):
                 if last_response.cursor is None or last_response.more or \
                         await core.notifications.changes(last_response.cursor):
                     response = await core.notifications.get(cloudfolders, last_response.cursor)
-                    print(response)
-                    print(response.objects)
                     if response.objects:
                         await server_queue.put(response)
                     last_response = response
