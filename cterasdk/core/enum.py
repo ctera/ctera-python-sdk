@@ -594,3 +594,18 @@ class Duration:
     Days = 'Days'
     Months = 'Months'
     Years = 'Years'
+
+
+class Reports:
+    """
+    Reports
+
+    :ivar str Storage: Minutes
+    :ivar str Portals: Hours
+    :ivar str Folders: Days
+    :ivar str FolderGroups: Months
+    """
+    Storage = 'storageLocationsStatisticsReport'
+    Portals = 'portalsStatisticsReport'
+    Folders = 'foldersStatisticsReport'
+    FolderGroups = 'folderGroupsStatisticsReport'

@@ -1,4 +1,5 @@
 from cterasdk.core import reports
+from cterasdk import exceptions
 from tests.ut import base_core
 
 
@@ -29,10 +30,15 @@ class TestCoreReports(base_core.BaseCoreTest):
         self._assert_called_once_with('folderGroupsStatisticsReport')
         self.assertEqual(ret, self._get_response)
 
-    def test_devices_report(self):
-        ret = reports.Reports(self._global_admin).devices()
-        self._assert_called_once_with('devicesStatisticsReport')
-        self.assertEqual(ret, self._get_response)
+    def test_generate_report_success(self):
+        name = 'folderGroupsStatisticsReport'
+        reports.Reports(self._global_admin).generate(name)
+        self._global_admin.api.execute.assert_called_once_with('', 'generateReport', name)
+
+    def test_generate_report_failure(self):
+        with self.assertRaises(exceptions.InputError) as error:
+            reports.Reports(self._global_admin).generate('Expected Failure')
+        self.assertEqual('Invalid report type', error.exception.message)
 
     def _assert_called_once_with(self, report_name):
         self._global_admin.api.get.assert_called_once_with(f'/reports/{report_name}')

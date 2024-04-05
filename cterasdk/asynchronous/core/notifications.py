@@ -77,21 +77,6 @@ class Notifications(BaseCommand):
             logging.getLogger().error('Could not retrieve ancestors. %s', {'folder_id': param.folder_id, 'guid': param.guid})
             raise
 
-    @staticmethod
-    def _ancestry(descendant, ancestors):
-        """
-        Sorted Ancestry.
-        """
-        ancestry_mapper = {ancestor.guid: ancestor for ancestor in ancestors}
-        ancestry = [descendant]
-
-        current_ancestor = descendant
-        while ancestry_mapper:
-            ancestor = ancestry_mapper.pop(current_ancestor.parent_guid)
-            ancestry.insert(0, ancestor)
-            current_ancestor = ancestor
-        return ancestry
-
 
 class Service(BaseCommand):
     """Change Notification Service"""
