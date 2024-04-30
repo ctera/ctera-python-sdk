@@ -31,7 +31,7 @@ class Config(BaseCommand):
         :param str location: New location to set
         :return str: The new location
         """
-        logging.getLogger().info('Configuring device location. %s', {'location': location})
+        logging.getLogger('cterasdk.edge').info('Configuring device location. %s', {'location': location})
         return self._edge.api.put('/config/device/location', location)
 
     def get_hostname(self):
@@ -49,7 +49,7 @@ class Config(BaseCommand):
         :param str hostname: New hostname to set
         :return str: The new hostname
         """
-        logging.getLogger().info('Configuring device hostname. %s', {'hostname': hostname})
+        logging.getLogger('cterasdk.edge').info('Configuring device hostname. %s', {'hostname': hostname})
         return self._edge.api.put('/config/device/hostname', hostname)
 
     def import_config(self, config, exclude=None):
@@ -76,7 +76,7 @@ class Config(BaseCommand):
 
     def _import_configuration(self, path):
         self._filesystem.get_local_file_info(path)
-        logging.getLogger().info('Importing Edge Filer configuration.')
+        logging.getLogger('cterasdk.edge').info('Importing Edge Filer configuration.')
         with open(path, 'rb') as fd:
             response = self._edge.api.form_data(
                 '/config',
@@ -86,7 +86,7 @@ class Config(BaseCommand):
                     config=fd
                 )
             )
-            logging.getLogger().info('Imported Edge Filer configuration.')
+            logging.getLogger('cterasdk.edge').info('Imported Edge Filer configuration.')
         return response
 
     def load_config(self, config):
@@ -97,7 +97,7 @@ class Config(BaseCommand):
         """
         data = None
         if self._filesystem.exists(config):
-            logging.getLogger().info('Reading the Edge Filer configuration from file. %s', {'path': config})
+            logging.getLogger('cterasdk.edge').info('Reading the Edge Filer configuration from file. %s', {'path': config})
             with open(config, 'r', encoding='utf-8') as f:
                 data = f.read()
         else:
@@ -105,9 +105,9 @@ class Config(BaseCommand):
 
         database = fromxmlstr(data)
         if database:
-            logging.getLogger().info('Completed parsing the Edge Filer configuration. %s', {'firmware': database.firmware})
+            logging.getLogger('cterasdk.edge').info('Completed parsing the Edge Filer configuration. %s', {'firmware': database.firmware})
             return database
-        logging.getLogger().error("Failed parsing the Edge Filer's configuration.")
+        logging.getLogger('cterasdk.edge').error("Failed parsing the Edge Filer's configuration.")
         raise CTERAException("Failed parsing the Edge Filer's configuration")
 
     def export(self, destination=None):
@@ -119,10 +119,10 @@ class Config(BaseCommand):
         """
         default_filename = self._edge.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.xml'
         directory, filename = self._filesystem.split_file_directory_with_defaults(destination, default_filename)
-        logging.getLogger().info('Exporting configuration. %s', {'host': self._edge.host()})
+        logging.getLogger('cterasdk.edge').info('Exporting configuration. %s', {'host': self._edge.host()})
         handle = self._edge.api.handle('/export')
         filepath = FileSystem.instance().save(directory, filename, handle)
-        logging.getLogger().info('Exported configuration. %s', {'filepath': filepath})
+        logging.getLogger('cterasdk.edge').info('Exported configuration. %s', {'filepath': filepath})
 
     def is_wizard_enabled(self):
         """
@@ -145,5 +145,5 @@ class Config(BaseCommand):
         return self._set_wizard(False)
 
     def _set_wizard(self, state):
-        logging.getLogger().info('Disabling first time wizard')
+        logging.getLogger('cterasdk.edge').info('Disabling first time wizard')
         return self._edge.api.put('/config/gui/openFirstTimeWizard', state)

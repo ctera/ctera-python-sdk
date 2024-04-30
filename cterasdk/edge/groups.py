@@ -37,11 +37,11 @@ class Groups(BaseCommand):
 
         members = [v for k, v in new_member_dict.items()]
 
-        logging.getLogger().info('Adding group members. %s', {'group': group})
+        logging.getLogger('cterasdk.edge').info('Adding group members. %s', {'group': group})
 
         self._edge.api.put('/config/auth/groups/' + group + '/members', members)
 
-        logging.getLogger().info('Group members added. %s', {'group': group})
+        logging.getLogger('cterasdk.edge').info('Group members added. %s', {'group': group})
 
     def remove_members(self, group, members):
         """
@@ -63,11 +63,11 @@ class Groups(BaseCommand):
             if not remove_members_dict.get(user_group_entry.principal_type + '#' + user_group_entry.name, False):
                 members.append(member)
 
-        logging.getLogger().info('Removing group members. %s', {'group': group})
+        logging.getLogger('cterasdk.edge').info('Removing group members. %s', {'group': group})
 
         self._edge.api.put('/config/auth/groups/' + group + '/members', members)
 
-        logging.getLogger().info('Group members removed. %s', {'group': group})
+        logging.getLogger('cterasdk.edge').info('Group members removed. %s', {'group': group})
 
     @staticmethod
     def _validate_members(members):

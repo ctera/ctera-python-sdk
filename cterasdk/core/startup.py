@@ -32,15 +32,15 @@ class Startup(BaseCommand):
             try:
                 current_status = self.status()
                 if current_status == Startup.Started:
-                    logging.getLogger().info('Server started.')
+                    logging.getLogger('cterasdk.core').info('Server started.')
                     break
-                logging.getLogger().debug('Current server status. %s', {'status': current_status})
+                logging.getLogger('cterasdk.core').debug('Current server status. %s', {'status': current_status})
                 attempt = attempt + 1
                 if attempt >= retries:
-                    logging.getLogger().error('Timed out. Server did not start in a timely manner.')
+                    logging.getLogger('cterasdk.core').error('Timed out. Server did not start in a timely manner.')
                     raise CTERAException('Timed out. Server did not start in a timely manner')
                 time.sleep(seconds)
             except (ConnectionError, TimeoutError) as e:
-                logging.getLogger().debug('Exception. %s', e.__dict__)
+                logging.getLogger('cterasdk.core').debug('Exception. %s', e.__dict__)
                 attempt = attempt + 1
                 time.sleep(seconds)

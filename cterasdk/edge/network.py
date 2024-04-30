@@ -56,11 +56,11 @@ class Network(BaseCommand):
         if secondary_dns_server is not None:
             ip.DNSServer2 = secondary_dns_server
 
-        logging.getLogger().info('Configuring a static ip address.')
+        logging.getLogger('cterasdk.edge').info('Configuring a static ip address.')
 
         self._edge.api.put('/config/network/ports/0/ip', ip)
 
-        logging.getLogger().info(
+        logging.getLogger('cterasdk.edge').info(
             'Network settings updated. %s',
             {'address': address, 'subnet': subnet, 'gateway': gateway, 'DNS1': primary_dns_server, 'DNS2': secondary_dns_server}
         )
@@ -79,11 +79,11 @@ class Network(BaseCommand):
         if secondary_dns_server is not None:
             ip.DNSServer2 = secondary_dns_server
 
-        logging.getLogger().info('Configuring nameserver settings.')
+        logging.getLogger('cterasdk.edge').info('Configuring nameserver settings.')
 
         self._edge.api.put('/config/network/ports/0/ip', ip)
 
-        logging.getLogger().info('Nameserver settings updated. %s', {'DNS1': primary_dns_server, 'DNS2': secondary_dns_server})
+        logging.getLogger('cterasdk.edge').info('Nameserver settings updated. %s', {'DNS1': primary_dns_server, 'DNS2': secondary_dns_server})
 
     def enable_dhcp(self):
         """
@@ -93,11 +93,11 @@ class Network(BaseCommand):
         ip.DHCPMode = Mode.Enabled
         ip.autoObtainDNS = True
 
-        logging.getLogger().info('Enabling DHCP.')
+        logging.getLogger('cterasdk.edge').info('Enabling DHCP.')
 
         self._edge.api.put('/config/network/ports/0/ip', ip)
 
-        logging.getLogger().info('Network settings updated. Enabled DHCP.')
+        logging.getLogger('cterasdk.edge').info('Network settings updated. Enabled DHCP.')
 
     def diagnose(self, services):
         """
@@ -121,18 +121,18 @@ class Network(BaseCommand):
         param.address = service.host
         param.port = service.port
 
-        logging.getLogger().info("Testing connection. %s", {'host': service.host, 'port': service.port})
+        logging.getLogger('cterasdk.edge').info("Testing connection. %s", {'host': service.host, 'port': service.port})
 
         task = self._edge.api.execute("/status/network", "tcpconnect", param)
         try:
             task = self._edge.tasks.wait(task)
-            logging.getLogger().debug("Obtained connection status. %s", {'status': task.result.rc})
+            logging.getLogger('cterasdk.edge').debug("Obtained connection status. %s", {'status': task.result.rc})
             if task.result.rc == "Open":
                 return TCPConnectResult(service.host, service.port, True)
         except TaskError:
             pass
 
-        logging.getLogger().warning("Couldn't establish TCP connection. %s", {'address': service.host, 'port': service.port})
+        logging.getLogger('cterasdk.edge').warning("Couldn't establish TCP connection. %s", {'address': service.host, 'port': service.port})
 
         return TCPConnectResult(service.host, service.port, False)
 
@@ -208,9 +208,9 @@ class Proxy(BaseCommand):
                 param.username = username
             if password:
                 param.password = password
-        logging.getLogger().info('Updating Proxy Server Configuration.')
+        logging.getLogger('cterasdk.edge').info('Updating Proxy Server Configuration.')
         response = self._edge.api.put('/config/network/proxy', param)
-        logging.getLogger().info('Updated Proxy Server Configuration.')
+        logging.getLogger('cterasdk.edge').info('Updated Proxy Server Configuration.')
         return response
 
     def disable(self):
@@ -220,7 +220,7 @@ class Proxy(BaseCommand):
         :returns: Proxy settings
         :rtype: cterasdk.common.object.Object
         """
-        logging.getLogger().info('Disabling Proxy.')
+        logging.getLogger('cterasdk.edge').info('Disabling Proxy.')
         return self._configure(False)
 
 
@@ -245,7 +245,7 @@ class MTU(BaseCommand):
         settings = self._edge.api.get('/config/network/ports/0/ethernet')
         settings.jumbo = jumbo
         settings.mtu = mtu
-        logging.getLogger().info('Configuring MTU. %s', {'MTU': mtu})
+        logging.getLogger('cterasdk.edge').info('Configuring MTU. %s', {'MTU': mtu})
         return self._edge.api.put('/config/network/ports/0/ethernet', settings)
 
 
@@ -270,11 +270,11 @@ class StaticRoutes(BaseCommand):
             param.GwIP = str(parse_to_ipaddress(source_ip))
             param.DestIpMask = str(parse_to_ipaddress(destination_ip_mask)).replace("/", "_")
             res = self._edge.api.add('/config/network/static_routes', param)
-            logging.getLogger().info(
+            logging.getLogger('cterasdk.edge').info(
                 "Static route updated. %s", {'Source': param.GwIP, 'Destination': destination_ip_mask})
             return res
         except CTERAException as error:
-            logging.getLogger().error("Static route creation failed.")
+            logging.getLogger('cterasdk.edge').error("Static route creation failed.")
             raise CTERAException('Static route creation failed', error)
 
     def remove(self, destination_ip_mask):
@@ -286,11 +286,11 @@ class StaticRoutes(BaseCommand):
         try:
             dest_ip_mask = str(parse_to_ipaddress(destination_ip_mask)).replace("/", "_")
             response = self._edge.api.delete(f'/config/network/static_routes/{dest_ip_mask}')
-            logging.getLogger().info(
+            logging.getLogger('cterasdk.edge').info(
                 "Static route deleted. %s", {'Destination': dest_ip_mask})
             return response
         except CTERAException as error:
-            logging.getLogger().error("Static route deletion failed.")
+            logging.getLogger('cterasdk.edge').error("Static route deletion failed.")
             raise CTERAException('Static route deletion failed', error)
 
     def clear(self):
@@ -299,7 +299,7 @@ class StaticRoutes(BaseCommand):
         """
         try:
             self._edge.api.execute('/config/network', 'cleanStaticRoutes')
-            logging.getLogger().info('Static routes were deleted successfully')
+            logging.getLogger('cterasdk.edge').info('Static routes were deleted successfully')
         except CTERAException as error:
-            logging.getLogger().error("Failed to clear static routes")
+            logging.getLogger('cterasdk.edge').error("Failed to clear static routes")
             raise CTERAException('Failed to clear static routes', error)

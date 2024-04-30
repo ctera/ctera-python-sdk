@@ -37,7 +37,7 @@ class FileSystem:  # pylint: disable=unused-private-member
             destination = os.path.join(dirpath, dst)
             os.rename(source, destination)
             return (dirpath, dst)
-        logging.getLogger().error('Could not rename temporary file. File not found. %s', {'path': dirpath, 'temp': src})
+        logging.getLogger('cterasdk.filesystem').error('Could not rename temporary file. File not found. %s', {'path': dirpath, 'temp': src})
         raise RenameException(dirpath, src, dst)
 
     def validate_directory(self, dirpath):
@@ -62,15 +62,15 @@ class FileSystem:  # pylint: disable=unused-private-member
         while True:
             try:
                 dirpath, filename = self.rename(dirpath, tempfile, filename)
-                logging.getLogger().debug('Renamed temporary file. %s', {'path': dirpath, 'temp': tempfile, 'name': filename})
+                logging.getLogger('cterasdk.filesystem').debug('Renamed temporary file. %s', {'path': dirpath, 'temp': tempfile, 'name': filename})
                 break
             except (FileExistsError, IsADirectoryError):
-                logging.getLogger().debug('File exists. %s', {'path': dirpath, 'name': filename})
+                logging.getLogger('cterasdk.filesystem').debug('File exists. %s', {'path': dirpath, 'name': filename})
                 version = version + 1
                 filename = self.version(origin, version)
 
         filepath = os.path.join(dirpath, filename)
-        logging.getLogger().info('Saved. %s', {'path': filepath})
+        logging.getLogger('cterasdk.filesystem').info('Saved. %s', {'path': filepath})
         return filepath
 
     @staticmethod
@@ -92,16 +92,16 @@ class FileSystem:  # pylint: disable=unused-private-member
             else:
                 for chunk in handle.iter_content(chunk_size=8192):
                     fd.write(chunk)
-        logging.getLogger().debug('Saved temporary file. %s', {'path': filepath})
+        logging.getLogger('cterasdk.filesystem').debug('Saved temporary file. %s', {'path': filepath})
 
     @staticmethod
     def get_local_file_info(local_file):
         path = Path(local_file)
         if not path.exists():
-            logging.getLogger().error('The path %(local_file)s was not found', dict(local_file=local_file))
+            logging.getLogger('cterasdk.filesystem').error('The path %(local_file)s was not found', dict(local_file=local_file))
             raise LocalFileNotFound(local_file)
         if not path.is_file():
-            logging.getLogger().error('The path %(local_file)s is not a file', dict(local_file=local_file))
+            logging.getLogger('cterasdk.filesystem').error('The path %(local_file)s is not a file', dict(local_file=local_file))
             raise LocalFileNotFound(local_file)
 
         return dict(
@@ -124,7 +124,7 @@ class FileSystem:  # pylint: disable=unused-private-member
             self.validate_directory(dirpath)
         except LocalDirectoryNotFound as error:
             dirpath = self.expanduser(dirpath)
-            logging.getLogger().error('Download failed. Check the following directory exists. %s', {'path': dirpath})
+            logging.getLogger('cterasdk.filesystem').error('Download failed. Check the following directory exists. %s', {'path': dirpath})
             raise error
         return dirpath
 

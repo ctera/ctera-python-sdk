@@ -66,7 +66,7 @@ def find_attr(obj, path):
     for part in parts:
         attr = get_attr(attr, part)
         if attr is None:
-            logging.getLogger().warning('Could not find attribute. %s', {'path': f'/{"/".join(parts)}'})
+            logging.getLogger('cterasdk.common').warning('Could not find attribute. %s', {'path': f'/{"/".join(parts)}'})
             return attr
     return attr
 
@@ -85,7 +85,7 @@ def get_attr(obj, attr):
             attr = int(attr)
             return obj[attr]
         except ValueError:
-            logging.getLogger().warning('Could not find attribute.')
+            logging.getLogger('cterasdk.common').warning('Could not find attribute.')
             return None
 
     return getattr(obj, attr, None)
@@ -104,7 +104,7 @@ def remove_attr(obj, attr):
         try:
             delattr(obj, attr)
         except AttributeError:
-            logging.getLogger().warning('Failed to remove attribute. Attribute not found. %s', {'attr': attr})
+            logging.getLogger('cterasdk.common').warning('Failed to remove attribute. Attribute not found. %s', {'attr': attr})
 
 
 def remove_array_element(array, attr):
@@ -114,7 +114,7 @@ def remove_array_element(array, attr):
         if attr <= len(array) - 1:
             array.pop(attr)
         else:
-            logging.getLogger().warning('Could not remove array item. Index out of range. %s', {'index': attr})
+            logging.getLogger('cterasdk.common').warning('Could not remove array item. Index out of range. %s', {'index': attr})
     except ValueError:
         pass
 

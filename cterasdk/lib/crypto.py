@@ -30,14 +30,14 @@ class RSAKeyPair:
     def save(self, dirpath, key_filename):
         filesystem = FileSystem.instance()
 
-        logging.getLogger().info('Saving private key.')
+        logging.getLogger('cterasdk.crypto').info('Saving private key.')
         path = filesystem.save(dirpath, f'{key_filename}.pem', self.private_key)
         os.chmod(path, 0o600)
-        logging.getLogger().info('Saved private key. %s', {'filepath': path, 'format': 'PEM'})
+        logging.getLogger('cterasdk.crypto').info('Saved private key. %s', {'filepath': path, 'format': 'PEM'})
 
-        logging.getLogger().info('Saving public key.')
+        logging.getLogger('cterasdk.crypto').info('Saving public key.')
         path = filesystem.save(dirpath, f'{key_filename}.pub', self.public_key)
-        logging.getLogger().info('Saved public key. %s', {'filepath': path, 'format': 'OpenSSH'})
+        logging.getLogger('cterasdk.crypto').info('Saved public key. %s', {'filepath': path, 'format': 'OpenSSH'})
 
 
 class CryptoServices:
@@ -102,7 +102,7 @@ class PrivateKey:
                 return PrivateKey.from_file(key, password)
             return PrivateKey.from_string(key, password)
         except ValueError as e:
-            logging.getLogger().error('Failed loading private key.')
+            logging.getLogger('cterasdk.crypto').error('Failed loading private key.')
             raise CTERAException('Failed loading private key', e, reason=str(e))
 
 
@@ -161,7 +161,7 @@ class X509Certificate:
                 return X509Certificate.from_file(cert)
             return X509Certificate.from_string(cert)
         except ValueError as e:
-            logging.getLogger().error('Failed loading certificate.')
+            logging.getLogger('cterasdk.crypto').error('Failed loading certificate.')
             raise CTERAException('Failed loading certificate', e, reason=str(e))
 
     def __str__(self):

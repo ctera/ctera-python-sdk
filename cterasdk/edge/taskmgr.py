@@ -21,7 +21,7 @@ class Task(TaskBase):
                 uid = ref[start: end]
         if uid is not None:
             return '/proc/bgtasks/' + uid
-        logging.getLogger().error('Could not parse task id. %s', {'ref': ref})
+        logging.getLogger('cterasdk.edge').error('Could not parse task id. %s', {'ref': ref})
         raise InputError('Invalid task id', ref, [64, '64', '/proc/bgtasks/64'])
 
     def get_task_status(self):

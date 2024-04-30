@@ -11,21 +11,21 @@ class SMB(BaseCommand):
 
     def enable(self):
         """ Enable SMB """
-        logging.getLogger().info('Enabling SMB server.')
+        logging.getLogger('cterasdk.edge').info('Enabling SMB server.')
         self._edge.api.put('/config/fileservices/cifs/mode', Mode.Enabled)
-        logging.getLogger().info('SMB server enabled.')
+        logging.getLogger('cterasdk.edge').info('SMB server enabled.')
 
     def enable_abe(self):
         """ Enable ABE """
-        logging.getLogger().info('Enabling ABE.')
+        logging.getLogger('cterasdk.edge').info('Enabling ABE.')
         self._edge.api.put('/config/fileservices/cifs/hideUnreadable', True)
-        logging.getLogger().info('Access Based Enumeration (ABE) enabled.')
+        logging.getLogger('cterasdk.edge').info('Access Based Enumeration (ABE) enabled.')
 
     def disable_abe(self):
         """ Disable ABE """
-        logging.getLogger().info('Disabling ABE.')
+        logging.getLogger('cterasdk.edge').info('Disabling ABE.')
         self._edge.api.put('/config/fileservices/cifs/hideUnreadable', False)
-        logging.getLogger().info('Access Based Enumeration (ABE) disabled.')
+        logging.getLogger('cterasdk.edge').info('Access Based Enumeration (ABE) disabled.')
 
     def set_packet_signing(self, packet_signing):
         """
@@ -34,19 +34,19 @@ class SMB(BaseCommand):
         :param cterasdk.edge.enum.CIFSPacketSigning packet_signing: Packet signing type
         """
         self._verify_packet_signing_parameter(packet_signing)
-        logging.getLogger().info('Updating SMB packet signing configuration.')
+        logging.getLogger('cterasdk.edge').info('Updating SMB packet signing configuration.')
         try:
             self._edge.api.put('/config/fileservices/cifs/packetSigning', packet_signing)
-            logging.getLogger().info('SMB packet signing configuration updated. %s', {'packet_signing': packet_signing})
+            logging.getLogger('cterasdk.edge').info('SMB packet signing configuration updated. %s', {'packet_signing': packet_signing})
         except CTERAException as error:
-            logging.getLogger().error('Failed to update SMB packet signing configuration.')
+            logging.getLogger('cterasdk.edge').error('Failed to update SMB packet signing configuration.')
             raise CTERAException('Invalid packet signing co', error)
 
     def disable(self):
         """ Disable SMB """
-        logging.getLogger().info('Disabling SMB server.')
+        logging.getLogger('cterasdk.edge').info('Disabling SMB server.')
         self._edge.api.put('/config/fileservices/cifs/mode', Mode.Disabled)
-        logging.getLogger().info('SMB server disabled.')
+        logging.getLogger('cterasdk.edge').info('SMB server disabled.')
 
     def restart(self):
         self.disable()
@@ -125,10 +125,10 @@ class SMB(BaseCommand):
             cifs.maxServerProtocol = max_server_protocol
         try:
             self._edge.api.put('/config/fileservices/cifs', cifs)
-            logging.getLogger().info('SMB configuration updated.')
+            logging.getLogger('cterasdk.edge').info('SMB configuration updated.')
         except CTERAException as error:
             msg = 'Failed to update SMB configuration.'
-            logging.getLogger().error(msg)
+            logging.getLogger('cterasdk.edge').error(msg)
             raise CTERAException(message=msg, instace=error)
 
     @staticmethod

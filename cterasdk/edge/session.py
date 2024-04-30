@@ -45,7 +45,7 @@ class Session(SessionBase):
         self.status = SessionStatus.Active
 
     def _do_terminate(self):
-        logging.getLogger().debug('Terminating local session. %s', {'host': self.host, 'user': self.user.name})
+        logging.getLogger('cterasdk.edge').debug('Terminating local session. %s', {'host': self.host, 'user': self.user.name})
         self.connection = SessionConnection(SessionType.Local)
 
     def local(self):

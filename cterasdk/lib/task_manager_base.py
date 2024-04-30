@@ -40,9 +40,9 @@ class TaskBase(ABC):
     def wait(self):
         task = None
         while self.running:
-            logging.getLogger().debug('Obtaining task status. %s', {'path': self.path, 'attempt': (self.attempt + 1)})
+            logging.getLogger('cterasdk.common').debug('Obtaining task status. %s', {'path': self.path, 'attempt': (self.attempt + 1)})
             task = self.get_task_status()
-            logging.getLogger().debug('Task status. %s', tojsonstr(task, False))
+            logging.getLogger('cterasdk.common').debug('Task status. %s', tojsonstr(task, False))
             self.increment()
             self.running = task.status == TaskRunningStatus.Running
         return TaskBase.resolve(task)
@@ -51,19 +51,19 @@ class TaskBase(ABC):
     def resolve(task):
         task_info = {'id': task.id, 'name': task.name, 'status': task.status, 'start_time': task.startTime, 'end_time': task.endTime}
         if task.status == TaskRunningStatus.Failed:
-            logging.getLogger().error('Task failed. %s', task_info)
+            logging.getLogger('cterasdk.common').error('Task failed. %s', task_info)
             raise TaskError(task)
         if task.status == TaskRunningStatus.Warnings:
-            logging.getLogger().warning('Task completed with warnings. %s', task_info)
+            logging.getLogger('cterasdk.common').warning('Task completed with warnings. %s', task_info)
         if task.status == TaskRunningStatus.Completed:
-            logging.getLogger().debug('Task completed successfully. %s', task_info)
+            logging.getLogger('cterasdk.common').debug('Task completed successfully. %s', task_info)
         return task
 
     def increment(self):
         if self.attempt >= self.retries:
             duration = time.strftime("%H:%M:%S", time.gmtime(self.retries * self.seconds))
-            logging.getLogger().error('Could not obtain task status in a timely manner. %s', {'duration': duration})
+            logging.getLogger('cterasdk.common').error('Could not obtain task status in a timely manner. %s', {'duration': duration})
             raise CTERAException('Timed out. Could not obtain task status in a timely manner', None, duration=duration)
         self.attempt = self.attempt + 1
-        logging.getLogger().debug('Sleep. %s', {'seconds': self.seconds})
+        logging.getLogger('cterasdk.common').debug('Sleep. %s', {'seconds': self.seconds})
         time.sleep(self.seconds)

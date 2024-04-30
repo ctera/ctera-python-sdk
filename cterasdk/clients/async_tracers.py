@@ -14,7 +14,7 @@ def default():
                 'headers': [dict(params.headers)] if params.headers else []
             }
         }
-        logging.getLogger().debug('Starting request. %s', serialize(param))
+        logging.getLogger('cterasdk.http.trace').debug('Starting request. %s', serialize(param))
 
     async def on_request_redirect(session, context, params):
         # pylint: disable=unused-argument
@@ -24,7 +24,7 @@ def default():
                 'destination': params.response.headers['Location']
             }
         }
-        logging.getLogger().debug('Starting redirect. %s', serialize(param))
+        logging.getLogger('cterasdk.http.trace').debug('Starting redirect. %s', serialize(param))
 
     async def on_request_end(session, context, params):
         # pylint: disable=unused-argument
@@ -40,7 +40,7 @@ def default():
                 'headers': [dict(params.response.headers)]
             }
         }
-        logging.getLogger().debug('Ended request. %s', serialize(param))
+        logging.getLogger('cterasdk.http.trace').debug('Ended request. %s', serialize(param))
 
     trace_config = aiohttp.TraceConfig()
     trace_config.on_request_start.append(on_request_start)

@@ -30,9 +30,9 @@ class Users(BaseCommand):
             user.password = password
             user.email = email
             self._edge.api.post('/nosession/createfirstuser', user)
-            logging.getLogger().info('User created. %s', {'user': username})
+            logging.getLogger('cterasdk.edge').info('User created. %s', {'user': username})
         else:
-            logging.getLogger().info('Skipping. root account already exists.')
+            logging.getLogger('cterasdk.edge').info('Skipping. root account already exists.')
         self._edge.login(username, password)
 
     def add(self, username, password, full_name=None, email=None, uid=None):
@@ -53,10 +53,10 @@ class Users(BaseCommand):
         user.uid = uid
         try:
             response = self._edge.api.add('/config/auth/users', user)
-            logging.getLogger().info("User created. %s", {'username': user.username})
+            logging.getLogger('cterasdk.edge').info("User created. %s", {'username': user.username})
             return response
         except CTERAException as error:
-            logging.getLogger().error("User creation failed.")
+            logging.getLogger('cterasdk.edge').error("User creation failed.")
             raise CTERAException('User creation failed', error)
 
     def modify(self, username, password=None, full_name=None, email=None, uid=None):
@@ -84,10 +84,10 @@ class Users(BaseCommand):
             user.uid = uid
         try:
             response = self._edge.api.put('/config/auth/users/' + username, user)
-            logging.getLogger().info("User modified. %s", {'username': user.username})
+            logging.getLogger('cterasdk.edge').info("User modified. %s", {'username': user.username})
             return response
         except CTERAException as error:
-            logging.getLogger().error("Failed to modify user.")
+            logging.getLogger('cterasdk.edge').error("Failed to modify user.")
             raise CTERAException('Failed to modify user', error)
 
     def delete(self, username):
@@ -98,8 +98,8 @@ class Users(BaseCommand):
         """
         try:
             response = self._edge.api.delete('/config/auth/users/' + username)
-            logging.getLogger().info("User deleted. %s", {'username': username})
+            logging.getLogger('cterasdk.edge').info("User deleted. %s", {'username': username})
             return response
         except Exception as error:
-            logging.getLogger().error("User deletion failed.")
+            logging.getLogger('cterasdk.edge').error("User deletion failed.")
             raise CTERAException('User deletion failed', error)

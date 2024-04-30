@@ -30,12 +30,12 @@ class Array(BaseCommand):
         param.members = [drive.name for drive in self._edge.drive.get_status()] if members is None else members
 
         try:
-            logging.getLogger().info("Creating a storage array.")
+            logging.getLogger('cterasdk.edge').info("Creating a storage array.")
             response = self._edge.api.add("/config/storage/arrays", param)
-            logging.getLogger().info("Storage array created.")
+            logging.getLogger('cterasdk.edge').info("Storage array created.")
             return response
         except CTERAException as error:
-            logging.getLogger().error("Storage array creation failed.")
+            logging.getLogger('cterasdk.edge').error("Storage array creation failed.")
             raise CTERAException("Storage array creation failed.", error)
 
     def delete(self, array_name):
@@ -45,12 +45,12 @@ class Array(BaseCommand):
         :param str name: The name of the array to delete
         """
         try:
-            logging.getLogger().info("Deleting a storage array.")
+            logging.getLogger('cterasdk.edge').info("Deleting a storage array.")
             response = self._edge.api.delete("/config/storage/arrays/" + array_name)
-            logging.getLogger().info("Storage array deleted. %s", {'array_name': array_name})
+            logging.getLogger('cterasdk.edge').info("Storage array deleted. %s", {'array_name': array_name})
             return response
         except CTERAException as error:
-            logging.getLogger().error("Storage array deletion failed.")
+            logging.getLogger('cterasdk.edge').error("Storage array deletion failed.")
             raise CTERAException("Storage array deletion failed.", error)
 
     def delete_all(self):

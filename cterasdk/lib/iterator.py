@@ -22,7 +22,7 @@ class BaseIterator:
             self._objects.extend(page)
             if self._objects:
                 return self.object
-        logging.getLogger().debug('Stopping iteration.')
+        logging.getLogger('cterasdk.common').debug('Stopping iteration.')
         raise StopIteration
 
     @property

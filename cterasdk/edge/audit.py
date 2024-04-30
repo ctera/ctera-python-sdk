@@ -54,14 +54,14 @@ class Audit(BaseCommand):
         settings.includeAuditLogTag = includeAuditLogTag
         settings.humanReadableAuditLog = humanReadableAuditLog
 
-        logging.getLogger().info('Enabling SMB audit logs')
+        logging.getLogger('cterasdk.edge').info('Enabling SMB audit logs')
         self._edge.api.put('/config/logging/files', settings)
-        logging.getLogger().info('Audit logs enabled')
+        logging.getLogger('cterasdk.edge').info('Audit logs enabled')
 
     def disable(self):
         """
         Disable Edge Filer Audit log
         """
-        logging.getLogger().info('Disabling SMB audit logs')
+        logging.getLogger('cterasdk.edge').info('Disabling SMB audit logs')
         self._edge.api.put('/config/logging/files/mode', enum.Mode.Disabled)
-        logging.getLogger().info('Audit logs disabled')
+        logging.getLogger('cterasdk.edge').info('Audit logs disabled')

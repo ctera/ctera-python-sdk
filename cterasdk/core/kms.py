@@ -44,9 +44,9 @@ class KMS(BaseCommand):
         param.integration.connectionSettings.timeout = timeout if timeout else 2
         param.integration.connectionSettings.port = port if port else 5696
         param.integration.tlsDetails = self._TLS_details(private_key, client_certificate, server_certificate)
-        logging.getLogger().info('Enabling Key Management Service')
+        logging.getLogger('cterasdk.core').info('Enabling Key Management Service')
         response = self._core.api.put('/settings/keyManagerSettings', param)
-        logging.getLogger().info('Key Management Service enabled')
+        logging.getLogger('cterasdk.core').info('Key Management Service enabled')
         return response
 
     @staticmethod
@@ -64,9 +64,9 @@ class KMS(BaseCommand):
         """
         Disable Key Management Service
         """
-        logging.getLogger().info('Disabling Key Management Service')
+        logging.getLogger('cterasdk.core').info('Disabling Key Management Service')
         response = self._core.api.execute('', 'removeKeyManagementService')
-        logging.getLogger().info('Key Management Service disabled')
+        logging.getLogger('cterasdk.core').info('Key Management Service disabled')
         return response
 
     def modify(self, private_key=None, client_certificate=None, server_certificate=None, expiration=None, timeout=None, port=None):
@@ -95,9 +95,9 @@ class KMS(BaseCommand):
         if port:
             settings.integration.connectionSettings.port = port
 
-        logging.getLogger().info('Updating Key Management Service settings')
+        logging.getLogger('cterasdk.core').info('Updating Key Management Service settings')
         response = self._core.api.put('/settings/keyManagerSettings', settings)
-        logging.getLogger().info('Updated Key Management Service settings')
+        logging.getLogger('cterasdk.core').info('Updated Key Management Service settings')
         return response
 
 
@@ -130,9 +130,9 @@ class KMSServers(BaseCommand):
         param._classname = 'KeyManagerServer'  # pylint: disable=protected-access
         param.name = name
         param.host = ipaddr
-        logging.getLogger().info('Adding Key Server. %s', {'name': name, 'host': ipaddr})
+        logging.getLogger('cterasdk.core').info('Adding Key Server. %s', {'name': name, 'host': ipaddr})
         response = self._core.api.add('/keyManagerServers', param)
-        logging.getLogger().info('Key Server. %s Added', {'name': name, 'host': ipaddr})
+        logging.getLogger('cterasdk.core').info('Key Server. %s Added', {'name': name, 'host': ipaddr})
         return response
 
     def modify(self, current_name, new_name):
@@ -144,9 +144,9 @@ class KMSServers(BaseCommand):
         """
         key_server = self.get(current_name)
         key_server.name = new_name
-        logging.getLogger().info("Modifying Key Server. %s", {'name': current_name})
+        logging.getLogger('cterasdk.core').info("Modifying Key Server. %s", {'name': current_name})
         response = self._core.api.put(f'/keyManagerServers/{current_name}', key_server)
-        logging.getLogger().info("Key Server modified. %s", {'name': current_name})
+        logging.getLogger('cterasdk.core').info("Key Server modified. %s", {'name': current_name})
         return response
 
     def delete(self, name):
@@ -155,7 +155,7 @@ class KMSServers(BaseCommand):
 
         :param str name: Key-server name
         """
-        logging.getLogger().info('Deleting Key Server. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Deleting Key Server. %s', {'name': name})
         response = self._core.api.delete(f'/keyManagerServers/{name}')
-        logging.getLogger().info('Key Server deleted. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Key Server deleted. %s', {'name': name})
         return response

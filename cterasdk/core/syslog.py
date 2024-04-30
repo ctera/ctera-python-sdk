@@ -43,9 +43,9 @@ class Syslog(BaseCommand):
         param.port = port
         param.protocol = protocol
         param.useClientCertificate = False
-        logging.getLogger().info('Enabling syslog.')
+        logging.getLogger('cterasdk.core').info('Enabling syslog.')
         response = self._core.api.put('/settings/logsSettings/syslogConfig', param)
-        logging.getLogger().info('Syslog enabled.')
+        logging.getLogger('cterasdk.core').info('Syslog enabled.')
         return response
 
     def modify(self, server=None, port=None, protocol=None, min_severity=None):
@@ -69,9 +69,9 @@ class Syslog(BaseCommand):
         if min_severity:
             current_config.minSeverity = min_severity
 
-        logging.getLogger().info("Updating syslog server configuration.")
+        logging.getLogger('cterasdk.core').info("Updating syslog server configuration.")
         self._core.api.put('/settings/logsSettings/syslogConfig', current_config)
-        logging.getLogger().info(
+        logging.getLogger('cterasdk.core').info(
             "Syslog server configured. %s",
             {
                 'server': current_config.server,
@@ -82,7 +82,7 @@ class Syslog(BaseCommand):
         )
 
     def disable(self):
-        logging.getLogger().info('Disabling syslog.')
+        logging.getLogger('cterasdk.core').info('Disabling syslog.')
         response = self._core.api.put('/settings/logsSettings/syslogConfig/mode', Mode.Disabled)
-        logging.getLogger().info('Syslog disabled.')
+        logging.getLogger('cterasdk.core').info('Syslog disabled.')
         return response

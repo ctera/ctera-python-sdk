@@ -45,7 +45,7 @@ class Reports(BaseCommand):
         options = {v: k for k, v in enum.Reports.__dict__.items() if not k.startswith('_')}
         if options.get(name, None) is None:
             raise InputError('Invalid report type', name, list(options.values()))
-        logging.getLogger().info('Running Portal Report. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Running Portal Report. %s', {'name': name})
         self._core.api.execute('', 'generateReport', name)
 
     def _get_report(self, report_name):

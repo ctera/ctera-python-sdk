@@ -91,10 +91,10 @@ class Plans(BaseCommand):
         Plans._assign_quotas(plan, quotas)
         try:
             response = self._core.api.add('/plans', plan)
-            logging.getLogger().info("Plan created. %s", {'plan': name})
+            logging.getLogger('cterasdk.core').info("Plan created. %s", {'plan': name})
             return response
         except CTERAException as error:
-            logging.getLogger().error("Plan creation failed.")
+            logging.getLogger('cterasdk.core').error("Plan creation failed.")
             raise CTERAException('Plan creation failed', error)
 
     def modify(self, name, retention=None, quotas=None, apply_changes=True):
@@ -110,7 +110,7 @@ class Plans(BaseCommand):
         Plans._assign_quotas(plan, quotas)
         try:
             response = self._core.api.put('/plans/' + name, plan)
-            logging.getLogger().info("Plan modified. %s", {'plan': name})
+            logging.getLogger('cterasdk.core').info("Plan modified. %s", {'plan': name})
             if apply_changes:
                 if self._core.session().in_tenant_context():
                     self._core.users.apply_changes(True)
@@ -118,7 +118,7 @@ class Plans(BaseCommand):
                     self._core.portals.apply_changes(True)
             return response
         except CTERAException as error:
-            logging.getLogger().error("Could not modify subscription plan.")
+            logging.getLogger('cterasdk.core').error("Could not modify subscription plan.")
             raise CTERAException('Could not modify subscription plan', error)
 
     @staticmethod
@@ -178,10 +178,10 @@ class Plans(BaseCommand):
         """
         try:
             response = self._core.api.delete('/plans/' + name)
-            logging.getLogger().info("Plan deleted. %s", {'name': name})
+            logging.getLogger('cterasdk.core').info("Plan deleted. %s", {'name': name})
             return response
         except CTERAException as error:
-            logging.getLogger().error("Plan deletion failed.")
+            logging.getLogger('cterasdk.core').error("Plan deletion failed.")
             raise CTERAException('Plan deletion failed', error)
 
 
@@ -210,7 +210,7 @@ class PlanAutoAssignPolicy(BaseCommand):
 
         not_found = [plan for plan in plans if plan not in portal_plans.keys()]
         if not_found:
-            logging.getLogger().error('Could not find one or more plans. %s', {'plans': not_found})
+            logging.getLogger('cterasdk.core').error('Could not find one or more plans. %s', {'plans': not_found})
             raise CTERAException('Could not find one or more plans', None, plans=not_found)
 
         policy = self.get_policy()
@@ -225,7 +225,7 @@ class PlanAutoAssignPolicy(BaseCommand):
         policy.planAutoAssignmentRules = policy_rules
 
         response = self._core.api.execute('', 'setPlanAutoAssignmentRules', policy)
-        logging.getLogger().info('Set plans auto assignment rules.')
+        logging.getLogger('cterasdk.core').info('Set plans auto assignment rules.')
 
         if apply_changes:
             self._core.users.apply_changes(True)

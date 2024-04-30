@@ -125,7 +125,7 @@ class Path:
             self._from_string(param)
         else:
             message = 'Invalid directory path specified. Please ensure the directory path is correct and try again.'
-            logging.getLogger().error(message)
+            logging.getLogger('cterasdk.core').error(message)
             raise ValueError(message)
 
         if self._relative.root == '/' or self._base.joinpath(self._relative) == self._relative:
@@ -217,14 +217,14 @@ def raise_for_status(response, path):
         if error:
             raise error
     except ItemExists as error:
-        logging.getLogger().info('A file or folder with the same name already exists. %s', {'path': path})
+        logging.getLogger('cterasdk.core').info('A file or folder with the same name already exists. %s', {'path': path})
         raise error
     except InvalidPath as error:
-        logging.getLogger().error('Invalid parent directory path. %s', {'path': path})
+        logging.getLogger('cterasdk.core').error('Invalid parent directory path. %s', {'path': path})
         raise error
     except InvalidName as error:
-        logging.getLogger().error('Directory name contains invalid characters. %s', {'name': path})
+        logging.getLogger('cterasdk.core').error('Directory name contains invalid characters. %s', {'name': path})
         raise error
     except ReservedName as error:
-        logging.getLogger().error('Reserved directory name. %s', {'name': path})
+        logging.getLogger('cterasdk.core').error('Reserved directory name. %s', {'name': path})
         raise error

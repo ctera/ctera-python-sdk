@@ -14,11 +14,11 @@ class StorageClasses(BaseCommand):
 
         :param str name: Name
         """
-        logging.getLogger().info("Adding storage class. %s", {'name': name})
+        logging.getLogger('cterasdk.core').info("Adding storage class. %s", {'name': name})
         param = Object()
         param.name = name
         response = self._core.api.add('/storageClasses', param)
-        logging.getLogger().info("Storage class added. %s", {'name': name})
+        logging.getLogger('cterasdk.core').info("Storage class added. %s", {'name': name})
         return response
 
     def all(self):

@@ -21,27 +21,27 @@ def _search_collaboration_member(core, account, cloud_folder_uid):
     search_param.countLimit = 1
     response = core.api.execute('', 'searchCollaborationMembers', search_param)
     if not response.objects:
-        logging.getLogger().warning('Could not find results that match your search criteria. %s', {'name': account.name})
+        logging.getLogger('cterasdk.core').warning('Could not find results that match your search criteria. %s', {'name': account.name})
     elif len(response.objects) > 1:
-        logging.getLogger().warning('Search returned multiple results. Skipping...')
+        logging.getLogger('cterasdk.core').warning('Search returned multiple results. Skipping...')
     else:
         collaborator = response.objects.pop()
         if account.is_local:
             if account.account_type == PortalAccountType.User and collaborator.type == CollaboratorType.LU:
-                logging.getLogger().debug('Found local user account. %s', {'name': account.name})
+                logging.getLogger('cterasdk.core').debug('Found local user account. %s', {'name': account.name})
                 return collaborator
             if account.account_type == PortalAccountType.Group and collaborator.type == CollaboratorType.LG:
-                logging.getLogger().debug('Found local group account. %s', {'name': account.name})
+                logging.getLogger('cterasdk.core').debug('Found local group account. %s', {'name': account.name})
                 return collaborator
-            logging.getLogger().warning('Expected to find local %s but found domain %s', account.account_type, account.account_type)
+            logging.getLogger('cterasdk.core').warning('Expected to find local %s but found domain %s', account.account_type, account.account_type)
         else:
             if account.account_type == PortalAccountType.User and collaborator.type == CollaboratorType.DU:
-                logging.getLogger().debug('Found domain user account. %s', {'name': account.name, 'domain': account.directory})
+                logging.getLogger('cterasdk.core').debug('Found domain user account. %s', {'name': account.name, 'domain': account.directory})
                 return collaborator
             if account.account_type == PortalAccountType.Group and collaborator.type == CollaboratorType.DG:
-                logging.getLogger().debug('Found domain group account. %s', {'name': account.name, 'domain': account.directory})
+                logging.getLogger('cterasdk.core').debug('Found domain group account. %s', {'name': account.name, 'domain': account.directory})
                 return collaborator
-            logging.getLogger().warning('Expected to find domain %s but found local %s', account.account_type, account.account_type)
+            logging.getLogger('cterasdk.core').warning('Expected to find domain %s but found local %s', account.account_type, account.account_type)
     return None
 
 
@@ -55,10 +55,10 @@ def remove_share_recipients(core, path, accounts):
             if current_account not in accounts:
                 accounts_to_keep.append(share_info.shares[idx])
             else:
-                logging.getLogger().debug('Found recipient to remove. %s', {'account': str(current_account)})
+                logging.getLogger('cterasdk.core').debug('Found recipient to remove. %s', {'account': str(current_account)})
                 accounts_to_remove.append(current_account)
         if not accounts_to_remove:
-            logging.getLogger().info(
+            logging.getLogger('cterasdk.core').info(
                 'Could not find share recipients to remove. %s',
                 {
                     'path': str(path.relative),
@@ -68,13 +68,13 @@ def remove_share_recipients(core, path, accounts):
         else:
             share_param = _create_share_param(path.fullpath(), share_info.teamProject, share_info.allowReshare, share_info.shouldSync)
             _update_share_param(share_param, accounts_to_keep)
-            logging.getLogger().info(
+            logging.getLogger('cterasdk.core').info(
                 'Removing share recipients. %s',
                 {'path': str(path.relative), 'recipients': [str(account) for account in accounts_to_remove]}
             )
             core.api.execute('', 'shareResource', share_param)
     else:
-        logging.getLogger().info('Share has no recipients. %s', {'path': str(path.relative)})
+        logging.getLogger('cterasdk.core').info('Share has no recipients. %s', {'path': str(path.relative)})
     return accounts_to_remove
 
 
@@ -94,13 +94,13 @@ def share(core, path, recipients, as_project, allow_reshare, allow_sync):
         for recipient in valid_recipients:
             _add_share_recipient(share_param, recipient)
 
-        logging.getLogger().info(
+        logging.getLogger('cterasdk.core').info(
             'Sharing item. %s',
             {'path': str(path.relative), 'recipients': [str(recipient) for recipient in valid_recipients]}
         )
         core.api.execute('', 'shareResource', share_param)
         return valid_recipients
-    logging.getLogger().warning('Resource was not shared. Could not find valid recipients. %s', {'path': str(path.relative)})
+    logging.getLogger('cterasdk.core').warning('Resource was not shared. Could not find valid recipients. %s', {'path': str(path.relative)})
     return valid_recipients
 
 
@@ -124,21 +124,21 @@ def add_share_recipients(core, path, recipients):
     if valid_recipients:
         for recipient in valid_recipients:
             if recipient.account not in current_accounts:
-                logging.getLogger().debug('Found new share recipient. %s', {'recipient': str(recipient.account)})
+                logging.getLogger('cterasdk.core').debug('Found new share recipient. %s', {'recipient': str(recipient.account)})
                 _add_share_recipient(share_param, recipient)
                 accounts_added.append(recipient)
             else:
-                logging.getLogger().debug('Share recipient already exists. %s', {'recipient': str(recipient.account)})
+                logging.getLogger('cterasdk.core').debug('Share recipient already exists. %s', {'recipient': str(recipient.account)})
         if accounts_added:
-            logging.getLogger().info(
+            logging.getLogger('cterasdk.core').info(
                 'Adding share recipients. %s',
                 {'path': str(path.relative), 'recipients': [str(recipient.account) for recipient in accounts_added]}
             )
             core.api.execute('', 'shareResource', share_param)
         else:
-            logging.getLogger().warning('Could not find new share recipients. %s', {'path': str(path.relative)})
+            logging.getLogger('cterasdk.core').warning('Could not find new share recipients. %s', {'path': str(path.relative)})
         return accounts_added
-    logging.getLogger().warning('Share recipients were not added. Could not find valid recipients. %s', {'path': str(path.relative)})
+    logging.getLogger('cterasdk.core').warning('Share recipients were not added. Could not find valid recipients. %s', {'path': str(path.relative)})
     return valid_recipients
 
 
@@ -176,7 +176,7 @@ def unshare(core, path):
         as_project = False
         allow_sync = False
 
-    logging.getLogger().info(
+    logging.getLogger('cterasdk.core').info(
         'Unsharing %s. %s',
         ('folder' if resource_info.isFolder else 'file'), {'path': str(path.relative)}
     )
@@ -187,37 +187,37 @@ def unshare(core, path):
 def _valid_recipient(recipient):
     valid_recipient = True
     if not recipient.account:
-        logging.getLogger().warning(
+        logging.getLogger('cterasdk.core').warning(
             'No account information found. Skipping. %s',
             {'account': recipient.account}
         )
         valid_recipient = False
     if not isinstance(recipient.account, (str, UserAccount, GroupAccount)):
-        logging.getLogger().warning(
+        logging.getLogger('cterasdk.core').warning(
             'Invalid recipient type. Skipping. %s',
             {'type': type(recipient.account)}
         )
         valid_recipient = False
     if recipient.access not in [v for k, v in FileAccessMode.__dict__.items() if not k.startswith('_')]:
-        logging.getLogger().warning(
+        logging.getLogger('cterasdk.core').warning(
             'Invalid file access mode. Skipping. %s',
             {'account': str(recipient.account), 'access': recipient.access}
         )
         valid_recipient = False
     if recipient.type == CollaboratorType.EXT and not isinstance(recipient.account, str):
-        logging.getLogger().warning(
+        logging.getLogger('cterasdk.core').warning(
             'Invalid external recipient type. Skipping. %s',
             {'expected': 'str', 'actual': type(recipient.account)}
         )
         valid_recipient = False
     if recipient.type in [CollaboratorType.LU, CollaboratorType.LG] and not recipient.account.is_local:
-        logging.getLogger().warning(
+        logging.getLogger('cterasdk.core').warning(
             'Expected local account. Received a domain account. Skipping. %s',
             {'account': str(recipient.account)}
         )
         valid_recipient = False
     if recipient.type in [CollaboratorType.DU, CollaboratorType.DG] and recipient.account.is_local:
-        logging.getLogger().warning(
+        logging.getLogger('cterasdk.core').warning(
             'Expected domain account. Received a local account. Skipping. %s',
             {'account': str(recipient.account)}
         )
@@ -273,7 +273,7 @@ def _add_share_recipient(share_param, recipient):
 def create_public_link(core, path, access, expire_in):
     access = {'RO': 'ReadOnly', 'RW': 'ReadWrite', 'PO': 'PreviewOnly'}.get(access)
     expire_on = DateTimeUtils.get_expiration_date(expire_in).strftime('%Y-%m-%d')
-    logging.getLogger().info('Creating public link. %s', {'path': str(path.relative), 'access': access, 'expire_on': expire_on})
+    logging.getLogger('cterasdk.core').info('Creating public link. %s', {'path': str(path.relative), 'access': access, 'expire_on': expire_on})
     param = common.CreateShareParam.instance(path=path.fullpath(), access=access, expire_on=expire_on)
     response = core.api.execute('', 'createShare', param)
     return response.publicLink

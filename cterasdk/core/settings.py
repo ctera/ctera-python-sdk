@@ -29,7 +29,7 @@ class GlobalSettings(BaseCommand):
 
         :param str timezone: Timezone
         """
-        logging.getLogger().info('Updating timezone. %s', {'timezone': timezone})
+        logging.getLogger('cterasdk.core').info('Updating timezone. %s', {'timezone': timezone})
         response = self._core.api.put('/settings/timezone', timezone)
-        logging.getLogger().info('Updated timezone. %s', {'timezone': timezone})
+        logging.getLogger('cterasdk.core').info('Updated timezone. %s', {'timezone': timezone})
         return response

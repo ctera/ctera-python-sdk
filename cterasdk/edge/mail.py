@@ -33,17 +33,17 @@ class Mail(BaseCommand):
         if settings.useTLS != use_tls:
             settings.useTLS = use_tls
 
-        logging.getLogger().info('Enabling mail server.')
+        logging.getLogger('cterasdk.edge').info('Enabling mail server.')
 
         self._edge.api.put('/config/logging/alert', settings)
 
-        logging.getLogger().info(
+        logging.getLogger('cterasdk.edge').info(
             'Updated mail server settings. %s',
             {'SMTPServer': smtp_server, 'port': port, 'username': username, 'useTLS': use_tls}
         )
 
     def disable(self):
         """ Disable e-mail delivery using a custom SMTP server """
-        logging.getLogger().info('Disabling mail server.')
+        logging.getLogger('cterasdk.edge').info('Disabling mail server.')
         self._edge.api.put('/config/logging/alert/useCustomServer', False)
-        logging.getLogger().info('Mail server disabled.')
+        logging.getLogger('cterasdk.edge').info('Mail server disabled.')

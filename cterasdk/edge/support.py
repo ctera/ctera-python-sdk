@@ -60,7 +60,7 @@ class Support(BaseCommand):
     def get_support_report(self):
         """ Download support report """
         filename = 'Support-' + self._edge.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.zip'
-        logging.getLogger().info('Downloading support report. %s', {'host': self._edge.host()})
+        logging.getLogger('cterasdk.edge').info('Downloading support report. %s', {'host': self._edge.host()})
         handle = self._edge.api.handle('/supportreport')
         filepath = FileSystem.instance().save(cterasdk.settings.downloads.location, filename, handle)
-        logging.getLogger().info('Support report downloaded. %s', {'filepath': filepath})
+        logging.getLogger('cterasdk.edge').info('Support report downloaded. %s', {'filepath': filepath})

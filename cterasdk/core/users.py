@@ -100,9 +100,9 @@ class Users(BaseCommand):
         if password_change:
             param.requirePasswordChangeOn = DateTimeUtils.get_expiration_date(password_change).strftime('%Y-%m-%d')
 
-        logging.getLogger().info('Creating user. %s', {'user': name})
+        logging.getLogger('cterasdk.core').info('Creating user. %s', {'user': name})
         response = self._core.api.add('/users', param)
-        logging.getLogger().info('User created. %s', {'user': name, 'email': email, 'role': role})
+        logging.getLogger('cterasdk.core').info('User created. %s', {'user': name, 'email': email, 'role': role})
 
         return response
 
@@ -142,10 +142,10 @@ class Users(BaseCommand):
 
         try:
             response = self._core.api.put('/users/' + current_username, user)
-            logging.getLogger().info("User modified. %s", {'username': user.name})
+            logging.getLogger('cterasdk.core').info("User modified. %s", {'username': user.name})
             return response
         except CTERAException as error:
-            logging.getLogger().error("Failed to modify user.")
+            logging.getLogger('cterasdk.core').error("Failed to modify user.")
             raise CTERAException('Failed to modify user', error)
 
     def apply_changes(self, wait=False):
@@ -157,7 +157,7 @@ class Users(BaseCommand):
         param = Object()
         param.objectId = None
         param.type = 'users'
-        logging.getLogger().info('Applying provisioning changes.')
+        logging.getLogger('cterasdk.core').info('Applying provisioning changes.')
         task = self._core.api.execute('', 'updateAccounts', param)
         if wait:
             task = self._core.tasks.wait(task)
@@ -169,10 +169,10 @@ class Users(BaseCommand):
 
         :param cterasdk.core.types.UserAccount user: the user account
         """
-        logging.getLogger().info('Deleting user. %s', {'user': str(user)})
+        logging.getLogger('cterasdk.core').info('Deleting user. %s', {'user': str(user)})
         baseurl = f'/users/{user.name}' if user.is_local else f'/domains/{user.directory}/adUsers/{user.name}'
         response = self._core.api.execute(baseurl, 'delete', True)
-        logging.getLogger().info('User deleted. %s', {'user': str(user)})
+        logging.getLogger('cterasdk.core').info('User deleted. %s', {'user': str(user)})
 
         return response
 

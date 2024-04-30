@@ -33,25 +33,25 @@ class Antivirus(BaseCommand):
         """
         Scan all files using the latest antivirus update. This may take a while
         """
-        logging.getLogger().info("Starting antivirus rescan.")
+        logging.getLogger('cterasdk.core').info("Starting antivirus rescan.")
         self._core.api.execute('/servers', 'resetAllAVBG')
-        logging.getLogger().info("Started antivirus rescan.")
+        logging.getLogger('cterasdk.core').info("Started antivirus rescan.")
 
     def suspend(self):
         """
         Suspend antivirus scanning
         """
-        logging.getLogger().info("Suspending antivirus scanning.")
+        logging.getLogger('cterasdk.core').info("Suspending antivirus scanning.")
         self._core.api.put('/settings/cloudFSSettings/antivirusSettings/isEnabled', False)
-        logging.getLogger().info("Suspended antivirus scanning.")
+        logging.getLogger('cterasdk.core').info("Suspended antivirus scanning.")
 
     def unsuspend(self):
         """
         Unsuspend antivirus scanning
         """
-        logging.getLogger().info("Unsuspending antivirus scanning.")
+        logging.getLogger('cterasdk.core').info("Unsuspending antivirus scanning.")
         self._core.api.put('/settings/cloudFSSettings/antivirusSettings/isEnabled', True)
-        logging.getLogger().info("Unsuspended antivirus scanning.")
+        logging.getLogger('cterasdk.core').info("Unsuspended antivirus scanning.")
 
     def status(self):
         """
@@ -87,9 +87,9 @@ class AntivirusServers(BaseCommand):
         param.type = vendor
         param.serverUrl = url
         param.connectionTimeoutSeconds = connection_timeout
-        logging.getLogger().info("Adding antivirus server. %s", {'name': name, 'type': vendor, 'url': url})
+        logging.getLogger('cterasdk.core').info("Adding antivirus server. %s", {'name': name, 'type': vendor, 'url': url})
         response = self._core.api.add('/antiviruses', param)
-        logging.getLogger().info("Added antivirus server. %s", {'name': name, 'type': vendor, 'url': url})
+        logging.getLogger('cterasdk.core').info("Added antivirus server. %s", {'name': name, 'type': vendor, 'url': url})
         return response
 
     def delete(self, name):
@@ -102,14 +102,14 @@ class AntivirusServers(BaseCommand):
         """
         Suspend an antivirus server
         """
-        logging.getLogger().info("Suspending antivirus server. %s", {'name': name})
+        logging.getLogger('cterasdk.core').info("Suspending antivirus server. %s", {'name': name})
         self._core.api.put(f'/antiviruses/{name}/enabled', False)
-        logging.getLogger().info("Suspended antivirus server. %s", {'name': name})
+        logging.getLogger('cterasdk.core').info("Suspended antivirus server. %s", {'name': name})
 
     def unsuspend(self, name):
         """
         Unsuspend antivirus scanning
         """
-        logging.getLogger().info("Unsuspending antivirus server. %s", {'name': name})
+        logging.getLogger('cterasdk.core').info("Unsuspending antivirus server. %s", {'name': name})
         self._core.api.put(f'/antiviruses/{name}/enabled', True)
-        logging.getLogger().info("Unsuspended antivirus server. %s", {'name': name})
+        logging.getLogger('cterasdk.core').info("Unsuspended antivirus server. %s", {'name': name})

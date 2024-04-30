@@ -39,15 +39,15 @@ class SNMP(BaseCommand):
             param.snmpV3.authenticationPassword = auth_password
             param.snmpV3.privacyPassword = privacy_password
 
-        logging.getLogger().info("Enabling SNMP.")
+        logging.getLogger('cterasdk.edge').info("Enabling SNMP.")
         self._edge.api.put('/config/snmp', param)
-        logging.getLogger().info("Enabled SNMP.")
+        logging.getLogger('cterasdk.edge').info("Enabled SNMP.")
 
     def disable(self):
         """ Disable SNMP """
-        logging.getLogger().info("Disabling SNMP.")
+        logging.getLogger('cterasdk.edge').info("Disabling SNMP.")
         self._edge.api.put('/config/snmp/mode', enum.Mode.Disabled)
-        logging.getLogger().info("Disabled SNMP.")
+        logging.getLogger('cterasdk.edge').info("Disabled SNMP.")
 
     def get_configuration(self):
         return self._edge.api.get('/config/snmp')
@@ -76,6 +76,6 @@ class SNMP(BaseCommand):
             current_config.snmpV3.authenticationPassword = auth_password
             current_config.snmpV3.privacyPassword = privacy_password
 
-        logging.getLogger().info("Updating SNMP configuration.")
+        logging.getLogger('cterasdk.edge').info("Updating SNMP configuration.")
         self._edge.api.put('/config/snmp', current_config)
-        logging.getLogger().info("SNMP configured.")
+        logging.getLogger('cterasdk.edge').info("SNMP configured.")

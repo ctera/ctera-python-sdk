@@ -54,12 +54,12 @@ class Setup(BaseCommand):
 
             params.settings = Setup.default_settings()
             params.settings.dnsSuffix = domain
-            logging.getLogger().info('Initializing Portal. %s', {'domain': domain, 'user': name})
+            logging.getLogger('cterasdk.core').info('Initializing Portal. %s', {'domain': domain, 'user': name})
             self._core.ctera.execute('/public', 'init', params)
             SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Portal)
-            logging.getLogger().info('Portal initialized.')
+            logging.getLogger('cterasdk.core').info('Portal initialized.')
         elif self.stage == SetupWizardStage.Finish:
-            logging.getLogger().warning('Portal already initialized. %s', {'host': self._core.host()})
+            logging.getLogger('cterasdk.core').warning('Portal already initialized. %s', {'host': self._core.host()})
         self._core.startup.wait()
 
     def _init_slave(self, ipaddr, secret):
@@ -72,7 +72,7 @@ class Setup(BaseCommand):
         elif response == SlaveAuthenticaionMethod.PrivateKey:
             params.slaveSettings.masterKey = secret
         else:
-            logging.getLogger().error('Unknown authentication method. %s', {'method': response})
+            logging.getLogger('cterasdk.core').error('Unknown authentication method. %s', {'method': response})
         self._init_server(params, True)
 
     def _init_server(self, params, wait=False):
@@ -84,14 +84,14 @@ class Setup(BaseCommand):
             if params.serverMode == ServerMode.Slave:
                 form.add('masterIpAddr', params.slaveSettings.masterIpAddr)
 
-            logging.getLogger().info('Initializing server. %s', {'host': self._core.host(), 'mode': params.serverMode})
+            logging.getLogger('cterasdk.core').info('Initializing server. %s', {'host': self._core.host(), 'mode': params.serverMode})
             self._core.ctera.multipart('/setup', form)
             if wait:
                 status = SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Server)
                 self.stage = status.wizard
-                logging.getLogger().info('Server initialized. %s', {'host': self._core.host(), 'mode': params.serverMode})
+                logging.getLogger('cterasdk.core').info('Server initialized. %s', {'host': self._core.host(), 'mode': params.serverMode})
         else:
-            logging.getLogger().warning('Server already initialized. %s', {'host': self._core.host()})
+            logging.getLogger('cterasdk.core').warning('Server already initialized. %s', {'host': self._core.host()})
 
     def init_application_server(self, ipaddr, secret):
         """
@@ -102,7 +102,7 @@ class Setup(BaseCommand):
         """
         self._init_slave(ipaddr, secret)
         if self.stage == SetupWizardStage.Replication:
-            logging.getLogger().info('Initializing an Application Server. %s', {'host': ipaddr})
+            logging.getLogger('cterasdk.core').info('Initializing an Application Server. %s', {'host': ipaddr})
             params = Setup._init_replication_param()
             self._init_role(params)
         self._core.startup.wait()
@@ -117,8 +117,8 @@ class Setup(BaseCommand):
         """
         self._init_slave(ipaddr, secret)
         if self.stage == SetupWizardStage.Replication:
-            logging.getLogger().info('Initializing a Replication Database Server. %s', {'host': ipaddr, 'replicate_from': replicate_from})
-            logging.getLogger().debug('Retrieving database replication candidates.')
+            logging.getLogger('cterasdk.core').info('Initializing a Replication Database Server. %s', {'host': ipaddr, 'replicate_from': replicate_from})
+            logging.getLogger('cterasdk.core').debug('Retrieving database replication candidates.')
             replication_candidates = {re.search('([^/]+$)', k).group(0): k for k in self.get_replication_candidates()}
             if replication_candidates:
                 if replicate_from is None and len(replication_candidates) == 1:
@@ -126,18 +126,18 @@ class Setup(BaseCommand):
                 else:
                     server = replication_candidates.get(replicate_from)
                 if server:
-                    logging.getLogger().debug('Found server in replication candidates. %s', {'server': replicate_from})
+                    logging.getLogger('cterasdk.core').debug('Found server in replication candidates. %s', {'server': replicate_from})
                     params = Setup._init_replication_param(server)
                     self._init_role(params)
                 else:
-                    logging.getLogger().error('Could not find database replication target. %s', {
+                    logging.getLogger('cterasdk.core').error('Could not find database replication target. %s', {
                         'target': replicate_from,
                         'options': replication_candidates
                     })
                     raise CTERAException('Could not find database replication target.',
                                          None, target=replicate_from, options=replication_candidates)
             else:
-                logging.getLogger().error('Could not find database replication candidates.')
+                logging.getLogger('cterasdk.core').error('Could not find database replication candidates.')
         self._core.startup.wait()
 
     def _init_role(self, params):
@@ -205,9 +205,9 @@ class SetupWizardStatusMonitor:
         while current_stage == stage:
             try:
                 self._increment()
-                logging.getLogger().debug('Obtaining wizard status. %s', {'attempt': self._attempt})
+                logging.getLogger('cterasdk.core').debug('Obtaining wizard status. %s', {'attempt': self._attempt})
                 status = self._core.setup.get_setup_status()
-                logging.getLogger().debug('Current wizard status. %s', {
+                logging.getLogger('cterasdk.core').debug('Current wizard status. %s', {
                     'stage': status.wizard,
                     'status': status.currentWizardProgress,
                     'description': status.description
@@ -216,18 +216,18 @@ class SetupWizardStatusMonitor:
                     raise CTERAException('Initialization failed.', status)
                 current_stage = status.wizard
             except (ConnectionError, TimeoutError) as e:
-                logging.getLogger().debug('Exception. %s', e.__dict__)
-        logging.getLogger().debug('Wizard update. %s', {'previous_stage': stage, 'current_stage': current_stage})
+                logging.getLogger('cterasdk.core').debug('Exception. %s', e.__dict__)
+        logging.getLogger('cterasdk.core').debug('Wizard update. %s', {'previous_stage': stage, 'current_stage': current_stage})
         return status
 
     def _increment(self):
         self._attempt = self._attempt + 1
         if self._attempt >= self._retries:
             SetupWizardStatusMonitor._unreachable()
-        logging.getLogger().debug('Sleep. %s', {'seconds': self._seconds})
+        logging.getLogger('cterasdk.core').debug('Sleep. %s', {'seconds': self._seconds})
         time.sleep(self._seconds)
 
     @staticmethod
     def _unreachable():
-        logging.getLogger().error('Timed out. Setup did not complete in a timely manner.')
+        logging.getLogger('cterasdk.core').error('Timed out. Setup did not complete in a timely manner.')
         raise CTERAException('Timed out. Setup did not complete in a timely manner')

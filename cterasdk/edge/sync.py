@@ -36,7 +36,7 @@ class Sync(BaseCommand):
 
         :param bool wait: Wait for synchronization to stop
         """
-        logging.getLogger().info("Suspending cloud sync.")
+        logging.getLogger('cterasdk.edge').info("Suspending cloud sync.")
         self._edge.api.put('/config/cloudsync/mode', Mode.Disabled)
         if wait:
             self._track_status(
@@ -64,11 +64,11 @@ class Sync(BaseCommand):
                     SyncStatus.NoFolder
                 ]
             )
-        logging.getLogger().info("Cloud sync suspended.")
+        logging.getLogger('cterasdk.edge').info("Cloud sync suspended.")
 
     def unsuspend(self):
         """ Unsuspend Cloud Sync """
-        logging.getLogger().info("Unsuspending cloud sync.")
+        logging.getLogger('cterasdk.edge').info("Unsuspending cloud sync.")
         self._edge.api.put('/config/cloudsync/mode', Mode.Enabled)
         try:
             self._track_status(
@@ -96,23 +96,23 @@ class Sync(BaseCommand):
                     SyncStatus.NoFolder
                 ]
             )
-            logging.getLogger().info('Unsuspended cloud sync.')
+            logging.getLogger('cterasdk.edge').info('Unsuspended cloud sync.')
         except ErrorStatus as error:
             if error.status == SyncStatus.ShouldSupportWinNtAcl:
-                logging.getLogger().warning('Windows ACL enabled folder cannot be synchronized to this device.')
+                logging.getLogger('cterasdk.edge').warning('Windows ACL enabled folder cannot be synchronized to this device.')
                 self._edge.api.put('/config/fileservices/share/cloud/access', Acl.WindowsNT)
-                logging.getLogger().info('Updated network share access. %s', {'share': 'cloud', 'access': Acl.WindowsNT})
+                logging.getLogger('cterasdk.edge').info('Updated network share access. %s', {'share': 'cloud', 'access': Acl.WindowsNT})
             else:
-                logging.getLogger().error("An error occurred while unsuspendeding sync. %s", {'status': error.status})
+                logging.getLogger('cterasdk.edge').error("An error occurred while unsuspendeding sync. %s", {'status': error.status})
 
     def _track_status(self, success, progress, transient, failure):
         track(self._edge, '/proc/cloudsync/serviceStatus/id', success, progress, transient, failure)
 
     def refresh(self):
         """ Refresh Cloud Folders """
-        logging.getLogger().info("Refreshing cloud folders.")
+        logging.getLogger('cterasdk.edge').info("Refreshing cloud folders.")
         self._edge.api.execute("/config/cloudsync/cloudExtender", "refreshPaths", None)
-        logging.getLogger().info("Completed refreshing cloud folders.")
+        logging.getLogger('cterasdk.edge').info("Completed refreshing cloud folders.")
 
     def exclude_files(self, extensions=None, filenames=None, paths=None, custom_exclusion_rules=None):
         """
@@ -141,24 +141,24 @@ class Sync(BaseCommand):
             rules.extend(custom_exclusion_rules)
 
         if rules:
-            logging.getLogger().info('Setting sync exclusion rules')
+            logging.getLogger('cterasdk.edge').info('Setting sync exclusion rules')
             self._edge.api.put('/config/cloudsync/excludeFiles', rules)
-            logging.getLogger().info('Sync exclusion rules set')
+            logging.getLogger('cterasdk.edge').info('Sync exclusion rules set')
 
     def remove_file_exclusion_rules(self):
         """
         Remove previously configured sync exclusion rules
         """
-        logging.getLogger().info('Removing sync exclusion rules')
+        logging.getLogger('cterasdk.edge').info('Removing sync exclusion rules')
         self._edge.api.put('/config/cloudsync/excludeFiles', None)
-        logging.getLogger().info('Sync exclusion rules removed')
+        logging.getLogger('cterasdk.edge').info('Sync exclusion rules removed')
 
     def get_linux_avoid_using_fanotify(self):
-        logging.getLogger().info('Getting LinuxAvoidUsingFAnotify')
+        logging.getLogger('cterasdk.edge').info('Getting LinuxAvoidUsingFAnotify')
         return self._edge.api.get('/config/cloudsync/LinuxAvoidUsingFAnotify')
 
     def set_linux_avoid_using_fanotify(self, avoid):
-        logging.getLogger().info('Setting LinuxAvoidUsingFAnotify to %s', avoid)
+        logging.getLogger('cterasdk.edge').info('Setting LinuxAvoidUsingFAnotify to %s', avoid)
         self._edge.api.put('/config/cloudsync/LinuxAvoidUsingFAnotify', avoid)
 
     def evict(self, path, wait=False):
