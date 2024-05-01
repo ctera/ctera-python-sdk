@@ -9,14 +9,14 @@ This library features numerous console loggers, with an option to redirect the o
 
     +--------------------------------+---------+--------------------------------------+
     |Logger name                     |Level    |Description                           |
-    +================================+=========+--------------------------------------+
+    +================================+=========+======================================+
     |cterasdk                        |NOTSET   |Package Logger                        |
     +--------------------------------+---------+--------------------------------------+
     |cterasdk.edge                   |INFO     |Logger for CTERA Edge and Drive App   |
     +--------------------------------+---------+--------------------------------------+
     |cterasdk.core                   |INFO     |Logger for CTERA Portal               |
     +--------------------------------+---------+--------------------------------------+
-    |cterasdk.common                 |INFO     |Common Infrastructure Logger          | 
+    |cterasdk.common                 |INFO     |Common Infrastructure Logger          |
     +--------------------------------+---------+--------------------------------------+
     |cterasdk.metadata.connector     |INFO     |Notification Service Logger           |
     +--------------------------------+---------+--------------------------------------+
