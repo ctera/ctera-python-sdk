@@ -117,7 +117,8 @@ class Setup(BaseCommand):
         """
         self._init_slave(ipaddr, secret)
         if self.stage == SetupWizardStage.Replication:
-            logging.getLogger('cterasdk.core').info('Initializing a Replication Database Server. %s', {'host': ipaddr, 'replicate_from': replicate_from})
+            logging.getLogger('cterasdk.core').info('Initializing a Replication Database Server. %s',
+                                                    {'host': ipaddr, 'replicate_from': replicate_from})
             logging.getLogger('cterasdk.core').debug('Retrieving database replication candidates.')
             replication_candidates = {re.search('([^/]+$)', k).group(0): k for k in self.get_replication_candidates()}
             if replication_candidates:

@@ -58,7 +58,8 @@ class DirectoryService(BaseCommand):
         connection_results = self._edge.network.diagnose([TCPService(host, port) for host in domain_controllers])
         for connection_result in connection_results:
             if not connection_result.is_open:
-                logging.getLogger('cterasdk.edge').error("Connection failed. No traffic allowed over port %(port)s", dict(port=connection_result.port))
+                logging.getLogger('cterasdk.edge').error("Connection failed. No traffic allowed over port %(port)s",
+                                                         dict(port=connection_result.port))
                 raise ConnectionError(f'Unable to establish LDAP connection {connection_result.host}:{connection_result.port}')
 
     def get_static_domain_controller(self):

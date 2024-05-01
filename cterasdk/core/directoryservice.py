@@ -247,7 +247,8 @@ class DirectoryService(BaseCommand):
 
         objects = self._core.api.execute('', 'searchAD', param)
         if not objects:
-            logging.getLogger('cterasdk.core').info('Could not find results that match your search criteria. %s', {'domain': domain, 'name': name})
+            logging.getLogger('cterasdk.core').info('Could not find results that match your search criteria. %s',
+                                                    {'domain': domain, 'name': name})
             raise CTERAException(
                 'Could not find results that match your search criteria',
                 None,

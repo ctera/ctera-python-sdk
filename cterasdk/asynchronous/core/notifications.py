@@ -72,7 +72,8 @@ class Notifications(BaseCommand):
         try:
             return Notifications._ancestry(descendant, await self._core.v2.api.post('/metadata/ancestors', param))
         except ClientResponseException:
-            logging.getLogger('cterasdk.metadata.connector').error('Could not retrieve ancestors. %s', {'folder_id': param.folder_id, 'guid': param.guid})
+            logging.getLogger('cterasdk.metadata.connector').error('Could not retrieve ancestors. %s',
+                                                                   {'folder_id': param.folder_id, 'guid': param.guid})
             raise
 
 
@@ -191,7 +192,8 @@ async def persist_cursor(save_cursor, cursor):
         await save_cursor(cursor)
         logging.getLogger('cterasdk.metadata.connector').debug("Called Persist Cursor Function.")
     except Exception:  # pylint: disable=broad-exception-caught
-        logging.getLogger('cterasdk.metadata.connector').error("An error occurred while trying to persist cursor. Function: '%s'", save_cursor.__name__)
+        logging.getLogger('cterasdk.metadata.connector').error("An error occurred while trying to persist cursor. Function: '%s'",
+                                                               save_cursor.__name__)
 
 
 async def on_connection_error(error):

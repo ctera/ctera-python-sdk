@@ -83,7 +83,8 @@ class Network(BaseCommand):
 
         self._edge.api.put('/config/network/ports/0/ip', ip)
 
-        logging.getLogger('cterasdk.edge').info('Nameserver settings updated. %s', {'DNS1': primary_dns_server, 'DNS2': secondary_dns_server})
+        logging.getLogger('cterasdk.edge').info('Nameserver settings updated. %s',
+                                                {'DNS1': primary_dns_server, 'DNS2': secondary_dns_server})
 
     def enable_dhcp(self):
         """

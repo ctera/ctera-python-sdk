@@ -268,7 +268,8 @@ class CloudDrives(BaseCommand):
         :param bool,optional permanently: Delete permanently
         """
         cloudfolder = self.find(name, owner, include=['uid', 'isDeleted'])
-        logging.getLogger('cterasdk.core').info('Deleting cloud drive folder. %s', {'name': name, 'owner': str(owner), 'permanently': permanently})
+        logging.getLogger('cterasdk.core').info('Deleting cloud drive folder. %s',
+                                                {'name': name, 'owner': str(owner), 'permanently': permanently})
         if permanently:
             return self._core.api.execute(f'/objs/{cloudfolder.uid}', 'deleteFolderPermanently')
         if not cloudfolder.isDeleted:

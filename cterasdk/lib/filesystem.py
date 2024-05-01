@@ -37,7 +37,8 @@ class FileSystem:  # pylint: disable=unused-private-member
             destination = os.path.join(dirpath, dst)
             os.rename(source, destination)
             return (dirpath, dst)
-        logging.getLogger('cterasdk.filesystem').error('Could not rename temporary file. File not found. %s', {'path': dirpath, 'temp': src})
+        logging.getLogger('cterasdk.filesystem').error('Could not rename temporary file. File not found. %s',
+                                                       {'path': dirpath, 'temp': src})
         raise RenameException(dirpath, src, dst)
 
     def validate_directory(self, dirpath):
@@ -62,7 +63,8 @@ class FileSystem:  # pylint: disable=unused-private-member
         while True:
             try:
                 dirpath, filename = self.rename(dirpath, tempfile, filename)
-                logging.getLogger('cterasdk.filesystem').debug('Renamed temporary file. %s', {'path': dirpath, 'temp': tempfile, 'name': filename})
+                logging.getLogger('cterasdk.filesystem').debug('Renamed temporary file. %s',
+                                                               {'path': dirpath, 'temp': tempfile, 'name': filename})
                 break
             except (FileExistsError, IsADirectoryError):
                 logging.getLogger('cterasdk.filesystem').debug('File exists. %s', {'path': dirpath, 'name': filename})

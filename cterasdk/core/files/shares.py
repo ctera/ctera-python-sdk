@@ -33,15 +33,19 @@ def _search_collaboration_member(core, account, cloud_folder_uid):
             if account.account_type == PortalAccountType.Group and collaborator.type == CollaboratorType.LG:
                 logging.getLogger('cterasdk.core').debug('Found local group account. %s', {'name': account.name})
                 return collaborator
-            logging.getLogger('cterasdk.core').warning('Expected to find local %s but found domain %s', account.account_type, account.account_type)
+            logging.getLogger('cterasdk.core').warning('Expected to find local %s but found domain %s',
+                                                       account.account_type, account.account_type)
         else:
             if account.account_type == PortalAccountType.User and collaborator.type == CollaboratorType.DU:
-                logging.getLogger('cterasdk.core').debug('Found domain user account. %s', {'name': account.name, 'domain': account.directory})
+                logging.getLogger('cterasdk.core').debug('Found domain user account. %s',
+                                                         {'name': account.name, 'domain': account.directory})
                 return collaborator
             if account.account_type == PortalAccountType.Group and collaborator.type == CollaboratorType.DG:
-                logging.getLogger('cterasdk.core').debug('Found domain group account. %s', {'name': account.name, 'domain': account.directory})
+                logging.getLogger('cterasdk.core').debug('Found domain group account. %s',
+                                                         {'name': account.name, 'domain': account.directory})
                 return collaborator
-            logging.getLogger('cterasdk.core').warning('Expected to find domain %s but found local %s', account.account_type, account.account_type)
+            logging.getLogger('cterasdk.core').warning('Expected to find domain %s but found local %s',
+                                                       account.account_type, account.account_type)
     return None
 
 
@@ -138,7 +142,8 @@ def add_share_recipients(core, path, recipients):
         else:
             logging.getLogger('cterasdk.core').warning('Could not find new share recipients. %s', {'path': str(path.relative)})
         return accounts_added
-    logging.getLogger('cterasdk.core').warning('Share recipients were not added. Could not find valid recipients. %s', {'path': str(path.relative)})
+    logging.getLogger('cterasdk.core').warning('Share recipients were not added. Could not find valid recipients. %s',
+                                               {'path': str(path.relative)})
     return valid_recipients
 
 
@@ -273,7 +278,8 @@ def _add_share_recipient(share_param, recipient):
 def create_public_link(core, path, access, expire_in):
     access = {'RO': 'ReadOnly', 'RW': 'ReadWrite', 'PO': 'PreviewOnly'}.get(access)
     expire_on = DateTimeUtils.get_expiration_date(expire_in).strftime('%Y-%m-%d')
-    logging.getLogger('cterasdk.core').info('Creating public link. %s', {'path': str(path.relative), 'access': access, 'expire_on': expire_on})
+    logging.getLogger('cterasdk.core').info('Creating public link. %s',
+                                            {'path': str(path.relative), 'access': access, 'expire_on': expire_on})
     param = common.CreateShareParam.instance(path=path.fullpath(), access=access, expire_on=expire_on)
     response = core.api.execute('', 'createShare', param)
     return response.publicLink
