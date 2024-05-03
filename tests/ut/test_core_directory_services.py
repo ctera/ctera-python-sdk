@@ -106,7 +106,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         ret = directoryservice.DirectoryService(self._global_admin).fetch(self._accounts)
         mock_search_users.assert_called_once_with(self._domain, self._account_user_name)
         mock_search_groups.assert_called_once_with(self._domain, self._account_group_name)
-        self._global_admin.api.execute.assert_called_once_with('', 'syncAD', [])
+        self._global_admin.api.execute.assert_called_once_with('', 'syncAD', mock.ANY)
         self.assertEqual(ret, execute_response)
 
     @staticmethod
