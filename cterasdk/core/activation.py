@@ -21,8 +21,8 @@ class Activation(BaseCommand):
         if tenant:
             params['portal'] = tenant
 
-        logging.getLogger().info('Generating device activation code. %s', {'user': username, 'portal': tenant})
+        logging.getLogger('cterasdk.core').info('Generating device activation code. %s', {'user': username, 'portal': tenant})
         response = self._core.api.get('/ssoActivation', params=params)
-        logging.getLogger().info('Generated device activation code. %s', {'user': username, 'portal': tenant})
+        logging.getLogger('cterasdk.core').info('Generated device activation code. %s', {'user': username, 'portal': tenant})
 
         return response.code

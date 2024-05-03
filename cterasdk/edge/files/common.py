@@ -62,10 +62,10 @@ def raise_for_status(response, path):
         if error:
             raise error
     except ItemExists as error:
-        logging.getLogger().warning('A file or folder with the same name already exists. %s', {'path': path})
+        logging.getLogger('cterasdk.edge').warning('A file or folder with the same name already exists. %s', {'path': path})
         raise error
     except Forbidden as error:
-        logging.getLogger().error('Creating a folder in this location is forbidden. %s', {'name': path})
+        logging.getLogger('cterasdk.edge').error('Creating a folder in this location is forbidden. %s', {'name': path})
         raise error
 
 

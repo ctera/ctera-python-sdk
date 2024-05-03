@@ -14,7 +14,7 @@ class Power(BaseCommand):
 
         :param bool,optional wait: Wait for reboot to complete, defaults to False
         """
-        logging.getLogger().info("Rebooting device. %s", {'host': self._edge.host()})
+        logging.getLogger('cterasdk.edge').info("Rebooting device. %s", {'host': self._edge.host()})
         self._edge.api.execute("/status/device", "reboot", None)
         if wait:
             Boot(self._edge).wait()
@@ -30,7 +30,7 @@ class Power(BaseCommand):
         :param bool,optional wait: Wait for reset to complete, defaults to False
         """
         self._edge.api.execute("/status/device", "reset2default", None)
-        logging.getLogger().info("Resetting device to default settings. %s", {'host': self._edge.host()})
+        logging.getLogger('cterasdk.edge').info("Resetting device to default settings. %s", {'host': self._edge.host()})
         if wait:
             Boot(self._edge).wait()
 
@@ -47,22 +47,22 @@ class Boot:
         while True:
             try:
                 self._increment()
-                logging.getLogger().debug('Checking if device is up and running. %s', {'attempt': self._attempt})
+                logging.getLogger('cterasdk.edge').debug('Checking if device is up and running. %s', {'attempt': self._attempt})
                 self._edge.test()
-                logging.getLogger().info("Device is back up and running.")
+                logging.getLogger('cterasdk.edge').info("Device is back up and running.")
                 break
             except (CTERAException, ConnectionError, TimeoutError) as e:
-                logging.getLogger().debug('Exception. %s', {'exception': e.__class__.__name__, 'message': e.message})
+                logging.getLogger('cterasdk.edge').debug('Exception. %s', {'exception': e.__class__.__name__, 'message': e.message})
 
     def _increment(self):
         self._attempt = self._attempt + 1
         if self._attempt >= self._retries:
             self._unreachable()
-        logging.getLogger().debug('Sleep. %s', {'seconds': self._seconds})
+        logging.getLogger('cterasdk.edge').debug('Sleep. %s', {'seconds': self._seconds})
         time.sleep(self._seconds)
 
     def _unreachable(self):
         host = self._edge.host()
         port = self._edge.port()
-        logging.getLogger().error('Timed out. Could not reach host. %s', {'host': host, 'port': port})
+        logging.getLogger('cterasdk.edge').error('Timed out. Could not reach host. %s', {'host': host, 'port': port})
         raise ConnectionError(f'Timed out. Could not reach host {host}:{port}.')

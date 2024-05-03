@@ -19,15 +19,15 @@ class RansomProtect(BaseCommand):
 
     def enable(self):
         """Enable Ransom Protect service"""
-        logging.getLogger().info('Enabling Ransom Protect.')
+        logging.getLogger('cterasdk.edge').info('Enabling Ransom Protect.')
         self._edge.api.put('/config/ransomProtect/enabled', True)
-        logging.getLogger().info('Ransom Protect enabled.')
+        logging.getLogger('cterasdk.edge').info('Ransom Protect enabled.')
 
     def disable(self):
         """Enable Ransom Protect service"""
-        logging.getLogger().info('Disabling Ransom Protect.')
+        logging.getLogger('cterasdk.edge').info('Disabling Ransom Protect.')
         self._edge.api.put('/config/ransomProtect/enabled', False)
-        logging.getLogger().info('Ransom Protect disabled.')
+        logging.getLogger('cterasdk.edge').info('Ransom Protect disabled.')
 
     def is_disabled(self):
         """Check if Ransom Protect is disabled"""

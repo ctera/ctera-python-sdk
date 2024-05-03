@@ -19,8 +19,8 @@ class Timezone(BaseCommand):
 
         :param str timezone: New timezone to set
         """
-        logging.getLogger().info("Updating timezone. %s", {'timezone': timezone})
+        logging.getLogger('cterasdk.edge').info("Updating timezone. %s", {'timezone': timezone})
 
         self._edge.api.put('/config/time/TimeZone', timezone)
 
-        logging.getLogger().info("Timezone updated. %s", {'timezone': timezone})
+        logging.getLogger('cterasdk.edge').info("Timezone updated. %s", {'timezone': timezone})

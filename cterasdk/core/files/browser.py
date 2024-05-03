@@ -211,7 +211,8 @@ class Backups(FileBrowser):
             destination = destination if destination is not None else f'{cterasdk.settings.downloads.location}/{device}.xml'
             return self.download(f'backups/{device}/Device Configuration/db.xml', destination)
         except CTERAException as error:
-            logging.getLogger().error('Failed downloading configuration file. %s', {'device': device, 'error': error.response.reason})
+            logging.getLogger('cterasdk.core').error('Failed downloading configuration file. %s',
+                                                     {'device': device, 'error': error.response.reason})
             raise error
 
     @property

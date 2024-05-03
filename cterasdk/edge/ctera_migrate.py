@@ -95,7 +95,7 @@ class CTERAMigrate(BaseCommand):
         response = self._edge.migrate.get('/tasks/history', params={'id': task.id})  # pylint: disable=protected-access
         if response.history:
             return Jobs(response.history)
-        logging.getLogger().error('Task not found. %s', {'task_id': task.id})
+        logging.getLogger('cterasdk.edge').error('Task not found. %s', {'task_id': task.id})
         return None
 
     def results(self, task):
@@ -105,7 +105,7 @@ class CTERAMigrate(BaseCommand):
         if task.type == 'migration':
             return self._edge.migrate.get('/migration/results',  # pylint: disable=protected-access
                                           params={'id': task.id}).migration
-        logging.getLogger().error('Could not determine task type. %s', {'id': task.id, 'type': task.type, 'name': task.name})
+        logging.getLogger('cterasdk.edge').error('Could not determine task type. %s', {'id': task.id, 'type': task.type, 'name': task.name})
         return None
 
 

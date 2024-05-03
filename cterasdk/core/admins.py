@@ -78,9 +78,9 @@ class Administrators(BaseCommand):
         if password_change:
             param.requirePasswordChangeOn = DateTimeUtils.get_expiration_date(password_change).strftime('%Y-%m-%d')
 
-        logging.getLogger().info('Creating a global administrator. %s', {'user': name})
+        logging.getLogger('cterasdk.core').info('Creating a global administrator. %s', {'user': name})
         response = self._core.api.add('/administrators', param)
-        logging.getLogger().info('Global administrator created. %s', {'user': name, 'email': email, 'role': role})
+        logging.getLogger('cterasdk.core').info('Global administrator created. %s', {'user': name, 'email': email, 'role': role})
 
         return response
 
@@ -119,10 +119,10 @@ class Administrators(BaseCommand):
 
         try:
             response = self._core.api.put('/administrators/' + current_username, user)
-            logging.getLogger().info("User modified. %s", {'username': user.name})
+            logging.getLogger('cterasdk.core').info("User modified. %s", {'username': user.name})
             return response
         except CTERAException as error:
-            logging.getLogger().error("Failed to modify user.")
+            logging.getLogger('cterasdk.core').error("Failed to modify user.")
             raise CTERAException('Failed to modify user', error)
 
     def delete(self, name):
@@ -131,9 +131,9 @@ class Administrators(BaseCommand):
 
         :param str username: Global administrator username
         """
-        logging.getLogger().info('Deleting user. %s', {'user': name})
+        logging.getLogger('cterasdk.core').info('Deleting user. %s', {'user': name})
         baseurl = f'/administrators/{name}'
         response = self._core.api.execute(baseurl, 'delete', True)
-        logging.getLogger().info('User deleted. %s', {'user': name})
+        logging.getLogger('cterasdk.core').info('User deleted. %s', {'user': name})
 
         return response

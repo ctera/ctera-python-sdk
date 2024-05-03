@@ -20,17 +20,17 @@ class NTP(BaseCommand):
 
         :param list[str] servers: List of NTP servers address
         """
-        logging.getLogger().info("Enabling time synchronization with ntp servers.")
+        logging.getLogger('cterasdk.edge').info("Enabling time synchronization with ntp servers.")
         self._edge.api.put('/config/time/NTPMode', Mode.Enabled)
-        logging.getLogger().info("Time synchronization enabled.")
+        logging.getLogger('cterasdk.edge').info("Time synchronization enabled.")
 
         if servers:
-            logging.getLogger().info("Updating time servers. %s", {'servers': servers})
+            logging.getLogger('cterasdk.edge').info("Updating time servers. %s", {'servers': servers})
             self._edge.api.put('/config/time/NTPServer', servers)
-            logging.getLogger().info("Time servers updated. %s", {'servers': servers})
+            logging.getLogger('cterasdk.edge').info("Time servers updated. %s", {'servers': servers})
 
     def disable(self):
         """ Disable NTP """
-        logging.getLogger().info("Disabling time synchronization with ntp servers.")
+        logging.getLogger('cterasdk.edge').info("Disabling time synchronization with ntp servers.")
         self._edge.api.put('/config/time/NTPMode', Mode.Disabled)
-        logging.getLogger().info("Time synchronization disabled.")
+        logging.getLogger('cterasdk.edge').info("Time synchronization disabled.")

@@ -51,9 +51,11 @@ class Buckets(BaseCommand):
         param.dedicated = bool(dedicated_to)
         param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
 
-        logging.getLogger().info('Adding bucket. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
+        logging.getLogger('cterasdk.core').info('Adding bucket. %s',
+                                                {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
         response = self._core.api.add('/locations', param)
-        logging.getLogger().info('Bucket added. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
+        logging.getLogger('cterasdk.core').info('Bucket added. %s',
+                                                {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
         return response
 
     def modify(self, current_name, new_name=None, read_only=None, dedicated_to=None):
@@ -81,9 +83,9 @@ class Buckets(BaseCommand):
             elif isinstance(dedicated_to, str):
                 param.dedicated = True
                 param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
-        logging.getLogger().info("Modifying bucket. %s", {'name': current_name})
+        logging.getLogger('cterasdk.core').info("Modifying bucket. %s", {'name': current_name})
         response = self._core.api.put(f'/locations/{current_name}', param)
-        logging.getLogger().info("Bucket modified. %s", {'name': current_name})
+        logging.getLogger('cterasdk.core').info("Bucket modified. %s", {'name': current_name})
         return response
 
     def list_buckets(self, include=None):
@@ -103,9 +105,9 @@ class Buckets(BaseCommand):
 
         :param str name: Name of the bucket
         """
-        logging.getLogger().info('Deleting bucket. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Deleting bucket. %s', {'name': name})
         response = self._core.api.delete(f'/locations/{name}')
-        logging.getLogger().info('Bucket deleted. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Bucket deleted. %s', {'name': name})
         return response
 
     def read_write(self, name):
@@ -114,7 +116,7 @@ class Buckets(BaseCommand):
 
         :param str name: Name of the bucket
         """
-        logging.getLogger().info('Setting bucket to read-write. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Setting bucket to read-write. %s', {'name': name})
         return self._read_only(name, False)
 
     def read_only(self, name):
@@ -123,7 +125,7 @@ class Buckets(BaseCommand):
 
         :param str name: Name of the bucket
         """
-        logging.getLogger().info('Setting bucket to read-delete only. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Setting bucket to read-delete only. %s', {'name': name})
         return self._read_only(name, True)
 
     def _read_only(self, name, enabled):

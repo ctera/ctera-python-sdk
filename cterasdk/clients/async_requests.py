@@ -41,19 +41,19 @@ class Session:
             response = await self._session.request(r.method, r.url, **r.kwargs)
             return asyncio.create_task(on_response(response))
         except aiohttp.ClientSSLError as error:
-            logging.getLogger().warning(error)
+            logging.getLogger('cterasdk.http').warning(error)
             raise
         except aiohttp.ClientProxyConnectionError as error:
-            logging.getLogger().error(error)
+            logging.getLogger('cterasdk.http').error(error)
             raise
         except aiohttp.ClientConnectorError as error:
-            logging.getLogger().error(error)
+            logging.getLogger('cterasdk.http').error(error)
             raise ConnectionError(error)
         except aiohttp.ServerDisconnectedError as error:
-            logging.getLogger().error(error)
+            logging.getLogger('cterasdk.http').error(error)
             raise ConnectionError(error)
         except asyncio.TimeoutError as error:
-            logging.getLogger().error('Request timed out while making an HTTP request.')
+            logging.getLogger('cterasdk.http').error('Request timed out while making an HTTP request.')
             raise TimeoutError(error)
 
     @staticmethod

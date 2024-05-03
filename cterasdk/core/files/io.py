@@ -26,10 +26,10 @@ def walk(core, base, path, include_deleted=False):
 
 def mkdir(core, path):
     param = common.get_create_dir_param(path.name(), path.parent().encoded_fullpath())
-    logging.getLogger().info('Creating directory. %s', {'path': str(path.relative)})
+    logging.getLogger('cterasdk.core').info('Creating directory. %s', {'path': str(path.relative)})
     response = core.api.execute('', 'makeCollection', param)
     common.raise_for_status(response, str(path.relative))
-    logging.getLogger().info('Directory created. %s', {'path': str(path.relative)})
+    logging.getLogger('cterasdk.core').info('Directory created. %s', {'path': str(path.relative)})
 
 
 def makedirs(core, path):
@@ -44,7 +44,7 @@ def makedirs(core, path):
 
 def rename(core, path, name):
     param = common.ActionResourcesParam.instance()
-    logging.getLogger().info('Renaming item. %s', {'path': str(path.relative), 'name': name})
+    logging.getLogger('cterasdk.core').info('Renaming item. %s', {'path': str(path.relative), 'name': name})
     param.add(common.SrcDstParam.instance(src=path.fullpath(), dest=path.parent().joinpath(name).fullpath()))
     return core.api.execute('', 'moveResources', param)
 
@@ -53,7 +53,7 @@ def remove(core, *paths):
     param = common.ActionResourcesParam.instance()
     paths = [paths] if not isinstance(paths, tuple) else paths
     for path in paths:
-        logging.getLogger().info('Deleting item. %s', {'path': str(path.relative)})
+        logging.getLogger('cterasdk.core').info('Deleting item. %s', {'path': str(path.relative)})
         param.add(common.SrcDstParam.instance(src=path.fullpath()))
     return core.api.execute('', 'deleteResources', param)
 
@@ -62,7 +62,7 @@ def recover(core, *paths):
     param = common.ActionResourcesParam.instance()
     paths = [paths] if not isinstance(paths, tuple) else paths
     for path in paths:
-        logging.getLogger().info('Recovering item. %s', {'path': str(path.relative)})
+        logging.getLogger('cterasdk.core').info('Recovering item. %s', {'path': str(path.relative)})
         param.add(common.SrcDstParam.instance(src=path.fullpath()))
     return core.api.execute('', 'restoreResources', param)
 
@@ -71,7 +71,7 @@ def copy(core, *paths, destination=None):
     param = common.ActionResourcesParam.instance()
     paths = [paths] if not isinstance(paths, tuple) else paths
     for path in paths:
-        logging.getLogger().info('Copying item. %s', {'path': str(path.relative), 'to': str(destination.relative)})
+        logging.getLogger('cterasdk.core').info('Copying item. %s', {'path': str(path.relative), 'to': str(destination.relative)})
         param.add(common.SrcDstParam.instance(src=path.fullpath(), dest=destination.joinpath(path.name()).fullpath()))
     return core.api.execute('', 'copyResources', param)
 
@@ -80,6 +80,6 @@ def move(core, *paths, destination=None):
     param = common.ActionResourcesParam.instance()
     paths = [paths] if not isinstance(paths, tuple) else paths
     for path in paths:
-        logging.getLogger().info('Copying item. %s', {'path': str(path.relative), 'to': str(destination.relative)})
+        logging.getLogger('cterasdk.core').info('Copying item. %s', {'path': str(path.relative), 'to': str(destination.relative)})
         param.add(common.SrcDstParam.instance(src=path.fullpath(), dest=destination.joinpath(path.name()).fullpath()))
     return core.api.execute('', 'moveResources', param)

@@ -15,8 +15,8 @@ class AFP(BaseCommand):
         """
         Disable AFP
         """
-        logging.getLogger().info('Disabling AFP server.')
+        logging.getLogger('cterasdk.edge').info('Disabling AFP server.')
 
         self._edge.api.put('/config/fileservices/afp/mode', Mode.Disabled)
 
-        logging.getLogger().info('AFP server disabled.')
+        logging.getLogger('cterasdk.edge').info('AFP server disabled.')

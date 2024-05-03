@@ -89,10 +89,10 @@ class Servers(BaseCommand):
 
         try:
             response = self._core.api.put(f'/servers/{name}', server)
-            logging.getLogger().info("Server modified. %s", {'server': name})
+            logging.getLogger('cterasdk.core').info("Server modified. %s", {'server': name})
             return response
         except CTERAException as error:
-            logging.getLogger().error("Could not modify server.")
+            logging.getLogger('cterasdk.core').error("Could not modify server.")
             raise CTERAException('Could not modify server', error)
 
 

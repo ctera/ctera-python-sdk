@@ -30,9 +30,9 @@ class RSync(BaseCommand):
 
     def _set_mode(self, enabled):
         """ Disable RSync """
-        logging.getLogger().info('%s RSync server.', ('Enabling' if enabled else 'Disabling'))
+        logging.getLogger('cterasdk.edge').info('%s RSync server.', ('Enabling' if enabled else 'Disabling'))
         self._edge.api.put('/config/fileservices/rsync/server', Mode.Enabled if enabled else Mode.Disabled)
-        logging.getLogger().info('RSync server %s.', ('enabled' if enabled else 'disabled'))
+        logging.getLogger('cterasdk.edge').info('RSync server %s.', ('enabled' if enabled else 'disabled'))
 
     def modify(
             self,

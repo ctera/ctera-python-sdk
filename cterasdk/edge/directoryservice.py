@@ -42,14 +42,14 @@ class DirectoryService(BaseCommand):
         param.password = password
         if ou is not None:
             param.ouPath = ou
-        logging.getLogger().info("Connecting to Active Directory. %s", {'domain': domain, 'user': username})
+        logging.getLogger('cterasdk.edge').info("Connecting to Active Directory. %s", {'domain': domain, 'user': username})
 
         try:
             self._edge.api.execute("/status/fileservices/cifs", "joinDomain", param)
         except CTERAException as error:
-            logging.getLogger().error("Failed connecting to Active Directory.")
+            logging.getLogger('cterasdk.edge').error("Failed connecting to Active Directory.")
             raise error
-        logging.getLogger().info("Connected to Active Directory.")
+        logging.getLogger('cterasdk.edge').info("Connected to Active Directory.")
 
     def _check_domain_connectivity(self, domain):
         port = 389
@@ -58,7 +58,8 @@ class DirectoryService(BaseCommand):
         connection_results = self._edge.network.diagnose([TCPService(host, port) for host in domain_controllers])
         for connection_result in connection_results:
             if not connection_result.is_open:
-                logging.getLogger().error("Connection failed. No traffic allowed over port %(port)s", dict(port=connection_result.port))
+                logging.getLogger('cterasdk.edge').error("Connection failed. No traffic allowed over port %(port)s",
+                                                         dict(port=connection_result.port))
                 raise ConnectionError(f'Unable to establish LDAP connection {connection_result.host}:{connection_result.port}')
 
     def get_static_domain_controller(self):
@@ -111,13 +112,13 @@ class DirectoryService(BaseCommand):
             if mapping.domainFlatName in domains:
                 advanced_mapping.append(mapping)
             else:
-                logging.getLogger().warning('Invalid mapping. Could not find domain. %s', {'domain': mapping.domainFlatName})
+                logging.getLogger('cterasdk.edge').warning('Invalid mapping. Could not find domain. %s', {'domain': mapping.domainFlatName})
 
-        logging.getLogger().debug('Updating advanced mapping. %s', {
+        logging.getLogger('cterasdk.edge').debug('Updating advanced mapping. %s', {
             'domains': [mapping.domainFlatName for mapping in advanced_mapping]
         })
         response = self._edge.api.put('/config/fileservices/cifs/idMapping/map', advanced_mapping)
-        logging.getLogger().info('Updated advanced mapping.')
+        logging.getLogger('cterasdk.edge').info('Updated advanced mapping.')
 
         return response
 
@@ -146,7 +147,7 @@ class DirectoryService(BaseCommand):
         """
         Disconnect from Active Directory Service
         """
-        logging.getLogger().info("Disconnecting from Active Directory.")
+        logging.getLogger('cterasdk.edge').info("Disconnecting from Active Directory.")
 
         cifs = self._edge.api.get('/config/fileservices/cifs')
         cifs.type = "workgroup"
@@ -154,4 +155,4 @@ class DirectoryService(BaseCommand):
         cifs.domain = None
 
         self._edge.api.put('/config/fileservices/cifs', cifs)
-        logging.getLogger().info("Disconnected from Active Directory.")
+        logging.getLogger('cterasdk.edge').info("Disconnected from Active Directory.")

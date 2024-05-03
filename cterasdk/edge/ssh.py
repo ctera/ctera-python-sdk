@@ -30,11 +30,11 @@ class SSH(BaseCommand):
 
         param.publicKey = public_key
 
-        logging.getLogger().info("Enabling SSH daemon.")
+        logging.getLogger('cterasdk.edge').info("Enabling SSH daemon.")
         self._edge.api.execute('/config/device', 'startSSHD', param)
-        logging.getLogger().info("SSH daemon enabled.")
+        logging.getLogger('cterasdk.edge').info("SSH daemon enabled.")
 
     def disable(self):
-        logging.getLogger().info("Disabling SSH daemon.")
+        logging.getLogger('cterasdk.edge').info("Disabling SSH daemon.")
         self._edge.api.execute('/config/device', 'stopSSHD')
-        logging.getLogger().info("SSH daemon disabled.")
+        logging.getLogger('cterasdk.edge').info("SSH daemon disabled.")

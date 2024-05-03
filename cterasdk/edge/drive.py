@@ -36,7 +36,7 @@ class Drive(BaseCommand):
 
         self._edge.api.execute("/proc/storage", "format", param)
 
-        logging.getLogger().info('Formatting drive. %s', {'drive': name})
+        logging.getLogger('cterasdk.edge').info('Formatting drive. %s', {'drive': name})
 
     def format_all(self):
         """ Format all drives """

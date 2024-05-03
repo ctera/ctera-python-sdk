@@ -19,9 +19,9 @@ class Login(BaseCommand):
         host = self._core.host()
         try:
             await self._core.v1.api.form_data('/login', {'j_username': username, 'j_password': password})
-            logging.getLogger().info("User logged in. %s", {'host': host, 'user': username})
+            logging.getLogger('cterasdk.core').info("User logged in. %s", {'host': host, 'user': username})
         except CTERAException:
-            logging.getLogger().error("Login failed. %s", {'host': host, 'user': username})
+            logging.getLogger('cterasdk.core').error("Login failed. %s", {'host': host, 'user': username})
             raise
 
     async def logout(self):
@@ -29,4 +29,4 @@ class Login(BaseCommand):
         Log out of the portal
         """
         await self._core.v1.api.form_data('/logout', {})
-        logging.getLogger().info("User logged out. %s", {'host': self._core.host()})
+        logging.getLogger('cterasdk.core').info("User logged out. %s", {'host': self._core.host()})

@@ -208,10 +208,10 @@ def execute_request(async_session, request, *, on_response, max_retries=3, backo
             retries += 1
             if retries < max_retries:
                 delay = backoff_factor ** retries
-                logging.getLogger().warning("Retrying in %s seconds.", delay)
+                logging.getLogger('cterasdk.http').warning("Retrying in %s seconds.", delay)
                 time.sleep(delay)
             else:
-                logging.getLogger().error("Max retries reached. Request failed.")
+                logging.getLogger('cterasdk.http').error("Max retries reached. Request failed.")
                 raise
     return None
 

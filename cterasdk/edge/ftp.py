@@ -29,9 +29,9 @@ class FTP(BaseCommand):
         return self._edge.api.get('/config/fileservices/ftp/mode') == Mode.Disabled
 
     def _set_mode(self, enabled):
-        logging.getLogger().info('%s FTP server.', ('Enabling' if enabled else 'Disabling'))
+        logging.getLogger('cterasdk.edge').info('%s FTP server.', ('Enabling' if enabled else 'Disabling'))
         self._edge.api.put('/config/fileservices/ftp/mode', Mode.Enabled if enabled else Mode.Disabled)
-        logging.getLogger().info('FTP server %s.', ('enabled' if enabled else 'disabled'))
+        logging.getLogger('cterasdk.edge').info('FTP server %s.', ('enabled' if enabled else 'disabled'))
 
     def modify(
             self,

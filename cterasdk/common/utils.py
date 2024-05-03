@@ -137,7 +137,7 @@ class BaseObjectRef(Object):
 
 def parse_base_object_ref(base_object_ref):
     if not base_object_ref.startswith('objs/'):
-        logging.getLogger().error('Invalid base object reference. %s', {'ref': base_object_ref})
+        logging.getLogger('cterasdk.common').error('Invalid base object reference. %s', {'ref': base_object_ref})
         return None
     base_object_ref = base_object_ref[5:]
     p = re.compile('[^/]*')
@@ -160,15 +160,15 @@ def parse_to_ipaddress(address):
     try:
         try:
             ip_addrr = ipaddress.ip_address(address)
-            logging.getLogger().debug('ip address validated. %s', {'ip': str(ip_addrr)})
+            logging.getLogger('cterasdk.common').debug('ip address validated. %s', {'ip': str(ip_addrr)})
             return ip_addrr
         except (ValueError, TypeError):
             ip_network = ipaddress.ip_network(address)
-            logging.getLogger().debug('ip network validated. %s', {'network': str(ip_network)})
+            logging.getLogger('cterasdk.common').debug('ip network validated. %s', {'network': str(ip_network)})
             return ip_network
     except (ValueError, TypeError):
         err = ValueError(f'{address} does not appear to be an IPv4 or IPv6 network or ip address')
-        logging.getLogger().error('Incorrect entry, please use IPv4 or IPv6 CIDR Formats. %s', {'Error': err})
+        logging.getLogger('cterasdk.common').error('Incorrect entry, please use IPv4 or IPv6 CIDR Formats. %s', {'Error': err})
         raise err
 
 
@@ -212,17 +212,17 @@ def utf8_decode(message):
 
 
 def tcp_connect(host, port):
-    logging.getLogger().debug('Testing connection. %s', {'host': host, 'port': port})
+    logging.getLogger('cterasdk.common').debug('Testing connection. %s', {'host': host, 'port': port})
     message = f"Connection error to remote host {host} on port {port}."
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     rc = None
     try:
         rc = sock.connect_ex((host, port))
     except socket.gaierror:
-        logging.getLogger().debug(message)
+        logging.getLogger('cterasdk.common').debug(message)
         raise ConnectionError(message)
 
     if rc != 0:
-        logging.getLogger().debug(message)
+        logging.getLogger('cterasdk.common').debug(message)
         raise ConnectionError(message)
-    logging.getLogger().debug("Connection established to remote host %s on port %s", host, port)
+    logging.getLogger('cterasdk.common').debug("Connection established to remote host %s on port %s", host, port)

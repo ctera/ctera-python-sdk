@@ -78,11 +78,11 @@ class Portals(BaseCommand):
         param.companyName = company
         param.comment = comment
 
-        logging.getLogger().info('Creating Team Portal. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Creating Team Portal. %s', {'name': name})
 
         response = self._core.api.add('/teamPortals', param)
 
-        logging.getLogger().info('Team Portal created. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Team Portal created. %s', {'name': name})
 
         return response
 
@@ -101,11 +101,11 @@ class Portals(BaseCommand):
 
         :param str name: Name of the tenant to delete
         """
-        logging.getLogger().info('Deleting Portal. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Deleting Portal. %s', {'name': name})
 
         response = self._core.api.execute('/teamPortals/' + name, 'delete')
 
-        logging.getLogger().info('Portal deleted. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Portal deleted. %s', {'name': name})
 
         return response
 
@@ -115,11 +115,11 @@ class Portals(BaseCommand):
 
         :param str name: Name of the tenant to undelete
         """
-        logging.getLogger().info('Recovering Portal. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Recovering Portal. %s', {'name': name})
 
         response = self._core.api.execute('/teamPortals/' + name, 'moveFromTrashcan')
 
-        logging.getLogger().info('Portal recovered. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Portal recovered. %s', {'name': name})
 
         return response
 
@@ -147,7 +147,7 @@ class Portals(BaseCommand):
         param = Object()
         param.objectId = None
         param.type = 'portals'
-        logging.getLogger().info('Applying provisioning changes.')
+        logging.getLogger('cterasdk.core').info('Applying provisioning changes.')
         task = self._core.api.execute('', 'updatePortals', param)
         if wait:
             task = self._core.tasks.wait(task)

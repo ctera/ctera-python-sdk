@@ -46,9 +46,9 @@ class Messaging(BaseCommand):
                     nodes.append(param)
             if len(nodes) in messaging_obj.globalStatus.validServerNumber:
                 response = self._core.api.put('microservices/messaging/currentNodes', nodes)
-                logging.getLogger().info('Nodes added to cluster successfully')
+                logging.getLogger('cterasdk.core').info('Nodes added to cluster successfully')
                 return response
-            logging.getLogger().error('Wrong number of servers. expected:"1" or "3", %s', {'given': len(servers)})
+            logging.getLogger('cterasdk.core').error('Wrong number of servers. expected:"1" or "3", %s', {'given': len(servers)})
         else:
-            logging.getLogger().error('Can not add new servers: %s', {messaging_obj.globalStatus.cantAddServersReason})
+            logging.getLogger('cterasdk.core').error('Can not add new servers: %s', {messaging_obj.globalStatus.cantAddServersReason})
         return None

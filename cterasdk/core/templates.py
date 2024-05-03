@@ -73,9 +73,9 @@ class Templates(BaseCommand):
         Templates._configure_software_update_schedule(param, update_settings)
         Templates._configure_consent_page(param, consent_page)
 
-        logging.getLogger().info('Adding template. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Adding template. %s', {'name': name})
         response = self._core.api.add('/deviceTemplates', param)
-        logging.getLogger().info('Template added. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Template added. %s', {'name': name})
         return response
 
     def _configure_firmware_settings(self, param, versions):
@@ -205,9 +205,9 @@ class Templates(BaseCommand):
 
         :param str name: Name of the template
         """
-        logging.getLogger().info('Deleting template. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Deleting template. %s', {'name': name})
         response = self._core.api.delete(f'/deviceTemplates/{name}')
-        logging.getLogger().info('Template deleted. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Template deleted. %s', {'name': name})
         return response
 
     def set_default(self, name, wait=False):
@@ -217,10 +217,10 @@ class Templates(BaseCommand):
         :param str name: Name of the template
         :param bool,optional wait: Wait for all changes to apply, defaults to `False`
         """
-        logging.getLogger().info('Setting default template. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Setting default template. %s', {'name': name})
         response = self._core.api.execute(f'/deviceTemplates/{name}', 'setAsDefault')
         self.auto_assign.apply_changes(wait=wait)
-        logging.getLogger().info('Set default template. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Set default template. %s', {'name': name})
         return response
 
     def remove_default(self, name, wait=False):
@@ -232,12 +232,12 @@ class Templates(BaseCommand):
         """
         template = self.get(name, include=['isDefault'])
         if template.isDefault:
-            logging.getLogger().info('Removing default template. %s', {'name': name})
+            logging.getLogger('cterasdk.core').info('Removing default template. %s', {'name': name})
             response = self._core.api.execute('', 'removeDefaultDeviceTemplate')
-            logging.getLogger().info('Removed default template. %s', {'name': name})
+            logging.getLogger('cterasdk.core').info('Removed default template. %s', {'name': name})
             self.auto_assign.apply_changes(wait=wait)
             return response
-        logging.getLogger().info('Template not set as default. %s', {'name': name})
+        logging.getLogger('cterasdk.core').info('Template not set as default. %s', {'name': name})
         return None
 
 
@@ -266,7 +266,7 @@ class TemplateAutoAssignPolicy(BaseCommand):
 
         not_found = [template for template in templates if template not in portal_templates.keys()]
         if not_found:
-            logging.getLogger().error('Could not find one or more templates. %s', {'templates': not_found})
+            logging.getLogger('cterasdk.core').error('Could not find one or more templates. %s', {'templates': not_found})
             raise CTERAException('Could not find one or more templates', None, templates=not_found)
 
         policy = self.get_policy()
@@ -281,7 +281,7 @@ class TemplateAutoAssignPolicy(BaseCommand):
         policy.deviceTemplatesAutoAssignmentRules = policy_rules
 
         response = self._core.api.execute('', 'setAutoAssignmentRules', policy)
-        logging.getLogger().info('Set templates auto assignment rules.')
+        logging.getLogger('cterasdk.core').info('Set templates auto assignment rules.')
 
         if apply_changes:
             self.apply_changes(True)

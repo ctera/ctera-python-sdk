@@ -49,7 +49,7 @@ def fromjsonstr(fromstr):
     try:
         root.node = json.loads(fromstr)
     except json.decoder.JSONDecodeError:
-        logging.getLogger().debug('Parsing failed. Expected JSON format but received invalid input.')
+        logging.getLogger('cterasdk.convert').debug('Parsing failed. Expected JSON format but received invalid input.')
         return None
     root.parent = None
     root.value = None
@@ -86,7 +86,7 @@ def fromjsonstr(fromstr):
 def fromxmlstr(string):  # pylint: disable=too-many-branches,too-many-statements
 
     if not string:
-        logging.getLogger().debug('Empty payload received.')
+        logging.getLogger('cterasdk.convert').debug('Empty payload received.')
 
     root = Item()
     root.value = None
@@ -95,7 +95,7 @@ def fromxmlstr(string):  # pylint: disable=too-many-branches,too-many-statements
     try:
         root.node = fromstring(string)
     except ParseError:
-        logging.getLogger().debug('Parsing failed. Expected XML format but received invalid input.')
+        logging.getLogger('cterasdk.convert').debug('Parsing failed. Expected XML format but received invalid input.')
         return None
 
     q = queue.Queue()

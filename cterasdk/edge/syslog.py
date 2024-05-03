@@ -27,18 +27,18 @@ class Syslog(BaseCommand):
         obj.proto = proto
         obj.minSeverity = min_severity
 
-        logging.getLogger().info("Configuring syslog server.")
+        logging.getLogger('cterasdk.edge').info("Configuring syslog server.")
         self._edge.api.put('/config/logging/syslog', obj)
-        logging.getLogger().info(
+        logging.getLogger('cterasdk.edge').info(
             "Syslog server configured. %s",
             {'server': server, 'port': port, 'protocol': proto, 'minSeverity': min_severity}
         )
 
     def disable(self):
         """ Disable Syslog """
-        logging.getLogger().info("Disabling syslog server.")
+        logging.getLogger('cterasdk.edge').info("Disabling syslog server.")
         self._edge.api.put('/config/logging/syslog/mode', enum.Mode.Disabled)
-        logging.getLogger().info("Syslog server disabled.")
+        logging.getLogger('cterasdk.edge').info("Syslog server disabled.")
 
     def get_configuration(self):
         return self._edge.api.get('/config/logging/syslog')
@@ -64,9 +64,9 @@ class Syslog(BaseCommand):
         if min_severity:
             current_config.minSeverity = min_severity
 
-        logging.getLogger().info("Updating syslog server configuration.")
+        logging.getLogger('cterasdk.edge').info("Updating syslog server configuration.")
         self._edge.api.put('/config/logging/syslog', current_config)
-        logging.getLogger().info(
+        logging.getLogger('cterasdk.edge').info(
             "Syslog server configured. %s",
             {
                 'server': current_config.server,

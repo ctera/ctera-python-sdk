@@ -88,9 +88,9 @@ class Groups(BaseCommand):
         if members:
             param.members = self._members_reference(members)
 
-        logging.getLogger().info('Creating group. %s', {'group': name})
+        logging.getLogger('cterasdk.core').info('Creating group. %s', {'group': name})
         response = self._core.api.execute('', 'addGroup', param)
-        logging.getLogger().info('Group created. %s', {'group': name})
+        logging.getLogger('cterasdk.core').info('Group created. %s', {'group': name})
 
         return response
 
@@ -118,10 +118,10 @@ class Groups(BaseCommand):
 
         try:
             response = self._core.api.execute(f'/localGroups/{current_groupname}', 'updateGroup', param)
-            logging.getLogger().info("Group modified. %s", {'group_name': group.name})
+            logging.getLogger('cterasdk.core').info("Group modified. %s", {'group_name': group.name})
             return response
         except CTERAException as error:
-            logging.getLogger().error("Failed to modify group.")
+            logging.getLogger('cterasdk.core').error("Failed to modify group.")
             raise CTERAException('Failed to modify group', error)
 
     def get_members(self, group_account):
@@ -169,10 +169,10 @@ class Groups(BaseCommand):
 
         :param cterasdk.core.types.GroupAccount group_account: Group account
         """
-        logging.getLogger().info('Deleting group. %s', {'group': str(group_account.name)})
+        logging.getLogger('cterasdk.core').info('Deleting group. %s', {'group': str(group_account.name)})
         baseurl = f'/localGroups/{group_account.name}' if group_account.is_local \
             else f'/domains/{group_account.directory}/adGroups/{group_account.name}'
         response = self._core.api.execute(baseurl, 'delete', True)
-        logging.getLogger().info('Group deleted. %s', {'group': str(group_account.name)})
+        logging.getLogger('cterasdk.core').info('Group deleted. %s', {'group': str(group_account.name)})
 
         return response

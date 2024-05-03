@@ -56,13 +56,13 @@ class SSL(BaseCommand):
 
         :param str certificate: The PEM-encoded certificate or a path to the PEM-encoded server certificate file
         """
-        logging.getLogger().info('Setting trusted object storage CA certificate')
+        logging.getLogger('cterasdk.edge').info('Setting trusted object storage CA certificate')
         param = Object()
         param._classname = 'ExtTrustedCA'  # pylint: disable=protected-access
         param.certificate = X509Certificate.load_certificate(certificate).pem_data.decode('utf-8')
-        logging.getLogger().info("Uploading object storage certificate.")
+        logging.getLogger('cterasdk.edge').info("Uploading object storage certificate.")
         response = self._edge.api.put('/config/extStorageTrustedCA', param)
-        logging.getLogger().info("Uploaded object storage certificate.")
+        logging.getLogger('cterasdk.edge').info("Uploaded object storage certificate.")
         return response
 
     def import_certificate(self, private_key, *certificates):
@@ -77,7 +77,7 @@ class SSL(BaseCommand):
         certificates = [X509Certificate.load_certificate(certificate) for certificate in certificates]
         certificate_chain = [certificate.pem_data.decode('utf-8') for certificate in create_certificate_chain(*certificates)]
         server_certificate = ''.join([key_object.pem_data.decode('utf-8')] + certificate_chain)
-        logging.getLogger().info("Uploading SSL certificate.")
+        logging.getLogger('cterasdk.edge').info("Uploading SSL certificate.")
         response = self._edge.api.put('/config/certificate', f"\n{server_certificate}")
-        logging.getLogger().info("Uploaded SSL certificate.")
+        logging.getLogger('cterasdk.edge').info("Uploaded SSL certificate.")
         return response

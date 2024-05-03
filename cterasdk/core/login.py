@@ -19,9 +19,10 @@ class Login(BaseCommand):
         host = self._core.host()
         try:
             self._core.api.form_data('/login', {'j_username': username, 'j_password': password})
-            logging.getLogger().info("User logged in. %s", {'host': host, 'user': username})
+            logging.getLogger('cterasdk.core').info("User logged in. %s", {'host': host, 'user': username})
         except CTERAException:
-            logging.getLogger().error('Login failed. %s', {'host': host, 'user': username})
+            logging.getLogger('cterasdk.core').error('Login failed. %s', {'host': host, 'user': username})
+            raise
 
     def logout(self):
         """
@@ -29,4 +30,4 @@ class Login(BaseCommand):
         """
         username = self._core.session().user.name
         self._core.api.form_data('/logout', {})
-        logging.getLogger().info("User logged out. %s", {'host': self._core.host(), 'user': username})
+        logging.getLogger('cterasdk.core').info("User logged out. %s", {'host': self._core.host(), 'user': username})

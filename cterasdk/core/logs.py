@@ -132,9 +132,9 @@ class Alerts(BaseCommand):
 
         :param list[cterasdk.core.types.Alert] alerts: List of alerts
         """
-        logging.getLogger().info('Updating log based alerts.')
+        logging.getLogger('cterasdk.core').info('Updating log based alerts.')
         response = self._core.api.put(self._context, alerts)
-        logging.getLogger().info('Log based alerts updated.')
+        logging.getLogger('cterasdk.core').info('Log based alerts updated.')
         return response
 
     def get(self):

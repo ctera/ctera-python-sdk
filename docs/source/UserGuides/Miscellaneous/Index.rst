@@ -5,57 +5,81 @@ Miscellaneous
 Logging
 =======
 
-The library includes a built-in console logger. The logger's configuration is controlled by the ``config.Logging.get()`` class object.
+This library features numerous console loggers, with an option to redirect the output to a file.
 
-Redirecting the log to a file
-=============================
-You can redirect the cterasdk log to a file by setting the environment variable **CTERASDK_LOG_FILE**
+    +--------------------------------+---------+--------------------------------------+
+    |Logger name                     |Level    |Description                           |
+    +================================+=========+======================================+
+    |cterasdk                        |NOTSET   |Package Logger                        |
+    +--------------------------------+---------+--------------------------------------+
+    |cterasdk.edge                   |INFO     |Logger for CTERA Edge and Drive App   |
+    +--------------------------------+---------+--------------------------------------+
+    |cterasdk.core                   |INFO     |Logger for CTERA Portal               |
+    +--------------------------------+---------+--------------------------------------+
+    |cterasdk.common                 |INFO     |Common Infrastructure Logger          |
+    +--------------------------------+---------+--------------------------------------+
+    |cterasdk.metadata.connector     |INFO     |Notification Service Logger           |
+    +--------------------------------+---------+--------------------------------------+
+    |cterasdk.http                   |ERROR    |Transport Layer Logger                |
+    +--------------------------------+---------+--------------------------------------+
+    |cterasdk.http.trace             |ERROR    |Transport Layer Tracing               |
+    +--------------------------------+---------+--------------------------------------+
+    |cterasdk.crypto                 |ERROR    |Cryptography Logger                   |
+    +--------------------------------+---------+--------------------------------------+
+    |cterasdk.filesystem             |ERROR    |Local File System Logger              |
+    +--------------------------------+---------+--------------------------------------+
 
-
-Disabling the Logger
-====================
-
-The logger is enabled by default. To disable the logger, run:
+List the available loggers:
 
 .. code:: python
 
-   config.Logging.get().disable()
+   import logging
+   import cterasdk.logging
 
-Changing the Log Level
-======================
+   print({name: logging.getLevelName(logging.getLogger(name).level) for name in logging.root.manager.loggerDict})
 
-The default logging level is set to ``logging.INFO``. To change the log level, run:
+To update the log level of a logger:
 
 .. code:: python
 
-   config.Logging.get().setLevel(logging.ERROR) # will log severity >= error
+   import logging
+   import cterasdk.logging
 
-   config.Logging.get().setLevel(logging.WARNING) # will log severity >= warning
+   logging.getLogger('cterasdk.metadata.connector').setLevel(logging.DEBUG)  # Enables 'DEBUG'
 
-Log Levels
-----------
+Redirecting log output to a file:
 
-The available log levels are:
+.. code:: console
 
-    +----------+-------------+
-    |Level     |Numeric Value|
-    +==========+=============+
-    |CRITICAL  |50           |
-    +----------+-------------+
-    |ERROR     |40           |
-    +----------+-------------+
-    |WARNING   |30           |
-    +----------+-------------+
-    |INFO      |20           |
-    +----------+-------------+
-    |DEBUG     |10           |
-    +----------+-------------+
+   set cterasdk.log=cterasdk.log  # Redirect output to 'cterasdk.log' in the current directory
+
+   set cterasdk.log=C:/users/username/Desktop/cterasdk.log  # Redirect output to an alternate location
+
+.. code:: bash
+
+   export cterasdk.log="cterasdk.log"
+
+   export cterasdk.log="/home/username/cterasdk.log"
 
 
-Formatting
-##########
+Serialization
+=============
 
-The following formatting functions are included in this library:
+This library features JSON and XML serialization, in alignment with the CTERA API schema.
+
+.. autofunction:: cterasdk.convert.serializers.toxmlstr
+   :noindex:
+
+.. code-block:: python
+
+   user = Object()
+   user.name = 'alice'
+   user.firstName = 'Alice'
+   user.lastName = 'Wonderland'
+   user.email = 'alice@adventures.com'
+   user.password = 'Passw0rd1!'
+   print(toxmlstr(user))
+   print(toxmlstr(user, True))
 
 .. autofunction:: cterasdk.convert.serializers.tojsonstr
    :noindex:
@@ -78,17 +102,3 @@ The following formatting functions are included in this library:
    }
    print(tojsonstr(user, False))
    {"lastName": "Wonderland", "password": "Passw0rd1!", "name": "alice", "firstName": "Alice", "email": "alice@adventures.com"}
-
-.. autofunction:: cterasdk.convert.serializers.toxmlstr
-   :noindex:
-
-.. code-block:: python
-
-   user = Object()
-   user.name = 'alice'
-   user.firstName = 'Alice'
-   user.lastName = 'Wonderland'
-   user.email = 'alice@adventures.com'
-   user.password = 'Passw0rd1!'
-   print(toxmlstr(user))
-   print(toxmlstr(user, True))
