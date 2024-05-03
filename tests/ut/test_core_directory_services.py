@@ -2,6 +2,7 @@ from unittest import mock
 import munch
 
 from cterasdk.core import directoryservice
+from cterasdk.core.types import UserAccount, GroupAccount
 from cterasdk.common.types import ADDomainIDMapping
 from cterasdk.common.object import Object
 from cterasdk import exceptions
@@ -16,6 +17,9 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         self._domain = 'demo.local'
         self._mapping_start = 0
         self._mapping_end = 1
+        self._account_user_name = 'user'
+        self._account_group_name = 'group'
+        self._accounts = [UserAccount(self._account_user_name, self._domain), GroupAccount(self._account_group_name, self._domain)]
 
     def test_disconnect(self):
         put_response = 'Success'
@@ -92,6 +96,18 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         self._global_admin.api.get.assert_called_once_with('/directoryConnector')
         self._global_admin.api.execute.assert_called_once_with('', 'testAndSaveAD', get_response)
         self.assertEqual(ret, True)
+
+    def test_fetch_users_groups_success(self):
+        mock_search_users = self.patch_call("cterasdk.core.directoryservice.DirectoryService._search_users")
+        mock_search_groups = self.patch_call("cterasdk.core.directoryservice.DirectoryService._search_groups")
+        get_response = [self._domain]
+        execute_response = 'Success'
+        self._init_global_admin(get_response=get_response, execute_response=execute_response)
+        ret = directoryservice.DirectoryService(self._global_admin).fetch(self._accounts)
+        mock_search_users.assert_called_once_with(self._domain, self._account_user_name)
+        mock_search_groups.assert_called_once_with(self._domain, self._account_group_name)
+        self._global_admin.api.execute.assert_called_once_with('', 'syncAD', [])
+        self.assertEqual(ret, execute_response)
 
     @staticmethod
     def _create_mapping_param(mapping):
