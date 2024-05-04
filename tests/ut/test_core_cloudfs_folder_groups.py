@@ -44,7 +44,7 @@ class TestCoreFolderGroups(base_core.BaseCoreTest):   # pylint: disable=too-many
         get_user_uid_mock = self.patch_call("cterasdk.core.users.Users.get")
         get_user_uid_mock.return_value = param
         return get_user_uid_mock
-    
+
     def test_get_folder_group_default_attrs(self):
         get_multi_response = munch.Munch({'name': self._name})
         self._init_global_admin(get_multi_response=get_multi_response)

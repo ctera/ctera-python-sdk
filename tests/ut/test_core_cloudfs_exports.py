@@ -37,7 +37,7 @@ class TestCoreExports(base_core.BaseCoreTest):   # pylint: disable=too-many-publ
         param.name = self._bucket_name
         param.cloudDrive = self._cloudfolder_baseObjectRef
         return param
-    
+
     def test_modify_bucket_description(self):
         get_response = munch.Munch({'name': self._bucket_name})
         put_response = 'Success'
