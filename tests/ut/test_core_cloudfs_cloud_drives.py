@@ -251,7 +251,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         mock_find_cloudfolder = self.patch_call('cterasdk.core.cloudfs.CloudDrives.find')
         mock_find_cloudfolder.return_value = munch.Munch({'baseObjectRef': self._cloudfolder_baseObjecrRef})
         self._init_global_admin(get_response=munch.Munch({'baseObjectRef': self._cloudfolder_baseObjecrRef}))
-        self._global_admin.api.execute = mock.MagicMock(side_effect=exceptions.CTERAException())
+        self._global_admin.api.put = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.CloudDrives(self._global_admin).modify(self._cloudfolder_name, self._local_user_account)
         self._global_admin.api.get.assert_called_once_with(self._cloudfolder_baseObjecrRef)
