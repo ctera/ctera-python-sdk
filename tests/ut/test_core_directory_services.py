@@ -3,7 +3,7 @@ import munch
 
 from cterasdk.core import directoryservice
 from cterasdk.core.types import UserAccount, GroupAccount, DomainControllers, AccessControlEntry, AccessControlRule 
-from cterasdk.core.enum import Role, DirectoryServiceType, DirectoryServiceFetchMode
+from cterasdk.core.enum import Role, DirectoryServiceType, DirectoryServiceFetchMode, DirectorySearchEntityType
 from cterasdk.common.types import ADDomainIDMapping
 from cterasdk.common.object import Object
 from cterasdk import exceptions
@@ -67,6 +67,13 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         ret = directoryservice.DirectoryService(self._global_admin).get_advanced_mapping()
         self._global_admin.api.get.assert_called_once_with('/directoryConnector/idMapping/map')
         self.assertEqual(ret[self._domain_flat_name], get_response[0])
+
+    def test_set_advanced_mapping_disconnected(self):
+        self._init_global_admin()
+        with self.assertRaises(exceptions.CTERAException) as error:
+            directoryservice.DirectoryService(self._global_admin).set_access_control(self._acl)
+        self.assertEqual('Failed to apply mapping. Not connected to directory services.', 
+                         error.exception.message)
 
     def test_set_advanced_mapping(self):
         put_response = 'Success'
@@ -174,6 +181,24 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
             ]
         )
         self.assertEqual(ret, put_response)
+
+    def test_get_access_control(self):
+        self._init_global_admin(get_response=[
+            self._create_access_control_entry(DirectorySearchEntityType.User, self._account_user_name, Role.ReadOnlyAdmin), 
+            self._create_access_control_entry(DirectorySearchEntityType.Group, self._account_group_name, Role.EndUser)
+        ])
+        ret = directoryservice.DirectoryService(self._global_admin).get_access_control()
+        self._global_admin.api.get.assert_called_once_with('/directoryConnector/accessControlRules')
+        self._assert_equal_objects(ret, self._acl)
+
+    def _create_access_control_entry(self, ace_type, ace_name, ace_role):
+        ace = Object()
+        ace.group = Object()
+        ace.group.type = ace_type
+        ace.group.name = ace_name
+        ace.group.domain = self._domain
+        ace.role = ace_role
+        return ace
 
     @staticmethod
     def _create_mapping_param(mapping):
