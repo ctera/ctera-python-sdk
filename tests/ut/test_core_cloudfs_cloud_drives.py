@@ -9,7 +9,7 @@ from cterasdk.common import Object, union
 from tests.ut import base_core
 
 
-class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-public-methods
+class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-public-methods, too-many-instance-attributes
 
     def setUp(self):
         super().setUp()
@@ -252,7 +252,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         mock_find_cloudfolder.return_value = munch.Munch({'baseObjectRef': self._cloudfolder_baseObjecrRef})
         self._init_global_admin(get_response=munch.Munch({'baseObjectRef': self._cloudfolder_baseObjecrRef}))
         self._global_admin.api.put = mock.MagicMock(side_effect=exceptions.CTERAException())
-        with self.assertRaises(exceptions.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException):
             cloudfs.CloudDrives(self._global_admin).modify(self._cloudfolder_name, self._local_user_account)
         self._global_admin.api.get.assert_called_once_with(self._cloudfolder_baseObjecrRef)
         self._global_admin.api.put.assert_called_once_with(f'/{self._cloudfolder_baseObjecrRef}', mock.ANY)
