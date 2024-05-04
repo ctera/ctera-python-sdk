@@ -49,7 +49,7 @@ class TestCoreFolderGroups(base_core.BaseCoreTest):   # pylint: disable=too-many
         get_multi_response = munch.Munch({'name': self._name})
         self._init_global_admin(get_multi_response=get_multi_response)
         ret = cloudfs.FolderGroups(self._global_admin).get(self._name)
-        self._global_admin.api.get_multi.assert_called_once_with(f'/foldersGroups/{self._name}')
+        self._global_admin.api.get_multi.assert_called_once_with(f'/foldersGroups/{self._name}', mock.ANY)
         expected_include = ['/' + attr for attr in cloudfs.FolderGroups.default]
         actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
@@ -62,7 +62,7 @@ class TestCoreFolderGroups(base_core.BaseCoreTest):   # pylint: disable=too-many
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.FolderGroups(self._global_admin).get(self._name)
-        self._global_admin.api.get_multi.assert_called_once_with(f'/foldersGroups/{self._name}')
+        self._global_admin.api.get_multi.assert_called_once_with(f'/foldersGroups/{self._name}', mock.ANY)
         self.assertEqual('Could not find folder group', error.exception.message)
 
     def test_add_folder_group_no_owner(self):
