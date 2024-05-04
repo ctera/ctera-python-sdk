@@ -10,6 +10,7 @@ class TestCoreStorageClasses(base_core.BaseCoreTest):
     def setUp(self):
         super().setUp()
         self._storage_class_name = 'Test'
+        self._mock_session = self.patch_call("cterasdk.objects.services.Management.session")
 
     def test_add_storage_class(self):
         add_response = 'Success'

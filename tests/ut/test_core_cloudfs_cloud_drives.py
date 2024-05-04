@@ -9,11 +9,13 @@ from cterasdk.common import Object, union
 from tests.ut import base_core
 
 
-class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-public-methods
+class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-public-methods, too-many-instance-attributes
 
     def setUp(self):
         super().setUp()
         self._owner = 'admin'
+        self._cloudfolder_name = 'folder_name'
+        self._cloudfolder_baseObjecrRef = 'objs/1'
         self._local_user_account = UserAccount(self._owner)
         self._group = 'admin'
         self._name = 'folderGroup'
@@ -244,3 +246,13 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
             cloudfs.CloudDrives(self._global_admin).setoacl(self._nt_acl_owner.foldersPath, self._nt_acl_owner.ownerSid,
                                                             self._nt_acl_owner.isRecursive)
         self.assertEqual('Failed to setOwnerACL', error.exception.message)
+
+    def test_modify_cloudfolder_failure(self):
+        mock_find_cloudfolder = self.patch_call('cterasdk.core.cloudfs.CloudDrives.find')
+        mock_find_cloudfolder.return_value = munch.Munch({'baseObjectRef': self._cloudfolder_baseObjecrRef})
+        self._init_global_admin(get_response=munch.Munch({'baseObjectRef': self._cloudfolder_baseObjecrRef}))
+        self._global_admin.api.put = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException):
+            cloudfs.CloudDrives(self._global_admin).modify(self._cloudfolder_name, self._local_user_account)
+        self._global_admin.api.get.assert_called_once_with(self._cloudfolder_baseObjecrRef)
+        self._global_admin.api.put.assert_called_once_with(f'/{self._cloudfolder_baseObjecrRef}', mock.ANY)
