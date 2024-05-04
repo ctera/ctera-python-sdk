@@ -2,15 +2,15 @@ from unittest import mock
 import munch
 
 from cterasdk.core import directoryservice
-from cterasdk.core.types import UserAccount, GroupAccount, DomainControllers, AccessControlEntry 
-from cterasdk.core.enum import Role, DirectoryServiceType, DirectoryServiceFetchMode, DirectorySearchEntityType, SearchType
+from cterasdk.core.types import UserAccount, GroupAccount, DomainControllers, AccessControlEntry
+from cterasdk.core.enum import Role, DirectoryServiceType, DirectoryServiceFetchMode, DirectorySearchEntityType
 from cterasdk.common.types import ADDomainIDMapping
 from cterasdk.common.object import Object
 from cterasdk import exceptions
 from tests.ut import base_core
 
 
-class TestCoreDirectoryServices(base_core.BaseCoreTest):
+class TestCoreDirectoryServices(base_core.BaseCoreTest):  # pylint: disable=too-many-public-methods, too-many-instance-attributes
 
     def setUp(self):
         super().setUp()
@@ -139,8 +139,8 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         mock_session.return_value = munch.Munch({'user': munch.Munch({'tenant': self._tenant})})
         self._init_global_admin()
         directoryservice.DirectoryService(self._global_admin).connect(self._domain, self._join_username,
-                                                                            self._join_password,
-                                                                            domain_controllers=self._domain_controllers)
+                                                                      self._join_password,
+                                                                      domain_controllers=self._domain_controllers)
         self._global_admin.api.execute.assert_called_once_with('', 'testAndSaveAD', mock.ANY)
         expected_param = self._create_connect_to_directory_services_param(domain_controllers=self._domain_controllers)
         actual_param = self._global_admin.api.execute.call_args[0][2]
@@ -166,7 +166,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
             param.ipAddresses = Object()
             param.ipAddresses._classname = 'DomainControlIPAddresses'  # pylint: disable=protected-access
             param.ipAddresses.ipAddress1 = domain_controllers.primary
-            param.ipAddresses.ipAddress2 = domain_controllers.secondary        
+            param.ipAddresses.ipAddress2 = domain_controllers.secondary
         return param
 
     def test_set_access_control_disconnected(self):
@@ -174,7 +174,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             directoryservice.DirectoryService(self._global_admin).set_access_control(self._acl)
         self.assertEqual('Failed to apply access control. Not connected to directory services.', error.exception.message)
-    
+
     def test_set_access_control_with_default(self):
         mock_search_users = self.patch_call("cterasdk.core.directoryservice.DirectoryService._search_users")
         mock_search_users.return_value = self._account_user_name
@@ -195,7 +195,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
 
     def test_get_access_control(self):
         self._init_global_admin(get_response=[
-            self._create_access_control_entry(DirectorySearchEntityType.User, self._account_user_name, Role.ReadOnlyAdmin), 
+            self._create_access_control_entry(DirectorySearchEntityType.User, self._account_user_name, Role.ReadOnlyAdmin),
             self._create_access_control_entry(DirectorySearchEntityType.Group, self._account_group_name, Role.EndUser)
         ])
         acl = directoryservice.DirectoryService(self._global_admin).get_access_control()
@@ -206,27 +206,31 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
     def test_user_search_not_found(self):
         self._init_global_admin(execute_response=None)
         with self.assertRaises(exceptions.CTERAException) as error:
-            directoryservice.DirectoryService(self._global_admin)._search_users(self._domain, self._account_user_name)
+            directoryservice.DirectoryService(self._global_admin)._search_users(self._domain,  # pylint: disable=protected-access
+                                                                                self._account_user_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
         self.assertEqual('Could not find results that match your search criteria', error.exception.message)
 
     def test_group_search_not_found(self):
         self._init_global_admin(execute_response=None)
         with self.assertRaises(exceptions.CTERAException) as error:
-            directoryservice.DirectoryService(self._global_admin)._search_users(self._domain, self._account_user_name)
+            directoryservice.DirectoryService(self._global_admin)._search_users(self._domain,  # pylint: disable=protected-access
+                                                                                self._account_user_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
         self.assertEqual('Could not find results that match your search criteria', error.exception.message)
 
     def test_user_search_no_match(self):
         self._init_global_admin(execute_response=[munch.Munch({'name': 'random'})])
         with self.assertRaises(exceptions.CTERAException) as error:
-            directoryservice.DirectoryService(self._global_admin)._search_users(self._domain, self._account_user_name)
+            directoryservice.DirectoryService(self._global_admin)._search_users(self._domain,  # pylint: disable=protected-access
+                                                                                self._account_user_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
         self.assertEqual('Search returned multiple results, but none matched your search criteria', error.exception.message)
 
     def test_user_search_found(self):
         self._init_global_admin(execute_response=[munch.Munch({'name': self._account_user_name})])
-        ret = directoryservice.DirectoryService(self._global_admin)._search_users(self._domain, self._account_user_name)
+        ret = directoryservice.DirectoryService(self._global_admin)._search_users(self._domain,  # pylint: disable=protected-access
+                                                                                  self._account_user_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
         self.assertEqual(ret.name, self._account_user_name)
 
