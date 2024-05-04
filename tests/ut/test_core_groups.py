@@ -95,6 +95,25 @@ class TestCoreGroups(base_core.BaseCoreTest):
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, execute_response)
 
+    def test_modify_group_not_found(self):
+        self._global_admin.api.get = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
+            groups.Groups(self._global_admin).modify(self._local_group)
+        self._global_admin.api.get.assert_called_once_with(f'/localGroups/{self._groupname}', mock.ANY)
+        self.assertEqual('Failed to retrieve group', error.exception.message)
+
+    def test_modify_failure(self):
+        get_response = self._get_group_object(name=self._groupname)
+        self._init_global_admin(get_response=get_response)
+        self._global_admin.api.execute = mock.MagicMock(side_effect=exceptions.CTERAException())
+        with self.assertRaises(exceptions.CTERAException) as error:
+            groups.Groups(self._global_admin).modify(self._groupname, self._new_groupname, self._description)
+        self._global_admin.api.execute.assert_called_once_with(f'/localGroups/{self._groupname}', 'updateGroup', mock.ANY)
+        expected_param = self._get_update_group_object(name=self._new_groupname, description=self._description)
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual('Failed to modify group', error.exception.message)
+
     def _get_add_group_object(self, **kwargs):
         param = Object()
         param._classname = 'AddGroupParam'  # pylint: disable=protected-access

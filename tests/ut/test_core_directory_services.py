@@ -2,7 +2,8 @@ from unittest import mock
 import munch
 
 from cterasdk.core import directoryservice
-from cterasdk.core.types import UserAccount, GroupAccount
+from cterasdk.core.types import UserAccount, GroupAccount, DomainControllers
+from cterasdk.core.enum import Role, DirectoryServiceType, DirectoryServiceFetchMode
 from cterasdk.common.types import ADDomainIDMapping
 from cterasdk.common.object import Object
 from cterasdk import exceptions
@@ -13,10 +14,14 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
 
     def setUp(self):
         super().setUp()
+        self._tenant = 'tenant'
         self._domain_flat_name = 'DEMO'
         self._domain = 'demo.local'
         self._mapping_start = 0
         self._mapping_end = 1
+        self._join_username = 'user'
+        self._join_password = 'pass'
+        self._domain_controllers = DomainControllers('192.168.0.1', '192.168.0.2')
         self._account_user_name = 'user'
         self._account_group_name = 'group'
         self._accounts = [UserAccount(self._account_user_name, self._domain), GroupAccount(self._account_group_name, self._domain)]
@@ -108,6 +113,40 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         mock_search_groups.assert_called_once_with(self._domain, self._account_group_name)
         self._global_admin.api.execute.assert_called_once_with('', 'syncAD', mock.ANY)
         self.assertEqual(ret, execute_response)
+
+    def test_connect(self):
+        mock_session = self.patch_call("cterasdk.objects.services.Management.session")
+        mock_session.return_value = munch.Munch({'user': munch.Munch({'tenant': self._tenant})})
+        directoryservice.DirectoryService(self._global_admin).connect(self._domain, self._join_username,
+                                                                            self._join_password,
+                                                                            domain_controllers=self._domain_controllers)
+        self._global_admin.api.execute.assert_called_once_with('', 'testAndSaveAD', mock.ANY)
+        expected_param = self._create_connect_to_directory_services_param(domain_controllers=self._domain_controllers)
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def _create_connect_to_directory_services_param(self, domain_controllers=None):
+        param = Object()
+        param._classname = 'ActiveDirectory'  # pylint: disable=protected-access
+        param.type = DirectoryServiceType.Microsoft
+        param.domain = self._domain
+        param.useKerberos = False
+        param.useSSL = False
+        param.username = self._join_username
+        param.password = self._join_password
+        param.ou = None
+        param.noMatchRole = Role.Disabled
+        param.accessControlRules = None
+        param.idMapping = None
+        param.fetchMode = DirectoryServiceFetchMode.Lazy
+        param.ipAddresses = None
+
+        if domain_controllers:
+            param.ipAddresses = Object()
+            param.ipAddresses._classname = 'DomainControlIPAddresses'  # pylint: disable=protected-access
+            param.ipAddresses.ipAddress1 = domain_controllers.primary
+            param.ipAddresses.ipAddress2 = domain_controllers.secondary        
+        return param
 
     @staticmethod
     def _create_mapping_param(mapping):
