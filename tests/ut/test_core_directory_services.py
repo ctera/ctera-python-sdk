@@ -121,6 +121,19 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         self._global_admin.api.execute.assert_called_once_with('', 'syncAD', mock.ANY)
         self.assertEqual(ret, execute_response)
 
+    def test_fetch_invalid_domain(self):
+        self._init_global_admin(get_response=['invalid.domain'])
+        with self.assertRaises(exceptions.CTERAException) as error:
+            directoryservice.DirectoryService(self._global_admin).fetch(self._accounts)
+        self.assertEqual('Invalid domain', error.exception.message)
+
+    def test_fetch_invalid_account_type(self):
+        self._init_global_admin(get_response=[self._domain])
+        bad_account = munch.Munch({'name': self._account_user_name, 'directory': self._domain, 'account_type': 'bad_type'})
+        with self.assertRaises(exceptions.CTERAException) as error:
+            directoryservice.DirectoryService(self._global_admin).fetch([bad_account])
+        self.assertEqual('Invalid domain', error.exception.message)
+
     def test_connect(self):
         mock_session = self.patch_call("cterasdk.objects.services.Management.session")
         mock_session.return_value = munch.Munch({'user': munch.Munch({'tenant': self._tenant})})
