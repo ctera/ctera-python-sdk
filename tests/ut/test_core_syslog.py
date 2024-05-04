@@ -56,7 +56,7 @@ class TestCoreSyslog(base_core.BaseCoreTest):
             syslog.Syslog(self._global_admin).modify()
         self._global_admin.api.get.assert_called_once_with('/settings/logsSettings/syslogConfig')
         self.assertEqual('Syslog configuration cannot be modified when disabled', error.exception.message)
-        
+
     def _default_settings(self):
         param = Object()
         param._classname = 'PortalSyslogConfig'  # pylint: disable=protected-access

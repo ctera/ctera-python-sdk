@@ -24,7 +24,7 @@ class TestCoreStorageClasses(base_core.BaseCoreTest):
 
     def test_get_storage_class_global_admin(self):
         self._mock_session.in_tenant_context = mock.MagicMock()
-        self._mock_session.in_tenant_context.return_value = True
+        self._mock_session.in_tenant_context.return_value = False
         get_response = 'Success'
         self._init_global_admin(get_response=get_response)
         ret = storage_classes.StorageClasses(self._global_admin).get(self._storage_class_name)
