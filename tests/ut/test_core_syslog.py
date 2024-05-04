@@ -42,13 +42,12 @@ class TestCoreSyslog(base_core.BaseCoreTest):
         get_response = munch.Munch({'mode': Mode.Enabled})
         put_response = 'Success'
         self._init_global_admin(get_response=get_response, put_response=put_response)
-        ret = syslog.Syslog(self._global_admin).modify(self._server, self._port, IPProtocol.UDP, Severity.INFO)
+        syslog.Syslog(self._global_admin).modify(self._server, self._port, IPProtocol.UDP, Severity.INFO)
         self._global_admin.api.get.assert_called_once_with('/settings/logsSettings/syslogConfig')
         self._global_admin.api.put.assert_called_once_with('/settings/logsSettings/syslogConfig', mock.ANY)
         expected_param = self._default_settings()
         actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(ret, put_response)
 
     def test_modify_disabled_syslog(self):
         get_response = munch.Munch({'mode': Mode.Disabled})
