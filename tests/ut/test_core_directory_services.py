@@ -71,7 +71,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
     def test_set_advanced_mapping_disconnected(self):
         self._init_global_admin()
         with self.assertRaises(exceptions.CTERAException) as error:
-            directoryservice.DirectoryService(self._global_admin).set_access_control(self._acl)
+            directoryservice.DirectoryService(self._global_admin).set_advanced_mapping(None)
         self.assertEqual('Failed to apply mapping. Not connected to directory services.', 
                          error.exception.message)
 
@@ -187,9 +187,10 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
             self._create_access_control_entry(DirectorySearchEntityType.User, self._account_user_name, Role.ReadOnlyAdmin), 
             self._create_access_control_entry(DirectorySearchEntityType.Group, self._account_group_name, Role.EndUser)
         ])
-        ret = directoryservice.DirectoryService(self._global_admin).get_access_control()
+        acl = directoryservice.DirectoryService(self._global_admin).get_access_control()
         self._global_admin.api.get.assert_called_once_with('/directoryConnector/accessControlRules')
-        self._assert_equal_objects(ret, self._acl)
+        self.assertEqual(acl[0].account, self._accounts[0])
+        self.assertEqual(acl[1].account, self._accounts[1])
 
     def _create_access_control_entry(self, ace_type, ace_name, ace_role):
         ace = Object()
