@@ -2,7 +2,7 @@ from unittest import mock
 import munch
 
 from cterasdk.core import directoryservice
-from cterasdk.core.types import UserAccount, GroupAccount, DomainControllers
+from cterasdk.core.types import UserAccount, GroupAccount, DomainControllers, AccessControlEntry, AccessControlRule 
 from cterasdk.core.enum import Role, DirectoryServiceType, DirectoryServiceFetchMode
 from cterasdk.common.types import ADDomainIDMapping
 from cterasdk.common.object import Object
@@ -25,6 +25,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         self._account_user_name = 'user'
         self._account_group_name = 'group'
         self._accounts = [UserAccount(self._account_user_name, self._domain), GroupAccount(self._account_group_name, self._domain)]
+        self._acl = [AccessControlEntry(ace) for ace in zip(self._accounts, [Role.ReadOnlyAdmin, Role.EndUser])]
 
     def test_disconnect(self):
         put_response = 'Success'
@@ -147,6 +148,22 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
             param.ipAddresses.ipAddress1 = domain_controllers.primary
             param.ipAddresses.ipAddress2 = domain_controllers.secondary        
         return param
+    
+    def test_set_access_with_default(self):
+        mock_search_users = self.patch_call("cterasdk.core.directoryservice.DirectoryService._search_users")
+        mock_search_users.return_value = self._account_user_name
+        mock_search_groups = self.patch_call("cterasdk.core.directoryservice.DirectoryService._search_groups")
+        mock_search_groups.return_value = self._account_group_name
+        put_response = 'Success'
+        self._init_global_admin(put_response=put_response)
+        ret = directoryservice.DirectoryService(self._global_admin).set_access_control(self._acl, Role.Disabled)
+        self._global_admin.api.put.assert_has_calls(
+            [
+                mock.call('/directoryConnector/accessControlRules', mock.ANY),
+                mock.call('/directoryConnector/noMatchRole', Role.Disabled)
+            ]
+        )
+        self.assertEqual(ret, put_response)
 
     @staticmethod
     def _create_mapping_param(mapping):
