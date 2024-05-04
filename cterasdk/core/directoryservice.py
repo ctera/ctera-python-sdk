@@ -263,7 +263,7 @@ class DirectoryService(BaseCommand):
                 return principal
 
         raise CTERAException(
-            'Search returned multiple results, but none matches your search criteria',
+            'Search returned multiple results, but none matched your search criteria',
             None,
             domain=domain,
             type=search_type,
