@@ -19,6 +19,8 @@ class TestCoreSyslog(base_core.BaseCoreTest):
             self._init_global_admin(get_response=Mode.Enabled if True else Mode.Disabled)
             ret = syslog.Syslog(self._global_admin).is_enabled()
             self._global_admin.api.get.assert_called_once_with('/settings/logsSettings/syslogConfig/mode')
+            print('enabled', enabled)
+            print('ret', ret)
             self.assertEqual(ret, enabled)
 
     def test_get_configuration(self):
@@ -39,7 +41,7 @@ class TestCoreSyslog(base_core.BaseCoreTest):
         self.assertEqual(ret, put_response)
 
     def test_modify_enabled_syslog(self):
-        get_response = munch.Munch()
+        get_response = munch.Munch({'mode': Mode.Enabled})
         put_response = 'Success'
         self._init_global_admin(get_response=get_response, put_response=put_response)
         ret = syslog.Syslog(self._global_admin).modify(self._server, self._port, IPProtocol.UDP, Severity.INFO)
