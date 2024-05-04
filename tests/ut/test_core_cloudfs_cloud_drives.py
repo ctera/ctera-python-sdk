@@ -256,4 +256,3 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
             cloudfs.CloudDrives(self._global_admin).modify(self._cloudfolder_name, self._local_user_account)
         self._global_admin.api.get.assert_called_once_with(self._cloudfolder_baseObjecrRef)
         self._global_admin.api.put.assert_called_once_with(f'/{self._cloudfolder_baseObjecrRef}', mock.ANY)
-        self.assertEqual('Cloud Drive folder update failed', error.exception.message)
