@@ -215,7 +215,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):  # pylint: disable=too-
         self._init_global_admin(execute_response=None)
         with self.assertRaises(exceptions.CTERAException) as error:
             directoryservice.DirectoryService(self._global_admin)._search_groups(self._domain,  # pylint: disable=protected-access
-                                                                                self._account_group_name)
+                                                                                 self._account_group_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
         self.assertEqual('Could not find results that match your search criteria', error.exception.message)
 
