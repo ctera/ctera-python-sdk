@@ -98,8 +98,8 @@ class TestCoreGroups(base_core.BaseCoreTest):
     def test_modify_group_not_found(self):
         self._global_admin.api.get = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
-            groups.Groups(self._global_admin).modify(self._local_group)
-        self._global_admin.api.get.assert_called_once_with(f'/localGroups/{self._groupname}', mock.ANY)
+            groups.Groups(self._global_admin).modify(self._groupname)
+        self._global_admin.api.get.assert_called_once_with(f'/localGroups/{self._groupname}')
         self.assertEqual('Failed to retrieve group', error.exception.message)
 
     def test_modify_failure(self):

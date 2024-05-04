@@ -25,7 +25,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         self._account_user_name = 'user'
         self._account_group_name = 'group'
         self._accounts = [UserAccount(self._account_user_name, self._domain), GroupAccount(self._account_group_name, self._domain)]
-        self._acl = [AccessControlEntry(ace) for ace in zip(self._accounts, [Role.ReadOnlyAdmin, Role.EndUser])]
+        self._acl = [AccessControlEntry(*ace) for ace in zip(self._accounts, [Role.ReadOnlyAdmin, Role.EndUser])]
 
     def test_disconnect(self):
         put_response = 'Success'
@@ -118,6 +118,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
     def test_connect(self):
         mock_session = self.patch_call("cterasdk.objects.services.Management.session")
         mock_session.return_value = munch.Munch({'user': munch.Munch({'tenant': self._tenant})})
+        self._init_global_admin()
         directoryservice.DirectoryService(self._global_admin).connect(self._domain, self._join_username,
                                                                             self._join_password,
                                                                             domain_controllers=self._domain_controllers)
@@ -148,15 +149,24 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
             param.ipAddresses.ipAddress1 = domain_controllers.primary
             param.ipAddresses.ipAddress2 = domain_controllers.secondary        
         return param
+
+    def test_set_access_control_disconnected(self):
+        self._init_global_admin()
+        with self.assertRaises(exceptions.CTERAException) as error:
+            directoryservice.DirectoryService(self._global_admin).set_access_control(self._acl)
+        self.assertEqual('Failed to apply access control. Not connected to directory services.', 
+                         error.exception.message)
     
-    def test_set_access_with_default(self):
+    def test_set_access_control_with_default(self):
         mock_search_users = self.patch_call("cterasdk.core.directoryservice.DirectoryService._search_users")
         mock_search_users.return_value = self._account_user_name
         mock_search_groups = self.patch_call("cterasdk.core.directoryservice.DirectoryService._search_groups")
         mock_search_groups.return_value = self._account_group_name
+        get_response = munch.Munch()
         put_response = 'Success'
-        self._init_global_admin(put_response=put_response)
+        self._init_global_admin(get_response=get_response, put_response=put_response)
         ret = directoryservice.DirectoryService(self._global_admin).set_access_control(self._acl, Role.Disabled)
+        self._global_admin.api.get.assert_called_once_with('/directoryConnector')
         self._global_admin.api.put.assert_has_calls(
             [
                 mock.call('/directoryConnector/accessControlRules', mock.ANY),
