@@ -16,11 +16,9 @@ class TestCoreSyslog(base_core.BaseCoreTest):
 
     def test_is_enabled(self):
         for enabled in [True, False]:
-            self._init_global_admin(get_response=Mode.Enabled if True else Mode.Disabled)
+            self._init_global_admin(get_response=Mode.Enabled if enabled else Mode.Disabled)
             ret = syslog.Syslog(self._global_admin).is_enabled()
             self._global_admin.api.get.assert_called_once_with('/settings/logsSettings/syslogConfig/mode')
-            print('enabled', enabled)
-            print('ret', ret)
             self.assertEqual(ret, enabled)
 
     def test_get_configuration(self):
