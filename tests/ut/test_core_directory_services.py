@@ -192,21 +192,21 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
 
     def test_user_search_not_found(self):
         self._init_global_admin(execute_response=None)
-        with self.assertRaises(exceptions.CTERAException()) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             directoryservice.DirectoryService(self._global_admin)._search_users(self._domain, self._account_user_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
         self.assertEqual('Could not find results that match your search criteria', error.exception.message)
 
     def test_group_search_not_found(self):
         self._init_global_admin(execute_response=None)
-        with self.assertRaises(exceptions.CTERAException()) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             directoryservice.DirectoryService(self._global_admin)._search_users(self._domain, self._account_user_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
         self.assertEqual('Could not find results that match your search criteria', error.exception.message)
 
     def test_user_search_no_match(self):
         self._init_global_admin(execute_response=[munch.Munch({'name': 'random'})])
-        with self.assertRaises(exceptions.CTERAException()) as error:
+        with self.assertRaises(exceptions.CTERAException) as error:
             directoryservice.DirectoryService(self._global_admin)._search_users(self._domain, self._account_user_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
         self.assertEqual('Search returned multiple results, but none matched your search criteria', error.exception.message)
