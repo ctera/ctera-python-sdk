@@ -132,7 +132,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):
         bad_account = munch.Munch({'name': self._account_user_name, 'directory': self._domain, 'account_type': 'bad_type'})
         with self.assertRaises(exceptions.CTERAException) as error:
             directoryservice.DirectoryService(self._global_admin).fetch([bad_account])
-        self.assertEqual('Invalid domain', error.exception.message)
+        self.assertEqual('Invalid account type', error.exception.message)
 
     def test_connect(self):
         mock_session = self.patch_call("cterasdk.objects.services.Management.session")
