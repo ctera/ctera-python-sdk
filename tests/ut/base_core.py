@@ -27,6 +27,12 @@ class BaseCoreTest(base.BaseTest):
         self._global_admin.ctera.execute = mock.MagicMock(return_value=execute_response)
         self._global_admin.ctera.multipart = mock.MagicMock(return_value=multipart_response)
 
+    def _enable_tenant_context(self, m):
+        m.in_tenant_context = True
+
+    def _disable_tenant_context(self, m):
+        m.in_tenant_context = True
+
     @staticmethod
     def _create_filter(filter_type, field, restriction, value):
         query_filter = Object()
