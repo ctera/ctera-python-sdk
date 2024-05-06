@@ -28,10 +28,10 @@ class BaseCoreTest(base.BaseTest):
         self._global_admin.ctera.multipart = mock.MagicMock(return_value=multipart_response)
 
     def _enable_tenant_context(self, m):
-        m.in_tenant_context = True
+        m().in_tenant_context.return_value = True
 
     def _disable_tenant_context(self, m):
-        m.in_tenant_context = False
+        m().in_tenant_context.return_value = False
 
     @staticmethod
     def _create_filter(filter_type, field, restriction, value):

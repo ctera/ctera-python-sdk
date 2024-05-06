@@ -28,7 +28,7 @@ class TestCoreStorageClasses(base_core.BaseCoreTest):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
         ret = storage_classes.StorageClasses(self._global_admin).all()
-        self._global_admin.api.execute.assert_called_once_with('', '/storageClasses')
+        self._global_admin.api.execute.assert_called_once_with('', 'getStorageClasses')
         self.assertEqual(ret, execute_response)
 
     def test_list_storage_classes_global_admin(self):
@@ -52,7 +52,7 @@ class TestCoreStorageClasses(base_core.BaseCoreTest):
         execute_response = [munch.Munch({'name': self._storage_class_name})]
         self._init_global_admin(execute_response=execute_response)
         ret = storage_classes.StorageClasses(self._global_admin).get(self._storage_class_name)
-        self._global_admin.api.execute.assert_called_once_with('', '/storageClasses')
+        self._global_admin.api.execute.assert_called_once_with('', 'getStorageClasses')
         self.assertEqual(ret.name, self._storage_class_name)
 
     def test_get_storage_class_in_tenant_context_not_found(self):
@@ -61,5 +61,5 @@ class TestCoreStorageClasses(base_core.BaseCoreTest):
         self._init_global_admin(execute_response=execute_response)
         with self.assertRaises(exceptions.CTERAException) as error:
             storage_classes.StorageClasses(self._global_admin).get(self._storage_class_name)
-            self._global_admin.api.execute.assert_called_once_with('', '/storageClasses')
+            self._global_admin.api.execute.assert_called_once_with('', 'getStorageClasses')
         self.assertEqual('Could not find storage class.', error.exception.message)
