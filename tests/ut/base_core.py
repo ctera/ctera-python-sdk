@@ -31,7 +31,7 @@ class BaseCoreTest(base.BaseTest):
         m.in_tenant_context = True
 
     def _disable_tenant_context(self, m):
-        m.in_tenant_context = True
+        m.in_tenant_context = False
 
     @staticmethod
     def _create_filter(filter_type, field, restriction, value):

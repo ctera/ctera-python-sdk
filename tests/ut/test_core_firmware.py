@@ -7,8 +7,12 @@ from tests.ut import base_core
 
 class TestCoreFirmwares(base_core.BaseCoreTest):
 
+    def setUp(self):
+        super().setUp()
+        self._mock_session = self.patch_call("cterasdk.objects.services.Management.session")
+
     def test_list_images_in_tenant_context(self):
-        self._enable_tenant_context()
+        self._enable_tenant_context(self._mock_session)
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
         ret = firmwares.Firmwares(self._global_admin).list_images()
@@ -19,7 +23,7 @@ class TestCoreFirmwares(base_core.BaseCoreTest):
         self.assertEqual(ret, execute_response)
 
     def test_list_images_global_admin(self):
-        self._disable_tenant_context()
+        self._disable_tenant_context(self._mock_session)
         get_response = 'Success'
         self._init_global_admin(get_response=get_response)
         ret = firmwares.Firmwares(self._global_admin).list_images()
