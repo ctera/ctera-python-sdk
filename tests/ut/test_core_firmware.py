@@ -12,7 +12,7 @@ class TestCoreFirmwares(base_core.BaseCoreTest):
         self._mock_session = self.patch_call("cterasdk.objects.services.Management.session")
 
     def test_list_images_in_tenant_context(self):
-        base_core.BaseCoreTest._enable_tenant_context(self._mock_session)
+        base_core.BaseCoreTest.enable_tenant_context(self._mock_session)
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
         ret = firmwares.Firmwares(self._global_admin).list_images()
@@ -23,7 +23,7 @@ class TestCoreFirmwares(base_core.BaseCoreTest):
         self.assertEqual(ret, execute_response)
 
     def test_list_images_global_admin(self):
-        base_core.BaseCoreTest._disable_tenant_context(self._mock_session)
+        base_core.BaseCoreTest.disable_tenant_context(self._mock_session)
         get_response = 'Success'
         self._init_global_admin(get_response=get_response)
         ret = firmwares.Firmwares(self._global_admin).list_images()

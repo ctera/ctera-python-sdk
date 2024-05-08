@@ -132,7 +132,7 @@ class TestCoreTemplates(base_core.BaseCoreTest):
             'consent_page': consent_page
         })
 
-    def _create_template_param(self, include_sets=None, backup_schedule=None, apps=None,
+    def _create_template_param(self, include_sets=None, backup_schedule=None, apps=None,  # pylint: disable=too-many-statements
                                scripts=None, cli_commands=None, update_settings=None, consent_page=None):
         param = Object()
         param._classname = self._classname  # pylint: disable=protected-access
