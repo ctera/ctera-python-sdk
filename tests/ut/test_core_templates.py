@@ -39,7 +39,7 @@ class TestCoreTemplates(base_core.BaseCoreTest):
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exceptions.ObjectNotFoundException) as error:
             templates.Templates(self._global_admin).get(self._name)
-        self._global_admin.api.get_multi.assert_called_once_with(f'/deviceTemplates/{self._groupname}', mock.ANY)
+        self._global_admin.api.get_multi.assert_called_once_with(f'/deviceTemplates/{self._name}', mock.ANY)
         expected_include = ['/' + attr for attr in templates.Templates.default]
         actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
