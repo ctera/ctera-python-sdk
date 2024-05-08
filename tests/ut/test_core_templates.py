@@ -89,9 +89,11 @@ class TestCoreTemplates(base_core.BaseCoreTest):
         add_response = 'Success'
         self._init_global_admin(add_response=add_response)
         parameters = TestCoreTemplates._template_parameters()
-        ret = templates.Templates(self._global_admin).add(self._name, self._description, include_sets=parameters.include_sets, exclude_sets=None,
-                                                          apps=parameters.apps, backup_schedule=parameters.backup_schedule,
-                                                          update_settings=parameters.update_settings, scripts=parameters.scripts, cli_commands=parameters.cli_commands,
+        ret = templates.Templates(self._global_admin).add(self._name, self._description, include_sets=parameters.include_sets,
+                                                          exclude_sets=None, apps=parameters.apps,
+                                                          backup_schedule=parameters.backup_schedule,
+                                                          update_settings=parameters.update_settings,
+                                                          scripts=parameters.scripts, cli_commands=parameters.cli_commands,
                                                           consent_page=parameters.consent_page)
         self._global_admin.api.add.assert_called_once_with('/deviceTemplates', mock.ANY)
         expected_param = self._create_template_param(parameters.include_sets, parameters.backup_schedule, parameters.apps, parameters.scripts,
