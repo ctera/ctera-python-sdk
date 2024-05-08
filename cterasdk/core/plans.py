@@ -127,10 +127,11 @@ class Plans(BaseCommand):
         
     @staticmethod
     def _assign_services(plan, services):
-        for service in plan.services:
-            service_state = services.get(service.serviceName, None)
-            if service_state:
-                service.serviceState = service_state
+        if services is not None:
+            for service in plan.services:
+                service_state = services.get(service.serviceName, None)
+                if service_state:
+                    service.serviceState = service_state
 
     @staticmethod
     def _assign_retention(plan, retention):
