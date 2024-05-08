@@ -1,14 +1,9 @@
-from unittest import mock
-
 import munch
 from cterasdk.core import ssl
 from tests.ut import base_core
 
 
 class TestCoreSSL(base_core.BaseCoreTest):
-
-    def setUp(self):
-        super().setUp()
 
     def test_get_certificate(self):
         get_response = 'Success'
