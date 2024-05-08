@@ -28,6 +28,14 @@ class BaseCoreTest(base.BaseTest):
         self._global_admin.ctera.multipart = mock.MagicMock(return_value=multipart_response)
 
     @staticmethod
+    def enable_tenant_context(m):
+        m().in_tenant_context.return_value = True
+
+    @staticmethod
+    def disable_tenant_context(m):
+        m().in_tenant_context.return_value = False
+
+    @staticmethod
     def _create_filter(filter_type, field, restriction, value):
         query_filter = Object()
         query_filter._classname = filter_type  # pylint: disable=protected-access

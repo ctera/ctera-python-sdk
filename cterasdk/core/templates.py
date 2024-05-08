@@ -35,7 +35,7 @@ class Templates(BaseCommand):
         include = ['/' + attr for attr in include]
         template = self._core.api.get_multi('/deviceTemplates/' + name, include)
         if template.name is None:
-            raise ObjectNotFoundException('Could not find server', f'/deviceTemplates/{name}', name=name)
+            raise ObjectNotFoundException('Could not find template', f'/deviceTemplates/{name}', name=name)
         return template
 
     def add(self, name, description=None, include_sets=None, exclude_sets=None,  # pylint: disable=too-many-arguments
