@@ -4,8 +4,8 @@ from unittest import mock
 import munch
 from cterasdk.common import Object
 from cterasdk.core import templates
-from cterasdk.core.types import TemplateScript, PlatformVersion
-from cterasdk.common.types import ApplicationBackupSet, FileFilterBuilder, FilterBackupSet, BackupScheduleBuilder, \
+from cterasdk.core.types import TemplateScript
+from cterasdk.common.types import ApplicationBackupSet, FileFilterBuilder, FilterBackupSet, \
                                   TimeRange, BackupScheduleBuilder, SoftwareUpdatePolicyBuilder  # noqa: E402, F401
 from cterasdk.common.enum import DayOfWeek, Application
 from cterasdk.common.types import ConsentPage
@@ -93,7 +93,7 @@ class TestCoreTemplates(base_core.BaseCoreTest):
                                                           apps=parameters.apps, backup_schedule=parameters.backup_schedule,
                                                           update_settings=parameters.update_settings, scripts=parameters.scripts, cli_commands=parameters.cli_commands,
                                                           consent_page=parameters.consent_page)
-        self._global_admin.api.add.assert_called_once_with(f'/deviceTemplates', mock.ANY)
+        self._global_admin.api.add.assert_called_once_with('/deviceTemplates', mock.ANY)
         expected_param = self._create_template_param(parameters.include_sets, parameters.backup_schedule, parameters.apps, parameters.scripts,
                                                      parameters.cli_commands, parameters.update_settings, parameters.consent_page)
         actual_param = self._global_admin.api.add.call_args[0][1]
@@ -132,7 +132,7 @@ class TestCoreTemplates(base_core.BaseCoreTest):
 
         """Configure Consent Page"""
         consent_page = ConsentPage('the header of your consent page', 'the body of your consent page')
-        
+
         return munch.Munch({
             'include_sets': include_sets,
             'backup_schedule': backup_schedule,
@@ -144,7 +144,7 @@ class TestCoreTemplates(base_core.BaseCoreTest):
         })
 
     def _create_template_param(self, include_sets=None, backup_schedule=None, apps=None,
-                        scripts=None, cli_commands=None, update_settings=None, consent_page=None):
+                               scripts=None, cli_commands=None, update_settings=None, consent_page=None):
         param = Object()
         param._classname = self._classname  # pylint: disable=protected-access
         param.name = self._name
