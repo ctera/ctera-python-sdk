@@ -124,7 +124,7 @@ class Plans(BaseCommand):
         except CTERAException as error:
             logging.getLogger('cterasdk.core').error("Could not modify subscription plan.")
             raise CTERAException('Could not modify subscription plan', error)
-        
+
     @staticmethod
     def _assign_services(plan, services):
         if services is not None:

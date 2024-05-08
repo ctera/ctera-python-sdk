@@ -21,14 +21,11 @@ class PortalSettings(BaseCommand):
     """
     Virtual Portal Settings APIs
     """
-    def __init__(self, core):
-        super().__init__(core)
-
     def get(self):
         if self.session().in_tenant_context():
             return self._core.api.execute('', 'getSettings').settings
         return self._core.api.get('/settings/defaultPortalSettings')
-    
+
     def use_global_settings(self):
         return self.update()
 
