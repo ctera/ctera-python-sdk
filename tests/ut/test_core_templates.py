@@ -96,8 +96,9 @@ class TestCoreTemplates(base_core.BaseCoreTest):
                                                           scripts=parameters.scripts, cli_commands=parameters.cli_commands,
                                                           consent_page=parameters.consent_page)
         self._global_admin.api.add.assert_called_once_with('/deviceTemplates', mock.ANY)
-        expected_param = self._create_template_param(parameters.include_sets, parameters.backup_schedule, parameters.apps, parameters.scripts,
-                                                     parameters.cli_commands, parameters.update_settings, parameters.consent_page)
+        expected_param = self._create_template_param(parameters.include_sets, parameters.backup_schedule, parameters.apps,
+                                                     parameters.scripts, parameters.cli_commands,
+                                                     parameters.update_settings, parameters.consent_page)
         actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
