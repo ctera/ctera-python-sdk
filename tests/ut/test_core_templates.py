@@ -105,37 +105,23 @@ class TestCoreTemplates(base_core.BaseCoreTest):
 
     @staticmethod
     def _template_parameters():
-        """Include all 'pptx', 'xlsx' and 'docx' file types for all users"""
         docs = FileFilterBuilder.extensions().include(['pptx', 'xlsx', 'docx']).build()
         include_sets = FilterBackupSet('Documents', filter_rules=[docs], template_dirs=[EnvironmentVariables.ALLUSERSPROFILE])
-
-        """Schedule backup for a specific time"""
         time_range = TimeRange().start('07:00:00').days(DayOfWeek.Weekdays).build()  # 7am, on weekdays
         backup_schedule = BackupScheduleBuilder.window(time_range)
-
-        """Backup applications"""
         apps = Application.All  # back up all applications
-
-        """Configure software update schedule"""
         schedule = TimeRange().start('01:00:00').end('02:00:00').days(DayOfWeek.Weekdays).build()
         update_settings = SoftwareUpdatePolicyBuilder().download_and_install(True).reboot_after_update(True).schedule(schedule).build()
-
-        """Configure Scripts"""
         scripts = [
             TemplateScript.windows().after_logon('echo Current directory: %cd%'),
             TemplateScript.linux().before_backup('./mysqldump -u admin website > /mnt/backup/backup.sql'),
             TemplateScript.linux().after_backup('rm /mnt/backup/backup.sql')
         ]
-
-        """Configure CLI Commands"""
         cli_commands = [
             'set /config/agent/stubs/deleteFilesOfCachedFolderOnDisable false',
             'add /config/agent/stubs/allowedExplorerExtensions url'
         ]
-
-        """Configure Consent Page"""
         consent_page = ConsentPage('the header of your consent page', 'the body of your consent page')
-
         return munch.Munch({
             'include_sets': include_sets,
             'backup_schedule': backup_schedule,
