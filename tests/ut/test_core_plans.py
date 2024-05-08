@@ -155,7 +155,7 @@ class TestCorePlans(base_core.BaseCoreTest):
             Connect=5,
             Storage=4096
         )
-        plans.Plans(self._global_admin).modify(self._plan_name, retention, quotas, False)
+        plans.Plans(self._global_admin).modify(self._plan_name, retention=retention, quotas=quotas, apply_changes=False)
         self._global_admin.api.get.assert_called_once_with(f'/plans/{self._plan_name}')
         self._global_admin.api.put.assert_called_once_with(f'/plans/{self._plan_name}', mock.ANY)
         expected_param = self._get_plan_object(retention, licenses)

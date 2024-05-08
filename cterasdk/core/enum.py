@@ -312,6 +312,34 @@ class PlanItem:
     Storage = 'Storage'
 
 
+class PlanService:
+    """
+    Plan Service
+
+    :ivar str CloudDrive: Cloud Drive
+    :ivar str CloudBackup: Cloud Backup
+    :ivar str Seeding: Seeding
+    :ivar str Remote: Remote Access
+    """
+    CloudDrive = 'Cloud folders'
+    CloudBackup = 'Cloud Backup'
+    Seeding = 'Seeding'
+    Remote = 'Remote Access'
+
+
+class PlanServiceState:
+    """
+    Plan Service State
+
+    :ivar str Enabled: Enabled
+    :ivar str Disabled: Disabled
+    :ivar str Connect: Cloud Drive Connect
+    """
+    Enabled = 'OK'
+    Disabled = 'Disabled'
+    Connect = 'Lite'
+
+
 class ListFilter:
     """
     Cloud Drive Folder List Filter
