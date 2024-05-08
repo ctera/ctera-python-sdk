@@ -35,7 +35,7 @@ class TestCoreTemplates(base_core.BaseCoreTest):
         self.assertEqual(ret.name, self._name)
 
     def test_get_template_not_found(self):
-        get_multi_response = self._get_template_object(name=self._name)
+        get_multi_response = self._get_template_object(name=None)
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exceptions.ObjectNotFoundException) as error:
             templates.Templates(self._global_admin).get(self._name)
