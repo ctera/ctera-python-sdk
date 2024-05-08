@@ -78,15 +78,17 @@ class Plans(BaseCommand):
             raise ObjectNotFoundException('Could not find subscription plan', f'/plans/{name}', name=name)
         return plan
 
-    def add(self, name, retention=None, quotas=None):
+    def add(self, name, services=None, retention=None, quotas=None):
         """
         Add a subscription plan
 
+        :param dict,optional services: Services to enable or disable
         :param dict,optional retention: The data retention policy
         :param dict,optional quotas: The items included in the plan and their respective quota
         """
         plan = self._core.api.defaults('Plan')
         plan.name = name
+        Plans._assign_services(plan, services)
         Plans._assign_retention(plan, retention)
         Plans._assign_quotas(plan, quotas)
         try:
@@ -97,15 +99,17 @@ class Plans(BaseCommand):
             logging.getLogger('cterasdk.core').error("Plan creation failed.")
             raise CTERAException('Plan creation failed', error)
 
-    def modify(self, name, retention=None, quotas=None, apply_changes=True):
+    def modify(self, name, services=None, retention=None, quotas=None, apply_changes=True):
         """
         Modify a subscription plan
 
+        :param dict,optional services: Services to enable or disable
         :param dict,optional retention: The data retention policy
         :param dict,optional quotas: The items included in the plan and their respective quota
         :param bool,optional apply_changes: Apply provisioning changes immediately
         """
         plan = self._get_entire_object(name)
+        Plans._assign_services(plan, services)
         Plans._assign_retention(plan, retention)
         Plans._assign_quotas(plan, quotas)
         try:
@@ -120,6 +124,13 @@ class Plans(BaseCommand):
         except CTERAException as error:
             logging.getLogger('cterasdk.core').error("Could not modify subscription plan.")
             raise CTERAException('Could not modify subscription plan', error)
+        
+    @staticmethod
+    def _assign_services(plan, services):
+        for service in plan.services:
+            service_state = services.get(service.serviceName, None)
+            if service_state:
+                service.serviceState = service_state
 
     @staticmethod
     def _assign_retention(plan, retention):

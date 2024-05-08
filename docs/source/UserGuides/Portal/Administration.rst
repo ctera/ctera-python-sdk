@@ -310,9 +310,10 @@ Subscription Plans
    """
 
    name = 'good_plan'
+   services = {core_enum.PlanService.CloudBackup: core_enum.PlanServiceState.Disabled, core_enum.PlanService.CloudDrive: core_enum.PlanServiceState.Disabled}
    retention = {core_enum.PlanRetention.Daily: 7, core_enum.PlanRetention.Monthly: 12}
    quotas = {core_enum.PlanItem.EV16: 10, core_enum.PlanItem.EV32: 5, core_enum.PlanItem.Share: 100}
-   admin.plans.add(name, retention, quotas)
+   admin.plans.add(name, services, retention, quotas)
 
 .. automethod:: cterasdk.core.plans.Plans.modify
    :noindex:
@@ -326,9 +327,10 @@ Subscription Plans
    """
 
    name = 'good_plan'
+   services = {core_enum.PlanService.CloudBackup: core_enum.PlanServiceState.Disabled, core_enum.PlanService.CloudDrive: core_enum.PlanServiceState.Disabled}
    retention = {core_enum.PlanRetention.Daily: 30, core_enum.PlanRetention.Monthly: 36}
    quotas = {core_enum.PlanItem.EV16: 20, core_enum.PlanItem.EV32: 10, core_enum.PlanItem.Share: 200}
-   admin.plans.modify(name, retention, quotas)
+   admin.plans.modify(name, services, retention, quotas)
 
 .. automethod:: cterasdk.core.plans.Plans.delete
    :noindex:
@@ -1560,6 +1562,30 @@ Timezone
 .. code:: python
 
    admin.settings.global_settings.set_timzeone('(GMT-05:00) Eastern Time (US , Canada)')
+
+
+Virtual Portal Settings
+=======================
+
+.. automethod:: cterasdk.core.settings.PortalSettings.get
+   :noindex:
+
+.. code:: python
+
+   admin.settings.portal.get()
+
+.. automethod:: cterasdk.core.settings.PortalSettings.use_global_settings
+   :noindex:
+
+.. automethod:: cterasdk.core.settings.PortalSettings.update
+   :noindex:
+
+.. code:: python
+
+   settings = admin.settings.portal.get()
+   settings.defaultMail = 'support@acme.com'  # assign default email to domain users without an email address
+   admin.settings.portal.update(settings)  # apply settings changes
+
 
 TLS Certificate
 ===============
