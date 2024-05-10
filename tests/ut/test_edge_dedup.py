@@ -24,7 +24,7 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
     def test_disable_no_reboot(self):
         put_response = 'Success'
         self._init_filer(put_response=put_response)
-        ret = dedup.Dedup(self._filer).disable(reboot=True, wait=True)
+        ret = dedup.Dedup(self._filer).disable(reboot=False, wait=True)
         self._filer.api.put.assert_called_once_with('/config/dedup/useLocalMapFileDedup', False)
         self._mock_reboot.assert_not_called()
         self.assertEqual(ret, put_response)
