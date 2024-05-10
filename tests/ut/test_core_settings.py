@@ -51,7 +51,7 @@ class TestCoreSettings(base_core.BaseCoreTest):
     def test_get_settings_in_tenant_context(self):
         settings = 'Success'
         execute_response = munch.Munch({'settings': settings})
-        self.disable_tenant_context(self._mock_session)
+        self.enable_tenant_context(self._mock_session)
         self._init_global_admin(execute_response=execute_response)
         ret = settings.Settings(self._global_admin).portal.get()
         self._global_admin.api.execute.assert_called_once_with('', 'getSettings')
@@ -59,7 +59,7 @@ class TestCoreSettings(base_core.BaseCoreTest):
 
     def test_get_settings_global_admin(self):
         get_response = 'Success'
-        self.enable_tenant_context(self._mock_session)
+        self.disable_tenant_context(self._mock_session)
         self._init_global_admin(get_response=get_response)
         ret = settings.Settings(self._global_admin).portal.get()
         self._global_admin.api.get.assert_called_once_with('/settings/defaultPortalSettings')
