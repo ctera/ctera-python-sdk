@@ -61,4 +61,3 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
         ret = dedup.Regeneration(self._filer).status()
         self._filer.api.get.assert_called_once_with('/proc/dedup/regenerate/general')
         self.assertEqual(ret, get_response)
-    
