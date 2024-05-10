@@ -6,10 +6,11 @@ from tests.ut import base_edge
 
 class TestEdgeDedup(base_edge.BaseEdgeTest):
 
+    Size = 5
+    Usage = 6
+
     def setUp(self):
         super().setUp()
-        self._size = 5
-        self._usage = 6
         self._mock_reboot = self.patch_call('cterasdk.edge.power.Power.reboot')
 
     def test_enable_reboot_wait(self):
@@ -23,7 +24,7 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
     def test_disable_no_reboot(self):
         put_response = 'Success'
         self._init_filer(put_response=put_response)
-        ret = dedup.Dedup(self._filer).enable(reboot=True, wait=True)
+        ret = dedup.Dedup(self._filer).disable(reboot=True, wait=True)
         self._filer.api.put.assert_called_once_with('/config/dedup/useLocalMapFileDedup', False)
         self._mock_reboot.assert_not_called
         self.assertEqual(ret, put_response)
@@ -36,15 +37,16 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
             mock.call('/config/cloudsync/cloudExtender', 'allFilesTotalUsedBytes'),
             mock.call('/config/cloudsync/cloudExtender', 'storageUsedBytes')
         ])
-        self.assertEqual(ret.size, self._size)
-        self.assertEqual(ret.usage, self._usage)
+        self.assertEqual(ret.size, TestEdgeDedup.Size)
+        self.assertEqual(ret.usage, TestEdgeDedup.Usage)
 
-    def _execute_side_effect(self, path, name, param):
+    @staticmethod
+    def _execute_side_effect(path, name, param):
         # pylint: disable=unused-argument
         if name == 'allFilesTotalUsedBytes':
-            return self._size
+            return TestEdgeDedup.Size
         if name == 'allFilesTotalUsedBytes':
-            return self._usage
+            return TestEdgeDedup.Usage
 
     def test_run_regenerate(self):
         execute_response = 'Success'
@@ -56,7 +58,7 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
     def test_regen_status(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = dedup.Regeneration(self._filer).run()
+        ret = dedup.Regeneration(self._filer).status()
         self._filer.api.get.assert_called_once_with('/proc/dedup/regenerate/general')
         self.assertEqual(ret, get_response)
     
