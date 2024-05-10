@@ -1,5 +1,3 @@
-from unittest import mock
-
 import munch
 from cterasdk.core import startup
 from cterasdk import exceptions
