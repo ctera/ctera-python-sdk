@@ -22,7 +22,7 @@ class Servers(BaseCommand):
         try:
             return self._core.api.get(f'/servers/{server}')
         except CTERAException as error:
-            raise CTERAException('Failed to retreive server', error)
+            raise CTERAException('Failed to retrieve server', error)
 
     def get(self, name, include=None):
         """

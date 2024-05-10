@@ -1,8 +1,10 @@
 # pylint: disable=protected-access
 from unittest import mock
 
+import munch
 from cterasdk.common import Object
 from cterasdk.core import servers
+from cterasdk import exceptions
 from tests.ut import base_core
 
 
@@ -49,6 +51,45 @@ class TestCoreServers(base_core.BaseCoreTest):
                                                                                   )])
         servers.Servers(self._global_admin).tasks.scheduled(self._server)
         self._global_admin.api.get.assert_called_once_with(f'/servers/{self._server}/schedTasks')
+
+    def test_get_servers_success(self):
+        get_multi_response = munch.Munch({'name': self._name})
+        self._init_global_admin(get_multi_response=get_multi_response)
+        ret = servers.Servers(self._global_admin).get(self._server)
+        self._global_admin.api.get_multi.assert_called_once_with(f'/servers/{self._server}')
+        expected_include = ['/' + attr for attr in servers.Servers.default]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
+        self.assertEqual(len(expected_include), len(actual_include))
+        for attr in expected_include:
+            self.assertIn(attr, actual_include)
+        self.assertEqual(ret.name, self._server)
+
+    def test_get_servers_failure(self):
+        get_multi_response = munch.Munch({'name': None})
+        self._init_global_admin(get_multi_response=get_multi_response)
+        with self.assertRaises(exceptions.ObjectNotFoundException) as error:
+            servers.Servers(self._global_admin).get(self._server)
+        self._global_admin.api.get_multi.assert_called_once_with(f'/servers/{self._server}')
+        expected_include = ['/' + attr for attr in servers.Servers.default]
+        actual_include = self._global_admin.api.get_multi.call_args[0][1]
+        self.assertEqual(len(expected_include), len(actual_include))
+        for attr in expected_include:
+            self.assertIn(attr, actual_include)
+        self.assertEqual('Could not find server', error.exception.message)
+
+    def test_modify_server_not_found(self):
+        with self.assertRaises(exceptions.CTERAException) as error:
+            servers.Servers(self._global_admin).modify(self._server)
+        self._global_admin.api.get.assert_called_once_with(f'/servers/{self._server}')
+        self.assertEqual('Failed to retrieve servers', error.exception.message)
+
+    def test_modify_server_update_failure(self):
+        self._init_global_admin(get_response=self._server)
+        with self.assertRaises(exceptions.CTERAException) as error:
+            servers.Servers(self._global_admin).modify(self._server)
+        self._global_admin.api.get.assert_called_once_with(f'/servers/{self._server}')
+        self._global_admin.api.put.assert_called_once_with(f'/servers/{self._server}', self._server)
+        self.assertEqual('Could not modify server', error.exception.message)
 
     @staticmethod
     def _create_task_object(**kwargs):
