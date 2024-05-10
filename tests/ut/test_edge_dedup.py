@@ -6,8 +6,8 @@ from tests.ut import base_edge
 
 class TestEdgeDedup(base_edge.BaseEdgeTest):
 
-    Size = 5
-    Usage = 6
+    Size = 2
+    Usage = 1
 
     def setUp(self):
         super().setUp()
@@ -45,7 +45,7 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
         # pylint: disable=unused-argument
         if name == 'allFilesTotalUsedBytes':
             return TestEdgeDedup.Size
-        if name == 'allFilesTotalUsedBytes':
+        if name == 'storageUsedBytes':
             return TestEdgeDedup.Usage
 
     def test_run_regenerate(self):
