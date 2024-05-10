@@ -41,7 +41,7 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
         self.assertEqual(ret.usage, TestEdgeDedup.Usage)
 
     @staticmethod
-    def _execute_side_effect(path, name, param):
+    def _execute_side_effect(path, name):
         # pylint: disable=unused-argument
         if name == 'allFilesTotalUsedBytes':
             return TestEdgeDedup.Size
