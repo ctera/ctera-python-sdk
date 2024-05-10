@@ -79,6 +79,7 @@ class TestCoreServers(base_core.BaseCoreTest):
 
     def test_modify_server_not_found(self):
         self._init_global_admin()
+        self._global_admin.get = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
             servers.Servers(self._global_admin).modify(self._server)
         self._global_admin.api.get.assert_called_once_with(f'/servers/{self._server}')
