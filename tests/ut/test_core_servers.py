@@ -83,7 +83,7 @@ class TestCoreServers(base_core.BaseCoreTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             servers.Servers(self._global_admin).modify(self._server)
         self._global_admin.api.get.assert_called_once_with(f'/servers/{self._server}')
-        self.assertEqual('Failed to retrieve servers', error.exception.message)
+        self.assertEqual('Failed to retrieve server', error.exception.message)
 
     def test_modify_server_update_failure(self):
         self._init_global_admin(get_response=self._server)
