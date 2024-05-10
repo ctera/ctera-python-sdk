@@ -10,7 +10,7 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
         super().setUp()
         self._size = 5
         self._usage = 6
-        self._mock_reboot = self.patch_call('cterasdk.edge.power.reboot')
+        self._mock_reboot = self.patch_call('cterasdk.edge.power.Power.reboot')
 
     def test_enable_reboot_wait(self):
         put_response = 'Success'
@@ -49,14 +49,14 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
     def test_run_regenerate(self):
         execute_response = 'Success'
         self._init_filer(execute_response=execute_response)
-        ret = dedup.Dedup(self._filer).regen.run()
+        ret = dedup.Regeneration(self._filer).run()
         self._filer.api.execute.assert_called_once_with('/config/dedup', 'regenerate', mock.ANY)
         self.assertEqual(ret, execute_response)
 
     def test_regen_status(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = dedup.Dedup(self._filer).regen.run()
+        ret = dedup.Regeneration(self._filer).run()
         self._filer.api.get.assert_called_once_with('/proc/dedup/regenerate/general')
         self.assertEqual(ret, get_response)
     
