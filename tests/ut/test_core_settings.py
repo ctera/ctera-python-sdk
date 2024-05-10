@@ -26,12 +26,12 @@ class TestCoreSettings(base_core.BaseCoreTest):
         self.assertEqual(ret, put_response)
 
     def test_update_settings_in_tenant_context(self):
-        settings = 'Settings'
+        portal_settings = 'Settings'
         self._init_global_admin()
         self.enable_tenant_context(self._mock_session)
-        settings.Settings(self._global_admin).portal.update(settings)
+        settings.Settings(self._global_admin).portal.update(portal_settings)
         self._global_admin.api.execute.assert_called_once_with('', 'setSettings', mock.ANY)
-        expected_param = munch.Munch({'fromSystem': False, 'settings': settings})
+        expected_param = munch.Munch({'fromSystem': False, 'settings': portal_settings})
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
@@ -42,15 +42,15 @@ class TestCoreSettings(base_core.BaseCoreTest):
         self._global_admin.api.execute.assert_called_once_with('', 'setSettings', None)
 
     def test_update_settings_global_admin(self):
-        settings = 'Settings'
+        portal_settings = 'Settings'
         self._init_global_admin()
         self.disable_tenant_context(self._mock_session)
-        settings.Settings(self._global_admin).portal.update(settings)
-        self._global_admin.api.put.assert_called_once_with('/settings/defaultPortalSettings', settings)
+        settings.Settings(self._global_admin).portal.update(portal_settings)
+        self._global_admin.api.put.assert_called_once_with('/settings/defaultPortalSettings', portal_settings)
 
     def test_get_settings_in_tenant_context(self):
-        settings = 'Success'
-        execute_response = munch.Munch({'settings': settings})
+        portal_settings = 'Success'
+        execute_response = munch.Munch({'settings': portal_settings})
         self.enable_tenant_context(self._mock_session)
         self._init_global_admin(execute_response=execute_response)
         ret = settings.Settings(self._global_admin).portal.get()
