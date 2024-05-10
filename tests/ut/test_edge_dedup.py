@@ -26,7 +26,7 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
         self._init_filer(put_response=put_response)
         ret = dedup.Dedup(self._filer).disable(reboot=True, wait=True)
         self._filer.api.put.assert_called_once_with('/config/dedup/useLocalMapFileDedup', False)
-        self._mock_reboot.assert_not_called
+        self._mock_reboot.assert_not_called()
         self.assertEqual(ret, put_response)
 
     def test_status(self):
@@ -47,6 +47,7 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
             return TestEdgeDedup.Size
         if name == 'storageUsedBytes':
             return TestEdgeDedup.Usage
+        return None
 
     def test_run_regenerate(self):
         execute_response = 'Success'
