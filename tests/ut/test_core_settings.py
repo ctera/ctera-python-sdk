@@ -40,7 +40,7 @@ class TestCoreSettings(base_core.BaseCoreTest):
         self.enable_tenant_context(self._mock_session)
         settings.Settings(self._global_admin).portal.use_global_settings()
         self._global_admin.api.execute.assert_called_once_with('', 'setSettings', mock.ANY)
-        expected_param = munch.Munch({'_classname': 'SettingsParam', 'fromSystem': False})
+        expected_param = munch.Munch({'_classname': 'SettingsParam', 'fromSystem': True})
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
