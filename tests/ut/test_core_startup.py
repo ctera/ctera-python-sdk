@@ -18,7 +18,7 @@ class TestCoreStartup(base_core.BaseCoreTest):
         get_response = munch.Munch({'status': status})
         self._init_setup(get_response=get_response)
         ret = startup.Startup(self._global_admin).status()
-        self._global_admin.api.get.assert_called_once_with('/startup')
+        self._global_admin.ctera.get.assert_called_once_with('/startup')
         self.assertEqual(ret, status)
 
     def test_wait_success(self):
