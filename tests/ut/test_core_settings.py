@@ -31,7 +31,7 @@ class TestCoreSettings(base_core.BaseCoreTest):
         self.enable_tenant_context(self._mock_session)
         settings.Settings(self._global_admin).portal.update(portal_settings)
         self._global_admin.api.execute.assert_called_once_with('', 'setSettings', mock.ANY)
-        expected_param = munch.Munch({'fromSystem': False, 'settings': portal_settings})
+        expected_param = munch.Munch({'_classname': 'SettingsParam', 'fromSystem': False, 'settings': portal_settings})
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
@@ -39,7 +39,10 @@ class TestCoreSettings(base_core.BaseCoreTest):
         self._init_global_admin()
         self.enable_tenant_context(self._mock_session)
         settings.Settings(self._global_admin).portal.use_global_settings()
-        self._global_admin.api.execute.assert_called_once_with('', 'setSettings', None)
+        self._global_admin.api.execute.assert_called_once_with('', 'setSettings', mock.ANY)
+        expected_param = munch.Munch({'_classname': 'SettingsParam', 'fromSystem': False})
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
 
     def test_update_settings_global_admin(self):
         portal_settings = 'Settings'
@@ -55,7 +58,7 @@ class TestCoreSettings(base_core.BaseCoreTest):
         self._init_global_admin(execute_response=execute_response)
         ret = settings.Settings(self._global_admin).portal.get()
         self._global_admin.api.execute.assert_called_once_with('', 'getSettings')
-        self.assertEqual(ret, settings)
+        self.assertEqual(ret, portal_settings)
 
     def test_get_settings_global_admin(self):
         get_response = 'Success'
