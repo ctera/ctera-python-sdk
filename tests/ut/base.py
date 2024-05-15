@@ -2,9 +2,6 @@ import queue
 import unittest
 
 
-from cterasdk.common.utils import Version
-
-
 class BaseTest(unittest.TestCase):
 
     def patch_call(self, module_path, **patch_kwargs):
@@ -17,9 +14,6 @@ class BaseTest(unittest.TestCase):
         """Mock patch a given path as a property and schedule proper mock cleanup."""
         patch_kwargs.update({'new_callable': unittest.mock.PropertyMock})
         return self.patch_call(module_path, **patch_kwargs)
-    
-    def set_version(self, m_session, version):
-        m_session().version = Version(version)
 
     def _assert_equal_objects(self, actual_param, expected_param):
         q = queue.Queue()
