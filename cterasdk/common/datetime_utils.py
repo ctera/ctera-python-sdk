@@ -18,7 +18,7 @@ class DateTimeUtils():
             expiration_date = datetime.date.today() + datetime.timedelta(days=expiration)
         elif isinstance(expiration, datetime.date):
             expiration_date = expiration
-        return expiration_date
+        return expiration_date  # pylint: disable=possibly-used-before-assignment
 
 
 def from_iso_format(time):

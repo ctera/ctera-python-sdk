@@ -62,7 +62,7 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
         mock_load_private_key.return_value = TestEdgeSSL._get_secret(self._private_key_contents)
         mock_load_certificate = self.patch_call("cterasdk.lib.crypto.X509Certificate.load_certificate")
         mock_load_certificate.return_value = TestEdgeSSL._get_secret(self._certificate_contents)
-        ret = ssl.SSL(self._filer).import_certificate(self._key_filepath, self._domain_cert, self._intermediate_cert, self._root_cert)
+        ret = ssl.SSLv1(self._filer).import_certificate(self._key_filepath, self._domain_cert, self._intermediate_cert, self._root_cert)
         mock_load_private_key.assert_called_once_with(self._key_filepath)
         mock_load_certificate.assert_has_calls(
             [
@@ -83,7 +83,7 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
     def test_get_storage_ca(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = ssl.SSL(self._filer).get_storage_ca()
+        ret = ssl.SSLv1(self._filer).get_storage_ca()
         self._filer.api.get.assert_called_once_with('/status/extStorageTrustedCA')
         self.assertEqual(ret, get_response)
 
@@ -92,7 +92,7 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
         self._init_filer(put_response=put_response)
         mock_load_certificate = self.patch_call("cterasdk.lib.crypto.X509Certificate.load_certificate")
         mock_load_certificate.return_value = TestEdgeSSL._get_secret(self._certificate_contents)
-        ret = ssl.SSL(self._filer).import_storage_ca(self._domain_cert)
+        ret = ssl.SSLv1(self._filer).import_storage_ca(self._domain_cert)
         expected_param = Object()
         expected_param._classname = 'ExtTrustedCA'  # pylint: disable=protected-access
         expected_param.certificate = self._certificate_contents
@@ -105,7 +105,7 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
     def test_remove_storage_ca(self):
         put_response = 'Success'
         self._init_filer(put_response=put_response)
-        ssl.SSL(self._filer).remove_storage_ca()
+        ssl.SSLv1(self._filer).remove_storage_ca()
         self._filer.api.put.assert_called_once_with('/config/extStorageTrustedCA', None)
 
     @staticmethod
