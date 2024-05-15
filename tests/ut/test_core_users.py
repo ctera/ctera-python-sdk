@@ -69,7 +69,7 @@ class TestCoreUsers(base_core.BaseCoreTest):
                 expiration_date = datetime.date.today() + datetime.timedelta(days=password_change)
             elif isinstance(password_change, datetime.date):
                 expiration_date = password_change
-            expected_requirePasswordChangeOn = expiration_date.strftime('%Y-%m-%d')
+            expected_requirePasswordChangeOn = expiration_date.strftime('%Y-%m-%d')  # pylint: disable=possibly-used-before-assignment
         expected_param = self._get_user_object(
             name=self._username,
             email=self._email,
@@ -79,7 +79,7 @@ class TestCoreUsers(base_core.BaseCoreTest):
             role=self._role,
             company=None,
             comment=None,
-            requirePasswordChangeOn=expected_requirePasswordChangeOn
+            requirePasswordChangeOn=expected_requirePasswordChangeOn  # pylint: disable=possibly-used-before-assignment
         )
         actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
@@ -247,7 +247,7 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
                 expiration_date = datetime.date.today() + datetime.timedelta(days=password_change)
             elif isinstance(password_change, datetime.date):
                 expiration_date = password_change
-            expected_requirePasswordChangeOn = expiration_date.strftime('%Y-%m-%d')
+            expected_requirePasswordChangeOn = expiration_date.strftime('%Y-%m-%d')  # pylint: disable=possibly-used-before-assignment
         expected_param = self._get_admin_object(
             name=self._username,
             email=self._email,
@@ -257,7 +257,7 @@ class TestCoreAdministrators(base_core.BaseCoreTest):
             role=self._role,
             company=None,
             comment=None,
-            requirePasswordChangeOn=expected_requirePasswordChangeOn
+            requirePasswordChangeOn=expected_requirePasswordChangeOn  # pylint: disable=possibly-used-before-assignment
         )
         actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
