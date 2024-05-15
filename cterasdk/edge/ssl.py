@@ -3,7 +3,6 @@ import logging
 from .base_command import BaseCommand
 from ..lib import X509Certificate, PrivateKey, create_certificate_chain
 from ..common import Object
-from ..exceptions import InputError
 
 
 def initialize(edge):
@@ -114,7 +113,7 @@ class ServerCertificate(BaseCommand):
         Get Server Cerificate.
         """
         return self._edge.api.get('/proc/certificates/serverCertificate')
-    
+
     def regenerate(self):
         """
         Generate a Self Signed Certificate.
@@ -123,7 +122,7 @@ class ServerCertificate(BaseCommand):
         response = self._edge.api.execute('/config/certificates', 'createSelfSign')
         logging.getLogger('cterasdk.edge').info("Generated a Self Signed Certificate.")
         return response
-    
+
     def import_certificate(self, private_key, *certificates):
         """
         Import the Edge Filer's server SSL certificate
@@ -149,7 +148,7 @@ class TrustedCAs(BaseCommand):
         List Trusted CAs.
         """
         return self._edge.api.get('/proc/certificates/trustedCACertificates')
-    
+
     def add(self, ca):
         """
         Add Trusted CA.
@@ -174,10 +173,10 @@ class TrustedCAs(BaseCommand):
         if fingerprint:
             logging.getLogger('cterasdk.edge').info("Removing Trusted CA. %s", {'fingerprint': fingerprint})
             response = self._edge.api.delete(f'/config/certificates/trustedCACertificates/{fingerprint}')
-            logging.getLogger('cterasdk.edge').info("Removed Trusted CA." %s, {'fingerprint': fingerprint})
+            logging.getLogger('cterasdk.edge').info("Removed Trusted CA. %s", {'fingerprint': fingerprint})
             return response
 
-        raise InputError('Could not identify CA fingerprint.')
+        raise ValueError('Could not identify CA fingerprint.')
 
     def clear(self):
         """

@@ -43,7 +43,7 @@ class CTERA(Service):
     @property
     def clients(self):
         return self._ctera_clients
-    
+
     def _before_login(self):
         """Override to implement logic before login"""
 

@@ -1036,7 +1036,7 @@ Reset to Defaults
 
 .. seealso:: Create the first admin account after resetting the Edge Filer to its default settings: :py:func:`cterasdk.edge.users.Users.add_first_user()`
 
-SSL Certificate 
+SSL Certificate
 ===============
 
 SSL management commands supported starting Edge Filer v7.8 or higher:
@@ -1053,14 +1053,14 @@ SSL management commands supported starting Edge Filer v7.8 or higher:
    :noindex:
 
 .. code-block:: python
-   
+
    edge.ssl.server.regenerate()  # generate a self-signed server certificate
 
 .. automethod:: cterasdk.edge.ssl.ServerCertificate.import_certificate
    :noindex:
 
 .. code-block:: python
-   
+
    edge.ssl.server.import_certificate(
       r'C:/users/username/certificate/private.key',
       r'C:/users/username/certificate/certificate.crt',
