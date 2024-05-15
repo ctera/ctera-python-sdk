@@ -1036,8 +1036,98 @@ Reset to Defaults
 
 .. seealso:: Create the first admin account after resetting the Edge Filer to its default settings: :py:func:`cterasdk.edge.users.Users.add_first_user()`
 
-SSL Certificate
+SSL Certificate 
 ===============
+
+SSL management commands supported starting Edge Filer v7.8 or higher:
+
+.. automethod:: cterasdk.edge.ssl.ServerCertificate.get
+   :noindex:
+
+.. code-block:: python
+
+   server_certificate = edge.ssl.server.get()
+   print(server_certificate.fingerprint)
+
+.. automethod:: cterasdk.edge.ssl.ServerCertificate.regenerate
+   :noindex:
+
+.. code-block:: python
+   
+   edge.ssl.server.regenerate()  # generate a self-signed server certificate
+
+.. automethod:: cterasdk.edge.ssl.ServerCertificate.import_certificate
+   :noindex:
+
+.. code-block:: python
+   
+   edge.ssl.server.import_certificate(
+      r'C:/users/username/certificate/private.key',
+      r'C:/users/username/certificate/certificate.crt',
+      r'C:/users/username/certificate/intermediate1.crt',
+      r'C:/users/username/certificate/intermediate2.crt',
+      r'C:/users/username/certificate/root.crt'
+   )
+
+.. automethod:: cterasdk.edge.ssl.TrustedCAs.all
+   :noindex:
+
+.. code-block:: python
+
+   for ca_certificate in edge.ssl.ca.all():
+       print(ca_certificate.fingerprint)
+
+.. automethod:: cterasdk.edge.ssl.TrustedCAs.add
+   :noindex:
+
+.. code-block:: python
+
+   edge.ssl.ca.add(r'C:/users/username/certificate/ca.crt')  # add Trusted CA certificate
+
+.. automethod:: cterasdk.edge.ssl.TrustedCAs.remove
+   :noindex:
+
+.. code-block:: python
+
+   certificate_fingerprint = '04:a0:56:a9:87:64:bb:dc:96:bf:6d:b0:49:fa:80:81:ed:06:8a:1e'
+   edge.ssl.ca.remove(certificate_fingerprint)
+
+.. automethod:: cterasdk.edge.ssl.TrustedCAs.clear
+   :noindex:
+
+.. code-block:: python
+
+   edge.ssl.ca.clear()
+
+SSL management commands supported up to Edge Filer v7.6:
+
+.. automethod:: cterasdk.edge.ssl.SSLv1.get_storage_ca
+   :noindex:
+
+.. automethod:: cterasdk.edge.ssl.SSLv1.remove_storage_ca
+   :noindex:
+
+.. automethod:: cterasdk.edge.ssl.SSLv1.import_certificate
+   :noindex:
+
+.. code-block:: python
+
+   """
+   certificate = './certs/certificate.crt'
+   intermediate_cert = './certs/certificate1.crt'
+   ca_certificate = './certs/certificate2.crt'
+   private_key = './certs/private.key'
+   """
+
+   """
+   Specify certificates in the following order: domain cert, intermediary certs, CA cert
+   You may include as many intermediate certificates as needed
+   """
+   edge.ssl.import_certificate(private_key, certificate, intermediate_cert, ca_certificate)
+
+.. danger: Exercise caution. Test thoroughly prior to implementing in production. Ensure the integrity of the PEM encoded private key and certificates. Supplying an invalid private key or certificate will disable administrative access to the filer and would require CTERA Support to re-enable it.
+
+SSL management commands supported in all Edge Filer versions:
 
 .. automethod:: cterasdk.edge.ssl.SSL.disable_http
    :noindex:
@@ -1066,32 +1156,6 @@ SSL Certificate
 .. code-block:: python
 
    edge.ssl.is_http_enabled()
-
-.. automethod:: cterasdk.edge.ssl.SSL.get_storage_ca
-   :noindex:
-
-.. automethod:: cterasdk.edge.ssl.SSL.remove_storage_ca
-   :noindex:
-
-.. automethod:: cterasdk.edge.ssl.SSL.import_certificate
-   :noindex:
-
-.. code-block:: python
-
-   """
-   certificate = './certs/certificate.crt'
-   intermediate_cert = './certs/certificate1.crt'
-   ca_certificate = './certs/certificate2.crt'
-   private_key = './certs/private.key'
-   """
-
-   """
-   Specify certificates in the following order: domain cert, intermediary certs, CA cert
-   You may include as many intermediate certificates as needed
-   """
-   edge.ssl.import_certificate(private_key, certificate, intermediate_cert, ca_certificate)
-
-.. danger: Exercise caution. Test thoroughly prior to implementing in production. Ensure the integrity of the PEM encoded private key and certificates. Supplying an invalid private key or certificate will disable administrative access to the filer and would require CTERA Support to re-enable it.
 
 Power Management
 ================
