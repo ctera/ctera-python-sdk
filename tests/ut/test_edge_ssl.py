@@ -16,7 +16,6 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
 
         self._private_key_contents = 'private_key'
         self._certificate_contents = 'certificate'
-        self._mock_session = self.patch_call("cterasdk.objects.services.Management.session")
 
     def test_is_http_disabled_true(self):
         get_response = True
@@ -56,15 +55,14 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
         ssl.SSL(self._filer).disable_http()
         self._filer.api.put.assert_called_once_with('/config/fileservices/webdav/forceHttps', True)
 
-    def test_import_certificate_v1(self):
-        self.set_version(self._mock_session, '1.0')
+    def test_import_certificate(self):
         put_response = 'Success'
         self._init_filer(put_response=put_response)
         mock_load_private_key = self.patch_call("cterasdk.lib.crypto.PrivateKey.load_private_key")
         mock_load_private_key.return_value = TestEdgeSSL._get_secret(self._private_key_contents)
         mock_load_certificate = self.patch_call("cterasdk.lib.crypto.X509Certificate.load_certificate")
         mock_load_certificate.return_value = TestEdgeSSL._get_secret(self._certificate_contents)
-        ret = ssl.SSL(self._filer).import_certificate(self._key_filepath, self._domain_cert, self._intermediate_cert, self._root_cert)
+        ret = ssl.SSLv1(self._filer).import_certificate(self._key_filepath, self._domain_cert, self._intermediate_cert, self._root_cert)
         mock_load_private_key.assert_called_once_with(self._key_filepath)
         mock_load_certificate.assert_has_calls(
             [
@@ -82,21 +80,19 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
         self._filer.api.put.assert_called_once_with('/config/certificate', f'\n{expected_param}')
         self.assertEqual(ret, put_response)
 
-    def test_get_storage_ca_v1(self):
-        self.set_version(self._mock_session, '1.0')
+    def test_get_storage_ca(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = ssl.SSL(self._filer).get_storage_ca()
+        ret = ssl.SSLv1(self._filer).get_storage_ca()
         self._filer.api.get.assert_called_once_with('/status/extStorageTrustedCA')
         self.assertEqual(ret, get_response)
 
     def test_import_storage_ca(self):
-        self.set_version(self._mock_session, '1.0')
         put_response = 'Success'
         self._init_filer(put_response=put_response)
         mock_load_certificate = self.patch_call("cterasdk.lib.crypto.X509Certificate.load_certificate")
         mock_load_certificate.return_value = TestEdgeSSL._get_secret(self._certificate_contents)
-        ret = ssl.SSL(self._filer).import_storage_ca(self._domain_cert)
+        ret = ssl.SSLv1(self._filer).import_storage_ca(self._domain_cert)
         expected_param = Object()
         expected_param._classname = 'ExtTrustedCA'  # pylint: disable=protected-access
         expected_param.certificate = self._certificate_contents
@@ -107,10 +103,9 @@ class TestEdgeSSL(base_edge.BaseEdgeTest):
         self.assertEqual(ret, put_response)
 
     def test_remove_storage_ca(self):
-        self.set_version(self._mock_session, '1.0')
         put_response = 'Success'
         self._init_filer(put_response=put_response)
-        ssl.SSL(self._filer).remove_storage_ca()
+        ssl.SSLv1(self._filer).remove_storage_ca()
         self._filer.api.put.assert_called_once_with('/config/extStorageTrustedCA', None)
 
     @staticmethod
