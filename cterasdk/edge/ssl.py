@@ -3,6 +3,16 @@ import logging
 from .base_command import BaseCommand
 from ..lib import X509Certificate, PrivateKey, create_certificate_chain
 from ..common import Object
+from ..exceptions import InputError
+
+
+def initialize(edge):
+    """
+    Conditional intialization of the Edge Filer SSL Module.
+    """
+    if edge.session().version > '7.8':
+        return SSLv78(edge)
+    return SSLv1(edge)
 
 
 class SSL(BaseCommand):
@@ -37,6 +47,10 @@ class SSL(BaseCommand):
 
     def _set_force_https(self, force):
         self._edge.api.put('/config/fileservices/webdav/forceHttps', force)
+
+
+class SSLv1(SSL):
+    """ Edge Filer SSLv1 APIs """
 
     def remove_storage_ca(self):
         """
@@ -81,3 +95,94 @@ class SSL(BaseCommand):
         response = self._edge.api.put('/config/certificate', f"\n{server_certificate}")
         logging.getLogger('cterasdk.edge').info("Uploaded SSL certificate.")
         return response
+
+
+class SSLv78(SSL):
+    """ Edge Filer v7.8 SSL Certificate APIs """
+
+    def __init__(self, edge):
+        super().__init__(edge)
+        self.server = ServerCertificate(edge)
+        self.ca = TrustedCAs(edge)
+
+
+class ServerCertificate(BaseCommand):
+    """ Edge Filer v7.8 Server Certificate APIs """
+
+    def get(self):
+        """
+        Get Server Cerificate.
+        """
+        return self._edge.api.get('/proc/certificates/serverCertificate')
+    
+    def regenerate(self):
+        """
+        Generate a Self Signed Certificate.
+        """
+        logging.getLogger('cterasdk.edge').info("Generating a Self Signed Certificate.")
+        response = self._edge.api.execute('/config/certificates', 'createSelfSign')
+        logging.getLogger('cterasdk.edge').info("Generated a Self Signed Certificate.")
+        return response
+    
+    def import_certificate(self, private_key, *certificates):
+        """
+        Import the Edge Filer's server SSL certificate
+
+        :param str private_key: The PEM-encoded private key, or a path to the PEM-encoded private key file
+        :param list[str] certificates: The PEM-encoded certificates, or a list of paths to the PEM-encoded certificates
+        """
+        key_object = PrivateKey.load_private_key(private_key)
+        certificates = [X509Certificate.load_certificate(certificate) for certificate in certificates]
+        certificate_chain = [certificate.pem_data.decode('utf-8') for certificate in create_certificate_chain(*certificates)]
+        server_certificate = ''.join([key_object.pem_data.decode('utf-8')] + certificate_chain)
+        logging.getLogger('cterasdk.edge').info("Uploading SSL certificate.")
+        response = self._edge.api.put('/config/certificates/serverCertificate', f"\n{server_certificate}")
+        logging.getLogger('cterasdk.edge').info("Uploaded SSL certificate.")
+        return response
+
+
+class TrustedCAs(BaseCommand):
+    """ Edge Filer v7.8 Trusted CAs APIs """
+
+    def all(self):
+        """
+        List Trusted CAs.
+        """
+        return self._edge.api.get('/proc/certificates/trustedCACertificates')
+    
+    def add(self, ca):
+        """
+        Add Trusted CA.
+
+        :param str certificate: The PEM-encoded certificate or a path to the PEM-encoded server certificate file
+        """
+        certificate = X509Certificate.load_certificate(ca).pem_data.decode('utf-8')
+        return self._edge.api.execute('/config/certificates', 'addTrustedCACert', certificate)
+
+    def remove(self, ca):
+        """
+        Remove Trusted CA.
+
+        :param object ca: CA fingerprint as `str`, or a trusted CA object.
+        """
+        fingerprint = None
+        if isinstance(ca, Object) and hasattr(ca, 'fingerprint'):
+            fingerprint = ca.fingerprint
+        else:
+            fingerprint = ca
+
+        if fingerprint:
+            logging.getLogger('cterasdk.edge').info("Removing Trusted CA. %s", {'fingerprint': fingerprint})
+            response = self._edge.api.delete(f'/config/certificates/trustedCACertificates/{fingerprint}')
+            logging.getLogger('cterasdk.edge').info("Removed Trusted CA." %s, {'fingerprint': fingerprint})
+            return response
+
+        raise InputError('Could not identify CA fingerprint.')
+
+    def clear(self):
+        """
+        Remove all Trusted CAs.
+        """
+        logging.getLogger('cterasdk.edge').info("Removing all Trusted CAs.")
+        for ca in self.all():
+            self.remove(ca)

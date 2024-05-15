@@ -43,6 +43,12 @@ class CTERA(Service):
     @property
     def clients(self):
         return self._ctera_clients
+    
+    def _before_login(self):
+        """Override to implement logic before login"""
+
+    def _after_login(self):
+        """Override to implement logic after login"""
 
     @property
     @abstractmethod
@@ -80,8 +86,10 @@ class Management(CTERA):
         :param str username: Username
         :param str password: Password
         """
+        self._before_login()
         self._login_object.login(username, password)
         self._ctera_session.start_local_session(self)
+        self._after_login()
 
     def logout(self):
         """ Log out """
