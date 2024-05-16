@@ -47,6 +47,16 @@ class SSL(BaseCommand):
     def _set_force_https(self, force):
         self._edge.api.put('/config/fileservices/webdav/forceHttps', force)
 
+    def _import_certificate(self, path, private_key, *certificates):
+        key_object = PrivateKey.load_private_key(private_key)
+        certificates = [X509Certificate.load_certificate(certificate) for certificate in certificates]
+        certificate_chain = [certificate.pem_data.decode('utf-8') for certificate in create_certificate_chain(*certificates)]
+        server_certificate = ''.join([key_object.pem_data.decode('utf-8')] + certificate_chain)
+        logging.getLogger('cterasdk.edge').info("Uploading Web Server SSL certificate.")
+        response = self._edge.api.put(path, f"\n{server_certificate}")
+        logging.getLogger('cterasdk.edge').info("Uploaded Web Server SSL certificate.")
+        return response
+
 
 class SSLv1(SSL):
     """ Edge Filer SSLv1 APIs """
@@ -85,15 +95,7 @@ class SSLv1(SSL):
         :param str private_key: The PEM-encoded private key, or a path to the PEM-encoded private key file
         :param list[str] certificates: The PEM-encoded certificates, or a list of paths to the PEM-encoded certificates
         """
-
-        key_object = PrivateKey.load_private_key(private_key)
-        certificates = [X509Certificate.load_certificate(certificate) for certificate in certificates]
-        certificate_chain = [certificate.pem_data.decode('utf-8') for certificate in create_certificate_chain(*certificates)]
-        server_certificate = ''.join([key_object.pem_data.decode('utf-8')] + certificate_chain)
-        logging.getLogger('cterasdk.edge').info("Uploading SSL certificate.")
-        response = self._edge.api.put('/config/certificate', f"\n{server_certificate}")
-        logging.getLogger('cterasdk.edge').info("Uploaded SSL certificate.")
-        return response
+        return self._import_certificate('/config/certificate', private_key, *certificates)
 
 
 class SSLv78(SSL):
@@ -130,14 +132,7 @@ class ServerCertificate(BaseCommand):
         :param str private_key: The PEM-encoded private key, or a path to the PEM-encoded private key file
         :param list[str] certificates: The PEM-encoded certificates, or a list of paths to the PEM-encoded certificates
         """
-        key_object = PrivateKey.load_private_key(private_key)
-        certificates = [X509Certificate.load_certificate(certificate) for certificate in certificates]
-        certificate_chain = [certificate.pem_data.decode('utf-8') for certificate in create_certificate_chain(*certificates)]
-        server_certificate = ''.join([key_object.pem_data.decode('utf-8')] + certificate_chain)
-        logging.getLogger('cterasdk.edge').info("Uploading SSL certificate.")
-        response = self._edge.api.put('/config/certificates/serverCertificate', f"\n{server_certificate}")
-        logging.getLogger('cterasdk.edge').info("Uploaded SSL certificate.")
-        return response
+        return self._import_certificate('/config/certificates/serverCertificate', private_key, *certificates)
 
 
 class TrustedCAs(BaseCommand):
