@@ -1,14 +1,14 @@
-from ..clients.synchronous import clients
-from .services import Management
-from .endpoints import EndpointBuilder
+from ...clients.synchronous import clients
+from ..services import Management
+from ..endpoints import EndpointBuilder
 
-from ..edge import backup
-from ..edge import cli
-from ..edge import logs
-from ..edge import services
-from ..edge import session
-from ..edge import support
-from ..edge import sync
+from ...edge import backup
+from ...edge import cli
+from ...edge import logs
+from ...edge import services
+from ...edge import session
+from ...edge import support
+from ...edge import sync
 
 
 class Clients:

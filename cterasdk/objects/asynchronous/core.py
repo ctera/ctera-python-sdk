@@ -1,12 +1,12 @@
-from .services import CTERA
-from .endpoints import EndpointBuilder
-from ..clients.asynchronous import clients
+from ..services import CTERA
+from ..endpoints import EndpointBuilder
+from ...clients.asynchronous import clients
 
 
-from ..asynchronous.core import login
-from ..asynchronous.core import cloudfs
-from ..asynchronous.core import notifications
-from ..asynchronous.core import users
+from ...asynchronous.core import login
+from ...asynchronous.core import cloudfs
+from ...asynchronous.core import notifications
+from ...asynchronous.core import users
 
 
 class Clients:
@@ -30,7 +30,7 @@ class V2:
         self.api = clients.AsyncJSON(EndpointBuilder.new(services.base, services.context, '/v2/api'), session, services._authenticator)
 
 
-class DataServices(CTERA):
+class AsyncPortal(CTERA):
 
     async def __aenter__(self):
         return self
@@ -63,12 +63,22 @@ class DataServices(CTERA):
     def _login_object(self):
         return login.Login(self)
 
-    @property
-    def context(self):
-        return 'admin'
-
     def _authenticator(self, url):
         return True
 
     async def __aexit__(self, exc_type, exc, tb):
         await self._generic.shutdown()
+
+
+class AsyncGlobalAdmin(AsyncPortal):
+
+    @property
+    def context(self):
+        return 'admin'
+
+class AsyncServicesPortal(AsyncPortal):
+
+    @property
+    def context(self):
+        return 'ServicesPortal'
+

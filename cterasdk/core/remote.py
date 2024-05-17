@@ -1,5 +1,6 @@
+from ..objects.synchronous import drive
 from .enum import DeviceType
-from ..objects import edge, drive
+from ..objects.synchronous import edge
 from ..common import parse_base_object_ref
 
 
