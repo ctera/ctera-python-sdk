@@ -11,7 +11,7 @@ Submodules
 
 .. toctree::
 
-   cterasdk.objects.drive
-   cterasdk.objects.edge
-   cterasdk.objects.core
+   cterasdk.objects.synchronous.drive
+   cterasdk.objects.synchronous.edge
+   cterasdk.objects.synchronous.core
 

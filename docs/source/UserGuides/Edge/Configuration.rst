@@ -5,14 +5,14 @@ Configuration Management
 Logging In
 ==========
 
-.. automethod:: cterasdk.objects.edge.Edge.login
+.. automethod:: cterasdk.objects.synchronous.edge.Edge.login
    :noindex:
 
 .. code-block:: python
 
    edge.login('admin', 'G3neralZ0d!')
 
-.. automethod:: cterasdk.objects.edge.Edge.logout
+.. automethod:: cterasdk.objects.synchronous.edge.Edge.logout
    :noindex:
 
 .. code-block:: python
@@ -1289,14 +1289,14 @@ SSH
 Miscellaneous
 -------------
 
-.. automethod:: cterasdk.objects.edge.Edge.test
+.. automethod:: cterasdk.objects.synchronous.edge.Edge.test
    :noindex:
 
 .. code-block:: python
 
    edge.test()
 
-.. automethod:: cterasdk.objects.edge.Edge.whoami
+.. automethod:: cterasdk.objects.synchronous.edge.Edge.whoami
    :noindex:
 
 .. code-block:: python

@@ -5,14 +5,14 @@ Services Portal
 Logging In
 ==========
 
-.. automethod:: cterasdk.objects.core.ServicesPortal.login
+.. automethod:: cterasdk.objects.synchronous.core.ServicesPortal.login
    :noindex:
 
 .. code-block:: python
 
    user.login('walice', 'G3neralZ0d!')
 
-.. automethod:: cterasdk.objects.core.ServicesPortal.logout
+.. automethod:: cterasdk.objects.synchronous.core.ServicesPortal.logout
    :noindex:
 
 .. code-block:: python
@@ -52,14 +52,14 @@ Managing S3 Credentials
 Miscellaneous
 =============
 
-.. automethod:: cterasdk.objects.core.GlobalAdmin.test
+.. automethod:: cterasdk.objects.synchronous.core.GlobalAdmin.test
    :noindex:
 
 .. code-block:: python
 
    admin.test()
 
-.. automethod:: cterasdk.objects.core.GlobalAdmin.whoami
+.. automethod:: cterasdk.objects.synchronous.core.GlobalAdmin.whoami
    :noindex:
 
 .. code-block:: python

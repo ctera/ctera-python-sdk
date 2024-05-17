@@ -5,14 +5,14 @@ Global Administration
 Logging In
 ==========
 
-.. automethod:: cterasdk.objects.core.GlobalAdmin.login
+.. automethod:: cterasdk.objects.synchronous.core.GlobalAdmin.login
    :noindex:
 
 .. code-block:: python
 
    admin.login('admin', 'G3neralZ0d!')
 
-.. automethod:: cterasdk.objects.core.GlobalAdmin.logout
+.. automethod:: cterasdk.objects.synchronous.core.GlobalAdmin.logout
    :noindex:
 
 .. code-block:: python
@@ -1182,7 +1182,7 @@ The Devices APIs retrieve a handle that can be used to query and update the conf
 The handle retrieved from the Portal provides limited access to the Edge Filer or Drive Agent APIs.
 To obtain access to the full set of APIs, use the ``remote_access`` function.
 
-.. automethod:: cterasdk.objects.edge.Edge.remote_access
+.. automethod:: cterasdk.objects.synchronous.edge.Edge.remote_access
    :noindex:
 
 .. code-block:: python
@@ -1750,14 +1750,14 @@ Setup
 Miscellaneous
 =============
 
-.. automethod:: cterasdk.objects.core.GlobalAdmin.test
+.. automethod:: cterasdk.objects.synchronous.core.GlobalAdmin.test
    :noindex:
 
 .. code-block:: python
 
    admin.test()
 
-.. automethod:: cterasdk.objects.core.GlobalAdmin.whoami
+.. automethod:: cterasdk.objects.synchronous.core.GlobalAdmin.whoami
    :noindex:
 
 .. code-block:: python
