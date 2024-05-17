@@ -69,7 +69,7 @@ class AsyncPortal(CTERA):
     @property
     def v2(self):
         return self.clients.v2
-    
+
     @property
     def io(self):
         return self.clients.io
@@ -98,9 +98,9 @@ class AsyncGlobalAdmin(AsyncPortal):
     def context(self):
         return 'admin'
 
+
 class AsyncServicesPortal(AsyncPortal):
 
     @property
     def context(self):
         return 'ServicesPortal'
-
