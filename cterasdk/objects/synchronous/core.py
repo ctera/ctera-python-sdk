@@ -58,7 +58,7 @@ class IO:
         self._folders = clients.Folders(EndpointBuilder.new(core.base, core.context, '/folders/folders'),
                                         async_session, core._authenticator)
         self._upload = clients.Upload(EndpointBuilder.new(core.base, core.context, '/upload/folders'), async_session, core._authenticator)
-        self._webdav = clients.Dav(EndpointBuilder.new(core.base, core.context, '/webdav'), async_session, core._authenticator)
+        self._webdav = clients.WebDAV(EndpointBuilder.new(core.base, core.context, '/webdav'), async_session, core._authenticator)
 
     @property
     def upload(self):

@@ -44,6 +44,10 @@ class AsyncClient(BaseClient):
         return await errors.accept(response)
 
 
+class AsyncWebDAV(AsyncClient):
+    """WebDAV"""
+
+
 class AsyncJSON(AsyncClient):
 
     def __init__(self, builder=None, async_session=None, authenticator=None):

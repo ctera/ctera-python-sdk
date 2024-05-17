@@ -11,23 +11,41 @@ from ...asynchronous.core import users
 
 class Clients:
 
-    def __init__(self, services):
-        self.v1 = V1(services)
-        self.v2 = V2(services)
+    def __init__(self, core):
+        self.v1 = V1(core)
+        self.v2 = V2(core)
+        self.io = IO(core)
 
 
 class V1:
 
-    def __init__(self, services):
-        session = services._generic._async_session
-        self.api = clients.AsyncAPI(EndpointBuilder.new(services.base, services.context, '/api'), session, services._authenticator)
+    def __init__(self, core):
+        session = core._generic._async_session
+        self.api = clients.AsyncAPI(EndpointBuilder.new(core.base, core.context, '/api'), session, core._authenticator)
 
 
 class V2:
 
-    def __init__(self, services):
-        session = services._generic._async_session
-        self.api = clients.AsyncJSON(EndpointBuilder.new(services.base, services.context, '/v2/api'), session, services._authenticator)
+    def __init__(self, core):
+        session = core._generic._async_session
+        self.api = clients.AsyncJSON(EndpointBuilder.new(core.base, core.context, '/v2/api'), session, core._authenticator)
+
+
+class IO:
+
+    def __init__(self, core):
+        self.webdav = WebDAV(core)
+
+
+class WebDAV:
+
+    def __init__(self, core):
+        session = core._generic._async_session
+        self._webdav = clients.AsyncWebDAV(EndpointBuilder.new(core.base, core.context, '/webdav'), session, core._authenticator)
+
+    @property
+    def download(self):
+        return self._webdav.get
 
 
 class AsyncPortal(CTERA):
@@ -51,6 +69,10 @@ class AsyncPortal(CTERA):
     @property
     def v2(self):
         return self.clients.v2
+    
+    @property
+    def io(self):
+        return self.clients.io
 
     async def login(self, username, password):
         return await self._login_object.login(username, password)

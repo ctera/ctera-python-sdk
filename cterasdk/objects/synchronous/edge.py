@@ -70,7 +70,7 @@ class IO:
 
     def __init__(self, edge):
         self._edge = edge
-        self._webdav = clients.Dav(EndpointBuilder.new(edge.base, '/localFiles'), edge._generic._async_session, edge._authenticator)
+        self._webdav = clients.WebDAV(EndpointBuilder.new(edge.base, '/localFiles'), edge._generic._async_session, edge._authenticator)
 
     @property
     def download(self):

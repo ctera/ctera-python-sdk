@@ -72,8 +72,7 @@ class Upload(Client):
         return super().form_data(path, data, **kwargs)
 
 
-class Dav(Client):
-    """WebDAV"""
+class WebDAV(Client):
 
     def download(self, path, **kwargs):
         return super().handle(path, **kwargs)
