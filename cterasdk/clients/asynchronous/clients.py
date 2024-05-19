@@ -48,6 +48,13 @@ class AsyncWebDAV(AsyncClient):
     """WebDAV"""
 
 
+class DirectIO(AsyncClient):
+
+    async def chunks(self, path, **kwargs):
+        response = await super().get(path, **kwargs)
+        return await response.json()
+
+
 class AsyncJSON(AsyncClient):
 
     def __init__(self, builder=None, async_session=None, authenticator=None):
