@@ -22,7 +22,8 @@ class BaseCoreTest(base.BaseTest):
         self._global_admin.api.add = mock.MagicMock(return_value=add_response)
         self._global_admin.api.delete = mock.MagicMock(return_value=delete_response)
 
-    def _init_setup(self, get_response=None, execute_response=None, multipart_response=None):
+    def _init_setup(self, handle_response=None, get_response=None, execute_response=None, multipart_response=None):
+        self._global_admin.ctera.handle = mock.MagicMock(return_value=get_response)
         self._global_admin.ctera.get = mock.MagicMock(return_value=get_response)
         self._global_admin.ctera.execute = mock.MagicMock(return_value=execute_response)
         self._global_admin.ctera.multipart = mock.MagicMock(return_value=multipart_response)

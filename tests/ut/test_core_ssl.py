@@ -19,3 +19,18 @@ class TestCoreSSL(base_core.BaseCoreTest):
         ret = ssl.SSL(self._global_admin).thumbprint
         self._global_admin.api.get.assert_called_once_with('/settings/ca')
         self.assertEqual(ret, thumbprint)
+
+    def test_export_certificate(self):
+        destination  = '/home/user'
+        filename = 'certificate.zip'
+        mock_split_file_directory = self.patch_call('cterasdk.core.ssl.FileSystem.split_file_directory_with_defaults')
+        mock_split_file_directory.return_value = (destination, filename)
+        mock_save = self.patch_call('cterasdk.core.ssl.FileSystem.save')
+        mock_save.return_value = f'{destination}/{filename}'
+        handle_response = 'handle'
+        self._init_setup(handle_response=handle_response)
+        ret = ssl.SSL(self._global_admin).export(destination=destination)
+        mock_split_file_directory.assert_called_once_with(destination, filename)
+        mock_save.assert_called_once_with(destination, filename, handle)
+        self._global_admin.ctera.handle.assert_called_once_with('/preview/exportCertificate')
+        self.assertEqual(ret, f'{destination}/{filename}')
