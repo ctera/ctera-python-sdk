@@ -21,7 +21,7 @@ class TestCoreSSL(base_core.BaseCoreTest):
         self.assertEqual(ret, thumbprint)
 
     def test_export_certificate(self):
-        destination  = '/home/user'
+        destination = '/home/user'
         filename = 'certificate.zip'
         mock_split_file_directory = self.patch_call('cterasdk.core.ssl.FileSystem.split_file_directory_with_defaults')
         mock_split_file_directory.return_value = (destination, filename)
