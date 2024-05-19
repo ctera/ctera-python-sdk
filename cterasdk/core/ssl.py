@@ -41,7 +41,7 @@ class SSL(BaseCommand):
         """
         directory, filename = self._filesystem.split_file_directory_with_defaults(destination, 'certificate.zip')
         logging.getLogger('cterasdk.core').info('Exporting SSL certificate.')
-        handle = self._core.ctera.chunks('/admin/preview/exportCertificate')
+        handle = self._core.ctera.handle('/preview/exportCertificate')
         filepath = self._filesystem.save(directory, filename, handle)
         logging.getLogger('cterasdk.core').info('Exported SSL certificate. %s', {'filepath': filepath})
         return filepath

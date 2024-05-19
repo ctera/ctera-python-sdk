@@ -70,7 +70,7 @@ class Notifications(BaseCommand):
         param.guid = descendant.guid
         logging.getLogger('cterasdk.metadata.connector').debug('Getting ancestors. %s', {'guid': param.guid, 'folder_id': param.folder_id})
         try:
-            return Notifications._ancestry(descendant, await self._core.v2.api.post('/metadata/ancestors', param))
+            return await self._core.v2.api.post('/metadata/ancestors', param)
         except ClientResponseException:
             logging.getLogger('cterasdk.metadata.connector').error('Could not retrieve ancestors. %s',
                                                                    {'folder_id': param.folder_id, 'guid': param.guid})
