@@ -1,4 +1,5 @@
 pyyaml
 aiohttp
-cryptography
 packaging
+cryptography
+python-snappy

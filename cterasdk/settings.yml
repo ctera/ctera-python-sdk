@@ -20,6 +20,8 @@ logging:
       level: info
     - name: cterasdk.filesystem
       level: error
+    - name: cterasdk.direct
+      level: error
     - name: cterasdk.crypto
       level: error
     - name: cterasdk.http
