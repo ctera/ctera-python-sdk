@@ -31,6 +31,6 @@ class TestCoreSSL(base_core.BaseCoreTest):
         self._init_setup(handle_response=handle_response)
         ret = ssl.SSL(self._global_admin).export(destination=destination)
         mock_split_file_directory.assert_called_once_with(destination, filename)
-        mock_save.assert_called_once_with(destination, filename, handle)
+        mock_save.assert_called_once_with(destination, filename, handle_response)
         self._global_admin.ctera.handle.assert_called_once_with('/preview/exportCertificate')
         self.assertEqual(ret, f'{destination}/{filename}')
