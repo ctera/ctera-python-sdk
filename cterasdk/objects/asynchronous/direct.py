@@ -1,40 +1,30 @@
 from collections import namedtuple
-
-from ..services import CTERA
-from ..endpoints import EndpointBuilder
-from ...clients.asynchronous import clients
+from ...direct import client
 
 
-from ...direct import io
+Credentials = namedtuple('Credentials', ('access_key_id', 'secret_access_key'))
+Credentials.__doc__ = 'Tuple holding the access and secret keys to access objects using DirectIO'
+Credentials.access_key_id.__doc__ = 'Access key'
+Credentials.secret_access_key.__doc__ = 'Secret Key'
 
 
-Credential = namedtuple('Credential', ('access_key_id', 'secret_access_key'))
-Credential.__doc__ = 'Tuple holding the access and secret keys to access objects using DirectIO'
-Credential.access_key_id.__doc__ = 'Access key'
-Credential.secret_access_key.__doc__ = 'Secret Key'
-
-
-class DirectIO(CTERA):
-
-    async def __aenter__(self):
-        return self
+class Client:
     
-    def __init__(self, host, port=None, https=True, credential=None):
-        super().__init__(host, port, https, base=None)
-        self._direct = clients.DirectIO(EndpointBuilder.new(self.base, '/directio'), authenticator=self._authenticator)
-        self.__credential = credential
+    def __init__(self, baseurl, access_key_id=None, secret_access_key=None):
+        self._client = client.DirectIO(baseurl, Credentials(access_key_id, secret_access_key))
 
-    async def get(self, file_id, credential=None):
+    async def parts(self, file_id, access_key_id=None, secret_access_key=None):
         """
-        Get file.
+        File Parts.
 
         :param int file_id: File ID
-        :param cterasdk.objects.asynchronous.direct.Credential credential: Credential
-        """
-        return await io.get(self._direct, file_id, credential if credential else self.__credential)
+        :param str,optional access_key_id: Access key
+        :param str,optional secret_access_key: Secret key
 
-    def _authenticator(self, url):
-        return True
+        :returns: File Parts
+        """
+        credentials = Credentials(access_key_id, secret_access_key) if all([access_key_id, secret_access_key]) else None
+        return await self._client.parts(file_id, credentials)
     
-    async def __aexit__(self, exc_type, exc, tb):
-        await self._direct.shutdown()
+    async def shutdown(self):
+        await self._client.shutdown()

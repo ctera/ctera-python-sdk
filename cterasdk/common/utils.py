@@ -1,6 +1,8 @@
 import re
 import socket
+import base64
 import logging
+import binascii
 import ipaddress
 
 from datetime import datetime
@@ -209,6 +211,10 @@ def utf8_decode(message):
     Decode UTF-8 String
     """
     return message.decode('utf-8')
+
+
+def b64decode(s, altchars=None, validate=False):
+
 
 
 def tcp_connect(host, port):

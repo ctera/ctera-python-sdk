@@ -48,13 +48,6 @@ class AsyncWebDAV(AsyncClient):
     """WebDAV"""
 
 
-class DirectIO(AsyncClient):
-
-    async def chunks(self, path, **kwargs):
-        response = await super().get(path, **kwargs)
-        return await response.json()
-
-
 class AsyncJSON(AsyncClient):
 
     def __init__(self, builder=None, async_session=None, authenticator=None):
@@ -124,7 +117,7 @@ class AsyncAPI(AsyncExtended):
 class AsyncResponse(BaseResponse):
     """Asynchronous Response Object"""
 
-    async def chunk(self, chunk_size=None):
+    async def iter_content(self, chunk_size=None):
         async for chunk in self._response.content.iter_chunked(chunk_size if chunk_size else 5120):
             yield chunk
 
@@ -136,6 +129,10 @@ class AsyncResponse(BaseResponse):
 
     async def xml(self):
         return Deserializers.XML(await self._response.read())
+    
+    async def read(self, n=-1):
+        #return await self._response.content.read()
+        return self._response.content.read()
 
     @staticmethod
     def new():
