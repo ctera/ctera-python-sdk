@@ -24,7 +24,7 @@ class Mail(BaseCommand):
         """
         settings = self._core.api.get('/settings')
         settings.enableEmailSending = True
-        settings = self._configure_settings(settings, host, port, sender, username, password, use_tls)
+        settings = Mail._configure_settings(settings, host, port, sender, username, password, use_tls)
         logging.getLogger('cterasdk.core').info('Enabling Mail Server.')
         response = self._core.api.put('/settings', settings)
         logging.getLogger('cterasdk.core').info('Mail Server enabled.')
@@ -39,7 +39,8 @@ class Mail(BaseCommand):
         logging.getLogger('cterasdk.core').info('Mail Server disabled.')
         return response
 
-    def _configure_settings(self, settings, host, port, sender, username, password, use_tls):
+    @staticmethod
+    def _configure_settings(settings, host, port, sender, username, password, use_tls):
         if host is not None:
             settings.smtpSettings.smtpHost = host
         if port is not None:
@@ -65,7 +66,7 @@ class Mail(BaseCommand):
         :param bool,optional use_tls: Use TLS when connecting to the SMTP Server, defaults to None
         """
         settings = self._core.api.get('/settings')
-        settings = self._configure_settings(settings, host, port, sender, username, password, use_tls)
+        settings = Mail._configure_settings(settings, host, port, sender, username, password, use_tls)
         logging.getLogger('cterasdk.core').info('Modifying Mail Server settings.')
         response = self._core.api.put('/settings', settings)
         logging.getLogger('cterasdk.core').info('Mail Server settings modified.')
