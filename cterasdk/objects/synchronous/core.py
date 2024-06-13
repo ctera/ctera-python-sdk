@@ -24,6 +24,7 @@ from ...core import kms
 from ...core import licenses
 from ...core import login
 from ...core import logs
+from ...core import mail
 from ...core import messaging
 from ...core import plans
 from ...core import portals
@@ -156,6 +157,7 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
         self.cli = cli.CLI(self)
         self.kms = kms.KMS(self)
         self.licenses = licenses.Licenses(self)
+        self.mail = mail.Mail(self)
         self.messaging = messaging.Messaging(self)
         self.portals = portals.Portals(self)
         self.servers = servers.Servers(self)
@@ -170,8 +172,8 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['antivirus', 'buckets', 'cli', 'kms', 'licenses', 'messaging', 'portals', 'servers', 'setup',
-                                       'ssl', 'startup', 'syslog']
+        return super()._omit_fields + ['antivirus', 'buckets', 'cli', 'kms', 'licenses', 'mail', 'messaging', 'portals', 'servers',
+                                       'setup', 'ssl', 'startup', 'syslog']
 
 
 class ServicesPortal(Portal):

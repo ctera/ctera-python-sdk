@@ -1587,6 +1587,40 @@ Virtual Portal Settings
    admin.settings.portal.update(settings)  # apply settings changes
 
 
+Mail Server
+===========
+
+.. automethod:: cterasdk.core.mail.Mail.is_enabled
+   :noindex:
+
+.. code:: python
+
+   admin.mail.is_enabled()
+
+.. automethod:: cterasdk.core.mail.Mail.enable
+   :noindex:
+
+.. code:: python
+
+   admin.mail.enable('mail.smtp.org', 587, 'support@acme.com', username='user', password='password', use_tls=True)
+
+.. automethod:: cterasdk.core.mail.Mail.modify
+   :noindex:
+
+.. code:: python
+
+   admin.mail.modify('mail.smtp.org', 587, 'support@acme.com', username='user', password='password', use_tls=True)
+   admin.mail.modify(sender='support@acme.com')  # only update sender
+   admin.mail.modify(use_tls=True)  # enable TLS
+
+.. automethod:: cterasdk.core.mail.Mail.disable
+   :noindex:
+
+.. code:: python
+
+   admin.mail.disable()
+
+
 TLS Certificate
 ===============
 
