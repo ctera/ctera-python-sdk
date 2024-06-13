@@ -25,7 +25,7 @@ class TestCoreMail(base_core.BaseCoreTest):
 
     def test_enable(self):
         put_response = 'Success'
-        self._init_global_admin(put_response=put_response, get_response=Object())
+        self._init_global_admin(put_response=put_response, get_response=self._default_settings_object())
         ret = mail.Mail(self._global_admin).enable(self._host, self._port, self._sender, self._user, self._password, True)
         self._global_admin.api.get.assert_called_once_with('/settings')
         self._global_admin.api.put.assert_called_once_with('/settings', mock.ANY)
@@ -36,7 +36,7 @@ class TestCoreMail(base_core.BaseCoreTest):
 
     def test_modify(self):
         put_response = 'Success'
-        self._init_global_admin(put_response=put_response, get_response=Object())
+        self._init_global_admin(put_response=put_response, get_response=self._default_settings_object())
         ret = mail.Mail(self._global_admin).modify(self._host, self._port, self._sender, self._user, self._password, True)
         self._global_admin.api.put.assert_called_once_with('/settings', mock.ANY)
         expected_param = self._create_settings_object()
@@ -49,12 +49,16 @@ class TestCoreMail(base_core.BaseCoreTest):
         mail.Mail(self._global_admin).disable()
         self._global_admin.api.put.assert_called_once_with('/settings/enableEmailSending', False)
 
-    def _create_settings_object(self):
+    def _default_settings_object(self):
+        return self._create_settings_object('default', 587, 'no-reply@acme.com', 'user', 'pass', False)
+
+    def _create_settings_object(self, host=None, port=None, sender=None, user=None, password=None, use_tls=None):
         settings = Object()
-        settings.smtpSettings.smtpHost = self._host
-        settings.smtpSettings.smtpPort = self._port
-        settings.smtpSettings.user = self._user
-        settings.smtpSettings.password = self._password
-        settings.smtpSettings.enableTls = True
-        settings.defaultPortalSettings.mailSettings.sender = self._sender
+        settings.smtpSettings = Object()
+        settings.smtpSettings.smtpHost = host if host else self._host
+        settings.smtpSettings.smtpPort = port if port else self._port
+        settings.defaultPortalSettings.mailSettings.sender = sender if sender else self._sender
+        settings.smtpSettings.user = user if user else self._user
+        settings.smtpSettings.password = password if password else self._password
+        settings.smtpSettings.enableTls = use_tls if use_tls else True
         return settings
