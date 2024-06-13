@@ -213,10 +213,6 @@ def utf8_decode(message):
     return message.decode('utf-8')
 
 
-def b64decode(s, altchars=None, validate=False):
-
-
-
 def tcp_connect(host, port):
     logging.getLogger('cterasdk.common').debug('Testing connection. %s', {'host': host, 'port': port})
     message = f"Connection error to remote host {host} on port {port}."

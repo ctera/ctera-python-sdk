@@ -16,6 +16,7 @@ async def get_object(client, location):
     :returns: Object
     :rtype: bytes
     """
+    print(location)
     response = await client.get(location)
     return await response.read()
 
@@ -147,7 +148,6 @@ async def process_chunks(client, chunks, encryption_key):
     :rtype: list[asyncio.Task]
     """
     futures = []
-    print([f'{chunk.location}, ' for chunk in chunks])
     for chunk in chunks:
         futures.append(asyncio.create_task(process_chunk(client, chunk, encryption_key)))
     return futures
