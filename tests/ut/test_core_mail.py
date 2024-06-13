@@ -1,5 +1,4 @@
 from unittest import mock
-import munch
 
 from cterasdk.core import mail
 from cterasdk.common import Object

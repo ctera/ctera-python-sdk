@@ -9,7 +9,7 @@ class Mail(BaseCommand):
         """
         Check if forwarding log messages over syslog is enabled
         """
-        return self._core.api.get('/settings/enableEmailSending') == True
+        return self._core.api.get('/settings/enableEmailSending') is True
 
     def enable(self, host=None, port=None, sender=None, username=None, password=None, use_tls=None):
         """
