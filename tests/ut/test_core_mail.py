@@ -57,6 +57,7 @@ class TestCoreMail(base_core.BaseCoreTest):
         settings.smtpSettings = Object()
         settings.smtpSettings.smtpHost = host if host else self._host
         settings.smtpSettings.smtpPort = port if port else self._port
+        settings.defaultPortalSettings = Object()
         settings.defaultPortalSettings.mailSettings.sender = sender if sender else self._sender
         settings.smtpSettings.user = user if user else self._user
         settings.smtpSettings.password = password if password else self._password
