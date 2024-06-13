@@ -54,6 +54,7 @@ class TestCoreMail(base_core.BaseCoreTest):
 
     def _create_settings_object(self, host=None, port=None, sender=None, user=None, password=None, use_tls=None):
         settings = Object()
+        settings.enableEmailSending = True
         settings.smtpSettings = Object()
         settings.smtpSettings.smtpHost = host if host else self._host
         settings.smtpSettings.smtpPort = port if port else self._port
