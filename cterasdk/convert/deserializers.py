@@ -9,7 +9,7 @@ from ..common import Item, Object, Device
 
 def ParseValue(data):
 
-    if not data:
+    if data is None:
         return ''
 
     try:
