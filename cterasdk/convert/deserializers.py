@@ -8,8 +8,9 @@ from ..common import Item, Object, Device
 
 
 def ParseValue(data):
-    if not data:
-        return data
+
+    if data is None:
+        return ''
 
     try:
         if "." in data:

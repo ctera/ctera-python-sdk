@@ -32,6 +32,7 @@ Submodules
    cterasdk.core.kms
    cterasdk.core.login
    cterasdk.core.logs
+   cterasdk.core.mail
    cterasdk.core.messaging
    cterasdk.core.portals
    cterasdk.core.query
