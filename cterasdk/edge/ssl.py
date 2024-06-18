@@ -132,7 +132,8 @@ class ServerCertificate(BaseCommand):
         :param str private_key: The PEM-encoded private key, or a path to the PEM-encoded private key file
         :param list[str] certificates: The PEM-encoded certificates, or a list of paths to the PEM-encoded certificates
         """
-        return self._import_certificate('/config/certificates/serverCertificate', private_key, *certificates)
+        return self._edge.ssl._import_certificate('/config/certificates/serverCertificate',  # pylint: disable=protected-access
+                                                  private_key, *certificates)
 
 
 class TrustedCAs(BaseCommand):
