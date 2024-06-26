@@ -25,7 +25,6 @@ class Shares(BaseCommand):
             csc=enum.ClientSideCaching.Manual,
             dir_permissions=777,
             comment=None,
-            export_to_afp=False,
             export_to_ftp=False,
             export_to_nfs=False,
             export_to_pc_agent=False,
@@ -44,7 +43,6 @@ class Shares(BaseCommand):
         :param cterasdk.edge.enum.ClientSideCaching csc: The client side caching (offline files) configuration, defaults to ``manual``
         :param int dir_permissions: Directory Permission, defaults to 777
         :param str comment: Comment
-        :param bool export_to_afp: Whether to enable AFP access, defaults to ``False``
         :param bool export_to_ftp: Whether to enable FTP access, defaults to ``False``
         :param bool export_to_nfs: Whether to enable NFS access, defaults to ``False``
         :param bool export_to_pc_agent: Whether to allow as a destination share for CTERA Backup Agents, defaults to ``False``
@@ -68,7 +66,6 @@ class Shares(BaseCommand):
         param.access = access
         param.clientSideCaching = csc
         param.dirPermissions = dir_permissions
-        param.exportToAFP = export_to_afp
         param.exportToFTP = export_to_ftp
         param.exportToNFS = export_to_nfs
         param.exportToPCAgent = export_to_pc_agent
@@ -210,7 +207,6 @@ class Shares(BaseCommand):
             csc=None,
             dir_permissions=None,
             comment=None,
-            export_to_afp=None,
             export_to_ftp=None,
             export_to_nfs=None,
             export_to_pc_agent=None,
@@ -228,7 +224,6 @@ class Shares(BaseCommand):
         :param cterasdk.edge.enum.ClientSideCaching,optional csc: The client side caching (offline files) configuration
         :param int,optional dir_permissions: Directory Permission
         :param str,optional comment: Comment
-        :param bool,optional export_to_afp: Whether to enable AFP access
         :param bool,optional export_to_ftp: Whether to enable FTP access
         :param bool,optional export_to_nfs: Whether to enable NFS access
         :param bool,optional export_to_pc_agent: Whether to allow as a destination share for CTERA Backup Agents
@@ -250,8 +245,6 @@ class Shares(BaseCommand):
             share.clientSideCaching = csc
         if dir_permissions is not None:
             share.dirPermissions = dir_permissions
-        if export_to_afp is not None:
-            share.exportToAFP = export_to_afp
         if export_to_ftp is not None:
             share.exportToFTP = export_to_ftp
         if export_to_nfs is not None:

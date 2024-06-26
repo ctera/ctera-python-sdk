@@ -1,5 +1,4 @@
 __all__ = [
-    'afp',
     'aio',
     'array',
     'audit',

@@ -5,7 +5,6 @@ from ..endpoints import EndpointBuilder
 from .. import authenticators
 
 
-from ...edge import afp
 from ...edge import aio
 from ...edge import array
 from ...edge import audit
@@ -108,7 +107,6 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self._ctera_session = session.Session(self.host())
         self._ctera_clients = Clients(self, Portal)
 
-        self.afp = afp.AFP(self)
         self.aio = aio.AIO(self)
         self.array = array.Array(self)
         self.audit = audit.Audit(self)
