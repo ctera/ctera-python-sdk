@@ -1,4 +1,5 @@
 from unittest.mock import patch, mock_open
+import munch
 
 from cterasdk.edge import ssh
 from tests.ut import base_edge
@@ -15,20 +16,25 @@ class TestEdgeSSH(base_edge.BaseEdgeTest):
         
 
     def test_enable_public_key_from_string(self):
+        self._init_filer()
+        ssh.SSH(self._filer).enable(self._public_key_string)
+        self._filer.api.execute.assert_called_once_with('/config/device', 'startSSHD', munch.Munch({'publicKey': self._public_key_string}))
+
+    def test_enable_no_public_key(self):
         response = 'PublicKey'
         mock_generate_and_save_key_pair = self.patch_call('cterasdk.edge.ssh.CryptoServices.generate_and_save_key_pair')
         mock_generate_and_save_key_pair.return_value = response
         self._init_filer()
-        ssh.SSH(self._filer).enable(self._public_key_string)
+        ssh.SSH(self._filer).enable()
         mock_generate_and_save_key_pair.assert_called_once_with(self._filer.host(), exponent=self._exponent, key_size=self._key_size)
-        self._filer.api.execute.assert_called_once_with('/config/device', 'startSSHD', response)
+        self._filer.api.execute.assert_called_once_with('/config/device', 'startSSHD', munch.Munch({'publicKey': response}))
 
     def test_enable_public_key_from_file(self):
         response = 'PublicKey'
         self._init_filer()
-        with patch("builtins.open", mock_open(read_data=response)):
+        with patch("__builtins__.open", mock_open(read_data=response)):
             ssh.SSH(self._filer).enable(public_key_file=self._public_key_file)
-            self._filer.api.execute.assert_called_once_with('/config/device', 'startSSHD', response)
+            self._filer.api.execute.assert_called_once_with('/config/device', 'startSSHD', munch.Munch({'publicKey': response}))
 
     def test_disable(self):
         self._init_filer()

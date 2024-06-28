@@ -40,7 +40,7 @@ class TestEdgeRansomProtect(base_edge.BaseEdgeTest):
     def test_get_incidents(self):
         self._init_filer()
         ransom_protect.RansomProtect(self._filer).incidents()
-        self._filer.api.put.assert_called_once_with('/proc/rpsrv', 'getListOfIncidents')
+        self._filer.api.execute.assert_called_once_with('/proc/rpsrv', 'getListOfIncidents')
 
     def test_get_details(self):
         incident_id = 1
