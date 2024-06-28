@@ -1,5 +1,6 @@
 from unittest import mock
 
+from cterasdk.common import Object
 from cterasdk.objects import Edge
 from tests.ut import base
 
