@@ -103,14 +103,14 @@ class TestCoreServers(base_core.BaseCoreTest):
         self._init_global_admin(get_response=munch.Munch({'name': self._server}), get_multi_response=get_multi_response,
                                 put_response=put_response)
         ret = servers.Servers(self._global_admin).modify(self._server, new_server_name, True, True, True, public_ip, False, self._server)
-        expected_param = TestCoreServers._create_server_object(new_server_name, True, True, 
+        expected_param = TestCoreServers._create_server_object(new_server_name, True, True,
                                                                True, public_ip, False, True, replica_base_object_ref)
         actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, put_response)
 
     @staticmethod
-    def _create_server_object(name=None, app=None, preview=None, enable_public_ip=None, 
+    def _create_server_object(name=None, app=None, preview=None, enable_public_ip=None,
                               public_ip=None, allow_user_login=None, enable_replication=None, replica_of=None):
         server = Object()
         if enable_replication is True and replica_of is not None:

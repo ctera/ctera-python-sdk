@@ -14,4 +14,3 @@ class TestCoreBaseCommand(base_core.BaseCoreTest):
         self._init_global_admin()
         ret = base_command.BaseCommand(self._global_admin).session()
         self.assertEqual(ret, response)
-      

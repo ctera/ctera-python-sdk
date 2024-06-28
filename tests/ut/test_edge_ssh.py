@@ -13,7 +13,6 @@ class TestEdgeSSH(base_edge.BaseEdgeTest):
         self._public_key_file = "./public_key_file.ley"
         self._exponent = 65537
         self._key_size = 2048
-        
 
     def test_enable_public_key_from_string(self):
         self._init_filer()

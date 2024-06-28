@@ -14,4 +14,3 @@ class TestEdgeBaseCommand(base_edge.BaseEdgeTest):
         self._init_filer()
         ret = base_command.BaseCommand(self._filer).session()
         self.assertEqual(ret, response)
-      
