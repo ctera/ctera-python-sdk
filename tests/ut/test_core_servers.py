@@ -94,6 +94,45 @@ class TestCoreServers(base_core.BaseCoreTest):
         self._global_admin.api.put.assert_called_once_with(f'/servers/{self._server}', self._server)
         self.assertEqual('Could not modify server', error.exception.message)
 
+    def test_modify_success(self):
+        new_server_name = 'server1'
+        public_ip = '192.168.90.1'
+        replica_base_object_ref = 'objs/server'
+        get_multi_response = munch.Munch({'name': self._server, 'baseObjectRef': replica_base_object_ref})
+        put_response = 'Success'
+        self._init_global_admin(get_response=munch.Munch({'name': self._server}), get_multi_response=get_multi_response,
+                                put_response=put_response)
+        ret = servers.Servers(self._global_admin).modify(self._server, new_server_name, True, True, True, public_ip, False, self._server)
+        expected_param = TestCoreServers._create_server_object(new_server_name, True, True, 
+                                                               True, public_ip, False, True, replica_base_object_ref)
+        actual_param = self._global_admin.api.put.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, put_response)
+
+    @staticmethod
+    def _create_server_object(name=None, app=None, preview=None, enable_public_ip=None, 
+                              public_ip=None, allow_user_login=None, enable_replication=None, replica_of=None):
+        server = Object()
+        if enable_replication is True and replica_of is not None:
+            server.replicationSettings = Object()
+            server.replicationSettings._classname = 'ServerReplicationSettings'  # pylint: disable=protected-access
+            server.replicationSettings.replicationOf = replica_of
+        if enable_replication is False:
+            server.replicationSettings = None
+        if name is not None:
+            server.name = name
+        if app is not None:
+            server.isApplicationServer = app
+        if preview is not None:
+            server.renderingServer = preview
+        if enable_public_ip is True and public_ip is not None:
+            server.publicIpaddr = public_ip
+        elif enable_public_ip is False:
+            server.publicIpaddr = None
+        if allow_user_login is not None:
+            server.allowUserLogin = allow_user_login
+        return server
+
     @staticmethod
     def _create_task_object(**kwargs):
         param = Object()

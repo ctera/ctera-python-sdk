@@ -37,6 +37,24 @@ class TestEdgeRansomProtect(base_edge.BaseEdgeTest):
         ransom_protect.RansomProtect(self._filer).disable()
         self._filer.api.put.assert_called_once_with('/config/ransomProtect/enabled', False)
 
+    def test_get_incidents(self):
+        self._init_filer()
+        ransom_protect.RansomProtect(self._filer).incidents()
+        self._filer.api.put.assert_called_once_with('/proc/rpsrv', 'getListOfIncidents')
+
+    def test_get_details(self):
+        incident_id = 1
+        with mock.patch("cterasdk.edge.ransom_protect.query.iterator") as query_iterator_mock:
+            ransom_protect.RansomProtect(self._filer).details(incident_id)
+            query_iterator_mock.assert_called_once_with(self._filer, '/proc/rpsrv', mock.ANY, 'getIncidentDetails')
+            expected_query_params = base_edge.BaseEdgeTest._create_query_params(  # pylint: disable=protected-access
+                start_from=0,
+                count_limit=50,
+                incidentId=incident_id
+            )
+            actual_query_params = query_iterator_mock.call_args[0][2]
+            self._assert_equal_objects(actual_query_params, expected_query_params)
+
     def test_modify_success(self):
         self._init_filer(get_response=TestEdgeRansomProtect._get_ransom_protect_config())
         ransom_protect.RansomProtect(self._filer).modify(True, 5, 30)
