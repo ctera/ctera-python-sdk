@@ -16,7 +16,6 @@ async def get_object(client, location):
     :returns: Object
     :rtype: bytes
     """
-    print(location)
     response = await client.get(location)
     return await response.read()
 
