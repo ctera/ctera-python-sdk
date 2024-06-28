@@ -38,6 +38,7 @@ class TestEdgeSSH(base_edge.BaseEdgeTest):
     def test_enable_public_key_from_file(self):
         response = 'PublicKey'
         self._init_filer()
+        self.patch_call('cterasdk.edge.ssh.FileSystem.get_local_file_info')
         with mock.patch("builtins.open", mock.mock_open(read_data=response)):
             ssh.SSH(self._filer).enable(public_key_file=self._public_key_file)
             self._filer.api.execute.assert_called_once_with('/config/device', 'startSSHD', mock.ANY)
