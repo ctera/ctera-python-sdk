@@ -1,4 +1,4 @@
-from unittest import mock_open, mock
+from unittest import mock
 import munch
 
 from cterasdk.edge import ssh
