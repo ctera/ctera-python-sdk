@@ -41,7 +41,7 @@ class Notifications(BaseCommand):
                     param.folder_ids.append(drive.uid)
         return param
 
-    async def changes(self, cursor, timeout=None):
+    async def changes(self, cursor, drives=None, timeout=None):
         """
         Check for Changes.
 
@@ -54,6 +54,11 @@ class Notifications(BaseCommand):
         param = Object()
         param.cursor = cursor
         param.timeout = timeout if timeout else 10000
+        param.folder_ids = []
+        if drives:
+            for drive in drives:
+                async for drive in await self._core.cloudfs.drives.find(drive.name, drive.owner, include=['uid']):
+                    param.folder_ids.append(drive.uid)
         logging.getLogger('cterasdk.metadata.connector').debug('Checking for updates. %s', {'timeout': param.timeout})
         return (await self._core.v2.api.post('/metadata/longpoll', param)).changes
 
