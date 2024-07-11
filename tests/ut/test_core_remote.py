@@ -80,4 +80,5 @@ class TestCoreRemote(base_core.BaseCoreTest):
         session = Object()
         session.username = 'admin'
         session.role = 'admin'
+        session.domain = None
         return session
