@@ -40,7 +40,7 @@ class TestCoreRemote(base_core.BaseCoreTest):
             self._call_and_assert_instance_type(get_multi_response, Object)
 
     def test_filer_remote_access(self):
-        self.patch_call("cterasdk.lib.session.base.BaseSession.start_session")
+        self.patch_call("cterasdk.lib.session.core.Session._start_session")
         remote_session = self.patch_call("cterasdk.lib.session.edge.Session.start_remote_session")
         self.patch_call("cterasdk.edge.ctera_migrate.CTERAMigrate.login")
         remote_session.return_value = munch.Munch({'account': munch.Munch({'name': 'mickey', 'tenant': 'tenant'})})
