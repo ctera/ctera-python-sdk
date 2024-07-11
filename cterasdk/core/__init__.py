@@ -17,6 +17,5 @@ __all__ = [
     'remote',
     'reports',
     'servers',
-    'session',
     'users'
 ]

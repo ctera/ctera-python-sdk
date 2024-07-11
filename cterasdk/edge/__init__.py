@@ -27,7 +27,6 @@ __all__ = [
     'rsync',
     'ransom_protect',
     'services',
-    'session',
     'shares',
     'shell',
     'smb',

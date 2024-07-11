@@ -67,7 +67,7 @@ class DirectoryService(BaseCommand):
             param.ipAddresses.ipAddress1 = domain_controllers.primary
             param.ipAddresses.ipAddress2 = domain_controllers.secondary
 
-        tenant = self._core.session().user.tenant
+        tenant = self._core.session().account.tenant
         logging.getLogger('cterasdk.core').info('Connecting Portal to directory services. %s', {
             'tenant': tenant,
             'type': type,

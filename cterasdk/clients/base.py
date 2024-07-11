@@ -1,3 +1,4 @@
+import logging
 from . import async_requests
 from ..common import utils
 
@@ -31,7 +32,7 @@ class PersistentHeaders:
 class BaseClient:
     """Base Client"""
 
-    def __init__(self, builder=None, async_session=None, authenticator=None, **session_settings):
+    def __init__(self, builder=None, async_session=None, authenticator=None, **kwargs):
         """
         Initialize a Client
 
@@ -42,7 +43,8 @@ class BaseClient:
         self._headers = PersistentHeaders()
         self._authenticator = authenticator
         self._builder = builder
-        self._async_session = async_session if async_session else async_requests.Session(**session_settings)
+        self._kwargs = kwargs
+        self._async_session = async_session if async_session else async_requests.Session(**kwargs)
 
     @property
     def cookies(self):
@@ -62,6 +64,19 @@ class BaseClient:
 
     def __str__(self):
         return f"({self.__class__.__name__} client at {hex(hash(self))}, baseurl={self.baseurl})"
+
+    def _before_request(self):
+        if self._async_session.closed:
+            logging.getLogger('cterasdk.http').debug('Session Closed. Renewing.')
+            self._async_session.initialize(**self._kwargs)
+
+    def request(self, request, *, on_response=None):
+        self._before_request()
+        return self._request(request, on_response=on_response)
+
+    async def async_request(self, request, *, on_response=None):
+        self._before_request()
+        return await self._request(request, on_response=on_response)
 
     async def shutdown(self):
         await self._async_session.shutdown()

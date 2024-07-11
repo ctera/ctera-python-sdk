@@ -2,6 +2,9 @@ from ..services import CTERA
 from ..endpoints import EndpointBuilder
 from ...clients.asynchronous import clients
 
+from .. import authenticators
+
+from ...lib.session.core import Session
 
 from ...asynchronous.core import login
 from ...asynchronous.core import cloudfs
@@ -56,6 +59,7 @@ class AsyncPortal(CTERA):
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https, base=None)
         self._generic = clients.AsyncClient(EndpointBuilder.new(self.base), authenticator=self._authenticator)
+        self._ctera_session = Session(self.host(), self.context)
         self._ctera_clients = Clients(self)
 
         self.cloudfs = cloudfs.CloudFS(self)
@@ -75,18 +79,23 @@ class AsyncPortal(CTERA):
         return self.clients.io
 
     async def login(self, username, password):
-        return await self._login_object.login(username, password)
+        self._before_login()
+        await self._login_object.login(username, password)
+        await self._ctera_session.async_start_session(self)
+        self._after_login()
 
     async def logout(self):
-        await self._login_object.logout()
-        await self.clients.v1.api.shutdown()
+        if self._ctera_session.connected:
+            await self._login_object.logout()
+            self._ctera_session.stop_session()
+        await self._generic.shutdown()
 
     @property
     def _login_object(self):
         return login.Login(self)
 
     def _authenticator(self, url):
-        return True
+        return authenticators.core(self.session(), url, self.context)
 
     async def __aexit__(self, exc_type, exc, tb):
         await self._generic.shutdown()

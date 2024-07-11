@@ -2,11 +2,12 @@ from ...clients.synchronous import clients
 from ..services import Management
 from ..endpoints import EndpointBuilder
 
+from ...lib.session.edge import Session
+
 from ...edge import backup
 from ...edge import cli
 from ...edge import logs
 from ...edge import services
-from ...edge import session
 from ...edge import support
 from ...edge import sync
 
@@ -27,7 +28,7 @@ class Drive(Management):
 
     def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
         super().__init__(host, port, https, base=base)
-        self._ctera_session = session.Session(self.host())
+        self._ctera_session = Session(self.host())
 
         self._initialize(Portal)
 

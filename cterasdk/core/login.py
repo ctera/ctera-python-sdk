@@ -28,6 +28,6 @@ class Login(BaseCommand):
         """
         Log out of the portal
         """
-        username = self._core.session().user.name
+        username = self._core.session().account.name
         self._core.api.form_data('/logout', {})
         logging.getLogger('cterasdk.core').info("User logged out. %s", {'host': self._core.host(), 'user': username})

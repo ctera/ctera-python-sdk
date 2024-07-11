@@ -4,6 +4,7 @@ from ..endpoints import EndpointBuilder
 
 from .. import authenticators
 
+from ...lib.session.edge import Session
 
 from ...edge import afp
 from ...edge import aio
@@ -34,7 +35,6 @@ from ...edge import remote
 from ...edge import rsync
 from ...edge import ransom_protect
 from ...edge import services
-from ...edge import session
 from ...edge import shares
 from ...edge import shell
 from ...edge import smb
@@ -105,7 +105,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
         super().__init__(host, port, https, base=base)
-        self._ctera_session = session.Session(self.host())
+        self._ctera_session = Session(self.host())
         self._ctera_clients = Clients(self, Portal)
 
         self.afp = afp.AFP(self)
@@ -185,7 +185,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
     def sso(self, ticket):
         """ Login using Single Sign On"""
         self._login_object.sso(ticket)
-        self.session().start_local_session(self)
+        self.session().start_session(self)
 
     def remote_access(self):
         return remote.remote_access(self, self._Portal)

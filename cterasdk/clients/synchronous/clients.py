@@ -20,37 +20,37 @@ class Client(BaseClient):
     @decorators.authenticated
     def handle(self, path, *, on_response=None, **kwargs):
         request = async_requests.GetRequest(self._builder(path), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def get(self, path, *, on_response=None, **kwargs):
         request = async_requests.GetRequest(self._builder(path), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def put(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
         request = async_requests.PutRequest(self._builder(path), data=data_serializer(data), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def post(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=data_serializer(data), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def form_data(self, path, data, *, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=Serializers.FormData(data), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def multipart(self, path, form, *, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=form.data, **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def delete(self, path, *, on_response=None, **kwargs):
         request = async_requests.DeleteRequest(self._builder(path), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     def _request(self, request, *, on_response=None):
         on_response = on_response if on_response else SyncResponse.new()

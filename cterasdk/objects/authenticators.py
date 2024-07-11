@@ -2,17 +2,16 @@ from . import uri
 
 
 def edge(ctera_session, url):
-    if ctera_session.authenticated() or \
-       ctera_session.initializing() or \
+    if ctera_session.connecting or \
+       ctera_session.connected or \
        uri.components(url).path.endswith(_edge_no_session_resources()):
         return True
     return False
 
 
 def core(ctera_session, url, context):
-    if ctera_session.authenticated() or \
-       ctera_session.initializing() or \
-       ctera_session.is_local_auth() or \
+    if ctera_session.connecting or \
+       ctera_session.connected or \
        uri.components(url).path.startswith(_core_no_session_resources(context)):
         return True
     return False

@@ -49,7 +49,6 @@ Submodules
    cterasdk.edge.remote
    cterasdk.edge.rsync
    cterasdk.edge.services
-   cterasdk.edge.session
    cterasdk.edge.shares
    cterasdk.edge.shell
    cterasdk.edge.smb

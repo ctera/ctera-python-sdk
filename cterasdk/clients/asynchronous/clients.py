@@ -16,27 +16,27 @@ class AsyncClient(BaseClient):
     @decorators.authenticated
     async def get(self, path, *, on_response=None, **kwargs):
         request = async_requests.GetRequest(self._builder(path), **kwargs)
-        return await self._request(request, on_response=on_response)
+        return await self.async_request(request, on_response=on_response)
 
     @decorators.authenticated
     async def put(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
         request = async_requests.PutRequest(self._builder(path), data=data_serializer(data), **kwargs)
-        return await self._request(request, on_response=on_response)
+        return await self.async_request(request, on_response=on_response)
 
     @decorators.authenticated
     async def post(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=data_serializer(data), **kwargs)
-        return await self._request(request, on_response=on_response)
+        return await self.async_request(request, on_response=on_response)
 
     @decorators.authenticated
     async def form_data(self, path, data, *, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=Serializers.FormData(data), **kwargs)
-        return await self._request(request, on_response=on_response)
+        return await self.async_request(request, on_response=on_response)
 
     @decorators.authenticated
     async def delete(self, path, *, on_response=None, **kwargs):
         request = async_requests.DeleteRequest(self._builder(path), **kwargs)
-        return await self._request(request, on_response=on_response)
+        return await self.async_request(request, on_response=on_response)
 
     async def _request(self, request, *, on_response=None):
         on_response = on_response if on_response else AsyncResponse.new()

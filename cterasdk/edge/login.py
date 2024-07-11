@@ -34,7 +34,7 @@ class Login(BaseCommand):
 
     def logout(self):
         host = self._edge.host()
-        user = self._edge.session().user.name
+        user = self._edge.session().account.name
         try:
             self._edge.api.form_data('/logout', {'foo': 'bar'})
             logging.getLogger('cterasdk.edge').info("User logged out. %s", {'host': host, 'user': user})
