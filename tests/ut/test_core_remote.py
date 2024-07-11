@@ -40,7 +40,7 @@ class TestCoreRemote(base_core.BaseCoreTest):
             self._call_and_assert_instance_type(get_multi_response, Object)
 
     def test_filer_remote_access(self):
-        self.patch_call("cterasdk.lib.session.core.Session._start_session")
+        self.patch_call("cterasdk.lib.session.base.BaseSession.start_session")
         remote_session = self.patch_call("cterasdk.lib.session.edge.Session.start_remote_session")
         self.patch_call("cterasdk.edge.ctera_migrate.CTERAMigrate.login")
         remote_session.return_value = munch.Munch({'account': munch.Munch({'name': 'mickey', 'tenant': 'tenant'})})
@@ -62,8 +62,8 @@ class TestCoreRemote(base_core.BaseCoreTest):
         self.assertIsInstance(portal_device, instance_type)
 
     def _activate_portal_session(self):
-        self._global_admin.api.get = mock.MagicMock(side_effect=['team-portal-name', '7.5.182.16',
-                                                                 TestCoreRemote._create_current_session_object()])
+        self._global_admin.api.get = mock.MagicMock(side_effect=[TestCoreRemote._create_current_session_object(),
+                                                                 'team-portal-name', '7.5.182.16'])
         self._global_admin.session().start_session(self._global_admin)
 
     @staticmethod
