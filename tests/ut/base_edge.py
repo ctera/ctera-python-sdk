@@ -1,5 +1,6 @@
 from unittest import mock
 
+from cterasdk.common import Object
 from cterasdk.objects import Edge
 from tests.ut import base
 
@@ -37,3 +38,29 @@ class BaseEdgeTest(base.BaseTest):
         self._filer.migrate.post = mock.MagicMock(return_value=post_response)  # pylint: disable=protected-access
         self._filer.migrate.delete = mock.MagicMock(return_value=delete_response)  # pylint: disable=protected-access
         self._filer.migrate.login = mock.MagicMock()  # pylint: disable=protected-access
+
+    @staticmethod
+    def _create_query_params(include_classname=False, start_from=None,
+                             count_limit=None, include=None, filters=None,
+                             or_filter=None, all_portals=None, **kwargs):
+        query_params = Object()
+
+        if include_classname:
+            query_params._classname = 'QueryParams'  # pylint: disable=protected-access
+        if start_from is not None:
+            query_params.startFrom = start_from
+        if count_limit is not None:
+            query_params.countLimit = count_limit
+        if include is not None:
+            query_params.include = include
+        if filters is not None:
+            query_params.filters = filters
+        if or_filter is not None:
+            query_params.orFilter = or_filter
+        if all_portals is not None:
+            query_params.allPortals = all_portals
+
+        for k, v in kwargs.items():
+            setattr(query_params, k, v)
+
+        return query_params
