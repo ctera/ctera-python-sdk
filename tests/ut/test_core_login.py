@@ -30,6 +30,7 @@ class TestCoreLogin(base_core.BaseCoreTest):
             current_session = Object()
             current_session.username = TestCoreLogin._username
             current_session.role = TestCoreLogin._password
+            current_session.domain = None
             return current_session
         return ''
 

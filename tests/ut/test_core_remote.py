@@ -43,7 +43,7 @@ class TestCoreRemote(base_core.BaseCoreTest):
         self.patch_call("cterasdk.lib.session.base.BaseSession.start_session")
         remote_session = self.patch_call("cterasdk.lib.session.edge.Session.start_remote_session")
         self.patch_call("cterasdk.edge.ctera_migrate.CTERAMigrate.login")
-        remote_session.return_value = munch.Munch({'user': munch.Munch({'name': 'mickey', 'tenant': 'tenant'})})
+        remote_session.return_value = munch.Munch({'account': munch.Munch({'name': 'mickey', 'tenant': 'tenant'})})
         get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
                                                                  'vGateway', self._device_remote_access_url)
         self._init_global_admin(get_multi_response=get_multi_response, execute_response=self._sso_ticket)

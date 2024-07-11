@@ -51,7 +51,7 @@ class Session(BaseSession):
         logging.getLogger('cterasdk.core').debug('Stopping Session.')
 
     def current_tenant(self):
-        return self.account.tenant
+        return self.account.tenant if self.account else None
 
     def update_current_tenant(self, current_tenant):
         self.account.tenant = current_tenant or Session.Administration
