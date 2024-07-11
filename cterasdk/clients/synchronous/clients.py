@@ -225,7 +225,7 @@ class SyncResponse(AsyncResponse):
     def iter_content(self, chunk_size=None):
         while True:
             try:
-                yield self._executor.run_until_complete(super().iter_content(chunk_size).__anext__())
+                yield self._executor.run_until_complete(super().async_iter_content(chunk_size).__anext__())
             except StopAsyncIteration:
                 break
 

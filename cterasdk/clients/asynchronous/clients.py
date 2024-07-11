@@ -117,7 +117,7 @@ class AsyncAPI(AsyncExtended):
 class AsyncResponse(BaseResponse):
     """Asynchronous Response Object"""
 
-    async def iter_content(self, chunk_size=None):
+    async def async_iter_content(self, chunk_size=None):
         async for chunk in self._response.content.iter_chunked(chunk_size if chunk_size else 5120):
             yield chunk
 
