@@ -2,8 +2,6 @@ import logging
 from .base import BaseSession, BaseUser
 from .types import Product
 
-from ...common import Object
-
 
 class PortalUser(BaseUser):
     """Local User"""
@@ -47,7 +45,7 @@ class Session(BaseSession):
         )
         self._update_software_version(software_version)
 
-    def _stop_session(self):
+    def _stop_session(self):  # pylint: disable=no-self-use
         logging.getLogger('cterasdk.core').debug('Stopping Session.')
 
     def current_tenant(self):

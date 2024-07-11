@@ -1,5 +1,5 @@
-
 import copy
+from abc import abstractmethod
 
 from .types import ConnectionStatus
 from ...common import Object, Version
@@ -42,6 +42,7 @@ class BaseSession(Object):
             self._deactivate_connection()
             raise
 
+    @abstractmethod
     def _start_session(self, session):
         return NotImplementedError("Subclass must implement the '_start_session' method.")
 
@@ -54,6 +55,7 @@ class BaseSession(Object):
             self._deactivate_connection()
             raise
 
+    @abstractmethod
     async def _async_start_session(self, session):
         return NotImplementedError("Subclass must implement the '_start_session_async' method.")
 
