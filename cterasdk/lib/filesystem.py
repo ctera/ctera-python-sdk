@@ -1,10 +1,10 @@
 import os
 import errno
-import aiofiles
 import mimetypes
 import logging
 from pathlib import Path
 
+import aiofiles
 import cterasdk.settings
 
 
