@@ -10,7 +10,7 @@ class DefaultBuilder:
         return uri.join(self._base, url)
 
 
-class EndpointBuilder:
+class EndpointBuilder(DefaultBuilder):
 
     def __init__(self, base, *segments):
         super().__init__(base)
