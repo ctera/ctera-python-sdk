@@ -1,10 +1,19 @@
 from . import uri
 
 
+class DefaultBuilder:
+
+    def __init__(self, base=None):
+        self._base = base
+
+    def __call__(self, url):
+        return uri.join(self._base, url)
+
+
 class EndpointBuilder:
 
     def __init__(self, base, *segments):
-        self._base = base
+        super().__init__(base)
         self._segments = segments
 
     def __call__(self, *segments):
