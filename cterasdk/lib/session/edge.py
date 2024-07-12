@@ -36,6 +36,15 @@ class Session(BaseSession):
         logging.getLogger('cterasdk.edge').debug('Starting Session.')
         username = session.api.get('/currentuser').username
         software_version = session.api.get('/status/device/runningFirmware')
+        self._update_session(username, software_version)
+
+    async def _async_start_session(self, session):
+        logging.getLogger('cterasdk.edge').debug('Starting Session.')
+        user = session.api.get('/currentuser')
+        software = session.api.get('/status/device/runningFirmware')
+        self._update_session((await user).username, await software)
+
+    def _update_session(self, username, software_version):
         self._update_account(LocalUser(username))
         self._update_software_version(software_version)
         self.connection = Connection(False)

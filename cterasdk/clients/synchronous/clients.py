@@ -79,17 +79,17 @@ class WebDAV(Client):
 
     def mkcol(self, path):
         request = async_requests.MkcolRequest(self._builder(path))
-        response = self._request(request)
+        response = self.request(request)
         return response.text()
 
     def copy(self, source, destination, *, overwrite=False):
         request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
-        response = self._request(request)
+        response = self.request(request)
         return response.xml()
 
     def move(self, source, destination, *, overwrite=False):
         request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
-        response = self._request(request)
+        response = self.request(request)
         return response.xml()
 
     def delete(self, path):  # pylint: disable=arguments-differ
@@ -145,9 +145,6 @@ class JSON(Client):
     def delete(self, path, **kwargs):
         response = super().delete(path, **kwargs)
         return response.json()
-
-    def request(self, request):
-        return super()._request(request)
 
 
 class Extended(XML):
