@@ -23,7 +23,7 @@ class DirectIO:
     async def parts(self, file_id, access_key_id=None, secret_access_key=None):
         """
         File Parts.
-        
+
         :param int file_id: File ID
         :param str,optional access_key_id: Access key
         :param str,optional secret_access_key: Secret key

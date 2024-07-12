@@ -30,4 +30,4 @@ def decrypt_block(block, encryption_key):
         logging.getLogger('cterasdk.direct').error(f'Could not decrypt block. Key error. {error}')
     except UnsupportedAlgorithm as error:
         logging.getLogger('cterasdk.direct').error(f'Could not decrypt block. Unsupported algorithm. {error}')
-    raise CTERAException(f'Could not decrypt block. {error}')
+    raise CTERAException('Could not decrypt block.')

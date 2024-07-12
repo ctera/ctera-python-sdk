@@ -54,7 +54,7 @@ async def process_chunk(client, chunk, encryption_key):
     :param cterasdk.clients.asynchronous.clients.AsyncClient client: Asynchronous HTTP Client.
     :param cterasdk.direct.client.Chunk chunk: Chunk.
     :param str encryption_key: Encryption key.
-    
+
     :returns: File Part
     :rtype: cterasdk.direct.client.FilePart
     """
