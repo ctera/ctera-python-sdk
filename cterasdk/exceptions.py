@@ -58,33 +58,6 @@ class ConsentException(CTERAException):
     """Consent Exception"""
 
 
-class FileSystemException(CTERAException):
-    pass
-
-
-class RenameException(FileSystemException):
-    def __init__(self, dirpath, src, dst):
-        FileSystemException.__init__(self, 'Could not rename file', None, dirpath=dirpath, src=src, dst=dst)
-
-
-class LocalDirectoryNotFound(FileSystemException):
-
-    def __init__(self, path):
-        FileSystemException.__init__(self, 'Could not find local directory', None, path=path)
-
-
-class LocalFileNotFound(FileSystemException):
-
-    def __init__(self, path):
-        FileSystemException.__init__(self, 'Could not find local file', None, path=path)
-
-
-class LocalPathNotFound(FileSystemException):
-
-    def __init__(self, path):
-        FileSystemException.__init__(self, 'Path does not exist', None, path=path)
-
-
 class RemoteFileSystemException(CTERAException):
     pass
 

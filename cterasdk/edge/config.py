@@ -69,13 +69,13 @@ class Config(BaseCommand):
         if exclude:
             delete_attrs(database, exclude)
 
-        path = self._filesystem.join(TempfileServices.mkdir(), f'{self._edge.session().host}.xml')
+        path = self._filesystem.join(TempfileServices.mkdir(), f'{self._edge.session().address}.xml')
         self._filesystem.write(path, toxmlstr(database, True).encode('utf-8'))
 
         return self._import_configuration(path)
 
     def _import_configuration(self, path):
-        self._filesystem.get_local_file_info(path)
+        self._filesystem.properties(path)
         logging.getLogger('cterasdk.edge').info('Importing Edge Filer configuration.')
         with open(path, 'rb') as fd:
             response = self._edge.api.form_data(
@@ -118,7 +118,7 @@ class Config(BaseCommand):
          File destination, defaults to the default directory
         """
         default_filename = self._edge.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.xml'
-        directory, filename = self._filesystem.split_file_directory_with_defaults(destination, default_filename)
+        directory, filename = self._filesystem.generate_file_location(destination, default_filename)
         logging.getLogger('cterasdk.edge').info('Exporting configuration. %s', {'host': self._edge.host()})
         handle = self._edge.api.handle('/export')
         filepath = FileSystem.instance().save(directory, filename, handle)

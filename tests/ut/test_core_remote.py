@@ -40,10 +40,10 @@ class TestCoreRemote(base_core.BaseCoreTest):
             self._call_and_assert_instance_type(get_multi_response, Object)
 
     def test_filer_remote_access(self):
-        self.patch_call("cterasdk.lib.session_base.SessionBase.start_local_session")
-        remote_session = self.patch_call("cterasdk.edge.session.Session.start_remote_session")
+        self.patch_call("cterasdk.lib.session.base.BaseSession.start_session")
+        remote_session = self.patch_call("cterasdk.lib.session.edge.Session.start_remote_session")
         self.patch_call("cterasdk.edge.ctera_migrate.CTERAMigrate.login")
-        remote_session.return_value = munch.Munch({'user': munch.Munch({'name': 'mickey', 'tenant': 'tenant'})})
+        remote_session.return_value = munch.Munch({'account': munch.Munch({'name': 'mickey', 'tenant': 'tenant'})})
         get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
                                                                  'vGateway', self._device_remote_access_url)
         self._init_global_admin(get_multi_response=get_multi_response, execute_response=self._sso_ticket)
@@ -62,9 +62,9 @@ class TestCoreRemote(base_core.BaseCoreTest):
         self.assertIsInstance(portal_device, instance_type)
 
     def _activate_portal_session(self):
-        self._global_admin.api.get = mock.MagicMock(side_effect=['team-portal-name', '7.5.182.16',
-                                                                 TestCoreRemote._create_current_session_object()])
-        self._global_admin.session().start_local_session(self._global_admin)
+        self._global_admin.api.get = mock.MagicMock(side_effect=[TestCoreRemote._create_current_session_object(),
+                                                                 'team-portal-name', '7.5.182.16'])
+        self._global_admin.session().start_session(self._global_admin)
 
     @staticmethod
     def _create_device_param(name, portal, device_type, remote_access_url):
@@ -80,4 +80,5 @@ class TestCoreRemote(base_core.BaseCoreTest):
         session = Object()
         session.username = 'admin'
         session.role = 'admin'
+        session.domain = None
         return session

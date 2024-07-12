@@ -90,7 +90,7 @@ If we combine the two examples above, we get the following result:
                 print('Size: ', drive.folderStats.cloudFolderSize)
                 print('Count: ', drive.folderStats.totalFiles)
 
-            for edge in admin.devices.filers(include['deviceConnectionstatus']):
+            for edge in admin.devices.filers(include=['deviceConnectionstatus']):
                 print(edge)
 
             admin.portals.browse_global_admin()
@@ -122,7 +122,7 @@ And equivalnent example to the one given above:
             print('Size: ', drive.folderStats.cloudFolderSize)
             print('Count: ', drive.folderStats.totalFiles)
 
-        for edge in admin.devices.filers(include['deviceConnectionstatus']):
+        for edge in admin.devices.filers(include=['deviceConnectionstatus']):
             print(edge)
 
         admin.portals.browse_global_admin()

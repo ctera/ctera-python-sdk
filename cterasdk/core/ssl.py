@@ -39,7 +39,7 @@ class SSL(BaseCommand):
         :param str,optional destination:
          File destination, defaults to the default directory
         """
-        directory, filename = self._filesystem.split_file_directory_with_defaults(destination, 'certificate.zip')
+        directory, filename = self._filesystem.generate_file_location(destination, 'certificate.zip')
         logging.getLogger('cterasdk.core').info('Exporting SSL certificate.')
         handle = self._core.ctera.handle('/preview/exportCertificate')
         filepath = self._filesystem.save(directory, filename, handle)
@@ -96,7 +96,7 @@ class SSL(BaseCommand):
         return self.import_from_zip(zipflie)
 
     def _import_certificate(self, zipfile):
-        self._filesystem.get_local_file_info(zipfile)
+        self._filesystem.properties(zipfile)
         logging.getLogger('cterasdk.core').info('Uploading SSL certificate.')
         with open(zipfile, 'rb') as fd:
             response = self._core.api.form_data(

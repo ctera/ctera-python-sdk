@@ -20,7 +20,7 @@ class S3(BaseCommand):
     """S3 Credential Management APIs"""
 
     def _user_account(self, user_account=None):
-        return user_account if user_account else UserAccount(self._core.session().user.name)
+        return user_account if user_account else UserAccount(self._core.session().account.name)
 
     def all(self, user_account=None):
         """

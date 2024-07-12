@@ -41,7 +41,6 @@ Submodules
    cterasdk.core.remote
    cterasdk.core.roles
    cterasdk.core.servers
-   cterasdk.core.session
    cterasdk.core.setup
    cterasdk.core.ssl
    cterasdk.core.startup

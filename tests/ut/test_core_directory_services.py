@@ -136,7 +136,7 @@ class TestCoreDirectoryServices(base_core.BaseCoreTest):  # pylint: disable=too-
 
     def test_connect(self):
         mock_session = self.patch_call("cterasdk.objects.services.Management.session")
-        mock_session.return_value = munch.Munch({'user': munch.Munch({'tenant': self._tenant})})
+        mock_session.return_value = munch.Munch({'account': munch.Munch({'tenant': self._tenant})})
         self._init_global_admin()
         directoryservice.DirectoryService(self._global_admin).connect(self._domain, self._join_username,
                                                                       self._join_password,

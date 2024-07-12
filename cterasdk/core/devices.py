@@ -17,11 +17,8 @@ class Devices(BaseCommand):
         if not tenant:
             if not session.in_tenant_context():
                 raise CTERAException('You must specify a tenant name or browse the tenant first.')
-            tenant = self._core.session().tenant()
-        if session.is_local_auth():
-            resource_uri = '/devices/' + device_name  # local auth: auto appends /portals/{tenant_name}
-        else:
-            resource_uri = f'/portals/{tenant}/devices/{device_name}'  # regular auth: support both tenant and Administration context
+            tenant = self._core.session().current_tenant()
+        resource_uri = f'/portals/{tenant}/devices/{device_name}'  # regular auth: support both tenant and Administration context
         return resource_uri
 
     def device(self, device_name, tenant=None, include=None):
@@ -33,7 +30,7 @@ class Devices(BaseCommand):
         :param list[str],optional include: List of fields to retrieve, defaults to ['name', 'portal', 'deviceType']
 
         :return: Managed Device
-        :rtype: ctera.object.Gateway.Gateway or ctera.object.Agent.Agent
+        :rtype: cterasdk.objects.synchronous.Edge or cterasdk.objects.synchronous.Drive
         """
         include = union(include or [], Devices.default)
         include = ['/' + attr for attr in include]

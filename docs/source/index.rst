@@ -79,7 +79,7 @@ Portal
                 print(user)
 
             admin.portals.browse_global_admin()
-            for administrator in admin.admins.list_admins(include['email']):
+            for administrator in admin.admins.list_admins(include=['email']):
                 print(administrator)
 
     if __name__ == '__main__':

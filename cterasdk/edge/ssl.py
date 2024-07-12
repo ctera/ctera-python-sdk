@@ -9,7 +9,7 @@ def initialize(edge):
     """
     Conditional intialization of the Edge Filer SSL Module.
     """
-    if edge.session().version > '7.8':
+    if edge.session().software_version > '7.8':
         return SSLv78(edge)
     return SSLv1(edge)
 

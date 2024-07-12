@@ -20,37 +20,37 @@ class Client(BaseClient):
     @decorators.authenticated
     def handle(self, path, *, on_response=None, **kwargs):
         request = async_requests.GetRequest(self._builder(path), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def get(self, path, *, on_response=None, **kwargs):
         request = async_requests.GetRequest(self._builder(path), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def put(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
         request = async_requests.PutRequest(self._builder(path), data=data_serializer(data), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def post(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=data_serializer(data), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def form_data(self, path, data, *, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=Serializers.FormData(data), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def multipart(self, path, form, *, on_response=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=form.data, **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     @decorators.authenticated
     def delete(self, path, *, on_response=None, **kwargs):
         request = async_requests.DeleteRequest(self._builder(path), **kwargs)
-        return self._request(request, on_response=on_response)
+        return self.request(request, on_response=on_response)
 
     def _request(self, request, *, on_response=None):
         on_response = on_response if on_response else SyncResponse.new()
@@ -79,17 +79,17 @@ class WebDAV(Client):
 
     def mkcol(self, path):
         request = async_requests.MkcolRequest(self._builder(path))
-        response = self._request(request)
+        response = self.request(request)
         return response.text()
 
     def copy(self, source, destination, *, overwrite=False):
         request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
-        response = self._request(request)
+        response = self.request(request)
         return response.xml()
 
     def move(self, source, destination, *, overwrite=False):
         request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
-        response = self._request(request)
+        response = self.request(request)
         return response.xml()
 
     def delete(self, path):  # pylint: disable=arguments-differ
@@ -145,9 +145,6 @@ class JSON(Client):
     def delete(self, path, **kwargs):
         response = super().delete(path, **kwargs)
         return response.json()
-
-    def request(self, request):
-        return super()._request(request)
 
 
 class Extended(XML):
@@ -225,7 +222,7 @@ class SyncResponse(AsyncResponse):
     def iter_content(self, chunk_size=None):
         while True:
             try:
-                yield self._executor.run_until_complete(self.chunk(chunk_size).__anext__())
+                yield self._executor.run_until_complete(super().async_iter_content(chunk_size).__anext__())
             except StopAsyncIteration:
                 break
 

@@ -18,6 +18,9 @@ class Session:
     """Asynchronous HTTP Session"""
 
     def __init__(self, **kwargs):
+        self.initialize(**kwargs)
+
+    def initialize(self, **kwargs):
         self._session = aiohttp.ClientSession(trace_configs=[async_tracers.default()], **kwargs)
 
     @property
@@ -56,9 +59,9 @@ class Session:
             logging.getLogger('cterasdk.http').error('Request timed out while making an HTTP request.')
             raise TimeoutError(error)
 
-    @staticmethod
-    def new(**kwargs):
-        return Session(**kwargs)
+    @property
+    def closed(self):
+        return self._session.closed
 
     async def shutdown(self):
         await self._session.close()

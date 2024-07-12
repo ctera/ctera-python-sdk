@@ -23,6 +23,10 @@ def create(base, *segments):
     return f'{url}{root}' if segments[-1] == root else url
 
 
+def join(base, url):
+    return urllib.parse.urljoin(base, url)
+
+
 def components(url):
     """
     Parse a URL

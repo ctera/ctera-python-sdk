@@ -5,6 +5,7 @@ from ..endpoints import EndpointBuilder
 
 from .. import authenticators
 
+from ...lib.session.core import Session
 
 from ...core import activation
 from ...core import admins
@@ -31,7 +32,6 @@ from ...core import portals
 from ...core import reports
 from ...core import roles
 from ...core import servers
-from ...core import session
 from ...core import settings
 from ...core import setup
 from ...core import ssl
@@ -83,7 +83,7 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https, base=None)
 
-        self._ctera_session = session.Session(self.host(), self.context)
+        self._ctera_session = Session(self.host(), self.context)
         self._ctera_clients = Clients(self)
 
         self.activation = activation.Activation(self)

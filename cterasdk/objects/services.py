@@ -44,6 +44,9 @@ class CTERA(Service):
     def clients(self):
         return self._ctera_clients
 
+    def session(self):
+        return self._ctera_session
+
     def _before_login(self):
         """Override to implement logic before login"""
 
@@ -88,14 +91,14 @@ class Management(CTERA):
         """
         self._before_login()
         self._login_object.login(username, password)
-        self._ctera_session.start_local_session(self)
+        self._ctera_session.start_session(self)
         self._after_login()
 
     def logout(self):
         """ Log out """
-        if self._ctera_session.active:
+        if self._ctera_session.connected:
             self._login_object.logout()
-            self._ctera_session.terminate()
+            self._ctera_session.stop_session()
         self._generic.shutdown()
 
     @abstractmethod
@@ -107,9 +110,6 @@ class Management(CTERA):
     def _session_id_key(self):
         return NotImplementedError("Subclass must implement the '_session_id_key' property")
 
-    def session(self):
-        return self._ctera_session
-
     def get_session_id(self):
         """
         Get Session Identifier
@@ -120,7 +120,7 @@ class Management(CTERA):
 
     def set_session_id(self, session_id):
         self._generic.cookies.update({self._session_id_key: session_id}, self._generic.baseurl)
-        self._ctera_session.start_local_session(self)
+        self._ctera_session.start_session(self)
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         self._generic.shutdown()
