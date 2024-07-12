@@ -66,7 +66,7 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
     def test_edge_config_export_default_dest(self):
         handle_response = 'Stream'
         self._init_filer(handle_response=handle_response)
-        mock_get_dirpath = self.patch_call("cterasdk.lib.filesystem.FileSystem.get_dirpath",
+        mock_get_dirpath = self.patch_call("cterasdk.lib.filesystem.FileSystem.downloads_directory",
                                            return_value=self._default_download_directory)
         mock_save_file = self.patch_call("cterasdk.lib.filesystem.FileSystem.save")
         with mock.patch.object(datetime, 'datetime', mock.Mock(wraps=datetime.datetime)) as patched:

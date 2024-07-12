@@ -44,7 +44,7 @@ class FileSystem:  # pylint: disable=unused-private-member
         """
         return Path(p).exists()
 
-    def rename(self, parent, source, destination):
+    def rename(self, parent, source, destination):  # pylint: disable=no-self-use
         """
         Rename a file or a directory.
 
@@ -130,7 +130,7 @@ class FileSystem:  # pylint: disable=unused-private-member
             parent, filename = self.split_file_directory(location)
         else:
             parent = self.downloads_directory()
-        
+
         if not filename:
             filename = default_filename
 
