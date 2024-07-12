@@ -27,7 +27,7 @@ class FileAccessBase(ABC):
         return self._filesystem.save(directory, filename, handle)
 
     def upload(self, local_file, dest_path):
-        local_file_info = self._filesystem.get_local_file_info(local_file)
+        local_file_info = self._filesystem.properties(local_file)
         with open(local_file, 'rb') as fd:
             return self._upload_object(local_file_info, fd, dest_path)
 
@@ -75,7 +75,7 @@ class FileAccessBase(ABC):
         if destination:
             directory, filename = self._filesystem.split_file_directory(destination)
         else:
-            directory = self._filesystem.get_dirpath()
+            directory = self._filesystem.downloads_directory()
         if filename is None:
             filename = filename_resolver(**filename_resolver_kwargs)
         return directory, filename

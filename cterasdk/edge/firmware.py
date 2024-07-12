@@ -32,7 +32,7 @@ class Firmware(BaseCommand):
             self._edge.power.reboot(wait=wait_for_reboot)
 
     def _upload_firmware(self, file_path):
-        self._filesystem.get_local_file_info(file_path)
+        self._filesystem.properties(file_path)
         with open(file_path, 'rb') as fd:
             return self._edge.api.form_data(
                 'proc/firmware',

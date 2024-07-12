@@ -22,7 +22,7 @@ class SSH(BaseCommand):
 
         if public_key is None:
             if public_key_file is not None:
-                FileSystem.instance().get_local_file_info(public_key_file)
+                FileSystem.instance().properties(public_key_file)
                 with open(public_key_file, 'r', encoding='utf-8') as f:
                     public_key = f.read()
             else:
