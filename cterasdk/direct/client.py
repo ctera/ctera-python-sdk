@@ -7,6 +7,8 @@ from .decompressor import decompress
 
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
 from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
+from ..exceptions import UnAuthorized, BlocksNotFoundError, UnprocessableContent, ClientResponseException, \
+    DecryptBlockError, DecryptKeyError, DecompressError
 
 
 async def get_object(client, location):
@@ -17,6 +19,7 @@ async def get_object(client, location):
     :returns: Object
     :rtype: bytes
     """
+    logging.getLogger('cterasdk.direct').debug('Downloading Block.')
     response = await client.get(location)
     return await response.read()
 
@@ -58,13 +61,20 @@ async def process_chunk(client, chunk, encryption_key):
     :returns: File Part
     :rtype: cterasdk.direct.client.FilePart
     """
+    logging.getLogger('cterasdk.direct').debug('Processing Block. %s', {'number': chunk.index + 1})
     try:
         encrypted_object = await get_object(client, chunk.location)
         decrypted_object = await decrypt_object(encrypted_object, encryption_key)
         decompressed_object = await decompress_object(decrypted_object, chunk.length)
         return FilePart(chunk.index + 1, chunk.offset, decompressed_object, chunk.length)
     except ConnectionError as error:
-        logging.getLogger('cterasdk.direct').error(f'Could not retrieve object. Connection error: {error}')
+        logging.getLogger('cterasdk.direct').error(f'Failed to retrieve block. Connection error: {error}')
+        raise
+    except DecryptBlockError:
+        logging.getLogger('cterasdk.direct').error('Failed to decrypt block. %s', {'number': chunk.index + 1})
+        raise
+    except DecompressError:
+        logging.getLogger('cterasdk.direct').error('Failed to decompress block. %s', {'number': chunk.index + 1})
         raise
 
 
@@ -78,6 +88,7 @@ async def process_chunks(client, chunks, encryption_key):
     :returns: List of futures.
     :rtype: list[asyncio.Task]
     """
+    logging.getLogger('cterasdk.direct').debug('Processing Blocks. %s', {'count': len(chunks)})
     futures = []
     for chunk in chunks:
         futures.append(asyncio.create_task(process_chunk(client, chunk, encryption_key)))
@@ -108,9 +119,13 @@ async def process_response(client, response, secret_access_key):
     :param cterasdk.clients.asynchronous.clients.AsyncResponse response: Response.
     :param str secret_access_key: Secret Key.
     """
-    encryption_key = decrypt_key(response.wrapped_key, secret_access_key)
-    chunks = create_chunks(response.chunks)
-    return await process_chunks(client, chunks, encryption_key)
+    try:
+        encryption_key = decrypt_key(response.wrapped_key, secret_access_key)
+        chunks = create_chunks(response.chunks)
+        return await process_chunks(client, chunks, encryption_key)
+    except DecryptKeyError:
+        logging.getLogger('cterasdk.direct').error('Failed to decrypt secret key.')
+        raise
 
 
 def create_authorization_header(credentials):
@@ -135,7 +150,19 @@ async def get_chunks(api, credentials, file_id):
     :returns: Wrapped key and file chunks.
     :rtype: cterasdk.common.object.Object
     """
-    return await api.get(f'{file_id}', headers=create_authorization_header(credentials))
+    logging.getLogger('cterasdk.direct').debug('Listing blocks. %s', {'file_id': file_id})
+    try:
+        response = await api.get(f'{file_id}', headers=create_authorization_header(credentials))
+        if not response.chunks:
+            logging.getLogger('cterasdk.direct').debug('No blocks found. %s', {'file_id': file_id})
+            raise BlocksNotFoundError(file_id)
+        return response
+    except ClientResponseException as error:
+        if error.response.status == 401:
+            raise UnAuthorized()
+        elif error.response.status == 422:
+            raise UnprocessableContent(file_id)
+        raise error
 
 
 def validate_file_identifier(file_id):
@@ -163,6 +190,7 @@ class DirectIO:
     async def parts(self, file_id, credentials):
         """
         Get File Parts.
+
         :param int file_id: File ID.
         :param cterasdk.objects.asynchronous.directio.Credentials,optional credentials: Credentials
         """
