@@ -72,6 +72,12 @@ class DirectIOError(CTERAException):
     """Base Exception for DirectIO Errors"""
 
 
+class FileNotFoundError(DirectIOError):
+
+    def __init__(self, file_id):
+        super().__init__('File not found', None, file_id=file_id)
+
+
 class BlocksNotFoundError(DirectIOError):
 
     def __init__(self, file_id):

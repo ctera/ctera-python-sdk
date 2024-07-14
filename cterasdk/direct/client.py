@@ -1,3 +1,4 @@
+import errno
 import logging
 import asyncio
 
@@ -8,7 +9,7 @@ from .decompressor import decompress
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
 from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
 from ..exceptions import UnAuthorized, BlocksNotFoundError, UnprocessableContent, ClientResponseException, \
-    DecryptBlockError, DecryptKeyError, DecompressError
+    DecryptBlockError, DecryptKeyError, DecompressError, FileNotFoundError
 
 
 async def get_object(client, chunk):
@@ -171,7 +172,9 @@ async def get_chunks(api, credentials, file_id):
             raise BlocksNotFoundError(file_id)
         return response
     except ClientResponseException as error:
-        if error.response.status == 401:
+        if error.response.status == 400:
+            raise FileNotFoundError(file_id)
+        elif error.response.status == 401:
             raise UnAuthorized()
         elif error.response.status == 422:
             raise UnprocessableContent(file_id)
