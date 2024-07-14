@@ -6,6 +6,7 @@ from ..exceptions import DecompressError
 def decompress(compressed_block):
     """
     Decompress a Block.
+
     :param bytes block: Compressed Block
     :returns: Decompressed Block
     :rtype: bytes
@@ -24,4 +25,5 @@ def decompress(compressed_block):
             chunk_start = chunk_end
         return decompressed_block
     except snappy.UncompressError:
+        logging.getLogger('cterasdk.direct').error('Failed to decompress block.')
         raise DecompressError()

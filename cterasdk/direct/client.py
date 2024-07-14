@@ -1,7 +1,7 @@
 import logging
 import asyncio
 
-from .types import Chunk, FilePart
+from .types import Chunk, Block, BlockError
 from .crypto import decrypt_key, decrypt_block
 from .decompressor import decompress
 
@@ -11,16 +11,16 @@ from ..exceptions import UnAuthorized, BlocksNotFoundError, UnprocessableContent
     DecryptBlockError, DecryptKeyError, DecompressError
 
 
-async def get_object(client, location):
+async def get_object(client, chunk):
     """
     Get Object from a Signed URL.
 
-    :param str location: Signed URL.
+    :param cterasdk.direct.types.Chunk chunk: Chunk.
     :returns: Object
     :rtype: bytes
     """
-    logging.getLogger('cterasdk.direct').debug('Downloading Block.')
-    response = await client.get(location)
+    logging.getLogger('cterasdk.direct').debug('Downloading Block. %s', {'file_id': chunk.file_id, 'number': chunk.index})
+    response = await client.get(chunk.location)
     return await response.read()
 
 
@@ -55,27 +55,21 @@ async def process_chunk(client, chunk, encryption_key):
     Process a Chunk.
 
     :param cterasdk.clients.asynchronous.clients.AsyncClient client: Asynchronous HTTP Client.
-    :param cterasdk.direct.client.Chunk chunk: Chunk.
+    :param cterasdk.direct.types.Chunk chunk: Chunk.
     :param str encryption_key: Encryption key.
 
-    :returns: File Part
-    :rtype: cterasdk.direct.client.FilePart
+    :returns: Block
+    :rtype: cterasdk.direct.types.Block
     """
-    logging.getLogger('cterasdk.direct').debug('Processing Block. %s', {'number': chunk.index + 1})
+    logging.getLogger('cterasdk.direct').debug('Processing Block. %s', {'file_id': chunk.file_id, 'number': chunk.index})
     try:
-        encrypted_object = await get_object(client, chunk.location)
+        encrypted_object = await get_object(client, chunk)
         decrypted_object = await decrypt_object(encrypted_object, encryption_key)
         decompressed_object = await decompress_object(decrypted_object, chunk.length)
-        return FilePart(chunk.index + 1, chunk.offset, decompressed_object, chunk.length)
-    except ConnectionError as error:
-        logging.getLogger('cterasdk.direct').error(f'Failed to retrieve block. Connection error: {error}')
-        raise
-    except DecryptBlockError:
-        logging.getLogger('cterasdk.direct').error('Failed to decrypt block. %s', {'number': chunk.index + 1})
-        raise
-    except DecompressError:
-        logging.getLogger('cterasdk.direct').error('Failed to decompress block. %s', {'number': chunk.index + 1})
-        raise
+        return Block(chunk.index, chunk.offset, decompressed_object, chunk.length)
+    except (ConnectionError, DecryptBlockError, DecompressError) as error:
+        logging.getLogger('cterasdk.direct').error('Failed to retrieve block. Connection error.')
+        return BlockError(chunk.file_id, chunk.index, error)
 
 
 async def process_chunks(client, chunks, encryption_key):
@@ -83,45 +77,62 @@ async def process_chunks(client, chunks, encryption_key):
     Process Chunks Asynchronously.
 
     :param cterasdk.clients.asynchronous.clients.AsyncClient client: Asynchronous HTTP Client.
-    :param list[cterasdk.direct.client.Chunk] chunks: Chunk.
+    :param list[cterasdk.direct.types.Chunk] chunks: Chunk.
     :param str encryption_key: Encryption key.
     :returns: List of futures.
     :rtype: list[asyncio.Task]
     """
-    logging.getLogger('cterasdk.direct').debug('Processing Blocks. %s', {'count': len(chunks)})
+    logging.getLogger('cterasdk.direct').debug('Processing Blocks. %s', {'file_id': chunks[0].file_id, 'count': len(chunks)})
     futures = []
     for chunk in chunks:
         futures.append(asyncio.create_task(process_chunk(client, chunk, encryption_key)))
     return futures
 
 
-def create_chunks(server_object):
+def filter_chunks(chunks, blocks):
     """
-    Create Chunks.
+    Filter Chunks to Specific Block Numbers.
 
-    :param cterasdk.common.object.Object server_object: Server response.
+    :param list[cterasdk.direct.types.Chunk] chunks: List of Chunks.
+    :param list[int] chunks: Block Numbers.
     :returns: Chunk objects
-    :rtype: list[cterasdk.direct.client.Chunk]
+    :rtype: list[cterasdk.direct.types.Chunk]
     """
-    offset = 0
-    chunks = []
-    for index, chunk in enumerate(server_object):
-        chunks.append(Chunk(index, offset, chunk.url, chunk.len))
-        offset = offset + chunk.len
+    if blocks is not None:
+        return [chunks[block_number - 1] for block_number in blocks]
     return chunks
 
 
-async def process_response(client, response, secret_access_key):
+def create_chunks(file_id, server_object, blocks):
+    """
+    Create Chunks.
+
+    :param int file_id: File ID.
+    :param cterasdk.common.object.Object server_object: Server response.
+    :param list[int] blocks: List of block numbers to retrieve.
+    :returns: Chunk objects
+    :rtype: list[cterasdk.direct.types.Chunk]
+    """
+    offset = 0
+    chunks = []
+    for index, chunk in enumerate(server_object, 1):
+        chunks.append(Chunk(file_id, index, offset, chunk.url, chunk.len))
+        offset = offset + chunk.len
+    return filter_chunks(chunks, blocks)
+
+
+async def process_response(client, file_id, response, secret_access_key, blocks):
     """
     Process Response.
 
     :param cterasdk.clients.asynchronous.clients.AsyncClient client: Asynchronous HTTP Client.
+    :param int file_id: File ID.
     :param cterasdk.clients.asynchronous.clients.AsyncResponse response: Response.
     :param str secret_access_key: Secret Key.
     """
     try:
         encryption_key = decrypt_key(response.wrapped_key, secret_access_key)
-        chunks = create_chunks(response.chunks)
+        chunks = create_chunks(file_id, response.chunks, blocks)
         return await process_chunks(client, chunks, encryption_key)
     except DecryptKeyError:
         logging.getLogger('cterasdk.direct').error('Failed to decrypt secret key.')
@@ -153,6 +164,8 @@ async def get_chunks(api, credentials, file_id):
     logging.getLogger('cterasdk.direct').debug('Listing blocks. %s', {'file_id': file_id})
     try:
         response = await api.get(f'{file_id}', headers=create_authorization_header(credentials))
+        #if response is None:
+            #logging.getLogger('cterasdk.direct').debug('No blocks found. %s', {'file_id': file_id})
         if not response.chunks:
             logging.getLogger('cterasdk.direct').debug('No blocks found. %s', {'file_id': file_id})
             raise BlocksNotFoundError(file_id)
@@ -187,16 +200,17 @@ class DirectIO:
         self._client = AsyncClient(DefaultBuilder(), authenticator=lambda *_: True)
         self._credentials = credentials
 
-    async def parts(self, file_id, credentials):
+    async def blocks(self, file_id, credentials, blocks=None):
         """
-        Get File Parts.
+        Get Blocks.
 
         :param int file_id: File ID.
-        :param cterasdk.objects.asynchronous.directio.Credentials,optional credentials: Credentials
+        :param cterasdk.objects.asynchronous.directio.Credentials,optional credentials: Credentials.
+        :param list[int],optional blocks: List of blocks to retrieve, defaults to all blocks.
         """
         credentials = credentials if credentials else self._credentials
         response = await get_chunks(self._api, credentials, file_id)
-        return await process_response(self._client, response, credentials.secret_access_key)
+        return await process_response(self._client, file_id, response, credentials.secret_access_key, blocks)
 
     async def shutdown(self):
         await self._api.shutdown()

@@ -30,7 +30,7 @@ def decrypt_block(block, encryption_key):
         decryptor = Cipher(algorithms.AES(encryption_key), modes.CBC(initialization_vector)).decryptor()
         return decryptor.update(encrypted_data)
     except ValueError as error:
-        logging.getLogger('cterasdk.direct').error(f'Could not decrypt block. Key error. {error}')
+        logging.getLogger('cterasdk.direct').error(f'Failed to decrypt block. Key error. {error}')
     except UnsupportedAlgorithm as error:
-        logging.getLogger('cterasdk.direct').error(f'Could not decrypt block. Unsupported algorithm. {error}')
+        logging.getLogger('cterasdk.direct').error(f'Failed to decrypt block. Unsupported algorithm. {error}')
     raise DecryptBlockError()
