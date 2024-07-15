@@ -72,7 +72,7 @@ class DirectIOError(CTERAException):
     """Base Exception for DirectIO Errors"""
 
 
-class FileNotFoundError(DirectIOError):
+class NotFoundError(DirectIOError):
 
     def __init__(self, file_id):
         super().__init__('File not found', None, file_id=file_id)
@@ -113,6 +113,6 @@ class DecryptBlockError(DecryptError):
 
 
 class DecompressError(DirectIOError):
-    
+
     def __init__(self):
         super().__init__('Failed to decompress block')

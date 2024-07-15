@@ -8,7 +8,7 @@ from .decompressor import decompress
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
 from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
 from ..exceptions import UnAuthorized, BlocksNotFoundError, UnprocessableContent, ClientResponseException, \
-    DecryptBlockError, DecryptKeyError, DecompressError, FileNotFoundError
+    DecryptBlockError, DecryptKeyError, DecompressError, NotFoundError
 
 
 async def get_object(client, chunk):
@@ -175,16 +175,13 @@ async def get_chunks(api, credentials, file_id):
     logging.getLogger('cterasdk.direct').debug('Listing blocks. %s', message_attributes)
     try:
         response = await api.get(f'{file_id}', headers=create_authorization_header(credentials))
-        if response is None:
-            logging.getLogger('cterasdk.direct').error('File not found. %s', message_attributes)
-            raise FileNotFoundError(file_id)
         if not response.chunks:
             logging.getLogger('cterasdk.direct').error('Blocks not found. %s', message_attributes)
             raise BlocksNotFoundError(file_id)
         return response
     except ClientResponseException as error:
         if error.response.status == 400:
-            raise FileNotFoundError(file_id)
+            raise NotFoundError(file_id)
         elif error.response.status == 401:
             raise UnAuthorized()
         elif error.response.status == 422:
