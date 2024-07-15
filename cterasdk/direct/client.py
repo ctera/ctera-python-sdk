@@ -171,13 +171,15 @@ async def get_chunks(api, credentials, file_id):
     :returns: Wrapped key and file chunks.
     :rtype: cterasdk.common.object.Object
     """
-    logging.getLogger('cterasdk.direct').debug('Listing blocks. %s', {'file_id': file_id})
+    message_attributes = {'file_id': file_id}
+    logging.getLogger('cterasdk.direct').debug('Listing blocks. %s', message_attributes)
     try:
         response = await api.get(f'{file_id}', headers=create_authorization_header(credentials))
-        #if response is None:
-            #logging.getLogger('cterasdk.direct').debug('No blocks found. %s', {'file_id': file_id})
+        if response is None:
+            logging.getLogger('cterasdk.direct').error('File not found. %s', message_attributes)
+            raise FileNotFoundError(file_id)
         if not response.chunks:
-            logging.getLogger('cterasdk.direct').debug('No blocks found. %s', {'file_id': file_id})
+            logging.getLogger('cterasdk.direct').error('Blocks not found. %s', message_attributes)
             raise BlocksNotFoundError(file_id)
         return response
     except ClientResponseException as error:
