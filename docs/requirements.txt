@@ -1,6 +1,7 @@
 pyyaml
 aiohttp
 aiofiles
+python-snappy
 cryptography
 packaging
 sphinx>=3.0.4
