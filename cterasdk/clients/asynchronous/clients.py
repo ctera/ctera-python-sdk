@@ -130,6 +130,9 @@ class AsyncResponse(BaseResponse):
     async def xml(self):
         return Deserializers.XML(await self._response.read())
 
+    async def read(self, n=-1):
+        return await self._response.content.read(n)
+
     @staticmethod
     def new():
         async def new_response(response):

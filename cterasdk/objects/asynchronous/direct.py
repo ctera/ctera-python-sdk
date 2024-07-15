@@ -20,17 +20,30 @@ class DirectIO:
         """
         self._client = client.DirectIO(baseurl, Credentials(access_key_id, secret_access_key))
 
-    async def parts(self, file_id, access_key_id=None, secret_access_key=None):
+    async def blocks(self, file_id, access_key_id=None, secret_access_key=None, *, blocks=None):
         """
-        File Parts.
+        Get Blocks.
 
         :param int file_id: File ID
         :param str,optional access_key_id: Access key
         :param str,optional secret_access_key: Secret key
-        :returns: File Parts
+        :param list[int],optional blocks: List of blocks to retrieve, defaults to all blocks.
+        :returns: Blocks
+        :rtype: list[cterasdk.direct.types.Block] or list[cterasdk.direct.types.BlockError]
         """
         credentials = Credentials(access_key_id, secret_access_key) if all([access_key_id, secret_access_key]) else None
-        return await self._client.parts(file_id, credentials)
+        return await self._client.blocks(file_id, credentials, blocks)
+
+    async def iter_chunked(self, file_id, access_key_id=None, secret_access_key=None):
+        """
+        Iterates over data chunks with maximum size limit.
+
+        :param int file_id: File ID.
+        :param str,optional access_key_id: Access key
+        :param str,optional secret_access_key: Secret key
+        """
+        credentials = Credentials(access_key_id, secret_access_key) if all([access_key_id, secret_access_key]) else None
+        return await self._client.iter_chunked(file_id, credentials)
 
     async def shutdown(self):
         await self._client.shutdown()
