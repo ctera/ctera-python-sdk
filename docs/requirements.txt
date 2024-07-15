@@ -1,5 +1,6 @@
 pyyaml
 aiohttp
+aiofiles
 cryptography
 packaging
 sphinx>=3.0.4
