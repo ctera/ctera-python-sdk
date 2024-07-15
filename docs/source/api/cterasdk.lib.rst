@@ -18,7 +18,6 @@ Submodules
    cterasdk.lib.iterator
    cterasdk.lib.platform
    cterasdk.lib.registry
-   cterasdk.lib.session_base
    cterasdk.lib.tempfile
    cterasdk.lib.tracker
    cterasdk.lib.version
