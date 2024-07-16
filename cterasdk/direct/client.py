@@ -4,7 +4,6 @@ import asyncio
 from .types import Chunk, Block, BlockError
 from .crypto import decrypt_key, decrypt_block
 from .decompressor import decompress
-from .stream import Streamer
 
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
 from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
@@ -222,17 +221,14 @@ class DirectIO:
         """
         return await self._blocks(file_id, credentials, blocks)
 
-    async def iter_content(self, file_id, credentials):
+    async def iter_chunked(self, file_id, credentials):
         """
-        Iterates over data.
+        Iterates over data chunks with maximum size limit.
 
         :param int file_id: File ID.
         :param cterasdk.objects.asynchronous.directio.Credentials,optional credentials: Credentials.
-        :returns: Stream Object
-        :rtype: cterasdk.direct.streamer.Streamer
         """
-        promises = await self._blocks(file_id, credentials, None, asyncio.Semaphore(50))
-        return Streamer(promises)
+        return await self._blocks(file_id, credentials, None, asyncio.Semaphore(5))
 
     async def _blocks(self, file_id, credentials, blocks, semaphore=None):
         credentials = credentials if credentials else self._credentials
