@@ -229,7 +229,7 @@ class DirectIO:
         :param int file_id: File ID.
         :param cterasdk.objects.asynchronous.directio.Credentials,optional credentials: Credentials.
         :returns: Stream Object
-        :rtype: cterasdk.direct.streamer.Streamer
+        :rtype: cterasdk.direct.stream.Streamer
         """
         promises = await self._blocks(file_id, credentials, None, asyncio.Semaphore(50))
         return Streamer(promises)

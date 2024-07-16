@@ -41,6 +41,8 @@ class DirectIO:
         :param int file_id: File ID.
         :param str,optional access_key_id: Access key
         :param str,optional secret_access_key: Secret key
+        :returns: Stream Object
+        :rtype: cterasdk.direct.stream.Streamer
         """
         credentials = Credentials(access_key_id, secret_access_key) if all([access_key_id, secret_access_key]) else None
         return await self._client.iter_content(file_id, credentials)
