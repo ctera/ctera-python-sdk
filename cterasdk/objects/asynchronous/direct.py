@@ -20,32 +20,26 @@ class DirectIO:
         """
         self._client = client.DirectIO(baseurl, Credentials(access_key_id, secret_access_key))
 
-    async def blocks(self, file_id, access_key_id=None, secret_access_key=None, *, blocks=None):
+    async def blocks(self, file_id, blocks=None):
         """
         Get Blocks.
 
         :param int file_id: File ID
-        :param str,optional access_key_id: Access key
-        :param str,optional secret_access_key: Secret key
         :param list[int],optional blocks: List of blocks to retrieve, defaults to all blocks.
         :returns: Blocks
         :rtype: list[cterasdk.direct.types.Block] or list[cterasdk.direct.types.BlockError]
         """
-        credentials = Credentials(access_key_id, secret_access_key) if all([access_key_id, secret_access_key]) else None
-        return await self._client.blocks(file_id, credentials, blocks)
+        return await self._client.blocks(file_id, blocks)
 
-    async def iter_content(self, file_id, access_key_id=None, secret_access_key=None):
+    async def streamer(self, file_id, byte_range=None):
         """
         Iterates over data chunks.
 
         :param int file_id: File ID.
-        :param str,optional access_key_id: Access key
-        :param str,optional secret_access_key: Secret key
         :returns: Stream Object
         :rtype: cterasdk.direct.stream.Streamer
         """
-        credentials = Credentials(access_key_id, secret_access_key) if all([access_key_id, secret_access_key]) else None
-        return await self._client.iter_content(file_id, credentials)
+        return await self._client.streamer(file_id, byte_range)
 
     async def shutdown(self):
         await self._client.shutdown()

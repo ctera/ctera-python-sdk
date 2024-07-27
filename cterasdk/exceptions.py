@@ -116,3 +116,17 @@ class DecompressError(DirectIOError):
 
     def __init__(self):
         super().__init__('Failed to decompress block')
+
+
+class BlockError(DirectIOError):
+    """Block Error"""
+
+    def __init__(self, file_id, number, error):
+        super().__init__('An error occurred while processing a block.', error=error, file_id=file_id, number=number)
+
+
+class StreamError(DirectIOError):
+    """Stream Error"""
+
+    def __init__(self, error):
+        super().__init__('An error occurred while processing stream.', error=error)

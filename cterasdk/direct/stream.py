@@ -1,38 +1,29 @@
-import asyncio
 import logging
+from ..exceptions import DecryptBlockError, DecompressError, BlockError, StreamError
 
 
 class Streamer:
+    """
+    Direct IO Streamer.
+    """
 
-    def __init__(self, promises, counter=1):
-        self._promises = promises
-        self._queue = asyncio.Queue()
-        self._counter = counter
-        self._blocks = dict()
-        self._streamer = asyncio.create_task(self._stream())
+    def __init__(self, executor, byte_range):
+        """
+        Initialize a Streamer.
 
-    def __aiter__(self):
-        return self
+        :param callable _executor: Asynchronous Direct IO Callable.
+        :param cterasdk.direct.types.ByteRange byte_range: Byte Range.
+        """
+        self._executor = executor
+        self._downloads = None
+        self._byte_range = byte_range
 
-    async def _stream(self):
-        message = {'count': len(self._promises)}
-        logging.getLogger('cterasdk.direct').debug('Gathering Blocks. %s', message)
-        for promise in asyncio.as_completed(self._promises):
-            logging.getLogger('cterasdk.direct').debug('Put Block.')
-            await self._queue.put(await promise)
-        logging.getLogger('cterasdk.direct').debug('Completed Gathering Blocks. %s', message)
-
-    async def __anext__(self):
-        if self._counter > len(self._promises):
-            raise StopAsyncIteration
-
-        while self._blocks.get(self._counter, None) is None:
-            try:
-                block = await asyncio.wait_for(self._queue.get(), timeout=1.0)
-                self._blocks[block.number] = block
-            except asyncio.TimeoutError:
-                logging.getLogger('cterasdk.direct').debug('Timeout.')
-
-        block = self._blocks.pop(self._counter)
-        self._counter = self._counter + 1
-        return block.data
+    async def stream(self):
+        cursor = 0
+        self._downloads = await self._executor()
+        while cursor < len(self._downloads):
+            block = await self._downloads[cursor]
+            fragment = block.fragment(self._byte_range)
+            logging.getLogger('cterasdk.direct').debug('Streamer Fragment. %s', {'offset': fragment.offset, 'length': fragment.length})
+            yield fragment
+            cursor = cursor + 1
