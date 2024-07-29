@@ -12,9 +12,8 @@ class ByteRange:
         if end is not None:
             if end < self._start:
                 raise ValueError(f'Byte range end {end} must be greater than or equal to range start {start}.')
-            else:
-                self._eof = False
-                self._end = end
+            self._eof = False
+            self._end = end
 
     @property
     def start(self):
@@ -47,9 +46,10 @@ class DirectIOResponse:
         :param cterasdk.common.object.Object server_object: Response Object.
         """
         self._wrapped_key = server_object.wrapped_key
-        self._chunks = self._create_chunks(file_id, server_object.chunks)
+        self._chunks = DirectIOResponse._create_chunks(file_id, server_object.chunks)
 
-    def _create_chunks(self, file_id, server_object):
+    @staticmethod
+    def _create_chunks(file_id, server_object):
         """
         Create Chunks.
 

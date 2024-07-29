@@ -11,7 +11,7 @@ from .stream import Streamer
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
 from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
 from ..exceptions import ClientResponseException
-from .exceptions import UnAuthorized, UnprocessableContent, TimeoutError, ListBlocksError, BlocksNotFoundError, \
+from .exceptions import UnAuthorized, UnprocessableContent, ListBlocksError, BlocksNotFoundError, \
     DownloadBlockError, DecryptKeyError, NotFoundError, BlockValidationException, DirectIOError
 
 
@@ -38,7 +38,7 @@ async def get_object(client, chunk):
         raise DownloadBlockError(chunk, error.response)
     except asyncio.TimeoutError:
         logging.getLogger('cterasdk.direct').error('Timeout occurred while downloading block. %s', parameters)
-        raise TimeoutError('Timeout occurred while downloading block.', **parameters)
+        raise
 
 
 async def decrypt_object(encrypted_object, encryption_key):
@@ -162,14 +162,14 @@ async def get_chunks(api, credentials, file_id):
     except ClientResponseException as error:
         if error.response.status == 400:
             raise NotFoundError(file_id)
-        elif error.response.status == 401:
+        if error.response.status == 401:
             raise UnAuthorized()
-        elif error.response.status == 422:
+        if error.response.status == 422:
             raise UnprocessableContent(file_id)
         raise error
     except asyncio.TimeoutError:
         logging.getLogger('cterasdk.direct').error('Timeout occurred while listing blocks. %s', parameters)
-        raise TimeoutError('Timeout occurred while listing blocks.', **parameters)
+        raise
 
 
 def validate_file_identifier(file_id):
@@ -180,7 +180,7 @@ def validate_file_identifier(file_id):
     :raises: ValueError
     """
     if not isinstance(file_id, int):
-        ValueError('Invalid file identifier.')
+        raise ValueError('Invalid file identifier.')
 
 
 class Client:
@@ -221,7 +221,7 @@ class Client:
         """
         byte_range = byte_range if byte_range else ByteRange.default()
         file = await self._file(file_id)
-        executor = self._executor(filters.bytes(file, byte_range), file.encryption_key, asyncio.Semaphore(50))
+        executor = self._executor(filters.byte_range(file, byte_range), file.encryption_key, asyncio.Semaphore(50))
         return Streamer(executor, byte_range)
 
     def _executor(self, chunks, encryption_key, semaphore=None):

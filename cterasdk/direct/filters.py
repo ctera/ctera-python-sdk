@@ -1,21 +1,21 @@
 import logging
 
 
-def blocks(file, blocks):
+def blocks(file, numbers):
     """
     Filter Blocks by Block Number.
 
     :param list[cterasdk.direct.types.File] file: File Object.
-    :param list[cterasdk.direct.types.BlockError] blocks: List of BlockError objects or integers.
+    :param list[int] numbers: List of block numbers.
     :returns: List of Chunks.
     :rtype: list[cterasdk.direct.types.Chunk]
     """
-    if blocks is not None:
-        return [file.chunks[number - 1] for number in blocks]
+    if numbers is not None:
+        return [file.chunks[number - 1] for number in numbers]
     return file.chunks
 
 
-def bytes(file, byte_range):
+def byte_range(file, byte_range):
     """
     Filter Blocks by Byte Range.
 
@@ -26,16 +26,14 @@ def bytes(file, byte_range):
     """
     if validate_byte_range(file, byte_range):
         start, end = None, None
-        for i in range(0, len(file.chunks)):
-            chunk = file.chunks[i]
+        for index, chunk in enumerate(file.chunks):
             if byte_range.start < chunk.offset + chunk.length:
-                start = i
+                start = index
                 break
         if not byte_range.eof:
-            for i in range(0, len(file.chunks)):
-                chunk = file.chunks[i]
+            for index, chunk in enumerate(file.chunks):
                 if byte_range.end < chunk.offset + chunk.length:
-                    end = i + 1
+                    end = index + 1
                     break
         return file.chunks[start:end]
     return file.chunks
@@ -44,7 +42,7 @@ def bytes(file, byte_range):
 def validate_byte_range(file, byte_range):
     size = file.size
     if byte_range.start > size:
-        logging.getLogger('cterasdk.direct').error(f'Byte range start {byte_range.start} is greater than the file size {size}.')
+        logging.getLogger('cterasdk.direct').error('Byte range start %s is greater than the file size %s.', byte_range.start, size)
         return False
     if not byte_range.eof and byte_range.end >= size:
         logging.getLogger('cterasdk.direct').debug('Byte range end is greater than file size.')

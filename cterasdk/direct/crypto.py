@@ -18,7 +18,7 @@ def decrypt_key(wrapped_key, secret):
         decrypted_key = ''.join(c for c in decrypted_wrapped_key if c.isprintable())[1:-1]
         return base64.b64decode(decrypted_key)
     except (AssertionError, ValueError, binascii.Error) as error:
-        logging.getLogger('cterasdk.direct').error(f'Could not decrypt secret key. {error}')
+        logging.getLogger('cterasdk.direct').error('Could not decrypt secret key. %s', error)
     raise DecryptKeyError()
 
 
@@ -30,7 +30,7 @@ def decrypt_block(block, encryption_key):
         decryptor = Cipher(algorithms.AES(encryption_key), modes.CBC(initialization_vector)).decryptor()
         return decryptor.update(encrypted_data)
     except ValueError as error:
-        logging.getLogger('cterasdk.direct').error(f'Failed to decrypt block. Key error. {error}')
+        logging.getLogger('cterasdk.direct').error('Failed to decrypt block. Key error. %s', error)
     except UnsupportedAlgorithm as error:
-        logging.getLogger('cterasdk.direct').error(f'Failed to decrypt block. Unsupported algorithm. {error}')
+        logging.getLogger('cterasdk.direct').error('Failed to decrypt block. Unsupported algorithm. %s', error)
     raise DecryptBlockError()

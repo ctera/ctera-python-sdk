@@ -67,9 +67,3 @@ class DecompressBlockError(DirectIOError):
 
     def __init__(self):
         super().__init__('Failed to decompress block')
-
-
-class TimeoutError(DirectIOError):
-
-    def __init__(self, message, **kwargs):
-        super().__init__(message, **kwargs)
