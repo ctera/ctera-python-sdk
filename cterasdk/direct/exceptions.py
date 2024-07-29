@@ -5,12 +5,6 @@ class DirectIOError(CTERAException):
     """Base Exception for DirectIO Errors"""
 
 
-class BlockValidationException(DirectIOError):
-
-    def __init__(self, **kwargs):
-        super().__init__('Expected block length does not match decrypted and decompressed block length', **kwargs)
-
-
 class NotFoundError(DirectIOError):
 
     def __init__(self, file_id):
@@ -61,3 +55,9 @@ class DecompressBlockError(DirectIOError):
 
     def __init__(self):
         super().__init__('Failed to decompress block')
+
+
+class BlockValidationException(DirectIOError):
+
+    def __init__(self, **kwargs):
+        super().__init__('Expected block length does not match decrypted and decompressed block length', **kwargs)
