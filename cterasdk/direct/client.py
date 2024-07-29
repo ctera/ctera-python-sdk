@@ -172,17 +172,6 @@ async def get_chunks(api, credentials, file_id):
         raise
 
 
-def validate_file_identifier(file_id):
-    """
-    Validate File ID.
-
-    :param int file_id: File ID.
-    :raises: ValueError
-    """
-    if not isinstance(file_id, int):
-        raise ValueError('Invalid file identifier.')
-
-
 class Client:
 
     def __init__(self, baseurl, credentials):
