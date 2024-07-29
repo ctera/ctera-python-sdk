@@ -11,7 +11,7 @@ from .stream import Streamer
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
 from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
 from ..exceptions import ClientResponseException
-from .exceptions import UnAuthorized, UnprocessableContent, ListBlocksError, BlocksNotFoundError, \
+from .exceptions import UnAuthorized, UnprocessableContent, BlocksNotFoundError, \
     DownloadBlockError, DecryptKeyError, NotFoundError, BlockValidationException, DirectIOError
 
 
@@ -157,8 +157,6 @@ async def get_chunks(api, credentials, file_id):
             logging.getLogger('cterasdk.direct').error('Blocks not found. %s', parameters)
             raise BlocksNotFoundError(file_id)
         return DirectIOResponse(file_id, response)
-    except ConnectionError as error:
-        raise ListBlocksError(file_id=file_id, error=str(error))
     except ClientResponseException as error:
         if error.response.status == 400:
             raise NotFoundError(file_id)
