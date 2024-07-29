@@ -1,5 +1,4 @@
 import logging
-from ..exceptions import BlockError
 
 
 def blocks(file, blocks):
@@ -12,8 +11,7 @@ def blocks(file, blocks):
     :rtype: list[cterasdk.direct.types.Chunk]
     """
     if blocks is not None:
-        chunks = [block.number if isinstance(block, BlockError) else block for block in blocks]
-        return [file.chunks[number - 1] for number in chunks]
+        return [file.chunks[number - 1] for number in blocks]
     return file.chunks
 
 

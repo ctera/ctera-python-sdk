@@ -1,6 +1,6 @@
 import logging
 import snappy
-from ..exceptions import DecompressError
+from .exceptions import DecompressBlockError
 
 
 def decompress(compressed_block):
@@ -26,4 +26,4 @@ def decompress(compressed_block):
         return decompressed_block
     except snappy.UncompressError:
         logging.getLogger('cterasdk.direct').error('Failed to decompress block.')
-        raise DecompressError()
+        raise DecompressBlockError()

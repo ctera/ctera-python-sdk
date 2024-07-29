@@ -4,7 +4,7 @@ import binascii
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.exceptions import UnsupportedAlgorithm
 from ..common.utils import utf8_decode
-from ..exceptions import DecryptKeyError, DecryptBlockError
+from .exceptions import DecryptKeyError, DecryptBlockError
 
 
 def decrypt_key(wrapped_key, secret):

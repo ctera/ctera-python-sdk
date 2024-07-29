@@ -1,5 +1,6 @@
 import logging
 import asyncio
+from collections import namedtuple
 
 from . import filters
 from .types import DirectIOResponse, File, Block, ByteRange
@@ -9,8 +10,15 @@ from .stream import Streamer
 
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
 from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
-from ..exceptions import UnAuthorized, BlocksNotFoundError, UnprocessableContent, ClientResponseException, \
-    DecryptBlockError, DecryptKeyError, DecompressError, NotFoundError, BlockError
+from ..exceptions import ClientResponseException
+from .exceptions import UnAuthorized, UnprocessableContent, TimeoutError, ListBlocksError, BlocksNotFoundError, \
+    DownloadBlockError, DecryptKeyError, NotFoundError, BlockValidationException, DirectIOError
+
+
+Credentials = namedtuple('Credentials', ('access_key_id', 'secret_access_key'))
+Credentials.__doc__ = 'Tuple holding the access and secret keys to access objects using DirectIO'
+Credentials.access_key_id.__doc__ = 'Access key'
+Credentials.secret_access_key.__doc__ = 'Secret Key'
 
 
 async def get_object(client, chunk):
@@ -21,9 +29,16 @@ async def get_object(client, chunk):
     :returns: Object
     :rtype: bytes
     """
-    logging.getLogger('cterasdk.direct').debug('Downloading Block. %s', {'file_id': chunk.file_id, 'number': chunk.index})
-    response = await client.get(chunk.location)
-    return await response.read()
+    parameters = {'file_id': chunk.file_id, 'number': chunk.index, 'offset': chunk.offset}
+    logging.getLogger('cterasdk.direct').debug('Downloading Block. %s', parameters)
+    try:
+        response = await client.get(chunk.location)
+        return await response.read()
+    except ClientResponseException as error:
+        raise DownloadBlockError(chunk, error.response)
+    except asyncio.TimeoutError:
+        logging.getLogger('cterasdk.direct').error('Timeout occurred while downloading block. %s', parameters)
+        raise TimeoutError('Timeout occurred while downloading block.', **parameters)
 
 
 async def decrypt_object(encrypted_object, encryption_key):
@@ -65,15 +80,20 @@ async def process_chunk(client, chunk, encryption_key, semaphore):
     :rtype: cterasdk.direct.types.Block
     """
     async def process(client, chunk, encryption_key):
-        logging.getLogger('cterasdk.direct').debug('Processing Block. %s', {'file_id': chunk.file_id, 'number': chunk.index})
+        parameters = {'file_id': chunk.file_id, 'number': chunk.index, 'offset': chunk.offset}
+        logging.getLogger('cterasdk.direct').debug('Processing Block. %s', parameters)
         try:
             encrypted_object = await get_object(client, chunk)
             decrypted_object = await decrypt_object(encrypted_object, encryption_key)
             decompressed_object = await decompress_object(decrypted_object, chunk.length)
             return Block(chunk.index, chunk.offset, decompressed_object, chunk.length)
-        except (ConnectionError, DecryptBlockError, DecompressError) as error:
-            logging.getLogger('cterasdk.direct').error('Failed to process block.')
-            raise BlockError(chunk.file_id, chunk.index, error)
+        except (ConnectionError, DirectIOError):
+            logging.getLogger('cterasdk.direct').error('Failed to process block. %s', parameters)
+            raise
+        except AssertionError:
+            logging.getLogger('cterasdk.direct').error('Expected block length does not match decrypted and decompressed block length. %s',
+                                                       parameters)
+            raise BlockValidationException(**parameters)
 
     if semaphore is not None:
         async with semaphore:
@@ -129,14 +149,16 @@ async def get_chunks(api, credentials, file_id):
     :returns: Wrapped key and file chunks.
     :rtype: cterasdk.direct.types.DirectIOResponse
     """
-    message_attributes = {'file_id': file_id}
-    logging.getLogger('cterasdk.direct').debug('Listing blocks. %s', message_attributes)
+    parameters = {'file_id': file_id}
+    logging.getLogger('cterasdk.direct').debug('Listing blocks. %s', parameters)
     try:
         response = await api.get(f'{file_id}', headers=create_authorization_header(credentials))
         if not response.chunks:
-            logging.getLogger('cterasdk.direct').error('Blocks not found. %s', message_attributes)
+            logging.getLogger('cterasdk.direct').error('Blocks not found. %s', parameters)
             raise BlocksNotFoundError(file_id)
         return DirectIOResponse(file_id, response)
+    except ConnectionError as error:
+        raise ListBlocksError(file_id)
     except ClientResponseException as error:
         if error.response.status == 400:
             raise NotFoundError(file_id)
@@ -145,6 +167,9 @@ async def get_chunks(api, credentials, file_id):
         elif error.response.status == 422:
             raise UnprocessableContent(file_id)
         raise error
+    except asyncio.TimeoutError:
+        logging.getLogger('cterasdk.direct').error('Timeout occurred while listing blocks. %s', parameters)
+        raise TimeoutError('Timeout occurred while listing blocks.', **parameters)
 
 
 def validate_file_identifier(file_id):
@@ -158,7 +183,7 @@ def validate_file_identifier(file_id):
         ValueError('Invalid file identifier.')
 
 
-class DirectIO:
+class Client:
 
     def __init__(self, baseurl, credentials):
         """
@@ -179,7 +204,7 @@ class DirectIO:
         Blocks API.
 
         :param int file_id: File ID.
-        :param list[cterasdk.direct.types.BlockError] blocks: List of ``BlockError`` objects or block numbers.
+        :param list[int] blocks: List of block numbers.
         """
         file = await self._file(file_id)
         executor = self._executor(filters.blocks(file, blocks), file.encryption_key)
@@ -220,4 +245,41 @@ class DirectIO:
 
     async def shutdown(self):
         await self._api.shutdown()
+        await self._client.shutdown()
+
+
+class DirectIO:
+
+    def __init__(self, baseurl, access_key_id=None, secret_access_key=None):
+        """
+        Initialize a DirectIO Client.
+
+        :param str baseurl: Portal URL
+        :param str,optional access_key_id: Access key
+        :param str,optional secret_access_key: Secret key
+        """
+        self._client = Client(baseurl, Credentials(access_key_id, secret_access_key))
+
+    async def blocks(self, file_id, blocks=None):
+        """
+        Get Blocks.
+
+        :param int file_id: File ID
+        :param list[int],optional blocks: List of blocks to retrieve, defaults to all blocks.
+        :returns: Blocks
+        :rtype: list[cterasdk.direct.types.Block] or list[cterasdk.direct.types.BlockError]
+        """
+        return await self._client.blocks(file_id, blocks)
+
+    async def streamer(self, file_id, byte_range=None):
+        """
+        Iterates over data chunks.
+
+        :param int file_id: File ID.
+        :returns: Stream Object
+        :rtype: cterasdk.direct.stream.Streamer
+        """
+        return await self._client.streamer(file_id, byte_range)
+
+    async def shutdown(self):
         await self._client.shutdown()
