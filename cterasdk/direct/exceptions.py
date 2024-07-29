@@ -6,7 +6,7 @@ class DirectIOError(CTERAException):
 
 
 class BlockValidationException(DirectIOError):
-    
+
     def __init__(self, **kwargs):
         super().__init__('Expected block length does not match decrypted and decompressed block length', **kwargs)
 
@@ -31,8 +31,8 @@ class UnprocessableContent(DirectIOError):
 
 class ListBlocksError(DirectIOError):
 
-    def __init__(self, file_id):
-        super().__init__('Failed to list blocks', file_id=file_id)
+    def __init__(self, **kwargs):
+        super().__init__('Failed to list blocks', **kwargs)
 
 
 class BlocksNotFoundError(DirectIOError):
@@ -73,5 +73,3 @@ class TimeoutError(DirectIOError):
 
     def __init__(self, message, **kwargs):
         super().__init__(message, **kwargs)
-
-

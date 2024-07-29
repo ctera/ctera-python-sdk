@@ -186,7 +186,7 @@ class Block:
         else:
             start = None
 
-        if not byte_range.eof and byte_range.end < self._offset  + self._length:
+        if not byte_range.eof and byte_range.end < self._offset + self._length:
             end = byte_range.end - self._offset + 1
         else:
             end = None

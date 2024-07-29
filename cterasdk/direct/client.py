@@ -117,7 +117,7 @@ async def process_chunks(client, chunks, encryption_key, semaphore=None):
     for chunk in chunks:
         futures.append(asyncio.create_task(process_chunk(client, chunk, encryption_key, semaphore)))
     return futures
-    
+
 
 def decrypt_encryption_key(wrapped_key, secret_access_key):
     try:
@@ -158,7 +158,7 @@ async def get_chunks(api, credentials, file_id):
             raise BlocksNotFoundError(file_id)
         return DirectIOResponse(file_id, response)
     except ConnectionError as error:
-        raise ListBlocksError(file_id)
+        raise ListBlocksError(file_id=file_id, error=str(error))
     except ClientResponseException as error:
         if error.response.status == 400:
             raise NotFoundError(file_id)

@@ -50,4 +50,3 @@ def validate_byte_range(file, byte_range):
         logging.getLogger('cterasdk.direct').debug('Byte range end is greater than file size.')
         byte_range.eof = True
     return True
-    
