@@ -29,12 +29,6 @@ class UnprocessableContent(DirectIOError):
         super().__init__('Not all blocks of the requested file are stored on a storage node set to Direct Mode', file_id=file_id)
 
 
-class ListBlocksError(DirectIOError):
-
-    def __init__(self, **kwargs):
-        super().__init__('Failed to list blocks', **kwargs)
-
-
 class BlocksNotFoundError(DirectIOError):
 
     def __init__(self, file_id):
