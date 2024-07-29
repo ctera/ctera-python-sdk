@@ -221,7 +221,7 @@ class Client:
         """
         byte_range = byte_range if byte_range else ByteRange.default()
         file = await self._file(file_id)
-        executor = self._executor(filters.byte_range(file, byte_range), file.encryption_key, asyncio.Semaphore(50))
+        executor = self._executor(filters.span(file, byte_range), file.encryption_key, asyncio.Semaphore(50))
         return Streamer(executor, byte_range)
 
     def _executor(self, chunks, encryption_key, semaphore=None):

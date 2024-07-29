@@ -15,7 +15,7 @@ def blocks(file, numbers):
     return file.chunks
 
 
-def byte_range(file, byte_range):
+def span(file, byte_range):
     """
     Filter Blocks by Byte Range.
 
