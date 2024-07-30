@@ -73,3 +73,30 @@ class NFS(BaseCommand):
         if nfsd_host is not None:
             config.nfsHost = nfsd_host
         self._edge.api.put('/config/fileservices/nfs', config)
+
+    def get_nfs_security(self, name):
+        """
+        Get the security priority on share NFS authentication mode
+
+        :param str name: The share name
+        """
+        logging.getLogger('cterasdk.edge').info("Fetching NFS sharing access type and priority. %s", {'share': name})
+        return self._edge.api.get('/config/fileservices/share/' + name + '/nfsSec')
+
+    def set_nfs_security(self, name, priority, sectype):
+        """
+        Set the security priority on share NFS authentication mode
+
+        :param str name: The share name
+        :param cterasdk.edge.enum.NFSPriority Priority: Set the Priority for the NFS Security Type
+        :param cterasdk.edge.enum.NFSSecurityType Type: Set the Security Method for the NFS Priority
+        """
+        try:
+            logging.getLogger('cterasdk.edge').info(
+                "Updating NFS sharing access type and priority. %s",
+                {'share': name, 'priority': priority, 'sectype': sectype}
+                )
+            self._edge.api.put('/config/fileservices/share/' + name + '/nfsSec/' + priority + '/', sectype)
+        except Exception as error:
+            logging.getLogger('cterasdk.edge').error("Update NFS Security failed.")
+            raise CTERAException('Share deletion failed', error)

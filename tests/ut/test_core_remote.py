@@ -2,6 +2,7 @@ from unittest import mock
 import munch
 
 from cterasdk.core import devices
+import cterasdk.settings
 from cterasdk.common import Object
 from cterasdk.objects import Edge, Drive
 from tests.ut import base_core
@@ -11,6 +12,7 @@ class TestCoreRemote(base_core.BaseCoreTest):
 
     def setUp(self):
         super().setUp()
+        cterasdk.settings.sessions.management.ssl = False
         self._device_name = 'device-name'
         self._tenant_name = 'team-portal-name'
         self._device_portal = f'objs/21//TeamPortal/{self._tenant_name}'
