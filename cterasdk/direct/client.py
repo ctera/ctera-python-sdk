@@ -35,7 +35,7 @@ async def get_object(client, chunk):
     try:
         response = await client.get(chunk.location)
         return await response.read()
-    except ConnectionError as error:
+    except ConnectionError:
         raise DownloadConnectionError(chunk)
     except asyncio.TimeoutError:
         logging.getLogger('cterasdk.direct').error('Failed to download block. Timed out. %s', parameters)
@@ -96,14 +96,11 @@ async def process_chunk(client, chunk, encryption_key, semaphore):
     async def process(client, chunk, encryption_key):
         parameters = {'file_id': chunk.file_id, 'number': chunk.index, 'offset': chunk.offset}
         logging.getLogger('cterasdk.direct').debug('Processing Block. %s', parameters)
-        try:
-            encrypted_object = await get_object(client, chunk)
-            decrypted_object = await decrypt_object(encrypted_object, encryption_key, chunk)
-            decompressed_object = await decompress_object(decrypted_object, chunk)
-            return Block(chunk.index, chunk.offset, decompressed_object, chunk.length)
-        except:
-            logging.getLogger('cterasdk.direct').error('Failed to process block. %s', parameters)
-            raise
+
+        encrypted_object = await get_object(client, chunk)
+        decrypted_object = await decrypt_object(encrypted_object, encryption_key, chunk)
+        decompressed_object = await decompress_object(decrypted_object, chunk)
+        return Block(chunk.index, chunk.offset, decompressed_object, chunk.length)
 
     if semaphore is not None:
         async with semaphore:
