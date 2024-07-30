@@ -426,3 +426,31 @@ class TaskType:
     """
     Discovery = 0
     Migration = 1
+
+
+class NFSPriority:
+    """
+    NFS Security Priority
+
+    :ivar str First: Discovery
+    :ivar str Second: Migration
+    :ivar str Third: Migration
+    """
+    First = 'nfsSecFirst'
+    Second = 'nfsSecSecond'
+    Third = 'nfsSecThird'
+
+
+class NFSSecurityType:
+    """
+    NFS Security Type
+
+    :ivar str empty: None
+    :ivar str krb5: krb5
+    :ivar str krb5i: krb5i
+    :ivar str krb5p: krb5p
+    """
+    empty = None
+    krb5 = 'krb5'
+    krb5i = 'krb5i'
+    krb5p = 'krb5p'
