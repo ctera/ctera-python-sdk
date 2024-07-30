@@ -5,6 +5,12 @@ class DirectIOError(IOError):
     """Base Exception for Direct IO Errors"""
 
 
+class StreamError(DirectIOError):
+
+    def __init__(self, filename):
+        super().__init__(errno.EIO, 'Failed to stream file', filename)
+
+
 class DirectIOAPIError(DirectIOError):
     """Direct IO API Error"""
 

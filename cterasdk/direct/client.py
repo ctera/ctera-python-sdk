@@ -1,192 +1,20 @@
-import logging
 import asyncio
 from collections import namedtuple
 
 from . import filters
-from .types import DirectIOResponse, File, Block, ByteRange
-from .crypto import decrypt_key, decrypt_block
-from .decompressor import decompress
+from .lib import get_chunks, decrypt_encryption_key, process_chunks
+from .types import File, ByteRange
 from .stream import Streamer
 
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
 from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
-from ..exceptions import ClientResponseException
-from .exceptions import UnAuthorized, UnprocessableContent, BlocksNotFoundError, DownloadError, DownloadTimeout, BlockListTimeout, \
-    DownloadConnectionError, DecryptKeyError, DecryptBlockError, NotFoundError, DecompressBlockError, BlockValidationException, \
-    BlockListConnectionError, DirectIOError
+
 
 
 Credentials = namedtuple('Credentials', ('access_key_id', 'secret_access_key'))
 Credentials.__doc__ = 'Tuple holding the access and secret keys to access objects using DirectIO'
 Credentials.access_key_id.__doc__ = 'Access key'
 Credentials.secret_access_key.__doc__ = 'Secret Key'
-
-
-async def get_object(client, chunk):
-    """
-    Get Object from a Signed URL.
-
-    :param cterasdk.direct.types.Chunk chunk: Chunk.
-    :returns: Object
-    :rtype: bytes
-    """
-    parameters = {'file_id': chunk.file_id, 'number': chunk.index, 'offset': chunk.offset}
-    logging.getLogger('cterasdk.direct').debug('Downloading Block. %s', parameters)
-    try:
-        response = await client.get(chunk.location)
-        return await response.read()
-    except ConnectionError:
-        raise DownloadConnectionError(chunk)
-    except asyncio.TimeoutError:
-        logging.getLogger('cterasdk.direct').error('Failed to download block. Timed out. %s', parameters)
-        raise DownloadTimeout(chunk)
-    except ClientResponseException as error:
-        raise DownloadError(error.response, chunk)
-
-
-async def decrypt_object(encrypted_object, encryption_key, chunk):
-    """
-    Decrypt Encrypted Object.
-
-    :param bytes encrypted_object: Encrypted object.
-    :param bytes encryption_key: Encryption key.
-    :param cterasdk.direct.types.Chunk chunk: Chunk.
-    :returns: Decrypted Object.
-    :rtype: bytes
-    """
-    try:
-        return decrypt_block(encrypted_object, encryption_key)
-    except DirectIOError:
-        logging.getLogger('cterasdk.direct').error('Failed to decrypt block.')
-        raise DecryptBlockError(chunk)
-
-
-async def decompress_object(compressed_object, chunk):
-    """
-    Decompress Object.
-
-    :param bytes compressed_object: Compressed object.
-    :param cterasdk.direct.types.Chunk chunk: Chunk.
-    :returns: Decompressed Object.
-    :rtype: bytes
-    """
-    try:
-        decompressed_object = decompress(compressed_object)
-        if chunk.length != len(decompressed_object):
-            logging.getLogger('cterasdk.direct').error('Expected block length does not match decrypted and decompressed block length.')
-            raise BlockValidationException(chunk)
-        return decompressed_object
-    except DirectIOError:
-        logging.getLogger('cterasdk.direct').error('Failed to decompress block.')
-        raise DecompressBlockError(chunk)
-
-
-async def process_chunk(client, chunk, encryption_key, semaphore):
-    """
-    Process a Chunk.
-
-    :param cterasdk.clients.asynchronous.clients.AsyncClient client: Asynchronous HTTP Client.
-    :param cterasdk.direct.types.Chunk chunk: Chunk.
-    :param str encryption_key: Encryption key.
-    :param asyncio.Semaphore semaphore: Semaphore.
-
-    :returns: Block
-    :rtype: cterasdk.direct.types.Block
-    """
-    async def process(client, chunk, encryption_key):
-        parameters = {'file_id': chunk.file_id, 'number': chunk.index, 'offset': chunk.offset}
-        logging.getLogger('cterasdk.direct').debug('Processing Block. %s', parameters)
-
-        encrypted_object = await get_object(client, chunk)
-        decrypted_object = await decrypt_object(encrypted_object, encryption_key, chunk)
-        decompressed_object = await decompress_object(decrypted_object, chunk)
-        return Block(chunk.index, chunk.offset, decompressed_object, chunk.length)
-
-    if semaphore is not None:
-        async with semaphore:
-            return await process(client, chunk, encryption_key)
-    return await process(client, chunk, encryption_key)
-
-
-async def process_chunks(client, chunks, encryption_key, semaphore=None):
-    """
-    Process Chunks Asynchronously.
-
-    :param cterasdk.clients.asynchronous.clients.AsyncClient client: Asynchronous HTTP Client.
-    :param list[cterasdk.direct.types.Chunk] chunks: Chunk.
-    :param str encryption_key: Encryption key.
-    :param asyncio.Semaphore,optional semaphore: Semaphore.
-    :returns: List of futures.
-    :rtype: list[asyncio.Task]
-    """
-    logging.getLogger('cterasdk.direct').debug('Processing Blocks. %s', {'file_id': chunks[0].file_id, 'count': len(chunks)})
-    futures = []
-    for chunk in chunks:
-        futures.append(asyncio.create_task(process_chunk(client, chunk, encryption_key, semaphore)))
-    return futures
-
-
-def decrypt_encryption_key(file_id, wrapped_key, secret_access_key):
-    """
-    Decrypt Encryption Key.
-
-    :param int file_id: File ID.
-    :param str wrapped_key: Encryption Key.
-    :param str secret_access_key: Secret Access Key.
-    :returns: Decrypted Encryption Key.
-    :rtype: bytes
-    """
-    try:
-        return decrypt_key(wrapped_key, secret_access_key)
-    except DirectIOError:
-        logging.getLogger('cterasdk.direct').error('Failed to decrypt secret key.')
-        raise DecryptKeyError(file_id)
-
-
-def create_authorization_header(credentials):
-    """
-    Create Authorization Header.
-
-    :param cterasdk.objects.asynchronous.direct.Credentials credentials: Credentials
-    :returns: Authorization header as a dictionary.
-    :rtype: dict
-    """
-    return {
-        'Authorization': f'Bearer {credentials.access_key_id}'
-    }
-
-
-async def get_chunks(api, credentials, file_id):
-    """
-    Get Chunks.
-
-    :param cterasdk.clients.asynchronous.clients.AsyncJSON api: Asynchronous JSON Client.
-    :param int file_id: File ID.
-    :returns: Wrapped key and file chunks.
-    :rtype: cterasdk.direct.types.DirectIOResponse
-    """
-    parameters = {'file_id': file_id}
-    logging.getLogger('cterasdk.direct').debug('Listing blocks. %s', parameters)
-    try:
-        response = await api.get(f'{file_id}', headers=create_authorization_header(credentials))
-        if not response.chunks:
-            logging.getLogger('cterasdk.direct').error('Blocks not found. %s', parameters)
-            raise BlocksNotFoundError(file_id)
-        return DirectIOResponse(file_id, response)
-    except ClientResponseException as error:
-        if error.response.status == 400:
-            raise NotFoundError(file_id)
-        if error.response.status == 401:
-            raise UnAuthorized(file_id)
-        if error.response.status == 422:
-            raise UnprocessableContent(file_id)
-        raise error
-    except ConnectionError:
-        logging.getLogger('cterasdk.direct').error('Failed to list blocks. Connection error. %s', parameters)
-        raise BlockListConnectionError(file_id)
-    except asyncio.TimeoutError:
-        logging.getLogger('cterasdk.direct').error('Failed to list blocks. Timed out. %s', parameters)
-        raise BlockListTimeout(file_id)
 
 
 class Client:
@@ -227,7 +55,7 @@ class Client:
         """
         byte_range = byte_range if byte_range else ByteRange.default()
         file = await self._file(file_id)
-        executor = self._executor(filters.span(file, byte_range), file.encryption_key, asyncio.Semaphore(50))
+        executor = self._executor(filters.span(file, byte_range), file.encryption_key, asyncio.Semaphore(5))
         return Streamer(executor, byte_range)
 
     def _executor(self, chunks, encryption_key, semaphore=None):

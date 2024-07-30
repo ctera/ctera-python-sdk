@@ -1,4 +1,5 @@
 import logging
+from .exceptions import DirectIOAPIError, BlockError, StreamError
 
 
 class Streamer:
@@ -17,12 +18,27 @@ class Streamer:
         self._downloads = None
         self._byte_range = byte_range
 
-    async def stream(self):
-        cursor = 0
-        self._downloads = await self._executor()
-        while cursor < len(self._downloads):
-            block = await self._downloads[cursor]
-            fragment = block.fragment(self._byte_range)
-            logging.getLogger('cterasdk.direct').debug('Streamer Fragment. %s', {'offset': fragment.offset, 'length': fragment.length})
-            yield fragment
-            cursor = cursor + 1
+    def stop(self):
+        """
+        Stop Stream.
+        """
+        for download in self._downloads:
+            download.cancel()
+
+    async def start(self):
+        """
+        Stop Stream.
+        """
+        try:
+            self._downloads = await self._executor()
+            for download in self._downloads:
+                block = await download
+                fragment = block.fragment(self._byte_range)
+                logging.getLogger('cterasdk.direct').debug('Streamer Fragment. %s', {'offset': fragment.offset, 'length': fragment.length})
+                yield fragment
+        except DirectIOAPIError as error:
+            raise StreamError(error.filename)
+        except BlockError as error:
+            raise StreamError(error.block.file_id)
+        finally:
+            self.stop()
