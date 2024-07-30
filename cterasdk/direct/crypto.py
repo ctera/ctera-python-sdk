@@ -4,7 +4,7 @@ import binascii
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.exceptions import UnsupportedAlgorithm
 from ..common.utils import utf8_decode
-from .exceptions import DecryptKeyError, DecryptBlockError
+from .exceptions import DirectIOError
 
 
 def decrypt_key(wrapped_key, secret):
@@ -19,7 +19,7 @@ def decrypt_key(wrapped_key, secret):
         return base64.b64decode(decrypted_key)
     except (AssertionError, ValueError, binascii.Error) as error:
         logging.getLogger('cterasdk.direct').error('Could not decrypt secret key. %s', error)
-    raise DecryptKeyError()
+    raise DirectIOError()
 
 
 def decrypt_block(block, encryption_key):
@@ -33,4 +33,4 @@ def decrypt_block(block, encryption_key):
         logging.getLogger('cterasdk.direct').error('Failed to decrypt block. Key error. %s', error)
     except UnsupportedAlgorithm as error:
         logging.getLogger('cterasdk.direct').error('Failed to decrypt block. Unsupported algorithm. %s', error)
-    raise DecryptBlockError()
+    raise DirectIOError()
