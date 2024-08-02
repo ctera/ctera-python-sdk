@@ -52,6 +52,10 @@ class IsOneOfOperator(Operator):
     pass
 
 
+class IncludeOperator(Operator):
+    pass
+
+
 class LessThanOperator(Operator):
     pass
 
@@ -88,10 +92,17 @@ class CriteriaBuilder:
         return AdvancedFilterRule(self.criteria_type, self.criteria_field, self.operator)
 
 
-class ListCriteriaBuilder(CriteriaBuilder):
+class PredefinedListCriteriaBuilder(CriteriaBuilder):
 
     def include(self, values):
         self.operator = IsOneOfOperator(values)
+        return self
+
+
+class CustomListCriteriaBuilder(CriteriaBuilder):
+
+    def include(self, values):
+        self.operator = IncludeOperator(values)
         return self
 
 
@@ -229,12 +240,12 @@ class FileFilterBuilder:
     @staticmethod
     def extensions():
         """Filter files by extension"""
-        return ListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Type)
+        return PredefinedListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Type)
 
     @staticmethod
     def names():
         """Filter files by names"""
-        return ListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Name)
+        return PredefinedListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Name)
 
     @staticmethod
     def name():
@@ -244,7 +255,7 @@ class FileFilterBuilder:
     @staticmethod
     def paths():
         """Filter files by path"""
-        return ListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Path)
+        return PredefinedListCriteriaBuilder(FileFilterBuilder.Type, FileCriteria.Path)
 
     @staticmethod
     def path():
