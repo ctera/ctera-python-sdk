@@ -63,7 +63,7 @@ class Session:
     def closed(self):
         return self._session.closed
 
-    async def shutdown(self):
+    async def close(self):
         await self._session.close()
 
 

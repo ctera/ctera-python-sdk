@@ -906,7 +906,7 @@ Directory Services
 .. code-block:: python
 
    """Connect to Active Directory using a primary domain controller, configure domain UID/GID mapping and access control"""
-   mapping = [core_types.ADDomainIDMapping('demo.local', 200001, 5000000), core_types.ADDomainIDMapping('trusted.local', 5000001, 10000000)]
+   mapping = [common_types.ADDomainIDMapping('demo.local', 200001, 5000000), common_types.ADDomainIDMapping('trusted.local', 5000001, 10000000)]
    rw_admin_group = core_types.AccessControlEntry(
        core_types.GroupAccount('ctera_admins', 'demo.local'),
        core_enum.Role.ReadWriteAdmin
@@ -946,7 +946,7 @@ Directory Services
 .. code-block:: python
 
    """Configure UID/GID mapping"""
-   mapping = [core_types.ADDomainIDMapping('demo.local', 200001, 5000000), core_types.ADDomainIDMapping('trusted.local', 5000001, 10000000)]
+   mapping = [common_types.ADDomainIDMapping('demo.local', 200001, 5000000), common_types.ADDomainIDMapping('trusted.local', 5000001, 10000000)]
    admin.directoryservice.set_advanced_mapping(mapping)
 
 .. automethod:: cterasdk.core.directoryservice.DirectoryService.get_access_control

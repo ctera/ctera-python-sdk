@@ -11,7 +11,7 @@ from .exceptions import UnAuthorized, UnprocessableContent, BlocksNotFoundError,
 from ..exceptions import ClientResponseException
 
 
-async def retry(coro, retries=5, backoff=1):
+async def retry(coro, retries=3, backoff=1):
     """
     Retry Coroutine.
 
@@ -115,7 +115,7 @@ async def process_chunk(client, chunk, encryption_key, semaphore):
         encrypted_object = await get_object(client, chunk)
         decrypted_object = await decrypt_object(encrypted_object, encryption_key, chunk)
         decompressed_object = await decompress_object(decrypted_object, chunk)
-        return Block(chunk.index, chunk.offset, decompressed_object, chunk.length)
+        return Block(chunk.file_id, chunk.index, chunk.offset, decompressed_object, chunk.length)
 
     if semaphore is not None:
         async with semaphore:

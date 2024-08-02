@@ -99,7 +99,7 @@ class Management(CTERA):
         if self._ctera_session.connected:
             self._login_object.logout()
             self._ctera_session.stop_session()
-        self._generic.shutdown()
+        self._generic.close()
 
     @abstractmethod
     def test(self):
@@ -123,4 +123,4 @@ class Management(CTERA):
         self._ctera_session.start_session(self)
 
     def __exit__(self, exc_type, exc_value, exc_tb):
-        self._generic.shutdown()
+        self._generic.close()

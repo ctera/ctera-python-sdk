@@ -38,10 +38,12 @@ class Client:
         Blocks API.
 
         :param int file_id: File ID.
-        :param list[int] blocks: List of block numbers.
+        :param list[int] blocks: List of Block numbers.
+        :returns: List of Blocks.
+        :rtype: list[cterasdk.direct.types.Block]
         """
         file = await self._file(file_id)
-        executor = self._executor(filters.blocks(file, blocks), file.encryption_key)
+        executor = await self._executor(filters.blocks(file, blocks), file.encryption_key)
         return await executor()
 
     async def streamer(self, file_id, byte_range):
@@ -49,16 +51,16 @@ class Client:
         Stream API.
 
         :param int file_id: File ID.
-        :param cterasdk.direct.types.ByteRange,optional byte_range: Byte Range.
+        :param cterasdk.direct.types.ByteRange byte_range: Byte Range.
         :returns: Streamer Object
         :rtype: cterasdk.direct.stream.Streamer
         """
-        byte_range = byte_range if byte_range else ByteRange.default()
         file = await self._file(file_id)
-        executor = self._executor(filters.span(file, byte_range), file.encryption_key, asyncio.Semaphore(5))
+        byte_range = byte_range if byte_range is not None else ByteRange.default()
+        executor = await self._executor(filters.span(file, byte_range), file.encryption_key, asyncio.Semaphore(20))
         return Streamer(executor, byte_range)
 
-    def _executor(self, chunks, encryption_key, semaphore=None):
+    async def _executor(self, chunks, encryption_key, semaphore=None):
         """
         Get Blocks.
 
@@ -69,6 +71,7 @@ class Client:
         :returns: Callable Downloader
         :rtype: function
         """
+
         async def execute():
             """
             Asynchronous Executable of Chunk Retrieval Tasks.
@@ -77,12 +80,15 @@ class Client:
 
         return execute
 
-    async def shutdown(self):
-        await self._api.shutdown()
-        await self._client.shutdown()
+    async def close(self):
+        await self._api.close()
+        await self._client.close()
 
 
 class DirectIO:
+
+    async def __aenter__(self):
+        return self
 
     def __init__(self, baseurl, access_key_id=None, secret_access_key=None):
         """
@@ -99,9 +105,9 @@ class DirectIO:
         Get Blocks.
 
         :param int file_id: File ID
-        :param list[int],optional blocks: List of blocks to retrieve, defaults to all blocks.
+        :param list[int] blocks: List of Block numbers
         :returns: Blocks
-        :rtype: list[cterasdk.direct.types.Block] or list[cterasdk.direct.types.BlockError]
+        :rtype: list[cterasdk.direct.types.Block]
         """
         return await self._client.blocks(file_id, blocks)
 
@@ -110,10 +116,14 @@ class DirectIO:
         Iterates over data chunks.
 
         :param int file_id: File ID.
+        :param cterasdk.direct.types.ByteRange,optional byte_range: Byte Range.
         :returns: Stream Object
         :rtype: cterasdk.direct.stream.Streamer
         """
         return await self._client.streamer(file_id, byte_range)
 
-    async def shutdown(self):
-        await self._client.shutdown()
+    async def close(self):
+        await self._client.close()
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.close()

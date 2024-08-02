@@ -1,16 +1,18 @@
 import logging
+from .exceptions import BlockInfo
 
 
-def blocks(file, numbers):
+def blocks(file, array):
     """
     Filter Blocks by Block Number.
 
     :param list[cterasdk.direct.types.File] file: File Object.
-    :param list[int] numbers: List of block numbers.
+    :param list[int] array: List of Block Info objects.
     :returns: List of Chunks.
     :rtype: list[cterasdk.direct.types.Chunk]
     """
-    if numbers is not None:
+    if array is not None:
+        numbers = [block.number if isinstance(block, BlockInfo) else block for block in array]
         return [file.chunks[number - 1] for number in numbers]
     return file.chunks
 

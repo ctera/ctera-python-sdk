@@ -17,6 +17,7 @@ class Streamer:
         self._executor = executor
         self._downloads = None
         self._byte_range = byte_range
+        self._offset = byte_range.start
 
     def stop(self):
         """
@@ -36,9 +37,10 @@ class Streamer:
                 fragment = block.fragment(self._byte_range)
                 logging.getLogger('cterasdk.direct').debug('Streamer Fragment. %s', {'offset': fragment.offset, 'length': fragment.length})
                 yield fragment
+                self._offset = fragment.offset + fragment.length
         except DirectIOAPIError as error:
-            raise StreamError(error.filename)
+            raise StreamError(error.filename, self._offset)
         except BlockError as error:
-            raise StreamError(error.block.file_id)
+            raise StreamError(error.block.file_id, self._offset)
         finally:
             self.stop()

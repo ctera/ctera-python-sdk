@@ -7,8 +7,9 @@ class DirectIOError(IOError):
 
 class StreamError(DirectIOError):
 
-    def __init__(self, filename):
+    def __init__(self, filename, offset):
         super().__init__(errno.EIO, 'Failed to stream file', filename)
+        self.offset = offset
 
 
 class DirectIOAPIError(DirectIOError):
@@ -69,7 +70,7 @@ class BlockInfo:
         :param cterasdk.direct.types.Chunk chunk: Chunk.
         """
         self.file_id = chunk.file_id
-        self.index = chunk.index
+        self.number = chunk.index
         self.offset = chunk.offset
         self.length = chunk.length
 
@@ -78,7 +79,7 @@ class BlockError(DirectIOError):
     """Direct IO Block Error"""
 
     def __init__(self, error, strerror, chunk):
-        super().__init__(error, strerror)
+        super().__init__(error, strerror, chunk.file_id)
         self.block = BlockInfo(chunk)
 
 

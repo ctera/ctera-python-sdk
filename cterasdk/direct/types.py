@@ -150,19 +150,25 @@ class File:
 class Block:
     """Block"""
 
-    def __init__(self, number, offset, data, length):
+    def __init__(self, file_id, number, offset, data, length):
         """
         Initialize a Block.
 
+        :param int file_id: File ID.
         :param int number: Block number.
         :param int offset: Block offset.
         :param bytes data: Bytes
         :param int length: Block length.
         """
+        self._file_id = file_id
         self._number = number
         self._offset = offset
         self._data = data
         self._length = length
+
+    @property
+    def file_id(self):
+        return self._file_id
 
     @property
     def number(self):
@@ -192,4 +198,4 @@ class Block:
             end = None
 
         data = self._data[start:end]
-        return Block(self._number, self._offset + start if start else self._offset, data, len(data))
+        return Block(self._file_id, self._number, self._offset + start if start else self._offset, data, len(data))

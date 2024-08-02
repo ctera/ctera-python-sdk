@@ -56,7 +56,7 @@ class Clients:
     def __init__(self, edge, Portal):
         if Portal:
             edge._Portal = Portal
-            edge._generic.shutdown()
+            edge._generic.close()
             edge._ctera_session.start_remote_session(Portal.session())
             self.api = clients.API(EndpointBuilder.new(edge.base), Portal._generic._async_session, lambda *_: True)
         else:
