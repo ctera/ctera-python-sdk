@@ -1,6 +1,6 @@
 from abc import ABC
 from collections import namedtuple
-from ..common import DateTimeUtils, StringCriteriaBuilder, ListCriteriaBuilder, Object
+from ..common import DateTimeUtils, StringCriteriaBuilder, PredefinedListCriteriaBuilder, CustomListCriteriaBuilder, Object
 from ..lib import FileSystem
 
 from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, \
@@ -211,11 +211,11 @@ class PlanCriteriaBuilder:
 
     @staticmethod
     def user_groups():
-        return ListCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Groups)
+        return CustomListCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Groups)
 
     @staticmethod
     def role():
-        return ListCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Role)
+        return PredefinedListCriteriaBuilder(PlanCriteriaBuilder.Type, PlanCriteria.Role)
 
     @staticmethod
     def first_name():
@@ -244,7 +244,7 @@ class TemplateCriteriaBuilder:
 
     @staticmethod
     def type():
-        return ListCriteriaBuilder(TemplateCriteriaBuilder.Type, TemplateCriteria.Type)
+        return PredefinedListCriteriaBuilder(TemplateCriteriaBuilder.Type, TemplateCriteria.Type)
 
     @staticmethod
     def os():
