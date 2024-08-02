@@ -10,7 +10,6 @@ from ..objects.endpoints import DefaultBuilder, EndpointBuilder
 from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
 
 
-
 Credentials = namedtuple('Credentials', ('access_key_id', 'secret_access_key'))
 Credentials.__doc__ = 'Tuple holding the access and secret keys to access objects using DirectIO'
 Credentials.access_key_id.__doc__ = 'Access key'
