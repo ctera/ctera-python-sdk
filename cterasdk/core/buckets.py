@@ -58,7 +58,7 @@ class Buckets(BaseCommand):
                                                 {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
         return response
 
-    def modify(self, current_name, new_name=None, read_only=None, dedicated_to=None):
+    def modify(self, current_name, new_name=None, read_only=None, dedicated_to=None, verify_ssl=None):
         """
         Modify a Bucket
 
@@ -66,6 +66,7 @@ class Buckets(BaseCommand):
         :param str,optional new_name: New name
         :param bool,optional read_only: Set bucket to read-delete only
         :param bool,optional dedicated: Dedicate bucket to a tenant
+        :param bool,optional verify_ssl: ``False`` to trust all certificate, ``True`` to verify.
         :param str,optional dedicated_to: Tenant name
         """
         param = self._get_entire_object(current_name)
@@ -83,6 +84,8 @@ class Buckets(BaseCommand):
             elif isinstance(dedicated_to, str):
                 param.dedicated = True
                 param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
+        if verify_ssl is not None:
+            param.trustAllCertificates = not verify_ssl
         logging.getLogger('cterasdk.core').info("Modifying bucket. %s", {'name': current_name})
         response = self._core.api.put(f'/locations/{current_name}', param)
         logging.getLogger('cterasdk.core').info("Bucket modified. %s", {'name': current_name})
