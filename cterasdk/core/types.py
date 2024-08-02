@@ -290,13 +290,18 @@ class Bucket:
 
 class HTTPBucket(Bucket):
 
-    def __init__(self, bucket, driver, access_key, secret_key, endpoint, https, direct=False):
+    def __init__(self, bucket, driver, access_key, secret_key, endpoint, https, direct=False, verify_ssl=True):
         super().__init__(bucket, driver)
         self.access_key = access_key
         self.secret_key = secret_key
         self.endpoint = endpoint
         self.https = https
         self.direct = direct
+        self.verify_ssl = verify_ssl
+
+    @property
+    def trust_all_certificates(self):
+        return not self.verify_ssl
 
 
 class AzureBlob(HTTPBucket):
@@ -318,8 +323,8 @@ class AzureBlob(HTTPBucket):
 class S3Compatible(HTTPBucket):
 
     def __init__(self, bucket, driver, access_key, secret_key,
-                 endpoint, https, direct):
-        super().__init__(bucket, driver, access_key, secret_key, endpoint, https, direct)
+                 endpoint, https, direct, verify_ssl):
+        super().__init__(bucket, driver, access_key, secret_key, endpoint, https, direct, verify_ssl)
 
     def to_server_object(self):
         param = super().to_server_object()
@@ -329,56 +334,57 @@ class S3Compatible(HTTPBucket):
         param.awsSecretKey = self.secret_key
         param.useHttps = self.https
         param.directUpload = self.direct
+        param.trustAllCertificates = self.trust_all_certificates
         return param
 
 
 class Scality(S3Compatible):
 
     def __init__(self, bucket, access_key, secret_key,
-                 endpoint, https=False, direct=False):
-        super().__init__(bucket, BucketType.Scality, access_key, secret_key, endpoint, https, direct)
+                 endpoint, https=False, direct=False, verify_ssl=True):
+        super().__init__(bucket, BucketType.Scality, access_key, secret_key, endpoint, https, direct, verify_ssl)
 
 
 class ICOS(S3Compatible):
 
     def __init__(self, bucket, access_key, secret_key,
-                 endpoint, https=False, direct=False):
-        super().__init__(bucket, BucketType.ICOS, access_key, secret_key, endpoint, https, direct)
+                 endpoint, https=False, direct=False, verify_ssl=True):
+        super().__init__(bucket, BucketType.ICOS, access_key, secret_key, endpoint, https, direct, verify_ssl)
 
 
 class Nutanix(S3Compatible):
 
     def __init__(self, bucket, access_key, secret_key,
-                 endpoint, https=False, direct=False):
-        super().__init__(bucket, BucketType.Nutanix, access_key, secret_key, endpoint, https, direct)
+                 endpoint, https=False, direct=False, verify_ssl=True):
+        super().__init__(bucket, BucketType.Nutanix, access_key, secret_key, endpoint, https, direct, verify_ssl)
 
 
 class Wasabi(S3Compatible):
 
     def __init__(self, bucket, access_key, secret_key,
-                 endpoint, https=False, direct=False):
-        super().__init__(bucket, BucketType.Wasabi, access_key, secret_key, endpoint, https, direct)
+                 endpoint, https=False, direct=False, verify_ssl=True):
+        super().__init__(bucket, BucketType.Wasabi, access_key, secret_key, endpoint, https, direct, verify_ssl)
 
 
 class Google(S3Compatible):
 
     def __init__(self, bucket, access_key, secret_key,
-                 endpoint, https=False, direct=False):
-        super().__init__(bucket, BucketType.Google, access_key, secret_key, endpoint, https, direct)
+                 endpoint, https=False, direct=False, verify_ssl=True):
+        super().__init__(bucket, BucketType.Google, access_key, secret_key, endpoint, https, direct, verify_ssl)
 
 
 class GenericS3(S3Compatible):
 
     def __init__(self, bucket, access_key, secret_key,
-                 endpoint, https=False, direct=False):
-        super().__init__(bucket, BucketType.GenericS3, access_key, secret_key, endpoint, https, direct)
+                 endpoint, https=False, direct=False, verify_ssl=True):
+        super().__init__(bucket, BucketType.GenericS3, access_key, secret_key, endpoint, https, direct, verify_ssl)
 
 
 class NetAppStorageGRID(S3Compatible):
 
     def __init__(self, bucket, access_key, secret_key,
-                 endpoint, https=False, direct=False, tags=False):
-        super().__init__(bucket, BucketType.NetAppStorageGRID, access_key, secret_key, endpoint, https, direct)
+                 endpoint, https=False, direct=False, tags=False, verify_ssl=True):
+        super().__init__(bucket, BucketType.NetAppStorageGRID, access_key, secret_key, endpoint, https, direct, verify_ssl)
         self.tagBlocks = tags
 
     def to_server_object(self):
@@ -389,8 +395,8 @@ class NetAppStorageGRID(S3Compatible):
 
 class AmazonS3(HTTPBucket):
 
-    def __init__(self, bucket, access_key, secret_key, endpoint='s3.amazonaws.com', https=True, direct=True):
-        super().__init__(bucket, BucketType.AWS, access_key, secret_key, endpoint, https, direct)
+    def __init__(self, bucket, access_key=None, secret_key=None, endpoint='s3.amazonaws.com', https=True, direct=True, verify_ssl=True):
+        super().__init__(bucket, BucketType.AWS, access_key, secret_key, endpoint, https, direct, verify_ssl)
 
     def to_server_object(self):
         param = super().to_server_object()
@@ -400,6 +406,7 @@ class AmazonS3(HTTPBucket):
         param.awsSecretKey = self.secret_key
         param.httpsOnly = self.https
         param.directUpload = self.direct
+        param.trustAllCertificates = self.trust_all_certificates
         return param
 
 

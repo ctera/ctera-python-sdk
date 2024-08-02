@@ -52,7 +52,7 @@ class TestCoreBuckets(base_core.BaseCoreTest):
         self._global_admin.api.add.assert_called_once_with('/locations', mock.ANY)
         expected_param = TestCoreBuckets._customize_bucket(bucket.to_server_object(), name=self._bucket_name,
                                                            readOnly=True, dedicated=True,
-                                                           dedicatedPortal=self._tenant_base_object_ref)
+                                                           dedicatedPortal=self._tenant_base_object_ref, trustAllCertificates=False)
         actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)

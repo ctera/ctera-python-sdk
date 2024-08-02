@@ -103,13 +103,21 @@ Managing Storage Nodes
 
 .. code-block:: python
 
-   """Add an Amazon S3 bucket called 'mybucket'"""
+   """Add an Amazon S3 bucket using IAM Role Policy"""
+   bucket = core_types.AmazonS3('mybucket')
+   admin.buckets.add('cterabucket', bucket)
+
+   """Add an Amazon S3 bucket called 'mybucket' using an access key and secret key pair"""
    bucket = core_types.AmazonS3('mybucket', 'access-key', 'secret-key')
    admin.buckets.add('cterabucket', bucket)
 
    """Add an Amazon S3 bucket called 'mybucket', dedicated to a tenant called 'mytenant'"""
    bucket = core_types.AmazonS3('mybucket', 'access-key', 'secret-key')
    admin.buckets.add('cterabucket', bucket, dedicated_to='mytenant')
+
+   """Add an Amazon S3 bucket and trust all certificates"""
+   bucket = core_types.AmazonS3('mybucket', verify_ssl=False)
+   admin.buckets.add('cterabucket', bucket)
 
    """Add a bucket in read-delete only mode"""
    bucket = core_types.AmazonS3('mybucket', 'access-key', 'secret-key')
