@@ -4,7 +4,7 @@ import binascii
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.exceptions import UnsupportedAlgorithm
 from ..common.utils import utf8_decode
-from ..exceptions import DecryptKeyError, DecryptBlockError
+from .exceptions import DirectIOError
 
 
 def decrypt_key(wrapped_key, secret):
@@ -18,8 +18,8 @@ def decrypt_key(wrapped_key, secret):
         decrypted_key = ''.join(c for c in decrypted_wrapped_key if c.isprintable())[1:-1]
         return base64.b64decode(decrypted_key)
     except (AssertionError, ValueError, binascii.Error) as error:
-        logging.getLogger('cterasdk.direct').error(f'Could not decrypt secret key. {error}')
-    raise DecryptKeyError()
+        logging.getLogger('cterasdk.direct').error('Could not decrypt secret key. %s', error)
+    raise DirectIOError()
 
 
 def decrypt_block(block, encryption_key):
@@ -30,7 +30,7 @@ def decrypt_block(block, encryption_key):
         decryptor = Cipher(algorithms.AES(encryption_key), modes.CBC(initialization_vector)).decryptor()
         return decryptor.update(encrypted_data)
     except ValueError as error:
-        logging.getLogger('cterasdk.direct').error(f'Failed to decrypt block. Key error. {error}')
+        logging.getLogger('cterasdk.direct').error('Failed to decrypt block. Key error. %s', error)
     except UnsupportedAlgorithm as error:
-        logging.getLogger('cterasdk.direct').error(f'Failed to decrypt block. Unsupported algorithm. {error}')
-    raise DecryptBlockError()
+        logging.getLogger('cterasdk.direct').error('Failed to decrypt block. Unsupported algorithm. %s', error)
+    raise DirectIOError()

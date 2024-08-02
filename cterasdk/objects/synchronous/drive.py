@@ -17,7 +17,7 @@ class Clients:
     def __init__(self, drive, Portal):
         if Portal:
             drive._Portal = Portal
-            drive._generic.shutdown()
+            drive._generic.close()
             drive._ctera_session.start_remote_session(Portal.session())
             self._api = clients.API(EndpointBuilder.new(drive.base), Portal._generic._async_session, lambda *_: True)
         else:
@@ -41,7 +41,7 @@ class Drive(Management):
 
     def _initialize(self, Portal):
         if Portal:
-            self._generic.shutdown()
+            self._generic.close()
             async_session = Portal._generic._async_session  # pylint: disable=protected-access
             self._ctera_session.start_remote_session(Portal.session())
             self._api = clients.API(EndpointBuilder.new(self.base), async_session, lambda *_: True)

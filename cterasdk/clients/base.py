@@ -78,8 +78,8 @@ class BaseClient:
         self._before_request()
         return await self._request(request, on_response=on_response)
 
-    async def shutdown(self):
-        await self._async_session.shutdown()
+    async def close(self):
+        await self._async_session.close()
 
 
 class BaseResponse:

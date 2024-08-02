@@ -88,7 +88,7 @@ class AsyncPortal(CTERA):
         if self._ctera_session.connected:
             await self._login_object.logout()
             self._ctera_session.stop_session()
-        await self._generic.shutdown()
+        await self._generic.close()
 
     @property
     def _login_object(self):
@@ -98,7 +98,7 @@ class AsyncPortal(CTERA):
         return authenticators.core(self.session(), url, self.context)
 
     async def __aexit__(self, exc_type, exc, tb):
-        await self._generic.shutdown()
+        await self._generic.close()
 
 
 class AsyncGlobalAdmin(AsyncPortal):
