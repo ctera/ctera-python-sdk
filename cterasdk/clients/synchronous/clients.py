@@ -13,9 +13,6 @@ from .. import async_requests, decorators
 class Client(BaseClient):
     """Synchronous Client"""
 
-    def __init__(self, builder=None, async_session=None, authenticator=None, client_settings=None):
-        super().__init__(builder, async_session, authenticator, client_settings)
-
     @decorators.authenticated
     def handle(self, path, *, on_response=None, **kwargs):
         request = async_requests.GetRequest(self._builder(path), **kwargs)

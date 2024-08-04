@@ -21,7 +21,7 @@ Credentials.secret_access_key.__doc__ = 'Secret Key'
 
 def client_settings(parameters):
     return ClientSettings(
-        TCPConnector(parameters.ssl), 
+        TCPConnector(parameters.ssl),
         ClientTimeout(**parameters.timeout.kwargs)
     )
 
@@ -34,7 +34,8 @@ class Client:
         :param cterasdk.objects.asynchronous.directio.Credentials credentials: Credentials
         """
         ctera_direct = cterasdk.settings.sessions.ctera_direct
-        self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio'), authenticator=lambda *_: True, client_settings=client_settings(ctera_direct.api))
+        self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio'), authenticator=lambda *_: True,
+                              client_settings=client_settings(ctera_direct.api))
         self._client = AsyncClient(DefaultBuilder(), authenticator=lambda *_: True, client_settings=client_settings(ctera_direct.storage))
         self._credentials = credentials
 

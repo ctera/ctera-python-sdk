@@ -25,17 +25,16 @@ class V1:
 
     def __init__(self, core):
         session = core._generic._async_session
-        client_settings = core._generic._client_settings
-        self.api = clients.AsyncAPI(EndpointBuilder.new(core.base, core.context, '/api'), session, core._authenticator, client_settings)
+        self.api = clients.AsyncAPI(EndpointBuilder.new(core.base, core.context, '/api'), session, core._authenticator,
+                                    core._generic._client_settings)
 
 
 class V2:
 
     def __init__(self, core):
         session = core._generic._async_session
-        client_settings = core._generic._client_settings
         self.api = clients.AsyncJSON(EndpointBuilder.new(core.base, core.context, '/v2/api'), session,
-                                     core._authenticator, client_settings)
+                                     core._authenticator, core._generic._client_settings)
 
 
 class IO:
@@ -48,9 +47,8 @@ class WebDAV:
 
     def __init__(self, core):
         session = core._generic._async_session
-        client_settings = core._generic._client_settings
         self._webdav = clients.AsyncWebDAV(EndpointBuilder.new(core.base, core.context, '/webdav'), session, core._authenticator,
-                                           client_settings)
+                                           core._generic._client_settings)
 
     @property
     def download(self):
