@@ -47,8 +47,9 @@ class Clients:
 
     def __init__(self, core):
         async_session = core._generic._async_session
-        self.ctera = clients.Extended(EndpointBuilder.new(core.base, core.context), async_session, core._authenticator)
-        self.api = clients.API(EndpointBuilder.new(core.base, core.context, '/api'), async_session, core._authenticator)
+        client_settings = core._generic._client_settings
+        self.ctera = clients.Extended(EndpointBuilder.new(core.base, core.context), async_session, core._authenticator, client_settings)
+        self.api = clients.API(EndpointBuilder.new(core.base, core.context, '/api'), async_session, core._authenticator, client_settings)
         self.io = IO(core)
 
 
@@ -56,10 +57,13 @@ class IO:
 
     def __init__(self, core):
         async_session = core._generic._async_session
+        client_settings = core._generic._client_settings
         self._folders = clients.Folders(EndpointBuilder.new(core.base, core.context, '/folders/folders'),
-                                        async_session, core._authenticator)
-        self._upload = clients.Upload(EndpointBuilder.new(core.base, core.context, '/upload/folders'), async_session, core._authenticator)
-        self._webdav = clients.WebDAV(EndpointBuilder.new(core.base, core.context, '/webdav'), async_session, core._authenticator)
+                                        async_session, core._authenticator, client_settings)
+        self._upload = clients.Upload(EndpointBuilder.new(core.base, core.context, '/upload/folders'), async_session,
+                                      core._authenticator, client_settings)
+        self._webdav = clients.WebDAV(EndpointBuilder.new(core.base, core.context, '/webdav'), async_session,
+                                      core._authenticator, client_settings)
 
     @property
     def upload(self):

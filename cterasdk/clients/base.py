@@ -32,7 +32,7 @@ class PersistentHeaders:
 class BaseClient:
     """Base Client"""
 
-    def __init__(self, builder=None, async_session=None, authenticator=None, **kwargs):
+    def __init__(self, builder=None, async_session=None, authenticator=None, client_settings=None):
         """
         Initialize a Client
 
@@ -43,8 +43,8 @@ class BaseClient:
         self._headers = PersistentHeaders()
         self._authenticator = authenticator
         self._builder = builder
-        self._kwargs = kwargs
-        self._async_session = async_session if async_session else async_requests.Session(**kwargs)
+        self._client_settings = client_settings
+        self._async_session = async_session if async_session else async_requests.Session(client_settings)
 
     @property
     def cookies(self):
@@ -68,7 +68,7 @@ class BaseClient:
     def _before_request(self):
         if self._async_session.closed:
             logging.getLogger('cterasdk.http').debug('Session Closed. Renewing.')
-            self._async_session.initialize(**self._kwargs)
+            self._async_session.initialize(self._client_settings)
 
     def request(self, request, *, on_response=None):
         self._before_request()

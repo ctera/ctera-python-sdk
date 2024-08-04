@@ -1,12 +1,15 @@
 import asyncio
 from collections import namedtuple
 
+import cterasdk.settings
+
 from . import filters
 from .lib import get_chunks, decrypt_encryption_key, process_chunks
 from .types import File, ByteRange
 from .stream import Streamer
 
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
+from ..clients.settings import ClientSettings, ClientTimeout, TCPConnector
 from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
 
 
@@ -16,6 +19,13 @@ Credentials.access_key_id.__doc__ = 'Access key'
 Credentials.secret_access_key.__doc__ = 'Secret Key'
 
 
+def client_settings(parameters):
+    return ClientSettings(
+        TCPConnector(parameters.ssl), 
+        ClientTimeout(**parameters.timeout.kwargs)
+    )
+
+
 class Client:
 
     def __init__(self, baseurl, credentials):
@@ -23,8 +33,9 @@ class Client:
         :param str baseurl: Portal URL
         :param cterasdk.objects.asynchronous.directio.Credentials credentials: Credentials
         """
-        self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio'), authenticator=lambda *_: True)
-        self._client = AsyncClient(DefaultBuilder(), authenticator=lambda *_: True)
+        ctera_direct = cterasdk.settings.sessions.ctera_direct
+        self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio'), authenticator=lambda *_: True, client_settings=client_settings(ctera_direct.api))
+        self._client = AsyncClient(DefaultBuilder(), authenticator=lambda *_: True, client_settings=client_settings(ctera_direct.storage))
         self._credentials = credentials
 
     async def _file(self, file_id):
@@ -32,17 +43,19 @@ class Client:
         encryption_key = decrypt_encryption_key(file_id, server_object.wrapped_key, self._credentials.secret_access_key)
         return File(file_id, encryption_key, server_object.chunks)
 
-    async def blocks(self, file_id, blocks):
+    async def blocks(self, file_id, blocks, max_workers):
         """
         Blocks API.
 
         :param int file_id: File ID.
-        :param list[int] blocks: List of Block numbers.
+        :param list[cterasdk.direct.exceptions.BlockInfo] blocks: List of BlockInfo objects,
+         or list of integers identifying the block position.
+        :param int max_workers: Max concurrent tasks. A task will be dispatched for each block if no limited was specified.
         :returns: List of Blocks.
         :rtype: list[cterasdk.direct.types.Block]
         """
         file = await self._file(file_id)
-        executor = await self._executor(filters.blocks(file, blocks), file.encryption_key)
+        executor = await self._executor(filters.blocks(file, blocks), file.encryption_key, max_workers)
         return await executor()
 
     async def streamer(self, file_id, byte_range):
@@ -56,16 +69,17 @@ class Client:
         """
         file = await self._file(file_id)
         byte_range = byte_range if byte_range is not None else ByteRange.default()
-        executor = await self._executor(filters.span(file, byte_range), file.encryption_key, asyncio.Semaphore(20))
+        max_workers = cterasdk.settings.sessions.ctera_direct.streamer.max_workers
+        executor = await self._executor(filters.span(file, byte_range), file.encryption_key, max_workers)
         return Streamer(executor, byte_range)
 
-    async def _executor(self, chunks, encryption_key, semaphore=None):
+    async def _executor(self, chunks, encryption_key, max_workers=None):
         """
         Get Blocks.
 
         :param list[cterasdk.direct.types.Chunk] chunks: List of Chunks.
         :param str encryption_key: Decryption Key.
-        :param asyncio.Semaphore: Sempahore.
+        :param int,optional max_workers: Max concurrent tasks.
 
         :returns: Callable Downloader
         :rtype: function
@@ -75,7 +89,7 @@ class Client:
             """
             Asynchronous Executable of Chunk Retrieval Tasks.
             """
-            return await process_chunks(self._client, chunks, encryption_key, semaphore)
+            return await process_chunks(self._client, chunks, encryption_key, asyncio.Semaphore(max_workers) if max_workers else None)
 
         return execute
 
@@ -99,16 +113,18 @@ class DirectIO:
         """
         self._client = Client(baseurl, Credentials(access_key_id, secret_access_key))
 
-    async def blocks(self, file_id, blocks=None):
+    async def blocks(self, file_id, blocks=None, max_workers=None):
         """
         Get Blocks.
 
         :param int file_id: File ID
-        :param list[int] blocks: List of Block numbers
+        :param list[cterasdk.direct.exceptions.BlockInfo] blocks: List of BlockInfo objects,
+         or list of integers identifying the block position.
+        :param int max_workers: Max concurrent tasks. A task will be dispatched for each block if no limited was specified.
         :returns: Blocks
         :rtype: list[cterasdk.direct.types.Block]
         """
-        return await self._client.blocks(file_id, blocks)
+        return await self._client.blocks(file_id, blocks, max_workers)
 
     async def streamer(self, file_id, byte_range=None):
         """

@@ -2,7 +2,6 @@
 import time
 import asyncio
 import logging
-import cterasdk.settings
 from . import errors
 from ..base import BaseClient
 from ..common import Serializers
@@ -14,8 +13,8 @@ from .. import async_requests, decorators
 class Client(BaseClient):
     """Synchronous Client"""
 
-    def __init__(self, builder=None, async_session=None, authenticator=None):
-        super().__init__(builder, async_session, authenticator, **session_settings())
+    def __init__(self, builder=None, async_session=None, authenticator=None, client_settings=None):
+        super().__init__(builder, async_session, authenticator, client_settings)
 
     @decorators.authenticated
     def handle(self, path, *, on_response=None, **kwargs):
@@ -243,10 +242,3 @@ class SyncResponse(AsyncResponse):
         async def new_response(response):
             return SyncResponse(response)
         return new_response
-
-
-def session_settings():
-    return {
-        'connector': async_requests.create_connector(ssl=cterasdk.settings.sessions.management.ssl),
-        'cookie_jar': async_requests.create_cookie_jar(unsafe=cterasdk.settings.sessions.management.allow_unsafe)
-    }

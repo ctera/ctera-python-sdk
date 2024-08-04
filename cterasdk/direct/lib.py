@@ -134,7 +134,10 @@ async def process_chunks(client, chunks, encryption_key, semaphore=None):
     :returns: List of futures.
     :rtype: list[asyncio.Task]
     """
-    logging.getLogger('cterasdk.direct').debug('Processing Blocks. %s', {'file_id': chunks[0].file_id, 'count': len(chunks)})
+    parameters = {'file_id': chunks[0].file_id, 'blocks': len(chunks)}
+    if semaphore:
+        parameters['max_workers'] = semaphore._value  # pylint: disable=protected-access
+    logging.getLogger('cterasdk.direct').debug('Processing Blocks. %s', parameters)
     futures = []
     for chunk in chunks:
         futures.append(asyncio.create_task(process_chunk(client, chunk, encryption_key, semaphore)))

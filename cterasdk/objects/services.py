@@ -1,6 +1,9 @@
 from abc import abstractmethod
+
+import cterasdk.settings
 from . import endpoints, uri
 from .utils import URI
+from ..clients.settings import ClientSettings, ClientTimeout, TCPConnector, CookieJar
 from ..clients.synchronous import clients
 from ..common import Object
 from ..convert import tojsonstr
@@ -73,6 +76,14 @@ class CTERA(Service):
         return self._ctera_session.whoami()
 
 
+def client_settings(parameters):
+    return ClientSettings(
+        TCPConnector(parameters.ssl),
+        ClientTimeout(**parameters.timeout.kwargs),
+        CookieJar(parameters.allow_unsafe)
+    )
+
+
 class Management(CTERA):
 
     def __enter__(self):
@@ -80,7 +91,8 @@ class Management(CTERA):
 
     def __init__(self, host, port, https, base):
         super().__init__(host, port, https, base)
-        self._generic = clients.Client(endpoints.EndpointBuilder.new(self.base), authenticator=self._authenticator)
+        self._generic = clients.Client(endpoints.EndpointBuilder.new(self.base), authenticator=self._authenticator,
+                                       client_settings=client_settings(cterasdk.settings.sessions.management))
 
     def login(self, username, password):
         """
