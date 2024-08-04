@@ -6,22 +6,22 @@ from yarl import URL
 from . import async_tracers
 
 
-def create_connector(**kwargs):
-    return aiohttp.TCPConnector(**kwargs)
-
-
-def create_cookie_jar(**kwargs):
-    return aiohttp.CookieJar(**kwargs)
+def session_parameters(client_settings):
+    return {
+        'timeout': aiohttp.ClientTimeout(**client_settings.timeout.kwargs),
+        'connector': aiohttp.TCPConnector(**client_settings.connector.kwargs),
+        'cookie_jar': aiohttp.CookieJar(**client_settings.cookie_jar.kwargs)
+    }
 
 
 class Session:
     """Asynchronous HTTP Session"""
 
-    def __init__(self, **kwargs):
-        self.initialize(**kwargs)
+    def __init__(self, client_settings):
+        self.initialize(client_settings)
 
-    def initialize(self, **kwargs):
-        self._session = aiohttp.ClientSession(trace_configs=[async_tracers.default()], **kwargs)
+    def initialize(self, client_settings):
+        self._session = aiohttp.ClientSession(trace_configs=[async_tracers.default()], **session_parameters(client_settings))
 
     @property
     def cookies(self):

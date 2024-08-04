@@ -3,30 +3,52 @@ sessions:
   management:
     allow_unsafe: true
     ssl: true
+    timeout:
+      sock_connect: 5
+      sock_read: 10
     edge:
       services:
         ssl: prompt
+  ctera_direct:
+    api:
+      ssl: true
+      timeout:
+        sock_connect: 5
+        sock_read: 10
+    storage:
+      ssl: true
+      timeout:
+        sock_connect: 5
+        sock_read: 10
+    streamer:
+      max_workers: 20
+  metadata_connector:
+    allow_unsafe: true
+    ssl: true
+    timeout:
+      sock_connect: 5
+      sock_read: 10
 logging:
   format: '%(asctime)s,%(msecs)3d %(levelname)7s [%(filename)s:%(lineno)d] [%(funcName)s] - %(message)s'
   date_format: '%Y-%m-%d %H:%M:%S'
   loggers:
-    - name: cterasdk.common
+    - name: common
       level: info
-    - name: cterasdk.core
+    - name: core
       level: info
-    - name: cterasdk.edge
+    - name: edge
       level: info
-    - name: cterasdk.metadata.connector
+    - name: metadata.connector
       level: info
-    - name: cterasdk.filesystem
+    - name: filesystem
       level: error
-    - name: cterasdk.direct
+    - name: direct
       level: error
-    - name: cterasdk.crypto
+    - name: crypto
       level: error
-    - name: cterasdk.http
+    - name: http
       level: error
-    - name: cterasdk.http.trace
+    - name: http.trace
       level: error
 downloads:
   location: ~/Downloads

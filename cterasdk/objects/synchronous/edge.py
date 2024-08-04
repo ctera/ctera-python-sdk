@@ -58,11 +58,15 @@ class Clients:
             edge._Portal = Portal
             edge._generic.close()
             edge._ctera_session.start_remote_session(Portal.session())
-            self.api = clients.API(EndpointBuilder.new(edge.base), Portal._generic._async_session, lambda *_: True)
+            self.api = clients.API(EndpointBuilder.new(edge.base), Portal._generic._async_session, lambda *_: True,
+                                   Portal._generic._client_settings)
         else:
             async_session = edge._generic._async_session  # pylint: disable=protected-access
-            self.migrate = clients.Migrate(EndpointBuilder.new(edge.base, '/migration/rest/v1'), async_session, edge._authenticator)
-            self.api = clients.API(EndpointBuilder.new(edge.base, '/admingui/api'), async_session, edge._authenticator)
+            client_settings = edge._generic._client_settings  # pylint: disable=protected-access
+            self.migrate = clients.Migrate(EndpointBuilder.new(edge.base, '/migration/rest/v1'), async_session,
+                                           edge._authenticator, client_settings)
+            self.api = clients.API(EndpointBuilder.new(edge.base, '/admingui/api'), async_session,
+                                   edge._authenticator, client_settings)
             self.io = IO(edge)
 
 
@@ -70,7 +74,8 @@ class IO:
 
     def __init__(self, edge):
         self._edge = edge
-        self._webdav = clients.WebDAV(EndpointBuilder.new(edge.base, '/localFiles'), edge._generic._async_session, edge._authenticator)
+        self._webdav = clients.WebDAV(EndpointBuilder.new(edge.base, '/localFiles'), edge._generic._async_session,
+                                      edge._authenticator, edge._generic._client_settings)
 
     @property
     def download(self):

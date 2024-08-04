@@ -1,4 +1,5 @@
-from ..services import CTERA
+import cterasdk.settings
+from ..services import CTERA, client_settings
 from ..endpoints import EndpointBuilder
 from ...clients.asynchronous import clients
 
@@ -24,14 +25,16 @@ class V1:
 
     def __init__(self, core):
         session = core._generic._async_session
-        self.api = clients.AsyncAPI(EndpointBuilder.new(core.base, core.context, '/api'), session, core._authenticator)
+        self.api = clients.AsyncAPI(EndpointBuilder.new(core.base, core.context, '/api'), session, core._authenticator,
+                                    core._generic._client_settings)
 
 
 class V2:
 
     def __init__(self, core):
         session = core._generic._async_session
-        self.api = clients.AsyncJSON(EndpointBuilder.new(core.base, core.context, '/v2/api'), session, core._authenticator)
+        self.api = clients.AsyncJSON(EndpointBuilder.new(core.base, core.context, '/v2/api'), session,
+                                     core._authenticator, core._generic._client_settings)
 
 
 class IO:
@@ -44,7 +47,8 @@ class WebDAV:
 
     def __init__(self, core):
         session = core._generic._async_session
-        self._webdav = clients.AsyncWebDAV(EndpointBuilder.new(core.base, core.context, '/webdav'), session, core._authenticator)
+        self._webdav = clients.AsyncWebDAV(EndpointBuilder.new(core.base, core.context, '/webdav'), session, core._authenticator,
+                                           core._generic._client_settings)
 
     @property
     def download(self):
@@ -58,7 +62,8 @@ class AsyncPortal(CTERA):
 
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https, base=None)
-        self._generic = clients.AsyncClient(EndpointBuilder.new(self.base), authenticator=self._authenticator)
+        self._generic = clients.AsyncClient(EndpointBuilder.new(self.base), authenticator=self._authenticator,
+                                            client_settings=client_settings(cterasdk.settings.sessions.metadata_connector))
         self._ctera_session = Session(self.host(), self.context)
         self._ctera_clients = Clients(self)
 

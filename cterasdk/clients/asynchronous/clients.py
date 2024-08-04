@@ -1,5 +1,3 @@
-import cterasdk.settings
-
 from . import errors
 from ..base import BaseClient, BaseResponse
 from ..common import Serializers, Deserializers
@@ -9,9 +7,6 @@ from ...common import Object
 
 class AsyncClient(BaseClient):
     """Asynchronous Client"""
-
-    def __init__(self, builder=None, async_session=None, authenticator=None):
-        super().__init__(builder, async_session, authenticator, **session_settings())
 
     @decorators.authenticated
     async def get(self, path, *, on_response=None, **kwargs):
@@ -50,8 +45,8 @@ class AsyncWebDAV(AsyncClient):
 
 class AsyncJSON(AsyncClient):
 
-    def __init__(self, builder=None, async_session=None, authenticator=None):
-        super().__init__(builder, async_session, authenticator)
+    def __init__(self, builder=None, async_session=None, authenticator=None, client_settings=None):
+        super().__init__(builder, async_session, authenticator, client_settings)
         self.headers.update_headers({'Content-Type': 'application/json'})
 
     async def get(self, path, **kwargs):
@@ -138,10 +133,3 @@ class AsyncResponse(BaseResponse):
         async def new_response(response):
             return AsyncResponse(response)
         return new_response
-
-
-def session_settings():
-    return {
-        'connector': async_requests.create_connector(ssl=cterasdk.settings.sessions.management.ssl),
-        'cookie_jar': async_requests.create_cookie_jar(unsafe=cterasdk.settings.sessions.management.allow_unsafe)
-    }

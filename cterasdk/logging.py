@@ -17,5 +17,5 @@ else:
 logging.basicConfig(**parameters)
 
 for logger_conf in cterasdk.settings.logging.loggers:
-    logger = logging.getLogger(logger_conf.name)
+    logger = logging.getLogger(f'{__package__}.{logger_conf.name}')
     logger.setLevel(logging.getLevelName(logger_conf.level.upper()))

@@ -7,7 +7,8 @@ def blocks(file, array):
     Filter Blocks by Block Number.
 
     :param list[cterasdk.direct.types.File] file: File Object.
-    :param list[int] array: List of Block Info objects.
+    :param list[cterasdk.direct.exceptions.BlockInfo] array: List of BlockInfo objects,
+     or list of integers identifying the block position.
     :returns: List of Chunks.
     :rtype: list[cterasdk.direct.types.Chunk]
     """
