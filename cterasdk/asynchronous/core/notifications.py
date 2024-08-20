@@ -27,32 +27,36 @@ class Notifications(BaseCommand):
         :rtype: cterasdk.asynchronous.core.iterator.CursorAsyncIterator
         """
         param = await self._create_parameter(cloudfolders, cursor)
+        param.max_results = 2000
         logging.getLogger('cterasdk.metadata.connector').debug('Listing updates.')
         return CursorResponse(await self._core.v2.api.post('/metadata/list', param))
 
-    async def _create_parameter(self, drives, cursor):
+    async def _create_parameter(self, cloudfolders, cursor):
         param = Object()
-        param.max_results = 2000
         param.folder_ids = []
         param.cursor = cursor
-        if drives:
-            for drive in drives:
-                async for drive in await self._core.cloudfs.drives.find(drive.name, drive.owner, include=['uid']):
-                    param.folder_ids.append(drive.uid)
+        if cloudfolders:
+            if all(isinstance(cloudfolder, int) for cloudfolder in cloudfolders):
+                param.folder_ids = cloudfolders
+            else:
+                for cloudfolder in cloudfolders:
+                    async for cloudfolder in await self._core.cloudfs.drives.find(cloudfolder.name, cloudfolder.owner, include=['uid']):
+                        param.folder_ids.append(cloudfolder.uid)
         return param
 
-    async def changes(self, cursor, timeout=None):
+    async def changes(self, cursor, cloudfolders=None, timeout=None):
         """
         Check for Changes.
 
         :param str cursor: Cursor
+        :param list[CloudFSFolderFindingHelper],optional cloudfolders: List of Cloud Drive folders, defaults to all cloud drive folders.
         :param int,optional timeout: Timeout
 
         :returns: ``True`` if changes are available for this ``cursor``, ``False`` otherwise
         :rtype: bool
         """
         param = Object()
-        param.cursor = cursor
+        param = await self._create_parameter(cloudfolders, cursor)
         param.timeout = timeout if timeout else 10000
         logging.getLogger('cterasdk.metadata.connector').debug('Checking for updates. %s', {'timeout': param.timeout})
         return (await self._core.v2.api.post('/metadata/longpoll', param)).changes
@@ -124,7 +128,7 @@ async def retrieve_events(server_queue, core, cloudfolders, cursor):
         while True:
             try:
                 if last_response.cursor is None or last_response.more or \
-                        await core.notifications.changes(last_response.cursor):
+                        await core.notifications.changes(last_response.cursor, cloudfolders):
                     response = await core.notifications.get(cloudfolders, last_response.cursor)
                     if response.objects:
                         await server_queue.put(response)
