@@ -16,18 +16,19 @@ class Notifications(BaseCommand):
         super().__init__(core)
         self.service = Service(core)
 
-    async def get(self, cloudfolders=None, cursor=None):
+    async def get(self, cloudfolders=None, cursor=None, max_results=None):
         """
         List Changes.
 
         :param list[CloudFSFolderFindingHelper],optional cloudfolders: List of Cloud Drive folders, defaults to all cloud drive folders.
         :param str,optional cursor: Cursor
+        :param int,optional max_results: Limit max results, defaults to 2000.
 
         :returns: An asynchronous iterator
         :rtype: cterasdk.asynchronous.core.iterator.CursorAsyncIterator
         """
         param = await self._create_parameter(cloudfolders, cursor)
-        param.max_results = 2000
+        param.max_results = max_results if max_results is not None else 2000
         logging.getLogger('cterasdk.metadata.connector').debug('Listing updates.')
         return CursorResponse(await self._core.v2.api.post('/metadata/list', param))
 
