@@ -42,6 +42,20 @@ class Config(BaseCommand):
         """
         return self._edge.api.get('/config/device/hostname')
 
+    def enable_remote_access(self):
+        """
+        Enable Remote Access on Edge Filer
+        """
+        logging.getLogger('cterasdk.edge').info('Remote Access is Enabled')
+        return self._edge.api.put('/config/services/remoteAccess/adminRemoteAccess', True)
+
+    def disable_remote_access(self):
+        """
+        Disable Remote Access on Edge Filer
+        """
+        logging.getLogger('cterasdk.edge').info('Remote Access is Disabled')
+        return self._edge.api.put('/config/services/remoteAccess/adminRemoteAccess', False)
+
     def set_hostname(self, hostname):
         """
         Set the hostname of the Edge Filer

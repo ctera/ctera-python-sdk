@@ -63,6 +63,20 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
         self._filer.api.put.assert_called_once_with('/config/gui/openFirstTimeWizard', False)
         self.assertEqual(ret, put_response)
 
+    def test_enable_remote_access(self):
+        put_response = 'Success'
+        self._init_filer(put_response=put_response)
+        ret = config.Config(self._filer).enable_remote_access()
+        self._filer.api.put.assert_called_once_with('/config/services/remoteAccess/adminRemoteAccess', True)
+        self.assertEqual(ret, put_response)
+
+    def test_disable_remote_access(self):
+        put_response = 'Success'
+        self._init_filer(put_response=put_response)
+        ret = config.Config(self._filer).disable_remote_access()
+        self._filer.api.put.assert_called_once_with('/config/services/remoteAccess/adminRemoteAccess', False)
+        self.assertEqual(ret, put_response)
+
     def test_edge_config_export_default_dest(self):
         handle_response = 'Stream'
         self._init_filer(handle_response=handle_response)
