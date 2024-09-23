@@ -99,7 +99,7 @@ class Client:
             """
             Asynchronous Executable of Chunk Retrieval Tasks.
             """
-            return await process_chunks(self._client, file_id, chunks, encryption_key, 
+            return await process_chunks(self._client, file_id, chunks, encryption_key,
                                         asyncio.Semaphore(max_workers) if max_workers else None)
 
         return execute

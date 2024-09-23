@@ -42,7 +42,7 @@ class ByteRange:
 
 class DirectIOResponse:
 
-    def __init__(self, file_id, server_object):
+    def __init__(self, server_object):
         """
         Initialize a Get Response Object.
 
@@ -50,10 +50,10 @@ class DirectIOResponse:
         :param cterasdk.common.object.Object server_object: Response Object.
         """
         self._wrapped_key = server_object.wrapped_key
-        self._chunks = DirectIOResponse._create_chunks(file_id, server_object.chunks)
+        self._chunks = DirectIOResponse._create_chunks(server_object.chunks)
 
     @staticmethod
-    def _create_chunks(file_id, server_object):
+    def _create_chunks(server_object):
         """
         Create Chunks.
 

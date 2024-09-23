@@ -194,7 +194,7 @@ async def get_chunks(api, credentials, file_id):
             if not response.chunks:
                 logging.getLogger('cterasdk.direct').error('Blocks not found. %s', parameters)
                 raise BlocksNotFoundError(file_id)
-            return DirectIOResponse(file_id, response)
+            return DirectIOResponse(response)
         except ClientResponseException as error:
             if error.response.status == 400:
                 raise NotFoundError(file_id)
