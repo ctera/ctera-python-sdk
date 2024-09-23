@@ -32,16 +32,17 @@ async def retry(coro, retries=3, backoff=1):
             await asyncio.sleep(wait)
 
 
-async def get_object(client, chunk):
+async def get_object(client, file_id, chunk):
     """
     Get Object from a Signed URL.
 
+    :param int file_id: File ID.
     :param cterasdk.direct.types.Chunk chunk: Chunk.
     :returns: Object
     :rtype: bytes
     """
     async def get_object_coro():
-        parameters = {'file_id': chunk.file_id, 'number': chunk.index, 'offset': chunk.offset}
+        parameters = {'file_id': file_id, 'number': chunk.index, 'offset': chunk.offset}
         logging.getLogger('cterasdk.direct').debug('Downloading Block. %s', parameters)
         try:
             response = await client.get(chunk.location)
@@ -96,11 +97,12 @@ async def decompress_object(compressed_object, chunk):
         raise DecompressBlockError(chunk)
 
 
-async def process_chunk(client, chunk, encryption_key, semaphore):
+async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
     """
     Process a Chunk.
 
     :param cterasdk.clients.asynchronous.clients.AsyncClient client: Asynchronous HTTP Client.
+    :param int file_id: File ID.
     :param cterasdk.direct.types.Chunk chunk: Chunk.
     :param str encryption_key: Encryption key.
     :param asyncio.Semaphore semaphore: Semaphore.
@@ -109,13 +111,13 @@ async def process_chunk(client, chunk, encryption_key, semaphore):
     :rtype: cterasdk.direct.types.Block
     """
     async def process(client, chunk, encryption_key):
-        parameters = {'file_id': chunk.file_id, 'number': chunk.index, 'offset': chunk.offset}
+        parameters = {'file_id': file_id, 'number': chunk.index, 'offset': chunk.offset}
         logging.getLogger('cterasdk.direct').debug('Processing Block. %s', parameters)
 
-        encrypted_object = await get_object(client, chunk)
+        encrypted_object = await get_object(client, file_id, chunk)
         decrypted_object = await decrypt_object(encrypted_object, encryption_key, chunk)
         decompressed_object = await decompress_object(decrypted_object, chunk)
-        return Block(chunk.file_id, chunk.index, chunk.offset, decompressed_object, chunk.length)
+        return Block(file_id, chunk.index, chunk.offset, decompressed_object, chunk.length)
 
     if semaphore is not None:
         async with semaphore:
@@ -123,24 +125,25 @@ async def process_chunk(client, chunk, encryption_key, semaphore):
     return await process(client, chunk, encryption_key)
 
 
-async def process_chunks(client, chunks, encryption_key, semaphore=None):
+async def process_chunks(client, file_id, chunks, encryption_key, semaphore=None):
     """
     Process Chunks Asynchronously.
 
     :param cterasdk.clients.asynchronous.clients.AsyncClient client: Asynchronous HTTP Client.
+    :param int file_id: File ID.
     :param list[cterasdk.direct.types.Chunk] chunks: Chunk.
     :param str encryption_key: Encryption key.
     :param asyncio.Semaphore,optional semaphore: Semaphore.
     :returns: List of futures.
     :rtype: list[asyncio.Task]
     """
-    parameters = {'file_id': chunks[0].file_id, 'blocks': len(chunks)}
+    parameters = {'file_id': file_id, 'blocks': len(chunks)}
     if semaphore:
         parameters['max_workers'] = semaphore._value  # pylint: disable=protected-access
     logging.getLogger('cterasdk.direct').debug('Processing Blocks. %s', parameters)
     futures = []
     for chunk in chunks:
-        futures.append(asyncio.create_task(process_chunk(client, chunk, encryption_key, semaphore)))
+        futures.append(asyncio.create_task(process_chunk(client, file_id, chunk, encryption_key, semaphore)))
     return futures
 
 

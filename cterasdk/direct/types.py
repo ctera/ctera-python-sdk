@@ -1,3 +1,7 @@
+import base64
+from ..common import Object, utils
+
+
 class ByteRange:
 
     def __init__(self, start=None, end=None):
@@ -62,7 +66,7 @@ class DirectIOResponse:
         offset = 0
         chunks = []
         for index, chunk in enumerate(server_object, 1):
-            chunks.append(Chunk(file_id, index, offset, chunk.url, chunk.len))
+            chunks.append(Chunk(index, offset, chunk.url, chunk.len))
             offset = offset + chunk.len
         return chunks
 
@@ -78,25 +82,19 @@ class DirectIOResponse:
 class Chunk:
     """Chunk to Retrieve"""
 
-    def __init__(self, file_id, index, offset, location, length):
+    def __init__(self, index, offset, location, length):
         """
         Initialize a Chunk.
 
-        :param int index: File ID.
         :param int index: Chunk index.
         :param int offset: Chunk offset.
         :param str location: Signed URL.
         :param int length: Object length.
         """
-        self._file_id = file_id
         self._index = index
         self._offset = offset
         self._location = location
         self._length = length
-
-    @property
-    def file_id(self):
-        return self._file_id
 
     @property
     def index(self):
@@ -199,3 +197,29 @@ class Block:
 
         data = self._data[start:end]
         return Block(self._file_id, self._number, self._offset + start if start else self._offset, data, len(data))
+
+
+class ChunkMetadata(Object):
+    """
+    Direct IO File Chunk Metadata Object
+
+    :ivar str url: Part URL
+    :ivar int index: Part Index
+    :ivar int offset: Part Offset
+    :ivar int length: Part Length
+    """
+    def __init__(self, url, index, offset, length):
+        self.url = url
+        self.index = index
+        self.offset = offset
+        self.length = length
+
+
+class FileMetadata(Object):
+    """
+    Direct IO File Metadata Object
+    """
+
+    def __init__(self, f):
+        self.encryption_key = utils.utf8_decode(base64.b64encode(f.encryption_key))
+        self.chunks = [ChunkMetadata(chunk.location, chunk.index, chunk.offset, chunk.length) for chunk in f.chunks]
