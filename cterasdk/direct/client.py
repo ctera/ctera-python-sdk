@@ -5,7 +5,7 @@ import cterasdk.settings
 
 from . import filters
 from .lib import get_chunks, decrypt_encryption_key, process_chunks
-from .types import File, ByteRange
+from .types import File, ByteRange, FileMetadata
 from .stream import Streamer
 
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
@@ -39,10 +39,18 @@ class Client:
         self._client = AsyncClient(DefaultBuilder(), authenticator=lambda *_: True, client_settings=client_settings(ctera_direct.storage))
         self._credentials = credentials
 
-    async def _file(self, file_id):
+    async def _direct(self, file_id):
         server_object = await get_chunks(self._api, self._credentials, file_id)
         encryption_key = decrypt_encryption_key(file_id, server_object.wrapped_key, self._credentials.secret_access_key)
         return File(file_id, encryption_key, server_object.chunks)
+
+    async def metadata(self, file_id):
+        """
+        Direct IO Metadata API.
+
+        :param int file_id: File ID.
+        """
+        return FileMetadata(await self._direct(file_id))
 
     async def blocks(self, file_id, blocks, max_workers):
         """
@@ -55,8 +63,8 @@ class Client:
         :returns: List of Blocks.
         :rtype: list[cterasdk.direct.types.Block]
         """
-        file = await self._file(file_id)
-        executor = await self._executor(filters.blocks(file, blocks), file.encryption_key, max_workers)
+        file = await self._direct(file_id)
+        executor = await self.executor(filters.blocks(file, blocks), file.encryption_key, file_id, max_workers)
         return await executor()
 
     async def streamer(self, file_id, byte_range):
@@ -68,18 +76,19 @@ class Client:
         :returns: Streamer Object
         :rtype: cterasdk.direct.stream.Streamer
         """
-        file = await self._file(file_id)
+        file = await self._direct(file_id)
         byte_range = byte_range if byte_range is not None else ByteRange.default()
         max_workers = cterasdk.settings.sessions.ctera_direct.streamer.max_workers
-        executor = await self._executor(filters.span(file, byte_range), file.encryption_key, max_workers)
+        executor = await self.executor(filters.span(file, byte_range), file.encryption_key, file_id, max_workers)
         return Streamer(executor, byte_range)
 
-    async def _executor(self, chunks, encryption_key, max_workers=None):
+    async def executor(self, chunks, encryption_key, file_id=None, max_workers=None):
         """
         Get Blocks.
 
         :param list[cterasdk.direct.types.Chunk] chunks: List of Chunks.
         :param str encryption_key: Decryption Key.
+        :param int,optional file_id: File ID.
         :param int,optional max_workers: Max concurrent tasks.
 
         :returns: Callable Downloader
@@ -90,7 +99,8 @@ class Client:
             """
             Asynchronous Executable of Chunk Retrieval Tasks.
             """
-            return await process_chunks(self._client, chunks, encryption_key, asyncio.Semaphore(max_workers) if max_workers else None)
+            return await process_chunks(self._client, file_id, chunks, encryption_key,
+                                        asyncio.Semaphore(max_workers) if max_workers else None)
 
         return execute
 
@@ -104,7 +114,7 @@ class DirectIO:
     async def __aenter__(self):
         return self
 
-    def __init__(self, baseurl, access_key_id=None, secret_access_key=None):
+    def __init__(self, baseurl=None, access_key_id=None, secret_access_key=None):
         """
         Initialize a DirectIO Client.
 
@@ -113,6 +123,14 @@ class DirectIO:
         :param str,optional secret_access_key: Secret key
         """
         self._client = Client(baseurl, Credentials(access_key_id, secret_access_key))
+
+    async def metadata(self, file_id):
+        """
+        Get Metadata.
+
+        :param int file_id: File ID
+        """
+        return await self._client.metadata(file_id)
 
     async def blocks(self, file_id, blocks=None, max_workers=None):
         """
