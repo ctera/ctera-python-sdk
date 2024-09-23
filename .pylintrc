@@ -75,7 +75,8 @@ disable=raw-checker-failed,
         unsubscriptable-object,
         raise-missing-from,
         use-dict-literal,
-        broad-exception-raised
+        broad-exception-raised,
+	too-many-positional-arguments
 
 
 # Enable the message, report, category or checker with the given id(s). You can
