@@ -125,7 +125,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
         self._global_admin.api.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
 
-        expected_param = self._get_add_cloud_drive_object(winacls=False)
+        expected_param = self._get_add_cloud_drive_object(winacls=False, xattrs=ExtendedAttributesBuilder.disabled().build())
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
