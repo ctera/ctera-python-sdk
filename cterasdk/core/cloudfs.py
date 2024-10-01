@@ -5,7 +5,7 @@ import logging
 from .base_command import BaseCommand
 from . import query, devices
 from .enum import ListFilter, PolicyType
-from .types import ComplianceSettingsBuilder
+from .types import ComplianceSettingsBuilder, ExtendedAttributesBuilder
 from ..common import union, Object
 from ..exceptions import CTERAException, ObjectNotFoundException
 
@@ -137,7 +137,7 @@ class CloudDrives(BaseCommand):
     def _get_entire_object(self, name, owner):
         return self._core.api.get(f'{self.find(name, owner, include=["baseObjectRef"]).baseObjectRef}')
 
-    def add(self, name, group, owner, winacls=True, description=None, quota=None, compliance_settings=None):
+    def add(self, name, group, owner, winacls=True, description=None, quota=None, compliance_settings=None, xattrs=None):
         """
         Create a new Cloud Drive Folder (Cloud Volume)
 
@@ -149,6 +149,8 @@ class CloudDrives(BaseCommand):
         :param str,optional quota: Cloud drive folder quota in GB
         :param cterasdk.common.object.Object,optional compliance_settings: Compliance settings, defaults to disabled.
          Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
+        :param cterasdk.common.object.Object,optional xattrs: Extended attributes, defaults to MacOS.
+         Use :func:`cterasdk.core.types.ExtendedAttributesBuilder` to build the extended attributes object
         """
         param = Object()
         param.name = name
@@ -159,6 +161,7 @@ class CloudDrives(BaseCommand):
         if description:
             param.description = description
         param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
+        param.extendedAttributes = xattrs if xattrs else ExtendedAttributesBuilder.default().build()
 
         try:
             response = self._core.api.execute('', 'addCloudDrive', param)
@@ -175,7 +178,7 @@ class CloudDrives(BaseCommand):
             raise error
 
     def modify(self, current_name, owner, new_name=None, new_owner=None, new_group=None,
-               description=None, winacls=None, quota=None, compliance_settings=None):
+               description=None, winacls=None, quota=None, compliance_settings=None, xattrs=None):
         """
         Modify a Cloud Drive Folder (Cloud Volume)
 
@@ -189,6 +192,8 @@ class CloudDrives(BaseCommand):
         :param str,optional quota: Folder quota in GB
         :param cterasdk.common.object.Object,optional compliance_settings: Compliance settings.
          Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
+        :param cterasdk.common.object.Object,optional xattrs: Extended attributes.
+         Use :func:`cterasdk.core.types.ExtendedAttributesBuilder` to build the extended attributes object
         """
         param = self._get_entire_object(current_name, owner)
         if new_name:
@@ -205,6 +210,8 @@ class CloudDrives(BaseCommand):
             param.folderQuota = quota
         if compliance_settings:
             param.wormSettings = compliance_settings
+        if xattrs:
+            param.extendedAttributes = xattrs
         try:
             response = self._core.api.put(f'/{param.baseObjectRef}', param)
             logging.getLogger('cterasdk.core').info('Cloud drive folder updated. %s', {'name': current_name})
