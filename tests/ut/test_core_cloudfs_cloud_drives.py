@@ -3,7 +3,7 @@ import munch
 
 from cterasdk import exceptions
 from cterasdk.core import cloudfs
-from cterasdk.core.types import UserAccount, ComplianceSettingsBuilder
+from cterasdk.core.types import UserAccount, ComplianceSettingsBuilder, ExtendedAttributesBuilder
 from cterasdk.core import query
 from cterasdk.common import Object, union
 from tests.ut import base_core
@@ -118,7 +118,8 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._mock_get_user_base_object_ref()
         self._mock_get_folder_group()
 
-        ret = cloudfs.CloudDrives(self._global_admin).add(self._name, self._group, self._local_user_account, False)
+        ret = cloudfs.CloudDrives(self._global_admin).add(self._name, self._group, self._local_user_account, False,
+                                                          xattrs=ExtendedAttributesBuilder.disabled().build())
 
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
         self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
@@ -171,7 +172,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['displayName'])
         self._global_admin.files.undelete.assert_called_once_with(f'Users/{self._owner}/{self._name}')
 
-    def _get_add_cloud_drive_object(self, winacls=True, description=None, quota=None, compliance_settings=None):
+    def _get_add_cloud_drive_object(self, winacls=True, description=None, quota=None, compliance_settings=None, xattrs=None):
         add_cloud_drive_param = Object()
         add_cloud_drive_param.name = self._name
         add_cloud_drive_param.owner = self._owner
@@ -181,6 +182,7 @@ class TestCoreCloudDrives(base_core.BaseCoreTest):   # pylint: disable=too-many-
         if description:
             add_cloud_drive_param.description = description
         add_cloud_drive_param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
+        add_cloud_drive_param.extendedAttributes = xattrs if xattrs else ExtendedAttributesBuilder.default().build()
         return add_cloud_drive_param
 
     def _mock_get_user_base_object_ref(self):
