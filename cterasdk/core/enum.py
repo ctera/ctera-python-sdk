@@ -607,6 +607,15 @@ class RetentionMode:
     Compliance = 'Compliance'
 
 
+class ExtendedAttributes:
+    """
+    Extended Attributes
+
+    :ivar str MacOS: MacOS
+    """
+    MacOS = 'MacOS'
+
+
 class Duration:
     """
     Duration

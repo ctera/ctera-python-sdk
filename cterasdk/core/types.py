@@ -4,7 +4,7 @@ from ..common import DateTimeUtils, StringCriteriaBuilder, PredefinedListCriteri
 from ..lib import FileSystem
 
 from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, \
-                  BucketType, LocationType, Platform, RetentionMode, Duration
+                  BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
@@ -696,6 +696,40 @@ class ComplianceSettingsBuilder:
         if self.settings.gracePeriod is None:
             self.grace_period()
         return self.settings
+
+
+class ExtendedAttribute(Object):
+
+    def __init__(self, name, supported):
+        self._classname = 'ExtendedAttributesInfo'  # pylint: disable=protected-access
+        self.name = name
+        self.supported = supported
+
+
+class ExtendedAttributesBuilder:
+
+    def __init__(self, enable, xattrs):
+        self.xattrs = Object()
+        self.xattrs._classname = 'ExtendedAttributes'  # pylint: disable=protected-access
+        self.xattrs.enable = enable
+        self.xattrs.attributes = xattrs
+
+    @staticmethod
+    def default():
+        return ExtendedAttributesBuilder(True, [ExtendedAttribute(ExtendedAttributes.MacOS, True)])
+
+    @staticmethod
+    def disabled():
+        return ExtendedAttributesBuilder(False, [ExtendedAttribute(ExtendedAttributes.MacOS, True)])
+
+    def add(self, xattr):
+        """
+        :param cterasdk.core.enum.ExtendedAttributes xattr: Extended attribute
+        """
+        self.xattrs.append(xattr)
+
+    def build(self):
+        return self.xattrs
 
 
 class RoleSettings(Object):  # pylint: disable=too-many-instance-attributes

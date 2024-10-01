@@ -1380,8 +1380,11 @@ Cloud Drive Folders
    """Create a Cloud Drive folder, owned by a local user account 'svc_account'"""
    svc_account = core_types.UserAccount('svc_account')
    admin.cloudfs.drives.add('DIR-001', 'FG-001', svc_account)
-   admin.cloudfs.drives.add('DIR-003', 'FG-003', svc_account, winacls = False) # disable Windows ACL's
-   admin.cloudfs.drives.add('DIR-003', 'FG-003', svc_account, quota = 1024) # Set folder quota, in GB
+   admin.cloudfs.drives.add('DIR-002', 'FG-002', svc_account, winacls=False,
+                            xattrs=core_types.ExtendedAttributesBuilder.disabled().build()) # Disable xattrs and Windows ACL's
+   admin.cloudfs.drives.add('DIR-003', 'FG-003', svc_account, winacls=True,
+                            xattrs=core_types.ExtendedAttributesBuilder.disabled().build()) # Disable xattrs, Enable Windows ACL's
+   admin.cloudfs.drives.add('DIR-004', 'FG-004', svc_account, quota=1024) # Set folder quota, in GB
 
    """Create a Cloud Drive folder, owned by the domain user 'ctera.local\wbruce'"""
    wbruce = core_types.UserAccount('wbruce', 'ctera.local')
@@ -1408,6 +1411,7 @@ Cloud Drive Folders
    admin.cloudfs.groups.add('FG-Compliance', svc_account)
    settings = core_types.ComplianceSettingsBuilder.enterprise(1, core_enum.Duration.Years).grace_period(1, core_enum.Duration.Hours).build()
    admin.cloudfs.drives.add('Compliance', 'FG-Compliance', svc_account, compliance_settings=settings)
+
 
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.modify
    :noindex:
