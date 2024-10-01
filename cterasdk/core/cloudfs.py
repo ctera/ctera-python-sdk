@@ -177,7 +177,7 @@ class CloudDrives(BaseCommand):
             )
             raise error
 
-    def modify(self, current_name, owner, new_name=None, new_owner=None, new_group=None,
+    def modify(self, current_name, owner, new_name=None, new_owner=None, new_group=None,  # pylint: disable=too-many-arguments
                description=None, winacls=None, quota=None, compliance_settings=None, xattrs=None):
         """
         Modify a Cloud Drive Folder (Cloud Volume)
