@@ -4,8 +4,8 @@ sessions:
     allow_unsafe: true
     ssl: true
     timeout:
-      sock_connect: 5
-      sock_read: 10
+      sock_connect: 30
+      sock_read: 60
     edge:
       services:
         ssl: prompt
