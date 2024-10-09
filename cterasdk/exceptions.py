@@ -30,6 +30,12 @@ class ClientResponseException(CTERAException):
         super().__init__('An error occurred while processing the HTTP request.', error_object)
 
 
+class NotificationsError(CTERAException):
+
+    def __init__(self, cloudfolders, cursor):
+        super().__init__('An error occurred while trying to retrieve notifications.', cloudfolders=cloudfolders, cursor=cursor)
+
+
 class ObjectNotFoundException(CTERAException):
 
     def __init__(self, message, object_ref, **kwargs):
