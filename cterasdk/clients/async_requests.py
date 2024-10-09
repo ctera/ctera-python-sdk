@@ -18,10 +18,11 @@ class Session:
     """Asynchronous HTTP Session"""
 
     def __init__(self, client_settings):
+        self._client_settings = client_settings
         self.initialize(client_settings)
 
     def initialize(self, client_settings):
-        self._session = aiohttp.ClientSession(trace_configs=[async_tracers.default()], **session_parameters(client_settings))
+        self._session = None
 
     @property
     def cookies(self):
@@ -41,6 +42,8 @@ class Session:
 
     async def _request(self, r, *, on_response=None):
         try:
+            if self._session is None:
+                self._session = aiohttp.ClientSession(trace_configs=[async_tracers.default()], **session_parameters(self._client_settings))
             response = await self._session.request(r.method, r.url, **r.kwargs)
             return asyncio.create_task(on_response(response))
         except aiohttp.ClientSSLError as error:
@@ -61,6 +64,8 @@ class Session:
 
     @property
     def closed(self):
+        if self._session is None:
+            return False
         return self._session.closed
 
     async def close(self):

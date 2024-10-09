@@ -259,10 +259,13 @@ def run_threadsafe(loop, target, *args, **kwargs):
     return t.response
 
 
+event_loop = asyncio.new_event_loop()
+
+
 def execute(target, *args, **kwargs):
     loop = asyncio.get_event_loop()
     
     if not loop.is_running():
         return loop.run_until_complete(target(*args, **kwargs))
-
-    return run_threadsafe(asyncio.new_event_loop(), target, *args, **kwargs)
+    
+    return run_threadsafe(event_loop, target, *args, **kwargs)
