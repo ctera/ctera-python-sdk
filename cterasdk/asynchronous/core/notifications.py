@@ -6,7 +6,7 @@ from .types import Event
 from .base_command import BaseCommand
 from ...common import Object
 from ...lib import CursorResponse
-from ...exceptions import ClientResponseException
+from ...exceptions import ClientResponseException, NotificationsError
 
 
 class Notifications(BaseCommand):
@@ -26,11 +26,16 @@ class Notifications(BaseCommand):
 
         :returns: An asynchronous iterator
         :rtype: cterasdk.asynchronous.core.iterator.CursorAsyncIterator
+        :raises: cterasdk.exceptions.NotificationsError
         """
         param = await self._create_parameter(cloudfolders, cursor)
         param.max_results = max_results if max_results is not None else 2000
         logging.getLogger('cterasdk.metadata.connector').debug('Listing updates.')
-        return CursorResponse(await self._core.v2.api.post('/metadata/list', param))
+        response = await self._core.v2.api.post('/metadata/list', param)
+        if response is not None:
+            return CursorResponse(response)
+        logging.getLogger('cterasdk.metadata.connector').error('An error occurred while trying to retrieve notifications.')
+        raise NotificationsError(cloudfolders, cursor)
 
     async def _create_parameter(self, cloudfolders, cursor):
         param = Object()
