@@ -239,13 +239,11 @@ class SetupWizardStage:
 
     :ivar str Server: Initializing Server
     :ivar str Portal: Initializing Portal
-    :ivar str Replication: Setting Database Replication
     :ivar str Restart: Restarting Server
     :ivar str Finish: Finished
     """
     Server = "initServer"
     Portal = "initPortal"
-    Replication = "setReplication"
     Restart = "restartingServer"
     Finish = "finish"
 

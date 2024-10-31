@@ -1789,9 +1789,6 @@ Setup
    master_pk = """...PEM-encoded private key..."""
    admin.setup.init_application_server(master_ipaddr, master_pk)
 
-.. automethod:: cterasdk.core.setup.Setup.init_replication_server
-   :noindex:
-
 
 Miscellaneous
 =============

@@ -1,6 +1,5 @@
 import logging
 import time
-import re
 
 from .base_command import BaseCommand
 from .enum import ServerMode, SetupWizardStage, SetupWizardStatus, SlaveAuthenticaionMethod
@@ -101,65 +100,8 @@ class Setup(BaseCommand):
         :param str secret: A password or a PEM-encoded private key
         """
         self._init_slave(ipaddr, secret)
-        if self.stage == SetupWizardStage.Replication:
-            logging.getLogger('cterasdk.core').info('Initializing an Application Server. %s', {'host': ipaddr})
-            params = Setup._init_replication_param()
-            self._init_role(params)
+        logging.getLogger('cterasdk.core').info('Initializing Application Server. %s', {'host': ipaddr})
         self._core.startup.wait()
-
-    def init_replication_server(self, ipaddr, secret, replicate_from=None):
-        """
-        Initialize a CTERA Portal Database Replication Server.
-
-        :param str ipaddr: The CTERA Portal master server IP address
-        :param str secret: A password or a PEM-encoded private key
-        :param str replicate_from: The name of a CTERA Portal server to replicate from
-        """
-        self._init_slave(ipaddr, secret)
-        if self.stage == SetupWizardStage.Replication:
-            logging.getLogger('cterasdk.core').info('Initializing a Replication Database Server. %s',
-                                                    {'host': ipaddr, 'replicate_from': replicate_from})
-            logging.getLogger('cterasdk.core').debug('Retrieving database replication candidates.')
-            replication_candidates = {re.search('([^/]+$)', k).group(0): k for k in self.get_replication_candidates()}
-            if replication_candidates:
-                if replicate_from is None and len(replication_candidates) == 1:
-                    server = next(iter(replication_candidates.values()))
-                else:
-                    server = replication_candidates.get(replicate_from)
-                if server:
-                    logging.getLogger('cterasdk.core').debug('Found server in replication candidates. %s', {'server': replicate_from})
-                    params = Setup._init_replication_param(server)
-                    self._init_role(params)
-                else:
-                    logging.getLogger('cterasdk.core').error('Could not find database replication target. %s', {
-                        'target': replicate_from,
-                        'options': replication_candidates
-                    })
-                    raise CTERAException('Could not find database replication target.',
-                                         None, target=replicate_from, options=replication_candidates)
-            else:
-                logging.getLogger('cterasdk.core').error('Could not find database replication candidates.')
-        self._core.startup.wait()
-
-    def _init_role(self, params):
-        response = self._core.ctera.execute('/public/servers', 'setReplication', params)
-        status = SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Replication)
-        self.stage = status.wizard
-        return response
-
-    def get_replication_candidates(self):
-        return self._core.ctera.execute('/public/servers', 'getReplicaitonCandidates', None)
-
-    @staticmethod
-    def _init_replication_param(replicate_from=None):
-        params = Object()
-        params._classname = 'SetReplicationParam'  # pylint: disable=protected-access
-        if replicate_from:
-            params.enabledReplicationParam = Object()
-            params.enabledReplicationParam._classname = 'EnabledReplicationParam'  # pylint: disable=protected-access
-            params.enabledReplicationParam.replicationOf = replicate_from
-            params.enabledReplicationParam.restartDB = True
-        return params
 
     @staticmethod
     def _init_server_params(mode):

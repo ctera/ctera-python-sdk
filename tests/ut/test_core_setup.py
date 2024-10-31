@@ -1,7 +1,6 @@
 from unittest import mock
 
 from cterasdk import toxmlstr
-from cterasdk import exceptions
 from cterasdk.core import setup
 from cterasdk.core.enum import ServerMode, SlaveAuthenticaionMethod, SetupWizardStage, SetupWizardStatus
 from cterasdk.common import Object
@@ -20,7 +19,6 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         self._admin_last_name = 'Account'
         self._admin_password = 'password'
         self._domain = 'ctera.me'
-        self._replication_candidates = ['objs/6//Server/server', 'objs/7//Server/server1', 'objs/8//Server/server3']
         self._replicate_from = 'server1'
 
     def test_init_master(self):
@@ -91,7 +89,6 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         self._init_setup()
         self._global_admin.ctera.get = mock.MagicMock(side_effect=[
             TestCoreSetup._generate_status_response(SetupWizardStage.Server, SetupWizardStatus.NA, ''),
-            TestCoreSetup._generate_status_response(SetupWizardStage.Replication, SetupWizardStatus.NA, ''),
             TestCoreSetup._generate_status_response(SetupWizardStage.Finish, SetupWizardStatus.NA, '')
         ])
         execute_side_effect = TestCoreSetup._create_init_slave_execute_function(authentication_method)
@@ -104,20 +101,15 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         self._global_admin.ctera.get.assert_has_calls(
             [
                 mock.call(setup_status_url),
-                mock.call(setup_status_url),
                 mock.call(setup_status_url)
             ]
         )
         self._global_admin.ctera.execute.assert_has_calls(
             [
                 mock.call('/setup/authenticaionMethod',
-                          'askMasterForSlaveAuthenticaionMethod', self._master_ipaddr),
-                mock.call('/public/servers', 'setReplication', mock.ANY)
+                          'askMasterForSlaveAuthenticaionMethod', self._master_ipaddr)
             ]
         )
-        expected_param = TestCoreSetup._get_init_replication_param()
-        actual_param = self._global_admin.ctera.execute.call_args_list[1][0][2]  # Access setReplication call param
-        self._assert_equal_objects(actual_param, expected_param)
 
         params = TestCoreSetup._get_init_server_params(ServerMode.Slave, authentication_method, self._master_ipaddr, self._master_secret)
         expected_params = TestCoreSetup._get_form_data(params)
@@ -126,70 +118,6 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         for key in actual_param.keys():  # pylint: disable=consider-using-dict-items, consider-iterating-dictionary
             self._assert_equal_objects(actual_param[key], expected_params[key])
         mock_startup_wait.assert_called_once()
-
-    def test_init_replication_server_success_password(self):
-        self._test_init_replication_server_success(SlaveAuthenticaionMethod.Password)
-
-    def test_init_replication_server_success_pk(self):
-        self._test_init_replication_server_success(SlaveAuthenticaionMethod.PrivateKey)
-
-    def _test_init_replication_server_success(self, authentication_method):
-        self.patch_call("time.sleep")
-        self._init_setup()
-        self._global_admin.ctera.get = mock.MagicMock(side_effect=[
-            TestCoreSetup._generate_status_response(SetupWizardStage.Server, SetupWizardStatus.NA, ''),
-            TestCoreSetup._generate_status_response(SetupWizardStage.Replication, SetupWizardStatus.NA, ''),
-            TestCoreSetup._generate_status_response(SetupWizardStage.Finish, SetupWizardStatus.NA, '')
-        ])
-        candidates = self._replication_candidates
-        execute_side_effect = TestCoreSetup._create_init_slave_execute_function(authentication_method, candidates)
-        self._global_admin.ctera.execute = mock.MagicMock(side_effect=execute_side_effect)
-        mock_startup_wait = self.patch_call("cterasdk.core.startup.Startup.wait")
-
-        setup.Setup(self._global_admin).init_replication_server(self._master_ipaddr, self._master_secret, self._replicate_from)
-
-        setup_status_url = '/setup/status'
-        self._global_admin.ctera.get.assert_has_calls(
-            [
-                mock.call(setup_status_url),
-                mock.call(setup_status_url),
-                mock.call(setup_status_url)
-            ]
-        )
-        self._global_admin.ctera.execute.assert_has_calls(
-            [
-                mock.call('/setup/authenticaionMethod',
-                          'askMasterForSlaveAuthenticaionMethod', self._master_ipaddr),
-                mock.call('/public/servers', 'getReplicaitonCandidates', None),
-                mock.call('/public/servers', 'setReplication', mock.ANY)
-            ]
-        )
-        expected_param = TestCoreSetup._get_init_replication_param(self._replication_candidates[1])
-        actual_param = self._global_admin.ctera.execute.call_args_list[2][0][2]  # Access setReplication call param
-        self._assert_equal_objects(actual_param, expected_param)
-
-        params = TestCoreSetup._get_init_server_params(ServerMode.Slave, authentication_method, self._master_ipaddr, self._master_secret)
-        expected_params = TestCoreSetup._get_form_data(params)
-        actual_param = TestCoreSetup._format_actual_parameters_to_dict(self._global_admin.ctera.multipart.call_args[0][1])
-        self._global_admin.ctera.multipart.assert_called_once_with('/setup', mock.ANY)
-        for key in actual_param.keys():  # pylint: disable=consider-using-dict-items, consider-iterating-dictionary
-            self._assert_equal_objects(actual_param[key], expected_params[key])
-        mock_startup_wait.assert_called_once()
-
-    def test_no_replication_target(self):
-        self._init_setup()
-        get_function = mock.MagicMock(side_effect=[
-            TestCoreSetup._generate_status_response(SetupWizardStage.Replication, SetupWizardStatus.NA, '')
-        ])
-        candidates = ['objs/8//Server/server4']
-        execute_side_effect_function = TestCoreSetup._create_init_slave_execute_function(SlaveAuthenticaionMethod.Password, candidates)
-        execute_function = mock.MagicMock(side_effect=execute_side_effect_function)
-        self._global_admin.ctera.get = get_function
-        self._global_admin.ctera.execute = execute_function
-
-        with self.assertRaises(exceptions.CTERAException) as error:
-            setup.Setup(self._global_admin).init_replication_server(self._master_ipaddr, self._master_secret, self._replicate_from)
-        self.assertEqual('Could not find database replication target.', error.exception.message)
 
     def _get_init_portal_param(self):
         params = Object()
@@ -225,15 +153,11 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
         return settings
 
     @staticmethod
-    def _create_init_slave_execute_function(authentication_method, replication_candidates=None):
+    def _create_init_slave_execute_function(authentication_method):
         def _get_init_slave_execute_function(path, name, param, use_file_url=False):
             # pylint: disable=unused-argument
             if name == 'askMasterForSlaveAuthenticaionMethod':
                 return authentication_method
-            if name == 'getReplicaitonCandidates':
-                return replication_candidates
-            if name == 'setReplication':
-                return 'Success'
             return None
         return _get_init_slave_execute_function
 
@@ -266,15 +190,4 @@ class TestCoreSetup(base_core.BaseCoreTest):  # pylint: disable=too-many-instanc
                 params.slaveSettings.masterPassword = master_secret
             elif authentication_method == SlaveAuthenticaionMethod.PrivateKey:
                 params.slaveSettings.masterKey = master_secret
-        return params
-
-    @staticmethod
-    def _get_init_replication_param(replicate_from=None):
-        params = Object()
-        params._classname = 'SetReplicationParam'  # pylint: disable=protected-access
-        if replicate_from:
-            params.enabledReplicationParam = Object()
-            params.enabledReplicationParam._classname = 'EnabledReplicationParam'  # pylint: disable=protected-access
-            params.enabledReplicationParam.replicationOf = replicate_from
-            params.enabledReplicationParam.restartDB = True
         return params
