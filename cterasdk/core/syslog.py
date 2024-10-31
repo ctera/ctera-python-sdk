@@ -1,9 +1,13 @@
 import logging
+from pathlib import Path
+
 
 from .base_command import BaseCommand
 from ..common import Object
 from ..core.enum import Severity, Mode, IPProtocol
 from ..exceptions import CTERAException
+from ..lib import X509Certificate, PrivateKey
+from ..clients.common import MultipartForm
 
 
 class Syslog(BaseCommand):
@@ -11,8 +15,47 @@ class Syslog(BaseCommand):
     Portal Syslog Management APIs
     """
 
-    # TODO: upload_ca_certificate  # pylint: disable=W0511
-    # TODO: upload_client_certificate  # pylint: disable=W0511
+    def import_ca(self, certificate):
+        """
+        Import the Syslog Server CA certificate
+
+        :param str certificate: Path to the PEM-encoded CA certificate.
+        """
+        X509Certificate.load_certificate(certificate)
+        logging.getLogger('cterasdk.edge').info("Uploading syslog server CA certificate.")
+        self._import_secret('/settings/logSettings/syslogConfig/caCertificateUpload', certificate)
+        logging.getLogger('cterasdk.edge').info("Uploaded syslog server CA certificate.")
+
+    def import_client_certificate(self, private_key, certificate):
+        """
+        Import the Syslog Server CA certificate
+
+        :param str private_key: Path to the PEM-encoded private key.
+        :param str certificate: Path to the PEM-encoded client certificate.
+        """
+        PrivateKey.load_private_key(private_key)
+        logging.getLogger('cterasdk.edge').info("Uploading syslog server private key.")
+        self._import_secret('/settings/logSettings/syslogConfig/clientPrivateKeyUpload', private_key)
+        logging.getLogger('cterasdk.edge').info("Uploaded syslog server private key.")
+
+        X509Certificate.load_certificate(certificate)
+        logging.getLogger('cterasdk.edge').info("Uploading syslog server client certificate.")
+        self._import_secret('/settings/logSettings/syslogConfig/clientCertificateUpload', certificate)
+        logging.getLogger('cterasdk.edge').info("Uploaded syslog server client certificate.")        
+
+    def _import_secret(self, path, file):
+        """
+        Import a Syslog Certificate or Private Key
+
+        :param str path: URL Path
+        :param str file: File Path
+        """
+        handle = Path(file)
+        with handle.open('rb') as fd:
+            form = MultipartForm()
+            form.add('name', handle.name)
+            form.add('firmware_path', fd, handle.name)
+            self._core.api.multipart(path, form)
 
     def is_enabled(self):
         """
@@ -26,14 +69,15 @@ class Syslog(BaseCommand):
         """
         return self._core.api.get('/settings/logsSettings/syslogConfig')
 
-    def enable(self, server, port=514, protocol=IPProtocol.UDP, min_severity=Severity.INFO):
+    def enable(self, server, port=514, protocol=IPProtocol.UDP, min_severity=Severity.INFO, ca_cert=None):
         """
         Enable Syslog
 
         :param str server: Syslog server address
         :param int,optional port: Syslog server port
         :param cterasdk.core.enum.IPProtocol,optional protocol: Syslog server IP protocol
-        :param cterasdk.core.enum.Severity,optional min_severity: Minimum log severity to forward
+        :param cterasdk.core.enum.Severity,optional min_severity: Minimum log severity to 
+        :param str,optional ca_cert: Path to the PEM-encoded CA certificate.
         """
         param = Object()
         param._classname = 'PortalSyslogConfig'  # pylint: disable=protected-access
@@ -43,6 +87,8 @@ class Syslog(BaseCommand):
         param.port = port
         param.protocol = protocol
         param.useClientCertificate = False
+        if protocol == IPProtocol.TCP and ca_cert is not None:
+            self.import_ca(ca_cert)
         logging.getLogger('cterasdk.core').info('Enabling syslog.')
         response = self._core.api.put('/settings/logsSettings/syslogConfig', param)
         logging.getLogger('cterasdk.core').info('Syslog enabled.')

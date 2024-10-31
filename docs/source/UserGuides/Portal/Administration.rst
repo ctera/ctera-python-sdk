@@ -1751,6 +1751,12 @@ Syslog
 .. automethod:: cterasdk.core.syslog.Syslog.disable
    :noindex:
 
+.. automethod:: cterasdk.core.syslog.Syslog.import_ca
+   :noindex:
+
+.. automethod:: cterasdk.core.syslog.Syslog.import_client_certificate
+   :noindex:
+
 
 CLI Execution
 =============
