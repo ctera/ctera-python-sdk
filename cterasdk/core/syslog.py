@@ -41,7 +41,7 @@ class Syslog(BaseCommand):
         X509Certificate.load_certificate(certificate)
         logging.getLogger('cterasdk.edge').info("Uploading syslog server client certificate.")
         self._import_secret('/settings/logSettings/syslogConfig/clientCertificateUpload', certificate)
-        logging.getLogger('cterasdk.edge').info("Uploaded syslog server client certificate.")        
+        logging.getLogger('cterasdk.edge').info("Uploaded syslog server client certificate.")
 
     def _import_secret(self, path, file):
         """
@@ -76,7 +76,7 @@ class Syslog(BaseCommand):
         :param str server: Syslog server address
         :param int,optional port: Syslog server port
         :param cterasdk.core.enum.IPProtocol,optional protocol: Syslog server IP protocol
-        :param cterasdk.core.enum.Severity,optional min_severity: Minimum log severity to 
+        :param cterasdk.core.enum.Severity,optional min_severity: Minimum Log Severity
         :param str,optional ca_cert: Path to the PEM-encoded CA certificate.
         """
         param = Object()
