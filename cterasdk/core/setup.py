@@ -1,6 +1,5 @@
 import logging
 import time
-import re
 
 from .base_command import BaseCommand
 from .enum import ServerMode, SetupWizardStage, SetupWizardStatus, SlaveAuthenticaionMethod
