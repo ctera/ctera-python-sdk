@@ -91,8 +91,9 @@ class Management(CTERA):
 
     def __init__(self, host, port, https, base):
         super().__init__(host, port, https, base)
-        self._generic = clients.Client(endpoints.EndpointBuilder.new(self.base), authenticator=self._authenticator,
-                                       client_settings=client_settings(cterasdk.settings.sessions.management))
+        self._default = clients.Client(endpoints.EndpointBuilder.new(self.base),
+                                       settings=client_settings(cterasdk.settings.sessions.management),
+                                       authenticator=self._authenticator)
 
     def login(self, username, password):
         """
@@ -111,7 +112,7 @@ class Management(CTERA):
         if self._ctera_session.connected:
             self._login_object.logout()
             self._ctera_session.stop_session()
-        self._generic.close()
+        self._default.close()
 
     @abstractmethod
     def test(self):
@@ -122,17 +123,21 @@ class Management(CTERA):
     def _session_id_key(self):
         return NotImplementedError("Subclass must implement the '_session_id_key' property")
 
+    @property
+    def default(self):
+        return self._default
+
     def get_session_id(self):
         """
         Get Session Identifier
 
         :return str: Session ID
         """
-        return self._generic.cookies.get(self._session_id_key)
+        return self._default.cookies.get(self._session_id_key)
 
     def set_session_id(self, session_id):
-        self._generic.cookies.update({self._session_id_key: session_id}, self._generic.baseurl)
+        self._default.cookies.update({self._session_id_key: session_id}, self._default.baseurl)
         self._ctera_session.start_session(self)
 
     def __exit__(self, exc_type, exc_value, exc_tb):
-        self._generic.close()
+        self._default.close()

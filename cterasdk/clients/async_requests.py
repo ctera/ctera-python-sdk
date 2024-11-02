@@ -17,11 +17,15 @@ def session_parameters(client_settings):
 class Session:
     """Asynchronous HTTP Session"""
 
-    def __init__(self, client_settings):
-        self.initialize(client_settings)
+    def __init__(self, settings):
+        self._settings = settings
+        self._session = None
 
-    def initialize(self, client_settings):
-        self._session = aiohttp.ClientSession(trace_configs=[async_tracers.default()], **session_parameters(client_settings))
+    @property
+    def session(self):
+        if self._session is None:
+            self._session = aiohttp.ClientSession(trace_configs=[async_tracers.default()], **session_parameters(self._settings))
+        return self._session
 
     @property
     def cookies(self):
@@ -41,7 +45,7 @@ class Session:
 
     async def _request(self, r, *, on_response=None):
         try:
-            response = await self._session.request(r.method, r.url, **r.kwargs)
+            response = await self.session.request(r.method, r.url, **r.kwargs)
             return asyncio.create_task(on_response(response))
         except aiohttp.ClientSSLError as error:
             logging.getLogger('cterasdk.http').warning(error)
@@ -61,10 +65,11 @@ class Session:
 
     @property
     def closed(self):
-        return self._session.closed
+        return self._session.closed if self._session is not None else True
 
     async def close(self):
-        await self._session.close()
+        if self._session is not None: 
+            await self._session.close()
 
 
 class CookieJar:

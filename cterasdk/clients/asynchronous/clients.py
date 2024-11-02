@@ -35,7 +35,7 @@ class AsyncClient(BaseClient):
 
     async def _request(self, request, *, on_response=None):
         on_response = on_response if on_response else AsyncResponse.new()
-        response = await self._async_session.await_promise(self.join_headers(request), on_response=on_response)
+        response = await self._session.await_promise(self.join_headers(request), on_response=on_response)
         return await errors.accept(response)
 
 
@@ -45,8 +45,8 @@ class AsyncWebDAV(AsyncClient):
 
 class AsyncJSON(AsyncClient):
 
-    def __init__(self, builder=None, async_session=None, authenticator=None, client_settings=None):
-        super().__init__(builder, async_session, authenticator, client_settings)
+    def __init__(self, builder=None, session=None, settings=None, authenticator=None):
+        super().__init__(builder, session, settings, authenticator)
         self.headers.update_headers({'Content-Type': 'application/json'})
 
     async def get(self, path, **kwargs):

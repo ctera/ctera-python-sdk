@@ -50,7 +50,7 @@ class Client(BaseClient):
 
     def _request(self, request, *, on_response=None):
         on_response = on_response if on_response else SyncResponse.new()
-        return execute_request(self._async_session, self.join_headers(request), on_response=on_response)
+        return execute_request(self._session, self.join_headers(request), on_response=on_response)
 
     def close(self):  # pylint: disable=invalid-overridden-method
         return asyncio.get_event_loop().run_until_complete(super().close())

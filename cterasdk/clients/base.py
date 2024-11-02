@@ -1,4 +1,3 @@
-import logging
 from . import async_requests
 from ..common import utils
 
@@ -32,23 +31,38 @@ class PersistentHeaders:
 class BaseClient:
     """Base Client"""
 
-    def __init__(self, builder=None, async_session=None, authenticator=None, client_settings=None):
+    def __init__(self, builder=None, session=None, settings=None, authenticator=None):
         """
         Initialize a Client
 
         :param builder: Endpoint builder.
-        :param ,optional async_session: Re-use an asynchronous session.
+        :param ,optional session: Session.
+        :param ,optional settings: Client Session Settings.
         :param ,optional authenticator: Authenticator function.
         """
         self._headers = PersistentHeaders()
         self._authenticator = authenticator
         self._builder = builder
-        self._client_settings = client_settings
-        self._async_session = async_session if async_session else async_requests.Session(client_settings)
+        self._session = session if session else async_requests.Session(settings)
 
+    def clone(self, definition, builder=None, authenticator=None):
+        """
+        Clone a Client
+
+        :param class definition: Class definition.
+        :param ,optional builder: Endpoint builder.
+        :param ,optional authenticator: Authenticator function.
+        """
+        return definition(
+            builder if builder is not None else self._builder,
+            self._session,
+            None,
+            authenticator if authenticator is not None else self._authenticator,
+        )
+        
     @property
     def cookies(self):
-        return CookieJar(self._async_session.cookies)
+        return CookieJar(self._session.cookies)
 
     @property
     def headers(self):
@@ -62,24 +76,17 @@ class BaseClient:
     def baseurl(self):
         return self._builder()
 
-    def __str__(self):
-        return f"({self.__class__.__name__} client at {hex(hash(self))}, baseurl={self.baseurl})"
-
-    def _before_request(self):
-        if self._async_session.closed:
-            logging.getLogger('cterasdk.http').debug('Session Closed. Renewing.')
-            self._async_session.initialize(self._client_settings)
-
     def request(self, request, *, on_response=None):
-        self._before_request()
         return self._request(request, on_response=on_response)
 
     async def async_request(self, request, *, on_response=None):
-        self._before_request()
         return await self._request(request, on_response=on_response)
 
     async def close(self):
-        await self._async_session.close()
+        await self._session.close()
+
+    def __str__(self):
+        return f"({self.__class__.__name__} client at {hex(hash(self))}, baseurl={self.baseurl})"
 
 
 class BaseResponse:
