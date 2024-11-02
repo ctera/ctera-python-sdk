@@ -59,7 +59,7 @@ class BaseClient:
             None,
             authenticator if authenticator is not None else self._authenticator,
         )
-        
+
     @property
     def cookies(self):
         return CookieJar(self._session.cookies)

@@ -68,7 +68,7 @@ class Session:
         return self._session.closed if self._session is not None else True
 
     async def close(self):
-        if self._session is not None: 
+        if self._session is not None:
             await self._session.close()
 
 

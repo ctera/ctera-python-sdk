@@ -57,8 +57,8 @@ class AsyncPortal(CTERA):
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https, base=None)
         self._default = clients.AsyncClient(EndpointBuilder.new(self.base),
-                                       settings=client_settings(cterasdk.settings.sessions.metadata_connector),
-                                       authenticator=self._authenticator)
+                                            settings=client_settings(cterasdk.settings.sessions.metadata_connector),
+                                            authenticator=self._authenticator)
         self._ctera_session = Session(self.host(), self.context)
         self._ctera_clients = Clients(self)
 
