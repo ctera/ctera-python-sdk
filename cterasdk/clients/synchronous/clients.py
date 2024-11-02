@@ -1,7 +1,5 @@
 
-import time
 import asyncio
-import logging
 import threading
 from . import errors
 from ..base import BaseClient
