@@ -213,16 +213,13 @@ class SyncResponse(AsyncResponse):
                 break
 
     def text(self):  # pylint: disable=invalid-overridden-method
-        return self._consume_response(super().text)
+        return execute(super().text)
 
     def json(self):  # pylint: disable=invalid-overridden-method
-        return self._consume_response(super().json)
+        return execute(super().json)
 
     def xml(self):  # pylint: disable=invalid-overridden-method
-        return self._consume_response(super().xml)
-
-    def _consume_response(self, consumer):
-        return execute(consumer)
+        return execute(super().xml)
 
     @staticmethod
     def new():
@@ -259,7 +256,7 @@ class Task(threading.Thread):
     def run(self):
         try:
             self.response = self.loop.run_until_complete(self.target(*self.args, **self.kwargs))
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             self.exception = e
         finally:
             self.event.set()
