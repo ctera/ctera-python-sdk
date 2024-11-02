@@ -33,10 +33,12 @@ class Client:
         :param str baseurl: Portal URL
         :param cterasdk.objects.asynchronous.directio.Credentials credentials: Credentials
         """
-        ctera_direct = cterasdk.settings.sessions.ctera_direct
-        self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio'), authenticator=lambda *_: True,
-                              client_settings=client_settings(ctera_direct.api))
-        self._client = AsyncClient(DefaultBuilder(), authenticator=lambda *_: True, client_settings=client_settings(ctera_direct.storage))
+        self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio'),
+                              settings=client_settings(cterasdk.settings.sessions.ctera_direct.api),
+                              authenticator=lambda *_: True)
+        self._client = AsyncClient(DefaultBuilder(),
+                                   settings=client_settings(cterasdk.settings.sessions.ctera_direct.storage),
+                                   authenticator=lambda *_: True)
         self._credentials = credentials
 
     async def _direct(self, file_id):

@@ -24,17 +24,13 @@ class Clients:
 class V1:
 
     def __init__(self, core):
-        session = core._generic._async_session
-        self.api = clients.AsyncAPI(EndpointBuilder.new(core.base, core.context, '/api'), session, core._authenticator,
-                                    core._generic._client_settings)
+        self.api = core.default.clone(clients.AsyncAPI, EndpointBuilder.new(core.base, core.context, '/api'))
 
 
 class V2:
 
     def __init__(self, core):
-        session = core._generic._async_session
-        self.api = clients.AsyncJSON(EndpointBuilder.new(core.base, core.context, '/v2/api'), session,
-                                     core._authenticator, core._generic._client_settings)
+        self.api = core.default.clone(clients.AsyncJSON, EndpointBuilder.new(core.base, core.context, '/v2/api'))
 
 
 class IO:
@@ -46,9 +42,7 @@ class IO:
 class WebDAV:
 
     def __init__(self, core):
-        session = core._generic._async_session
-        self._webdav = clients.AsyncWebDAV(EndpointBuilder.new(core.base, core.context, '/webdav'), session, core._authenticator,
-                                           core._generic._client_settings)
+        self._webdav = core.default.clone(clients.AsyncWebDAV, EndpointBuilder.new(core.base, core.context, '/webdav'))
 
     @property
     def download(self):
@@ -62,14 +56,19 @@ class AsyncPortal(CTERA):
 
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https, base=None)
-        self._generic = clients.AsyncClient(EndpointBuilder.new(self.base), authenticator=self._authenticator,
-                                            client_settings=client_settings(cterasdk.settings.sessions.metadata_connector))
+        self._default = clients.AsyncClient(EndpointBuilder.new(self.base),
+                                            settings=client_settings(cterasdk.settings.sessions.metadata_connector),
+                                            authenticator=self._authenticator)
         self._ctera_session = Session(self.host(), self.context)
         self._ctera_clients = Clients(self)
 
         self.cloudfs = cloudfs.CloudFS(self)
         self.notifications = notifications.Notifications(self)
         self.users = users.Users(self)
+
+    @property
+    def default(self):
+        return self._default
 
     @property
     def v1(self):
@@ -93,7 +92,7 @@ class AsyncPortal(CTERA):
         if self._ctera_session.connected:
             await self._login_object.logout()
             self._ctera_session.stop_session()
-        await self._generic.close()
+        await self.default.close()
 
     @property
     def _login_object(self):
@@ -103,7 +102,7 @@ class AsyncPortal(CTERA):
         return authenticators.core(self.session(), url, self.context)
 
     async def __aexit__(self, exc_type, exc, tb):
-        await self._generic.close()
+        await self.default.close()
 
 
 class AsyncGlobalAdmin(AsyncPortal):

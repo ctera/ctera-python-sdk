@@ -46,24 +46,17 @@ from ...core import users
 class Clients:
 
     def __init__(self, core):
-        async_session = core._generic._async_session
-        client_settings = core._generic._client_settings
-        self.ctera = clients.Extended(EndpointBuilder.new(core.base, core.context), async_session, core._authenticator, client_settings)
-        self.api = clients.API(EndpointBuilder.new(core.base, core.context, '/api'), async_session, core._authenticator, client_settings)
+        self.ctera = core.default.clone(clients.Extended, EndpointBuilder.new(core.base, core.context))
+        self.api = core.default.clone(clients.API, EndpointBuilder.new(core.base, core.context, '/api'))
         self.io = IO(core)
 
 
 class IO:
 
     def __init__(self, core):
-        async_session = core._generic._async_session
-        client_settings = core._generic._client_settings
-        self._folders = clients.Folders(EndpointBuilder.new(core.base, core.context, '/folders/folders'),
-                                        async_session, core._authenticator, client_settings)
-        self._upload = clients.Upload(EndpointBuilder.new(core.base, core.context, '/upload/folders'), async_session,
-                                      core._authenticator, client_settings)
-        self._webdav = clients.WebDAV(EndpointBuilder.new(core.base, core.context, '/webdav'), async_session,
-                                      core._authenticator, client_settings)
+        self._folders = core.default.clone(clients.Folders, EndpointBuilder.new(core.base, core.context, '/folders/folders'))
+        self._upload = core.default.clone(clients.Upload, EndpointBuilder.new(core.base, core.context, '/upload/folders'))
+        self._webdav = core.default.clone(clients.WebDAV, EndpointBuilder.new(core.base, core.context, '/webdav'))
 
     @property
     def upload(self):

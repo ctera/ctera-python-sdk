@@ -1,7 +1,6 @@
 
-import time
 import asyncio
-import logging
+import threading
 from . import errors
 from ..base import BaseClient
 from ..common import Serializers
@@ -50,10 +49,11 @@ class Client(BaseClient):
 
     def _request(self, request, *, on_response=None):
         on_response = on_response if on_response else SyncResponse.new()
-        return execute_request(self._async_session, self.join_headers(request), on_response=on_response)
+        response = execute(self._session.await_promise, self.join_headers(request), on_response=on_response)
+        return errors.accept(response)
 
     def close(self):  # pylint: disable=invalid-overridden-method
-        return asyncio.get_event_loop().run_until_complete(super().close())
+        return execute(super().close)
 
 
 class Folders(Client):
@@ -190,52 +190,73 @@ class Migrate(JSON):
         return response.json()
 
 
-def execute_request(async_session, request, *, on_response, max_retries=3, backoff_factor=2):
-    retries = 0
-    while retries < max_retries:
-        try:
-            response = asyncio.get_event_loop().run_until_complete(async_session.await_promise(request, on_response=on_response))
-            return errors.accept(response)
-        except (ConnectionError, TimeoutError):
-            retries += 1
-            if retries < max_retries:
-                delay = backoff_factor ** retries
-                logging.getLogger('cterasdk.http').warning("Retrying in %s seconds.", delay)
-                time.sleep(delay)
-            else:
-                logging.getLogger('cterasdk.http').error("Max retries reached. Request failed.")
-                raise
-    return None
+event_loop = asyncio.new_event_loop()
+
+
+def execute(target, *args, **kwargs):
+    loop = asyncio.get_event_loop()
+
+    if not loop.is_running():
+        return loop.run_until_complete(target(*args, **kwargs))
+
+    return run_threadsafe(event_loop, target, *args, **kwargs)
 
 
 class SyncResponse(AsyncResponse):
     """Synchronous Response Object"""
 
-    def __init__(self, response):
-        super().__init__(response)
-        self._executor = asyncio.get_event_loop()
-
     def iter_content(self, chunk_size=None):
         while True:
             try:
-                yield self._executor.run_until_complete(super().async_iter_content(chunk_size).__anext__())
+                yield execute(super().async_iter_content(chunk_size).__anext__)
             except StopAsyncIteration:
                 break
 
     def text(self):  # pylint: disable=invalid-overridden-method
-        return self._consume_response(super().text)
+        return execute(super().text)
 
     def json(self):  # pylint: disable=invalid-overridden-method
-        return self._consume_response(super().json)
+        return execute(super().json)
 
     def xml(self):  # pylint: disable=invalid-overridden-method
-        return self._consume_response(super().xml)
-
-    def _consume_response(self, consumer):
-        return self._executor.run_until_complete(consumer())
+        return execute(super().xml)
 
     @staticmethod
     def new():
         async def new_response(response):
             return SyncResponse(response)
         return new_response
+
+
+def run_threadsafe(loop, target, *args, **kwargs):
+    event = threading.Event()
+
+    t = Task(loop, event, target, *args, **kwargs)
+    t.start()
+
+    event.wait()
+
+    if t.exception:
+        raise t.exception
+    return t.response
+
+
+class Task(threading.Thread):
+
+    def __init__(self, loop, event, target, *args, **kwargs):
+        super().__init__(name='Thread-safe Executor')
+        self.loop = loop
+        self.event = event
+        self.target = target
+        self.args = args
+        self.kwargs = kwargs
+        self.exception = None
+        self.response = None
+
+    def run(self):
+        try:
+            self.response = self.loop.run_until_complete(self.target(*self.args, **self.kwargs))
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self.exception = e
+        finally:
+            self.event.set()
