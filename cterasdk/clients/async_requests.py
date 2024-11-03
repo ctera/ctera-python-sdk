@@ -23,7 +23,7 @@ class Session:
 
     @property
     def session(self):
-        if self._session is None:
+        if self.closed:
             self._session = aiohttp.ClientSession(trace_configs=[async_tracers.default()], **session_parameters(self._settings))
         return self._session
 
