@@ -23,7 +23,7 @@ class Portals(BaseCommand):
         include = union(include or [], Portals.default)
         include = ['/' + attr for attr in include]
         tenant = self._core.api.get_multi('/portals/' + name, include)
-        if tenant.name is None:
+        if tenant is None or tenant.name is None:
             raise ObjectNotFoundException('Could not find tenant', f'/portals/{name}', name=name)
         return tenant
 
