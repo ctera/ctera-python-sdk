@@ -87,10 +87,10 @@ class Syslog(BaseCommand):
         param.port = port
         param.protocol = protocol
         param.useClientCertificate = False
-        if protocol == IPProtocol.TCP and ca_cert is not None:
-            self.import_ca(ca_cert)
         logging.getLogger('cterasdk.core').info('Enabling syslog.')
         response = self._core.api.put('/settings/logsSettings/syslogConfig', param)
+        if protocol == IPProtocol.TCP and ca_cert is not None:
+            self.import_ca(ca_cert)
         logging.getLogger('cterasdk.core').info('Syslog enabled.')
         return response
 
