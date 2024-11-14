@@ -31,7 +31,7 @@ class BaseIterator:
 
     @abstractmethod
     def page(self):
-        raise NotImplementedError("Subclass must implemenet the 'page' function")
+        raise NotImplementedError("Subclass must implement the 'page' function")
 
 
 class KeyValueQueryIterator(BaseIterator):
