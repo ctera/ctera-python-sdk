@@ -143,3 +143,59 @@ class DirectoryTree:
         else:
             param._classname = 'FileEntry'  # pylint: disable=protected-access
         return param
+
+    def include_folder_recursive(self, path):
+        """
+        Include a folder and all its subfolders recursively
+        :param str path: Path to include recursively
+        """
+        self._check_root_dir(path)
+        parts = path.split('/')[1:]  # Skip the root part since we already checked it
+        current = self.root
+        # Navigate to the target folder
+        for part in parts:
+            if not part:  # Skip empty parts
+                continue
+            child = self._get_child(current, part)
+            if child is None:
+                # Create new folder entry if it doesn't exist
+                child = self._get_dir_entry(part, False)
+                self._add_child(current, child)
+            current = child
+
+        # Set the target folder and all its subfolders to included
+        def set_included_recursive(node):
+            node.isIncluded = True
+            if self._has_children(node):
+                for child in node.children:
+                    set_included_recursive(child)
+
+        set_included_recursive(current)
+
+    def exclude_folder_recursive(self, path):
+        """
+        Exclude a folder and all its subfolders recursively
+        :param str path: Path to exclude recursively
+        """
+        self._check_root_dir(path)
+        parts = path.split('/')[1:]  # Skip the root part since we already checked it
+        current = self.root
+        # Navigate to the target folder
+        for part in parts:
+            if not part:  # Skip empty parts
+                continue
+            child = self._get_child(current, part)
+            if child is None:
+                # Create new folder entry if it doesn't exist
+                child = self._get_dir_entry(part, False)
+                self._add_child(current, child)
+            current = child
+
+        # Set the target folder and all its subfolders to excluded
+        def set_excluded_recursive(node):
+            node.isIncluded = False
+            if self._has_children(node):
+                for child in node.children:
+                    set_excluded_recursive(child)
+
+        set_excluded_recursive(current)

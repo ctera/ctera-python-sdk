@@ -85,3 +85,25 @@ class Cache(BaseCommand):
 
     def _update_pinning_config(self, directory_tree):
         self._edge.api.put('/config/cloudsync/cloudExtender/selectedFolders', directory_tree.root)
+
+    def pin_recursive(self, path):
+        """
+        Pin a folder and all its subfolders recursively
+
+        :param str path: Directory path
+        """
+        directory_tree = self._fetch_pinning_config()
+        logging.getLogger('cterasdk.edge').info('Recursively pinning folder and all subfolders. %s', {'path': path})
+        directory_tree.include_folder_recursive(path)
+        self._update_pinning_config(directory_tree)
+
+    def unpin_recursive(self, path):
+        """
+        Unpin a folder and all its subfolders recursively
+
+        :param str path: Directory path
+        """
+        directory_tree = self._fetch_pinning_config()
+        logging.getLogger('cterasdk.edge').info('Recursively unpinning folder and all subfolders. %s', {'path': path})
+        directory_tree.exclude_folder_recursive(path)
+        self._update_pinning_config(directory_tree)
