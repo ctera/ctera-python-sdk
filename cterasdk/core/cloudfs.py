@@ -161,7 +161,18 @@ class CloudDrives(BaseCommand):
         if description:
             param.description = description
         param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
-        param.extendedAttributes = xattrs if xattrs else ExtendedAttributesBuilder.default().build()
+        if xattrs:
+            param.extendedAttributes = xattrs
+        elif not winacls:  # Only override default when winacls is False
+            param.extendedAttributes = Object()
+            param.extendedAttributes._classname = 'ExtendedAttributes'  # pylint: disable=protected-access
+            param.extendedAttributes.enable = False
+            param.extendedAttributes.attributes = [Object()]
+            param.extendedAttributes.attributes[0]._classname = 'ExtendedAttributesInfo'  # pylint: disable=protected-access
+            param.extendedAttributes.attributes[0].name = 'MacOS'
+            param.extendedAttributes.attributes[0].supported = True
+        else:
+            param.extendedAttributes = ExtendedAttributesBuilder.default().build()
 
         try:
             response = self._core.api.execute('', 'addCloudDrive', param)
