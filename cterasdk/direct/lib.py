@@ -49,18 +49,18 @@ async def get_object(client, file_id, chunk):
             return await response.read()
         except ConnectionError:
             logging.getLogger('cterasdk.direct').error('Failed to download block. Connection error. %s', parameters)
-            raise DownloadConnectionError(chunk)
+            raise DownloadConnectionError(file_id, chunk)
         except asyncio.TimeoutError:
             logging.getLogger('cterasdk.direct').error('Failed to download block. Timed out. %s', parameters)
-            raise DownloadTimeout(chunk)
+            raise DownloadTimeout(file_id, chunk)
         except ClientResponseException as error:
             logging.getLogger('cterasdk.direct').error('Failed to download block. Error. %s', parameters)
-            raise DownloadError(error.response, chunk)
+            raise DownloadError(error.response, file_id, chunk)
 
     return await retry(get_object_coro)
 
 
-async def decrypt_object(encrypted_object, encryption_key, chunk):
+async def decrypt_object(file_id, encrypted_object, encryption_key, chunk):
     """
     Decrypt Encrypted Object.
 
@@ -74,10 +74,10 @@ async def decrypt_object(encrypted_object, encryption_key, chunk):
         return decrypt_block(encrypted_object, encryption_key)
     except DirectIOError:
         logging.getLogger('cterasdk.direct').error('Failed to decrypt block.')
-        raise DecryptBlockError(chunk)
+        raise DecryptBlockError(file_id, chunk)
 
 
-async def decompress_object(compressed_object, chunk):
+async def decompress_object(file_id, compressed_object, chunk):
     """
     Decompress Object.
 
@@ -90,11 +90,11 @@ async def decompress_object(compressed_object, chunk):
         decompressed_object = decompress(compressed_object)
         if chunk.length != len(decompressed_object):
             logging.getLogger('cterasdk.direct').error('Expected block length does not match decrypted and decompressed block length.')
-            raise BlockValidationException(chunk)
+            raise BlockValidationException(file_id, chunk)
         return decompressed_object
     except DirectIOError:
         logging.getLogger('cterasdk.direct').error('Failed to decompress block.')
-        raise DecompressBlockError(chunk)
+        raise DecompressBlockError(file_id, chunk)
 
 
 async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
@@ -115,8 +115,8 @@ async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
         logging.getLogger('cterasdk.direct').debug('Processing Block. %s', parameters)
 
         encrypted_object = await get_object(client, file_id, chunk)
-        decrypted_object = await decrypt_object(encrypted_object, encryption_key, chunk)
-        decompressed_object = await decompress_object(decrypted_object, chunk)
+        decrypted_object = await decrypt_object(file_id, encrypted_object, encryption_key, chunk)
+        decompressed_object = await decompress_object(file_id, decrypted_object, chunk)
         return Block(file_id, chunk.index, chunk.offset, decompressed_object, chunk.length)
 
     if semaphore is not None:

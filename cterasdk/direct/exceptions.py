@@ -63,13 +63,13 @@ class DecryptKeyError(DirectIOError):
 
 class BlockInfo:
 
-    def __init__(self, chunk):
+    def __init__(self, file_id, chunk):
         """
         Initialize an Block Info Object for Direct IO Error Object.
 
         :param cterasdk.direct.types.Chunk chunk: Chunk.
         """
-        self.file_id = chunk.file_id
+        self.file_id = file_id
         self.number = chunk.index
         self.offset = chunk.offset
         self.length = chunk.length
@@ -78,42 +78,42 @@ class BlockInfo:
 class BlockError(DirectIOError):
     """Direct IO Block Error"""
 
-    def __init__(self, error, strerror, chunk):
-        super().__init__(error, strerror, chunk.file_id)
-        self.block = BlockInfo(chunk)
+    def __init__(self, error, strerror, file_id, chunk):
+        super().__init__(error, strerror, file_id)
+        self.block = BlockInfo(file_id, chunk)
 
 
 class DownloadError(BlockError):
 
-    def __init__(self, strerror, chunk):
-        super().__init__(errno.EIO, strerror, chunk)
+    def __init__(self, strerror, file_id, chunk):
+        super().__init__(errno.EIO, strerror, file_id, chunk)
 
 
 class DownloadTimeout(BlockError):
 
-    def __init__(self, chunk):
-        super().__init__(errno.ETIMEDOUT, 'Failed to download block. Timed out', chunk)
+    def __init__(self, file_id, chunk):
+        super().__init__(errno.ETIMEDOUT, 'Failed to download block. Timed out', file_id, chunk)
 
 
 class DownloadConnectionError(BlockError):
 
-    def __init__(self, chunk):
-        super().__init__(errno.ENETRESET, 'Failed to download block. Connection error', chunk)
+    def __init__(self, file_id, chunk):
+        super().__init__(errno.ENETRESET, 'Failed to download block. Connection error', file_id, chunk)
 
 
 class DecryptBlockError(BlockError):
 
-    def __init__(self, chunk):
-        super().__init__(errno.EIO, 'Failed to decrypt block', chunk)
+    def __init__(self, file_id, chunk):
+        super().__init__(errno.EIO, 'Failed to decrypt block', file_id, chunk)
 
 
 class DecompressBlockError(BlockError):
 
-    def __init__(self, chunk):
-        super().__init__(errno.EIO, 'Failed to decompress block', chunk)
+    def __init__(self, file_id, chunk):
+        super().__init__(errno.EIO, 'Failed to decompress block', file_id, chunk)
 
 
 class BlockValidationException(BlockError):
 
-    def __init__(self, chunk):
-        super().__init__(errno.EIO, 'Expected block length does not match decrypted and decompressed block length', chunk)
+    def __init__(self, file_id, chunk):
+        super().__init__(errno.EIO, 'Expected block length does not match decrypted and decompressed block length', file_id, chunk)
