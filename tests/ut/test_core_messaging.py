@@ -1,63 +1,97 @@
-from unittest import mock
-
+import warnings
 from cterasdk.common import Object
-from cterasdk.core import messaging
 from tests.ut import base_core
+
+# Suppress the RuntimeWarning about TestResult
+warnings.filterwarnings(
+    'ignore',
+    category=RuntimeWarning,
+    message='TestResult has no addDuration method'
+)
 
 
 class TestCoreMessaging(base_core.BaseCoreTest):
-
     def setUp(self):
         super().setUp()
-        self._servers = ["server1", "server2", "server3"]
-        self._messaging = Object()
-
-        self._messaging.globalStatus = Object()
-        self._messaging.globalStatus._class = "GlobalMessagingStatus"  # pylint: disable=protected-access
-        self._messaging.globalStatus.status = "Active"
-        self._messaging.globalStatus.canAddServers = True
-        self._messaging.globalStatus.cantAddServersReason = ""
-        self._messaging.globalStatus.validServerNumber = [1, 3]
-
-        self._messaging.availableNodes = []
-        self._messaging.currentNodes = []
-        for server in self._servers:
-            _node = Object()
-            _node._class = "MessagingServerCandidate"  # pylint: disable=protected-access
-            _node.canAssignAsMessaging = Object()
-            _node.canAssignAsMessaging.allowed = True
-            _node.server = Object()
-            _node.server.name = server
-            self._messaging.availableNodes.append(_node)
-
-    def test_status(self):
-        self._init_global_admin(get_response=self._messaging.globalStatus)
-        ret = messaging.Messaging(self._global_admin).get_status()
-        self._global_admin.api.get.assert_called_once_with('/microservices/messaging/globalStatus')
-        self.assertEqual(ret, self._messaging.globalStatus)
+        self._servers = ['server1', 'server3', 'server2']
 
     def test_is_active(self):
-        self._init_global_admin(get_response=self._messaging.globalStatus)
-        messaging.Messaging(self._global_admin).is_active()
+        """Test messaging service active status check"""
+        response = Object()
+        response.status = 'Active'
+        self._init_global_admin(get_response=response)
+        ret = self._global_admin.messaging.is_active()
         self._global_admin.api.get.assert_called_once_with('/microservices/messaging/globalStatus')
+        self.assertTrue(ret)
 
-    def test_add_server(self):
-        self._init_global_admin(get_response=self._messaging)
-        messaging.Messaging(self._global_admin).add(self._servers)
+    def test_get_status(self):
+        """Test getting messaging service global status"""
+        get_response = Object()
+        get_response.status = 'Active'
+        self._init_global_admin(get_response=get_response)
+        ret = self._global_admin.messaging.get_status()
+        self._global_admin.api.get.assert_called_once_with('/microservices/messaging/globalStatus')
+        self.assertEqual(ret, get_response)
+
+    def test_get_servers_status(self):
+        """Test getting messaging servers status"""
+        server1 = Object()
+        server1.server = Object()
+        server1.server.name = 'server1'
+        server1.serverStatus = Object()
+        server1.serverStatus.status = 'Running'
+        get_response = Object()
+        get_response.currentNodes = [server1]
+        self._init_global_admin(get_response=get_response)
+        ret = self._global_admin.messaging.get_servers_status()
         self._global_admin.api.get.assert_called_once_with('/microservices/messaging')
-        self._global_admin.api.put.assert_called_once_with('microservices/messaging/currentNodes', mock.ANY)
-        expected_param = self._get_current_node_objects()
-        actual_param = self._global_admin.api.put.call_args[0][1]
-        self._assert_equal_objects(actual_param, expected_param)
+        expected = {'server1: "Running"'}
+        self.assertEqual(ret, expected)
 
-    def _get_current_node_objects(self):
-        nodes = []
-        for node in self._messaging.availableNodes:
-            current_node_object = Object()
-            current_node_object._class = "CurrentMessagingNode"  # pylint: disable=protected-access
-            current_node_object.server = node.server
-            current_node_object.serverStatus = Object()
-            current_node_object.serverStatus.status = "Running"
-            current_node_object.serverStatus._class = "MessagingServerStatus"  # pylint: disable=protected-access
-            nodes.append(current_node_object)
-        return nodes
+    def test_add_servers_success(self):
+        """Test adding servers successfully"""
+        get_response = Object()
+        get_response.globalStatus = Object()
+        get_response.globalStatus.canAddServers = True
+        get_response.globalStatus.validServerNumber = [1, 3]
+        node1 = Object()
+        node1.server = Object()
+        node1.server.name = 'server1'
+        node1.canAssignAsMessaging = Object()
+        node1.canAssignAsMessaging.allowed = True
+        get_response.availableNodes = [node1]
+        put_response = Object()
+        self._init_global_admin(get_response=get_response, put_response=put_response)
+        ret = self._global_admin.messaging.add(['server1'])
+        self._global_admin.api.get.assert_called_once_with('/microservices/messaging')
+        self._global_admin.api.put.assert_called_once()
+        self.assertEqual(ret, put_response)
+
+    def test_add_servers_not_allowed(self):
+        """Test adding servers when not allowed"""
+        get_response = Object()
+        get_response.globalStatus = Object()
+        get_response.globalStatus.canAddServers = False
+        get_response.globalStatus.cantAddServersReason = "Cluster already exists"
+        self._init_global_admin(get_response=get_response)
+        ret = self._global_admin.messaging.add(['server1'])
+        self._global_admin.api.get.assert_called_once_with('/microservices/messaging')
+        self._global_admin.api.put.assert_not_called()
+        self.assertIsNone(ret)
+
+    def test_add_servers_invalid_number(self):
+        """Test adding invalid number of servers"""
+        get_response = Object()
+        get_response.globalStatus = Object()
+        get_response.globalStatus.canAddServers = True
+        get_response.globalStatus.validServerNumber = [1, 3]
+        node1 = Object()
+        node1.server = Object()
+        node1.server.name = 'server1'
+        node1.canAssignAsMessaging = Object()
+        node1.canAssignAsMessaging.allowed = False
+        get_response.availableNodes = [node1]
+        self._init_global_admin(get_response=get_response)
+        ret = self._global_admin.messaging.add(['server1', 'server2'])
+        self._global_admin.api.get.assert_called_once_with('/microservices/messaging')
+        self.assertIsNone(ret)

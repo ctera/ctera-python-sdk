@@ -117,6 +117,46 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         TestEdgeCaching._remove_parent_attrs(actual_param)
         self._assert_equal_objects(actual_param, expected_param)
 
+    def test_pin_recursive(self):
+        get_response = self._get_dir_entry(self._root, False)
+        self._init_filer(get_response=get_response)
+        cache.Cache(self._filer).pin_recursive(self._pin_valid_folder_path)
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.api.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
+
+        expected_param = self._create_dir_tree(self._pin_valid_folder_path, True)
+        actual_param = self._filer.api.put.call_args[0][1]
+        TestEdgeCaching._remove_parent_attrs(actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def test_pin_recursive_invalid_root_directory(self):
+        get_response = self._get_dir_entry(self._root, False)
+        self._init_filer(get_response=get_response)
+        with self.assertRaises(exceptions.CTERAException) as error:
+            cache.Cache(self._filer).pin_recursive(self._pin_invalid_folder_path)
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self.assertEqual('Invalid root directory', error.exception.message)
+
+    def test_unpin_recursive(self):
+        get_response = self._create_dir_tree(self._pin_valid_folder_path, True)
+        self._init_filer(get_response=get_response)
+        cache.Cache(self._filer).unpin_recursive(self._pin_valid_folder_path)
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self._filer.api.put.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders', mock.ANY)
+
+        expected_param = self._create_dir_tree(self._pin_valid_folder_path, False)
+        actual_param = self._filer.api.put.call_args[0][1]
+        TestEdgeCaching._remove_parent_attrs(actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def test_unpin_recursive_invalid_root_directory(self):
+        get_response = self._get_dir_entry(self._root, True)
+        self._init_filer(get_response=get_response)
+        with self.assertRaises(exceptions.CTERAException) as error:
+            cache.Cache(self._filer).unpin_recursive(self._pin_invalid_folder_path)
+        self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
+        self.assertEqual('Invalid root directory', error.exception.message)
+
     def _get_dir_entry(self, name, include):
         param = Object()
         param._classname = 'DirEntry'  # pylint: disable=protected-access

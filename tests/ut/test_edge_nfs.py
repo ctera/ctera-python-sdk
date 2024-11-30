@@ -59,12 +59,59 @@ class TestEdgeNFS(base_edge.BaseEdgeTest):
             nfs.NFS(self._filer).modify()
         self.assertEqual('NFS must be enabled in order to modify its configuration', error.exception.message)
 
+    def test_modify_all_parameters(self):
+        """Test modifying all NFS parameters"""
+        self._init_filer(get_response=TestEdgeNFS._get_nfs_configuration_response())
+        params = {
+            'async_write': False,
+            'aggregate_writes': False,
+            'mountd_port': 1234,
+            'statd_port': 5678,
+            'nfsv4_enabled': True,
+            'krb5_enabled': True,
+            'nfsd_host': '192.168.1.1'
+        }
+        nfs.NFS(self._filer).modify(**params)
+        self._filer.api.get.assert_called_once_with('/config/fileservices/nfs')
+        self._filer.api.put.assert_called_once_with('/config/fileservices/nfs', mock.ANY)
+        actual_param = self._filer.api.put.call_args[0][1]
+        self.assertEqual(actual_param.mountdPort, params['mountd_port'])
+        self.assertEqual(actual_param.nfsv4enabled, params['nfsv4_enabled'])
+        self.assertEqual(actual_param.krb5, params['krb5_enabled'])
+        self.assertEqual(actual_param.nfsHost, params['nfsd_host'])
+
+    def test_modify_krb5_without_nfsv4(self):
+        """Test enabling Kerberos without NFSv4 enabled"""
+        config = TestEdgeNFS._get_nfs_configuration_response()
+        config.nfsv4enabled = False
+        self._init_filer(get_response=config)
+
+        with self.assertRaises(exceptions.CTERAException) as error:
+            nfs.NFS(self._filer).modify(krb5_enabled=True)
+        self.assertEqual('NFSv4 must be enabled in order to enable Kerberos', error.exception.message)
+
     @staticmethod
-    def _get_nfs_configuration_response(async_write=True, aggregate_writes=True, statd_port=None):
+    def _get_nfs_configuration_response(
+            async_write=True,
+            aggregate_writes=True,
+            statd_port=None,
+            mountd_port=None,
+            nfsv4_enabled=None,
+            krb5_enabled=None,
+            nfsd_host=None):
+        """Extended helper method to support all configuration parameters"""
         obj = Object()
         obj.mode = Mode.Enabled
         setattr(obj, 'async', Mode.Enabled if async_write else Mode.Disabled)
         obj.aggregateWrites = Mode.Enabled if aggregate_writes else Mode.Disabled
         if statd_port is not None:
             obj.statdPort = statd_port
+        if mountd_port is not None:
+            obj.mountdPort = mountd_port
+        if nfsv4_enabled is not None:
+            obj.nfsv4enabled = nfsv4_enabled
+        if krb5_enabled is not None:
+            obj.krb5 = krb5_enabled
+        if nfsd_host is not None:
+            obj.nfsHost = nfsd_host
         return obj

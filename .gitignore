@@ -7,3 +7,5 @@ build/
 AUTHORS
 ChangeLog
 .coverage
+.venv
+.cursorrules
