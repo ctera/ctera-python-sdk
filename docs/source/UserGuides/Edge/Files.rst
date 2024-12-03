@@ -14,6 +14,15 @@ List
    for item in edge.files.listdir('/'):
        print(item.name, item.fullpath)
 
+.. automethod:: cterasdk.edge.files.browser.FileBrowser.walk
+   :noindex:
+
+.. code:: python
+
+   for item in edge.files.walk('/'):
+       print(item.fullpath)
+
+
 Download
 ========
 
