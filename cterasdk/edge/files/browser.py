@@ -90,14 +90,31 @@ class FileBrowser(BaseCommand):
         return io.remove(self._edge, self.get_object_path(path))
 
 
-    def ls(self, path):
+    def ls(self, path, recursive=False):
         """
-        List contents of a directory
+        Lists folders
         
         :param str path: Directory path to list
+        :param bool recursive: If True, recursively list all subfolders (defaults to False)
         :returns: Directory listing response
         """
-        return io.listdirs(self._edge, self.get_object_path(path))
+        folders = io.listdirs(self._edge, self.get_object_path(path))
+        
+        if not recursive:
+            return folders
+            
+        all_folders = []
+        def recurse_folders(folder_list):
+            for folder in folder_list:
+                all_folders.append(folder)
+                if hasattr(folder, 'hasSubfolders') and folder.hasSubfolders:
+                    # Remove leading '/' from the path and use it directly
+                    subfolder_path = str(folder.fullpath).lstrip('/')
+                    subfolders = io.listdirs(self._edge, self.get_object_path(subfolder_path))
+                    recurse_folders(subfolders)
+                    
+        recurse_folders(folders)
+        return all_folders
 
 
     @staticmethod
