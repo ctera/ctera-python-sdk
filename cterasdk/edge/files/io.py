@@ -51,7 +51,6 @@ def remove(edge, *paths):
 def listdirs(edge, path):
     """
     List directories
-    
     :param cterasdk.edge.edge.Edge edge: Edge Filer
     :param str path: Directory path
     """
@@ -59,10 +58,9 @@ def listdirs(edge, path):
         path_str = path.fullpath()
     else:
         path_str = str(path)
-        
     logging.getLogger('cterasdk.edge').debug('Listing directory: %s', path_str)
     try:
-        param = edge.files._file_access._get_list_directory_param(path)
+        param = edge.files._file_access._get_list_directory_param(path)  # pylint: disable=W0212
         response = edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
         return response
     except CTERAException as error:
