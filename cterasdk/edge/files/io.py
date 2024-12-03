@@ -1,6 +1,13 @@
 import logging
 from ...exceptions import CTERAException
+from ...common import Object
 from . import common
+
+
+def listdir(edge, path):
+    param = Object()
+    param.path = path
+    return edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
 
 
 def mkdir(edge, path):

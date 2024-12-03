@@ -9,6 +9,14 @@ class FileBrowser(BaseCommand):
         super().__init__(edge)
         self._file_access = file_access.FileAccess(edge)
 
+    def listdir(self, path):
+        """
+        List Directory
+
+        :param str path: Path
+        """
+        return io.listdir(self._edge, path)
+
     def download(self, path, destination=None):
         """
         Download a file
