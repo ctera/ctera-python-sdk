@@ -2,6 +2,18 @@
 File Browser
 ============
 
+
+List
+====
+
+.. automethod:: cterasdk.edge.files.browser.FileBrowser.listdir
+   :noindex:
+
+.. code:: python
+
+   for item in edge.files.listdir('/'):
+       print(item.name, item.fullpath)
+
 Download
 ========
 
