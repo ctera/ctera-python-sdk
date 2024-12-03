@@ -421,10 +421,7 @@ class Shares(BaseCommand):
         self._edge.api.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', new_list)
 
     def _validate_root_directory(self, name):
-        param = Object()
-        param.path = '/'
-
-        response = self._edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
+        response = self._edge.files.listdir('/')
         for root in response:
             if root.fullpath == f'/{name}':
                 logging.getLogger('cterasdk.edge').debug("Found root directory. %s",
