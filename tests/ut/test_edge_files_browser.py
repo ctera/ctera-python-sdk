@@ -4,6 +4,7 @@ from cterasdk.edge.files.browser import FileBrowser
 from tests.ut import base_edge
 
 import cterasdk.settings
+import cterasdk.edge.files.io  # Import the module where listdirs is defined
 
 
 class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
@@ -71,6 +72,14 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
             path = path + '/' + item
             calls.append(mock.call(TestEdgeFilesBrowser.make_local_files_dir(path)))
         self._filer.io.mkdir.assert_has_calls(calls)
+
+    def test_ls_success(self):
+        self._init_webdav()
+        mock_folder = mock.MagicMock(fullpath=self._fullpath)
+        with mock.patch('cterasdk.edge.files.io.listdirs', return_value=[mock_folder]) as mock_listdirs:
+            result = self._files.ls(self._path)
+            mock_listdirs.assert_called_once_with(self._filer, mock.ANY)
+            self.assertEqual(result[0].fullpath, self._fullpath)
 
     @staticmethod
     def make_local_files_dir(full_path):
