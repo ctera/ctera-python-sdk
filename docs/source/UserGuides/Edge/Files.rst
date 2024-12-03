@@ -19,6 +19,20 @@ Download
 
    edge.files.download_as_zip('network-share/docs', ['Sample.docx', 'Summary.xlsx'])
 
+List Directory
+================
+
+.. automethod:: cterasdk.edge.files.browser.FileBrowser.ls
+   :noindex:
+
+.. code:: python
+
+   """List folders in a directory"""
+   edge.files.ls('cloud/users/Service Account/My Files')
+
+   """List folders recursively"""
+   edge.files.ls('cloud/users/Service Account/My Files', recursive=True)
+
 Create Directory
 ================
 
