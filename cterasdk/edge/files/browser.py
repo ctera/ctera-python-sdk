@@ -17,6 +17,14 @@ class FileBrowser(BaseCommand):
         """
         return io.listdir(self._edge, path)
 
+    def walk(self, path):
+        """
+        Walk Directory Contents
+
+        :param str path: Path to walk
+        """
+        return io.walk(self._edge, path)
+
     def download(self, path, destination=None):
         """
         Download a file

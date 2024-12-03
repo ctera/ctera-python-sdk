@@ -10,6 +10,17 @@ def listdir(edge, path):
     return edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
 
 
+def walk(edge, path):
+    paths = [path]
+    while len(paths) > 0:
+        path = paths.pop(0)
+        elements = listdir(edge, path)
+        for element in elements:
+            if element.hasSubfolders:
+                paths.append(element.fullpath)
+            yield element
+
+
 def mkdir(edge, path):
     directory = path.fullpath()
     logging.getLogger('cterasdk.edge').info('Creating directory. %s', {'path': directory})
