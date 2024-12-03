@@ -89,6 +89,17 @@ class FileBrowser(BaseCommand):
         """
         return io.remove(self._edge, self.get_object_path(path))
 
+
+    def ls(self, path):
+        """
+        List contents of a directory
+        
+        :param str path: Directory path to list
+        :returns: Directory listing response
+        """
+        return io.listdirs(self._edge, self.get_object_path(path))
+
+
     @staticmethod
     def get_object_path(path):
         return common.get_object_path('/', path)

@@ -46,3 +46,22 @@ def remove(edge, *paths):
         logging.getLogger('cterasdk.edge').info('Deleting object. %s', {'path': path.fullpath()})
         edge.io.delete(path.fullpath())
         logging.getLogger('cterasdk.edge').info('Object deleted. %s', {'path': path.fullpath()})
+
+
+def listdirs(edge, path):
+    """
+    List contents of a directory
+    
+    :param edge: Edge filer instance
+    :param path: Path object representing the directory to list
+    :returns: Directory listing response
+    """
+    logging.getLogger('cterasdk.edge').info('Listing directory. %s', {'path': path.fullpath()})
+    try:
+        param = edge.files._file_access._get_list_directory_param(path)
+        response = edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
+        logging.getLogger('cterasdk.edge').debug('Directory listed. %s', {'path': path.fullpath()})
+        return response
+    except CTERAException as error:
+        logging.getLogger('cterasdk.edge').error('Failed to list directory. %s', {'path': path.fullpath()})
+        raise error

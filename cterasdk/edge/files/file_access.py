@@ -45,3 +45,14 @@ class FileAccess(FileAccessBase):
                 self._get_upload_url(dest_path),
                 self._get_upload_form(local_file_info, fd, dest_path)
             )
+
+    def _get_list_directory_param(self, path):
+        """
+        Create list directory parameter object
+        
+        :param path: Path object representing the directory to list
+        :returns: Parameter object for directory listing
+        """
+        param = Object()
+        param.path = path.fullpath()
+        return param
