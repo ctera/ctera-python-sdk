@@ -11,6 +11,18 @@ def decompress(compressed_block):
     :returns: Decompressed Block
     :rtype: bytes
     """
+    return decompress_with_magic_header(compressed_block) \
+        if compressed_block.startswith(b'\x82SNAPPY\x00') else decompress_without_magic_header(compressed_block)
+
+
+def decompress_with_magic_header(compressed_block):
+    """
+    Decompress a Block.
+
+    :param bytes block: Compressed Block
+    :returns: Decompressed Block
+    :rtype: bytes
+    """
     try:
         logging.getLogger('cterasdk.direct').debug('Decompressing Block.')
         decompressed_block = bytearray()
@@ -26,3 +38,14 @@ def decompress(compressed_block):
         return decompressed_block
     except snappy.UncompressError:
         raise DirectIOError()
+
+
+def decompress_without_magic_header(compressed_block):
+    """
+    Decompress a Block.
+
+    :param bytes compressed_block: Compressed Block
+    :returns: Decompressed Block
+    :rtype: bytes
+    """
+    return snappy.uncompress(compressed_block[:compressed_block.rfind(b'EOF') + 3])
