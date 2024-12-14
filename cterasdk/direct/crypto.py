@@ -28,7 +28,8 @@ def decrypt_block(block, encryption_key):
         encrypted_data = block[17:]
         logging.getLogger('cterasdk.direct').debug('Decrypting Block.')
         decryptor = Cipher(algorithms.AES(encryption_key), modes.CBC(initialization_vector)).decryptor()
-        return decryptor.update(encrypted_data)
+        decrypted_data = decryptor.update(encrypted_data)
+        return decrypted_data[:-decrypted_data[-1]]  # Remove CBC Padding
     except ValueError as error:
         logging.getLogger('cterasdk.direct').error('Failed to decrypt block. Key error. %s', error)
     except UnsupportedAlgorithm as error:
