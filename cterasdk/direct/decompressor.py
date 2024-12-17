@@ -31,7 +31,7 @@ def decompress_with_magic_header(compressed_block):
     size_of_data = len(compressed_block)
     chunk_size, chunk_start = 4, 16
     while chunk_start < size_of_data:
-        chunk_end = chunk_start + chunk_size + int.from_bytes(compressed_block[chunk_start:chunk_start + chunk_size])
+        chunk_end = chunk_start + chunk_size + int.from_bytes(compressed_block[chunk_start:chunk_start + chunk_size], byteorder='big')
         chunk_start = chunk_start + chunk_size
         if chunk_end > size_of_data:
             break
