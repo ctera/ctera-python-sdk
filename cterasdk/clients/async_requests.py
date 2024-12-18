@@ -51,16 +51,16 @@ class Session:
             logging.getLogger('cterasdk.http').warning(error)
             raise
         except aiohttp.ClientProxyConnectionError as error:
-            logging.getLogger('cterasdk.http').error(error)
+            logging.getLogger('cterasdk.http').warning(error)
             raise
         except aiohttp.ClientConnectorError as error:
-            logging.getLogger('cterasdk.http').error(error)
+            logging.getLogger('cterasdk.http').warning(error)
             raise ConnectionError(error)
         except aiohttp.ServerDisconnectedError as error:
-            logging.getLogger('cterasdk.http').error(error)
+            logging.getLogger('cterasdk.http').warning(error)
             raise ConnectionError(error)
         except asyncio.TimeoutError as error:
-            logging.getLogger('cterasdk.http').error('Request timed out while making an HTTP request.')
+            logging.getLogger('cterasdk.http').warning('Request timed out while making an HTTP request.')
             raise TimeoutError(error)
 
     @property
