@@ -35,6 +35,24 @@ List
       for element in user.files.walk('My Files/Documents'):
          print(element.name)  # as a user, traverse all and print the name of all files and folders in 'My Files/Documents'
 
+Snapshots
+=========
+
+.. automethod:: cterasdk.core.files.browser.FileBrowser.list_snapshots
+   :noindex:
+
+.. code:: python
+
+   with GlobalAdmin('tenant.ctera.com') as admin:
+      admin.login('admin-user', 'admin-pass')
+      # List all snapshots for a path
+      snapshots = admin.files.list_snapshots('Users/John Smith/My Files')
+      for snapshot in snapshots:
+         print(f"Snapshot from: {snapshot.startTimestamp}")
+         print(f"URL: {snapshot.url}")
+         # Access files in this snapshot using listdir
+         files = admin.files.listdir(f"{snapshot.url}")
+
 Download
 ========
 

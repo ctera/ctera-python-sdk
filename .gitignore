@@ -9,3 +9,4 @@ ChangeLog
 .coverage
 .venv
 .cursorrules
+.DS_Store
