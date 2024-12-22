@@ -109,6 +109,15 @@ class FetchResourcesParamBuilder:
 
     def include_deleted(self):
         self.param.includeDeleted = True  # pylint: disable=attribute-defined-outside-init
+        return self
+
+    def for_previous_versions(self):
+        """Add parameters needed for accessing PreviousVersions directories"""
+        self.param.includeDeleted = False  # pylint: disable=attribute-defined-outside-init
+        self.param.cloudFolderType = ['Personal']  # pylint: disable=attribute-defined-outside-init
+        self.param.sharedItems = False  # pylint: disable=attribute-defined-outside-init
+        self.param.sort = [{'_classname': 'Sort', 'field': 'name', 'ascending': True}]  # pylint: disable=attribute-defined-outside-init
+        return self
 
     def build(self):
         return self.param
@@ -163,6 +172,10 @@ class Path:
         return str(self._base.joinpath(self._relative))
 
     def encoded_fullpath(self):
+        path = str(self._relative)
+        if 'PreviousVersions/' in path:
+            idx = path.index('PreviousVersions/') + len('PreviousVersions/')
+            return str(self._base) + '/' + uri.quote(path[:idx]) + path[idx:]
         return uri.quote(self.fullpath())
 
     def encoded_parent(self):
