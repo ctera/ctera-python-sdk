@@ -12,6 +12,12 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         super().setUp()
         self.files = CloudDrive(self._global_admin)
 
+    def test_list_snapshots(self):
+        path = 'cloud/Users'
+        self._global_admin.api.execute = mock.MagicMock()
+        self.files.list_snapshots(path)
+        self._global_admin.api.execute.assert_called_once_with('', 'listSnapshots', os.path.join(TestCoreFilesBrowser._base_path, path))
+
     def test_listdir(self):
         path = 'cloud/Users'
         listdir_mock = self.patch_call('cterasdk.core.files.io.listdir')
