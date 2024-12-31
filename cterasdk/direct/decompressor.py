@@ -1,4 +1,5 @@
 import logging
+import gzip
 import snappy
 from .exceptions import DirectIOError
 
@@ -12,9 +13,18 @@ def decompress(compressed_block):
     :rtype: bytes
     """
     try:
-        return decompress_with_magic_header(compressed_block) \
-            if compressed_block.startswith(b'\x82SNAPPY\x00') else snappy.uncompress(compressed_block)
-    except snappy.UncompressError:
+        # Check for snappy with magic header
+        if compressed_block.startswith(b'\x82SNAPPY\x00'):
+            return decompress_with_magic_header(compressed_block)
+        
+        # Try gzip
+        try:
+            return gzip.decompress(compressed_block)
+        except OSError:
+            # Not gzip, try snappy
+            return snappy.uncompress(compressed_block)
+            
+    except (snappy.UncompressError, OSError):
         raise DirectIOError()
 
 
