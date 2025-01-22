@@ -18,7 +18,7 @@ def decompress(compressed_block):
         except gzip.BadGzipFile:
             logging.getLogger('cterasdk.direct').error('Failed to Decompress Block. Bad Gzip.')
             raise DirectIOError()
-    
+
     try:
         return decompress_with_magic_header(compressed_block) \
             if compressed_block.startswith(b'\x82SNAPPY\x00') else snappy.uncompress(compressed_block)  # Snappy Magic
