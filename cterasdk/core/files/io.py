@@ -7,8 +7,6 @@ def listdir(core, path, depth=None, include_deleted=False):
     builder = common.FetchResourcesParamBuilder().root(path.encoded_fullpath()).depth(depth)
     if include_deleted:
         builder.include_deleted()
-    elif 'PreviousVersions/' in str(path):
-        builder.for_previous_versions()
     param = builder.build()
     if depth > 0:
         return common.objects_iterator(core, param)
