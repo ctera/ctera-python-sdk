@@ -35,23 +35,28 @@ List
       for element in user.files.walk('My Files/Documents'):
          print(element.name)  # as a user, traverse all and print the name of all files and folders in 'My Files/Documents'
 
-Snapshots
-=========
+Versions
+========
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.list_snapshots
+.. automethod:: cterasdk.core.files.browser.FileBrowser.versions
    :noindex:
 
 .. code:: python
 
-   with GlobalAdmin('tenant.ctera.com') as admin:
-      admin.login('admin-user', 'admin-pass')
-      # List all snapshots for a path
-      snapshots = admin.files.list_snapshots('Users/John Smith/My Files')
-      for snapshot in snapshots:
-         print(f"Snapshot from: {snapshot.startTimestamp}")
-         print(f"URL: {snapshot.url}")
-         # Access files in this snapshot using listdir
-         files = admin.files.listdir(f"{snapshot.url}")
+   """When logged in as a Global Administrator"""
+   versions = admin.files.versions('Users/John Smith/My Files/Documents')
+   for version in versions:
+       if not version.current:
+           for item in admin.files.listdir(version):  # list items from previous versions
+               print(version.calculatedTimestamp, item.name)
+
+
+   """When logged in as a tenant user or admin"""
+   versions = user.files.versions('My Files/Documents')
+   for version in versions:
+       if not version.current:
+           for item in user.files.listdir(version):  # list items from previous versions
+               print(version.calculatedTimestamp, item.name)
 
 Download
 ========

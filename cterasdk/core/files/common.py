@@ -111,14 +111,6 @@ class FetchResourcesParamBuilder:
         self.param.includeDeleted = True  # pylint: disable=attribute-defined-outside-init
         return self
 
-    def for_previous_versions(self):
-        """Add parameters needed for accessing PreviousVersions directories"""
-        self.param.includeDeleted = False  # pylint: disable=attribute-defined-outside-init
-        self.param.cloudFolderType = ['Personal']  # pylint: disable=attribute-defined-outside-init
-        self.param.sharedItems = False  # pylint: disable=attribute-defined-outside-init
-        self.param.sort = [{'_classname': 'Sort', 'field': 'name', 'ascending': True}]  # pylint: disable=attribute-defined-outside-init
-        return self
-
     def build(self):
         return self.param
 
@@ -142,10 +134,19 @@ class Path:
 
     @staticmethod
     def _is_server_object(param):
-        return isinstance(param, Object) and param.__dict__.get('_classname', None) == 'ResourceInfo'
+        return isinstance(param, Object) and Path._fetch_reference_from_server_object(param) is not None
+
+    @staticmethod
+    def _fetch_reference_from_server_object(param):
+        server_object = param.__dict__.get('_classname', None)
+        if server_object == 'ResourceInfo':
+            return param.href
+        if server_object == 'SnapshotResp':
+            return f'{param.url}{param.path}'
+        raise CTERAException("Could not determine server object.", server_object=server_object)
 
     def _from_server_object(self, param):
-        href = uri.unquote(param.href)
+        href = uri.unquote(Path._fetch_reference_from_server_object(param))
         match = re.search('^/(ServicesPortal|admin)/webdav', href)
         start, end = match.span()
         self._base = self._base.joinpath(href[start: end])

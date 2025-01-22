@@ -45,6 +45,14 @@ class FileBrowser(BaseCommand):
         """
         return io.listdir(self._core, self.get_object_path(path), depth=depth, include_deleted=include_deleted)
 
+    def versions(self, path):
+        """
+        List snapshots of a file or directory
+
+        :param str path: Path
+        """
+        return io.versions(self._core, self.get_object_path(path))
+
     def walk(self, path, include_deleted=False):
         """
         Walk Directory Contents
@@ -81,21 +89,6 @@ class FileBrowser(BaseCommand):
     @property
     def base(self):
         return self._base
-
-    def list_snapshots(self, path):
-        """
-        List snapshots of a file or directory
-
-        :param str path: Path to the file or directory
-        :return: List of snapshots, each containing:
-                - startTimestamp: When the snapshot was created
-                - calculatedTimestamp: When the snapshot was processed
-                - current: Whether this is the current version
-                - url: The URL path to access this snapshot's contents
-        :rtype: list[dict]
-        """
-        param = self.get_object_path(path).fullpath()
-        return self._core.api.execute('', 'listSnapshots', param)
 
 
 class CloudDrive(FileBrowser):
