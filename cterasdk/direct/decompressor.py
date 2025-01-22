@@ -1,6 +1,6 @@
 import logging
-import snappy
 import gzip
+import snappy
 from .exceptions import DirectIOError
 
 
