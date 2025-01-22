@@ -1,5 +1,6 @@
 import logging
 import snappy
+import gzip
 from .exceptions import DirectIOError
 
 
@@ -11,10 +12,18 @@ def decompress(compressed_block):
     :returns: Decompressed Block
     :rtype: bytes
     """
+    if compressed_block.startswith(b'\x1f\x8b'):  # Gzip Standard Declaration.
+        try:
+            return gzip.decompress(compressed_block)
+        except gzip.BadGzipFile:
+            logging.getLogger('cterasdk.direct').error('Failed to Decompress Block. Bad Gzip.')
+            raise DirectIOError()
+    
     try:
         return decompress_with_magic_header(compressed_block) \
-            if compressed_block.startswith(b'\x82SNAPPY\x00') else snappy.uncompress(compressed_block)
+            if compressed_block.startswith(b'\x82SNAPPY\x00') else snappy.uncompress(compressed_block)  # Snappy Magic
     except snappy.UncompressError:
+        logging.getLogger('cterasdk.direct').error('Failed to Decompress Block.')
         raise DirectIOError()
 
 
