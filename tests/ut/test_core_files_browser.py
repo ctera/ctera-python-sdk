@@ -12,11 +12,13 @@ class TestCoreFilesBrowser(base_core.BaseCoreTest):
         super().setUp()
         self.files = CloudDrive(self._global_admin)
 
-    def test_list_snapshots(self):
+    def test_versions(self):
         path = 'cloud/Users'
-        self._global_admin.api.execute = mock.MagicMock()
-        self.files.list_snapshots(path)
-        self._global_admin.api.execute.assert_called_once_with('', 'listSnapshots', os.path.join(TestCoreFilesBrowser._base_path, path))
+        versions_mock = self.patch_call('cterasdk.core.files.io.versions')
+        self.files.versions(path)
+        versions_mock.assert_called_once_with(self._global_admin, mock.ANY)
+        actual_ctera_path = versions_mock.call_args[0][1]
+        self.assertEqual(actual_ctera_path.fullpath(), os.path.join(TestCoreFilesBrowser._base_path, path))
 
     def test_listdir(self):
         path = 'cloud/Users'

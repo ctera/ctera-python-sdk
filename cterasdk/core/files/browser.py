@@ -51,8 +51,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path
         """
-        param = self.get_object_path(path).fullpath()
-        return self._core.api.execute('', 'listSnapshots', param)
+        return io.versions(self._core, self.get_object_path(path))
 
     def walk(self, path, include_deleted=False):
         """

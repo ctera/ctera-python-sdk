@@ -13,6 +13,10 @@ def listdir(core, path, depth=None, include_deleted=False):
     return common.fetch_resources(core, param)
 
 
+def versions(core, path):
+    return core.api.execute('', 'listSnapshots', path.fullpath())
+
+
 def walk(core, base, path, include_deleted=False):
     paths = [common.get_object_path(base, path)]
     while len(paths) > 0:
