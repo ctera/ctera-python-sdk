@@ -45,7 +45,7 @@ async def get_object(client, file_id, chunk):
         parameters = {'file_id': file_id, 'number': chunk.index, 'offset': chunk.offset}
         logging.getLogger('cterasdk.direct').debug('Downloading Block. %s', parameters)
         try:
-            response = await client.get(chunk.location)
+            response = await client.get(chunk.url)
             return await response.read()
         except ConnectionError:
             logging.getLogger('cterasdk.direct').error('Failed to download block. Connection error. %s', parameters)
@@ -53,6 +53,9 @@ async def get_object(client, file_id, chunk):
         except asyncio.TimeoutError:
             logging.getLogger('cterasdk.direct').error('Failed to download block. Timed out. %s', parameters)
             raise DownloadTimeout(file_id, chunk)
+        except IOError as error:
+            logging.getLogger('cterasdk.direct').error('Failed to download block. IO Error. %s', parameters)
+            raise DownloadError(str(error), file_id, chunk)
         except ClientResponseException as error:
             logging.getLogger('cterasdk.direct').error('Failed to download block. Error. %s', parameters)
             raise DownloadError(error.response, file_id, chunk)

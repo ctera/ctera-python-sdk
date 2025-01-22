@@ -59,6 +59,9 @@ class Session:
         except aiohttp.ServerDisconnectedError as error:
             logging.getLogger('cterasdk.http').warning(error)
             raise ConnectionError(error)
+        except aiohttp.ClientPayloadError as error:
+            logging.getLogger('cterasdk.http').warning(error)
+            raise IOError(error)
         except asyncio.TimeoutError as error:
             logging.getLogger('cterasdk.http').warning('Request timed out while making an HTTP request.')
             raise TimeoutError(error)

@@ -82,18 +82,18 @@ class DirectIOResponse:
 class Chunk:
     """Chunk to Retrieve"""
 
-    def __init__(self, index, offset, location, length):
+    def __init__(self, index, offset, url, length):
         """
         Initialize a Chunk.
 
         :param int index: Chunk index.
         :param int offset: Chunk offset.
-        :param str location: Signed URL.
+        :param str url: Signed URL.
         :param int length: Object length.
         """
         self._index = index
         self._offset = offset
-        self._location = location
+        self._url = url
         self._length = length
 
     @property
@@ -105,8 +105,8 @@ class Chunk:
         return self._offset
 
     @property
-    def location(self):
-        return self._location
+    def url(self):
+        return self._url
 
     @property
     def length(self):
@@ -222,4 +222,4 @@ class FileMetadata(Object):
 
     def __init__(self, f):
         self.encryption_key = utils.utf8_decode(base64.b64encode(f.encryption_key))
-        self.chunks = [ChunkMetadata(chunk.location, chunk.index, chunk.offset, chunk.length) for chunk in f.chunks]
+        self.chunks = [ChunkMetadata(chunk.url, chunk.index, chunk.offset, chunk.length) for chunk in f.chunks]
