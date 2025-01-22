@@ -143,7 +143,7 @@ class Path:
             return param.href
         if server_object == 'SnapshotResp':
             return f'{param.url}{param.path}'
-        raise CTERAException("Could not determine server object. %s", {'_classname': server_object})
+        raise CTERAException("Could not determine server object.", server_object=server_object)
 
     def _from_server_object(self, param):
         href = uri.unquote(Path._fetch_reference_from_server_object(param))
