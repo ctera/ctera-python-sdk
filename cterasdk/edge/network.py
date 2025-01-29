@@ -1,8 +1,9 @@
 import logging
+import time
 
 from ..exceptions import CTERAException
 from .enum import Mode, IPProtocol, Traffic
-from .types import TCPConnectResult
+from .types import TCPConnectResult, PingResult
 from ..lib.task_manager_base import TaskError
 from ..common import Object, parse_to_ipaddress
 from .base_command import BaseCommand
@@ -164,6 +165,79 @@ class Network(BaseCommand):
             return task.result.res
         except TaskError as error:
             return error.task.result.res
+
+    def ping(self, address, retries=None, seconds=1, verbose=True):
+        """
+        Ping a remote host continuously and display results in a readable format
+
+        :param str address: The target IP address to ping
+        :param int,optional retries: Number of retries when sampling the ping task status (None for continuous ping), defaults to None
+        :param int,optional seconds: Number of seconds to wait between retries, defaults to 1
+        :param bool,optional verbose: Whether to print the ping results in real-time, defaults to True
+        :returns: Generator yielding PingResult objects for each ping response
+        :rtype: Generator[cterasdk.edge.types.PingResult]
+        """
+        logging.getLogger('cterasdk.edge').info("Starting ping to %s", address)
+
+        # Start the ping background task - pass address directly as value
+        task_path = self._edge.api.execute("/status/network", "ping", address)
+        if not isinstance(task_path, str):
+            raise CTERAException('Failed to start ping task')
+
+        # Extract task ID from the path
+        task_id = task_path.split('/')[-1]
+        processed_sequences = set()
+
+        try:
+            while True:
+                # Get the task status
+                task = self._edge.api.get(f'/proc/bgtasks/{task_id}')
+                
+                # Check if task is completed or no longer exists
+                if not task or task.status == 'completed' or task.status == 'failed':
+                    logging.getLogger('cterasdk.edge').info("Ping task completed")
+                    break
+
+                if task.result and task.result.rc == "Ok" and hasattr(task.result, 'res'):
+                    for ping_info in task.result.res:
+                        # Only yield new results we haven't seen before
+                        if ping_info.seq not in processed_sequences:
+                            processed_sequences.add(ping_info.seq)
+                            result = PingResult(
+                                sequence=ping_info.seq,
+                                ip_address=ping_info.ip,
+                                bytes=ping_info.bytes,
+                                time=ping_info.time,
+                                ttl=ping_info.ttl,
+                                result=ping_info.res
+                            )
+                            if verbose:
+                                print(f"Sequence: {result.sequence} | "
+                                      f"IP: {result.ip_address} | "
+                                      f"Bytes: {result.bytes} | "
+                                      f"Time: {result.time}ms | "
+                                      f"TTL: {result.ttl} | "
+                                      f"Result: {result.result}")
+                            yield result
+                
+                if retries is not None:
+                    retries -= 1
+                    if retries <= 0:
+                        break
+
+                # Wait before next poll
+                time.sleep(seconds)
+
+        except Exception as error:
+            logging.getLogger('cterasdk.edge').error("Ping failed. %s", {'address': address})
+            raise CTERAException('Ping failed', error)
+        finally:
+            # Try to clean up the background task
+            try:
+                self._edge.api.delete(f'/proc/bgtasks/{task_id}')
+            except:  # pylint: disable=bare-except
+                pass
+            logging.getLogger('cterasdk.edge').info("Ping task cleanup completed")
 
 
 class Proxy(BaseCommand):

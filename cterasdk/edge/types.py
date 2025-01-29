@@ -312,3 +312,6 @@ class DeduplicationStatus(Object):
 
         self.dedup = dedup
         self.savings = f"{savings:.2%}"
+
+
+PingResult = namedtuple('PingResult', ['sequence', 'ip_address', 'bytes', 'time', 'ttl', 'result'])
