@@ -1,5 +1,5 @@
 pyyaml
-aiohttp==3.9.5
+aiohttp
 aiofiles
 cryptography
 packaging
