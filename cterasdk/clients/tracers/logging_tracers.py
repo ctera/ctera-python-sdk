@@ -3,7 +3,7 @@ import logging
 import aiohttp
 
 
-def default():
+def logging_trace_config():
 
     async def on_request_start(session, context, params):
         # pylint: disable=unused-argument
@@ -48,7 +48,6 @@ def default():
     trace_config.on_request_end.append(on_request_end)
 
     return trace_config
-
 
 def serialize(param):
     return json.dumps(param, indent=5)

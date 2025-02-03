@@ -3,7 +3,7 @@ import logging
 import aiohttp
 
 from yarl import URL
-from . import async_tracers
+from .tracers import logging_tracers, session_tracers
 
 
 def session_parameters(client_settings):
@@ -24,12 +24,13 @@ class Session:
     @property
     def session(self):
         if self.closed:
-            self._session = aiohttp.ClientSession(trace_configs=[async_tracers.default()], **session_parameters(self._settings))
+            trace_configs = [logging_tracers.logging_trace_config(), session_tracers.session_expiration_trace_config()]
+            self._session = aiohttp.ClientSession(trace_configs=trace_configs, **session_parameters(self._settings))
         return self._session
 
     @property
     def cookies(self):
-        return CookieJar(self._session.cookie_jar)
+        return CookieJar(self.session.cookie_jar)
 
     async def request(self, r, *, await_promise=False, on_response=None):
         if await_promise:
@@ -88,6 +89,9 @@ class CookieJar:
             if cookie.key == key:
                 return cookie.value
         return None
+
+    def clear(self):
+        self._cookie_jar.clear()
 
 
 class BaseRequest:
