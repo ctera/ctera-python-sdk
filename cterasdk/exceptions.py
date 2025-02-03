@@ -24,6 +24,20 @@ class CTERAException(Exception):
         return tojsonstr(self)
 
 
+class SessionExpired(CTERAException):
+    """Raised on Session Expiration"""
+
+    def __init__(self):
+        super().__init__('Session expired.')
+
+
+class NotLoggedIn(CTERAException):
+    """Raised on No Session"""
+
+    def __init__(self):
+        super().__init__('Not logged in.')
+
+
 class ClientResponseException(CTERAException):
 
     def __init__(self, error_object):

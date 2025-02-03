@@ -13,6 +13,9 @@ class CookieJar:
     def update(self, cookies, response_url):
         self._cookies.update_cookies(cookies, response_url)
 
+    def clear(self):
+        self._cookies.clear()
+
 
 class PersistentHeaders:
     """Headers to include in every request"""

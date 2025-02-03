@@ -3,7 +3,7 @@ import logging
 import aiohttp
 
 
-def default():
+def logging_trace_config():
 
     async def on_request_start(session, context, params):
         # pylint: disable=unused-argument
