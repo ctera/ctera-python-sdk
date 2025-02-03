@@ -30,7 +30,7 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
         self.assertEqual(error_message, error.exception.message)
 
     def test_login_required(self):
-        with self.assertRaises(exceptions.CTERAException) as error:
+        with self.assertRaises(exceptions.NotLoggedIn) as error:
             self._filer.api.get('/config/device')
         self.assertEqual('Not logged in', error.exception.message)
 

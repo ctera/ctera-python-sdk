@@ -49,5 +49,6 @@ def logging_trace_config():
 
     return trace_config
 
+
 def serialize(param):
     return json.dumps(param, indent=5)
