@@ -1,7 +1,7 @@
+import functools
 import asyncio
 import logging
 import aiohttp
-import functools
 
 from yarl import URL
 from .tracers import logging_tracers, session_tracers
