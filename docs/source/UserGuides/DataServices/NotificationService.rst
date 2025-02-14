@@ -74,7 +74,7 @@ Ancestors
     import asyncio
     import logging
     from pathlib import Path
-    from cterasdk import DataServices
+    from cterasdk import AsyncGlobalAdmin
 
 
     async def save_cursor(cursor):
@@ -102,7 +102,7 @@ Ancestors
     async def main():
         cursor = None
         queue = asyncio.Queue()  # Shared queue between producer and consumer threads
-        async with DataServices('tenant.ctera.com') as admin:
+        async with AsyncGlobalAdmin('tenant.ctera.com') as admin:
             await admin.login('admin-username', 'admin-password')
             """Start event producer service."""
             admin.notifications.service.run(queue, save_cursor, cursor=cursor)

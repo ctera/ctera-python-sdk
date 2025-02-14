@@ -1,3 +1,4 @@
+import functools
 import asyncio
 import logging
 import aiohttp
@@ -60,9 +61,6 @@ class Session:
         except aiohttp.ServerDisconnectedError as error:
             logging.getLogger('cterasdk.http').warning(error)
             raise ConnectionError(error)
-        except aiohttp.ClientPayloadError as error:
-            logging.getLogger('cterasdk.http').warning(error)
-            raise IOError(error)
         except asyncio.TimeoutError as error:
             logging.getLogger('cterasdk.http').warning('Request timed out while making an HTTP request.')
             raise TimeoutError(error)
@@ -74,6 +72,17 @@ class Session:
     async def close(self):
         if self._session is not None:
             await self._session.close()
+
+
+def decorate_stream_error(stream_reader):
+    @functools.wraps(stream_reader)
+    async def wrapper(self, n=-1):
+        try:
+            return await stream_reader(self, n)
+        except aiohttp.ClientPayloadError as error:
+            logging.getLogger('cterasdk.http').warning(error)
+            raise IOError(error)
+    return wrapper
 
 
 class CookieJar:
