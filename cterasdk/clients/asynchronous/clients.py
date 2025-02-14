@@ -125,6 +125,7 @@ class AsyncResponse(BaseResponse):
     async def xml(self):
         return Deserializers.XML(await self._response.read())
 
+    @async_requests.decorate_stream_error
     async def read(self, n=-1):
         return await self._response.content.read(n)
 
