@@ -69,6 +69,35 @@ Blocks API
    :noindex:
 
 
+.. code-block:: python
+
+    import aiofiles
+    import cterasdk.settings
+    from cterasdk import ctera_direct
+
+    async def download(file_id, name):
+        url = 'https://tenant.ctera.com'
+        access_key_id = 'your-access-key-id'
+        secret_access_key = 'your-secret-key'
+
+        async with aiofiles.open(name, 'wb') as f:
+            async with ctera_direct.client.DirectIO(url, access_key_id, secret_access_key) as client:
+                futures = await client.blocks(file_id)
+                for future in asyncio.as_completed(futures):
+                    block = await future
+                    await f.seek(block.offset)
+                    await f.write(block.data)
+
+    if __name__ == '__main__':
+        cterasdk.settings.sessions.ctera_direct.api.ssl = False
+        cterasdk.settings.sessions.ctera_direct.storage.ssl = False
+
+        file_id = 12345
+
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(download(12345, 'example.pdf'))
+
+
 Streamer API
 ============
 
