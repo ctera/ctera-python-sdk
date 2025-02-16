@@ -71,6 +71,7 @@ Blocks API
 
 .. code-block:: python
 
+    import asyncio
     import aiofiles
     import cterasdk.settings
     from cterasdk import ctera_direct
@@ -113,22 +114,23 @@ Streamer API
     from cterasdk import ctera_direct
 
 
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
     logger = logging.getLogger('app')
 
 
     async def start_stream(file_id, offset):
 
-        baseurl = 'https://tenant.ctera.com'
+        url = 'https://tenant.ctera.com'
         access_key_id = 'your-access-key'
         secret_access_key = 'your-secret-key'
 
-        async with ctera_direct.client.DirectIO(baseurl, access_key_id, secret_access_key) as client:
+        async with ctera_direct.client.DirectIO(url, access_key_id, secret_access_key) as client:
             streamer = await client.streamer(file_id, byte_range=ctera_direct.types.ByteRange(offset))
 
-            logging.getLogger('app').info('Starting Stream. Offset: %s.', offset or 0)
+            logger.info('Starting Stream. Offset: %s.', offset or 0)
             async for block in streamer.start():
                 await handle_block(block)
-            logging.getLogger('app').info('Ending Stream.')
+            logger.info('Ending Stream.')
 
 
     async def handle_block(block):
