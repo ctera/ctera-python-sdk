@@ -6,6 +6,11 @@ class DirectIOError(IOError):
 
 
 class StreamError(DirectIOError):
+    """
+    Stream Error
+
+    :ivar int offset: Stream offset
+    """
 
     def __init__(self, filename, offset):
         super().__init__(errno.EIO, 'Failed to stream file', filename)
@@ -62,7 +67,14 @@ class DecryptKeyError(DirectIOError):
 
 
 class BlockInfo:
+    """
+    Block Info
 
+    :ivar int file_id: File ID
+    :ivar int number: Block number
+    :ivar int offset: Block offset
+    :ivar int length: Block length
+    """
     def __init__(self, file_id, chunk):
         """
         Initialize an Block Info Object for Direct IO Error Object.
@@ -76,8 +88,11 @@ class BlockInfo:
 
 
 class BlockError(DirectIOError):
-    """Direct IO Block Error"""
+    """
+    Direct IO Block Error
 
+    :ivar cterasdk.direct.exceptions.BlockInfo block: Block info
+    """
     def __init__(self, error, strerror, file_id, chunk):
         super().__init__(error, strerror, file_id)
         self.block = BlockInfo(file_id, chunk)
