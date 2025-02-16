@@ -128,23 +128,23 @@ Exceptions
 ==========
 
 .. autoclass:: cterasdk.direct.exceptions.DirectIOError
+   :noindex:
    :members:
-   :undoc-members:
    :show-inheritance:
 
 .. autoclass:: cterasdk.direct.exceptions.DirectIOAPIError
+   :noindex:
    :members:
-   :undoc-members:
    :show-inheritance:
 
 .. autoclass:: cterasdk.direct.exceptions.BlockError
+   :noindex:
    :members:
-   :undoc-members:
    :show-inheritance:
 
 .. autoclass:: cterasdk.direct.exceptions.StreamError
+   :noindex:
    :members:
-   :undoc-members:
    :show-inheritance:
 
 

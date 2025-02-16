@@ -16,6 +16,7 @@ Subpackages
     cterasdk.common
     cterasdk.convert
     cterasdk.core
+    cterasdk.direct
     cterasdk.edge
     cterasdk.lib
     cterasdk.objects
