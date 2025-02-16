@@ -6,3 +6,4 @@ Data Services
    :maxdepth: 5
 
    NotificationService
+   DirectIO
