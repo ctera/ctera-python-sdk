@@ -1,5 +1,5 @@
 cterasdk.clients.tracers package
-===============================
+================================
 
 .. automodule:: cterasdk.clients.tracers
     :members:
@@ -13,4 +13,3 @@ Submodules
 
    cterasdk.clients.tracers.logging_tracers
    cterasdk.clients.tracers.session_tracers
-
