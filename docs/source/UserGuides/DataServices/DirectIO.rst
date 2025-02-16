@@ -6,8 +6,9 @@ CTERA Direct IO is integrated into the CTERA Python SDK to enable high-speed, pr
 
 The CTERA Python SDK provides two key extensions for CTERA Direct IO:
 
-*Blocks API*: Enables concurrent retrieval of all blocks (chunks) that make up a file. It returns data payloads alongside metadata such as block offset and length, with no guaranteed order. This API is optimized for bulk data processing workflows.
-*Streamer API*: Supports prioritized, sequential retrieval of file content, ensuring efficient access from the beginning to the end of a file. It also allows for byte-range retrieval by specifying start and end offsets, making it ideal for real-time streaming and partial file access scenarios.
+**Blocks API**: Enables concurrent retrieval of all blocks (chunks) that make up a file. It returns data payloads alongside metadata such as block offset and length, with no guaranteed order. This API is optimized for bulk data processing workflows.
+
+**Streamer API**: Supports prioritized, sequential retrieval of file content, ensuring efficient access from the beginning to the end of a file. It also allows for byte-range retrieval by specifying start and end offsets, making it ideal for real-time streaming and partial file access scenarios.
 
 
 Getting Started
