@@ -8,7 +8,7 @@ By leveraging CTERA Direct IO, applications can retrieve file metadata from the 
 while directly accessing data blocks from the underlying object storage, whether on-premises or in the cloud.
 This approach ensures efficient, concurrent, and secure retrieval, making it ideal for high-performance data pipelines.
 
-The CTERA Python SDK provides two key extensions for CTERA Direct IO:
+The CTERA SDK provides two key extensions for CTERA Direct IO:
 
 **Blocks API**: Enables concurrent retrieval of all blocks (chunks) that make up a file.
 It returns data payloads alongside metadata such as block offset and length, with no guaranteed order.
@@ -17,6 +17,28 @@ This API is optimized for bulk data processing workflows.
 **Streamer API**: Supports prioritized, sequential retrieval of file content, ensuring efficient
 access from the beginning to the end of a file. It also allows for byte-range retrieval by
 specifying start and end offsets, making it ideal for real-time streaming and partial file access scenarios.
+
+
+Prerequisites
+=============
+
+Credentials
+-----------
+
+The .. autoclass:: cterasdk.direct.client.Client object is instantiated using the CTERA Portal URL, an access key, and a secret key.
+
+The API keys must be linked to a Team Portal user with the **Read Write Administrator** role.
+
+For key generation via the CTERA Portal administrator interface, see:
+`Setting Up API Keys <https://kb.ctera.com/docs/setting-up-api-keys-to-access-s3-buckets-2>`_
+
+For key generation via the end-user interface, refer to:
+`Creating Access Key IDs and Secret Access Keys <https://kb.ctera.com/docs/using-an-s3-browser-to-access-your-data>`_
+
+
+Network
+-------
+Using CTERA Direct IO requires connectivity to both the CTERA Portal and the Object Storage over HTTPS (TCP 443).
 
 
 Getting Started
@@ -49,17 +71,17 @@ For more information on how to obtain the File ID, name, refer to the `Event <ht
 ..
 
 
-SSL
+TLS
 ---
 
-During testing, you may need to disable SSL verification if the Portal or Object Storage certificate is not trusted by your host client.
+During testing, you may need to disable TLS verification if the Portal or Object Storage certificate is not trusted by your host client.
 
 .. code-block:: python
 
     import cterasdk.settings
 
-    cterasdk.settings.sessions.ctera_direct.api.ssl = False  # disable CTERA Portal SSL verification
-    cterasdk.settings.sessions.ctera_direct.storage.ssl = False  # disable Object Storage SSL verification
+    cterasdk.settings.sessions.ctera_direct.api.ssl = False  # disable CTERA Portal TLS verification
+    cterasdk.settings.sessions.ctera_direct.storage.ssl = False  # disable Object Storage TLS verification
 
 
 Blocks API
