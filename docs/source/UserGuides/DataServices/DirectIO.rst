@@ -25,14 +25,12 @@ Prerequisites
 Credentials
 -----------
 
-The .. autoclass:: cterasdk.direct.client.Client object is instantiated using the CTERA Portal URL, an access key, and a secret key.
+The :py:class:`cterasdk.direct.client.Client` object is instantiated using the CTERA Portal URL, an access key, and a secret key.
 
-The API keys must be linked to a Team Portal user with the **Read Write Administrator** role.
-
-For key generation via the CTERA Portal administrator interface, see:
+* The API keys must be linked to a Team Portal user with the **Read Write Administrator** role.
+* For key generation via the CTERA Portal administrator interface, see:
 `Setting Up API Keys <https://kb.ctera.com/docs/setting-up-api-keys-to-access-s3-buckets-2>`_
-
-For key generation via the end-user interface, refer to:
+* For key generation via the end-user interface, refer to:
 `Creating Access Key IDs and Secret Access Keys <https://kb.ctera.com/docs/using-an-s3-browser-to-access-your-data>`_
 
 
