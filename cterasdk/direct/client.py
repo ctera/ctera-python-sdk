@@ -141,7 +141,8 @@ class DirectIO:
         :param int file_id: File ID
         :param list[cterasdk.direct.exceptions.BlockInfo],optional blocks: List of BlockInfo objects,
          or list of integers identifying the block position.
-        :param int,optional max_workers: Max concurrent tasks. A task will be dispatched for each block if no limited was specified.
+        :param int,optional max_workers: Max allowed concurrent tasks.
+         A task will be dispatched for each block if no limited was specified.
         :returns: Blocks
         :rtype: list[cterasdk.direct.types.Block]
         """
