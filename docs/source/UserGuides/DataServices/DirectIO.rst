@@ -19,7 +19,7 @@ access from the beginning to the end of a file. It also allows for byte-range re
 specifying start and end offsets, making it ideal for real-time streaming and partial file access scenarios.
 
 
-Prerequisites 
+Prerequisites
 =============
 
 Credentials
