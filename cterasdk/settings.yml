@@ -50,5 +50,7 @@ logging:
       level: error
     - name: http.trace
       level: error
+    - name: http.curl
+      level: info
 downloads:
   location: ~/Downloads
