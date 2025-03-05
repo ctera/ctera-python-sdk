@@ -7,6 +7,8 @@ def logging_trace_config():
 
     async def on_request_start(session, context, params):
         # pylint: disable=unused-argument
+        context.request_body = []
+        context.response_body = []
         param = {
             'request': {
                 'method': params.method,
@@ -15,6 +17,28 @@ def logging_trace_config():
             }
         }
         logging.getLogger('cterasdk.http.trace').debug('Starting request. %s', serialize(param))
+
+    async def on_request_chunk_sent(session, context, params):
+        if hasattr(params, 'chunk') and params.chunk:
+            if isinstance(params.chunk, bytes):
+                try:
+                    chunk = params.chunk.decode('utf-8')
+                except UnicodeDecodeError:
+                    chunk = '<binary_data>'
+            else:
+                chunk = str(params.chunk)
+            context.request_body.append(chunk)
+
+    async def on_response_chunk_received(session, context, params):
+        if hasattr(params, 'chunk') and params.chunk:
+            if isinstance(params.chunk, bytes):
+                try:
+                    chunk = params.chunk.decode('utf-8')
+                except UnicodeDecodeError:
+                    chunk = '<binary_data>'
+            else:
+                chunk = str(params.chunk)
+            context.response_body.append(chunk)
 
     async def on_request_redirect(session, context, params):
         # pylint: disable=unused-argument
@@ -40,10 +64,21 @@ def logging_trace_config():
                 'headers': [dict(params.response.headers)]
             }
         }
+        
+        # Add request body if collected
+        if hasattr(context, 'request_body') and context.request_body:
+            param['request']['body'] = ''.join(context.request_body)
+            
+        # Add response body if collected
+        if hasattr(context, 'response_body') and context.response_body:
+            param['response']['body'] = ''.join(context.response_body)
+            
         logging.getLogger('cterasdk.http.trace').debug('Ended request. %s', serialize(param))
 
     trace_config = aiohttp.TraceConfig()
     trace_config.on_request_start.append(on_request_start)
+    trace_config.on_request_chunk_sent.append(on_request_chunk_sent)
+    trace_config.on_response_chunk_received.append(on_response_chunk_received)
     trace_config.on_request_redirect.append(on_request_redirect)
     trace_config.on_request_end.append(on_request_end)
 
