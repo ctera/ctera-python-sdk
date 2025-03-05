@@ -1,6 +1,6 @@
-import json
 import logging
 import aiohttp
+from ...convert import fromjsonstr, tojsonstr, fromxmlstr, toxmlstr  # noqa: E402, F401
 
 
 def logging_trace_config():
@@ -51,4 +51,4 @@ def logging_trace_config():
 
 
 def serialize(param):
-    return json.dumps(param, indent=5)
+    return tojsonstr(param)
