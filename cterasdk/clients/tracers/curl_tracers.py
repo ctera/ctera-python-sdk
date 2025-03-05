@@ -1,8 +1,7 @@
-import json
 import logging
 import aiohttp
-import shlex
 import urllib.parse
+from ...convert import fromjsonstr, tojsonstr, fromxmlstr, toxmlstr  # noqa: E402, F401
 
 
 def curl_trace_config():
@@ -68,11 +67,11 @@ def curl_trace_config():
                     else:
                         # Try parsing as JSON
                         try:
-                            json_data = json.loads(request_data)
-                            logger.debug('Detected JSON data: %s', json.dumps(json_data)[:100])
+                            json_data = fromjsonstr(request_data)
+                            logger.debug('Detected JSON data: %s', tojsonstr(json_data)[:100])
                             context.curl_command.extend(['-H', 'Content-Type: application/json'])
-                            context.curl_command.extend(['-d', json.dumps(json_data)])
-                        except json.JSONDecodeError:
+                            context.curl_command.extend(['-d', tojsonstr(json_data)])
+                        except Exception:
                             # Raw data
                             logger.debug('Using raw data: %s', request_data[:100])
                             context.curl_command.extend(['-d', request_data])
@@ -80,7 +79,7 @@ def curl_trace_config():
                     # Handle dictionary data
                     logger.debug('Detected dictionary data: %s', request_data)
                     context.curl_command.extend(['-H', 'Content-Type: application/json'])
-                    context.curl_command.extend(['-d', json.dumps(request_data)])
+                    context.curl_command.extend(['-d', tojsonstr(request_data)])
                 elif isinstance(request_data, aiohttp.FormData):
                     # Handle form data
                     logger.debug('Detected FormData object')
@@ -123,10 +122,10 @@ def curl_trace_config():
                 else:
                     # Try parsing as JSON
                     try:
-                        json_data = json.loads(chunk_str)
+                        json_data = fromjsonstr(chunk_str)
                         context.curl_command.extend(['-H', 'Content-Type: application/json'])
-                        context.curl_command.extend(['-d', json.dumps(json_data)])
-                    except json.JSONDecodeError:
+                        context.curl_command.extend(['-d', tojsonstr(json_data)])
+                    except Exception:
                         # Raw data
                         if chunk_str.strip():  # Only add if not empty
                             context.curl_command.extend(['-d', chunk_str])
@@ -138,12 +137,14 @@ def curl_trace_config():
             # Format the command with proper escaping and indentation
             formatted_parts = []
             for i, part in enumerate(context.curl_command):
+                # Escape single quotes and wrap in single quotes
+                escaped_part = part.replace("'", "'\\''")
                 if i == 0:  # First part (curl)
-                    formatted_parts.append(shlex.quote(part))
+                    formatted_parts.append(f"'{escaped_part}'")
                 elif part in ['-X', '-H', '-d']:  # New option
-                    formatted_parts.append(f"\\\n    {shlex.quote(part)}")
+                    formatted_parts.append(f"\\\n    '{escaped_part}'")
                 else:  # Option value
-                    formatted_parts.append(f" {shlex.quote(part)}")
+                    formatted_parts.append(f" '{escaped_part}'")
             
             # Always log the command, even if it's just curl and URL
             logging.getLogger('cterasdk.http.curl').info('\n%s', ''.join(formatted_parts))
