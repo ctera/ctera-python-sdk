@@ -102,16 +102,20 @@ class WebDAV(Client):
 class XML(Client):
     """XML Serializer and Deserializer"""
 
+    def __init__(self, builder=None, session=None, settings=None, authenticator=None):
+        super().__init__(builder, session, settings, authenticator)
+        self._type = {'Content-Type': 'text/plain'}
+
     def get(self, path, **kwargs):
         response = super().get(path, **kwargs)
         return response.xml()
 
     def put(self, path, data, **kwargs):
-        response = super().put(path, data, data_serializer=Serializers.XML, **kwargs)
+        response = super().put(path, data, data_serializer=Serializers.XML, headers=self._type, **kwargs)
         return response.xml()
 
     def post(self, path, data, **kwargs):
-        response = super().post(path, data, data_serializer=Serializers.XML, **kwargs)
+        response = super().post(path, data, data_serializer=Serializers.XML, headers=self._type, **kwargs)
         return response.xml()
 
     def form_data(self, path, data, **kwargs):

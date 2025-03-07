@@ -40,3 +40,7 @@ def unquote(url):
 
 def quote(url):
     return urllib.parse.quote(url)
+
+
+def parse_qsl(url):
+    return urllib.parse.parse_qsl(url)

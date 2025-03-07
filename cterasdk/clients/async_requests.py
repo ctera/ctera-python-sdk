@@ -4,7 +4,7 @@ import logging
 import aiohttp
 
 from yarl import URL
-from .tracers import logging_tracers, session_tracers
+from . import tracers
 
 
 def session_parameters(client_settings):
@@ -25,7 +25,11 @@ class Session:
     @property
     def session(self):
         if self.closed:
-            trace_configs = [logging_tracers.logging_trace_config(), session_tracers.session_expiration_trace_config()]
+            trace_configs = [
+                tracers.logger.trace_config(),
+                tracers.session.trace_config(),
+                tracers.postman.trace_config()
+            ]
             self._session = aiohttp.ClientSession(trace_configs=trace_configs, **session_parameters(self._settings))
         return self._session
 

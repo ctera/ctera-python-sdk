@@ -2,7 +2,7 @@ import aiohttp
 from ...exceptions import SessionExpired
 
 
-def session_expiration_trace_config():
+def trace_config():
 
     async def on_request_redirect(session, context, params):
         # pylint: disable=unused-argument
@@ -11,6 +11,6 @@ def session_expiration_trace_config():
             if location in ['/ServicesPortal/login.html'] or location.startswith(('https://login.microsoftonline.com')):
                 raise SessionExpired()
 
-    trace_config = aiohttp.TraceConfig()
-    trace_config.on_request_redirect.append(on_request_redirect)
-    return trace_config
+    tracer = aiohttp.TraceConfig()
+    tracer.on_request_redirect.append(on_request_redirect)
+    return tracer

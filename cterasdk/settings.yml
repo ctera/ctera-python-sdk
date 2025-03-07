@@ -9,6 +9,9 @@ sessions:
     edge:
       services:
         ssl: prompt
+    audit:
+      postman:
+        enabled: false
   ctera_direct:
     api:
       ssl: true
