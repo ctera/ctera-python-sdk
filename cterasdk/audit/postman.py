@@ -34,7 +34,7 @@ class Collection(Object):
 class Info(Object):
 
     def __init__(self):
-        self.name = f'{str(uuid.uuid4())}.json'
+        self.name = f'{str(uuid.uuid4())}'
         self.schema = "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 
 
@@ -152,4 +152,7 @@ def audit():
     if cterasdk.settings.sessions.management.audit.postman.enabled:
         fs = FileSystem.instance()
         collection = Collection.instance()
-        fs.save(fs.downloads_directory(), collection.info.name, collection.serialize().encode('utf-8'))
+        name = cterasdk.settings.sessions.management.audit.postman.name
+        if name is not None:
+            collection.info.name = name
+        fs.save(fs.downloads_directory(), f'{name}.json', collection.serialize().encode('utf-8'))
