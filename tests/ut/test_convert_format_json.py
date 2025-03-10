@@ -55,4 +55,4 @@ class TestFormatObjectJSON(base_convert.TestJSON):
         o = Object()
         o.password = 'secret'
         object_str_json = json.loads(base_convert.TestJSON._tojsonstr(o, False, True))
-        self.assertEqual(object_str_json['password'], "*** The Value is Hidden by the SDK ***")
+        self.assertEqual(object_str_json['password'], "*** Protected Value ***")
