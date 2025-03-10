@@ -27,7 +27,7 @@ class Collection(Object):
     def add(self, request):
         name = f'{request.method} /{"/".join(request.url.path)}'
         self.item.append(Command(name, request))
-    
+
     def serialize(self):
         return str(self)
 
@@ -54,10 +54,10 @@ class Request(Object):
         self.header = None
         self.url = url
 
-    def headers(self, d):
+    def request_headers(self, d):
         self.header = [Header(k, v) for k, v in d.items()]
 
-    def body(self, data):
+    def request_body(self, data):
         self.body = data
 
 
@@ -88,7 +88,7 @@ class BodyStream:
                     if form_data:
                         form = Form()
                         for k, v in form_data:
-                            form.add(k, v, 'text')
+                            form.add(k, v)
                         return form
                 elif mime_type == 'text/plain':
                     return Raw.xml(toxmlstr(fromxmlstr(self.data), no_log=True))
@@ -115,6 +115,7 @@ def form_data_generator(data, mime_type):
             value = form_value(segments[index + 1], key)
             form_data.add(key, value)
         return form_data
+    return None
 
 
 def form_value(data, key):
@@ -138,7 +139,7 @@ def form_keys(data):
     :returns: UTF-8 Encoded Keys
     :rtype: list[bytes]
     """
-    return [utf8_decode(key) for key in re.findall(b'(?<=\ name=")[^"]+', data)]
+    return [utf8_decode(key) for key in re.findall(rb'(?<=\ name=")[^"]+', data)]
 
 
 def form_boundary(mime_type):
@@ -166,13 +167,13 @@ class Form(Body):
         super().__init__('urlencoded')
         self.urlencoded = []
 
-    def add(self, key, value, type):
+    def add(self, key, value):
         param = Object()
         param.key = key
         if key in ['j_password']:
             value = '*** Protected Value ***'
         param.value = value
-        param.type = type
+        param.type = 'text'
         self.urlencoded.append(param)
 
 

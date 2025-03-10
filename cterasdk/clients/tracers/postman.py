@@ -5,6 +5,7 @@ from ...audit import postman
 def trace_config():
 
     async def on_request_start(session, ctx, params):
+        # pylint: disable=unused-argument
         """
         :param aiohttp.ClientSession session: Session.
         :param cterasdk.transcriber.postman.Command ctx: Command.
@@ -23,13 +24,15 @@ def trace_config():
         )
 
     async def on_request_headers_sent(session, ctx, params):
+        # pylint: disable=unused-argument
         """
         :param aiohttp.ClientSession session: Session.
         :param cterasdk.transcriber.postman.Command ctx: Command.
         """
-        ctx.request.headers({k: v for k, v in params.headers.items() if k in ['Cookie', 'Authorization', 'Content-Type']})
+        ctx.request.request_headers({k: v for k, v in params.headers.items() if k in ['Cookie', 'Authorization', 'Content-Type']})
 
     async def on_request_chunk_sent(session, ctx, params):
+        # pylint: disable=unused-argument
         """
         :param aiohttp.ClientSession session: Session.
         :param cterasdk.transcriber.postman.Command ctx: Command.
@@ -37,13 +40,14 @@ def trace_config():
         ctx.stream.append(params.chunk)
 
     async def on_request_end(session, ctx, params):
+        # pylint: disable=unused-argument
         """
         :param aiohttp.ClientSession session: Session.
         :param cterasdk.transcriber.postman.Command ctx: Command.
         """
         body = ctx.stream.deserialize(params.response.request_info.headers.get('Content-Type', None))
         if body:
-            ctx.request.body(body)
+            ctx.request.request_body(body)
         postman.Collection.instance().add(ctx.request)
 
     tracer = aiohttp.TraceConfig()
