@@ -3,7 +3,7 @@ import logging
 import aiohttp
 
 
-def logging_trace_config():
+def trace_config():
 
     async def on_request_start(session, context, params):
         # pylint: disable=unused-argument
@@ -42,12 +42,12 @@ def logging_trace_config():
         }
         logging.getLogger('cterasdk.http.trace').debug('Ended request. %s', serialize(param))
 
-    trace_config = aiohttp.TraceConfig()
-    trace_config.on_request_start.append(on_request_start)
-    trace_config.on_request_redirect.append(on_request_redirect)
-    trace_config.on_request_end.append(on_request_end)
+    tracer = aiohttp.TraceConfig()
+    tracer.on_request_start.append(on_request_start)
+    tracer.on_request_redirect.append(on_request_redirect)
+    tracer.on_request_end.append(on_request_end)
 
-    return trace_config
+    return tracer
 
 
 def serialize(param):
