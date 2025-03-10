@@ -100,15 +100,57 @@ class BodyStream:
 
 
 def form_data_generator(data, mime_type):
-    boundary = re.search(r'(?<=boundary=)[A-Za-z0-9]+', mime_type).group()
-    keys = [utf8_decode(key) for key in re.findall(b'(?<=\ name=")[^"]+', data)]
+    """
+    Generate Form Data.
+
+    :param bytearray data: Body.
+    :param str mime_type: Header.
+    """
+    boundary = form_boundary(mime_type)
+    keys = form_keys(data)
     if keys:
         form_data = FormData()
-        segments = data.split(utf8_encode(f'--{boundary}'))
+        segments = data.split(boundary)
         for index, key in enumerate(keys):
-            value = re.search(utf8_encode(f'(?<="{key}").+$'), segments[index + 1], re.DOTALL).group().strip()
+            value = form_value(segments[index + 1], key)
             form_data.add(key, value)
         return form_data
+
+
+def form_value(data, key):
+    """
+    Get Value for Key.
+
+    :param bytearray data: Segment of Body.
+    :param bytes key: UTF-8 Encoded Key.
+    """
+    CRLF = '\r\n\r\n'
+    expr = utf8_encode(f'(?<={key}"{CRLF})[^\r]+')
+    match = re.search(expr, data, re.DOTALL)
+    return match.group() if match else None
+
+
+def form_keys(data):
+    """
+    Get Form Keys from Data.
+
+    :param bytearray data: Body.
+    :returns: UTF-8 Encoded Keys
+    :rtype: list[bytes]
+    """
+    return [utf8_decode(key) for key in re.findall(b'(?<=\ name=")[^"]+', data)]
+
+
+def form_boundary(mime_type):
+    """
+    Get Multiparty Form Boundary from Content Type Header.
+
+    :param str mime_type: Header.
+    :returns: UTF-8 Encoded Boundary.
+    :rtype: bytes
+    """
+    match = re.search(r'(?<=boundary=)[A-Za-z0-9]+', mime_type)
+    return utf8_encode(f'--{match.group()}') if match else None
 
 
 class Body(Object):
@@ -127,6 +169,8 @@ class Form(Body):
     def add(self, key, value, type):
         param = Object()
         param.key = key
+        if key in ['j_password']:
+            value = '*** Protected Value ***'
         param.value = value
         param.type = type
         self.urlencoded.append(param)
@@ -179,8 +223,6 @@ class URL(Object):
         self.query = query
 
 
-import atexit
-
 @atexit.register
 def audit():
     if cterasdk.settings.sessions.management.audit.postman.enabled:
@@ -189,4 +231,4 @@ def audit():
         name = cterasdk.settings.sessions.management.audit.postman.name
         if name is not None:
             collection.info.name = name
-        fs.save(fs.downloads_directory(), f'{name}.json', collection.serialize().encode('utf-8'))
+        fs.save(fs.downloads_directory(), f'{name}.json', utf8_encode(collection.serialize()))

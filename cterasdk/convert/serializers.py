@@ -25,11 +25,14 @@ _sdk_hidden = [
 ]
 
 
+__protected__ = '*** Protected Value ***'
+
+
 def _to_protected_dict(o):
     ret = copy.deepcopy(o.__dict__)
     for key in _sdk_hidden:
         if key in ret:
-            ret[key] = '*** The Value is Hidden by the SDK ***'
+            ret[key] = __protected__
     return ret
 
 
@@ -82,8 +85,8 @@ def toxml(obj, no_log=False):  # pylint: disable=too-many-branches
             if isinstance(item.obj, bool):
                 item.node.text = str(item.obj).lower()
             else:
-                if no_log is True and item.parent.get(XMLTypes.ID) in _sdk_hidden:
-                    item.node.text = '*** The Value is Hidden by the SDK ***'
+                if no_log is True and item.parent and item.parent.get(XMLTypes.ID) in _sdk_hidden:
+                    item.node.text = __protected__
                 else:
                     item.node.text = str(item.obj)
         elif isinstance(item.obj, list):
