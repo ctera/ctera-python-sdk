@@ -49,7 +49,7 @@ def tojsonstr(obj, pretty_print=True, no_log=True):
     return json.dumps(obj, default=lambda o: o.__dict__, indent=indent)
 
 
-def toxmlstr(obj, pretty_print=False):
+def toxmlstr(obj, pretty_print=False, no_log=False):
     """
     Convert a Python object to an XML string
 
@@ -60,14 +60,14 @@ def toxmlstr(obj, pretty_print=False):
     """
     if obj is None:
         return None
-    xml = toxml(obj)
+    xml = toxml(obj, no_log)
     if pretty_print:
         string = minidom.parseString(tostring(xml)).toprettyxml(indent="   ")
         return ''.join(string.split('\n', 1)[1:])
     return tostring(xml, 'utf-8')
 
 
-def toxml(obj):  # pylint: disable=too-many-branches
+def toxml(obj, no_log=False):  # pylint: disable=too-many-branches
     root = Item()
     root.node = None
     root.parent = None
@@ -82,7 +82,10 @@ def toxml(obj):  # pylint: disable=too-many-branches
             if isinstance(item.obj, bool):
                 item.node.text = str(item.obj).lower()
             else:
-                item.node.text = str(item.obj)
+                if no_log is True and item.parent.get(XMLTypes.ID) in _sdk_hidden:
+                    item.node.text = '*** The Value is Hidden by the SDK ***'
+                else:
+                    item.node.text = str(item.obj)
         elif isinstance(item.obj, list):
             item.node = CreateElement(item.parent, XMLTypes.LIST)
             for member in item.obj:

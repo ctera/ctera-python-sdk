@@ -1,8 +1,9 @@
+import re
 import uuid
 import atexit
 import cterasdk.settings
 from ..lib import FileSystem
-from ..common import Object, utf8_decode
+from ..common import Object, utf8_decode, utf8_encode
 from ..convert import fromjsonstr, fromxmlstr, tojsonstr, toxmlstr
 from ..objects import uri
 
@@ -72,9 +73,12 @@ class BodyStream:
 
     def __init__(self):
         self.data = bytearray()
+        self.maxsize = 4194304  # 4 MB
 
     def append(self, data):
-        self.data = self.data + data
+        if len(self.data) >= self.maxsize:
+            return
+        self.data = self.data + data[:self.maxsize - len(self.data)]
 
     def deserialize(self, mime_type):
         if self.data:
@@ -87,12 +91,24 @@ class BodyStream:
                             form.add(k, v, 'text')
                         return form
                 elif mime_type == 'text/plain':
-                    return Raw.xml(toxmlstr(fromxmlstr(self.data)))
+                    return Raw.xml(toxmlstr(fromxmlstr(self.data), no_log=True))
                 elif mime_type == 'application/json':
                     return Raw.json(tojsonstr(fromjsonstr(self.data)))
-                elif mime_type == 'multipart/form-data':
-                    pass
+                elif mime_type.startswith('multipart/form-data'):
+                    return form_data_generator(self.data, mime_type)
         return None
+
+
+def form_data_generator(data, mime_type):
+    boundary = re.search(r'(?<=boundary=)[A-Za-z0-9]+', mime_type).group()
+    keys = [utf8_decode(key) for key in re.findall(b'(?<=\ name=")[^"]+', data)]
+    if keys:
+        form_data = FormData()
+        segments = data.split(utf8_encode(f'--{boundary}'))
+        for index, key in enumerate(keys):
+            value = re.search(utf8_encode(f'(?<="{key}").+$'), segments[index + 1], re.DOTALL).group().strip()
+            form_data.add(key, value)
+        return form_data
 
 
 class Body(Object):
@@ -114,6 +130,24 @@ class Form(Body):
         param.value = value
         param.type = type
         self.urlencoded.append(param)
+
+
+class FormData(Body):
+
+    def __init__(self):
+        super().__init__('formdata')
+        self.formdata = []
+
+    def add(self, key, value):
+        param = Object()
+        param.key = key
+        if key == 'file':
+            param.type = 'file'
+            param.src = ''
+        else:
+            param.type = 'text'
+            param.value = utf8_decode(value)
+        self.formdata.append(param)
 
 
 class Raw(Body):
