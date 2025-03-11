@@ -1,7 +1,7 @@
 import logging
+import cterasdk.settings
 from . import tracers
 from ..common import Object
-import cterasdk.settings
 
 
 logger = logging.getLogger('cterasdk.http.trace')
