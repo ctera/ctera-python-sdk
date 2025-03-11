@@ -4,14 +4,14 @@ import logging
 import aiohttp
 
 from yarl import URL
-from . import tracers
 
 
 def session_parameters(client_settings):
     return {
         'timeout': aiohttp.ClientTimeout(**client_settings.timeout.kwargs),
         'connector': aiohttp.TCPConnector(**client_settings.connector.kwargs),
-        'cookie_jar': aiohttp.CookieJar(**client_settings.cookie_jar.kwargs)
+        'cookie_jar': aiohttp.CookieJar(**client_settings.cookie_jar.kwargs),
+        'trace_configs': client_settings.trace_configs
     }
 
 
@@ -25,12 +25,7 @@ class Session:
     @property
     def session(self):
         if self.closed:
-            trace_configs = [
-                tracers.logger.trace_config(),
-                tracers.session.trace_config(),
-                tracers.postman.trace_config()
-            ]
-            self._session = aiohttp.ClientSession(trace_configs=trace_configs, **session_parameters(self._settings))
+            self._session = aiohttp.ClientSession(**session_parameters(self._settings))
         return self._session
 
     @property

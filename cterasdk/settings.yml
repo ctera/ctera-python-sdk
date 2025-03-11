@@ -11,7 +11,7 @@ sessions:
         ssl: prompt
     audit:
       postman:
-        name: null
+        name: ~
         enabled: false
   ctera_direct:
     api:

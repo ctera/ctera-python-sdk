@@ -1,4 +1,10 @@
+import logging
+import cterasdk.settings
+from . import tracers
 from ..common import Object
+
+
+logger = logging.getLogger('cterasdk.http.trace')
 
 
 class ClientSettings(Object):
@@ -10,6 +16,13 @@ class ClientSettings(Object):
         self.connector = connector if connector else TCPConnector(True)
         self.timeout = timeout if timeout else ClientTimeout(None, None)
         self.cookie_jar = cookie_jar if cookie_jar else CookieJar(False)
+        self.trace_configs = [
+            tracers.logger.trace_config(),
+            tracers.session.trace_config()
+        ]
+        if cterasdk.settings.sessions.management.audit.postman.enabled:
+            logger.info('Enabling Postman Auditing.')
+            self.trace_configs.append(tracers.postman.trace_config())
 
 
 class TCPConnector(Object):
