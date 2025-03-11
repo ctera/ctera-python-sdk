@@ -1,6 +1,7 @@
 import re
 import uuid
 import atexit
+import logging
 import cterasdk.settings
 from ..lib import FileSystem
 from ..common import Object, utf8_decode, utf8_encode
@@ -93,7 +94,7 @@ class BodyStream:
                 elif mime_type == 'text/plain':
                     return Raw.xml(toxmlstr(fromxmlstr(self.data), no_log=True))
                 elif mime_type == 'application/json':
-                    return Raw.json(tojsonstr(fromjsonstr(self.data)))
+                    return Raw.json(tojsonstr(fromjsonstr(self.data), False))
                 elif mime_type.startswith('multipart/form-data'):
                     return form_data_generator(self.data, mime_type)
         return None
@@ -199,7 +200,7 @@ class Raw(Body):
 
     def __init__(self, body, language):
         super().__init__('raw')
-        self.raw = utf8_decode(body)
+        self.raw = body if language == 'json' else utf8_decode(body)
         self.options = Object()
         self.options.raw = Object()
         self.options.language = language
@@ -230,6 +231,10 @@ def audit():
         fs = FileSystem.instance()
         collection = Collection.instance()
         name = cterasdk.settings.sessions.management.audit.postman.name
-        if name is not None:
-            collection.info.name = name
-        fs.save(fs.downloads_directory(), f'{name}.json', utf8_encode(collection.serialize()))
+        collection.info.name = name if name is not None else str(uuid.uuid4())
+        filename = f'{collection.info.name}.json'
+        logging.getLogger('cterasdk.http.trace').info('Saving Postman audit file. %s', {
+            'directory': fs.downloads_directory(),
+            'name': filename
+        })
+        fs.save(fs.downloads_directory(), filename, utf8_encode(collection.serialize()))
