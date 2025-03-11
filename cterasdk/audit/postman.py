@@ -199,7 +199,10 @@ class Raw(Body):
 
     def __init__(self, body, language):
         super().__init__('raw')
-        self.raw = utf8_decode(body)
+        if isinstance(body, str):
+            self.raw = body
+        else:
+            self.raw = utf8_decode(body)
         self.options = Object()
         self.options.raw = Object()
         self.options.language = language
