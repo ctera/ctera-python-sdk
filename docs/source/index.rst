@@ -13,8 +13,8 @@ Key Features
 ============
 
 1. Configuration Management:
-    1. `CTERA Portal <UserGuides/Portal/Administration.html>`_
-    2. `CTERA Edge Filer <UserGuides/Edge/Configuration.html>`_, including remote access.
+    1. `Portal Management <UserGuides/Portal/Administration.html>`_
+    2. `Edge Filer Management <UserGuides/Edge/Configuration.html>`_, including remote access.
 2. Managing `Data Discovery and Migration Jobs <UserGuides/Edge/Migration.html>`_
 3. File Data Management APIs for `CTERA Edge Filer <UserGuides/Edge/Index.html>`_ and `CTERA Portal <UserGuides/Portal/Index.html>`_.
 4. Data Services Framework:
