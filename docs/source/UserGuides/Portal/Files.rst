@@ -8,17 +8,47 @@ List
 .. automethod:: cterasdk.core.files.browser.FileBrowser.listdir
    :noindex:
 
+Use the following API to list the contents of a directory as a Global Administrator.
+This API requires that the administrator has *Access End User Folders*.
+For more details, see `Customizing Administrator Roles` <https://kb.ctera.com/docs/customizing-administrator-roles-2>`_.
+
 .. code:: python
 
    with GlobalAdmin('tenant.ctera.com') as admin:
       admin.login('admin-user', 'admin-pass')
-      admin.files.listdir('Users/John Smith/My Files')
-      admin.files.listdir('Users/John Smith/My Files', include_deleted=True)  # include deleted files
+
+      """List all sub-directories"""
+      for f in admin.files.listdir('Users/John Smith/My Files'):
+          if f.isFolder:
+              print({
+                  f.name,
+                  f.href,
+                  f.permalink  # a URL that links directly to a specific file
+              })
+
+..
+
+Use the following API to list the contents of a directory as an End User or a Team Portal Administrator.
+This API requires that the Team Portal Administrator has *Access End User Folders*.
+For more details, see `Viewing Folder Content <https://kb.ctera.com/docs/managing-folders-1#viewing-folder-content>`_.
+
+.. code:: python
 
    with ServicesPortal('tenant.ctera.com') as user:
       user.login('username', 'user-password')
-      user.files.listdir('My Files/Documents')
-      user.files.listdir('My Files/Documents', include_deleted=True)  # include deleted files
+      for f in user.files.listdir('My Files/Documents'):
+          if not f.isFolder:
+              print({
+                  f.name,
+                  f.href,
+                  f.size,
+                  f.lastmodified,
+                  f.permalink  # a URL that links directly to a specific file
+              })
+
+      """List all deleted files"""
+      deleted_files = [f.href for f in user.files.listdir('My Files/Documents', include_deleted=True) if f.isDeleted]
+      print(deleted_files)
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.walk
    :noindex:
