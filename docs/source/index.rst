@@ -12,14 +12,14 @@ and seamlessly integrate CTERA's global namespace with their applications.
 Key Features
 ============
 
-* Configuration management:
-    * `CTERA Portal <UserGuides/Portal/Configuration>`_
-    * `CTERA Edge Filer <UserGuides/Edge/Configuration>`_, including remote access.
-* Automating `data discovery and migration jobs <UserGuides/Edge/Migration>`_
-* File browser for `CTERA Edge Filer <UserGuides/Edge/Index>`_ and `CTERA Portal <UserGuides/Portal/Index>`_.
-* Asynchronous Data Services framework:
-    * Subscribing to file system notifications (triggers)
-    * High-performance access via CTERA Direct IO for parallel retrieval of data directly from Object or Cloud Storage.
+1. Configuration Management:
+* `CTERA Portal <UserGuides/Portal/Configuration.rst>`_
+* `CTERA Edge Filer <UserGuides/Edge/Configuration.rst>`_, including remote access.
+2. Managing `Data Discovery and Migration Jobs <UserGuides/Edge/Migration.rst>`_
+3. File Data Management APIs for `CTERA Edge Filer <UserGuides/Edge/Index.rst>`_ and `CTERA Portal <UserGuides/Portal/Index.rst>`_.
+4. Data Services Framework:
+* `Subscribing to File System Notifications <UserGuides/DataServices/NotificationService.rst>`_
+* `CTERA Direct IO <UserGuides/DataServices/DirectIO.rst>`_, enabling parallel high-performnace retrieval directly from object storage.
 
 .. _cterasdk-installation:
 
