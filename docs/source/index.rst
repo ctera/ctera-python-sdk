@@ -13,13 +13,13 @@ Key Features
 ============
 
 1. Configuration Management:
-* `CTERA Portal <UserGuides/Portal/Configuration.rst>`_
-* `CTERA Edge Filer <UserGuides/Edge/Configuration.rst>`_, including remote access.
+    1. `CTERA Portal <UserGuides/Portal/Configuration.rst>`_
+    2. `CTERA Edge Filer <UserGuides/Edge/Configuration.rst>`_, including remote access.
 2. Managing `Data Discovery and Migration Jobs <UserGuides/Edge/Migration.rst>`_
 3. File Data Management APIs for `CTERA Edge Filer <UserGuides/Edge/Index.rst>`_ and `CTERA Portal <UserGuides/Portal/Index.rst>`_.
 4. Data Services Framework:
-* `Subscribing to File System Notifications <UserGuides/DataServices/NotificationService.rst>`_
-* `CTERA Direct IO <UserGuides/DataServices/DirectIO.rst>`_, enabling parallel high-performnace retrieval directly from object storage.
+    1. `Subscribing to File System Notifications <UserGuides/DataServices/NotificationService.rst>`_
+    2. `CTERA Direct IO <UserGuides/DataServices/DirectIO.rst>`_, enabling parallel high-performnace retrieval directly from object storage.
 
 .. _cterasdk-installation:
 
