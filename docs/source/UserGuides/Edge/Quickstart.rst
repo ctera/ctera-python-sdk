@@ -4,7 +4,7 @@ Quickstart
 
 Eager to get started? This page gives a good introduction in how to get started with the CTERA SDK and the Edge Filer APIs.
 
-First, make sure that aiohttp is :ref:`installed<cterasdk-installation>` and up-to-date
+First, make sure that cterasdk is :ref:`installed<cterasdk-installation>` and up-to-date
 
 Let’s get started with some simple examples.
 

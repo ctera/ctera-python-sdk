@@ -11,5 +11,6 @@ Submodules
 
 .. toctree::
 
-   cterasdk.clients.tracers.logging_tracers
-   cterasdk.clients.tracers.session_tracers
+   cterasdk.clients.tracers.logger
+   cterasdk.clients.tracers.postman
+   cterasdk.clients.tracers.session

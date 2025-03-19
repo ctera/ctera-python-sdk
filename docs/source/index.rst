@@ -6,18 +6,20 @@ The CTERA SDK for Python provides developers with powerful tools to automate the
 of the CTERA Global File System, streamline data management tasks,
 and seamlessly integrate CTERA's global namespace with their applications.
 
-Current version is |release|.
-
 .. _GitHub: https://github.com/ctera/ctera-python-sdk
 
 
 Key Features
 ============
 
-- Supports configuration management for CTERA Drive, Edge Filer and Portal, including remote access
-- Supports managing CTERA Migrate
-- Supports file access for CTERA Edge Filer and Portal
-
+1. Configuration Management:
+    1. `Portal Management <UserGuides/Portal/Administration.html>`_
+    2. `Edge Filer Management <UserGuides/Edge/Configuration.html>`_, including remote access.
+2. Managing `Data Discovery and Migration Jobs <UserGuides/Edge/Migration.html>`_
+3. File Data Management APIs for `CTERA Edge Filer <UserGuides/Edge/Index.html>`_ and `CTERA Portal <UserGuides/Portal/Index.html>`_.
+4. Data Services Framework:
+    1. `Subscribing to File System Notifications <UserGuides/DataServices/NotificationService.html>`_
+    2. `CTERA Direct IO <UserGuides/DataServices/DirectIO.html>`_, enabling parallel high-performnace retrieval directly from object storage.
 
 .. _cterasdk-installation:
 
