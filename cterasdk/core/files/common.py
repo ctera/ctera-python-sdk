@@ -107,8 +107,16 @@ class FetchResourcesParamBuilder:
         self.param.depth = depth  # pylint: disable=attribute-defined-outside-init
         return self
 
+    def searchCriteria(self, criteria):
+        self.param.searchCriteria = criteria  # pylint: disable=attribute-defined-outside-init
+        return self
+
     def include_deleted(self):
         self.param.includeDeleted = True  # pylint: disable=attribute-defined-outside-init
+        return self
+
+    def limit(self, limit):
+        self.param.limit = limit
         return self
 
     def build(self):

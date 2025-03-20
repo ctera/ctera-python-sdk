@@ -147,6 +147,22 @@ Create Public Link
 
    user.files.public_link('My Files/Documents/Sample.docx', 'RW', 45)
 
+
+Create Permalink
+================
+
+.. automethod:: cterasdk.core.files.browser.FileBrowser.permalink
+   :noindex:
+
+.. code:: python
+
+   """Create permalink to a file"""
+   user.files.permalink('My Files/Documents/Sample.docx')
+
+   """Create permalink to a folder"""
+   user.files.permalink('My Files/Documents')
+
+
 Create Directories
 ==================
 

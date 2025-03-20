@@ -2,11 +2,15 @@ import logging
 from . import common
 
 
-def listdir(core, path, depth=None, include_deleted=False):
+def listdir(core, path, depth=None, include_deleted=False, criteria=None, limit=None):
     depth = depth if depth is not None else 1
     builder = common.FetchResourcesParamBuilder().root(path.encoded_fullpath()).depth(depth)
     if include_deleted:
         builder.include_deleted()
+    if criteria:
+        builder.searchCriteria(criteria)
+    if limit:
+        builder.limit(limit)
     param = builder.build()
     if depth > 0:
         return common.objects_iterator(core, param)
