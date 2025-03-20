@@ -16,7 +16,7 @@ Key Features
     1. `Portal Management <UserGuides/Portal/Administration.html>`_
     2. `Edge Filer Management <UserGuides/Edge/Configuration.html>`_, including remote access.
 2. Managing `Data Discovery and Migration Jobs <UserGuides/Edge/Migration.html>`_
-3. File Data Management APIs for `CTERA Edge Filer <UserGuides/Edge/Index.html>`_ and `CTERA Portal <UserGuides/Portal/Index.html>`_.
+3. File Data Management APIs for `CTERA Edge Filer <UserGuides/Edge/Files.html>`_ and `CTERA Portal <UserGuides/Portal/Files.html>`_.
 4. Data Services Framework:
     1. `Subscribing to File System Notifications <UserGuides/DataServices/NotificationService.html>`_
     2. `CTERA Direct IO <UserGuides/DataServices/DirectIO.html>`_, enabling parallel high-performnace retrieval directly from object storage.

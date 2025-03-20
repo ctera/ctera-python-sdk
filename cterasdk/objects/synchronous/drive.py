@@ -19,7 +19,7 @@ class Clients:
             drive._Portal = Portal
             drive.default.close()
             drive._ctera_session.start_remote_session(Portal.session())
-            self.api = drive.default.clone(clients.API, EndpointBuilder.new(drive.base), authenticator=lambda *_: True)
+            self.api = Portal.default.clone(clients.API, EndpointBuilder.new(drive.base), authenticator=lambda *_: True)
         else:
             self.api = drive.default.clone(clients.API, EndpointBuilder.new(drive.base, '/admingui/api'))
 
@@ -49,3 +49,7 @@ class Drive(Management):
     @property
     def _login_object(self):
         raise NotImplementedError("Logins to the 'Drive App' are not enabled.")
+
+    @property
+    def _omit_fields(self):
+        return super()._omit_fields + ['backup', 'cli', 'logs', 'services', 'support', 'sync']

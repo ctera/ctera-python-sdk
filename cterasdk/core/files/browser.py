@@ -1,7 +1,7 @@
 import logging
 
 import cterasdk.settings
-from ...exceptions import CTERAException
+from ...exceptions import CTERAException, ObjectNotFoundException
 from ..base_command import BaseCommand
 from . import io, common, shares, file_access
 
@@ -82,6 +82,18 @@ class FileBrowser(BaseCommand):
         if destination is None:
             raise ValueError('Copy destination was not specified.')
         return io.copy(self._core, *[self.get_object_path(path) for path in paths], destination=self.get_object_path(destination))
+
+    def permalink(self, path):
+        """
+        Get Permalink for Path.
+
+        :param str path: Path.
+        """
+        p = self.get_object_path(path)
+        contents =[e for e in io.listdir(self._core, p.parent(), 1, False, p.name(), 1)]
+        if contents and contents[0].name == p.name():
+            return contents[0].permalink
+        raise ObjectNotFoundException('File not found.', path)
 
     def get_object_path(self, elements):
         return common.get_object_path(self.base, elements)
