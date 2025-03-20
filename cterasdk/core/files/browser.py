@@ -90,7 +90,7 @@ class FileBrowser(BaseCommand):
         :param str path: Path.
         """
         p = self.get_object_path(path)
-        contents =[e for e in io.listdir(self._core, p.parent(), 1, False, p.name(), 1)]
+        contents = [e for e in io.listdir(self._core, p.parent(), 1, False, p.name(), 1)]  # pylint: disable=unnecessary-comprehension
         if contents and contents[0].name == p.name():
             return contents[0].permalink
         raise ObjectNotFoundException('File not found.', path)
