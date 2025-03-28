@@ -148,8 +148,8 @@ Create Public Link
    user.files.public_link('My Files/Documents/Sample.docx', 'RW', 45)
 
 
-Create Permalink
-================
+Get Permalink
+=============
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.permalink
    :noindex:
