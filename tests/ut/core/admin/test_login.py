@@ -19,6 +19,7 @@ class TestCoreLogin(base_admin.BaseCoreTest):
         self._username = TestCoreLogin._username
         self._password = TestCoreLogin._password
         self._role = TestCoreLogin._role
+        self._mock_close = self.patch_call("cterasdk.clients.synchronous.clients.Client.close")
 
     @staticmethod
     def _obtain_session_info(path):
@@ -51,3 +52,4 @@ class TestCoreLogin(base_admin.BaseCoreTest):
                 mock.call('/logout', {})
             ]
         )
+        self._mock_close.assert_called_once()

@@ -13,6 +13,7 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
         self._username = 'admin'
         self._password = 'password'
         self._version = '7.5.182.16'
+        self._mock_close = self.patch_call("cterasdk.clients.synchronous.clients.Client.close")
 
     def test_login_success(self):
         self._init_filer()
@@ -47,6 +48,7 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
             ]
         )
         self._filer.migrate.login.assert_called_once()  # pylint: disable=protected-access
+        self._mock_close.assert_called_once()
 
     def test_logout_failure_after_login_success(self):
         self._init_filer()

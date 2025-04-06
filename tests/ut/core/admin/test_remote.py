@@ -14,13 +14,11 @@ class TestCoreRemote(base_admin.BaseCoreTest):
         self._device_name = 'device-name'
         self._tenant_name = 'team-portal-name'
         self._device_portal = f'objs/21//TeamPortal/{self._tenant_name}'
-
         self._device_remote_access_url = "http://corp.gfs.ctera.me/devices/device-name"
-
         self._user_name = 'user'
         self._user_role = 'EndUser'
-
         self._sso_ticket = 'sso ticket'
+        self._mock_close = self.patch_call("cterasdk.clients.synchronous.clients.Client.close")
 
     def test_instantiation_of_remote_devices(self):
         filer_types = ['CloudPlug', 'C200', 'C400', 'C800', 'C800P', 'vGateway']
@@ -48,12 +46,12 @@ class TestCoreRemote(base_admin.BaseCoreTest):
                                                                  'vGateway', self._device_remote_access_url)
         self._init_global_admin(get_multi_response=get_multi_response, execute_response=self._sso_ticket)
         self._activate_portal_session()
-        portal_device = devices.Devices(self._global_admin).device(self._device_name)
-        portal_device.get = mock.MagicMock()
-        portal_device.remote_access()
+        device_api = self.patch_call('cterasdk.objects.synchronous.edge.Edge.api')
+        device = devices.Devices(self._global_admin).device(self._device_name)
+        device.remote_access()
         self._global_admin.api.execute.assert_called_once_with(f'/portals/{self._tenant_name}/devices/{self._device_name}',
                                                                'singleSignOn')
-        # portal_device.get.assert_called_once_with('/ssologin', {'ticket': self._sso_ticket})
+        device_api.get.assert_called_once_with('/ssologin', params={'ticket': self._sso_ticket})
 
     def _call_and_assert_instance_type(self, get_multi_response, instance_type):
         self._init_global_admin(get_multi_response=get_multi_response)

@@ -1,5 +1,5 @@
-import os
 from unittest import mock
+from pathlib import Path
 
 from cterasdk.common.object import Object
 from cterasdk.core.files import io, common
@@ -28,7 +28,7 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
         src_dst_obj._classname = 'SrcDstParam'  # pylint: disable=protected-access
         src_path = self._get_object_path(src)
         src_dst_obj.src = src_path.fullpath()
-        src_dst_obj.dest = os.path.join(self._get_object_path(dst).fullpath(), src_path.name())
+        src_dst_obj.dest = Path(self._get_object_path(dst).fullpath()).joinpath(src_path.name()).as_posix()
         o.urls = [src_dst_obj]
         return o
 
