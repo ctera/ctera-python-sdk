@@ -95,6 +95,7 @@ Blocks API
     import aiofiles
     import cterasdk.settings
     from cterasdk import ctera_direct
+    from cterasdk.direct.exceptions import DirectIOError
 
     async def download(file_id, name):
         url = 'https://tenant.ctera.com'
@@ -105,9 +106,15 @@ Blocks API
             async with ctera_direct.client.DirectIO(url, access_key_id, secret_access_key) as client:
                 futures = await client.blocks(file_id)
                 for future in asyncio.as_completed(futures):
-                    block = await future
-                    await f.seek(block.offset)
-                    await f.write(block.data)
+                    try:
+                        block = await future
+                        await f.seek(block.offset)
+                        await f.write(block.data)
+                    except DirectIOError as error:
+                        # Handle specific errors based on error type
+                        print(f"Error downloading block: {error}")
+                        # Decide whether to retry, abort, or continue based on error type
+                        raise  # Re-raise to abort the download, or handle differently
 
     if __name__ == '__main__':
         cterasdk.settings.sessions.ctera_direct.api.ssl = False
@@ -116,7 +123,10 @@ Blocks API
         file_id = 12345
 
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(download(12345, 'example.pdf'))
+        try:
+            loop.run_until_complete(download(12345, 'example.pdf'))
+        except Exception as e:
+            print(f"Download failed: {e}")
 
 
 Streamer API

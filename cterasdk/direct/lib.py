@@ -46,7 +46,13 @@ async def get_object(client, file_id, chunk):
         logging.getLogger('cterasdk.direct').debug('Downloading Block. %s', parameters)
         try:
             response = await client.get(chunk.url)
-            return await response.read()
+            try:
+                return await response.read()
+            except Exception as read_error:
+                # Log detailed information about read errors
+                error_details = f"{read_error.__class__.__name__}: {str(read_error)}"
+                logging.getLogger('cterasdk.direct').error('Failed to read response data: %s', error_details)
+                raise IOError(error_details) from read_error
         except ConnectionError:
             logging.getLogger('cterasdk.direct').error('Failed to download block. Connection error. %s', parameters)
             raise DownloadConnectionError(file_id, chunk)
@@ -54,10 +60,14 @@ async def get_object(client, file_id, chunk):
             logging.getLogger('cterasdk.direct').error('Failed to download block. Timed out. %s', parameters)
             raise DownloadTimeout(file_id, chunk)
         except IOError as error:
-            logging.getLogger('cterasdk.direct').error('Failed to download block. IO Error. %s', parameters)
+            # Include more detailed information in the log
+            error_details = f"{error.__class__.__name__}: {str(error)}"
+            logging.getLogger('cterasdk.direct').error('Failed to download block. IO Error: %s. %s', error_details, parameters)
             raise DownloadError(error, file_id, chunk)
         except ClientResponseException as error:
-            logging.getLogger('cterasdk.direct').error('Failed to download block. Error. %s', parameters)
+            # Include more detailed information in the log
+            error_details = f"Status: {error.response.status}, Message: {error.response.message}"
+            logging.getLogger('cterasdk.direct').error('Failed to download block. Error: %s. %s', error_details, parameters)
             raise DownloadError(error.response, file_id, chunk)
 
     return await retry(get_object_coro)
@@ -146,7 +156,10 @@ async def process_chunks(client, file_id, chunks, encryption_key, semaphore=None
     logging.getLogger('cterasdk.direct').debug('Processing Blocks. %s', parameters)
     futures = []
     for chunk in chunks:
-        futures.append(asyncio.create_task(process_chunk(client, file_id, chunk, encryption_key, semaphore)))
+        task = asyncio.create_task(process_chunk(client, file_id, chunk, encryption_key, semaphore))
+        # Ensure exceptions are not lost when task is garbage collected before being awaited
+        task.add_done_callback(lambda f: f.exception() if f.exception() else None)
+        futures.append(task)
     return futures
 
 

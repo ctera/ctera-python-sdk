@@ -102,6 +102,12 @@ class DownloadError(BlockError):
 
     def __init__(self, strerror, file_id, chunk):
         super().__init__(errno.EIO, strerror, file_id, chunk)
+        # Store original error details
+        self.original_error = strerror
+        self.original_repr = repr(strerror)
+        
+    def __str__(self):
+        return f"{super().__str__()} - Original error: {self.original_repr}"
 
 
 class DownloadTimeout(BlockError):
