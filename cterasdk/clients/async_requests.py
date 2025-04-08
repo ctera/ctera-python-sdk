@@ -79,14 +79,11 @@ def decorate_stream_error(stream_reader):
         try:
             return await stream_reader(self, n)
         except aiohttp.ClientPayloadError as error:
-            # Log detailed information about the error
-            detailed_error = f"{error.__class__.__name__}: {str(error)}"
-            logging.getLogger('cterasdk.http').warning("Client payload error: %s", detailed_error)
-            # Create a more descriptive IOError that preserves the original error details
-            detailed_ioerror = IOError(f"{detailed_error}")
-            detailed_ioerror.original_error = error
-            detailed_ioerror.original_repr = repr(error)
-            raise detailed_ioerror
+            error_message = f"{error.__class__.__name__}: {str(error)}"
+            logging.getLogger('cterasdk.http').warning(error_message)
+            io_error = IOError(error)
+            io_error.original_error = error
+            raise io_error
     return wrapper
 
 

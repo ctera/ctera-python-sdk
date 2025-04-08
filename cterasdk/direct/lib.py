@@ -48,11 +48,9 @@ async def get_object(client, file_id, chunk):
             response = await client.get(chunk.url)
             try:
                 return await response.read()
-            except Exception as read_error:
-                # Log detailed information about read errors
-                error_details = f"{read_error.__class__.__name__}: {str(read_error)}"
-                logging.getLogger('cterasdk.direct').error('Failed to read response data: %s', error_details)
-                raise IOError(error_details) from read_error
+            except Exception as error:
+                logging.getLogger('cterasdk.direct').error('Failed to read response data. %s', {'error': f"{error.__class__.__name__}: {str(error)}"})
+                raise IOError(error)
         except ConnectionError:
             logging.getLogger('cterasdk.direct').error('Failed to download block. Connection error. %s', parameters)
             raise DownloadConnectionError(file_id, chunk)
@@ -60,14 +58,10 @@ async def get_object(client, file_id, chunk):
             logging.getLogger('cterasdk.direct').error('Failed to download block. Timed out. %s', parameters)
             raise DownloadTimeout(file_id, chunk)
         except IOError as error:
-            # Include more detailed information in the log
-            error_details = f"{error.__class__.__name__}: {str(error)}"
-            logging.getLogger('cterasdk.direct').error('Failed to download block. IO Error: %s. %s', error_details, parameters)
+            logging.getLogger('cterasdk.direct').error('Failed to download block. IO Error. %s', parameters)
             raise DownloadError(error, file_id, chunk)
         except ClientResponseException as error:
-            # Include more detailed information in the log
-            error_details = f"Status: {error.response.status}, Message: {error.response.message}"
-            logging.getLogger('cterasdk.direct').error('Failed to download block. Error: %s. %s', error_details, parameters)
+            logging.getLogger('cterasdk.direct').error('Failed to download block. Error. %s', parameters)
             raise DownloadError(error.response, file_id, chunk)
 
     return await retry(get_object_coro)
