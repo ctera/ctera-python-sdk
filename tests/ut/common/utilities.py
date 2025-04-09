@@ -1,4 +1,18 @@
 import queue
+import unittest
+
+
+def patch_call(ut, module_path, **patch_kwargs):
+    """Mock patch a given path as a call and schedule proper mock cleanup."""
+    call_patcher = unittest.mock.patch(module_path, **patch_kwargs)
+    ut.addCleanup(call_patcher.stop)
+    return call_patcher.start()
+
+
+def patch_property(ut, module_path, **patch_kwargs):
+    """Mock patch a given path as a property and schedule proper mock cleanup."""
+    patch_kwargs.update({'new_callable': unittest.mock.PropertyMock})
+    return ut.patch_call(module_path, **patch_kwargs)
 
 
 def assert_equal_objects(self, actual_param, expected_param):
