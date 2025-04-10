@@ -23,7 +23,8 @@ class TestCoreLogs(base_admin.BaseCoreTest):
         origin_type_filter = base_admin.BaseCoreTest._create_filter(query.FilterType.String, 'originType',
                                                                     query.Restriction.EQUALS, OriginType.Portal)
         expected_query_params = base_admin.BaseCoreTest._create_query_params(filters=[origin_type_filter],
-                                                                             start_from=50, count_limit=50, topic=LogTopic.System, minSeverity=Severity.INFO)
+                                                                             start_from=50, count_limit=50, topic=LogTopic.System,
+                                                                             minSeverity=Severity.INFO)
         actual_query_params = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_query_params, expected_query_params)
 
@@ -43,7 +44,9 @@ class TestCoreLogs(base_admin.BaseCoreTest):
         after_t_time = TestCoreLogs.format_t_time(yesterday, '00:00:00')
         after_filter = base_admin.BaseCoreTest._create_filter(query.FilterType.DateTime, 'time',
                                                               query.Restriction.GREATER_THAN, after_t_time)
-        expected_query_params = base_admin.BaseCoreTest._create_query_params(filters=[origin_type_filter, before_filter, after_filter], start_from=50, count_limit=50, topic=LogTopic.System, minSeverity=Severity.ERROR)
+        expected_query_params = base_admin.BaseCoreTest._create_query_params(filters=[origin_type_filter, before_filter, after_filter],
+                                                                             start_from=50, count_limit=50, topic=LogTopic.System,
+                                                                             minSeverity=Severity.ERROR)
         actual_query_params = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_query_params, expected_query_params)
 

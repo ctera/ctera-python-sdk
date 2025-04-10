@@ -128,7 +128,8 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
             expire_in if expire_in is not None else 30
         )
         actual_ctera_path = ln_mock.call_args[0][1]
-        self.assertEqual(actual_ctera_path.fullpath(), TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, mklink_args['path']))
+        self.assertEqual(actual_ctera_path.fullpath(), TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path,
+                                                                                                  mklink_args['path']))
 
     @staticmethod
     def _create_expected_path(base, path):
