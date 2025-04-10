@@ -19,7 +19,7 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self._direct._client._client.get.side_effect = ConnectionError  # pylint: disable=protected-access
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(ctera_direct.exceptions.DownloadConnectionError) as error:
-                await get_object(self._direct._client._client, self._file_id, chunk)
+                await get_object(self._direct._client._client, self._file_id, chunk)  # pylint: disable=protected-access
         self.assertEqual(error.exception.errno, errno.ENETRESET)
         self.assertEqual(error.exception.strerror, 'Failed to download block. Connection error')
         self.assertEqual(error.exception.filename, self._file_id)
@@ -30,7 +30,7 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self._direct._client._client.get.side_effect = asyncio.TimeoutError  # pylint: disable=protected-access
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(ctera_direct.exceptions.DownloadTimeout) as error:
-                await get_object(self._direct._client._client, self._file_id, chunk)
+                await get_object(self._direct._client._client, self._file_id, chunk)  # pylint: disable=protected-access
         self.assertEqual(error.exception.errno, errno.ETIMEDOUT)
         self.assertEqual(error.exception.strerror, 'Failed to download block. Timed out')
         self.assertEqual(error.exception.filename, self._file_id)
@@ -46,7 +46,7 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self._direct._client._client.get.return_value = munch.Munch({'read': stream_reader})  # pylint: disable=protected-access
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(ctera_direct.exceptions.DownloadError) as error:
-                await get_object(self._direct._client._client, self._file_id, chunk)
+                await get_object(self._direct._client._client, self._file_id, chunk)  # pylint: disable=protected-access
         self.assertEqual(error.exception.errno, errno.EIO)
         self.assertEqual(str(error.exception.strerror), message)
         self.assertEqual(error.exception.filename, self._file_id)
@@ -59,7 +59,7 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         )
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(ctera_direct.exceptions.DownloadError) as error:
-                await get_object(self._direct._client._client, self._file_id, chunk)
+                await get_object(self._direct._client._client, self._file_id, chunk)  # pylint: disable=protected-access
         self.assertEqual(error.exception.errno, errno.EIO)
         self.assertEqual(error.exception.strerror.status, 500)
         self.assertEqual(error.exception.filename, self._file_id)
