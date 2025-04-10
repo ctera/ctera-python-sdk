@@ -198,13 +198,13 @@ async def persist_cursor(save_cursor, cursor):
     :param callback save_cursor: Asynchronous callback function to persist the cursor.
     :param str cursor: Cursor
     """
-    logging.getLogger('cterasdk.metadata.connector').debug("Persisting Cursor. Calling function: '%s'", save_cursor.__name__)
+    logging.getLogger('cterasdk.metadata.connector').debug("Persisting Cursor. Calling function: '%s'", save_cursor)
     try:
         await save_cursor(cursor)
         logging.getLogger('cterasdk.metadata.connector').debug("Called Persist Cursor Function.")
     except Exception:  # pylint: disable=broad-exception-caught
         logging.getLogger('cterasdk.metadata.connector').error("An error occurred while trying to persist cursor. Function: '%s'",
-                                                               save_cursor.__name__)
+                                                               save_cursor)
 
 
 async def on_connection_error(error):
