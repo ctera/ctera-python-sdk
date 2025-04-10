@@ -36,14 +36,14 @@ class TestAsyncCoreNotifications(base_core.BaseAsyncCoreTest):
         self._global_admin.notifications.service.run(queue, self._save_cursor, cloudfolders=self._cloudfolders, cursor=self._cursor)
 
         # Process Events
-        await TestAsyncCoreNotifications._process_events(queue, len(self._get.return_value.objects))
+        await self._process_events(queue, len(self._get.return_value.objects))
 
         # Stop Service
         await self._global_admin.notifications.service.stop()
 
         self._save_cursor.assert_called_once_with(TestAsyncCoreNotifications._new_cursor)
 
-    async def _process_events(queue, count):
+    async def _process_events(self, queue, count):  # pylint: disable=no-self-use
         object_counter = 0
         while object_counter < count:
             await queue.get()
