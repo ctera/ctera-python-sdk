@@ -27,7 +27,7 @@ class TestCoreServers(base_admin.BaseCoreTest):
             servers.Servers(self._global_admin).list_servers()
             query_iterator_mock.assert_called_once_with(self._global_admin, '/servers', mock.ANY)
             expected_query_params = base_admin.BaseCoreTest._create_query_params(include=servers.Servers.default,
-                                                                                start_from=0, count_limit=50)
+                                                                                 start_from=0, count_limit=50)
             actual_query_params = query_iterator_mock.call_args[0][2]
             self._assert_equal_objects(actual_query_params, expected_query_params)
 

@@ -2,9 +2,6 @@ from unittest import mock
 import uuid
 import munch
 import asyncio
-from cterasdk.asynchronous.core import notifications
-from cterasdk.core.types import CloudFSFolderFindingHelper, UserAccount
-from cterasdk import exceptions
 from tests.ut.aio import base_core
 
 
@@ -29,7 +26,7 @@ class TestAsyncCoreNotifications(base_core.BaseAsyncCoreTest):
         forward_events.assert_called_once_with(mock.ANY, queue, self._save_cursor)
         self.assertEqual(retrieve_events.call_args[0][0], forward_events.call_args[0][0])
         self.assertGreater(retrieve_events.call_args[0][0].maxsize, 1)
-    
+
     async def test_retrieve_events(self):
         queue = asyncio.Queue()
         self._changes.return_value = True

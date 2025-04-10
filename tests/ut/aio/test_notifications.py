@@ -60,8 +60,9 @@ class TestAsyncCoreNotifications(base_core.BaseAsyncCoreTest):
     async def test_get_notifications_cloudfolders_finder(self):
         self._init_global_admin(post_response=TestAsyncCoreNotifications._create_cursor_response(False, self._cursor, []))
         self._global_admin.cloudfs.drives.find = mock.AsyncMock()
-        
+
         cloudfolders = [munch.Munch({'uid': self._cloudfolder_id})]
+
         async def generator():
             for cloudfolder in cloudfolders:
                 yield cloudfolder

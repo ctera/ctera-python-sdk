@@ -23,6 +23,3 @@ class TestAsyncCoreUsers(base_core.BaseAsyncCoreTest):
         self._global_admin.users.get.assert_called_once_with(self._owner, ['uid'])
         query_iterator_mock.assert_called_once_with(self._global_admin, '/cloudDrives', mock.ANY)
         self.assert_equal_objects(query_iterator_mock.call_args[0][2], expected_param)
-
-        
-        

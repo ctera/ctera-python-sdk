@@ -17,7 +17,7 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
     async def test_retries_on_error(self):
         self._direct._client._api.get.return_value = munch.Munch({'chunks': None})
         with mock.patch('asyncio.sleep'):
-            with self.assertRaises(ctera_direct.exceptions.BlocksNotFoundError) as error:
+            with self.assertRaises(ctera_direct.exceptions.BlocksNotFoundError):
                 await self._direct.metadata(self._file_id)
         self._direct._client._api.get.assert_has_calls(
             self._retries * [

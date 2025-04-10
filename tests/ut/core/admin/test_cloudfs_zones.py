@@ -45,8 +45,9 @@ class TestCoreZones(base_admin.BaseCoreTest):
         ret = cloudfs.Zones(self._global_admin).get(self._zone_name)
         self._global_admin.api.execute.assert_called_once_with('', 'getZonesDisplayInfo', mock.ANY)
         query_filter = base_admin.BaseCoreTest._create_filter(query.FilterType.String, 'name', query.Restriction.EQUALS, self._zone_name)
-        expected_param = base_admin.BaseCoreTest._create_query_params(include_classname=True, start_from=0, count_limit=1,
-                                                                     filters=[query_filter], or_filter=False)
+        expected_param = base_admin.BaseCoreTest._create_query_params(include_classname=True, start_from=0,
+                                                                      count_limit=1, filters=[query_filter],
+                                                                      or_filter=False)
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret.zoneId, self._zone_id)
@@ -60,8 +61,9 @@ class TestCoreZones(base_admin.BaseCoreTest):
 
         self._global_admin.api.execute.assert_called_once_with('', 'getZonesDisplayInfo', mock.ANY)
         query_filter = base_admin.BaseCoreTest._create_filter(query.FilterType.String, 'name', query.Restriction.EQUALS, self._zone_name)
-        expected_param = base_admin.BaseCoreTest._create_query_params(include_classname=True, start_from=0, count_limit=1,
-                                                                     filters=[query_filter], or_filter=False)
+        expected_param = base_admin.BaseCoreTest._create_query_params(include_classname=True, start_from=0,
+                                                                      count_limit=1, filters=[query_filter],
+                                                                      or_filter=False)
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual('Zone not found', error.exception.message)

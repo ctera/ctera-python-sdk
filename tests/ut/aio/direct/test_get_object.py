@@ -39,8 +39,10 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
     async def test_response_read_io_error(self):
         message = 'Error reading block.'
         chunk = BaseDirectMetadata._create_chunk()
+
         async def stream_reader():
             raise IOError(message)
+
         self._direct._client._client.get.return_value = munch.Munch({'read': stream_reader})
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(ctera_direct.exceptions.DownloadError) as error:

@@ -27,7 +27,7 @@ class TestAsyncCoreLogin(base_core.BaseAsyncCoreTest):
     async def test_login_failure(self):
         self._init_global_admin()
         self._global_admin.v1.api.form_data = mock.AsyncMock(side_effect=exceptions.ClientResponseException(Object()))
-        with self.assertRaises(exceptions.CTERAException) as error:
+        with self.assertRaises(exceptions.CTERAException):
             await self._global_admin.login(self._username, self._password)
 
     async def test_logout_success_after_login(self):

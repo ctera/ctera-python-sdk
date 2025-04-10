@@ -52,7 +52,7 @@ class TestCoreTemplates(base_admin.BaseCoreTest):
             templates.Templates(self._global_admin).list_templates()
             query_iterator_mock.assert_called_once_with(self._global_admin, '/deviceTemplates', mock.ANY)
             expected_query_params = base_admin.BaseCoreTest._create_query_params(include=templates.Templates.default,
-                                                                                start_from=0, count_limit=50)
+                                                                                 start_from=0, count_limit=50)
             actual_query_params = query_iterator_mock.call_args[0][2]
             self._assert_equal_objects(actual_query_params, expected_query_params)
 
