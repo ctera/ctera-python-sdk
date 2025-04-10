@@ -1573,7 +1573,7 @@ Timezone
 
 .. code:: python
 
-   admin.settings.global_settings.set_timzeone('(GMT-05:00) Eastern Time (US , Canada)')
+   admin.settings.global_settings.set_timezone('(GMT-05:00) Eastern Time (US , Canada)')
 
 
 Virtual Portal Settings
