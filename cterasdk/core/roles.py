@@ -48,8 +48,11 @@ class Roles(BaseCommand):
         :returns: Updated role settings
         :rtype: cterasdk.core.types.RoleSettings
         """
+        name = role
         role = Roles.find(role)
         if role:
+            if settings.sudo:
+                settings = RoleSettings(name=name, **{attr: True for attr in settings.__dict__.keys() if attr != 'name'})
             logging.getLogger('cterasdk.core').info('Updating role settings. %s', {'role': role})
             response = self._core.api.put(f'/rolesSettings/{role}', settings.to_server_object())
             logging.getLogger('cterasdk.core').info('Role settings updated. %s', {'role': role})
