@@ -31,7 +31,7 @@ class Tasks(BaseCommand):
         :param str ref: Task reference
         """
         task = Task(self._core, ref)
-        return task.status()
+        return task.get_task_status()
 
     def wait(self, ref, retries=100, seconds=1):
         """

@@ -38,7 +38,7 @@ class Tasks(BaseCommand):
         :param str ref: Task reference
         """
         task = Task(self._edge, ref)
-        return task.status()
+        return task.get_task_status()
 
     def running(self):
         """
