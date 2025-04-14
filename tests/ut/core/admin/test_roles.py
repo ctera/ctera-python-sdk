@@ -59,5 +59,8 @@ class TestCoreRoles(base_admin.BaseCoreTest):
             'canManageAllFolders': True,
             'canManagePlans': True,
             'canManageUsers': True,
-            'canManageLogSettings': False
+            'canManageLogSettings': False,
+            'allowFoldersFilesPermanentDelete': False,
+            'canManageLegalHolds': False,
+            'canManageComplianceSetting': False
         })
