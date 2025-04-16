@@ -18,7 +18,10 @@ def create_callback_function(core, path, name=None, *, callback_response=None):
     async def database(core, path, name, param):
         return callback_response(await core.v1.api.database(path, name, param))
 
-    return Command(database, core, path, name or 'query')
+    async def execute(core, path, name, param):
+        return callback_response(await core.v1.api.execute(path, name, param))
+
+    return Command(execute if name else database, core, path, name or 'query')
 
 
 def iterator(core, path, param=None, name=None, *, callback_response=None):
