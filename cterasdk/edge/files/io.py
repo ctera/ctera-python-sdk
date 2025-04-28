@@ -1,24 +1,23 @@
 import logging
 from ...exceptions import CTERAException
-from ...common import Object
-from . import common
+from ...cio import edge as edge_parameters
+from ...cio import exceptions
 
 
 def listdir(edge, path):
-    param = Object()
-    param.path = path
+    param = edge_parameters.create_listdir_parameter(path)
     return edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
 
 
 def mkdir(edge, path):
-    directory = path.fullpath()
+    directory = path.absolute
     logging.getLogger('cterasdk.edge').info('Creating directory. %s', {'path': directory})
     try:
-        edge.io.mkdir(path.fullpath())
+        edge.io.mkdir(path.absolute)
     except CTERAException as error:
         try:
-            common.raise_for_status(error.response.message.msg, directory)
-        except common.ItemExists:
+            edge_parameters.raise_for_status(error.response.message.msg, directory)
+        except exceptions.ResourceExistsError:
             logging.getLogger('cterasdk.edge').info('Directory already exists. %s', {'path': directory})
     logging.getLogger('cterasdk.edge').info('Directory created. %s', {'path': directory})
     return directory
@@ -27,29 +26,29 @@ def mkdir(edge, path):
 def makedirs(edge, path):
     directories = path.parts()
     for i in range(1, len(directories) + 1):
-        path = common.get_object_path(path.base, '/'.join(directories[:i]))
+        path = edge_parameters.EdgePath(path.scope, '/'.join(directories[:i]))
         try:
             mkdir(edge, path)
-        except common.Forbidden:
+        except exceptions.RestrictedPathError:
             pass
 
 
 def copy(edge, path, destination=None, overwrite=False):
-    destination = destination.joinpath(path.name()).fullpath()
-    logging.getLogger('cterasdk.edge').info('Copying. %s', {'from': path.fullpath(), 'to': destination})
-    edge.io.copy(path.fullpath(), destination, overwrite=overwrite)
-    logging.getLogger('cterasdk.edge').info('Copied. %s', {'from': path.fullpath(), 'to': destination})
+    destination = destination.join(path.name).absolute
+    logging.getLogger('cterasdk.edge').info('Copying. %s', {'from': path.absolute, 'to': destination})
+    edge.io.copy(path.absolute, destination, overwrite=overwrite)
+    logging.getLogger('cterasdk.edge').info('Copied. %s', {'from': path.absolute, 'to': destination})
 
 
 def move(edge, path, destination=None, overwrite=False):
-    destination = destination.joinpath(path.name()).fullpath()
-    logging.getLogger('cterasdk.edge').info('Moving. %s', {'from': path.fullpath(), 'to': destination})
-    edge.io.move(path.fullpath(), destination, overwrite=overwrite)
-    logging.getLogger('cterasdk.edge').info('Moved. %s', {'from': path.fullpath(), 'to': destination})
+    destination = destination.join(path.name).absolute
+    logging.getLogger('cterasdk.edge').info('Moving. %s', {'from': path.absolute, 'to': destination})
+    edge.io.move(path.absolute, destination, overwrite=overwrite)
+    logging.getLogger('cterasdk.edge').info('Moved. %s', {'from': path.absolute, 'to': destination})
 
 
 def remove(edge, *paths):
     for path in paths:
-        logging.getLogger('cterasdk.edge').info('Deleting object. %s', {'path': path.fullpath()})
-        edge.io.delete(path.fullpath())
-        logging.getLogger('cterasdk.edge').info('Object deleted. %s', {'path': path.fullpath()})
+        logging.getLogger('cterasdk.edge').info('Deleting object. %s', {'path': path.absolute})
+        edge.io.delete(path.absolute)
+        logging.getLogger('cterasdk.edge').info('Object deleted. %s', {'path': path.absolute})

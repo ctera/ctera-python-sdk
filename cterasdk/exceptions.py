@@ -76,13 +76,3 @@ class InputError(CTERAException):
 
 class ConsentException(CTERAException):
     """Consent Exception"""
-
-
-class RemoteFileSystemException(CTERAException):
-    pass
-
-
-class RemoteDirectoryNotFound(RemoteFileSystemException):
-
-    def __init__(self, path):
-        super().__init__('Could not find remote directory', None, path=path)

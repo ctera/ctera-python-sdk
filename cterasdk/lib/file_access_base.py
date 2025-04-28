@@ -20,7 +20,7 @@ class FileAccessBase(ABC):
         directory, filename = self._split_destination(
             destination,
             self._filesystem.compute_zip_file_name,
-            cloud_directory=cloud_directory.fullpath(),
+            cloud_directory=cloud_directory.absolute,
             files=files
         )
         handle = self._get_zip_file_handle(cloud_directory, files)
@@ -77,5 +77,5 @@ class FileAccessBase(ABC):
         else:
             directory = self._filesystem.downloads_directory()
         if filename is None:
-            filename = filename_resolver(**filename_resolver_kwargs)
+            filename = filename_resolver if isinstance(filename_resolver, str) else filename_resolver(**filename_resolver_kwargs)
         return directory, filename

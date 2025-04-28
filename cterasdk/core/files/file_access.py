@@ -1,14 +1,15 @@
 
-from . import common
+from . import io
+from ...cio.core import CorePath
 from ...common import Object
 from ...lib import FileAccessBase
-from ...exceptions import RemoteFileSystemException
+from ...cio import exceptions
 
 
 class FileAccess(FileAccessBase):
 
     def _get_single_file_url(self, path):
-        return path.relative
+        return path.reference
 
     def _get_multi_file_url(self, cloud_directory, files):
         return str(self._get_cloud_folder_uid(cloud_directory))
@@ -19,7 +20,7 @@ class FileAccess(FileAccessBase):
 
     def _get_multi_file_object(self, cloud_directory, files):
         files_obj = Object()
-        files_obj.paths = ['/'.join([cloud_directory.fullpath(), filename]) for filename in files]
+        files_obj.paths = ['/'.join([cloud_directory.absolute, filename]) for filename in files]
         files_obj.snapshot = None
         files_obj.password = None
         files_obj.portalName = None
@@ -33,16 +34,16 @@ class FileAccess(FileAccessBase):
         return dict(
             name=local_file_info['name'],
             Filename=local_file_info['name'],
-            fullpath=self._ctera_host.io.builder(common.get_object_path(dest_path.relative,  # pylint: disable=protected-access
-                                                                        local_file_info['name']).encoded_fullpath()),
-            fileSize=local_file_info['size'],
-            file=fd
-        )
+            fullpath=self._ctera_host.io.builder(CorePath(dest_path.reference,  # pylint: disable=protected-access
+                                                          local_file_info['name']).absolute_encode),
+                                                          fileSize=local_file_info['size'],
+                                                          file=fd
+            )
 
     def _get_cloud_folder_uid(self, path):
-        resource_info = common.get_resource_info(self._ctera_host, path)
+        resource_info = io.root(self._ctera_host, path)
         if not resource_info.isFolder:
-            raise RemoteFileSystemException('The destination path is not a directory', None, path=path.fullpath())
+            raise exceptions.RemoteStorageException('The destination path is not a directory', None, path=path.absolute)
         return resource_info.cloudFolderInfo.uid
 
     def _get_zip_file_handle(self, cloud_directory, files):

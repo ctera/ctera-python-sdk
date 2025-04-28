@@ -1,5 +1,6 @@
 from ..base_command import BaseCommand
-from . import io, common, file_access
+from ...cio.edge import EdgePath
+from . import io, file_access
 
 
 class FileBrowser(BaseCommand):
@@ -99,4 +100,4 @@ class FileBrowser(BaseCommand):
 
     @staticmethod
     def get_object_path(path):
-        return common.get_object_path('/', path)
+        return EdgePath('/', path)

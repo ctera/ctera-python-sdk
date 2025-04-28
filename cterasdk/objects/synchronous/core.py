@@ -21,6 +21,7 @@ from ...core import domains
 from ...core import files
 from ...core import firmwares
 from ...core import groups
+from ...core import impersonate
 from ...core import kms
 from ...core import licenses
 from ...core import login
@@ -158,6 +159,7 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
         self.messaging = messaging.Messaging(self)
         self.portals = portals.Portals(self)
         self.servers = servers.Servers(self)
+        self.sessions = impersonate.Impersonate(self)
         self.setup = setup.Setup(self)
         self.ssl = ssl.SSL(self)
         self.startup = startup.Startup(self)
@@ -170,7 +172,7 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
     @property
     def _omit_fields(self):
         return super()._omit_fields + ['antivirus', 'buckets', 'cli', 'kms', 'licenses', 'mail', 'messaging', 'portals', 'servers',
-                                       'setup', 'ssl', 'startup', 'syslog']
+                                       'sessions', 'setup', 'ssl', 'startup', 'syslog']
 
 
 class ServicesPortal(Portal):

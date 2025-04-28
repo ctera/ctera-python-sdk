@@ -5,7 +5,7 @@ from ...lib import FileAccessBase
 class FileAccess(FileAccessBase):
 
     def _get_single_file_url(self, path):
-        return path.fullpath()
+        return path.absolute
 
     def _get_multi_file_url(self, cloud_directory, files):
         return '/admingui/api/status/fileManager/zip'
@@ -16,7 +16,7 @@ class FileAccess(FileAccessBase):
 
     def _get_multi_file_object(self, cloud_directory, files):
         files_obj = Object()
-        files_obj.paths = ['/'.join([cloud_directory.fullpath(), filename]) for filename in files]
+        files_obj.paths = ['/'.join([cloud_directory.absolute, filename]) for filename in files]
         files_obj.snapshot = Object()
         files_obj._classname = 'BackupRepository'  # pylint: disable=protected-access
         files_obj.snapshot.location = 1
@@ -30,7 +30,7 @@ class FileAccess(FileAccessBase):
     def _get_upload_form(self, local_file_info, fd, dest_path):
         return dict(
             name=local_file_info['name'],
-            fullpath=f'{dest_path.fullpath()}/{local_file_info["name"]}',
+            fullpath=f'{dest_path.absolute}/{local_file_info["name"]}',
             filedata=fd
         )
 

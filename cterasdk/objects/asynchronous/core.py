@@ -10,6 +10,7 @@ from ...lib.session.core import Session
 from ...asynchronous.core import login
 from ...asynchronous.core import cloudfs
 from ...asynchronous.core import notifications
+from ...asynchronous.core import portals
 from ...asynchronous.core import users
 
 
@@ -36,17 +37,25 @@ class V2:
 class IO:
 
     def __init__(self, core):
-        self.webdav = WebDAV(core)
-
-
-class WebDAV:
-
-    def __init__(self, core):
+        self._folders = core.default.clone(clients.AsyncFolders, EndpointBuilder.new(core.base, core.context, '/folders/folders'))
+        self._upload = core.default.clone(clients.AsyncUpload, EndpointBuilder.new(core.base, core.context, '/upload/folders'))
         self._webdav = core.default.clone(clients.AsyncWebDAV, EndpointBuilder.new(core.base, core.context, '/webdav'))
 
     @property
-    def download(self):
-        return self._webdav.get
+    async def upload(self):
+        return await self._upload.upload
+
+    @property
+    async def download(self):
+        return await self._webdav.get
+
+    @property
+    async def download_zip(self):
+        return await self._folders.download_zip
+
+    @property
+    def builder(self):
+        return self._webdav._builder  # pylint: disable=protected-access
 
 
 class AsyncPortal(CTERA):
@@ -106,6 +115,10 @@ class AsyncPortal(CTERA):
 
 
 class AsyncGlobalAdmin(AsyncPortal):
+
+    def __init__(self, host, port=None, https=True):
+        super().__init__(host, port, https)
+        self.portals = portals.Portals(self)
 
     @property
     def context(self):

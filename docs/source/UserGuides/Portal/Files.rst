@@ -10,7 +10,7 @@ List
 
 Use the following API to list the contents of a directory as a Global Administrator.
 This API requires that the administrator has *Access End User Folders*.
-For more details, see `Customizing Administrator Roles` <https://kb.ctera.com/docs/customizing-administrator-roles-2>`_.
+For more details, see `Customizing Administrator Roles <https://kb.ctera.com/docs/customizing-administrator-roles-2>`_.
 
 .. code:: python
 
@@ -278,7 +278,7 @@ Collaboration Shares
    recipients = []
 
    alice_rcpt = core_types.ShareRecipient.local_user(alice).expire_in(30).read_only()
-   engineers_rcpt = core_types.ShareRecipient.local_group(engineering).read_write()
+   engineers_rcpt = core_types.ShareRecipient.local_group(engineers).read_write()
 
    admin.files.share('Codebase', [alice_rcpt, engineers_rcpt])
 
@@ -320,12 +320,30 @@ Collaboration Shares
 .. automethod:: cterasdk.core.files.browser.CloudDrive.add_share_recipients
    :noindex:
 
+.. code:: python
+
+   """Add collaboration shares members.
+   - Grant the 'Engineering' local group with read-write permission
+   """
+   engineering = core_types.GroupAccount('Engineering')
+   engineering_rcpt = core_types.ShareRecipient.local_group(engineering).read_write()
+   admin.files.add_share_recipients('My Files/Projects/2020/ProjectX', [engineering_rcpt])
+
 .. note:: if the share recipients provided as an argument already exist, they will be skipped and not updated
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.remove_share_recipients
    :noindex:
 
-..
+.. code:: python
+
+   """Remove collaboration shares members.
+   - Remove the local user 'alice'
+   - Remove the local group 'Engineering'
+   """
+   """Remove 'Alice' and 'Engineering' from the List of Recipients"""
+   alice = core_types.UserAccount('alice')
+   engineering = core_types.GroupAccount('Engineering')
+   admin.files.remove_share_recipients('My Files/Projects/2020/ProjectX', [alice, engineering])
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.unshare
    :noindex:

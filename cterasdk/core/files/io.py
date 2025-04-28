@@ -1,93 +1,79 @@
 import logging
-from . import common
+from ...cio import core as fs
+from ...cio import exceptions
+from ... import query
+from ...lib import FetchResourcesResponse
 
 
-def listdir(core, path, depth=None, include_deleted=False, criteria=None, limit=None):
-    depth = depth if depth is not None else 1
-    builder = common.FetchResourcesParamBuilder().root(path.encoded_fullpath()).depth(depth)
-    if include_deleted:
-        builder.include_deleted()
-    if criteria:
-        builder.searchCriteria(criteria)
-    if limit:
-        builder.limit(limit)
-    param = builder.build()
-    if depth > 0:
-        return common.objects_iterator(core, param)
-    return common.fetch_resources(core, param)
+logger = logging.getLogger('cterasdk.core')
+
+
+def listdir(core, path, depth=None, include_deleted=False, search_criteria=None, limit=None):
+    with fs.fetch_resources(path, depth, include_deleted, search_criteria, limit) as param:    
+        if param.depth > 0:
+            return query.iterator(core, '', param, 'fetchResources', callback_response=FetchResourcesResponse)
+        return core.api.execute('', 'fetchResources', param)
+
+
+def root(core, path):
+    response = listdir(core, path, 0)
+    if response.root is None:
+        raise exceptions.RemoteStorageException(path.absolute)
+    return response.root
 
 
 def versions(core, path):
-    return core.api.execute('', 'listSnapshots', path.fullpath())
+    with fs.versions(path):
+        return core.api.execute('', 'listSnapshots', path.absolute)
 
 
-def walk(core, base, path, include_deleted=False):
-    paths = [common.get_object_path(base, path)]
+def walk(core, scope, path, include_deleted=False):
+    paths = [fs.CorePath.instance(scope, path)]
     while len(paths) > 0:
         path = paths.pop(0)
-        elements = listdir(core, path, include_deleted=include_deleted)
-        for element in elements:
-            if element.isFolder:
-                paths.append(common.get_object_path(base, element))
-            yield element
+        entries = listdir(core, path, include_deleted=include_deleted)
+        for e in entries:
+            if e.isFolder:
+                paths.append(fs.CorePath.instance(scope, e))
+            yield e
 
 
 def mkdir(core, path):
-    param = common.get_create_dir_param(path.name(), path.parent().encoded_fullpath())
-    logging.getLogger('cterasdk.core').info('Creating directory. %s', {'path': str(path.relative)})
-    response = core.api.execute('', 'makeCollection', param)
-    common.raise_for_status(response, str(path.relative))
-    logging.getLogger('cterasdk.core').info('Directory created. %s', {'path': str(path.relative)})
+    with fs.makedir(path) as param:
+        response = core.api.execute('', 'makeCollection', param)
+    fs.accept_response(response, path.reference.as_posix())
 
 
 def makedirs(core, path):
-    directories = path.parts()
+    directories = path.parts
     for i in range(1, len(directories) + 1):
-        path = common.get_object_path(path.base, '/'.join(directories[:i]))
+        path = fs.CorePath.instance(path.scope, '/'.join(directories[:i]))
         try:
             mkdir(core, path)
-        except common.ItemExists:
-            pass
+        except exceptions.ResourceExistsError:
+            logger.debug(f'Resource already exists: {path.reference.as_posix()}')
 
 
 def rename(core, path, name):
-    param = common.ActionResourcesParam.instance()
-    logging.getLogger('cterasdk.core').info('Renaming item. %s', {'path': str(path.relative), 'name': name})
-    param.add(common.SrcDstParam.instance(src=path.fullpath(), dest=path.parent().joinpath(name).fullpath()))
-    return core.api.execute('', 'moveResources', param)
+    with fs.rename(path, name) as param:
+        return core.api.execute('', 'moveResources', param)
 
 
 def remove(core, *paths):
-    param = common.ActionResourcesParam.instance()
-    paths = [paths] if not isinstance(paths, tuple) else paths
-    for path in paths:
-        logging.getLogger('cterasdk.core').info('Deleting item. %s', {'path': str(path.relative)})
-        param.add(common.SrcDstParam.instance(src=path.fullpath()))
-    return core.api.execute('', 'deleteResources', param)
+    with fs.delete(*paths) as param:
+        return core.api.execute('', 'deleteResources', param)
 
 
 def recover(core, *paths):
-    param = common.ActionResourcesParam.instance()
-    paths = [paths] if not isinstance(paths, tuple) else paths
-    for path in paths:
-        logging.getLogger('cterasdk.core').info('Recovering item. %s', {'path': str(path.relative)})
-        param.add(common.SrcDstParam.instance(src=path.fullpath()))
-    return core.api.execute('', 'restoreResources', param)
+    with fs.recover(*paths) as param:
+        return core.api.execute('', 'restoreResources', param)
 
 
 def copy(core, *paths, destination=None):
-    param = common.ActionResourcesParam.instance()
-    paths = [paths] if not isinstance(paths, tuple) else paths
-    for path in paths:
-        logging.getLogger('cterasdk.core').info('Copying item. %s', {'path': str(path.relative), 'to': str(destination.relative)})
-        param.add(common.SrcDstParam.instance(src=path.fullpath(), dest=destination.joinpath(path.name()).fullpath()))
-    return core.api.execute('', 'copyResources', param)
+    with fs.copy(*paths, destination=destination) as param:
+        return core.api.execute('', 'copyResources', param)
 
 
 def move(core, *paths, destination=None):
-    param = common.ActionResourcesParam.instance()
-    paths = [paths] if not isinstance(paths, tuple) else paths
-    for path in paths:
-        logging.getLogger('cterasdk.core').info('Copying item. %s', {'path': str(path.relative), 'to': str(destination.relative)})
-        param.add(common.SrcDstParam.instance(src=path.fullpath(), dest=destination.joinpath(path.name()).fullpath()))
-    return core.api.execute('', 'moveResources', param)
+    with fs.move(*paths, destination=destination) as param:
+        return core.api.execute('', 'moveResources', param)

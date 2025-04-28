@@ -1,16 +1,17 @@
 import logging
 
 import cterasdk.settings
+from ...cio.core import CorePath
 from ...exceptions import CTERAException, ObjectNotFoundException
 from ..base_command import BaseCommand
-from . import io, common, shares, file_access
+from . import io, shares, file_access
 
 
 class FileBrowser(BaseCommand):
 
     def __init__(self, core):
         super().__init__(core)
-        self._base = f'/{self._core.context}/webdav'
+        self._scope = f'/{self._core.context}/webdav'
         self._file_access = file_access.FileAccess(self._core)
 
     def download(self, path, destination=None):
@@ -60,7 +61,7 @@ class FileBrowser(BaseCommand):
         :param str path: Path to walk
         :param bool,optional include_deleted: Include deleted files, defaults to False
         """
-        return io.walk(self._core, self._base, path, include_deleted=include_deleted)
+        return io.walk(self._core, self._scope, path, include_deleted=include_deleted)
 
     def public_link(self, path, access='RO', expire_in=30):
         """
@@ -70,7 +71,7 @@ class FileBrowser(BaseCommand):
         :param str,optional access: Access policy of the link, defaults to 'RO'
         :param int,optional expire_in: Number of days until the link expires, defaults to 30
         """
-        return shares.create_public_link(self._core, self.get_object_path(path), access, expire_in)
+        return shares.public_link(self._core, self.get_object_path(path), access, expire_in)
 
     def copy(self, *paths, destination=None):
         """
@@ -95,12 +96,8 @@ class FileBrowser(BaseCommand):
             return contents[0].permalink
         raise ObjectNotFoundException('File not found.', path)
 
-    def get_object_path(self, elements):
-        return common.get_object_path(self.base, elements)
-
-    @property
-    def base(self):
-        return self._base
+    def get_object_path(self, entries):
+        return CorePath.instance(self._scope, entries)
 
 
 class CloudDrive(FileBrowser):
@@ -235,6 +232,3 @@ class Backups(FileBrowser):
                                                      {'device': device, 'error': error.response.reason})
             raise error
 
-    @property
-    def base(self):
-        return f'{super().base}/backups'

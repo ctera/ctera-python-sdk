@@ -39,6 +39,18 @@ class AsyncClient(BaseClient):
         return await errors.accept(response)
 
 
+class AsyncFolders(AsyncClient):
+
+    async def download_zip(self, path, data, **kwargs):
+        return super().form_data(path, data, **kwargs)
+
+
+class AsyncUpload(AsyncClient):
+
+    async def upload(self, path, data, **kwargs):
+        return super().form_data(path, data, **kwargs)
+
+
 class AsyncWebDAV(AsyncClient):
     """WebDAV"""
 

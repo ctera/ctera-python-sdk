@@ -10,7 +10,6 @@ class Firmwares(BaseCommand):
         """
         List Firmware Images.\n
         """
-        print(self.session().in_tenant_context())
         if self.session().in_tenant_context():
             param = Object()
             param._classname = 'FirmwareParam'  # pylint: disable=protected-access
