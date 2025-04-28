@@ -29,7 +29,7 @@ class CorePath(common.BasePath):
         else:
             message = 'Path validation failed: ensure the path exists and is correctly formatted.'
             logger.error(message)
-            raise ValueError(message)                
+            raise ValueError(message)
 
     def _from_server_object(self, reference):
         """

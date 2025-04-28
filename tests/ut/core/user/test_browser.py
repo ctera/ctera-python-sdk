@@ -129,7 +129,7 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
         )
         actual_ctera_path = ln_mock.call_args[0][1]
         self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path,
-                                                                                                  mklink_args['path']))
+                                                                                                mklink_args['path']))
 
     @staticmethod
     def _create_expected_path(base, path):

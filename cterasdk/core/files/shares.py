@@ -10,7 +10,7 @@ logger = logging.getLogger('cterasdk.core')
 def _search_collaboration_member(core, account, cloud_folder_uid):
     with fs.search_collaboration_member(account, cloud_folder_uid) as param:
         response = core.api.execute('', 'searchCollaborationMembers', param)
-    return fs.consume_search_collaboration_response(response, account)    
+    return fs.consume_search_collaboration_response(response, account)
 
 
 def remove_share_recipients(core, path, accounts):
@@ -45,7 +45,6 @@ def add_share_recipients(core, path, recipients):
     share_info = get_share_info(core, path)
     current_accounts = fs.obtain_current_accounts(share_info)
     valid_recipients = _obtain_valid_recipients(core, path, recipients)
-    
     with fs.share(path, share_info.teamProject, share_info.allowReshare, share_info.shouldSync, share_info.shares) as param:
         accounts_to_add = fs.find_recipients_to_add(path, share_info, current_accounts, valid_recipients)
         if accounts_to_add:

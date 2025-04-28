@@ -3,7 +3,7 @@ from ...core import decorator
 
 
 class Portals(BaseCommand):
- 
+
     @decorator.update_current_tenant
     async def browse(self, tenant):
         """

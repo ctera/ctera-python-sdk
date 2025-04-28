@@ -34,11 +34,11 @@ class FileAccess(FileAccessBase):
         return dict(
             name=local_file_info['name'],
             Filename=local_file_info['name'],
-            fullpath=self._ctera_host.io.builder(CorePath(dest_path.reference,  # pylint: disable=protected-access
-                                                          local_file_info['name']).absolute_encode),
-                                                          fileSize=local_file_info['size'],
-                                                          file=fd
-            )
+            fullpath=self._ctera_host.io.builder(CorePath(dest_path.reference,
+                                                          local_file_info['name']).absolute_encode),  # pylint: disable=protected-access
+            fileSize=local_file_info['size'],
+            file=fd
+        )
 
     def _get_cloud_folder_uid(self, path):
         resource_info = io.root(self._ctera_host, path)

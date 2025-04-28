@@ -9,7 +9,7 @@ logger = logging.getLogger('cterasdk.core')
 
 
 def listdir(core, path, depth=None, include_deleted=False, search_criteria=None, limit=None):
-    with fs.fetch_resources(path, depth, include_deleted, search_criteria, limit) as param:    
+    with fs.fetch_resources(path, depth, include_deleted, search_criteria, limit) as param:
         if param.depth > 0:
             return query.iterator(core, '', param, 'fetchResources', callback_response=FetchResourcesResponse)
         return core.api.execute('', 'fetchResources', param)

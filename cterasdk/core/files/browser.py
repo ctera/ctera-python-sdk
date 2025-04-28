@@ -231,4 +231,3 @@ class Backups(FileBrowser):
             logging.getLogger('cterasdk.core').error('Failed downloading configuration file. %s',
                                                      {'device': device, 'error': error.response.reason})
             raise error
-

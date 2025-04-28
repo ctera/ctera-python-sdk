@@ -17,7 +17,7 @@ class BaseUser(Object):
 class BaseSession(Object):
     """
     Base CTERA Session
-    
+
     :ivar str address: Address
     :ivar cterasdk.lib.session.types.Product product: Product
     :ivar cterasdk.lib.session.types.ConnectionStatus connection_status: Connection status
