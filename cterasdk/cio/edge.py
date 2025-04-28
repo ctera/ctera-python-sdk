@@ -1,7 +1,7 @@
 import logging
+from contextlib import contextmanager
 from ..common import Object
 from . import common, exceptions
-from contextlib import contextmanager
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -19,41 +19,41 @@ class EdgePath(common.BasePath):
 def listdir(path):
     param = Object()
     param.path = path
-    logger.info(f'Listing directory: {path}')
+    logger.info('Listing directory: %s', path)
     yield param
 
 
 @contextmanager
 def makedir(path):
     directory = path.absolute
-    logger.info('Creating directory. %s', {'path': path.absolute})
+    logger.info('Creating directory: %s', path.absolute)
     try:
         yield path.absolute
     except exceptions.CTERAException as error:
         try:
             accept_response(error.response.message.msg, directory)
         except exceptions.ResourceExistsError:
-            logger.info('Directory already exists. %s', {'path': directory})
-    logger.info('Directory created. %s', {'path': directory})
+            logger.info('Directory already exists: %s', directory)
+    logger.info('Directory created: %s', directory)
 
 
 @contextmanager
 def copy(path, destination):
     destination = destination.join(path.name).absolute
-    logger.info(f'Copying: {path.absolute} to: {destination}')
+    logger.info('Copying: %s to: %s', path.absolute, destination)
     yield path.absolute, destination
 
 
 @contextmanager
 def move(path, destination):
     destination = destination.join(path.name).absolute
-    logger.info(f'Moving: {path.absolute} to: {destination}')
+    logger.info('Moving: %s to: %s', path.absolute, destination)
     yield path.absolute, destination
 
 
 def delete_generator(*paths):
     for path in paths:
-        logger.info(f'Deleting item: {path.absolute}')
+        logger.info('Deleting item: %s', path.absolute)
         yield path
 
 

@@ -34,10 +34,10 @@ def share(core, path, recipients, as_project, allow_reshare, allow_sync):
         with fs.share(path, as_project, allow_reshare, allow_sync) as param:
             for recipient in valid_recipients:
                 fs.add_share_recipient(param, recipient)
-            logger.info(f'Sharing: {path.reference.as_posix()} with: {[str(recipient) for recipient in valid_recipients]}')
+            logger.info('Sharing: %s with: %s', path.reference.as_posix(), [str(recipient) for recipient in valid_recipients])
             core.api.execute('', 'shareResource', param)
             return valid_recipients
-    logger.warning(f'Resource not shared. Could not find valid recipients: {path.reference.as_posix()}')
+    logger.warning('Resource not shared. Could not find valid recipients: %s', path.reference.as_posix())
     return valid_recipients
 
 

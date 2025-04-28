@@ -27,6 +27,6 @@ def update_current_tenant(execute_request):
 def update_current_session(core, tenant):
     yield
     tenant = tenant if tenant else 'Administration'
-    logger.debug(f'Updating current session. Tenant: {tenant}')
+    logger.debug('Updating current session. Tenant: %s', tenant)
     core.session().update_current_tenant(tenant)
-    logger.debug(f'Updated current session. Tenant: {tenant}')
+    logger.debug('Updated current session. Tenant: %s', tenant)

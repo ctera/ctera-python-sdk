@@ -24,17 +24,17 @@ def makedirs(edge, path):
         try:
             mkdir(edge, path)
         except exceptions.RestrictedPathError:
-            logger.warning(f'Creating a folder in the specified location is forbidden: {path.reference.as_posix()}')
+            logger.warning('Creating a folder in the specified location is forbidden: %s', path.reference.as_posix())
 
 
 def copy(edge, path, destination=None, overwrite=False):
-    with fs.copy(path, destination) as (path, destination):
-        edge.io.copy(path, destination, overwrite=overwrite)
+    with fs.copy(path, destination) as (src, dst):
+        edge.io.copy(src, dst, overwrite=overwrite)
 
 
 def move(edge, path, destination=None, overwrite=False):
-    with fs.move(path, destination) as (path, destination):
-        edge.io.move(path, destination, overwrite=overwrite)
+    with fs.move(path, destination) as (src, dst):
+        edge.io.move(src, dst, overwrite=overwrite)
 
 
 def remove(edge, *paths):

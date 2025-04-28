@@ -51,7 +51,7 @@ def makedirs(core, path):
         try:
             mkdir(core, path)
         except exceptions.ResourceExistsError:
-            logger.debug(f'Resource already exists: {path.reference.as_posix()}')
+            logger.debug('Resource already exists: %s', path.reference.as_posix())
 
 
 def rename(core, path, name):

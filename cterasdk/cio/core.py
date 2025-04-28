@@ -23,7 +23,7 @@ class CorePath(common.BasePath):
         :param str reference: Reference.
         """
         if isinstance(reference, Object):
-            super().__init__(*self._from_server_object(reference))
+            super().__init__(*CorePath._from_server_object(reference))
         elif isinstance(reference, str):
             super().__init__(scope, reference)
         else:
@@ -31,7 +31,7 @@ class CorePath(common.BasePath):
             logger.error(message)
             raise ValueError(message)
 
-    def _from_server_object(self, reference):
+    def _from_server_object(reference):
         """
         Parse Path from Server Object.
 
@@ -47,7 +47,7 @@ class CorePath(common.BasePath):
         elif classname == 'SnapshotResp':
             href = f'{reference.url}{reference.path}'
         else:
-            raise ValueError(f'Could not determine server object: {classname}')
+            raise ValueError('Could not determine server object: {classname}')
 
         href = unquote(href)
         match = re.search('^/?(ServicesPortal|admin)/webdav', href)
@@ -57,9 +57,9 @@ class CorePath(common.BasePath):
     @property
     def absolute(self):
         reference = self.reference.as_posix()
-        versions = 'PreviousVersions/'
-        if versions in reference:
-            index = reference.index(versions) + len(versions)
+        previous_versions = 'PreviousVersions/'
+        if previous_versions in reference:
+            index = reference.index(previous_versions) + len(previous_versions)
             return f'{self.scope.as_posix()}/{quote(reference[:index]) + reference[index:]}'
         return super().absolute
 
@@ -180,13 +180,13 @@ def fetch_resources(path, depth, include_deleted, search_criteria, limit):
         builder.searchCriteria(search_criteria)
     if limit:
         builder.limit(limit)
-    logger.info(f'Listing directory: {path.reference.as_posix()}')
+    logger.info('Listing directory: %s', path.reference.as_posix())
     yield builder.build()
 
 
 @contextmanager
 def versions(path):
-    logger.info(f'Listing versions: {path.reference.as_posix()}')
+    logger.info('Listing versions: %s', path.reference.as_posix())
     yield
 
 
@@ -195,16 +195,16 @@ def makedir(path):
     param = Object()
     param.name = path.name
     param.parentPath = path.parent.absolute_encode
-    logger.info(f'Creating directory: {path.reference.as_posix()}')
+    logger.info('Creating directory: %s', path.reference.as_posix())
     yield param
-    logger.info(f'Directory created: {path.reference.as_posix()}')
+    logger.info('Directory created: %s', path.reference.as_posix())
 
 
 @contextmanager
 def rename(path, name):
     param = ActionResourcesParam.instance()
     param.add(SrcDstParam.instance(src=path.absolute, dest=path.parent.join(name).absolute))
-    logger.info(f'Renaming item: {path.reference.as_posix()} to: {name}')
+    logger.info('Renaming item: %s to: %s', path.reference.as_posix(), name)
     yield param
 
 
@@ -214,7 +214,7 @@ def _delete_or_recover(paths, *, message=None):
     for path in paths:
         param.add(SrcDstParam.instance(src=path.absolute))
         if message:
-            logger.info(f'{message}: {path.reference.as_posix()}')
+            logger.info('%s: %s', message, path.reference.as_posix())
     yield param
 
 
@@ -234,7 +234,7 @@ def _copy_or_move(paths, destination, *, message=None):
     for path in paths:
         param.add(SrcDstParam.instance(src=path.absolute, dest=destination.join(path.name).absolute))
         if message:
-            logger.info(f'{message} from: {path.reference.as_posix()} to: {destination.join(path.name).reference.as_posix()}')
+            logger.info('%s from: %s to: %s', message, path.reference.as_posix(), destination.join(path.name).reference.as_posix())
     yield param
 
 
@@ -252,14 +252,14 @@ def move(*paths, destination=None):
 def public_link(path, access, expire_in):
     access = {'RO': 'ReadOnly', 'RW': 'ReadWrite', 'PO': 'PreviewOnly'}.get(access)
     expire_on = DateTimeUtils.get_expiration_date(expire_in).strftime('%Y-%m-%d')
-    logger.info(f'Creating Public Link for: {path.reference.as_posix()}. Access: {access}. Expires: {expire_on}')
+    logger.info('Creating Public Link for: %s. Access: %s. Expires: %s', path.reference.as_posix(), access, expire_on)
     param = CreateShareParam.instance(path=path.absolute, access=access, expire_on=expire_on)
     yield param
 
 
 @contextmanager
 def share_info(path):
-    logger.info(f'Getting Share info: {path.reference.as_posix()}')
+    logger.info('Getting Share info: %s', path.reference.as_posix())
     yield path.absolute_encode
 
 
@@ -302,7 +302,7 @@ def share(path, as_project, allow_reshare, allow_sync, shares=None):
 @contextmanager
 def unshare(resource_info, path):
     with share(path, True, True, True) as param:
-        logger.info(f"Unsharing {('folder' if resource_info.isFolder else 'file')}: {path.reference.as_posix()}")
+        logger.info("Unsharing %s: %s", ('folder' if resource_info.isFolder else 'file'), path.reference.as_posix())
         yield param
 
 
@@ -336,14 +336,14 @@ def find_recipients_to_remove(share_info, path, current_accounts, accounts):
             if current_account not in accounts:
                 accounts_to_keep.append(share_info.shares[idx])
             else:
-                logger.debug(f'Found recipient to remove: {str(current_account)}')
+                logger.debug('Found recipient to remove: %s', str(current_account))
                 accounts_to_remove.append(current_account)
         if not accounts_to_remove:
-            logger.info(f'Share recipients not found: {[str(member) for member in accounts]}')
+            logger.info('Share recipients not found: %s', [str(member) for member in accounts])
         else:
-            logger.info(f'Removing share recipients: {[str(account) for account in accounts_to_remove]}')
+            logger.info('Removing share recipients: %s', [str(account) for account in accounts_to_remove])
     else:
-        logger.info('Share has no recipients. %s', {'path': path.reference.as_posix()})
+        logger.info('Share has no recipients. %s', path.reference.as_posix())
     return accounts_to_keep, accounts_to_remove
 
 
@@ -353,16 +353,16 @@ def find_recipients_to_add(path, share_info, current_accounts, valid_recipients)
     if valid_recipients:
         for recipient in valid_recipients:
             if recipient.account not in current_accounts:
-                logger.debug(f'New share recipient: {str(recipient.account)}')
+                logger.debug('New share recipient: %s', str(recipient.account))
                 accounts_to_add.append(recipient)
             else:
-                logger.debug(f'Share recipient already exists: {str(recipient.account)}')
+                logger.debug('Share recipient already exists: %s', str(recipient.account))
         if accounts_to_add:
-            logger.info(f'Adding share recipients: {[str(recipient.account) for recipient in accounts_to_add]}')
+            logger.info('Adding share recipients: %s', [str(recipient.account) for recipient in accounts_to_add])
         else:
-            logger.warning(f'Could not find new share recipients: {path.reference.as_posix()}')
+            logger.warning('Could not find new share recipients: %s', path.reference.as_posix())
         return accounts_to_add
-    logger.warning(f'Could not find valid share recipients: {path.reference.as_posix()}')
+    logger.warning('Could not find valid share recipients: %s', path.reference.as_posix())
     return accounts_to_add
 
 
@@ -379,7 +379,7 @@ def search_collaboration_member(account, cloud_folder_uid):
     param.searchTerm = account.name
     param.resourceUid = cloud_folder_uid
     param.countLimit = 1
-    logger.info('Searching for members. %s')
+    logger.info('Searching for member: %s', str(account))
     yield param
 
 
@@ -410,31 +410,31 @@ def consume_search_collaboration_response(response, account):
 
 
 def valid_recipient(recipient):
-    valid_recipient = True
+    is_valid = True
     if not recipient.account:
         logger.warning('No account information found. Skipping. %s', {'account': recipient.account})
-        valid_recipient = False
+        is_valid = False
     if not isinstance(recipient.account, (str, UserAccount, GroupAccount)):
         logger.warning('Invalid recipient type. Skipping. %s', {'type': type(recipient.account)})
-        valid_recipient = False
+        is_valid = False
     if recipient.access not in [v for k, v in FileAccessMode.__dict__.items() if not k.startswith('_')]:
         logger.warning('Invalid file access mode. Skipping. %s', {'account': str(recipient.account), 'access': recipient.access})
-        valid_recipient = False
+        is_valid = False
     if recipient.type == CollaboratorType.EXT and not isinstance(recipient.account, str):
         logger.warning('Invalid external recipient type. Skipping. %s', {'expected': 'str', 'actual': type(recipient.account)})
-        valid_recipient = False
+        is_valid = False
     if recipient.type in [CollaboratorType.LU, CollaboratorType.LG] and not recipient.account.is_local:
         logger.warning('Expected local account. Received a domain account. Skipping. %s', {'account': str(recipient.account)})
-        valid_recipient = False
+        is_valid = False
     if recipient.type in [CollaboratorType.DU, CollaboratorType.DG] and recipient.account.is_local:
         logger.warning('Expected domain account. Received a local account. Skipping. %s', {'account': str(recipient.account)})
-        valid_recipient = False
-    return valid_recipient
+        is_valid = False
+    return is_valid
 
 
-def obtain_current_accounts(share_info):
+def obtain_current_accounts(param):
     current_accounts = []
-    for collaborator in share_info.shares:
+    for collaborator in param.shares:
         if collaborator.invitee.type == CollaboratorType.EXT:
             current_accounts.append(collaborator.invitee.email)
         else:

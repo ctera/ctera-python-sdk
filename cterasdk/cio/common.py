@@ -47,10 +47,6 @@ class BasePath:
     def absolute_parent(self):
         return self.parent.as_posix()
 
-    @property
-    def absolute_parent_encode(self):
-        return self.parent.absolute_encode()
-
     def join(self, p):
         """
         Join Path.
