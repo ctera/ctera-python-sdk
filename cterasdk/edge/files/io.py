@@ -1,54 +1,42 @@
 import logging
-from ...exceptions import CTERAException
-from ...cio import edge as edge_parameters
+from ...cio import edge as fs
 from ...cio import exceptions
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 def listdir(edge, path):
-    param = edge_parameters.create_listdir_parameter(path)
-    return edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
+    with fs.listdir(path) as param:
+        return edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
 
 
 def mkdir(edge, path):
-    directory = path.absolute
-    logging.getLogger('cterasdk.edge').info('Creating directory. %s', {'path': directory})
-    try:
-        edge.io.mkdir(path.absolute)
-    except CTERAException as error:
-        try:
-            edge_parameters.raise_for_status(error.response.message.msg, directory)
-        except exceptions.ResourceExistsError:
-            logging.getLogger('cterasdk.edge').info('Directory already exists. %s', {'path': directory})
-    logging.getLogger('cterasdk.edge').info('Directory created. %s', {'path': directory})
-    return directory
+    with fs.makedir(path) as param:
+        edge.io.mkdir(param)
+    return path.absolute
 
 
 def makedirs(edge, path):
-    directories = path.parts()
+    directories = path.parts
     for i in range(1, len(directories) + 1):
-        path = edge_parameters.EdgePath(path.scope, '/'.join(directories[:i]))
+        path = fs.EdgePath(path.scope, '/'.join(directories[:i]))
         try:
             mkdir(edge, path)
         except exceptions.RestrictedPathError:
-            pass
+            logger.warning(f'Creating a folder in the specified location is forbidden: {path.reference.as_posix()}')
 
 
 def copy(edge, path, destination=None, overwrite=False):
-    destination = destination.join(path.name).absolute
-    logging.getLogger('cterasdk.edge').info('Copying. %s', {'from': path.absolute, 'to': destination})
-    edge.io.copy(path.absolute, destination, overwrite=overwrite)
-    logging.getLogger('cterasdk.edge').info('Copied. %s', {'from': path.absolute, 'to': destination})
+    with fs.copy(path, destination) as (path, destination):
+        edge.io.copy(path, destination, overwrite=overwrite)
 
 
 def move(edge, path, destination=None, overwrite=False):
-    destination = destination.join(path.name).absolute
-    logging.getLogger('cterasdk.edge').info('Moving. %s', {'from': path.absolute, 'to': destination})
-    edge.io.move(path.absolute, destination, overwrite=overwrite)
-    logging.getLogger('cterasdk.edge').info('Moved. %s', {'from': path.absolute, 'to': destination})
+    with fs.move(path, destination) as (path, destination):
+        edge.io.move(path, destination, overwrite=overwrite)
 
 
 def remove(edge, *paths):
-    for path in paths:
-        logging.getLogger('cterasdk.edge').info('Deleting object. %s', {'path': path.absolute})
+    for path in fs.delete_generator(*paths):
         edge.io.delete(path.absolute)
-        logging.getLogger('cterasdk.edge').info('Object deleted. %s', {'path': path.absolute})

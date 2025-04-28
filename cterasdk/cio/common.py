@@ -41,7 +41,7 @@ class BasePath:
 
     @property
     def absolute_encode(self):
-        return self.scope.joinpath(quote(self.reference.as_posix())).as_posix()
+        return f'/{self.scope.joinpath(quote(self.reference.as_posix())).as_posix()}'
 
     @property
     def absolute_parent(self):
