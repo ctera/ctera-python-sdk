@@ -1,7 +1,7 @@
 import logging
+from . import io
 from ..enum import CollaboratorType
 from ...cio import core as fs
-from ...cio import exceptions
 
 
 logger = logging.getLogger('cterasdk.core')
@@ -11,13 +11,6 @@ def _search_collaboration_member(core, account, cloud_folder_uid):
     with fs.search_collaboration_member(account, cloud_folder_uid) as param:
         response = core.api.execute('', 'searchCollaborationMembers', param)
     return fs.consume_search_collaboration_response(response, account)
-
-
-def _root(core, path):
-    response = core.files.listdir(core, path, 0)
-    if response.root is None:
-        raise exceptions.RemoteStorageException(path.absolute)
-    return response.root
 
 
 def remove_share_recipients(core, path, accounts):
@@ -60,7 +53,7 @@ def add_share_recipients(core, path, recipients):
 
 
 def _obtain_valid_recipients(core, path, recipients):
-    resource_info = _root(core, path)
+    resource_info = io.root(core, path)
     cloud_folder_uid = resource_info.cloudFolderInfo.uid
     valid_recipients = []
     for recipient in recipients:
@@ -76,7 +69,7 @@ def _obtain_valid_recipients(core, path, recipients):
 
 
 def unshare(core, path):
-    resource_info = _root(core, path)
+    resource_info = io.root(core, path)
     with fs.unshare(resource_info, path) as param:
         return core.api.execute('', 'shareResource', param)
 
