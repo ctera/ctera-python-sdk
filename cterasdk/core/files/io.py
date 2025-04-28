@@ -15,13 +15,6 @@ def listdir(core, path, depth=None, include_deleted=False, search_criteria=None,
         return core.api.execute('', 'fetchResources', param)
 
 
-def root(core, path):
-    response = listdir(core, path, 0)
-    if response.root is None:
-        raise exceptions.RemoteStorageException(path.absolute)
-    return response.root
-
-
 def versions(core, path):
     with fs.versions(path):
         return core.api.execute('', 'listSnapshots', path.absolute)

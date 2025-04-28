@@ -31,6 +31,7 @@ class CorePath(common.BasePath):
             logger.error(message)
             raise ValueError(message)
 
+    @staticmethod
     def _from_server_object(reference):
         """
         Parse Path from Server Object.
@@ -328,13 +329,13 @@ def add_share_recipient(param, recipient):
     param.shares.append(settings)
 
 
-def find_recipients_to_remove(share_info, path, current_accounts, accounts):
-    current_accounts = obtain_current_accounts(share_info)
+def find_recipients_to_remove(param, path, current_accounts, accounts):
+    current_accounts = obtain_current_accounts(param)
     accounts_to_keep, accounts_to_remove = [], []
     if current_accounts:
         for idx, current_account in enumerate(current_accounts):
             if current_account not in accounts:
-                accounts_to_keep.append(share_info.shares[idx])
+                accounts_to_keep.append(param.shares[idx])
             else:
                 logger.debug('Found recipient to remove: %s', str(current_account))
                 accounts_to_remove.append(current_account)
@@ -347,8 +348,8 @@ def find_recipients_to_remove(share_info, path, current_accounts, accounts):
     return accounts_to_keep, accounts_to_remove
 
 
-def find_recipients_to_add(path, share_info, current_accounts, valid_recipients):
-    current_accounts = obtain_current_accounts(share_info)
+def find_recipients_to_add(path, param, current_accounts, valid_recipients):
+    current_accounts = obtain_current_accounts(param)
     accounts_to_add = []
     if valid_recipients:
         for recipient in valid_recipients:
