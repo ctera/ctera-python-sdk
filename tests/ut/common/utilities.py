@@ -1,3 +1,4 @@
+# pylint: disable=cyclic-import
 import queue
 import unittest
 
