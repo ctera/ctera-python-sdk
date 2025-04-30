@@ -1,5 +1,7 @@
 from pathlib import PurePosixPath
 from ..objects.uri import quote
+from ..common.utils import utf8_decode
+from ..convert.serializers import toxmlstr
 
 
 class BasePath:
@@ -61,3 +63,9 @@ class BasePath:
 
     def __str__(self):
         return self.absolute
+
+
+def encode_request_parameter(param):
+    return dict(
+        inputXML=utf8_decode(toxmlstr(param))
+    )
