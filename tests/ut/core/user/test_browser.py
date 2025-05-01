@@ -119,7 +119,7 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
             mklink_args['access'] = access
         if expire_in is not None:
             mklink_args['expire_in'] = expire_in
-        ln_mock = self.patch_call('cterasdk.core.files.shares.public_link')
+        ln_mock = self.patch_call('cterasdk.core.files.io.public_link')
         self.files.public_link(**mklink_args)
         ln_mock.assert_called_once_with(
             self._global_admin,
