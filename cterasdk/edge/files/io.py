@@ -68,7 +68,7 @@ def handle_many(directory, *objects):
     Create function to retrieve zip archive
 
     :param cterasdk.cio.edge.EdgePath directory: Path to directory.
-    :param *str objects: List of files and folders.
+    :param args objects: List of files and folders.
     :returns: Callable function to retrieve file handle.
     :rtype: callable
     """
