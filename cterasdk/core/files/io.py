@@ -135,13 +135,13 @@ def handle_many(directory, *objects):
     return wrapper
 
 
-def upload(name, size, destination, handle):
+def upload(name, size, destination, fd):
     """
     Create upload function
 
     :param str name: File name.
     :param cterasdk.cio.core.CorePath destination: Path to directory.
-    :param object handle: File handle.
+    :param object fd: File handle.
     :returns: Callable function to start the upload.
     :rtype: callable
     """
@@ -156,7 +156,7 @@ def upload(name, size, destination, handle):
             Filename=name,
             fullpath=core.io.builder(fs.CorePath(destination.reference, name).absolute_encode),
             fileSize=size,
-            file=handle
+            file=fd
         )
         target = retrieve_remote_dir(core, destination)
         logger.info('Uploading: %s to: %s', name, destination.reference)

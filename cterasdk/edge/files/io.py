@@ -92,13 +92,13 @@ def handle_many(directory, *objects):
     return wrapper
 
 
-def upload(name, destination, handle):
+def upload(name, destination, fd):
     """
     Create upload function
 
     :param str name: File name.
     :param cterasdk.cio.edge.EdgePath destination: Path to directory.
-    :param object handle: File handle.
+    :param object fd: File handle.
     :returns: Callable function to start the upload.
     :rtype: callable
     """
@@ -111,7 +111,7 @@ def upload(name, destination, handle):
         param = dict(
             name=name,
             fullpath=f'{destination.absolute}/{name}',
-            filedata=handle
+            filedata=fd
         )
         logger.info('Uploading: %s to: %s', name, destination.reference)
         return edge.io.upload('/actions/upload', param)
