@@ -5,7 +5,7 @@ from ...cio.core import CorePath
 from ...exceptions import CTERAException, ObjectNotFoundException
 from ...lib import FileSystem
 from ..base_command import BaseCommand
-from . import io, shares
+from . import io
 
 
 class FileBrowser(BaseCommand):
@@ -95,7 +95,7 @@ class FileBrowser(BaseCommand):
         :param str,optional access: Access policy of the link, defaults to 'RO'
         :param int,optional expire_in: Number of days until the link expires, defaults to 30
         """
-        return shares.public_link(self._core, self.normalize(path), access, expire_in)
+        return io.public_link(self._core, self.normalize(path), access, expire_in)
 
     def copy(self, *paths, destination=None):
         """
@@ -233,7 +233,7 @@ class CloudDrive(FileBrowser):
 
         :param str path: Path
         """
-        return shares.get_share_info(self._core, self.normalize(path))
+        return io.get_share_info(self._core, self.normalize(path))
 
     def share(self, path, recipients, as_project=True, allow_reshare=True, allow_sync=True):
         """
@@ -247,7 +247,7 @@ class CloudDrive(FileBrowser):
         :return: A list of all recipients added to the collaboration share
         :rtype: list[cterasdk.core.types.ShareRecipient]
         """
-        return shares.share(self._core, self.normalize(path), recipients, as_project, allow_reshare, allow_sync)
+        return io.share(self._core, self.normalize(path), recipients, as_project, allow_reshare, allow_sync)
 
     def add_share_recipients(self, path, recipients):
         """
@@ -258,7 +258,7 @@ class CloudDrive(FileBrowser):
         :return: A list of all recipients added
         :rtype: list[cterasdk.core.types.ShareRecipient]
         """
-        return shares.add_share_recipients(self._core, self.normalize(path), recipients)
+        return io.add_share_recipients(self._core, self.normalize(path), recipients)
 
     def remove_share_recipients(self, path, accounts):
         """
@@ -269,13 +269,13 @@ class CloudDrive(FileBrowser):
         :return: A list of all share recipients removed
         :rtype: list[cterasdk.core.types.PortalAccount]
         """
-        return shares.remove_share_recipients(self._core, self.normalize(path), accounts)
+        return io.remove_share_recipients(self._core, self.normalize(path), accounts)
 
     def unshare(self, path):
         """
         Unshare a file or a folder
         """
-        return shares.unshare(self._core, self.normalize(path))
+        return io.unshare(self._core, self.normalize(path))
 
 
 class Backups(FileBrowser):
