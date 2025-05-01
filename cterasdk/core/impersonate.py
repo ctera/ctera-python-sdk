@@ -18,7 +18,7 @@ class Impersonate(BaseCommand):
         param.username = username
         param.portal = tenant
         ticket = self._core.api.execute('', 'getSessionToken', param)
-        #user = objects.ServicesPortal(self._core.host(), self._core.port())
-        #user.sso(ticket)
-        #return user
+        #  user = objects.ServicesPortal(self._core.host(), self._core.port())
+        #  user.sso(ticket)
+        #  return user
         return ticket
