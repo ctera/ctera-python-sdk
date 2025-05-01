@@ -10,7 +10,7 @@ List
 
 Use the following API to list the contents of a directory as a Global Administrator.
 This API requires that the administrator has *Access End User Folders*.
-For more details, see `Customizing Administrator Roles <https://kb.ctera.com/docs/customizing-administrator-roles-2>`_.
+For more details, see `Customizing Administrator Roles <https://kb.ctera.com/docs/customizing-administrator-roles-2>`_
 
 .. code:: python
 
@@ -30,7 +30,7 @@ For more details, see `Customizing Administrator Roles <https://kb.ctera.com/doc
 
 Use the following API to list the contents of a directory as an End User or a Team Portal Administrator.
 This API requires that the Team Portal Administrator has *Access End User Folders*.
-For more details, see `Viewing Folder Content <https://kb.ctera.com/docs/managing-folders-1#viewing-folder-content>`_.
+For more details, see `Viewing Folder Content <https://kb.ctera.com/docs/managing-folders-1#viewing-folder-content>`_
 
 .. code:: python
 
@@ -362,9 +362,9 @@ Managing S3 Credentials
 =======================
 
 Starting CTERA 8.0, CTERA Portal features programmatic access via the S3 protocol, also known as *CTERA Fusion*
-For more information on how to enable CTERA Fusion and the supported extensions of the S3 protocol, please refer to the following `article <https://kb.ctera.com/v1/docs/en/setting-up-access-from-an-s3-browser>`.
+For more information on how to enable CTERA Fusion and the supported extensions of the S3 protocol, please refer to the following `article <https://kb.ctera.com/v1/docs/en/setting-up-access-from-an-s3-browser>`_
 
-The following section includes examples on how to instantiate an S3 client using the Amazon SDK for Python (boto3).
+The following section includes examples on how to instantiate an S3 client using the Amazon SDK for Python `boto3 <https://pypi.org/project/boto3/>`_
 
 .. code:: python
 

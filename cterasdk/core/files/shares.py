@@ -48,6 +48,8 @@ def add_share_recipients(core, path, recipients):
     with fs.share(path, share_info.teamProject, share_info.allowReshare, share_info.shouldSync, share_info.shares) as param:
         accounts_to_add = fs.find_recipients_to_add(path, share_info, current_accounts, valid_recipients)
         if accounts_to_add:
+            for recipient in accounts_to_add:
+                fs.add_share_recipient(param, recipient)
             core.api.execute('', 'shareResource', param)
     return valid_recipients
 
