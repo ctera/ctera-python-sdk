@@ -3,7 +3,7 @@ from ...cio.common import encode_request_parameter
 from ...cio import core as fs
 from ...cio import exceptions
 from ...common import Object
-from ... import query
+from ...core import query
 from ..enum import CollaboratorType
 from ...lib import FetchResourcesResponse
 
