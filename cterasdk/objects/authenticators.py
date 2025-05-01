@@ -23,7 +23,7 @@ def _edge_no_session_resources():
 
 
 def _core_no_session_resources(context):
-    return _no_session_resources(context, '/api/login', '/public', '/setup', '/startup')
+    return _no_session_resources(context, '/api/login', '/public', '/setup', '/startup', '/sso')
 
 
 def _no_session_resources(context, *paths):

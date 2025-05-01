@@ -1,5 +1,6 @@
 from .base_command import BaseCommand
 from ..common import Object
+from .. import objects
 
 
 class Impersonate(BaseCommand):
@@ -7,7 +8,7 @@ class Impersonate(BaseCommand):
     Portal User Impersonation APIs
     """
 
-    def session_token(self, username, tenant):
+    def impersonate(self, username, tenant):
         """
         Impersonate a Portal User.
 
@@ -17,4 +18,7 @@ class Impersonate(BaseCommand):
         param = Object()
         param.username = username
         param.portal = tenant
-        return self._core.api.execute('', 'getSessionToken', param)
+        ticket = self._core.api.execute('', 'getSessionToken', param)
+        user = objects.ServicesPortal(self._core.host(), self._core.port())
+        user.sso(ticket)
+        return user

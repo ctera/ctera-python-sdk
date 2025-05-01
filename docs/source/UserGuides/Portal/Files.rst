@@ -275,8 +275,6 @@ Collaboration Shares
    alice = core_types.UserAccount('alice')
    engineers = core_types.GroupAccount('Engineers')
 
-   recipients = []
-
    alice_rcpt = core_types.ShareRecipient.local_user(alice).expire_in(30).read_only()
    engineers_rcpt = core_types.ShareRecipient.local_group(engineers).read_write()
 

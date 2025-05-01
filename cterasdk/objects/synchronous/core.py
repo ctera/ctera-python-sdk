@@ -180,3 +180,7 @@ class ServicesPortal(Portal):
     @property
     def context(self):
         return 'ServicesPortal'
+
+    def sso(self, ticket):
+        self._login_object.sso(ticket)
+        self.session().start_session(self)

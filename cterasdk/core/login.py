@@ -4,6 +4,9 @@ from .base_command import BaseCommand
 from ..exceptions import CTERAException
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Login(BaseCommand):
     """
     Portal Login APIs
@@ -19,10 +22,19 @@ class Login(BaseCommand):
         host = self._core.host()
         try:
             self._core.api.form_data('/login', {'j_username': username, 'j_password': password})
-            logging.getLogger('cterasdk.core').info("User logged in. %s", {'host': host, 'user': username})
+            logger.info("User logged in. %s", {'host': host, 'user': username})
         except CTERAException:
-            logging.getLogger('cterasdk.core').error('Login failed. %s', {'host': host, 'user': username})
+            logger.error('Login failed. %s', {'host': host, 'user': username})
             raise
+
+    def sso(self, ticket):
+        """
+        Single Sign On
+
+        :param str ticket: SSO Ticket.
+        """
+        logger.info('Single Sign On.')
+        self._core.ctera.form_data('/sso', {'ctera_ticket': ticket})
 
     def logout(self):
         """
@@ -30,4 +42,4 @@ class Login(BaseCommand):
         """
         username = self._core.session().account.name
         self._core.api.form_data('/logout', {})
-        logging.getLogger('cterasdk.core').info("User logged out. %s", {'host': self._core.host(), 'user': username})
+        logger.info("User logged out. %s", {'host': self._core.host(), 'user': username})
