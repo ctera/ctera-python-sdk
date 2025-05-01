@@ -14,7 +14,6 @@ Submodules
    cterasdk.lib.cmd
    cterasdk.lib.consent
    cterasdk.lib.filesystem
-   cterasdk.lib.file_access_base
    cterasdk.lib.iterator
    cterasdk.lib.platform
    cterasdk.lib.registry

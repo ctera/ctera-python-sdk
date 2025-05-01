@@ -12,6 +12,4 @@ Submodules
 .. toctree::
 
    cterasdk.edge.files.browser
-   cterasdk.edge.files.common
-   cterasdk.edge.files.file_access
    cterasdk.edge.files.io

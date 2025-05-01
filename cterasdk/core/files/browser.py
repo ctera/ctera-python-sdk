@@ -29,7 +29,7 @@ class FileBrowser(BaseCommand):
         Get a Zip Archive File Handle.
 
         :param str directory: Path to a folder
-        :param *args objects: List of files and folders
+        :param args objects: List of files and folders
         """
         handle_many_function = io.handle_many(self.normalize(directory), *objects)
         return handle_many_function(self._core)
