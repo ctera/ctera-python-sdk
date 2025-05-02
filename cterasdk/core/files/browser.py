@@ -2,7 +2,7 @@ import logging
 
 import cterasdk.settings
 from ...cio.core import CorePath
-from ...exceptions import CTERAException, ObjectNotFoundException
+from ...exceptions import CTERAException
 from ...lib import FileSystem
 from ..base_command import BaseCommand
 from . import io
@@ -118,7 +118,7 @@ class FileBrowser(BaseCommand):
         contents = [e for e in io.listdir(self._core, p.parent(), 1, False, p.name(), 1)]  # pylint: disable=unnecessary-comprehension
         if contents and contents[0].name == p.name():
             return contents[0].permalink
-        raise ObjectNotFoundException('File not found.', path)
+        raise FileNotFoundError('File not found.', path)
 
     def determine_directory_and_filename(self, p, objects=None, destination=None, archive=False):
         """

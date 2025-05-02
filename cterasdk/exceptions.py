@@ -24,6 +24,10 @@ class CTERAException(Exception):
         return tojsonstr(self)
 
 
+class ContextError(CTERAException):
+    """API Invocation Context Error"""
+
+
 class SessionExpired(CTERAException):
     """Raised on Session Expiration"""
 

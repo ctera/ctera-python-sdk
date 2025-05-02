@@ -103,6 +103,45 @@ Format Drives
 
    edge.drive.format_all()
 
+RAID Array
+----------
+
+.. automethod:: cterasdk.edge.array.Array.get
+   :noindex:
+
+.. code-block:: python
+
+   """All arrays"""
+   all_arrays = edge.array.get()
+   
+   """Get array by name"""
+   lvm1 = edge.array.get('LVM1')
+
+.. automethod:: cterasdk.edge.array.Array.add
+   :noindex:
+
+.. code-block:: python
+
+   """Create a logical volume 'LVM1' using all available drives"""
+   edge.array.add('LVM1', edge_enum.RAIDLevel.LVM, members=[drive.name for drive in edge.drive.get()])
+
+.. automethod:: cterasdk.edge.array.Array.delete
+   :noindex:
+
+.. code-block:: python
+
+   """Delete 'LVM1' array"""
+   edge.array.delete('LVM1')
+
+.. automethod:: cterasdk.edge.array.Array.delete_all
+   :noindex:
+
+.. code-block:: python
+
+   """Delete all arrays"""
+   edge.array.delete_all()
+
+
 Volume Management
 -----------------
 

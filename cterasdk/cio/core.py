@@ -259,6 +259,37 @@ def public_link(path, access, expire_in):
 
 
 @contextmanager
+def handle(path):
+    logger.info('Getting file handle: %s', path.reference)
+    yield path.reference
+
+
+@contextmanager
+def upload(core, name, destination, size, fd):
+    param = dict(
+        name=name,
+        Filename=name,
+        fullpath=core.io.builder(CorePath(destination.reference, name).absolute_encode),
+        fileSize=size,
+        file=fd
+    )
+    logger.info('Uploading: %s to: %s', name, destination.reference)
+    yield param
+
+
+@contextmanager
+def handle_many(directory, objects):
+    param = Object()
+    param.paths = ['/'.join([directory.absolute, filename]) for filename in objects]
+    param.snapshot = None
+    param.password = None
+    param.portalName = None
+    param.showDeleted = False
+    logger.info('Getting directory handle: %s', directory.reference)
+    yield param
+
+
+@contextmanager
 def share_info(path):
     logger.info('Getting Share info: %s', path.reference.as_posix())
     yield path.absolute_encode

@@ -42,13 +42,13 @@ class AsyncClient(BaseClient):
 class AsyncFolders(AsyncClient):
 
     async def download_zip(self, path, data, **kwargs):
-        return super().form_data(path, data, **kwargs)
+        return await super().form_data(path, data, **kwargs)
 
 
 class AsyncUpload(AsyncClient):
 
     async def upload(self, path, data, **kwargs):
-        return super().form_data(path, data, **kwargs)
+        return await super().form_data(path, data, **kwargs)
 
 
 class AsyncWebDAV(AsyncClient):
@@ -59,7 +59,7 @@ class AsyncJSON(AsyncClient):
 
     def __init__(self, builder=None, session=None, settings=None, authenticator=None):
         super().__init__(builder, session, settings, authenticator)
-        self.headers.update_headers({'Content-Type': 'application/json'})
+        self.headers.persist_headers({'Content-Type': 'application/json'})
 
     async def get(self, path, **kwargs):
         response = await super().get(path, **kwargs)
@@ -119,6 +119,14 @@ class AsyncExtended(AsyncXML):
 
 class AsyncAPI(AsyncExtended):
     """CTERA Management API"""
+
+    async def web_session(self):
+        response = await AsyncClient.get(self, '/currentSession')
+        self.headers.persist_response_header(response, 'X-CTERA-TOKEN')
+        return await response.xml()
+
+    async def defaults(self, classname):
+        return self.get(f'/defaults/{classname}')
 
 
 class AsyncResponse(BaseResponse):

@@ -25,7 +25,7 @@ Prerequisites
 Credentials
 -----------
 
-The :py:class:`cterasdk.direct.client.Client` object is instantiated using the CTERA Portal URL, an access key, and a secret key.
+The :py:class:`cterasdk.direct.client.DirectIO` object is instantiated using the CTERA Portal URL, an access key, and a secret key.
 
 The API keys must be linked to a Team Portal user with the **Read Write Administrator** role.
 For key generation via the CTERA Portal administrator interface, see:

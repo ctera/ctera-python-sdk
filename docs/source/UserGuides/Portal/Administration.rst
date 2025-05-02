@@ -864,7 +864,7 @@ Local Users
 .. code-block:: python
 
    """Create a local user"""
-   admin.users.add('bruce', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'G0th4amCity!')
+   admin.users.add('bruce', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'G0th4amCity!', core_enum.Role.EndUser)
 
 .. automethod:: cterasdk.core.users.Users.modify
    :noindex:

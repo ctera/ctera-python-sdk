@@ -27,14 +27,14 @@ class Login(BaseCommand):
             logger.error('Login failed. %s', {'host': host, 'user': username})
             raise
 
-    def sso(self, ticket):
+    def sso(self, ctera_ticket):
         """
-        Single Sign On
+        Login using a Portal ticket.
 
         :param str ticket: SSO Ticket.
         """
-        logger.info('Single Sign On.')
-        self._core.ctera.form_data('/sso', {'ctera_ticket': ticket})
+        logger.info('Logging in using a Portal ticket.')
+        self._core.ctera.form_data('/sso', {'ctera_ticket': ctera_ticket})
 
     def logout(self):
         """

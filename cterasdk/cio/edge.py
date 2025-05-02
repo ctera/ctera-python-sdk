@@ -57,6 +57,36 @@ def delete_generator(*paths):
         yield path
 
 
+@contextmanager
+def handle(path):
+    logger.info('Getting file handle: %s', path.reference)
+    yield path.absolute
+
+
+@contextmanager
+def handle_many(directory, objects):
+    param = Object()
+    param.paths = ['/'.join([directory.absolute, item]) for item in objects]
+    param.snapshot = Object()
+    param._classname = 'BackupRepository'  # pylint: disable=protected-access
+    param.snapshot.location = 1
+    param.snapshot.timestamp = None
+    param.snapshot.path = None
+    logger.info('Getting directory handle: %s', directory.reference)
+    yield param
+
+
+@contextmanager
+def upload(name, destination, fd):
+    param = dict(
+        name=name,
+        fullpath=f'{destination.absolute}/{name}',
+        filedata=fd
+    )
+    logger.info('Uploading: %s to: %s', name, destination.reference)
+    yield param
+
+
 def accept_response(response, reference):
     error = {
         "File exists": exceptions.ResourceExistsError(),

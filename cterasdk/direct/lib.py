@@ -2,6 +2,7 @@ import logging
 import asyncio
 
 from .types import DirectIOResponse, Block
+from .credentials import KeyPair, Bearer
 from .crypto import decrypt_key, decrypt_block
 from .decompressor import decompress
 from .exceptions import UnAuthorized, UnprocessableContent, BlocksNotFoundError, DownloadError, DownloadTimeout, BlockListTimeout, \
@@ -9,6 +10,9 @@ from .exceptions import UnAuthorized, UnprocessableContent, BlocksNotFoundError,
     BlockListConnectionError, DirectIOError
 
 from ..exceptions import ClientResponseException
+
+
+logger = logging.getLogger('cterasdk.direct')
 
 
 async def retry(coro, retries=3, backoff=1):
@@ -28,7 +32,7 @@ async def retry(coro, retries=3, backoff=1):
             if attempts == retries:
                 raise error
             wait = backoff * (2 ** (attempts - 1))
-            logging.getLogger('cterasdk.direct').debug('Failed attempt number %s. Retrying in %s seconds.', attempts, wait)
+            logger.debug('Failed attempt number %s. Retrying in %s seconds.', attempts, wait)
             await asyncio.sleep(wait)
 
 
@@ -43,21 +47,21 @@ async def get_object(client, file_id, chunk):
     """
     async def get_object_coro():
         parameters = {'file_id': file_id, 'number': chunk.index, 'offset': chunk.offset}
-        logging.getLogger('cterasdk.direct').debug('Downloading Block. %s', parameters)
+        logger.debug('Downloading Block. %s', parameters)
         try:
             response = await client.get(chunk.url)
             return await response.read()
         except ConnectionError:
-            logging.getLogger('cterasdk.direct').error('Failed to download block. Connection error. %s', parameters)
+            logger.error('Failed to download block. Connection error. %s', parameters)
             raise DownloadConnectionError(file_id, chunk)
         except asyncio.TimeoutError:
-            logging.getLogger('cterasdk.direct').error('Failed to download block. Timed out. %s', parameters)
+            logger.error('Failed to download block. Timed out. %s', parameters)
             raise DownloadTimeout(file_id, chunk)
         except IOError as error:
-            logging.getLogger('cterasdk.direct').error('Failed to download block. IO Error. %s', parameters)
+            logger.error('Failed to download block. IO Error. %s', parameters)
             raise DownloadError(error, file_id, chunk)
         except ClientResponseException as error:
-            logging.getLogger('cterasdk.direct').error('Failed to download block. Error. %s', parameters)
+            logger.error('Failed to download block. Error. %s', parameters)
             raise DownloadError(error.response, file_id, chunk)
 
     return await retry(get_object_coro)
@@ -76,7 +80,7 @@ async def decrypt_object(file_id, encrypted_object, encryption_key, chunk):
     try:
         return decrypt_block(encrypted_object, encryption_key)
     except DirectIOError:
-        logging.getLogger('cterasdk.direct').error('Failed to decrypt block.')
+        logger.error('Failed to decrypt block.')
         raise DecryptBlockError(file_id, chunk)
 
 
@@ -92,11 +96,11 @@ async def decompress_object(file_id, compressed_object, chunk):
     try:
         decompressed_object = decompress(compressed_object)
         if chunk.length != len(decompressed_object):
-            logging.getLogger('cterasdk.direct').error('Expected block length does not match decrypted and decompressed block length.')
+            logger.error('Expected block length does not match decrypted and decompressed block length.')
             raise BlockValidationException(file_id, chunk)
         return decompressed_object
     except DirectIOError:
-        logging.getLogger('cterasdk.direct').error('Failed to decompress block.')
+        logger.error('Failed to decompress block.')
         raise DecompressBlockError(file_id, chunk)
 
 
@@ -115,7 +119,7 @@ async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
     """
     async def process(client, chunk, encryption_key):
         parameters = {'file_id': file_id, 'number': chunk.index, 'offset': chunk.offset}
-        logging.getLogger('cterasdk.direct').debug('Processing Block. %s', parameters)
+        logger.debug('Processing Block. %s', parameters)
 
         encrypted_object = await get_object(client, file_id, chunk)
         decrypted_object = await decrypt_object(file_id, encrypted_object, encryption_key, chunk)
@@ -143,7 +147,7 @@ async def process_chunks(client, file_id, chunks, encryption_key, semaphore=None
     parameters = {'file_id': file_id, 'blocks': len(chunks)}
     if semaphore:
         parameters['max_workers'] = semaphore._value  # pylint: disable=protected-access
-    logging.getLogger('cterasdk.direct').debug('Processing Blocks. %s', parameters)
+    logger.debug('Processing Blocks. %s', parameters)
     futures = []
     for chunk in chunks:
         futures.append(asyncio.create_task(process_chunk(client, file_id, chunk, encryption_key, semaphore)))
@@ -163,7 +167,7 @@ def decrypt_encryption_key(file_id, wrapped_key, secret_access_key):
     try:
         return decrypt_key(wrapped_key, secret_access_key)
     except DirectIOError:
-        logging.getLogger('cterasdk.direct').error('Failed to decrypt secret key.')
+        logger.error('Failed to decrypt secret key.')
         raise DecryptKeyError(file_id)
 
 
@@ -171,13 +175,19 @@ def create_authorization_header(credentials):
     """
     Create Authorization Header.
 
-    :param cterasdk.objects.asynchronous.direct.Credentials credentials: Credentials
+    :param cterasdk.direct.credentials.BaseCredentials credentials: Credentials
     :returns: Authorization header as a dictionary.
     :rtype: dict
     """
-    return {
-        'Authorization': f'Bearer {credentials.access_key_id}'
-    }
+    authorization_header = None
+
+    if isinstance(credentials, Bearer):
+        authorization_header = f'Bearer {credentials.bearer}'
+
+    elif isinstance(credentials, KeyPair):
+        authorization_header = f'Bearer {credentials.access_key_id}'
+
+    return {'Authorization': authorization_header}
 
 
 async def get_chunks(api, credentials, file_id):
@@ -191,11 +201,11 @@ async def get_chunks(api, credentials, file_id):
     """
     async def get_chunks_coro():
         parameters = {'file_id': file_id}
-        logging.getLogger('cterasdk.direct').debug('Listing blocks. %s', parameters)
+        logger.debug('Listing blocks. %s', parameters)
         try:
             response = await api.get(f'{file_id}', headers=create_authorization_header(credentials))
             if not response.chunks:
-                logging.getLogger('cterasdk.direct').error('Blocks not found. %s', parameters)
+                logger.error('Blocks not found. %s', parameters)
                 raise BlocksNotFoundError(file_id)
             return DirectIOResponse(response)
         except ClientResponseException as error:
@@ -207,10 +217,10 @@ async def get_chunks(api, credentials, file_id):
                 raise UnprocessableContent(file_id)
             raise error
         except ConnectionError:
-            logging.getLogger('cterasdk.direct').error('Failed to list blocks. Connection error. %s', parameters)
+            logger.error('Failed to list blocks. Connection error. %s', parameters)
             raise BlockListConnectionError(file_id)
         except asyncio.TimeoutError:
-            logging.getLogger('cterasdk.direct').error('Failed to list blocks. Timed out. %s', parameters)
+            logger.error('Failed to list blocks. Timed out. %s', parameters)
             raise BlockListTimeout(file_id)
 
     return await retry(get_chunks_coro)

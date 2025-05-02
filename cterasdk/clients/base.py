@@ -1,5 +1,9 @@
+import logging
 from . import async_requests
 from ..common import utils
+
+
+logger = logging.getLogger('cterasdk.http')
 
 
 class CookieJar:
@@ -27,7 +31,20 @@ class PersistentHeaders:
     def all(self):
         return self._headers
 
-    def update_headers(self, headers):
+    def persist_response_header(self, response, header):
+        """
+        Persist header from response object.
+
+        :param cterasdk.clients.base.BaseResponse response: Response object
+        :param str header: Header name
+        """
+        value = response.headers.get(header, None)
+        if value:
+            self.persist_headers({header: value})
+        else:
+            logger.debug("Could not find header: '%s' in response", header)
+
+    def persist_headers(self, headers):
         self._headers.update(headers)
 
 

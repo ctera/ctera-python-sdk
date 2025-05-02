@@ -2,7 +2,6 @@ import logging
 from ...cio.common import encode_request_parameter
 from ...cio import core as fs
 from ...cio import exceptions
-from ...common import Object
 from ...core import query
 from ..enum import CollaboratorType
 from ...lib import FetchResourcesResponse
@@ -103,8 +102,8 @@ def handle(path):
 
         :param cterasdk.objects.synchronous.core.Portal core: Portal object.
         """
-        logger.info('Getting file handle: %s', path.reference)
-        return core.io.download(path.reference)
+        with fs.handle(path) as param:
+            return core.io.download(param)
     return wrapper
 
 
@@ -125,14 +124,8 @@ def handle_many(directory, *objects):
         :param str name: File name.
         :param object handle: File handle.
         """
-        param = Object()
-        param.paths = ['/'.join([directory.absolute, filename]) for filename in objects]
-        param.snapshot = None
-        param.password = None
-        param.portalName = None
-        param.showDeleted = False
-        logger.info('Getting directory handle: %s', directory.reference)
-        return core.io.download_zip(retrieve_remote_dir(core, directory), encode_request_parameter(param))
+        with fs.handle_many(directory, objects) as param:
+            return core.io.download_zip(retrieve_remote_dir(core, directory), encode_request_parameter(param))
     return wrapper
 
 
@@ -152,16 +145,9 @@ def upload(name, size, destination, fd):
 
         :param cterasdk.objects.synchronous.core.Portal core: POrtal object.
         """
-        param = dict(
-            name=name,
-            Filename=name,
-            fullpath=core.io.builder(fs.CorePath(destination.reference, name).absolute_encode),
-            fileSize=size,
-            file=fd
-        )
         target = retrieve_remote_dir(core, destination)
-        logger.info('Uploading: %s to: %s', name, destination.reference)
-        return core.io.upload(target, param)
+        with fs.upload(core, name, destination, size, fd) as param:
+            return core.io.upload(target, param)
     return wrapper
 
 
@@ -214,17 +200,15 @@ def add_share_recipients(core, path, recipients):
 
 def _obtain_valid_recipients(core, path, recipients):
     resource_info = root(core, path)
-    cloud_folder_uid = resource_info.cloudFolderInfo.uid
     valid_recipients = []
-    for recipient in recipients:
-        if fs.valid_recipient(recipient):
-            if not recipient.type == CollaboratorType.EXT:
-                collaborator = _search_collaboration_member(core, recipient.account, cloud_folder_uid)
-                if collaborator:
-                    recipient.collaborator = collaborator
-                    valid_recipients.append(recipient)
-            else:
+    for recipient in filter(fs.valid_recipient, recipients):
+        if not recipient.type == CollaboratorType.EXT:
+            collaborator = _search_collaboration_member(core, recipient.account, resource_info.cloudFolderInfo.uid)
+            if collaborator:
+                recipient.collaborator = collaborator
                 valid_recipients.append(recipient)
+        else:
+            valid_recipients.append(recipient)
     return valid_recipients
 
 

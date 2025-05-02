@@ -4,6 +4,9 @@ from ..common import Object
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Settings(BaseCommand):
     """
     CTERA Portal Settings APIs
@@ -57,6 +60,10 @@ class GlobalSettings(BaseCommand):
     Global Settings APIs
     """
 
+    @property
+    def dns_suffix(self):
+        return self._core.api.get('/settings/dnsSuffix')
+
     def get_timezone(self):
         """
         Get timezone
@@ -69,7 +76,7 @@ class GlobalSettings(BaseCommand):
 
         :param str timezone: Timezone
         """
-        logging.getLogger('cterasdk.core').info('Updating timezone. %s', {'timezone': timezone})
+        logger.info('Updating timezone. %s', {'timezone': timezone})
         response = self._core.api.put('/settings/timezone', timezone)
-        logging.getLogger('cterasdk.core').info('Updated timezone. %s', {'timezone': timezone})
+        logger.info('Updated timezone. %s', {'timezone': timezone})
         return response

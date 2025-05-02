@@ -21,7 +21,6 @@ from ...core import domains
 from ...core import files
 from ...core import firmwares
 from ...core import groups
-from ...core import impersonate
 from ...core import kms
 from ...core import licenses
 from ...core import login
@@ -159,7 +158,6 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
         self.messaging = messaging.Messaging(self)
         self.portals = portals.Portals(self)
         self.servers = servers.Servers(self)
-        self.sessions = impersonate.Impersonate(self)
         self.setup = setup.Setup(self)
         self.ssl = ssl.SSL(self)
         self.startup = startup.Startup(self)
@@ -169,10 +167,22 @@ class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
     def context(self):
         return 'admin'
 
+    def impersonate(self, username, tenant):
+        """
+        Impersonate a Portal user
+
+        :param str username: Username
+        :param str tenant: Tenant
+        """
+        ctera_ticket = self.users.generate_ticket(username, tenant)
+        user = ServicesPortal(f'{tenant}.{self.settings.global_settings.dns_suffix}', self.port())
+        user.sso(ctera_ticket)
+        return user
+
     @property
     def _omit_fields(self):
         return super()._omit_fields + ['antivirus', 'buckets', 'cli', 'kms', 'licenses', 'mail', 'messaging', 'portals', 'servers',
-                                       'sessions', 'setup', 'ssl', 'startup', 'syslog']
+                                       'setup', 'ssl', 'startup', 'syslog']
 
 
 class ServicesPortal(Portal):
@@ -181,6 +191,12 @@ class ServicesPortal(Portal):
     def context(self):
         return 'ServicesPortal'
 
-    def sso(self, ticket):
-        self._login_object.sso(ticket)
+    def sso(self, ctera_ticket):
+        """
+        Login using a Portal ticket
+
+        :param str ctera_ticket: SSO Ticket.
+        """
+        self._login_object.sso(ctera_ticket)
         self.session().start_session(self)
+        self.api.web_session()

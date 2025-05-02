@@ -2,7 +2,6 @@ import logging
 from ...cio.common import encode_request_parameter
 from ...cio import edge as fs
 from ...cio import exceptions
-from ...common import Object
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -58,8 +57,8 @@ def handle(path):
 
         :param cterasdk.objects.synchronous.edge.Edge edge: Edge Filer object.
         """
-        logger.info('Getting file handle: %s', path.reference)
-        return edge.io.download(path.absolute)
+        with fs.handle(path) as param:
+            return edge.io.download(param)
     return wrapper
 
 
@@ -80,15 +79,8 @@ def handle_many(directory, *objects):
         :param str name: File name.
         :param object handle: File handle.
         """
-        param = Object()
-        param.paths = ['/'.join([directory.absolute, item]) for item in objects]
-        param.snapshot = Object()
-        param._classname = 'BackupRepository'  # pylint: disable=protected-access
-        param.snapshot.location = 1
-        param.snapshot.timestamp = None
-        param.snapshot.path = None
-        logger.info('Getting directory handle: %s', directory.reference)
-        return edge.io.download_zip('/admingui/api/status/fileManager/zip', encode_request_parameter(param))
+        with fs.handle_many(directory, objects) as param:
+            return edge.io.download_zip('/admingui/api/status/fileManager/zip', encode_request_parameter(param))
     return wrapper
 
 
@@ -108,11 +100,6 @@ def upload(name, destination, fd):
 
         :param cterasdk.objects.synchronous.edge.Edge edge: Edge Filer object.
         """
-        param = dict(
-            name=name,
-            fullpath=f'{destination.absolute}/{name}',
-            filedata=fd
-        )
-        logger.info('Uploading: %s to: %s', name, destination.reference)
-        return edge.io.upload('/actions/upload', param)
+        with fs.upload(name, destination, fd) as param:
+            return edge.io.upload('/actions/upload', param)
     return wrapper
