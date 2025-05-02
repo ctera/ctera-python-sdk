@@ -30,33 +30,6 @@ class FileBrowser(BaseCommand):
         handle_many_function = await io.handle_many(self.normalize(directory), *objects)
         return await handle_many_function(self._core)
 
-    async def download(self, path, destination=None):
-        """
-        Download a file
-
-        :param str path: Path
-        :param str,optional destination:
-         File destination, if it is a directory, the original filename will be kept, defaults to the default directory
-        """
-        directory, name = self.determine_directory_and_filename(path, destination=destination)
-        handle = await self.handle(path)
-        return self._filesystem.async_write(directory, name, handle)
-
-    async def download_as_zip(self, target, objects, destination=None):
-        """
-        Download a list of files and/or directories from a cloud folder as a ZIP file
-
-        .. warning:: The list of files is not validated. The ZIP file will include only the existing  files and directories
-
-        :param str target: Path to the cloud directory
-        :param list[str] objects: List of files and/or directories in the cloud folder to download
-        :param str,optional destination:
-         File destination, if it is a directory, the original filename will be kept, defaults to the default directory
-        """
-        directory, name = self.determine_directory_and_filename(target, objects, destination=destination, archive=True)
-        handle = await self.handle_many(target, *objects)
-        return self._filesystem.async_write(directory, name, handle)
-
     async def listdir(self, path, depth=None, include_deleted=False):
         """
         List Directory
@@ -111,35 +84,10 @@ class FileBrowser(BaseCommand):
         :param str path: Path.
         """
         p = self.normalize(path)
-        contents = [e for e in await io.listdir(self._core, p.parent(), 1, False, p.name(), 1)]  # pylint: disable=unnecessary-comprehension
-        if contents and contents[0].name == p.name():
+        contents = [e async for e in await io.listdir(self._core, p.parent, 1, False, p.name, 1)]  # pylint: disable=unnecessary-comprehension
+        if contents and contents[0].name == p.name:
             return contents[0].permalink
         raise FileNotFoundError('File not found.', path)
-
-    def determine_directory_and_filename(self, p, objects=None, destination=None, archive=False):
-        """
-        Determine location to save file.
-
-        :param str p: Path.
-        :param list[str],optional objects: List of files or folders
-        :param str,optional destination: Destination
-        :param bool,optional archive: Compressed archive
-        :returns: Directory and file name
-        :rtype: tuple[str]
-        """
-        directory, name = None, None
-        if destination:
-            directory, name = self._filesystem.split_file_directory(destination)
-        else:
-            directory = self._filesystem.downloads_directory()
-
-        if not name:
-            normalized = self.normalize(p)
-            if archive:
-                name = self._filesystem.compute_zip_file_name(normalized.absolute, objects)
-            else:
-                name = normalized.name
-        return directory, name
 
     def normalize(self, entries):
         return CorePath.instance(self._scope, entries)

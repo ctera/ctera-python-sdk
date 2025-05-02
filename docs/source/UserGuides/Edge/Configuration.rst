@@ -113,7 +113,7 @@ RAID Array
 
    """All arrays"""
    all_arrays = edge.array.get()
-   
+
    """Get array by name"""
    lvm1 = edge.array.get('LVM1')
 
