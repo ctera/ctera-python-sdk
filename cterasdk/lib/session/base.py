@@ -15,7 +15,15 @@ class BaseUser(Object):
 
 
 class BaseSession(Object):
-    """Base CTERA Session"""
+    """
+    Base CTERA Session
+
+    :ivar str address: Address
+    :ivar cterasdk.lib.session.types.Product product: Product
+    :ivar cterasdk.lib.session.types.ConnectionStatus connection_status: Connection status
+    :ivar cterasdk.lib.session.base.BaseUser account: Account
+    :ivar str software_version: Software version
+    """
 
     def __init__(self, address, product):
         """

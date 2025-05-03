@@ -1,7 +1,7 @@
 import logging
 
 from . import enum
-from .files import common
+from ..cio.edge import EdgePath
 from ..common import Object
 from ..exceptions import CTERAException, InputError
 from .base_command import BaseCommand
@@ -57,7 +57,7 @@ class Shares(BaseCommand):
         param = Object()
         param.name = name
 
-        parts = common.Path(directory, '/').parts()
+        parts = EdgePath('/', directory).parts
         volume = parts[0]
         self._validate_root_directory(volume)
         param.volume = volume
@@ -238,7 +238,7 @@ class Shares(BaseCommand):
         """
         share = self.get(name=name)
         if directory is not None:
-            parts = common.Path(directory, '/').parts()
+            parts = EdgePath('/', directory).parts
             volume = parts[0]
             self._validate_root_directory(volume)
             share.volume = volume

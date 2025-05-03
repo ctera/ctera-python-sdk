@@ -1,9 +1,8 @@
 import asyncio
-from collections import namedtuple
-
 import cterasdk.settings
 
 from . import filters
+from .credentials import KeyPair, Bearer
 from .lib import get_chunks, decrypt_encryption_key, process_chunks
 from .types import File, ByteRange, FileMetadata
 from .stream import Streamer
@@ -11,12 +10,6 @@ from .stream import Streamer
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
 from ..clients.settings import ClientSettings, ClientTimeout, TCPConnector
 from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
-
-
-Credentials = namedtuple('Credentials', ('access_key_id', 'secret_access_key'))
-Credentials.__doc__ = 'Tuple holding the access and secret keys to access objects using DirectIO'
-Credentials.access_key_id.__doc__ = 'Access key'
-Credentials.secret_access_key.__doc__ = 'Secret Key'
 
 
 def client_settings(parameters):
@@ -31,7 +24,7 @@ class Client:
     def __init__(self, baseurl, credentials):
         """
         :param str baseurl: Portal URL
-        :param cterasdk.objects.asynchronous.directio.Credentials credentials: Credentials
+        :param cterasdk.direct.credentials.BaseCredentials credentials: Credentials object
         """
         self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio'),
                               settings=client_settings(cterasdk.settings.sessions.ctera_direct.api),
@@ -116,15 +109,16 @@ class DirectIO:
     async def __aenter__(self):
         return self
 
-    def __init__(self, baseurl=None, access_key_id=None, secret_access_key=None):
+    def __init__(self, baseurl=None, access_key_id=None, secret_access_key=None, bearer=None):
         """
-        Initialize a DirectIO Client.
+        Initialize a CTERA Direct IO Client.
 
         :param str baseurl: Portal URL
         :param str,optional access_key_id: Access key
         :param str,optional secret_access_key: Secret key
+        :param str,optional bearer: Bearer token
         """
-        self._client = Client(baseurl, Credentials(access_key_id, secret_access_key))
+        self._client = Client(baseurl, Bearer(bearer) if bearer else KeyPair(access_key_id, secret_access_key))
 
     async def metadata(self, file_id):
         """

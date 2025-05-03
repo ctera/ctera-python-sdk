@@ -176,6 +176,11 @@ class Extended(XML):
 class API(Extended):
     """CTERA Management API"""
 
+    def web_session(self):
+        response = Client.get(self, '/currentSession')
+        self.headers.persist_response_header(response, 'X-CTERA-TOKEN')
+        return response.xml()
+
     def defaults(self, classname):
         return self.get(f'/defaults/{classname}')
 
@@ -183,14 +188,9 @@ class API(Extended):
 class Migrate(JSON):
     """CTERA Migrate Service"""
 
-    ID = 'x-mt-x'
-
     def login(self):
-        request = async_requests.GetRequest(self._builder('/auth/user'))
-        response = self.request(request)
-        token = response.headers.get(Migrate.ID, None)
-        if token:
-            self.headers.update_headers({Migrate.ID: token})
+        response = Client.get(self, '/auth/user')
+        self.headers.persist_response_header(response, 'x-mt-x')
         return response.json()
 
 

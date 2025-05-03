@@ -6,6 +6,9 @@ import aiohttp
 from yarl import URL
 
 
+logger = logging.getLogger('cterasdk.http')
+
+
 def session_parameters(client_settings):
     return {
         'timeout': aiohttp.ClientTimeout(**client_settings.timeout.kwargs),
@@ -49,19 +52,19 @@ class Session:
             response = await self.session.request(r.method, r.url, **r.kwargs)
             return asyncio.create_task(on_response(response))
         except aiohttp.ClientSSLError as error:
-            logging.getLogger('cterasdk.http').warning(error)
+            logger.warning(error)
             raise
         except aiohttp.ClientProxyConnectionError as error:
-            logging.getLogger('cterasdk.http').warning(error)
+            logger.warning(error)
             raise
         except aiohttp.ClientConnectorError as error:
-            logging.getLogger('cterasdk.http').warning(error)
+            logger.warning(error)
             raise ConnectionError(error)
         except aiohttp.ServerDisconnectedError as error:
-            logging.getLogger('cterasdk.http').warning(error)
+            logger.warning(error)
             raise ConnectionError(error)
         except asyncio.TimeoutError as error:
-            logging.getLogger('cterasdk.http').warning('Request timed out while making an HTTP request.')
+            logger.warning('Request timed out while making an HTTP request.')
             raise TimeoutError(error)
 
     @property
@@ -79,7 +82,7 @@ def decorate_stream_error(stream_reader):
         try:
             return await stream_reader(self, n)
         except aiohttp.ClientPayloadError as error:
-            logging.getLogger('cterasdk.http').warning(error)
+            logger.warning(error)
             raise IOError(error)
     return wrapper
 

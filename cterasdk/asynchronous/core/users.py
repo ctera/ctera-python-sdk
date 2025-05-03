@@ -1,6 +1,6 @@
 from .base_command import BaseCommand
-from ...common import union
-from ...exceptions import ObjectNotFoundException
+from ...common import union, Object
+from ...exceptions import ObjectNotFoundException, ContextError
 
 
 class Users(BaseCommand):
@@ -27,3 +27,17 @@ class Users(BaseCommand):
         if user_object.name is None:
             raise ObjectNotFoundException('Could not find user', baseurl, user_directory=user_account.directory, username=user_account.name)
         return user_object
+
+    async def generate_ticket(self, username, tenant):
+        """
+        Create an SSO ticket for a user.
+
+        :param str username: Username
+        :param str portal: Tenant
+        """
+        if self.session().in_tenant_context():
+            raise ContextError('Context error: Browse the Global Administration to invoke this API.')
+        param = Object()
+        param.username = username
+        param.portal = tenant
+        return await self._core.v1.api.execute('', 'getSessionToken', param)

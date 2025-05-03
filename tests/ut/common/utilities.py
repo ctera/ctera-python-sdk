@@ -12,7 +12,7 @@ def patch_call(ut, module_path, **patch_kwargs):
 def patch_property(ut, module_path, **patch_kwargs):
     """Mock patch a given path as a property and schedule proper mock cleanup."""
     patch_kwargs.update({'new_callable': unittest.mock.PropertyMock})
-    return ut.patch_call(module_path, **patch_kwargs)
+    return patch_call(ut, module_path, **patch_kwargs)
 
 
 def assert_equal_objects(self, actual_param, expected_param):

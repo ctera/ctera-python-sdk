@@ -1,55 +1,105 @@
 import logging
-from ...exceptions import CTERAException
-from ...common import Object
-from . import common
+from ...cio.common import encode_request_parameter
+from ...cio import edge as fs
+from ...cio import exceptions
+
+
+logger = logging.getLogger('cterasdk.edge')
 
 
 def listdir(edge, path):
-    param = Object()
-    param.path = path
-    return edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
+    with fs.listdir(path) as param:
+        return edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
 
 
 def mkdir(edge, path):
-    directory = path.fullpath()
-    logging.getLogger('cterasdk.edge').info('Creating directory. %s', {'path': directory})
-    try:
-        edge.io.mkdir(path.fullpath())
-    except CTERAException as error:
-        try:
-            common.raise_for_status(error.response.message.msg, directory)
-        except common.ItemExists:
-            logging.getLogger('cterasdk.edge').info('Directory already exists. %s', {'path': directory})
-    logging.getLogger('cterasdk.edge').info('Directory created. %s', {'path': directory})
-    return directory
+    with fs.makedir(path) as param:
+        edge.io.mkdir(param)
+    return path.absolute
 
 
 def makedirs(edge, path):
-    directories = path.parts()
+    directories = path.parts
     for i in range(1, len(directories) + 1):
-        path = common.get_object_path(path.base, '/'.join(directories[:i]))
+        path = fs.EdgePath(path.scope, '/'.join(directories[:i]))
         try:
             mkdir(edge, path)
-        except common.Forbidden:
-            pass
+        except exceptions.RestrictedPathError:
+            logger.warning('Creating a folder in the specified location is forbidden: %s', path.reference.as_posix())
 
 
 def copy(edge, path, destination=None, overwrite=False):
-    destination = destination.joinpath(path.name()).fullpath()
-    logging.getLogger('cterasdk.edge').info('Copying. %s', {'from': path.fullpath(), 'to': destination})
-    edge.io.copy(path.fullpath(), destination, overwrite=overwrite)
-    logging.getLogger('cterasdk.edge').info('Copied. %s', {'from': path.fullpath(), 'to': destination})
+    with fs.copy(path, destination) as (src, dst):
+        edge.io.copy(src, dst, overwrite=overwrite)
 
 
 def move(edge, path, destination=None, overwrite=False):
-    destination = destination.joinpath(path.name()).fullpath()
-    logging.getLogger('cterasdk.edge').info('Moving. %s', {'from': path.fullpath(), 'to': destination})
-    edge.io.move(path.fullpath(), destination, overwrite=overwrite)
-    logging.getLogger('cterasdk.edge').info('Moved. %s', {'from': path.fullpath(), 'to': destination})
+    with fs.move(path, destination) as (src, dst):
+        edge.io.move(src, dst, overwrite=overwrite)
 
 
 def remove(edge, *paths):
-    for path in paths:
-        logging.getLogger('cterasdk.edge').info('Deleting object. %s', {'path': path.fullpath()})
-        edge.io.delete(path.fullpath())
-        logging.getLogger('cterasdk.edge').info('Object deleted. %s', {'path': path.fullpath()})
+    for path in fs.delete_generator(*paths):
+        edge.io.delete(path.absolute)
+
+
+def handle(path):
+    """
+    Create function to retrieve file handle.
+
+    :param cterasdk.cio.edge.EdgePath path: Path to file.
+    :returns: Callable function to retrieve file handle.
+    :rtype: callable
+    """
+    def wrapper(edge):
+        """
+        Get file handle.
+
+        :param cterasdk.objects.synchronous.edge.Edge edge: Edge Filer object.
+        """
+        with fs.handle(path) as param:
+            return edge.io.download(param)
+    return wrapper
+
+
+def handle_many(directory, *objects):
+    """
+    Create function to retrieve zip archive
+
+    :param cterasdk.cio.edge.EdgePath directory: Path to directory.
+    :param args objects: List of files and folders.
+    :returns: Callable function to retrieve file handle.
+    :rtype: callable
+    """
+    def wrapper(edge):
+        """
+        Upload file from metadata and file handle.
+
+        :param cterasdk.objects.synchronous.edge.Edge edge: Edge Filer object.
+        :param str name: File name.
+        :param object handle: File handle.
+        """
+        with fs.handle_many(directory, objects) as param:
+            return edge.io.download_zip('/admingui/api/status/fileManager/zip', encode_request_parameter(param))
+    return wrapper
+
+
+def upload(name, destination, fd):
+    """
+    Create upload function
+
+    :param str name: File name.
+    :param cterasdk.cio.edge.EdgePath destination: Path to directory.
+    :param object fd: File handle.
+    :returns: Callable function to start the upload.
+    :rtype: callable
+    """
+    def wrapper(edge):
+        """
+        Upload file from metadata and file handle.
+
+        :param cterasdk.objects.synchronous.edge.Edge edge: Edge Filer object.
+        """
+        with fs.upload(name, destination, fd) as param:
+            return edge.io.upload('/actions/upload', param)
+    return wrapper

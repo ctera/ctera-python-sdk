@@ -32,7 +32,6 @@ class Notifications(BaseCommand):
         param.max_results = max_results if max_results is not None else 2000
         logging.getLogger('cterasdk.metadata.connector').debug('Listing updates.')
         response = await self._core.v2.api.post('/metadata/list', param)
-        print(response)
         if response is not None:
             return CursorResponse(response)
         logging.getLogger('cterasdk.metadata.connector').error('An error occurred while trying to retrieve notifications.')
