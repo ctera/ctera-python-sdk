@@ -68,7 +68,7 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
         self._init_filer(handle_response=handle_response)
         mock_get_dirpath = self.patch_call("cterasdk.lib.storage.commonfs.downloads",
                                            return_value=self._default_download_directory)
-        mock_save_file = self.patch_call("cterasdk.lib.filesystem.FileSystem.save")
+        mock_save_file = self.patch_call("cterasdk.lib.storage.synfs.write")
         with mock.patch.object(datetime, 'datetime', mock.Mock(wraps=datetime.datetime)) as patched:
             patched.now.return_value = self._current_datetime
             config.Config(self._filer).export()
