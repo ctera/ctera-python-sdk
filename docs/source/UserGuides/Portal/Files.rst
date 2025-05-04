@@ -4,7 +4,8 @@ File Browser
 
 This article outlines the file-browser APIs available in the CTERA Portal, enabling programmatic access to files and directories.
 
-The API supports both **synchronous** and **asynchronous** implementations, allowing developers to choose the most suitable model for their integration use case—whether real-time interactions or background processing.
+The API supports both **synchronous** and **asynchronous** implementations, allowing developers to choose the most suitable model
+for their integration use case—whether real-time interactions or background processing.
 
 
 Synchronous API
@@ -531,4 +532,4 @@ Asynchronous API
        await user.files.makedirs('My Files/the/quick/brown/fox')  # Create a directory in your own account
 
        """Create directories as Team Portal Administrator"""
-       await user.files.makedirs('Users/John Smith/My Files/the/quick/brown/fox')  # Create a directory in a user's account 
+       await user.files.makedirs('Users/John Smith/My Files/the/quick/brown/fox')  # Create a directory in a user's account
