@@ -1,5 +1,5 @@
 import logging
-from .commonfs import write_new_version, join
+from .commonfs import write_new_version
 
 
 logger = logging.getLogger('cterasdk.filesystem')

@@ -53,11 +53,11 @@ class FileBrowser(BaseCommand):
             The provided list of objects is not validated. Only existing files and directories
             will be included in the resulting ZIP file.
 
-        :param str target: 
+        :param str target:
             Path to the cloud folder containing the files and directories to download.
-        :param list[str] objects: 
+        :param list[str] objects:
             List of file and/or directory names to include in the download.
-        :param str destination: 
+        :param str destination:
             Optional. Path to the destination file or directory. If a directory is provided, 
             the original filename will be preserved. Defaults to the default download directory.
         """
