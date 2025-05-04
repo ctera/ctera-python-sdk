@@ -2,18 +2,36 @@
 File Browser
 ============
 
+This article outlines the file-browser APIs available in the CTERA Portal, enabling programmatic access to files and directories.
+
+The API supports both **synchronous** and **asynchronous** implementations, allowing developers to choose the most suitable model
+for their integration use case—whether real-time interactions or background processing.
+
+
+Synchronous API
+===============
+
+
+User Roles
+----------
+
+The file access APIs are available to the following user roles:
+
+- **Global Administrators** with the `Access End User Folders` permission enabled.
+- **Team Portal Administrators** with the `Access End User Folders` permission enabled.
+- **End Users**, accessing their personal cloud drive folders.
+
+For more information, See: `Customizing Administrator Roles <https://kb.ctera.com/docs/customizing-administrator-roles-2>`_
+
 List
-====
+----
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.listdir
    :noindex:
 
-Use the following API to list the contents of a directory as a Global Administrator.
-This API requires that the administrator has *Access End User Folders*.
-For more details, see `Customizing Administrator Roles <https://kb.ctera.com/docs/customizing-administrator-roles-2>`_
-
 .. code:: python
 
+   """List directories as a Global Administrator"""
    with GlobalAdmin('tenant.ctera.com') as admin:
       admin.login('admin-user', 'admin-pass')
 
@@ -26,14 +44,9 @@ For more details, see `Customizing Administrator Roles <https://kb.ctera.com/doc
                   f.permalink  # a URL that links directly to a specific file
               })
 
-..
-
-Use the following API to list the contents of a directory as an End User or a Team Portal Administrator.
-This API requires that the Team Portal Administrator has *Access End User Folders*.
-For more details, see `Viewing Folder Content <https://kb.ctera.com/docs/managing-folders-1#viewing-folder-content>`_
-
 .. code:: python
 
+   """List directories as a Team Portal Administrator or End User"""
    with ServicesPortal('tenant.ctera.com') as user:
       user.login('username', 'user-password')
       for f in user.files.listdir('My Files/Documents'):
@@ -66,7 +79,7 @@ For more details, see `Viewing Folder Content <https://kb.ctera.com/docs/managin
          print(element.name)  # as a user, traverse all and print the name of all files and folders in 'My Files/Documents'
 
 Versions
-========
+--------
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.versions
    :noindex:
@@ -81,7 +94,7 @@ Versions
                print(version.calculatedTimestamp, item.name)
 
 
-   """When logged in as a tenant user or admin"""
+   """When logged in as a Team Portal Administrator End User"""
    versions = user.files.versions('My Files/Documents')
    for version in versions:
        if not version.current:
@@ -89,7 +102,7 @@ Versions
                print(version.calculatedTimestamp, item.name)
 
 Download
-========
+--------
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.download
    :noindex:
@@ -99,33 +112,34 @@ Download
    """When logged in as a Global Administrator"""
    admin.files.download('Users/John Smith/My Files/Documents/Sample.docx')
 
-   """When logged in as a tenant user or admin"""
-   user.files.download('Users/John Smith/My Files/Documents/Sample.docx')
+   """When logged in as a Team Portal Administrator End User"""
+   user.files.download('My Files/Documents/Sample.docx')
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.download_as_zip
+.. automethod:: cterasdk.core.files.browser.FileBrowser.download_many
    :noindex:
 
 .. code:: python
 
    """When logged in as a Global Administrator"""
-   admin.files.download_as_zip('Users/John Smith/My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
+   admin.files.download_many('Users/John Smith/My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
 
-   """When logged in as a tenant user or admin"""
-   user.files.download_as_zip('Users/John Smith/My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
+   """When logged in as a Team Portal Administrator End User"""
+   user.files.download_many('My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
 
 Copy
-====
+----
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.copy
    :noindex:
 
 .. code:: python
 
+   """When logged in as a Team Portal Administrator End User"""
    user.files.copy(*['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.xlsx'], destination='The/quick/brown/fox')
 
 
 Create Public Link
-==================
+------------------
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.public_link
    :noindex:
@@ -139,32 +153,34 @@ Create Public Link
    - NA: No Access
    """
 
+   """When logged in as a Team Portal Administrator End User"""
    """Create a Read Only public link to a file that expires in 30 days"""
-
    user.files.public_link('My Files/Documents/Sample.docx')
 
+   """When logged in as a Team Portal Administrator End User"""
    """Create a Read Write public link to a folder that expires in 45 days"""
-
    user.files.public_link('My Files/Documents/Sample.docx', 'RW', 45)
 
 
 Get Permalink
-=============
+-------------
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.permalink
    :noindex:
 
 .. code:: python
 
+   """When logged in as a Team Portal Administrator End User"""
    """Create permalink to a file"""
    user.files.permalink('My Files/Documents/Sample.docx')
 
+   """When logged in as a Team Portal Administrator End User"""
    """Create permalink to a folder"""
    user.files.permalink('My Files/Documents')
 
 
 Create Directories
-==================
+------------------
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.mkdir
    :noindex:
@@ -174,7 +190,7 @@ Create Directories
    """When logged in as a Global Administrator"""
    admin.files.mkdir('Users/John Smith/My Files/Documents')
 
-   """When logged in as a tenant user or admin"""
+   """When logged in as a Team Portal Administrator End User"""
    user.files.mkdir('My Files/Documents')
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.makedirs
@@ -185,11 +201,11 @@ Create Directories
    """When logged in as a Global Administrator"""
    admin.files.makedirs('Users/John Smith/My Files/The/quick/brown/fox')
 
-   """When logged in as a tenant user or admin"""
+   """When logged in as a Team Portal Administrator End User"""
    user.files.makedirs('The/quick/brown/fox')
 
 Rename
-======
+------
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.rename
    :noindex:
@@ -203,7 +219,7 @@ Rename
    user.files.makedirs('My Files/Documents/Sample.docx', 'Wizard Of Oz.docx')
 
 Delete
-======
+------
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.delete
    :noindex:
@@ -213,11 +229,11 @@ Delete
    """When logged in as a Global Administrator"""
    admin.files.delete(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'])
 
-   """When logged in as a tenant user or admin"""
+   """When logged in as a Team Portal Administrator End User"""
    user.files.delete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
 
 Undelete
-========
+--------
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.undelete
    :noindex:
@@ -227,11 +243,11 @@ Undelete
    """When logged in as a Global Administrator"""
    admin.files.undelete(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'])
 
-   """When logged in as a tenant user or admin"""
+   """When logged in as a Team Portal Administrator End User"""
    user.files.undelete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
 
 Move
-====
+----
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.move
    :noindex:
@@ -241,11 +257,11 @@ Move
    """When logged in as a Global Administrator"""
    admin.files.move(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'], destination='Users/John Smith/The/quick/brown/fox')
 
-   """When logged in as a tenant user or admin"""
+   """When logged in as a Team Portal Administrator End User"""
    user.files.move(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'], destination='The/quick/brown/fox')
 
 Upload
-======
+------
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.upload
 
@@ -254,17 +270,19 @@ Upload
    """When logged in as a Global Administrator"""
    admin.files.upload(r'C:\Users\admin\Downloads\Tree.jpg', 'Users/John Smith/My Files/Images')
 
-   """Uploading as a tenant user or admin"""
+   """When logged in as a Team Portal Administrator End User"""
    user.files.upload(r'C:\Users\admin\Downloads\Tree.jpg', 'My Files/Images')
 
 
 Collaboration Shares
-====================
+--------------------
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.share
    :noindex:
 
 .. code:: python
+
+   """When logged in as a Team Portal Administrator End User"""
 
    """
    Share with a local user and a local group.
@@ -278,29 +296,33 @@ Collaboration Shares
    alice_rcpt = core_types.ShareRecipient.local_user(alice).expire_in(30).read_only()
    engineers_rcpt = core_types.ShareRecipient.local_group(engineers).read_write()
 
-   admin.files.share('Codebase', [alice_rcpt, engineers_rcpt])
+   user.files.share('Codebase', [alice_rcpt, engineers_rcpt])
 
 ..
 
 .. code:: python
+
+   """When logged in as a Team Portal Administrator End User"""
 
    """
    Share with an external recipient
    - Grant the external user with preview only access for 10 days
    """
    jsmith = core_types.ShareRecipient.external('jsmith@hotmail.com').expire_in(10).preview_only()
-   admin.files.share('My Files/Projects/2020/ProjectX', [jsmith])
+   user.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
    """
    Share with an external recipient, and require 2 factor authentication
    - Grant the external user with read only access for 5 days, and require 2 factor authentication over e-mail
    """
    jsmith = core_types.ShareRecipient.external('jsmith@hotmail.com', True).expire_in(5).read_only()
-   admin.files.share('My Files/Projects/2020/ProjectX', [jsmith])
+   user.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
 ..
 
 .. code:: python
+
+   """When logged in as a Team Portal Administrator End User"""
 
    """
    Share with a domain groups
@@ -313,19 +335,23 @@ Collaboration Shares
    albany_rcpt = core_types.ShareRecipient.domain_group(albany_group).read_write()
    cleveland_rcpt = core_types.ShareRecipient.domain_group(cleveland_group).read_only()
 
-   admin.files.share('Cloud/Albany', [albany_rcpt, cleveland_rcpt])
+   user.files.share('Cloud/Albany', [albany_rcpt, cleveland_rcpt])
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.add_share_recipients
    :noindex:
 
 .. code:: python
 
-   """Add collaboration shares members.
+   """When logged in as a Team Portal Administrator End User"""
+
+   """
+   Add collaboration shares members.
+
    - Grant the 'Engineering' local group with read-write permission
    """
    engineering = core_types.GroupAccount('Engineering')
    engineering_rcpt = core_types.ShareRecipient.local_group(engineering).read_write()
-   admin.files.add_share_recipients('My Files/Projects/2020/ProjectX', [engineering_rcpt])
+   user.files.add_share_recipients('My Files/Projects/2020/ProjectX', [engineering_rcpt])
 
 .. note:: if the share recipients provided as an argument already exist, they will be skipped and not updated
 
@@ -334,14 +360,12 @@ Collaboration Shares
 
 .. code:: python
 
-   """Remove collaboration shares members.
-   - Remove the local user 'alice'
-   - Remove the local group 'Engineering'
-   """
+   """When logged in as a Team Portal Administrator End User"""
+
    """Remove 'Alice' and 'Engineering' from the List of Recipients"""
    alice = core_types.UserAccount('alice')
    engineering = core_types.GroupAccount('Engineering')
-   admin.files.remove_share_recipients('My Files/Projects/2020/ProjectX', [alice, engineering])
+   user.files.remove_share_recipients('My Files/Projects/2020/ProjectX', [alice, engineering])
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.unshare
    :noindex:
@@ -351,13 +375,13 @@ Collaboration Shares
    """
    Unshare a file or a folder
    """
-   admin.files.unshare('Codebase')
-   admin.files.unshare('My Files/Projects/2020/ProjectX')
-   admin.files.unshare('Cloud/Albany')
+   user.files.unshare('Codebase')
+   user.files.unshare('My Files/Projects/2020/ProjectX')
+   user.files.unshare('Cloud/Albany')
 
 
 Managing S3 Credentials
-=======================
+-----------------------
 
 Starting CTERA 8.0, CTERA Portal features programmatic access via the S3 protocol, also known as *CTERA Fusion*
 For more information on how to enable CTERA Fusion and the supported extensions of the S3 protocol, please refer to the following `article <https://kb.ctera.com/v1/docs/en/setting-up-access-from-an-s3-browser>`_
@@ -401,3 +425,111 @@ The following section includes examples on how to instantiate an S3 client using
    client.download_file(r'./data-management-document.docx', 'my-bucket-name', 'data-management-document-copy.docx')
 
    # for more information, please refer to the Amazon SDK for Python (boto3) documentation.
+
+
+Asynchronous API
+================
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.handle
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.handle_many
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.download
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.download_many
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.listdir
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.versions
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.walk
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.public_link
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.copy
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.move
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.permalink
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.upload
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.upload_file
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.mkdir
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.makedirs
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.rename
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.delete
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.undelete
+   :noindex:
+
+
+.. code:: python
+
+   """Access a Global Administrator"""
+   async with AsyncGlobalAdmin('global.ctera.com') as admin:
+       await admin.login('username', 'password')
+       await admin.portals.browse('corp')  # access files in the 'corp' Team Portal tenant
+
+       """Create directories recursively"""
+       await admin.files.makedirs('Users/John Smith/My Files/the/quick/brown/fox')
+
+       """Create a 'Documents' directory"""
+       await admin.files.mkdir('Users/John Smith/Documents')
+
+       """Walk 'John Smith's My Files directory"""
+       async for i in admin.files.walk('Users/John Smith/My Files'):
+           print(i.name, i.size, i.lastmodified, i.permalink)
+
+       """List all files in a directory"""
+       documents = [i.name async for i in admin.files.listdir('Users/John Smith/Documents') if i.isfile]
+
+       """Rename a directory"""
+       await admin.files.rename('Users/John Smith/Documents', 'Documents360')
+
+       """Download"""
+       await admin.files.download('Users/John Smith/My Files/Sunrise.png')
+       await admin.files.download('Users/John Smith/My Files/Sunrise.png', 'c:/users/jsmith/downloads/Patagonia.png')
+
+       await admin.files.download_many('Users/John Smith/Pictures', ['Sunrise.png', 'Gelato.pptx'])
+       await admin.files.download_many('Users/John Smith/Pictures', ['Sunrise.png', 'Gelato.pptx'], 'c:/users/jsmith/downloads/Images.zip')
+
+       """Upload"""
+       await admin.files.upload_file('c:/users/jsmith/downloads/Sunset.png', '/Users/John Smith/Pictures')
+
+       """Public Link"""
+       url = await admin.files.public_link('Users/John Smith/Pictures/Sunrise.png')
+       print(url)
+
+.. code:: python
+
+   """Access a Team Portal Administrator or End User"""
+   async with AsyncservicesPortal('tenant.ctera.com') as user:
+       await user.login('username', 'password')
+
+       """Create directories as an End User"""
+       await user.files.makedirs('My Files/the/quick/brown/fox')  # Create a directory in your own account
+
+       """Create directories as Team Portal Administrator"""
+       await user.files.makedirs('Users/John Smith/My Files/the/quick/brown/fox')  # Create a directory in a user's account

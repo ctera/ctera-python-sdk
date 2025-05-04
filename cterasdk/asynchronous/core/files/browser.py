@@ -1,5 +1,5 @@
 from ....cio.core import CorePath
-from ....lib import FileSystem
+from ....lib.storage import asynfs, commonfs
 from ..base_command import BaseCommand
 from . import io
 
@@ -9,7 +9,6 @@ class FileBrowser(BaseCommand):
     def __init__(self, core):
         super().__init__(core)
         self._scope = f'/{self._core.context}/webdav'
-        self._filesystem = FileSystem.instance()
 
     async def handle(self, path):
         """
@@ -29,6 +28,38 @@ class FileBrowser(BaseCommand):
         """
         handle_many_function = await io.handle_many(self.normalize(directory), *objects)
         return await handle_many_function(self._core)
+
+    async def download(self, path, destination=None):
+        """
+        Download a file
+
+        :param str path: Path
+        :param str,optional destination:
+         File destination, if it is a directory, the original filename will be kept, defaults to the default directory
+        """
+        directory, name = commonfs.determine_directory_and_filename(path, destination=destination)
+        handle = await self.handle(path)
+        return await asynfs.write(directory, name, handle)
+
+    async def download_many(self, target, objects, destination=None):
+        """
+        Download selected files and/or directories as a ZIP archive.
+
+        .. warning::
+            The provided list of objects is not validated. Only existing files and directories
+            will be included in the resulting ZIP file.
+
+        :param str target:
+            Path to the cloud folder containing the files and directories to download.
+        :param list[str] objects:
+            List of file and/or directory names to include in the download.
+        :param str destination:
+            Optional. Path to the destination file or directory. If a directory is provided,
+            the original filename will be preserved. Defaults to the default download directory.
+        """
+        directory, name = commonfs.determine_directory_and_filename(target, objects, destination=destination, archive=True)
+        handle = await self.handle_many(target, *objects)
+        return await asynfs.write(directory, name, handle)
 
     async def listdir(self, path, depth=None, include_deleted=False):
         """
@@ -116,7 +147,7 @@ class CloudDrive(FileBrowser):
         :param str destination: Remote path
         """
         with open(path, 'rb') as handle:
-            metadata = self._filesystem.properties(path)
+            metadata = commonfs.properties(path)
             response = await self.upload(metadata['name'], metadata['size'], destination, handle)
         return response
 

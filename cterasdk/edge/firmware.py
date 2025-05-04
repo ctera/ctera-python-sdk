@@ -1,4 +1,4 @@
-from ..lib import FileSystem
+from ..lib.storage import commonfs
 from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
@@ -11,10 +11,6 @@ class UploadTaskStatus():
 
 class Firmware(BaseCommand):
     """ Edge Filer Firmware upgrade API """
-
-    def __init__(self, edge):
-        super().__init__(edge)
-        self._filesystem = FileSystem.instance()
 
     def upgrade(self, file_path, reboot=True, wait_for_reboot=True):
         """
@@ -32,7 +28,7 @@ class Firmware(BaseCommand):
             self._edge.power.reboot(wait=wait_for_reboot)
 
     def _upload_firmware(self, file_path):
-        self._filesystem.properties(file_path)
+        commonfs.properties(file_path)
         with open(file_path, 'rb') as fd:
             return self._edge.api.form_data(
                 'proc/firmware',
