@@ -66,7 +66,7 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
     def test_edge_config_export_default_dest(self):
         handle_response = 'Stream'
         self._init_filer(handle_response=handle_response)
-        mock_get_dirpath = self.patch_call("cterasdk.lib.filesystem.FileSystem.downloads_directory",
+        mock_get_dirpath = self.patch_call("cterasdk.lib.storage.commonfs.downloads",
                                            return_value=self._default_download_directory)
         mock_save_file = self.patch_call("cterasdk.lib.filesystem.FileSystem.save")
         with mock.patch.object(datetime, 'datetime', mock.Mock(wraps=datetime.datetime)) as patched:
@@ -80,9 +80,9 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
     def test_edge_config_export_target_directory_default_filename(self):
         handle_response = 'Stream'
         self._init_filer(handle_response=handle_response)
-        mock_get_dirpath = self.patch_call("cterasdk.lib.filesystem.FileSystem.split_file_directory",
+        mock_get_dirpath = self.patch_call("cterasdk.lib.storage.commonfs.split_file_directory",
                                            return_value=(self._target_directory, None))
-        mock_save_file = self.patch_call("cterasdk.lib.filesystem.FileSystem.save")
+        mock_save_file = self.patch_call("cterasdk.lib.storage.synfs.write")
         with mock.patch.object(datetime, 'datetime', mock.Mock(wraps=datetime.datetime)) as patched:
             patched.now.return_value = self._current_datetime
             config.Config(self._filer).export(self._target_directory)

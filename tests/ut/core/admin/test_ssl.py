@@ -23,9 +23,9 @@ class TestCoreSSL(base_admin.BaseCoreTest):
     def test_export_certificate(self):
         destination = '/home/user'
         filename = 'certificate.zip'
-        mock_split_file_directory = self.patch_call('cterasdk.core.ssl.FileSystem.generate_file_location')
+        mock_split_file_directory = self.patch_call('cterasdk.core.ssl.commonfs.generate_file_destination')
         mock_split_file_directory.return_value = (destination, filename)
-        mock_save = self.patch_call('cterasdk.core.ssl.FileSystem.save')
+        mock_save = self.patch_call('cterasdk.core.ssl.synfs.write')
         mock_save.return_value = f'{destination}/{filename}'
         handle_response = 'handle'
         self._init_setup(handle_response=handle_response)
