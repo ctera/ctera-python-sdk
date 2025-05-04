@@ -6,6 +6,9 @@ import tempfile
 from .registry import Registry
 
 
+logger = logging.getLogger('cterasdk.filesystem')
+
+
 class TempfileServices:
 
     __tempdir_prefix = 'cterasdk-'
@@ -15,18 +18,18 @@ class TempfileServices:
         registry = Registry.instance()
         tempdir = registry.get('tempdir')
         if tempdir is None:
-            logging.getLogger('cterasdk.filesystem').debug('Creating temporary directory.')
+            logger.debug('Creating temporary directory.')
             tempdir = tempfile.mkdtemp(prefix=TempfileServices.__tempdir_prefix)
-            logging.getLogger('cterasdk.filesystem').debug('Temporary directory created. %s', {'path': tempdir})
+            logger.debug('Temporary directory created. %s', {'path': tempdir})
             registry.register('tempdir', tempdir)
         return tempdir
 
     @staticmethod
     def mkfile(prefix, suffix):
         tempdir = TempfileServices.mkdir()
-        logging.getLogger('cterasdk.filesystem').debug('Creating temporary file.')
+        logger.debug('Creating temporary file.')
         fd, filepath = tempfile.mkstemp(prefix=prefix, suffix=suffix, dir=tempdir)
-        logging.getLogger('cterasdk.filesystem').debug('Temporary file created. %s', {'path': filepath})
+        logger.debug('Temporary file created. %s', {'path': filepath})
         return (fd, filepath)
 
     @staticmethod
@@ -35,7 +38,7 @@ class TempfileServices:
         registry = Registry.instance()
         tempdir = registry.get('tempdir')
         if tempdir is not None:
-            logging.getLogger('cterasdk.filesystem').debug('Removing temporary directory. %s', {'path': tempdir})
+            logger.debug('Removing temporary directory. %s', {'path': tempdir})
             shutil.rmtree(path=tempdir)
-            logging.getLogger('cterasdk.filesystem').debug('Removed temporary directory. %s', {'path': tempdir})
+            logger.debug('Removed temporary directory. %s', {'path': tempdir})
             registry.remove('tempdir')

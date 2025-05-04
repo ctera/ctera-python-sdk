@@ -2,7 +2,8 @@ import logging
 from zipfile import ZipFile
 
 from .base_command import BaseCommand
-from ..lib import FileSystem, X509Certificate, PrivateKey, TempfileServices, create_certificate_chain
+from ..lib import X509Certificate, PrivateKey, TempfileServices, create_certificate_chain
+from ..lib.storage import commonfs, synfs
 
 
 class SSL(BaseCommand):
@@ -12,7 +13,6 @@ class SSL(BaseCommand):
 
     def __init__(self, portal):
         super().__init__(portal)
-        self._filesystem = FileSystem.instance()
 
     def get(self):
         """
@@ -39,10 +39,10 @@ class SSL(BaseCommand):
         :param str,optional destination:
          File destination, defaults to the default directory
         """
-        directory, filename = self._filesystem.generate_file_location(destination, 'certificate.zip')
+        directory, filename = commonfs.generate_file_destination(destination, 'certificate.zip')
         logging.getLogger('cterasdk.core').info('Exporting SSL certificate.')
         handle = self._core.ctera.handle('/preview/exportCertificate')
-        filepath = self._filesystem.save(directory, filename, handle)
+        filepath = synfs.write(directory, filename, handle)
         logging.getLogger('cterasdk.core').info('Exported SSL certificate. %s', {'filepath': filepath})
         return filepath
 
@@ -57,8 +57,8 @@ class SSL(BaseCommand):
 
         key_basename = 'private.key'
         key_object = PrivateKey.load_private_key(private_key)
-        key_filepath = FileSystem.join(tempdir, key_basename)
-        self._filesystem.write(key_filepath, key_object.pem_data)
+        key_filepath = commonfs.join(tempdir, key_basename)
+        synfs.overwrite(key_filepath, key_object.pem_data)
 
         cert_basename = 'certificate'
         certificates = [X509Certificate.load_certificate(certificate) for certificate in certificates]
@@ -66,13 +66,13 @@ class SSL(BaseCommand):
 
         certificate_chain_zip_archive = None
         if certificate_chain:
-            certificate_chain_zip_archive = FileSystem.join(tempdir, f'{cert_basename}.zip')
+            certificate_chain_zip_archive = commonfs.join(tempdir, f'{cert_basename}.zip')
             with ZipFile(certificate_chain_zip_archive, 'w') as zip_archive:
                 zip_archive.write(key_filepath, key_basename)
                 for idx, certificate in enumerate(certificate_chain):
                     filename = f'{cert_basename}{idx if idx > 0 else ""}.crt'
-                    filepath = FileSystem.join(tempdir, filename)
-                    self._filesystem.write(filepath, certificate.pem_data)
+                    filepath = commonfs.join(tempdir, filename)
+                    synfs.overwrite(filepath, certificate.pem_data)
                     zip_archive.write(filepath, filename)
 
         return certificate_chain_zip_archive
@@ -96,7 +96,7 @@ class SSL(BaseCommand):
         return self.import_from_zip(zipflie)
 
     def _import_certificate(self, zipfile):
-        self._filesystem.properties(zipfile)
+        commonfs.properties(zipfile)
         logging.getLogger('cterasdk.core').info('Uploading SSL certificate.')
         with open(zipfile, 'rb') as fd:
             response = self._core.api.form_data(

@@ -102,16 +102,16 @@ Download
    """When logged in as a tenant user or admin"""
    user.files.download('Users/John Smith/My Files/Documents/Sample.docx')
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.download_as_zip
+.. automethod:: cterasdk.core.files.browser.FileBrowser.download_many
    :noindex:
 
 .. code:: python
 
    """When logged in as a Global Administrator"""
-   admin.files.download_as_zip('Users/John Smith/My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
+   admin.files.download_many('Users/John Smith/My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
 
    """When logged in as a tenant user or admin"""
-   user.files.download_as_zip('Users/John Smith/My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
+   user.files.download_many('Users/John Smith/My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
 
 Copy
 ====
