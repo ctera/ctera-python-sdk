@@ -58,7 +58,7 @@ class FileBrowser(BaseCommand):
         :param list[str] objects:
             List of file and/or directory names to include in the download.
         :param str destination:
-            Optional. Path to the destination file or directory. If a directory is provided, 
+            Optional. Path to the destination file or directory. If a directory is provided,
             the original filename will be preserved. Defaults to the default download directory.
         """
         directory, name = commonfs.determine_directory_and_filename(target, objects, destination=destination, archive=True)
