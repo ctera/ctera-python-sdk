@@ -1,6 +1,6 @@
 import logging
 import aiofiles
-from .commonfs import write_new_version
+from .commonfs import write_new_version, ResultContext
 
 
 logger = logging.getLogger('cterasdk.filesystem')
@@ -16,8 +16,10 @@ async def write(directory, name, handle):
     :returns: Path
     :rtype: str
     """
+    ctx = ResultContext()
     with write_new_version(directory, name) as tempfile:
         await overwrite(tempfile, handle)
+    return ctx.value
 
 
 async def overwrite(p, handle):

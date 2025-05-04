@@ -7,9 +7,6 @@ from . import io
 class FileBrowser(BaseCommand):
     """ Edge Filer File Browser APIs """
 
-    def __init__(self, edge):
-        super().__init__(edge)
-
     def listdir(self, path):
         """
         List Directory

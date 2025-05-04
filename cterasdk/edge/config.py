@@ -16,9 +16,6 @@ logger = logging.getLogger('cterasdk.edge')
 class Config(BaseCommand):
     """ Edge Filer General Configuration APIs """
 
-    def __init__(self, edge):
-        super().__init__(edge)
-
     def get_location(self):
         """
         Get the location of the Edge Filer
@@ -67,7 +64,7 @@ class Config(BaseCommand):
         if isinstance(config, Device):
             database = copy.deepcopy(config)
         elif isinstance(config, str):
-            database = self.load_config(config)
+            database = Config.load_config(config)
 
         if exclude:
             delete_attrs(database, exclude)
@@ -92,7 +89,8 @@ class Config(BaseCommand):
             logger.info('Imported Edge Filer configuration.')
         return response
 
-    def load_config(self, config):
+    @staticmethod
+    def load_config(config):
         """
         Load the Edge Filer configuration
 
@@ -126,6 +124,7 @@ class Config(BaseCommand):
         handle = self._edge.api.handle('/export')
         filepath = synfs.write(directory, filename, handle)
         logger.info('Exported configuration. %s', {'filepath': filepath})
+        return filepath
 
     def is_wizard_enabled(self):
         """

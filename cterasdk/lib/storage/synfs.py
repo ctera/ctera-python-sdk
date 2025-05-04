@@ -1,5 +1,5 @@
 import logging
-from .commonfs import write_new_version
+from .commonfs import write_new_version, ResultContext
 
 
 logger = logging.getLogger('cterasdk.filesystem')
@@ -15,8 +15,10 @@ def write(directory, name, handle):
     :returns: Path
     :rtype: str
     """
-    with write_new_version(directory, name) as tempfile:
+    ctx = ResultContext()
+    with write_new_version(directory, name, ctx=ctx) as tempfile:
         overwrite(tempfile, handle)
+    return ctx.value
 
 
 def overwrite(p, handle):

@@ -11,9 +11,6 @@ class SSL(BaseCommand):
     Portal SSL Certificate APIs
     """
 
-    def __init__(self, portal):
-        super().__init__(portal)
-
     def get(self):
         """
         Retrieve details of the current installed SSL certificate
@@ -46,7 +43,8 @@ class SSL(BaseCommand):
         logging.getLogger('cterasdk.core').info('Exported SSL certificate. %s', {'filepath': filepath})
         return filepath
 
-    def create_zip_archive(self, private_key, *certificates):
+    @staticmethod
+    def create_zip_archive(private_key, *certificates):
         """
         Create a ZIP archive that can be imported to CTERA Portal
 
@@ -92,7 +90,7 @@ class SSL(BaseCommand):
         :param str private_key: The PEM-encoded private key, or a path to the PEM-encoded private key file
         :param list[str] certificates: The PEM-encoded certificates, or a list of paths of the PEM-encoded certificate files
         """
-        zipflie = self.create_zip_archive(private_key, *certificates)
+        zipflie = SSL.create_zip_archive(private_key, *certificates)
         return self.import_from_zip(zipflie)
 
     def _import_certificate(self, zipfile):

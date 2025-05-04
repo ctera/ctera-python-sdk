@@ -12,9 +12,6 @@ class UploadTaskStatus():
 class Firmware(BaseCommand):
     """ Edge Filer Firmware upgrade API """
 
-    def __init__(self, edge):
-        super().__init__(edge)
-
     def upgrade(self, file_path, reboot=True, wait_for_reboot=True):
         """
         Upgrade the Filer firmware with the provided file

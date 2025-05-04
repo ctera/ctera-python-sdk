@@ -140,13 +140,29 @@ def rename(source, new_name):
     return destination.as_posix()
 
 
+class ResultContext:
+    """Context Manager Result Context"""
+
+    def __init__(self):
+        self._value = None
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, v):
+        self._value = v
+
+
 @contextmanager
-def write_new_version(directory, name):
+def write_new_version(directory, name, *, ctx=None):
     """
     Context manager for writing a file without conflicts.
 
     :param str directory: Parent directory
     :param str name: File name
+    :param ResultContext,optional ctx: Result Context
     :returns: Path
     :rtype: str
     :raises: FileNotFoundError
@@ -171,7 +187,9 @@ def write_new_version(directory, name):
 
     p = parent.joinpath(name)
     logger.info('Saved: %s', p.as_posix())
-    return p.as_posix()
+
+    if ctx and isinstance(ctx, ResultContext):
+        ctx.value = p.as_posix()
 
 
 def split_file_directory(location):
