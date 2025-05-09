@@ -18,7 +18,7 @@ class TestCoreRemote(base_admin.BaseCoreTest):
         self._user_name = 'user'
         self._user_role = 'EndUser'
         self._sso_ticket = 'sso ticket'
-        self._mock_close = self.patch_call("cterasdk.clients.synchronous.clients.Client.close")
+        self._mock_close = self.patch_call("cterasdk.clients.clients.Client.close")
 
     def test_instantiation_of_remote_devices(self):
         filer_types = ['CloudPlug', 'C200', 'C400', 'C800', 'C800P', 'vGateway']

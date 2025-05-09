@@ -16,7 +16,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path to a file
         """
-        handle_function = await io.handle(self.normalize(path))
+        handle_function = io.handle(self.normalize(path))
         return await handle_function(self._core)
 
     async def handle_many(self, directory, *objects):
@@ -26,7 +26,7 @@ class FileBrowser(BaseCommand):
         :param str directory: Path to a folder
         :param args objects: List of files and folders
         """
-        handle_many_function = await io.handle_many(self.normalize(directory), *objects)
+        handle_many_function = io.handle_many(self.normalize(directory), *objects)
         return await handle_many_function(self._core)
 
     async def download(self, path, destination=None):
@@ -136,7 +136,7 @@ class CloudDrive(FileBrowser):
         :param str destination: Path to remote directory.
         :param object handle: Handle.
         """
-        upload_function = await io.upload(name, size, self.normalize(destination), handle)
+        upload_function = io.upload(name, size, self.normalize(destination), handle)
         return await upload_function(self._core)
 
     async def upload_file(self, path, destination):

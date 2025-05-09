@@ -138,22 +138,22 @@ The ``GlobalAdmin`` and ``ServicesPortal`` objects feature an ``api`` property u
 
 .. warning:: For optimal integration, it's advised to utilize the modules provided in this SDK instead of the ``api`` property. In cases where a specific command or module is absent, `please submit a feature request <https://github.com/ctera/ctera-python-sdk/issues>`_.
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.get
+.. automethod:: cterasdk.clients.clients.API.get
    :noindex:
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.get_multi
+.. automethod:: cterasdk.clients.clients.API.get_multi
    :noindex:
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.put
+.. automethod:: cterasdk.clients.clients.API.put
    :noindex:
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.add
+.. automethod:: cterasdk.clients.clients.API.add
    :noindex:
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.execute
+.. automethod:: cterasdk.clients.clients.API.execute
    :noindex:
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.delete
+.. automethod:: cterasdk.clients.clients.API.delete
    :noindex:
 
 Data Types and Enumerators

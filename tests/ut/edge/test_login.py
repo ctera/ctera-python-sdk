@@ -13,7 +13,7 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
         self._username = 'admin'
         self._password = 'password'
         self._version = '7.5.182.16'
-        self._mock_close = self.patch_call("cterasdk.clients.synchronous.clients.Client.close")
+        self._mock_close = self.patch_call("cterasdk.clients.clients.Client.close")
 
     def test_login_success(self):
         self._init_filer()

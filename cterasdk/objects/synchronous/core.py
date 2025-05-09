@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from ...clients.synchronous import clients
+from ...clients.clients import clients
 from ..services import Management
 from ..endpoints import EndpointBuilder
 

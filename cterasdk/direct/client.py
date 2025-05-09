@@ -9,7 +9,7 @@ from .stream import Streamer
 
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
 from ..clients.settings import ClientSettings, ClientTimeout, TCPConnector
-from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
+from ..clients.clients import AsyncClient, AsyncJSON
 
 
 def client_settings(parameters):

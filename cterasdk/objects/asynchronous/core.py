@@ -1,7 +1,7 @@
 import cterasdk.settings
 from ..services import CTERA, client_settings
 from ..endpoints import EndpointBuilder
-from ...clients.asynchronous import clients
+from ...clients import clients
 
 from .. import authenticators
 

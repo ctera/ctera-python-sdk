@@ -1,4 +1,5 @@
 import logging
+import threading
 from . import async_requests
 from ..common import utils
 
@@ -145,3 +146,37 @@ class BaseResponse:
 
     def raise_for_status(self):
         return self._response.raise_for_status()
+
+
+def run_threadsafe(loop, target, *args, **kwargs):
+    event = threading.Event()
+
+    t = Task(loop, event, target, *args, **kwargs)
+    t.start()
+
+    event.wait()
+
+    if t.exception:
+        raise t.exception
+    return t.response
+
+
+class Task(threading.Thread):
+
+    def __init__(self, loop, event, target, *args, **kwargs):
+        super().__init__(name='Thread-safe Executor')
+        self.loop = loop
+        self.event = event
+        self.target = target
+        self.args = args
+        self.kwargs = kwargs
+        self.exception = None
+        self.response = None
+
+    def run(self):
+        try:
+            self.response = self.loop.run_until_complete(self.target(*self.args, **self.kwargs))
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self.exception = e
+        finally:
+            self.event.set()
