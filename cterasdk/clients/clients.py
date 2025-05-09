@@ -1,8 +1,8 @@
 import asyncio
 from . import errors
 from .base import BaseClient, BaseResponse, run_threadsafe
-from ..common import Serializers, Deserializers
-from .. import async_requests, decorators
+from .common import Serializers, Deserializers
+from . import async_requests, decorators
 from ..common import Object
 
 

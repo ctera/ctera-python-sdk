@@ -1,4 +1,4 @@
-from ...clients.clients import clients
+from ...clients import clients
 from ..services import Management
 from ..endpoints import EndpointBuilder
 

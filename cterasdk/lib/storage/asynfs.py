@@ -35,5 +35,4 @@ async def overwrite(p, handle):
         else:
             async for chunk in handle.async_iter_content(chunk_size=8192):
                 await fd.write(chunk)
-        logger.debug('Wrote: %s', p.as_posix())
     return p.as_posix()

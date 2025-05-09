@@ -4,7 +4,7 @@ import cterasdk.settings
 from . import endpoints, uri
 from .utils import URI
 from ..clients.settings import ClientSettings, ClientTimeout, TCPConnector, CookieJar
-from ..clients.clients import clients
+from ..clients import clients
 from ..common import Object
 from ..convert import tojsonstr
 
