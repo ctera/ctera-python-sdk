@@ -115,21 +115,27 @@ class Chunk:
 
 class File:
 
-    def __init__(self, file_id, encryption_key, chunks):
+    def __init__(self, file_id, encrypted, encryption_key, chunks):
         """
         Initialize a File Object.
 
         :param int file_id: File ID.
+        :param bool encrypted: Boolean if File is Encrypted.
         :param str encryption_key: Encryption Key.
         :param cterasdk.direct.types.Chunk chunks: List of Chunks.
         """
         self._file_id = file_id
+        self._encrypted = encrypted
         self._encryption_key = encryption_key
         self._chunks = chunks
 
     @property
     def file_id(self):
         return self._file_id
+
+    @property
+    def encrypted(self):
+        return self._encrypted
 
     @property
     def encryption_key(self):

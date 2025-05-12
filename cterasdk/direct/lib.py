@@ -104,7 +104,7 @@ async def decompress_object(file_id, compressed_object, chunk):
         raise DecompressBlockError(file_id, chunk)
 
 
-async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
+async def process_chunk(client, file_id, chunk, encrypted, encryption_key, semaphore):
     """
     Process a Chunk.
 
@@ -122,7 +122,7 @@ async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
         logger.debug('Processing Block. %s', parameters)
 
         encrypted_object = await get_object(client, file_id, chunk)
-        decrypted_object = await decrypt_object(file_id, encrypted_object, encryption_key, chunk)
+        decrypted_object = decrypted_object if not encrypted else await decrypt_object(file_id, encrypted_object, encryption_key, chunk)
         decompressed_object = await decompress_object(file_id, decrypted_object, chunk)
         return Block(file_id, chunk.index, chunk.offset, decompressed_object, chunk.length)
 
@@ -132,13 +132,14 @@ async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
     return await process(client, chunk, encryption_key)
 
 
-async def process_chunks(client, file_id, chunks, encryption_key, semaphore=None):
+async def process_chunks(client, file_id, chunks, encrypted, encryption_key, semaphore=None):
     """
     Process Chunks Asynchronously.
 
     :param cterasdk.clients.asynchronous.clients.AsyncClient client: Asynchronous HTTP Client.
     :param int file_id: File ID.
     :param list[cterasdk.direct.types.Chunk] chunks: Chunk.
+    :param bool encrypted: Boolean, if File is Encrypted.
     :param str encryption_key: Encryption key.
     :param asyncio.Semaphore,optional semaphore: Semaphore.
     :returns: List of futures.
@@ -150,7 +151,7 @@ async def process_chunks(client, file_id, chunks, encryption_key, semaphore=None
     logger.debug('Processing Blocks. %s', parameters)
     futures = []
     for chunk in chunks:
-        futures.append(asyncio.create_task(process_chunk(client, file_id, chunk, encryption_key, semaphore)))
+        futures.append(asyncio.create_task(process_chunk(client, file_id, chunk, encrypted, encryption_key, semaphore)))
     return futures
 
 
