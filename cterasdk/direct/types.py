@@ -49,7 +49,25 @@ class DirectIOResponse:
         :param int file_id: File ID.
         :param cterasdk.common.object.Object server_object: Response Object.
         """
-        self._wrapped_key = server_object.wrapped_key
+        # Handle both old (8.2) and new (8.3) response formats
+        if hasattr(server_object, 'encrypt_info') and hasattr(server_object.encrypt_info, 'wrapped_key'):
+            self._wrapped_key = server_object.encrypt_info.wrapped_key
+        else:
+            self._wrapped_key = server_object.wrapped_key
+            
+        # Handle actual_blocks_range if present (8.3)
+        self._file_size = None
+        self._range = None
+        if hasattr(server_object, 'actual_blocks_range'):
+            if hasattr(server_object.actual_blocks_range, 'file_size'):
+                self._file_size = server_object.actual_blocks_range.file_size
+            if hasattr(server_object.actual_blocks_range, 'range'):
+                self._range = server_object.actual_blocks_range.range
+        
+        self._compression_type = None
+        if hasattr(server_object, 'compression_type'):
+            self._compression_type = server_object.compression_type
+                
         self._chunks = DirectIOResponse._create_chunks(server_object.chunks)
 
     @staticmethod
@@ -72,11 +90,53 @@ class DirectIOResponse:
 
     @property
     def wrapped_key(self):
+        """
+        Get the wrapped encryption key.
+        
+        :returns: Wrapped encryption key
+        :rtype: str
+        """
         return self._wrapped_key
 
     @property
     def chunks(self):
+        """
+        Get the chunks.
+        
+        :returns: List of chunks
+        :rtype: list[cterasdk.direct.types.Chunk]
+        """
         return self._chunks
+        
+    @property
+    def file_size(self):
+        """
+        Get the file size.
+        
+        :returns: File size in bytes
+        :rtype: int or None
+        """
+        return self._file_size
+        
+    @property
+    def range(self):
+        """
+        Get the file range.
+        
+        :returns: File range
+        :rtype: str or None
+        """
+        return self._range
+        
+    @property
+    def compression_type(self):
+        """
+        Get the compression type.
+        
+        :returns: Compression type (e.g., "NONE", "SNAPPY")
+        :rtype: str or None
+        """
+        return self._compression_type
 
 
 class Chunk:
