@@ -26,7 +26,7 @@ class Client:
         :param str baseurl: Portal URL
         :param cterasdk.direct.credentials.BaseCredentials credentials: Credentials object
         """
-        self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio/file'),
+        self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio'),
                               settings=client_settings(cterasdk.settings.sessions.ctera_direct.api),
                               authenticator=lambda *_: True)
         self._client = AsyncClient(DefaultBuilder(),
