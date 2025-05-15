@@ -49,7 +49,7 @@ class DirectIOResponse:
         :param int file_id: File ID.
         :param cterasdk.common.object.Object server_object: Response Object.
         """
-        self._wrapped_key = server_object.wrapped_key
+        self.encrypt_info = server_object.encrypt_info
         self._chunks = DirectIOResponse._create_chunks(server_object.chunks)
 
     @staticmethod
@@ -72,7 +72,7 @@ class DirectIOResponse:
 
     @property
     def wrapped_key(self):
-        return self._wrapped_key
+        return self.encrypt_info.wrapped_key
 
     @property
     def chunks(self):
