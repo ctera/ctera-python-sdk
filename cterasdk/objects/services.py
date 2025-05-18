@@ -74,7 +74,7 @@ class CTERA(Service):
         return self._ctera_session.whoami()
 
 
-class AsyncManagement(CTERA):
+class AsyncManagement(CTERA):  # pylint: disable=abstract-method
 
     async def __aenter__(self):
         return self

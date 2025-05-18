@@ -1,7 +1,7 @@
 import copy
-import cterasdk.settings
 from collections.abc import MutableMapping
 from aiohttp import TCPConnector, CookieJar, ClientTimeout
+import cterasdk.settings
 from .tracers import requests, session, postman
 
 
@@ -25,7 +25,7 @@ class ClientSessionSettings(MutableMapping):
         }
         self._mapping.update(dict(*args, **kwargs))
 
-    def update(self, **kwargs):
+    def update(self, **kwargs):  # pylint: disable=arguments-differ
         for k, v in self._mapping.items():
             attributes = kwargs.get(k, None)
             self._mapping[k] = attributes
@@ -67,13 +67,13 @@ class TraceSettings(MutableMapping):
     def __getitem__(self, key):
         return self._mapping.get(key, None)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value):  # pylint: disable=useless-parent-delegation
         return super().__setitem__(key, value)
 
-    def __delitem__(self, key):
+    def __delitem__(self, key):  # pylint: disable=useless-parent-delegation
         return super().__delitem__(key)
 
-    def __len__(self):
+    def __len__(self):  # pylint: disable=useless-parent-delegation
         return super().__len__()
 
     def __iter__(self):
