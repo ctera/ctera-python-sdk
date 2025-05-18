@@ -1,7 +1,7 @@
-cterasdk.clients.tracers.logger module
-======================================
+cterasdk.clients.tracers.requests module
+========================================
 
-.. automodule:: cterasdk.clients.tracers.logger
+.. automodule:: cterasdk.clients.tracers.requests
     :members:
     :undoc-members:
     :show-inheritance:
