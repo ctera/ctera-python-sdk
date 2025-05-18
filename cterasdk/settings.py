@@ -22,4 +22,4 @@ with open(settings, 'r', encoding='utf-8') as f:
     settings = fromjsonstr(json.dumps(yaml.safe_load(f)))
 
 
-core, edge, io, audit = settings.core, settings.edge, settings.io, settings.audit
+core, edge, drive, io, audit = settings.core, settings.edge, settings.drive, settings.io, settings.audit

@@ -5,6 +5,10 @@ from ..common import utilities
 class BaseAsyncTest(unittest.IsolatedAsyncioTestCase):
     """Base Async Test"""
 
+    def setUp(self):
+        super().setUp()
+        self.patch_call('asyncio.get_running_loop')
+
     def patch_call(self, module_path, **patch_kwargs):
         return utilities.patch_call(self, module_path, **patch_kwargs)
 

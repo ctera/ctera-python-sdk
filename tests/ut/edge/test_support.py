@@ -1,5 +1,6 @@
 import datetime
 
+from pathlib import Path
 from freezegun import freeze_time
 
 from cterasdk import exceptions
@@ -36,4 +37,4 @@ class TestEdgeSupport(base_edge.BaseEdgeTest):
             support.Support(self._filer).get_support_report()
             self._filer.api.handle.assert_called_once_with('/supportreport')
             filename = 'Support-' + current_datetime.strftime('_%Y-%m-%dT%H_%M_%S') + '.zip'
-            mock_save_file.assert_called_once_with(cterasdk.settings.io.downloads, filename, handle_response)
+            mock_save_file.assert_called_once_with(Path(cterasdk.settings.io.downloads).expanduser(), filename, handle_response)
