@@ -125,17 +125,17 @@ Asynchronous API
 .. automethod:: cterasdk.asynchronous.edge.files.browser.FileBrowser.move
    :noindex:
 
-.. automethod:: cterasdk.asynchronous.edge.files.browser.CloudDrive.upload
+.. automethod:: cterasdk.asynchronous.edge.files.browser.FileBrowser.upload
    :noindex:
 
-.. automethod:: cterasdk.asynchronous.edge.files.browser.CloudDrive.upload_file
+.. automethod:: cterasdk.asynchronous.edge.files.browser.FileBrowser.upload_file
    :noindex:
 
-.. automethod:: cterasdk.asynchronous.edge.files.browser.CloudDrive.mkdir
+.. automethod:: cterasdk.asynchronous.edge.files.browser.FileBrowser.mkdir
    :noindex:
 
-.. automethod:: cterasdk.asynchronous.edge.files.browser.CloudDrive.makedirs
+.. automethod:: cterasdk.asynchronous.edge.files.browser.FileBrowser.makedirs
    :noindex:
 
-.. automethod:: cterasdk.asynchronous.edge.files.browser.CloudDrive.delete
+.. automethod:: cterasdk.asynchronous.edge.files.browser.FileBrowser.delete
    :noindex:
