@@ -9,7 +9,6 @@ from .lib.storage import commonfs
 logger = logging.getLogger('cterasdk')
 
 
-
 settings = Path(__file__).parent.absolute().joinpath('settings.yml')
 try:
     commonfs.properties(settings)
