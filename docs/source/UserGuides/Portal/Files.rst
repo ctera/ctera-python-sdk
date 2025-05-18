@@ -457,7 +457,7 @@ Asynchronous API
 .. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.copy
    :noindex:
 
-.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.move
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.move
    :noindex:
 
 .. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.permalink
