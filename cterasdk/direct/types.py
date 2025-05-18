@@ -46,10 +46,21 @@ class DirectIOResponse:
         """
         Initialize a Get Response Object.
 
-        :param int file_id: File ID.
         :param cterasdk.common.object.Object server_object: Response Object.
         """
-        self.encrypt_info = server_object.encrypt_info
+        # Handle both 8.2 and 8.3 structures - try 8.2 first since 8.3 is in early stages
+        if hasattr(server_object, 'wrapped_key'):
+            # 8.2 structure
+            self.wrapped_key = server_object.wrapped_key
+            # Create encrypt_info for compatibility
+            self.encrypt_info = Object()
+            self.encrypt_info.wrapped_key = server_object.wrapped_key
+            self.encrypt_info.data_encrypted = True  # Default to True for 8.2 for security
+        else:
+            # 8.3 structure
+            self.encrypt_info = server_object.encrypt_info
+            self.wrapped_key = server_object.encrypt_info.wrapped_key
+
         self._chunks = DirectIOResponse._create_chunks(server_object.chunks)
 
     @staticmethod
@@ -57,9 +68,7 @@ class DirectIOResponse:
         """
         Create Chunks.
 
-        :param int file_id: File ID.
         :param cterasdk.common.object.Object server_object: Server response.
-        :param list[int] blocks: List of block numbers to retrieve.
         :returns: Chunk objects
         :rtype: list[cterasdk.direct.types.Chunk]
         """
@@ -72,7 +81,11 @@ class DirectIOResponse:
 
     @property
     def wrapped_key(self):
-        return self.encrypt_info.wrapped_key
+        return self._wrapped_key
+
+    @wrapped_key.setter
+    def wrapped_key(self, value):
+        self._wrapped_key = value
 
     @property
     def chunks(self):

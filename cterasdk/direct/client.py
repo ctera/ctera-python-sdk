@@ -36,7 +36,7 @@ class Client:
 
     async def _direct(self, file_id):
         server_object = await get_chunks(self._api, self._credentials, file_id)
-        encryption_key = decrypt_encryption_key(file_id, server_object.encrypt_info.wrapped_key, self._credentials.secret_access_key)
+        encryption_key = decrypt_encryption_key(file_id, server_object.wrapped_key, self._credentials.secret_access_key)
         return File(file_id, server_object.encrypt_info.data_encrypted, encryption_key, server_object.chunks)
 
     async def metadata(self, file_id):
