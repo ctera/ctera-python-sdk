@@ -1,22 +1,25 @@
-from pathlib import Path
 import yaml
-from .convert import tojsonstr, fromjsonstr
+import json
+import logging
+from pathlib import Path
+from .convert import fromjsonstr
+from .lib.storage import commonfs
 
 
-sessions, downloads, logging = None, None, None
+logger = logging.getLogger('cterasdk')
 
 
-def default_settings():
-    global sessions, downloads, logging  # # pylint: disable=global-statement
-    with open(Path(__file__).parent.absolute().joinpath('settings.yml'), 'r', encoding='utf-8') as f:
-        sdk_settings = yaml.safe_load(f)
-        sessions = convert_to_object(sdk_settings['sessions'])
-        downloads = convert_to_object(sdk_settings['downloads'])
-        logging = convert_to_object(sdk_settings['logging'])
+
+settings = Path(__file__).parent.absolute().joinpath('settings.yml')
+try:
+    commonfs.properties(settings)
+except FileNotFoundError:
+    logger.fatal("Configuration file 'settings.yml' not found. Please check your installation and try again.")
+    raise
 
 
-def convert_to_object(data):
-    return fromjsonstr(tojsonstr(data))
+with open(settings, 'r', encoding='utf-8') as f:
+    settings = fromjsonstr(json.dumps(yaml.safe_load(f)))
 
 
-default_settings()
+core, edge, io, audit = settings.core, settings.edge, settings.io, settings.audit

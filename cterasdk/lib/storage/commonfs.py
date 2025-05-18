@@ -83,7 +83,7 @@ def downloads():
     :returns: Directory path
     :rtype: Path object
     """
-    directory = expanduser(cterasdk.settings.downloads.location)
+    directory = expanduser(cterasdk.settings.io.downloads)
     if not is_dir(directory):
         logger.error('Directory not found: %s', directory)
         raise FileNotFoundError(errno.ENOENT, 'Directory not found', directory)

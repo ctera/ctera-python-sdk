@@ -1,7 +1,7 @@
 from abc import ABC
 from collections import namedtuple
 from ..common import DateTimeUtils, StringCriteriaBuilder, PredefinedListCriteriaBuilder, CustomListCriteriaBuilder, Object
-from ..lib import FileSystem
+from ..lib.storage import commonfs
 
 from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, \
                   BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes
@@ -495,7 +495,7 @@ class TemplateScript:
 
     @staticmethod
     def _get_contents(shell_script):
-        if FileSystem.instance().exists(shell_script):
+        if commonfs.exists(shell_script):
             with open(shell_script, 'r', encoding='utf-8') as f:
                 data = f.read()
             return data

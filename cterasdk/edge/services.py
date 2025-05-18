@@ -180,10 +180,10 @@ class Services(BaseCommand):
         try:
             if obj.rc in Services._UNTRUSTED_CERTIFICATE_ERRORS:
                 proceed = False
-                if cterasdk.settings.sessions.management.edge.services.ssl == 'prompt':
+                if cterasdk.settings.edge.syn.services.ssl == 'prompt':
                     logging.getLogger('cterasdk.edge').warning(msg=obj.msg)
                     proceed = ask(f"Connect {self._edge.host()} to {server}?")
-                if cterasdk.settings.sessions.management.edge.services.ssl is False or proceed:
+                if cterasdk.settings.edge.syn.services.ssl is False or proceed:
                     self._trust_cert[server] = True
                     return self._check_connection(server)
         except AttributeError:

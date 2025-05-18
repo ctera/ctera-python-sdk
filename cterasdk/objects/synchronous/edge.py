@@ -1,54 +1,17 @@
+import cterasdk.settings
 from ...clients import clients
 from ..services import Management
 from ..endpoints import EndpointBuilder
-
 from .. import authenticators
-
 from ...lib.session.edge import Session
 
-from ...edge import afp
-from ...edge import aio
-from ...edge import array
-from ...edge import audit
-from ...edge import backup
-from ...edge import cache
-from ...edge import cli
-from ...edge import config
-from ...edge import connection
-from ...edge import ctera_migrate
-from ...edge import dedup
-from ...edge import directoryservice
-from ...edge import drive
-from ...edge import files
-from ...edge import firmware
-from ...edge import ftp
-from ...edge import groups
-from ...edge import licenses
-from ...edge import login
-from ...edge import logs
-from ...edge import mail
-from ...edge import network
-from ...edge import nfs
-from ...edge import ntp
-from ...edge import power
-from ...edge import remote
-from ...edge import rsync
-from ...edge import ransom_protect
-from ...edge import services
-from ...edge import shares
-from ...edge import shell
-from ...edge import smb
-from ...edge import snmp
-from ...edge import ssh
-from ...edge import ssl
-from ...edge import support
-from ...edge import sync
-from ...edge import syslog
-from ...edge import taskmgr
-from ...edge import telnet
-from ...edge import timezone
-from ...edge import users
-from ...edge import volumes
+from ...edge import (
+    afp, aio, array, audit, backup, cache, cli, config, connection, ctera_migrate,
+    dedup, directoryservice, drive, files, firmware, ftp, groups, licenses, login,
+    logs, mail, network, nfs, ntp, power, remote, rsync, ransom_protect, services,
+    shares, shell, smb, snmp, ssh, ssl, support, sync, syslog, taskmgr, telnet,
+    timezone, users, volumes,
+)
 
 
 class Clients:
@@ -103,10 +66,9 @@ class IO:
 class Edge(Management):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
-        super().__init__(host, port, https, base=base)
+        super().__init__(host, port, https, base, cterasdk.settings.edge.syn.settings)
         self._ctera_session = Session(self.host())
         self._ctera_clients = Clients(self, Portal)
-
         self.afp = afp.AFP(self)
         self.aio = aio.AIO(self)
         self.array = array.Array(self)

@@ -29,14 +29,14 @@ Now, let's login to the CTERA Edge Filer:
         """By default, the Edge Filer uses a self-signed certificate.
         Therefore, we have to disable TLS/SSL verification to successfully login for the first time.
         """
-        cterasdk.settings.sessions.management.ssl = False  # disables TLS verification
+        cterasdk.settings.edge.syn.settings.connector.ssl = False  # disables TLS verification
         with Edge('192.168.0.1') as edge:
             edge.login('admin-username', 'admin-password')
 
     if __name__ == '__main__':
         main()
 
-.. note:: To ignore SSL errors, or log in using an IP address, use: ``cterasdk.settings.sessions.management.ssl = False``
+.. note:: To ignore SSL errors, or log in using an IP address, use: ``cterasdk.settings.edge.syn.settings.connector.ssl = False``
 
 Now we have an authenticated ``edge`` session. We can now proceed to access the Edge Filer API's.
 
@@ -62,7 +62,7 @@ If we combine the two examples above, we get the following result:
         """By default, the Edge Filer uses a self-signed certificate.
         Therefore, we have to disable TLS/SSL verification to successfully login for the first time.
         """
-        cterasdk.settings.sessions.management.ssl = False
+        cterasdk.settings.edge.syn.settings.connector.ssl = False
         with Edge('192.168.0.1') as edge:
             edge.login('admin-username', 'admin-password')
             edge.config.set_hostname('edge-filesystem')
@@ -89,7 +89,7 @@ And equivalnent example to the one given above:
         """By default, the Edge Filer uses a self-signed certificate.
         Therefore, we have to disable TLS/SSL verification to successfully login for the first time.
         """
-        cterasdk.settings.sessions.management.ssl = False
+        cterasdk.settings.edge.syn.settings.connector.ssl = False
         edge = Edge('192.168.0.1')
 
         edge.login('admin-username', 'admin-password')

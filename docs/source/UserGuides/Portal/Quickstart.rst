@@ -45,7 +45,7 @@ Alternatively, we can also login to CTERA Portal as a Team Portal (tenant) user 
     if __name__ == '__main__':
         main()
 
-.. note:: To ignore SSL errors, or log in using an IP address, use: ``cterasdk.settings.sessions.management.ssl = False``
+.. note:: To ignore SSL errors, or log in using an IP address, use: ``cterasdk.settings.core.syn.settings.connector.ssl = False``
 
 Now we have an authenticated ``admin`` or ``user`` session. We can now proceed to access the Portal API's.
 
@@ -103,9 +103,7 @@ And equivalnent example to the one given above:
 
 .. code-block:: python
 
-    import cterasdk.settings
     from cterasdk import Edge
-
     from cterasdk import GlobalAdmin
 
     def main():

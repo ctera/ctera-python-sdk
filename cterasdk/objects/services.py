@@ -1,9 +1,7 @@
 from abc import abstractmethod
 
-import cterasdk.settings
 from . import endpoints, uri
 from .utils import URI
-from ..clients.settings import ClientSettings, ClientTimeout, TCPConnector, CookieJar
 from ..clients import clients
 from ..common import Object
 from ..convert import tojsonstr
@@ -76,24 +74,42 @@ class CTERA(Service):
         return self._ctera_session.whoami()
 
 
-def client_settings(parameters):
-    return ClientSettings(
-        TCPConnector(parameters.ssl),
-        ClientTimeout(**parameters.timeout.kwargs),
-        CookieJar(parameters.allow_unsafe)
-    )
+class AsyncManagement(CTERA):
 
+    async def __aenter__(self):
+        return self
+
+    def __init__(self, host, port, https, base, settings):
+        super().__init__(host, port, https, base)
+        self._default = clients.AsyncClient(endpoints.EndpointBuilder.new(self.base), settings=settings, authenticator=self._authenticator)
+
+    @property
+    def default(self):
+        return self._default
+
+    async def login(self, username, password):
+        self._before_login()
+        await self._login_object.login(username, password)
+        await self._ctera_session.async_start_session(self)
+        self._after_login()
+
+    async def logout(self):
+        if self._ctera_session.connected:
+            await self._login_object.logout()
+            self._ctera_session.stop_session()
+        await self.default.close()
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.default.close()
 
 class Management(CTERA):
 
     def __enter__(self):
         return self
 
-    def __init__(self, host, port, https, base):
+    def __init__(self, host, port, https, base, settings):
         super().__init__(host, port, https, base)
-        self._default = clients.Client(endpoints.EndpointBuilder.new(self.base),
-                                       settings=client_settings(cterasdk.settings.sessions.management),
-                                       authenticator=self._authenticator)
+        self._default = clients.Client(endpoints.EndpointBuilder.new(self.base), settings=settings, authenticator=self._authenticator)
 
     def login(self, username, password):
         """

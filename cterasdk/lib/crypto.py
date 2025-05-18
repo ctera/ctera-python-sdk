@@ -8,9 +8,11 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, PublicFormat, NoEncryption, load_pem_private_key
 
-import cterasdk.settings
 from ..exceptions import CTERAException
-from .filesystem import FileSystem
+from .storage import synfs, commonfs
+
+
+logger = logging.getLogger('cterasdk.crypto')
 
 
 class RSAKeyPair:
@@ -28,16 +30,14 @@ class RSAKeyPair:
         return self._private_key.private_bytes(Encoding.PEM, PrivateFormat.OpenSSH, NoEncryption())
 
     def save(self, dirpath, key_filename):
-        filesystem = FileSystem.instance()
-
-        logging.getLogger('cterasdk.crypto').info('Saving private key.')
-        path = filesystem.save(dirpath, f'{key_filename}.pem', self.private_key)
+        logger.info('Saving private key.')
+        path = synfs.write(dirpath, f'{key_filename}.pem', self.private_key)
         os.chmod(path, 0o600)
-        logging.getLogger('cterasdk.crypto').info('Saved private key. %s', {'filepath': path, 'format': 'PEM'})
+        logger.info('Saved private key. %s', {'filepath': path, 'format': 'PEM'})
 
-        logging.getLogger('cterasdk.crypto').info('Saving public key.')
-        path = filesystem.save(dirpath, f'{key_filename}.pub', self.public_key)
-        logging.getLogger('cterasdk.crypto').info('Saved public key. %s', {'filepath': path, 'format': 'OpenSSH'})
+        logger.info('Saving public key.')
+        path = synfs.write(dirpath, f'{key_filename}.pub', self.public_key)
+        logger.info('Saved public key. %s', {'filepath': path, 'format': 'OpenSSH'})
 
 
 class CryptoServices:
@@ -52,7 +52,7 @@ class CryptoServices:
     def generate_and_save_key_pair(key_filename, exponent=65537, key_size=2048, dirpath=None):
         key_pair = CryptoServices.generate_rsa_key_pair(exponent, key_size)
         if not dirpath:
-            dirpath = cterasdk.settings.downloads.location
+            dirpath = commonfs.downloads()
         key_pair.save(dirpath, key_filename)
         return key_pair.public_key.decode('utf-8')
 
@@ -98,11 +98,11 @@ class PrivateKey:
             if isinstance(key, bytes):
                 return PrivateKey.from_bytes(key, password)
 
-            if FileSystem.instance().exists(key):
+            if commonfs.exists(key):
                 return PrivateKey.from_file(key, password)
             return PrivateKey.from_string(key, password)
         except ValueError as e:
-            logging.getLogger('cterasdk.crypto').error('Failed loading private key.')
+            logger.error('Failed loading private key.')
             raise CTERAException('Failed loading private key', e, reason=str(e))
 
 
@@ -157,11 +157,11 @@ class X509Certificate:
             if isinstance(cert, bytes):
                 return X509Certificate.from_bytes(cert)
 
-            if FileSystem.instance().exists(cert):
+            if commonfs.exists(cert):
                 return X509Certificate.from_file(cert)
             return X509Certificate.from_string(cert)
         except ValueError as e:
-            logging.getLogger('cterasdk.crypto').error('Failed loading certificate.')
+            logger.error('Failed loading certificate.')
             raise CTERAException('Failed loading certificate', e, reason=str(e))
 
     def __str__(self):

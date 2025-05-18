@@ -1,5 +1,6 @@
 import logging
-from ..lib import FileSystem, CryptoServices
+from ..lib import CryptoServices
+from ..lib.storage import commonfs
 from ..common import Object
 from .base_command import BaseCommand
 
@@ -22,7 +23,7 @@ class SSH(BaseCommand):
 
         if public_key is None:
             if public_key_file is not None:
-                FileSystem.instance().properties(public_key_file)
+                commonfs.properties(public_key_file)
                 with open(public_key_file, 'r', encoding='utf-8') as f:
                     public_key = f.read()
             else:

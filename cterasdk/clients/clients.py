@@ -56,6 +56,34 @@ class AsyncUpload(AsyncClient):
 class AsyncWebDAV(AsyncClient):
     """WebDAV"""
 
+    async def download(self, path, **kwargs):
+        return await super().get(path, **kwargs)
+
+    async def mkcol(self, path):
+        request = async_requests.MkcolRequest(self._builder(path))
+        response = await self.async_request(request)
+        return await response.text()
+
+    async def copy(self, source, destination, *, overwrite=False):
+        request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
+        response = await self.async_request(request)
+        return await response.xml()
+
+    async def move(self, source, destination, *, overwrite=False):
+        request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
+        response = await self.async_request(request)
+        return await response.xml()
+
+    async def delete(self, path):  # pylint: disable=arguments-differ
+        response = await super().delete(path)
+        return await response.text()
+
+    def _webdav_headers(self, destination, overwrite):
+        return {
+            'Destination': self._builder(destination),
+            'Overwrite': 'T' if overwrite is True else 'F'
+        }
+
 
 class AsyncJSON(AsyncClient):
 

@@ -101,7 +101,7 @@ Ancestors
 
 
     async def main():
-        cterasdk.settings.sessions.metadata_connector.ssl = False
+        cterasdk.settings.core.asyn.settings.connector.ssl = False
         cursor = None
         queue = asyncio.Queue()  # Shared queue between producer and consumer threads
         async with AsyncGlobalAdmin('tenant.ctera.com') as admin:
@@ -164,8 +164,8 @@ Code Snippets
 
 
     async def main():
-        cterasdk.settings.sessions.metadata_connector.ssl = False
-        cterasdk.settings.sessions.ctera_direct.api.ssl = False
+        cterasdk.settings.core.asyn.settings.connector.ssl = False
+        cterasdk.settings.io.direct.api.settings.connector.ssl = False
         cursor = None
         queue = asyncio.Queue()  # Shared queue between producer and consumer threads
         async with AsyncGlobalAdmin('tenant.ctera.com') as admin:

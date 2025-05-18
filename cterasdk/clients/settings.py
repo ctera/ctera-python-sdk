@@ -1,53 +1,80 @@
-import logging
+import copy
 import cterasdk.settings
-from . import tracers
-from ..common import Object
+from collections.abc import MutableMapping
+from aiohttp import TCPConnector, CookieJar, ClientTimeout
+from .tracers import requests, session, postman
 
 
-logger = logging.getLogger('cterasdk.http.trace')
+class ClientSessionSettings(MutableMapping):
+
+    def __init__(self, *args, **kwargs):
+        self._mapping = {
+            'connector': {
+                '_classname': TCPConnector,
+                'ssl': True
+            },
+            'timeout': {
+                '_classname': ClientTimeout,
+                'sock_connect': 10,
+                'sock_read': 60
+            },
+            'cookie_jar': {
+                '_classname': CookieJar,
+                'unsafe': False
+            }
+        }
+        self._mapping.update(dict(*args, **kwargs))
+
+    def update(self, **kwargs):
+        for k, v in self._mapping.items():
+            attributes = kwargs.get(k, None)
+            self._mapping[k] = attributes
+            self._mapping[k]['_classname'] = v.get('_classname', None)
+
+    def __getitem__(self, key):
+        mapping = copy.deepcopy(self._mapping)
+        attributes = mapping.get(key, None)
+        new_instance = attributes.pop('_classname', None)
+        if new_instance:
+            return new_instance(**attributes)
+        return attributes
+
+    def __setitem__(self, key, value):
+        self._mapping[key] = value
+
+    def __delitem__(self, key):
+        del self._mapping[key]
+
+    def __iter__(self):
+        return iter(self._mapping)
+
+    def __len__(self):
+        return len(self._mapping)
+
+    def __str__(self):
+        return str(self._mapping)
 
 
-class ClientSettings(Object):
-    """
-    Asynchronous HTTP Client Session Settings
-    """
+class TraceSettings(MutableMapping):
 
-    def __init__(self, connector=None, timeout=None, cookie_jar=None):
-        self.connector = connector if connector else TCPConnector(True)
-        self.timeout = timeout if timeout else ClientTimeout(None, None)
-        self.cookie_jar = cookie_jar if cookie_jar else CookieJar(False)
-        self.trace_configs = [
-            tracers.logger.trace_config(),
-            tracers.session.trace_config()
-        ]
-        if cterasdk.settings.sessions.management.audit.postman.enabled:
-            logger.info('Enabling Postman Auditing.')
-            self.trace_configs.append(tracers.postman.trace_config())
+    def __init__(self):
+        self._mapping = {
+            'trace_configs': [requests.tracer(), session.tracer()]
+        }
+        if cterasdk.settings.audit.enabled:
+            self._mapping['trace_configs'].append(postman.tracer())
 
+    def __getitem__(self, key):
+        return self._mapping.get(key, None)
 
-class TCPConnector(Object):
-    """
-    Asynchronous HTTP TCP Connector
-    """
+    def __setitem__(self, key, value):
+        return super().__setitem__(key, value)
 
-    def __init__(self, ssl):
-        self.ssl = ssl
+    def __delitem__(self, key):
+        return super().__delitem__(key)
 
+    def __len__(self):
+        return super().__len__()
 
-class ClientTimeout(Object):
-    """
-    Asynchronous HTTP Client Timeout Settings
-    """
-
-    def __init__(self, sock_connect, sock_read):
-        self.sock_connect = sock_connect
-        self.sock_read = sock_read
-
-
-class CookieJar(Object):
-    """
-    Asynchronous HTTP Cookie Jar Settings
-    """
-
-    def __init__(self, allow_unsafe):
-        self.unsafe = allow_unsafe
+    def __iter__(self):
+        return iter(self._mapping)
