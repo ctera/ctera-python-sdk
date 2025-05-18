@@ -1,6 +1,5 @@
 import logging
 
-import cterasdk.settings
 from ...cio.core import CorePath
 from ...exceptions import CTERAException
 from ...lib.storage import synfs, commonfs
