@@ -12,14 +12,15 @@ logger = logging.getLogger('cterasdk.http')
 class Session:
     """Asynchronous HTTP Session"""
 
-    def __init__(self, **kwargs):
-        self._kwargs = kwargs
+    def __init__(self, settings, trace):
+        self._settings = settings
+        self._trace = trace
         self._session = None
 
     @property
     def session(self):
         if self.closed:
-            self._session = aiohttp.ClientSession(**self._kwargs)
+            self._session = aiohttp.ClientSession(**self._settings, **self._trace)
         return self._session
 
     @property
