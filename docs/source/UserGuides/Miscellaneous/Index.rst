@@ -2,66 +2,6 @@
 Miscellaneous
 =============
 
-Logging
-=======
-
-This library features numerous console loggers, with an option to redirect the output to a file.
-
-    +--------------------------------+---------+--------------------------------------+
-    |Logger name                     |Level    |Description                           |
-    +================================+=========+======================================+
-    |cterasdk                        |NOTSET   |Package Logger                        |
-    +--------------------------------+---------+--------------------------------------+
-    |cterasdk.edge                   |INFO     |Logger for CTERA Edge and Drive App   |
-    +--------------------------------+---------+--------------------------------------+
-    |cterasdk.core                   |INFO     |Logger for CTERA Portal               |
-    +--------------------------------+---------+--------------------------------------+
-    |cterasdk.common                 |INFO     |Common Infrastructure Logger          |
-    +--------------------------------+---------+--------------------------------------+
-    |cterasdk.metadata.connector     |INFO     |Notification Service Logger           |
-    +--------------------------------+---------+--------------------------------------+
-    |cterasdk.http                   |ERROR    |Transport Layer Logger                |
-    +--------------------------------+---------+--------------------------------------+
-    |cterasdk.http.trace             |ERROR    |Transport Layer Tracing               |
-    +--------------------------------+---------+--------------------------------------+
-    |cterasdk.crypto                 |ERROR    |Cryptography Logger                   |
-    +--------------------------------+---------+--------------------------------------+
-    |cterasdk.filesystem             |ERROR    |Local File System Logger              |
-    +--------------------------------+---------+--------------------------------------+
-
-List the available loggers:
-
-.. code:: python
-
-   import logging
-   import cterasdk.logging
-
-   print({name: logging.getLevelName(logging.getLogger(name).level) for name in logging.root.manager.loggerDict})
-
-To update the log level of a logger:
-
-.. code:: python
-
-   import logging
-   import cterasdk.logging
-
-   logging.getLogger('cterasdk.metadata.connector').setLevel(logging.DEBUG)  # Enables 'DEBUG'
-
-Redirecting log output to a file:
-
-.. code:: console
-
-   set cterasdk.log=cterasdk.log  # Redirect output to 'cterasdk.log' in the current directory
-
-   set cterasdk.log=C:/users/username/Desktop/cterasdk.log  # Redirect output to an alternate location
-
-.. code:: bash
-
-   export cterasdk.log="cterasdk.log"
-
-   export cterasdk.log="/home/username/cterasdk.log"
-
-
 Auditing
 ========
 
