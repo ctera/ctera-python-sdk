@@ -29,6 +29,7 @@ class TestEdgeSupport(base_edge.BaseEdgeTest):
         self.assertEqual('Invalid debug level', error.exception.message)
 
     def test_get_support_report(self):
+        cterasdk.settings.io.downloads = '~'
         current_datetime = datetime.datetime.now()
         handle_response = 'Stream'
         self._init_filer(handle_response=handle_response)
@@ -37,4 +38,4 @@ class TestEdgeSupport(base_edge.BaseEdgeTest):
             support.Support(self._filer).get_support_report()
             self._filer.api.handle.assert_called_once_with('/supportreport')
             filename = 'Support-' + current_datetime.strftime('_%Y-%m-%dT%H_%M_%S') + '.zip'
-            mock_save_file.assert_called_once_with(Path(cterasdk.settings.io.downloads).expanduser(), filename, handle_response)
+            mock_save_file.assert_called_once_with(Path('~').expanduser(), filename, handle_response)
