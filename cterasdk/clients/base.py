@@ -70,7 +70,7 @@ class BaseClient:
         if settings:
             default_settings.update(**settings.kwargs)
 
-        self._session = session if session else async_requests.Session(**default_settings, **TraceSettings())
+        self._session = session if session else async_requests.Session(default_settings, TraceSettings())
 
     def clone(self, definition, builder=None, authenticator=None):
         """
