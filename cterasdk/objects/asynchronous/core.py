@@ -1,19 +1,10 @@
 import cterasdk.settings
-from ..services import CTERA, client_settings
+from ..services import AsyncManagement
 from ..endpoints import EndpointBuilder
-from ...clients.asynchronous import clients
-
+from ...clients import clients
 from .. import authenticators
-
 from ...lib.session.core import Session
-
-from ...asynchronous.core import files
-from ...asynchronous.core import login
-from ...asynchronous.core import cloudfs
-from ...asynchronous.core import notifications
-from ...asynchronous.core import portals
-from ...asynchronous.core import settings
-from ...asynchronous.core import users
+from ...asynchronous.core import files, login, cloudfs, notifications, portals, settings, users
 
 
 class Clients:
@@ -61,28 +52,17 @@ class IO:
         return self._webdav._builder  # pylint: disable=protected-access
 
 
-class AsyncPortal(CTERA):
-
-    async def __aenter__(self):
-        return self
+class AsyncPortal(AsyncManagement):
 
     def __init__(self, host, port=None, https=True):
-        super().__init__(host, port, https, base=None)
-        self._default = clients.AsyncClient(EndpointBuilder.new(self.base),
-                                            settings=client_settings(cterasdk.settings.sessions.metadata_connector),
-                                            authenticator=self._authenticator)
+        super().__init__(host, port, https, None, cterasdk.settings.core.asyn.settings)
         self._ctera_session = Session(self.host(), self.context)
         self._ctera_clients = Clients(self)
-
         self.cloudfs = cloudfs.CloudFS(self)
         self.files = files.CloudDrive(self)
         self.notifications = notifications.Notifications(self)
         self.settings = settings.Settings(self)
         self.users = users.Users(self)
-
-    @property
-    def default(self):
-        return self._default
 
     @property
     def v1(self):
@@ -96,27 +76,12 @@ class AsyncPortal(CTERA):
     def io(self):
         return self.clients.io
 
-    async def login(self, username, password):
-        self._before_login()
-        await self._login_object.login(username, password)
-        await self._ctera_session.async_start_session(self)
-        self._after_login()
-
-    async def logout(self):
-        if self._ctera_session.connected:
-            await self._login_object.logout()
-            self._ctera_session.stop_session()
-        await self.default.close()
-
     @property
     def _login_object(self):
         return login.Login(self)
 
     def _authenticator(self, url):
         return authenticators.core(self.session(), url, self.context)
-
-    async def __aexit__(self, exc_type, exc, tb):
-        await self.default.close()
 
 
 class AsyncGlobalAdmin(AsyncPortal):

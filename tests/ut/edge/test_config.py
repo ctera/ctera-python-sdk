@@ -15,7 +15,7 @@ class TestEdgeConfig(base_edge.BaseEdgeTest):
         self._location = '205 E. 42nd St. New York, NY. 10017'
         self._filename = 'file.xml'
         self._target_directory = '/path/to/folder'
-        self._default_download_directory = cterasdk.settings.downloads.location
+        self._default_download_directory = cterasdk.settings.io.downloads
         self._current_datetime = datetime.datetime.now()
 
     def test_get_hostname(self):

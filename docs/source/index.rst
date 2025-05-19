@@ -42,7 +42,7 @@ Edge
     from cterasdk import Edge
 
     def main():
-        cterasdk.settings.sessions.management.ssl = False  # for unstrusted or self-signed certificates
+        cterasdk.settings.edge.syn.settings.connector.ssl = False  # for unstrusted or self-signed certificates
         with Edge('192.168.0.1') as edge:
             edge.login('admin-username', 'admin-password')
             print('Hostname: ', edge.config.get_hostname())
@@ -74,7 +74,7 @@ Portal
     from cterasdk import GlobalAdmin
 
     def main():
-        cterasdk.settings.sessions.management.ssl = False  # for unstrusted or self-signed certificates
+        cterasdk.settings.core.syn.settings.connector.ssl = False  # for unstrusted or self-signed certificates
         with GlobalAdmin('tenant.ctera.com') as admin:
             admin.login('admin-username', 'admin-password')
             for user in admin.users.list_local_users(include=['firstName', 'lastName', 'email']):

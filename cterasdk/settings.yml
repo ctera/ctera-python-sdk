@@ -1,58 +1,60 @@
 ---
-sessions:
-  management:
-    allow_unsafe: true
+default_cookie_jar: &cookie_jar
+  cookie_jar:
+    unsafe: true
+
+default_connector: &connector
+  connector:
     ssl: true
-    timeout:
-      sock_connect: 30
-      sock_read: 60
-    edge:
-      services:
-        ssl: prompt
-    audit:
-      postman:
-        name: ~
-        enabled: false
-  ctera_direct:
+
+default_timeout: &timeout
+  timeout:
+    sock_connect: 5
+    sock_read: 10
+
+default_settings: &default_settings
+  settings:
+    <<: *cookie_jar
+    <<: *connector
+    <<: *timeout
+
+# CTERA Portal synchronous and asynchronous client configuration.
+core:
+  syn:
+    settings:
+      <<: *cookie_jar
+      <<: *connector
+      timeout:
+        sock_connect: 30
+        sock_read: 60
+  asyn:
+    <<: *default_settings
+
+# CTERA Edge Filer synchronous client configuration.
+edge:
+  syn:
+    <<: *default_settings
+    services:
+      ssl: prompt
+  asyn:
+    <<: *default_settings
+
+# CTERA Drive synchronous client configuration.
+drive:
+  syn:
+    <<: *default_settings
+
+# CTERA asynchronous Direct IO client configuration.
+io:
+  direct:
     api:
-      ssl: true
-      timeout:
-        sock_connect: 5
-        sock_read: 10
+      <<: *default_settings
     storage:
-      ssl: true
-      timeout:
-        sock_connect: 5
-        sock_read: 10
+      <<: *default_settings
     streamer:
       max_workers: 20
-  metadata_connector:
-    allow_unsafe: true
-    ssl: true
-    timeout:
-      sock_connect: 5
-      sock_read: 10
-logging:
-  format: '%(asctime)s,%(msecs)3d %(levelname)7s [%(filename)s:%(lineno)d] [%(funcName)s] - %(message)s'
-  date_format: '%Y-%m-%d %H:%M:%S'
-  loggers:
-    - name: common
-      level: info
-    - name: core
-      level: info
-    - name: edge
-      level: info
-    - name: metadata.connector
-      level: info
-    - name: filesystem
-      level: error
-    - name: direct
-      level: error
-    - name: crypto
-      level: error
-    - name: http
-      level: error
-    - name: http.trace
-      level: error
-downloads:
-  location: ~/Downloads
+  downloads: ~/Downloads
+
+audit:
+  enabled: false
+  filename: ~

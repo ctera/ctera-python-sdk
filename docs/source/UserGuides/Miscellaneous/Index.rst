@@ -74,8 +74,8 @@ By default, auditing is disabled for performance reasons. If you need to enable 
 .. code-block:: python
 
    import cterasdk.settings
-   cterasdk.settings.sessions.management.audit.postman.enabled = True
-   cterasdk.settings.sessions.management.audit.postman.name = 'name-of-your-postman-collection-file'
+   cterasdk.settings.audit.enabled = True
+   cterasdk.settings.audit.filename = 'name-of-your-postman-collection-file'
 
    admin = GlobalAdmin('tenant.ctera.com')
 

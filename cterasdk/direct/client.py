@@ -8,15 +8,7 @@ from .types import File, ByteRange, FileMetadata
 from .stream import Streamer
 
 from ..objects.endpoints import DefaultBuilder, EndpointBuilder
-from ..clients.settings import ClientSettings, ClientTimeout, TCPConnector
-from ..clients.asynchronous.clients import AsyncClient, AsyncJSON
-
-
-def client_settings(parameters):
-    return ClientSettings(
-        TCPConnector(parameters.ssl),
-        ClientTimeout(**parameters.timeout.kwargs)
-    )
+from ..clients.clients import AsyncClient, AsyncJSON
 
 
 class Client:
@@ -26,12 +18,9 @@ class Client:
         :param str baseurl: Portal URL
         :param cterasdk.direct.credentials.BaseCredentials credentials: Credentials object
         """
-        self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio'),
-                              settings=client_settings(cterasdk.settings.sessions.ctera_direct.api),
+        self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio'), settings=cterasdk.settings.io.direct.api.settings,
                               authenticator=lambda *_: True)
-        self._client = AsyncClient(DefaultBuilder(),
-                                   settings=client_settings(cterasdk.settings.sessions.ctera_direct.storage),
-                                   authenticator=lambda *_: True)
+        self._client = AsyncClient(DefaultBuilder(), settings=cterasdk.settings.io.direct.storage.settings, authenticator=lambda *_: True)
         self._credentials = credentials
 
     async def _direct(self, file_id):

@@ -1,12 +1,189 @@
-
 import asyncio
-import threading
 from . import errors
-from ..base import BaseClient
-from ..common import Serializers
-from ..asynchronous.clients import AsyncResponse
-from ...common import Object
-from .. import async_requests, decorators
+from .base import BaseClient, BaseResponse, run_threadsafe
+from .common import Serializers, Deserializers
+from . import async_requests, decorators
+from ..common import Object
+
+
+class AsyncClient(BaseClient):
+    """Asynchronous Client"""
+
+    @decorators.authenticated
+    async def get(self, path, *, on_response=None, **kwargs):
+        request = async_requests.GetRequest(self._builder(path), **kwargs)
+        return await self.async_request(request, on_response=on_response)
+
+    @decorators.authenticated
+    async def put(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
+        request = async_requests.PutRequest(self._builder(path), data=data_serializer(data), **kwargs)
+        return await self.async_request(request, on_response=on_response)
+
+    @decorators.authenticated
+    async def post(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
+        request = async_requests.PostRequest(self._builder(path), data=data_serializer(data), **kwargs)
+        return await self.async_request(request, on_response=on_response)
+
+    @decorators.authenticated
+    async def form_data(self, path, data, *, on_response=None, **kwargs):
+        request = async_requests.PostRequest(self._builder(path), data=Serializers.FormData(data), **kwargs)
+        return await self.async_request(request, on_response=on_response)
+
+    @decorators.authenticated
+    async def delete(self, path, *, on_response=None, **kwargs):
+        request = async_requests.DeleteRequest(self._builder(path), **kwargs)
+        return await self.async_request(request, on_response=on_response)
+
+    async def _request(self, request, *, on_response=None):
+        on_response = on_response if on_response else AsyncResponse.new()
+        response = await self._session.await_promise(self.join_headers(request), on_response=on_response)
+        error_message = await response.text() if response.status > 399 else None
+        return errors.accept(response, error_message)
+
+
+class AsyncFolders(AsyncClient):
+
+    async def download_zip(self, path, data, **kwargs):
+        return await super().form_data(path, data, **kwargs)
+
+
+class AsyncUpload(AsyncClient):
+
+    async def upload(self, path, data, **kwargs):
+        return await super().form_data(path, data, **kwargs)
+
+
+class AsyncWebDAV(AsyncClient):
+    """WebDAV"""
+
+    async def download(self, path, **kwargs):
+        return await super().get(path, **kwargs)
+
+    async def mkcol(self, path):
+        request = async_requests.MkcolRequest(self._builder(path))
+        response = await self.async_request(request)
+        return await response.text()
+
+    async def copy(self, source, destination, *, overwrite=False):
+        request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
+        response = await self.async_request(request)
+        return await response.xml()
+
+    async def move(self, source, destination, *, overwrite=False):
+        request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
+        response = await self.async_request(request)
+        return await response.xml()
+
+    async def delete(self, path):  # pylint: disable=arguments-differ
+        response = await super().delete(path)
+        return await response.text()
+
+    def _webdav_headers(self, destination, overwrite):
+        return {
+            'Destination': self._builder(destination),
+            'Overwrite': 'T' if overwrite is True else 'F'
+        }
+
+
+class AsyncJSON(AsyncClient):
+
+    def __init__(self, builder=None, session=None, settings=None, authenticator=None):
+        super().__init__(builder, session, settings, authenticator)
+        self.headers.persist_headers({'Content-Type': 'application/json'})
+
+    async def get(self, path, **kwargs):
+        response = await super().get(path, **kwargs)
+        return await response.json()
+
+    async def put(self, path, data, **kwargs):
+        response = await super().put(path, data, data_serializer=Serializers.JSON, **kwargs)
+        return await response.json()
+
+    async def post(self, path, data, **kwargs):
+        response = await super().post(path, data, data_serializer=Serializers.JSON, **kwargs)
+        return await response.json()
+
+    async def delete(self, path, **kwargs):
+        response = await super().delete(path, **kwargs)
+        return await response.json()
+
+
+class AsyncXML(AsyncClient):
+
+    async def get(self, path, **kwargs):
+        response = await super().get(path, **kwargs)
+        return await response.xml()
+
+    async def put(self, path, data, **kwargs):
+        response = await super().put(path, data, data_serializer=Serializers.XML, **kwargs)
+        return await response.xml()
+
+    async def post(self, path, data, **kwargs):
+        response = await super().post(path, data, data_serializer=Serializers.XML, **kwargs)
+        return await response.xml()
+
+    async def delete(self, path, **kwargs):
+        response = await super().delete(path, **kwargs)
+        return await response.xml()
+
+
+class AsyncExtended(AsyncXML):
+    """CTERA Schema"""
+
+    async def get_multi(self, path, paths):
+        return await self.database(path, 'get-multi', paths)
+
+    async def execute(self, path, name, param=None):  # schema method
+        return await self._execute(path, 'user-defined', name, param)
+
+    async def database(self, path, name, param=None):  # schema method
+        return await self._execute(path, 'db', name, param)
+
+    async def _execute(self, path, _type, name, param):
+        data = Object()
+        data.type = _type
+        data.name = name
+        data.param = param
+        return await super().post(path, data)
+
+
+class AsyncAPI(AsyncExtended):
+    """CTERA Management API"""
+
+    async def web_session(self):
+        response = await AsyncClient.get(self, '/currentSession')
+        self.headers.persist_response_header(response, 'X-CTERA-TOKEN')
+        return await response.xml()
+
+    async def defaults(self, classname):
+        return self.get(f'/defaults/{classname}')
+
+
+class AsyncResponse(BaseResponse):
+    """Asynchronous Response Object"""
+
+    async def async_iter_content(self, chunk_size=None):
+        async for chunk in self._response.content.iter_chunked(chunk_size if chunk_size else 5120):
+            yield chunk
+
+    async def text(self):
+        return await self._response.text()
+
+    async def json(self):
+        return Deserializers.JSON(await self._response.read())
+
+    async def xml(self):
+        return Deserializers.XML(await self._response.read())
+
+    @async_requests.decorate_stream_error
+    async def read(self, n=-1):
+        return await self._response.content.read(n)
+
+    @staticmethod
+    def new():
+        async def new_response(response):
+            return AsyncResponse(response)
+        return new_response
 
 
 class Client(BaseClient):
@@ -50,7 +227,8 @@ class Client(BaseClient):
     def _request(self, request, *, on_response=None):
         on_response = on_response if on_response else SyncResponse.new()
         response = execute(self._session.await_promise, self.join_headers(request), on_response=on_response)
-        return errors.accept(response)
+        error_message = response.text() if response.status > 399 else None
+        return errors.accept(response, error_message)
 
     def close(self):  # pylint: disable=invalid-overridden-method
         return execute(super().close)
@@ -230,37 +408,3 @@ class SyncResponse(AsyncResponse):
         async def new_response(response):
             return SyncResponse(response)
         return new_response
-
-
-def run_threadsafe(loop, target, *args, **kwargs):
-    event = threading.Event()
-
-    t = Task(loop, event, target, *args, **kwargs)
-    t.start()
-
-    event.wait()
-
-    if t.exception:
-        raise t.exception
-    return t.response
-
-
-class Task(threading.Thread):
-
-    def __init__(self, loop, event, target, *args, **kwargs):
-        super().__init__(name='Thread-safe Executor')
-        self.loop = loop
-        self.event = event
-        self.target = target
-        self.args = args
-        self.kwargs = kwargs
-        self.exception = None
-        self.response = None
-
-    def run(self):
-        try:
-            self.response = self.loop.run_until_complete(self.target(*self.args, **self.kwargs))
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            self.exception = e
-        finally:
-            self.event.set()

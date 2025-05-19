@@ -16,7 +16,7 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
         self._fullpath = '/' + self._path
         self._target = 'target/folder'
         self._target_fullpath = f'/{self._target}/{self._filename}'
-        self._default_download_dir = cterasdk.settings.downloads.location
+        self._default_download_dir = cterasdk.settings.io.downloads
 
     def test_download_as_zip_success(self):
         pass  # self._files.download_as_zip()

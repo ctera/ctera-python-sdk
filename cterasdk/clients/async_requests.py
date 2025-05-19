@@ -9,26 +9,17 @@ from yarl import URL
 logger = logging.getLogger('cterasdk.http')
 
 
-def session_parameters(client_settings):
-    return {
-        'timeout': aiohttp.ClientTimeout(**client_settings.timeout.kwargs),
-        'connector': aiohttp.TCPConnector(**client_settings.connector.kwargs),
-        'cookie_jar': aiohttp.CookieJar(**client_settings.cookie_jar.kwargs),
-        'trace_configs': client_settings.trace_configs
-    }
-
-
 class Session:
     """Asynchronous HTTP Session"""
 
-    def __init__(self, settings):
-        self._settings = settings
+    def __init__(self, **kwargs):
+        self._kwargs = kwargs
         self._session = None
 
     @property
     def session(self):
         if self.closed:
-            self._session = aiohttp.ClientSession(**session_parameters(self._settings))
+            self._session = aiohttp.ClientSession(**self._kwargs)
         return self._session
 
     @property

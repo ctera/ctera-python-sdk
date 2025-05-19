@@ -29,14 +29,14 @@ Now, let's login to the CTERA Edge Filer:
         """By default, the Edge Filer uses a self-signed certificate.
         Therefore, we have to disable TLS/SSL verification to successfully login for the first time.
         """
-        cterasdk.settings.sessions.management.ssl = False  # disables TLS verification
+        cterasdk.settings.edge.syn.settings.connector.ssl = False  # disables TLS verification
         with Edge('192.168.0.1') as edge:
             edge.login('admin-username', 'admin-password')
 
     if __name__ == '__main__':
         main()
 
-.. note:: To ignore SSL errors, or log in using an IP address, use: ``cterasdk.settings.sessions.management.ssl = False``
+.. note:: To ignore SSL errors, or log in using an IP address, use: ``cterasdk.settings.edge.syn.settings.connector.ssl = False``
 
 Now we have an authenticated ``edge`` session. We can now proceed to access the Edge Filer API's.
 
@@ -62,7 +62,7 @@ If we combine the two examples above, we get the following result:
         """By default, the Edge Filer uses a self-signed certificate.
         Therefore, we have to disable TLS/SSL verification to successfully login for the first time.
         """
-        cterasdk.settings.sessions.management.ssl = False
+        cterasdk.settings.edge.syn.settings.connector.ssl = False
         with Edge('192.168.0.1') as edge:
             edge.login('admin-username', 'admin-password')
             edge.config.set_hostname('edge-filesystem')
@@ -89,7 +89,7 @@ And equivalnent example to the one given above:
         """By default, the Edge Filer uses a self-signed certificate.
         Therefore, we have to disable TLS/SSL verification to successfully login for the first time.
         """
-        cterasdk.settings.sessions.management.ssl = False
+        cterasdk.settings.edge.syn.settings.connector.ssl = False
         edge = Edge('192.168.0.1')
 
         edge.login('admin-username', 'admin-password')
@@ -113,7 +113,7 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
 
 .. warning:: For optimal integration, it's advised to utilize the modules provided in this SDK instead of the ``api`` property. In cases where a specific command or module is absent, `please submit a feature request <https://github.com/ctera/ctera-python-sdk/issues>`_.
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.get
+.. automethod:: cterasdk.clients.clients.API.get
    :noindex:
 
 .. code-block:: python
@@ -121,10 +121,10 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
     hostname = edge.api.get('/config/device/hostname')  # Not recommended
     hostname = edge.config.get_hostname()  # Recommended: using the config module and the get_hostname() command
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.get_multi
+.. automethod:: cterasdk.clients.clients.API.get_multi
    :noindex:
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.put
+.. automethod:: cterasdk.clients.clients.API.put
    :noindex:
 
 .. code-block:: python
@@ -132,7 +132,7 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
     hostname = edge.api.put('/config/device/hostname', 'edge-filesystem')  # Not recommended
     hostname = edge.config.set_hostname('edge-filesystem')  # Recommended: using the config module and the set_hostname() command
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.add
+.. automethod:: cterasdk.clients.clients.API.add
    :noindex:
 
 .. code-block:: python
@@ -151,7 +151,7 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
     """Recommended way of adding a local user"""
     edge.users.add('alice', 'secret-password', 'Alice Wonderland', 'alice.wonderland@acme.com', 501)
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.execute
+.. automethod:: cterasdk.clients.clients.API.execute
    :noindex:
 
 .. code-block:: python
@@ -159,7 +159,7 @@ The ``Edge`` object features an ``api`` property used for accessing *Core Method
    edge.api.execute('/config/cloudsync', 'forceExecuteEvictor')  # Not recommended: Start the cache eviction process (force)
    edge.cache.force_eviction()  # Recommended
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.delete
+.. automethod:: cterasdk.clients.clients.API.delete
    :noindex:
 
 .. code-block:: python

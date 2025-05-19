@@ -78,8 +78,8 @@ During testing, you may need to disable TLS verification if the Portal or Object
 
     import cterasdk.settings
 
-    cterasdk.settings.sessions.ctera_direct.api.ssl = False  # disable CTERA Portal TLS verification
-    cterasdk.settings.sessions.ctera_direct.storage.ssl = False  # disable Object Storage TLS verification
+    cterasdk.settings.io.direct.api.settings.connector.ssl = False  # disable CTERA Portal TLS verification
+    cterasdk.settings.io.direct.storage.settings.connector.ssl = False  # disable Object Storage TLS verification
 
 
 Blocks API
@@ -110,8 +110,8 @@ Blocks API
                     await f.write(block.data)
 
     if __name__ == '__main__':
-        cterasdk.settings.sessions.ctera_direct.api.ssl = False
-        cterasdk.settings.sessions.ctera_direct.storage.ssl = False
+        cterasdk.settings.io.direct.api.settings.connector.ssl = False
+        cterasdk.settings.io.direct.storage.settings.connector.ssl = False
 
         file_id = 12345
 
@@ -174,8 +174,8 @@ Streamer API
 
 
     if __name__ == '__main__':
-        cterasdk.settings.sessions.ctera_direct.api.ssl = False
-        cterasdk.settings.sessions.ctera_direct.storage.ssl = False
+        cterasdk.settings.io.direct.api.settings.connector.ssl = False
+        cterasdk.settings.io.direct.storage.settings.connector.ssl = False
 
         file_id = 12345
 

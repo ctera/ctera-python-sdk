@@ -87,7 +87,7 @@ async def retrieve_remote_dir(core, directory):
     return str(resource.cloudFolderInfo.uid)
 
 
-async def handle(path):
+def handle(path):
     """
     Create function to retrieve file handle.
 
@@ -106,7 +106,7 @@ async def handle(path):
     return wrapper
 
 
-async def handle_many(directory, *objects):
+def handle_many(directory, *objects):
     """
     Create function to retrieve zip archive
 
@@ -128,7 +128,7 @@ async def handle_many(directory, *objects):
     return wrapper
 
 
-async def upload(name, size, destination, fd):
+def upload(name, size, destination, fd):
     """
     Create upload function
 

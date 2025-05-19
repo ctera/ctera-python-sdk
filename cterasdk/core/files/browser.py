@@ -1,6 +1,5 @@
 import logging
 
-import cterasdk.settings
 from ...cio.core import CorePath
 from ...exceptions import CTERAException
 from ...lib.storage import synfs, commonfs
@@ -268,7 +267,7 @@ class Backups(FileBrowser):
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
         try:
-            destination = destination if destination is not None else f'{cterasdk.settings.downloads.location}/{device}.xml'
+            destination = destination if destination is not None else f'{commonfs.downloads()}/{device}.xml'
             return self.download(f'backups/{device}/Device Configuration/db.xml', destination)
         except CTERAException as error:
             logging.getLogger('cterasdk.core').error('Failed downloading configuration file. %s',

@@ -2,7 +2,7 @@ import aiohttp
 from ...audit import postman
 
 
-def trace_config():
+def tracer():
 
     async def on_request_start(session, ctx, params):
         # pylint: disable=unused-argument
@@ -50,10 +50,10 @@ def trace_config():
             ctx.request.request_body(body)
         postman.Collection.instance().add(ctx.request)
 
-    tracer = aiohttp.TraceConfig()
-    tracer.on_request_start.append(on_request_start)
-    tracer.on_request_headers_sent.append(on_request_headers_sent)
-    tracer.on_request_chunk_sent.append(on_request_chunk_sent)
-    tracer.on_request_end.append(on_request_end)
+    conf = aiohttp.TraceConfig()
+    conf.on_request_start.append(on_request_start)
+    conf.on_request_headers_sent.append(on_request_headers_sent)
+    conf.on_request_chunk_sent.append(on_request_chunk_sent)
+    conf.on_request_end.append(on_request_end)
 
-    return tracer
+    return conf

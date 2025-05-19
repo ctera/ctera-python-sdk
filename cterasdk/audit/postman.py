@@ -3,7 +3,7 @@ import uuid
 import atexit
 import logging
 import cterasdk.settings
-from ..lib import FileSystem
+from ..lib.storage import synfs, commonfs
 from ..common import Object, utf8_decode, utf8_encode
 from ..convert import fromjsonstr, fromxmlstr, tojsonstr, toxmlstr
 from ..objects import uri
@@ -227,14 +227,13 @@ class URL(Object):
 
 @atexit.register
 def audit():
-    if cterasdk.settings.sessions.management.audit.postman.enabled:
-        fs = FileSystem.instance()
+    if cterasdk.settings.audit.enabled:
         collection = Collection.instance()
-        name = cterasdk.settings.sessions.management.audit.postman.name
+        name = cterasdk.settings.audit.filename
         collection.info.name = name if name is not None else str(uuid.uuid4())
         filename = f'{collection.info.name}.json'
-        logging.getLogger('cterasdk.http.trace').info('Saving Postman audit file. %s', {
-            'directory': fs.downloads_directory(),
+        logging.getLogger('cterasdk.http').info('Saving Postman audit file. %s', {
+            'directory': commonfs.downloads(),
             'name': filename
         })
-        fs.save(fs.downloads_directory(), filename, utf8_encode(collection.serialize()))
+        synfs.write(commonfs.downloads(), filename, utf8_encode(collection.serialize()))

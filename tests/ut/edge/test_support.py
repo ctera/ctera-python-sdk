@@ -1,5 +1,6 @@
 import datetime
 
+from pathlib import Path
 from freezegun import freeze_time
 
 from cterasdk import exceptions
@@ -28,12 +29,13 @@ class TestEdgeSupport(base_edge.BaseEdgeTest):
         self.assertEqual('Invalid debug level', error.exception.message)
 
     def test_get_support_report(self):
+        cterasdk.settings.io.downloads = '~'
         current_datetime = datetime.datetime.now()
         handle_response = 'Stream'
         self._init_filer(handle_response=handle_response)
-        mock_save_file = self.patch_call("cterasdk.lib.filesystem.FileSystem.save")
+        mock_save_file = self.patch_call("cterasdk.lib.storage.synfs.write")
         with freeze_time(current_datetime):
             support.Support(self._filer).get_support_report()
             self._filer.api.handle.assert_called_once_with('/supportreport')
             filename = 'Support-' + current_datetime.strftime('_%Y-%m-%dT%H_%M_%S') + '.zip'
-            mock_save_file.assert_called_once_with(cterasdk.settings.downloads.location, filename, handle_response)
+            mock_save_file.assert_called_once_with(Path('~').expanduser(), filename, handle_response)

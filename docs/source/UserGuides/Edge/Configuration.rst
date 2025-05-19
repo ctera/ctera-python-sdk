@@ -495,7 +495,7 @@ Connecting to CTERA Portal
 .. automethod:: cterasdk.edge.services.Services.connect
    :noindex:
 
-.. warning:: To ignore certificate errors when connecting to CTERA Portal, use: ``cterasdk.settings.sessions.management.edge.services.ssl = False``
+.. warning:: To ignore certificate errors when connecting to CTERA Portal, use: ``cterasdk.settings.edge.syn.services.ssl = False``
 ..
 
 .. code-block:: python

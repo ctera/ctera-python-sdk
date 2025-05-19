@@ -45,7 +45,7 @@ Alternatively, we can also login to CTERA Portal as a Team Portal (tenant) user 
     if __name__ == '__main__':
         main()
 
-.. note:: To ignore SSL errors, or log in using an IP address, use: ``cterasdk.settings.sessions.management.ssl = False``
+.. note:: To ignore SSL errors, or log in using an IP address, use: ``cterasdk.settings.core.syn.settings.connector.ssl = False``
 
 Now we have an authenticated ``admin`` or ``user`` session. We can now proceed to access the Portal API's.
 
@@ -103,9 +103,7 @@ And equivalnent example to the one given above:
 
 .. code-block:: python
 
-    import cterasdk.settings
     from cterasdk import Edge
-
     from cterasdk import GlobalAdmin
 
     def main():
@@ -138,22 +136,22 @@ The ``GlobalAdmin`` and ``ServicesPortal`` objects feature an ``api`` property u
 
 .. warning:: For optimal integration, it's advised to utilize the modules provided in this SDK instead of the ``api`` property. In cases where a specific command or module is absent, `please submit a feature request <https://github.com/ctera/ctera-python-sdk/issues>`_.
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.get
+.. automethod:: cterasdk.clients.clients.API.get
    :noindex:
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.get_multi
+.. automethod:: cterasdk.clients.clients.API.get_multi
    :noindex:
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.put
+.. automethod:: cterasdk.clients.clients.API.put
    :noindex:
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.add
+.. automethod:: cterasdk.clients.clients.API.add
    :noindex:
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.execute
+.. automethod:: cterasdk.clients.clients.API.execute
    :noindex:
 
-.. automethod:: cterasdk.clients.synchronous.clients.API.delete
+.. automethod:: cterasdk.clients.clients.API.delete
    :noindex:
 
 Data Types and Enumerators

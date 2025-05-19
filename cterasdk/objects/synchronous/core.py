@@ -1,46 +1,16 @@
 from abc import abstractmethod
-from ...clients.synchronous import clients
+import cterasdk.settings
+from ...clients import clients
 from ..services import Management
 from ..endpoints import EndpointBuilder
-
 from .. import authenticators
-
 from ...lib.session.core import Session
-
-from ...core import activation
-from ...core import admins
-from ...core import antivirus
-from ...core import buckets
-from ...core import cli
-from ...core import cloudfs
-from ...core import connection
-from ...core import credentials
-from ...core import devices
-from ...core import directoryservice
-from ...core import domains
-from ...core import files
-from ...core import firmwares
-from ...core import groups
-from ...core import kms
-from ...core import licenses
-from ...core import login
-from ...core import logs
-from ...core import mail
-from ...core import messaging
-from ...core import plans
-from ...core import portals
-from ...core import reports
-from ...core import roles
-from ...core import servers
-from ...core import settings
-from ...core import setup
-from ...core import ssl
-from ...core import startup
-from ...core import storage_classes
-from ...core import syslog
-from ...core import taskmgr
-from ...core import templates
-from ...core import users
+from ...core import (
+    activation, admins, antivirus, buckets, cli, cloudfs, connection, credentials,
+    devices, directoryservice, domains, files, firmwares, groups, kms, licenses,
+    login, logs, mail, messaging, plans, portals, reports, roles, servers, settings,
+    setup, ssl, startup, storage_classes, syslog, taskmgr, templates, users,
+)
 
 
 class Clients:
@@ -78,11 +48,9 @@ class IO:
 class Portal(Management):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, host, port=None, https=True):
-        super().__init__(host, port, https, base=None)
-
+        super().__init__(host, port, https, None, cterasdk.settings.core.syn.settings)
         self._ctera_session = Session(self.host(), self.context)
         self._ctera_clients = Clients(self)
-
         self.activation = activation.Activation(self)
         self.admins = admins.Administrators(self)
         self.backups = files.Backups(self)

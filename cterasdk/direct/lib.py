@@ -108,7 +108,7 @@ async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
     """
     Process a Chunk.
 
-    :param cterasdk.clients.asynchronous.clients.AsyncClient client: Asynchronous HTTP Client.
+    :param cterasdk.clients.clients.AsyncClient client: Asynchronous HTTP Client.
     :param int file_id: File ID.
     :param cterasdk.direct.types.Chunk chunk: Chunk.
     :param str encryption_key: Encryption key.
@@ -136,7 +136,7 @@ async def process_chunks(client, file_id, chunks, encryption_key, semaphore=None
     """
     Process Chunks Asynchronously.
 
-    :param cterasdk.clients.asynchronous.clients.AsyncClient client: Asynchronous HTTP Client.
+    :param cterasdk.clients.clients.AsyncClient client: Asynchronous HTTP Client.
     :param int file_id: File ID.
     :param list[cterasdk.direct.types.Chunk] chunks: Chunk.
     :param str encryption_key: Encryption key.
@@ -194,7 +194,7 @@ async def get_chunks(api, credentials, file_id):
     """
     Get Chunks.
 
-    :param cterasdk.clients.asynchronous.clients.AsyncJSON api: Asynchronous JSON Client.
+    :param cterasdk.clients.clients.AsyncJSON api: Asynchronous JSON Client.
     :param int file_id: File ID.
     :returns: Wrapped key and file chunks.
     :rtype: cterasdk.direct.types.DirectIOResponse

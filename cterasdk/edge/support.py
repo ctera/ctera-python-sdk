@@ -1,8 +1,7 @@
 from datetime import datetime
 import logging
-import cterasdk.settings
 
-from ..lib import FileSystem
+from ..lib.storage import synfs, commonfs
 from ..exceptions import InputError
 from .base_command import BaseCommand
 
@@ -62,5 +61,6 @@ class Support(BaseCommand):
         filename = 'Support-' + self._edge.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.zip'
         logging.getLogger('cterasdk.edge').info('Downloading support report. %s', {'host': self._edge.host()})
         handle = self._edge.api.handle('/supportreport')
-        filepath = FileSystem.instance().save(cterasdk.settings.downloads.location, filename, handle)
+        filepath = synfs.write(commonfs.downloads(), filename, handle)
         logging.getLogger('cterasdk.edge').info('Support report downloaded. %s', {'filepath': filepath})
+        return filepath
