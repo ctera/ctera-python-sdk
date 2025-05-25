@@ -17,4 +17,4 @@ class Portals(BaseCommand):
         """
         Browse the Global Admin
         """
-        self.browse('')
+        await self.browse('')
