@@ -129,13 +129,13 @@ class FileBrowser(BaseCommand):
             raise ValueError('Move destination was not specified.')
         return io.move(self._edge, self.normalize(path), self.normalize(destination), overwrite)
 
-    def delete(self, path):
+    def delete(self, *paths):
         """
         Delete a file
 
         :param str path: File path
         """
-        return io.remove(self._edge, self.normalize(path))
+        return io.remove(self._edge, *[self.normalize(path) for path in paths])
 
     @staticmethod
     def normalize(path):
