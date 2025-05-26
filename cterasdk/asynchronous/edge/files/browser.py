@@ -129,13 +129,13 @@ class FileBrowser(BaseCommand):
             raise ValueError('Move destination was not specified.')
         return await io.move(self._edge, self.normalize(path), self.normalize(destination), overwrite)
 
-    async def delete(self, path):
+    async def delete(self, *paths):
         """
         Delete a file
 
         :param str path: File path
         """
-        return await io.remove(self._edge, self.normalize(path))
+        return await io.remove(self._edge, *[self.normalize(path) for path in paths])
 
     @staticmethod
     def normalize(path):
