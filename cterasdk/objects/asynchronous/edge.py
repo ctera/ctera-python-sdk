@@ -33,6 +33,10 @@ class IO:
         return self._edge.default.form_data  # pylint: disable=protected-access
 
     @property
+    def propfind(self):
+        return self._webdav.propfind
+
+    @property
     def mkdir(self):
         return self._webdav.mkcol
 

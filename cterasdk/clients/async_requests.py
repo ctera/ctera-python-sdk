@@ -134,6 +134,13 @@ class DeleteRequest(BaseRequest):
         super().__init__('DELETE', url, **kwargs)
 
 
+class PropfindRequest(BaseRequest):
+    """PROPFIND"""
+
+    def __init__(self, url, **kwargs):
+        super().__init__('PROPFIND', url, **kwargs)
+
+
 class MkcolRequest(BaseRequest):
     """MKCOL"""
 

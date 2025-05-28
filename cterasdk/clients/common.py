@@ -1,5 +1,5 @@
 from . import async_requests
-from ..convert import tojsonstr, toxmlstr, fromjsonstr, fromxmlstr
+from ..convert import tojsonstr, toxmlstr, fromjsonstr, fromxmlstr, fromdavxmlstr
 
 
 class Serializers:
@@ -11,6 +11,7 @@ class Serializers:
 class Deserializers:
     JSON = fromjsonstr
     XML = fromxmlstr
+    DAV = fromdavxmlstr
 
 
 class MultipartForm:
