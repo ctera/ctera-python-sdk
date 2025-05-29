@@ -8,6 +8,7 @@ from ..exceptions import ClientResponseException
 class ClientError(Object):
 
     def __init__(self, exception, message):
+        super().__init__()
         self.request = Object()
         self.request.method = exception.request_info.method
         self.request.url = str(exception.request_info.real_url)

@@ -81,6 +81,7 @@ class SrcDstParam(Object):
         return SrcDstParam.__instance
 
     def __init__(self, src, dest=None):
+        super().__init__()
         self._classname = self.__class__.__name__
         self.src = src
         self.dest = dest
@@ -97,6 +98,7 @@ class ActionResourcesParam(Object):
         return ActionResourcesParam.__instance
 
     def __init__(self):
+        super().__init__()
         self._classname = self.__class__.__name__
         self.urls = []
         ActionResourcesParam.__instance = self  # pylint: disable=unused-private-member
@@ -115,6 +117,7 @@ class CreateShareParam(Object):
         return CreateShareParam.__instance
 
     def __init__(self, path, access, expire_on):
+        super().__init__()
         self._classname = self.__class__.__name__
         self.url = path
         self.share = Object()
@@ -131,6 +134,7 @@ class CreateShareParam(Object):
 class FetchResourcesParam(Object):
 
     def __init__(self):
+        super().__init__()
         self._classname = 'FetchResourcesParam'
         self.start = 0
         self.limit = 100

@@ -247,6 +247,7 @@ class Task(Object):
     """Class representing a migration tool task"""
 
     def __init__(self, task_id, task_type, name, created_at=None, source=None, source_type=None, last_status=None, shares=None, notes=None):
+        super().__init__()
         self.id = task_id
         self.type = {v: k for k, v in TaskType.__dict__.items() if not k.startswith('_')}.get(task_type).lower()
         self.name = name

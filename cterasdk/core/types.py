@@ -428,6 +428,7 @@ class DomainControllers:
 class AccessControlRule(Object):
 
     def __init__(self, group, role):
+        super().__init__()
         self._classname = 'AccessControlRule'
         self.group = group
         self.role = role
@@ -610,6 +611,7 @@ class AlertBuilder:
 class Task(Object):
 
     def __init__(self, task_id, name):
+        super().__init__()
         self.id = task_id
         self.name = name
 
@@ -701,6 +703,7 @@ class ComplianceSettingsBuilder:
 class ExtendedAttribute(Object):
 
     def __init__(self, name, supported):
+        super().__init__()
         self._classname = 'ExtendedAttributesInfo'  # pylint: disable=protected-access
         self.name = name
         self.supported = supported
@@ -758,6 +761,7 @@ class RoleSettings(Object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, name, sudo, enable_remote_wipe, enable_sso, enable_seeding_export, enable_seeding_import, access_end_user_folders,
                  update_settings, update_roles, update_account_emails, update_account_password, manage_cloud_drives, manage_plans,
                  manage_users, manage_logs, allow_folders_files_permanent_delete, can_manage_legal_holds, can_manage_compliance_settings):
+        super().__init__()
         self.name = name
         self.sudo = sudo
         self.enable_remote_wipe = enable_remote_wipe

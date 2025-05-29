@@ -43,6 +43,7 @@ def iterator(edge, path, param=None, name=None, callback_response=None):
 class QueryParam(Object):
 
     def __init__(self):
+        super().__init__()
         self.startFrom = 0
         self.countLimit = 50
 

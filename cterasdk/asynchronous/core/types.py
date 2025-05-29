@@ -21,6 +21,7 @@ class Event(Object):  # pylint: disable=too-many-instance-attributes
             self, type, guid, deleted, name, folder_id=None, modified=None,
             file_timestamp=None, size=None, id=None, acl=None, gvsn=None,
             parent_guid=None, portal_modified_date=None, virtual_portal_id=None):
+        super().__init__()
         self.type = type
         self.guid = guid
         self.folder_id = folder_id

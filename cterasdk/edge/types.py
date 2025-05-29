@@ -302,6 +302,7 @@ class DeduplicationStatus(Object):
     """
 
     def __init__(self, size, usage):
+        super().__init__()
         self.size = size
         self.usage = usage
 

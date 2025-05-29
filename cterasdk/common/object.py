@@ -7,6 +7,7 @@ from collections.abc import MutableMapping
 class Object(MutableMapping):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, **kwargs):
+        super().__init__()
         for k, v in kwargs.items():
             setattr(self, k, v)
 

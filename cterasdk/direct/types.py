@@ -209,6 +209,7 @@ class ChunkMetadata(Object):
     :ivar int length: Part Length
     """
     def __init__(self, url, index, offset, length):
+        super().__init__()
         self.url = url
         self.index = index
         self.offset = offset
@@ -221,5 +222,6 @@ class FileMetadata(Object):
     """
 
     def __init__(self, f):
+        super().__init__()
         self.encryption_key = utils.utf8_decode(base64.b64encode(f.encryption_key))
         self.chunks = [ChunkMetadata(chunk.url, chunk.index, chunk.offset, chunk.length) for chunk in f.chunks]

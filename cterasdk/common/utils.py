@@ -116,6 +116,7 @@ class BaseObjectRef(Object):
         :param str,optional name: Base object name
         :param str,optional more: Base object more info
         """
+        super().__init__()
         self.uid = uid
         self.tenant = tenant
         self.classname = classname

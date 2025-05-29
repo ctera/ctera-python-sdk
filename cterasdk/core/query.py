@@ -80,12 +80,14 @@ class FilterType:
 class Filter(Object):
 
     def __init__(self, field):
+        super().__init__()
         self.field = field
 
 
 class FilterBuilder(Object):
 
     def __init__(self, name, reference=False):
+        super().__init__()
         self.filter = Filter(name)
         self.reference = reference
 
@@ -145,6 +147,7 @@ class FilterBuilder(Object):
 class QueryParams(Object):
 
     def __init__(self):
+        super().__init__()
         self.startFrom = 0
         self.countLimit = 50
 
