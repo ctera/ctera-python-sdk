@@ -84,6 +84,10 @@ def fromjsonstr(fromstr):
     return root.value
 
 
+def fromdavxmlstr(string):
+    return fromstring(string)
+
+
 def fromxmlstr(string):  # pylint: disable=too-many-branches,too-many-statements
 
     if not string:

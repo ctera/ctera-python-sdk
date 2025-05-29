@@ -15,6 +15,7 @@ class Collection(Object):
     __instance = None
 
     def __init__(self):
+        super().__init__()
         self.info = Info()
         self.item = []
         Collection.__instance = self
@@ -36,6 +37,7 @@ class Collection(Object):
 class Info(Object):
 
     def __init__(self):
+        super().__init__()
         self.name = f'{str(uuid.uuid4())}'
         self.schema = "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 
@@ -43,6 +45,7 @@ class Info(Object):
 class Command(Object):
 
     def __init__(self, name, request):
+        super().__init__()
         self.name = name
         self.request = request
         self.response = []
@@ -51,6 +54,7 @@ class Command(Object):
 class Request(Object):
 
     def __init__(self, method, url):
+        super().__init__()
         self.method = method
         self.header = None
         self.url = url
@@ -65,6 +69,7 @@ class Request(Object):
 class Header(Object):
 
     def __init__(self, key, value):
+        super().__init__()
         self.key = key
         self.value = value
         self.type = 'text'
@@ -159,6 +164,7 @@ class Body(Object):
     """Request Body"""
 
     def __init__(self, mode):
+        super().__init__()
         self.mode = mode
 
 
@@ -217,6 +223,7 @@ class Raw(Body):
 class URL(Object):
 
     def __init__(self, raw, protocol, host, port, path, query):
+        super().__init__()
         self.raw = raw
         self.protocol = protocol
         self.host = host

@@ -115,10 +115,9 @@ class FileBrowser(BaseCommand):
         :param str path: Path.
         """
         p = self.normalize(path)
-        contents = [e async for e in await io.listdir(self._core,
-                                                      p.parent, 1, False, p.name, 1)]  # pylint: disable=unnecessary-comprehension
-        if contents and contents[0].name == p.name:
-            return contents[0].permalink
+        async for e in await io.listdir(self._core, p.parent, 1, False, p.name, 1):
+            if e.name == p.name:
+                return e.permalink
         raise FileNotFoundError('File not found.', path)
 
     def normalize(self, entries):

@@ -68,7 +68,7 @@ class BaseClient:
 
         default_settings = ClientSessionSettings()
         if settings:
-            default_settings.update(**settings.kwargs)
+            default_settings.update(**settings)
 
         self._session = session if session else async_requests.Session(default_settings, TraceSettings())
 

@@ -41,7 +41,7 @@ class CTERAMigrate(BaseCommand):
         :rtype: list(cterasdk.common.object.Object)
         """
         tasks = self._edge.migrate.get('/tasks/list', params={'deleted': int(deleted)}).tasks  # pylint: disable=W0212
-        return [Task.from_server_object(task) for task in tasks.__dict__.values()] if tasks else []
+        return [Task.from_server_object(task) for task in tasks.values()] if tasks else []
 
     def delete(self, tasks):
         """
@@ -247,6 +247,7 @@ class Task(Object):
     """Class representing a migration tool task"""
 
     def __init__(self, task_id, task_type, name, created_at=None, source=None, source_type=None, last_status=None, shares=None, notes=None):
+        super().__init__()
         self.id = task_id
         self.type = {v: k for k, v in TaskType.__dict__.items() if not k.startswith('_')}.get(task_type).lower()
         self.name = name

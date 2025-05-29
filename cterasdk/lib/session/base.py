@@ -10,6 +10,7 @@ class BaseUser(Object):
     """Base User Account"""
 
     def __init__(self, name, domain=None):
+        super().__init__()
         self.name = name
         self.domain = domain
 
@@ -32,6 +33,7 @@ class BaseSession(Object):
         :param str address: Hostname or IP address
         :param cterasdk.lib.session.types.Product product: Product
         """
+        super().__init__()
         self.address = address
         self.product = product
         self.connection_status = ConnectionStatus.Disconnected

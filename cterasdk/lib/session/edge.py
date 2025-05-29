@@ -9,6 +9,7 @@ class Connection(Object):
     """Connection"""
 
     def __init__(self, remote, source=None):
+        super().__init__()
         self.remote = remote
         if source:
             self.source = source

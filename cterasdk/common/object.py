@@ -1,13 +1,29 @@
 import re
 import json
 import logging
+from collections.abc import MutableMapping
 
 
-class Object:  # pylint: disable=too-many-instance-attributes
+class Object(MutableMapping):  # pylint: disable=too-many-instance-attributes
 
-    @property
-    def kwargs(self):
-        return json.loads(str(self))
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
+
+    def __delitem__(self, key):
+        delattr(self, key)
+
+    def __iter__(self):
+        return iter(self.__dict__)
+
+    def __len__(self):
+        return len(self.__dict__)
 
     def __str__(self):
         return json.dumps(self, default=lambda o: o.__dict__, indent=5)
@@ -19,6 +35,7 @@ class Object:  # pylint: disable=too-many-instance-attributes
 class Device(Object):
 
     def __init__(self, uid, version, firmware):
+        super().__init__()
         self.namespace = 'http://www.w3.org/2001/XMLSchema-instance'
         self.location = '../../db/resources/db.xsd'
         self.id = uid

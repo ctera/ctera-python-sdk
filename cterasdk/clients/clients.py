@@ -59,6 +59,11 @@ class AsyncWebDAV(AsyncClient):
     async def download(self, path, **kwargs):
         return await super().get(path, **kwargs)
 
+    async def propfind(self, path):
+        request = async_requests.PropfindRequest(self._builder(path))
+        response = await self.async_request(request)
+        return await response.dav()
+
     async def mkcol(self, path):
         request = async_requests.MkcolRequest(self._builder(path))
         response = await self.async_request(request)
@@ -175,6 +180,9 @@ class AsyncResponse(BaseResponse):
     async def xml(self):
         return Deserializers.XML(await self._response.read())
 
+    async def dav(self):
+        return Deserializers.DAV(await self._response.read())
+
     @async_requests.decorate_stream_error
     async def read(self, n=-1):
         return await self._response.content.read(n)
@@ -250,6 +258,11 @@ class WebDAV(Client):
 
     def download(self, path, **kwargs):
         return super().handle(path, **kwargs)
+
+    def propfind(self, path):
+        request = async_requests.PropfindRequest(self._builder(path))
+        response = self.request(request)
+        return response.dav()
 
     def mkcol(self, path):
         request = async_requests.MkcolRequest(self._builder(path))
@@ -402,6 +415,9 @@ class SyncResponse(AsyncResponse):
 
     def xml(self):  # pylint: disable=invalid-overridden-method
         return execute(super().xml)
+
+    def dav(self):  # pylint: disable=invalid-overridden-method
+        return execute(super().dav)
 
     @staticmethod
     def new():

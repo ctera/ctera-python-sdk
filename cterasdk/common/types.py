@@ -28,6 +28,7 @@ class PolicyRuleConverter:
 class Operator(Object):
 
     def __init__(self, right):
+        super().__init__()
         self._classname = self.__class__.__name__  # pylint: disable=protected-access
         self.right = right
 
@@ -75,6 +76,7 @@ class AfterOperator(Operator):
 class AdvancedFilterRule(Object):
 
     def __init__(self, classname, field, operator):
+        super().__init__()
         self._classname = self.__class__.__name__  # pylint: disable=protected-access
         self.className = classname
         self.fieldName = field
@@ -283,6 +285,7 @@ class DirectoryEntryFactory:
 class FileEntry(Object):
 
     def __init__(self, name, display_name=None, included=None):
+        super().__init__()
         self._classname = self.__class__.__name__  # pylint: disable=protected-access
         self.name = name
         self.displayName = display_name
@@ -300,6 +303,7 @@ class BackupSet(Object):
 
     def __init__(self, name, directory_tree=None, filter_rules=None, defaults_dirs=None,
                  template_dirs=None, enabled=True, boolean_function=None, comment=None):
+        super().__init__()
         self._classname = self.__class__.__name__  # pylint: disable=protected-access
         self.name = name
         self.isEnabled = enabled
@@ -334,6 +338,7 @@ class ApplicationBackupSet(BackupSet):
 class TaskSchedule(Object):
 
     def __init__(self):
+        super().__init__()
         self._classname = 'TaskSchedule'  # pylint: disable=protected-access
         self.mode = None
 
@@ -447,6 +452,7 @@ class ADDomainIDMapping(Object):
     :param int end: The maximum id to use for mapping
     """
     def __init__(self, domain, start, end):
+        super().__init__()
         self._classname = 'ADDomainIDMapping'
         self.domainFlatName = domain
         self.minID = start
@@ -499,6 +505,7 @@ class SoftwareUpdatePolicyBuilder:
 class SoftwareUpdatesTopic(Object):
 
     def __init__(self, enabled, reboot_after_update, reboot_when):
+        super().__init__()
         self._classname = "SoftwareUpdatesSettings"
         self.enabled = enabled if enabled else None
         self.rebootAfterUpdate = reboot_after_update if reboot_after_update else None
