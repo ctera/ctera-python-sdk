@@ -41,7 +41,7 @@ class CTERAMigrate(BaseCommand):
         :rtype: list(cterasdk.common.object.Object)
         """
         tasks = self._edge.migrate.get('/tasks/list', params={'deleted': int(deleted)}).tasks  # pylint: disable=W0212
-        return [Task.from_server_object(task) for task in tasks.__dict__.values()] if tasks else []
+        return [Task.from_server_object(task) for task in tasks.values()] if tasks else []
 
     def delete(self, tasks):
         """

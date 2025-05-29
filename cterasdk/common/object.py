@@ -6,8 +6,12 @@ from collections.abc import MutableMapping
 
 class Object(MutableMapping):  # pylint: disable=too-many-instance-attributes
 
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def __getitem__(self, key):
-        return getattr(self, key, None)
+        return getattr(self, key)
 
     def __setitem__(self, key, value):
         setattr(self, key, value)
