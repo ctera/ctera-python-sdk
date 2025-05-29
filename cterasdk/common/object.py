@@ -7,7 +7,6 @@ from collections.abc import MutableMapping
 class Object(MutableMapping):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, **kwargs):
-        super().__init__()
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -36,6 +35,7 @@ class Object(MutableMapping):  # pylint: disable=too-many-instance-attributes
 class Device(Object):
 
     def __init__(self, uid, version, firmware):
+        super().__init__()
         self.namespace = 'http://www.w3.org/2001/XMLSchema-instance'
         self.location = '../../db/resources/db.xsd'
         self.id = uid
