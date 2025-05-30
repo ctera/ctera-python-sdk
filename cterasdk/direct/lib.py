@@ -180,7 +180,7 @@ async def process_chunks(client, file_id, chunks, encryption_key, semaphore=None
     if file_id:
         message.append(f"for file ID {file_id}")
     if semaphore:
-        message.append(f"using up to {semaphore._value} workers")
+        message.append(f"using up to {semaphore._value} workers")  # pylint: disable=protected-access
     logger.debug(' '.join(message))
     futures = []
     for chunk in chunks:
