@@ -68,7 +68,7 @@ class Client:
         """
         meta = await self._chunks(file_id)
         byte_range = byte_range if byte_range is not None else ByteRange.default()
-        max_workers = cterasdk.settings.sessions.ctera_direct.streamer.max_workers
+        max_workers = cterasdk.settings.io.direct.streamer.max_workers
         executor = self.executor(filters.span(meta, byte_range), meta.encryption_key, file_id, max_workers)
         return Streamer(executor, byte_range)
 
