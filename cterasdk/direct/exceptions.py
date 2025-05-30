@@ -45,19 +45,19 @@ class UnprocessableContent(DirectIOAPIError):
 class BlocksNotFoundError(DirectIOAPIError):
 
     def __init__(self, filename):
-        super().__init__(errno.ENODATA, 'Blocks not found', filename)
+        super().__init__(errno.ENODATA, f'Could not find blocks for file ID: {filename}', filename)
 
 
 class BlockListConnectionError(DirectIOAPIError):
 
     def __init__(self, filename):
-        super().__init__(errno.ENETRESET, 'Failed to list blocks. Connection error', filename)
+        super().__init__(errno.ENETRESET, f'Failed to list blocks for file ID: {filename} due to a connection error', filename)
 
 
 class BlockListTimeout(DirectIOAPIError):
 
     def __init__(self, filename):
-        super().__init__(errno.ETIMEDOUT, 'Failed to list blocks. Timed out', filename)
+        super().__init__(errno.ETIMEDOUT, f'Timed out while listing blocks for file ID: {filename}', filename)
 
 
 class DecryptKeyError(DirectIOError):

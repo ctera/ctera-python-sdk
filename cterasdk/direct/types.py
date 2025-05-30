@@ -1,3 +1,4 @@
+import copy
 import base64
 from ..common import Object, utils
 
@@ -40,20 +41,63 @@ class ByteRange:
         return ByteRange(0)
 
 
-class DirectIOResponse:
+class CompressionLib:
+    """
+    Compression Library
 
-    def __init__(self, server_object):
+    :ivar str Snappy: Snappy
+    :ivar int Gzip: Gzip
+    :ivar int Off: No Compression
+    """
+    Snappy = 'SNAPPY'
+    Gzip = 'GZIP'
+    Off = 'NONE'
+
+
+class Chunk(Object):
+
+    def __init__(self, index, offset, url, length):
         """
-        Initialize a Get Response Object.
+        Initialize a Chunk.
+
+        :param int index: Chunk index.
+        :param int offset: Chunk offset.
+        :param str url: Signed URL.
+        :param int length: Object length.
+        """
+        super().__init__(
+            index=index,
+            offset=offset,
+            url=url,
+            length=length
+        )
+
+
+class Metadata(Object):
+    """
+    CTERA Direct IO File Metadata
+    """
+
+    def __init__(self, file_id, server_object):
+        """
+        Initialize a Direct IO metadata response object.
 
         :param int file_id: File ID.
         :param cterasdk.common.object.Object server_object: Response Object.
         """
-        self._wrapped_key = server_object.wrapped_key
-        self._chunks = DirectIOResponse._create_chunks(server_object.chunks)
+        super().__init__(
+            file_id=file_id,
+            encrypted = server_object.encrypt_info.data_encrypted,
+            compressed = server_object.compression_type != CompressionLib.Off,
+            chunks = Metadata._format_chunks(server_object.chunks)
+        )
+        self.encryption_key = server_object.encrypt_info.wrapped_key if self.encrypted else None
+        self.compression_library = server_object.compression_type if self.compressed else None
+        last_chunk = self.chunks[-1]
+        self.size = last_chunk.offset + last_chunk.length
 
     @staticmethod
-    def _create_chunks(server_object):
+    def _format_chunks(server_object):
         """
         Create Chunks.
 
@@ -70,79 +114,14 @@ class DirectIOResponse:
             offset = offset + chunk.len
         return chunks
 
-    @property
-    def wrapped_key(self):
-        return self._wrapped_key
-
-    @property
-    def chunks(self):
-        return self._chunks
-
-
-class Chunk:
-    """Chunk to Retrieve"""
-
-    def __init__(self, index, offset, url, length):
+    def serialize(self):
         """
-        Initialize a Chunk.
-
-        :param int index: Chunk index.
-        :param int offset: Chunk offset.
-        :param str url: Signed URL.
-        :param int length: Object length.
+        Serialize Direct IO metadata to a dictionary.
         """
-        self._index = index
-        self._offset = offset
-        self._url = url
-        self._length = length
-
-    @property
-    def index(self):
-        return self._index
-
-    @property
-    def offset(self):
-        return self._offset
-
-    @property
-    def url(self):
-        return self._url
-
-    @property
-    def length(self):
-        return self._length
-
-
-class File:
-
-    def __init__(self, file_id, encryption_key, chunks):
-        """
-        Initialize a File Object.
-
-        :param int file_id: File ID.
-        :param str encryption_key: Encryption Key.
-        :param cterasdk.direct.types.Chunk chunks: List of Chunks.
-        """
-        self._file_id = file_id
-        self._encryption_key = encryption_key
-        self._chunks = chunks
-
-    @property
-    def file_id(self):
-        return self._file_id
-
-    @property
-    def encryption_key(self):
-        return self._encryption_key
-
-    @property
-    def chunks(self):
-        return self._chunks
-
-    @property
-    def size(self):
-        last_chunk = self._chunks[-1]
-        return last_chunk.offset + last_chunk.length
+        x = copy.deepcopy(self)
+        if self.encrypted:
+            x.encryption_key = utils.utf8_decode(base64.b64encode(self.encryption_key))
+        return x
 
 
 class Block:
@@ -197,31 +176,3 @@ class Block:
 
         data = self._data[start:end]
         return Block(self._file_id, self._number, self._offset + start if start else self._offset, data, len(data))
-
-
-class ChunkMetadata(Object):
-    """
-    Direct IO File Chunk Metadata Object
-
-    :ivar str url: Part URL
-    :ivar int index: Part Index
-    :ivar int offset: Part Offset
-    :ivar int length: Part Length
-    """
-    def __init__(self, url, index, offset, length):
-        super().__init__()
-        self.url = url
-        self.index = index
-        self.offset = offset
-        self.length = length
-
-
-class FileMetadata(Object):
-    """
-    Direct IO File Metadata Object
-    """
-
-    def __init__(self, f):
-        super().__init__()
-        self.encryption_key = utils.utf8_decode(base64.b64encode(f.encryption_key))
-        self.chunks = [ChunkMetadata(chunk.url, chunk.index, chunk.offset, chunk.length) for chunk in f.chunks]
