@@ -31,7 +31,7 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
             with self.assertRaises(ctera_direct.exceptions.BlocksNotFoundError) as error:
                 await self._direct.metadata(self._file_id)
         self.assertEqual(error.exception.errno, errno.ENODATA)
-        self.assertEqual(error.exception.strerror, 'Blocks not found')
+        self.assertEqual(error.exception.strerror, f'Could not find blocks for file ID: {self._file_id}')
         self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_error_400(self):
@@ -82,7 +82,8 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
             with self.assertRaises(ctera_direct.exceptions.BlockListConnectionError) as error:
                 await self._direct.metadata(self._file_id)
         self.assertEqual(error.exception.errno, errno.ENETRESET)
-        self.assertEqual(error.exception.strerror, 'Failed to list blocks. Connection error')
+        self.assertEqual(error.exception.strerror,
+                         f'Failed to list blocks for file ID: {self._file_id} due to a connection error')
         self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_timeout(self):
@@ -91,7 +92,8 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
             with self.assertRaises(ctera_direct.exceptions.BlockListTimeout) as error:
                 await self._direct.metadata(self._file_id)
         self.assertEqual(error.exception.errno, errno.ETIMEDOUT)
-        self.assertEqual(error.exception.strerror, 'Failed to list blocks. Timed out')
+        self.assertEqual(error.exception.strerror,
+                         f'Timed out while listing blocks for file ID: {self._file_id}')
         self.assertEqual(error.exception.filename, self._file_id)
 
     @staticmethod
