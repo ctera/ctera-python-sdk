@@ -8,8 +8,23 @@ logger = logging.getLogger('cterasdk.edge')
 
 
 def listdir(edge, path):
-    with fs.listdir(path) as param:
-        return edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
+    return fs.format_listdir_response(path.reference.as_posix(), edge.io.propfind(path.absolute, 1))
+
+
+def walk(edge, path):
+    paths = [fs.EdgePath.instance('/', path)]
+    while len(paths) > 0:
+        path = paths.pop(0)
+        entries = listdir(edge, path)
+        for e in entries:
+            if e.is_dir:
+                paths.append(fs.EdgePath.instance('/', e))
+            yield e
+
+
+def exists(edge, path):
+    entries = edge.io.propfind(path.absolute, 0)
+    return fs.exists(entries, path.reference.as_posix())
 
 
 def mkdir(edge, path):

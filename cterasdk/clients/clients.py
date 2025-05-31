@@ -59,8 +59,8 @@ class AsyncWebDAV(AsyncClient):
     async def download(self, path, **kwargs):
         return await super().get(path, **kwargs)
 
-    async def propfind(self, path):
-        request = async_requests.PropfindRequest(self._builder(path))
+    async def propfind(self, path, depth):
+        request = async_requests.PropfindRequest(self._builder(path), headers={'depth': str(depth)})
         response = await self.async_request(request)
         return await response.dav()
 
@@ -259,8 +259,8 @@ class WebDAV(Client):
     def download(self, path, **kwargs):
         return super().handle(path, **kwargs)
 
-    def propfind(self, path):
-        request = async_requests.PropfindRequest(self._builder(path))
+    def propfind(self, path, depth):
+        request = async_requests.PropfindRequest(self._builder(path), headers={'depth': str(depth)})
         response = self.request(request)
         return response.dav()
 

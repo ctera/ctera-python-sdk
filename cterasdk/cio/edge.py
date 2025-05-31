@@ -1,6 +1,9 @@
 import logging
+from datetime import datetime
 from contextlib import contextmanager
+from pathlib import Path
 from ..common import Object
+from ..objects.uri import unquote
 from . import common, exceptions
 
 
@@ -10,17 +13,53 @@ logger = logging.getLogger('cterasdk.edge')
 class EdgePath(common.BasePath):
     """Path for CTERA Edge Filer"""
 
+    def __init__(self, scope, reference):
+        """
+        Initialize a CTERA Edge Filer Path.
+
+        :param str scope: Scope.
+        :param str reference: Reference.
+        """
+        if isinstance(reference, Object):
+            super().__init__(scope, reference.path)
+        elif isinstance(reference, str):
+            super().__init__(scope, reference)
+        else:
+            message = 'Path validation failed: ensure the path exists and is correctly formatted.'
+            logger.error(message)
+            raise ValueError(message)
+
     @staticmethod
     def instance(scope, reference):
         return EdgePath(scope, reference)
 
 
-@contextmanager
-def listdir(path):
-    param = Object()
-    param.path = path
-    logger.info('Listing directory: %s', path)
-    yield param
+def fetch_reference(href):
+    namespace = 'localFiles/'
+    return unquote(href[href.index(namespace)+len(namespace):])
+
+
+def format_listdir_response(parent, response):
+    entries = []
+    for e in response:
+        path = fetch_reference(e.href)
+        if parent != path:
+            is_dir = True if e.getcontenttype == 'httpd/unix-directory' else False
+            param = Object(
+                path=path,
+                name=Path(path).name,
+                is_dir=is_dir,
+                is_file=not is_dir,
+                created_at=e.creationdate,
+                last_modified=datetime.strptime(e.getlastmodified, "%a, %d %b %Y %H:%M:%S GMT").isoformat(),
+                size=e.getcontentlength
+            )
+            entries.append(param)    
+    return entries
+
+
+def exists(entries, path):
+    return True if len(entries) == 1 and fetch_reference(entries[0].href) == path else False
 
 
 @contextmanager

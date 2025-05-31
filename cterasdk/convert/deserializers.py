@@ -1,10 +1,14 @@
+import re
 import json
 import queue
 import logging
 from xml.etree.ElementTree import fromstring, ParseError
 
-from .types import XMLTypes
+from .types import XMLTypes, DAVTypes
 from ..common import Item, Object, Device
+
+
+logger = logging.getLogger('cterasdk.deserializers')
 
 
 def ParseValue(data):
@@ -50,7 +54,7 @@ def fromjsonstr(fromstr):
     try:
         root.node = json.loads(fromstr)
     except json.decoder.JSONDecodeError:
-        logging.getLogger('cterasdk.convert').debug('Parsing failed. Expected JSON format but received invalid input.')
+        logger.debug('Error: Unable to parse input as JSON.')
         return None
     root.parent = None
     root.value = None
@@ -84,25 +88,87 @@ def fromjsonstr(fromstr):
     return root.value
 
 
-def fromdavxmlstr(string):
-    return fromstring(string)
-
-
-def fromxmlstr(string):  # pylint: disable=too-many-branches,too-many-statements
-
+def loadxmlstr(string):
     if not string:
-        logging.getLogger('cterasdk.convert').debug('Empty payload received.')
-
-    root = Item()
-    root.value = None
-    root.parent = None
+        logger.debug("Nothing to parse: Input payload is empty.")
 
     try:
-        root.node = fromstring(string)
+        return True, fromstring(string)
     except ParseError:
-        logging.getLogger('cterasdk.convert').debug('Parsing failed. Expected XML format but received invalid input.')
+        logger.debug('Error: Unable to parse input as XML.')
+        return False, None
+
+
+def without_namespace(t):
+    return re.sub(r'^{[^}]+}', '', t)
+
+
+def fromdavxmlstr(s):
+    """
+    Convert an WebdAV XML String to a Python Object.
+
+    :param str s: String
+    """
+    root = Item()
+
+    success, root.node = loadxmlstr(s)
+    if not success:
         return None
 
+    root.value = None
+    root.parent = None
+    
+    q = queue.Queue()
+    q.put(root)
+    while not q.empty():
+        item = q.get()
+        tag = without_namespace(item.node.tag)
+        if tag == DAVTypes.MULTISTATUS:
+            item.value = []
+            SetAppendValue(item, item.value)
+            for kidnode in item.node:
+                kid = Item()
+                kid.parent = item
+                kid.node = kidnode
+                q.put(kid)
+        elif tag == DAVTypes.RESPONSE:
+            item.value = Object()
+            SetAppendValue(item, item.value)
+            for kidnode in item.node:
+                kid = Item()
+                kid.id = without_namespace(kidnode.tag)
+                kid.parent = item
+                kid.node = kidnode
+                q.put(kid)
+        elif tag in [DAVTypes.PROP, DAVTypes.PROPSTAT]:
+            for kidnode in item.node:
+                kid = Item()
+                kid.id = without_namespace(kidnode.tag)
+                kid.parent = item.parent
+                kid.node = kidnode
+                q.put(kid)
+        elif tag in [DAVTypes.HREF, DAVTypes.CREATED_DATE, DAVTypes.LAST_MODIFIED,
+                     DAVTypes.CONTENT_TYPE, DAVTypes.CONTENT_LENGTH]:
+            value = ParseValue(item.node.text)
+            SetAppendValue(item, value)
+    return root.value
+
+
+def fromxmlstr(s):  # pylint: disable=too-many-branches,too-many-statements
+    """
+    Convert an XML String to a Python Object.
+
+    :param str s: String
+    """
+    root = Item()
+
+    success, root.node = loadxmlstr(s)
+    if not success:
+        return None
+
+    root.value = None
+    root.parent = None
+    
     q = queue.Queue()
     q.put(root)
     while not q.empty():
