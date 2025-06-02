@@ -16,10 +16,18 @@ async def listdir(core, path, depth=None, include_deleted=False, search_criteria
         return await core.v1.api.execute('', 'fetchResources', param)
 
 
-async def root(core, path):
+async def exists(core, path):
+    try:
+        await metadata(core, path)
+        return True
+    except exceptions.ResourceNotFoundError:
+        return False
+
+
+async def metadata(core, path):
     response = await listdir(core, path, 0)
     if response.root is None:
-        raise exceptions.RemoteStorageException(path.absolute)
+        raise exceptions.ResourceNotFoundError(path.absolute)
     return response.root
 
 
@@ -81,7 +89,7 @@ async def move(core, *paths, destination=None):
 
 
 async def retrieve_remote_dir(core, directory):
-    resource = await root(core, directory)
+    resource = await metadata(core, directory)
     if not resource.isFolder:
         raise exceptions.RemoteStorageException('The destination path is not a directory', None, path=directory.absolute)
     return str(resource.cloudFolderInfo.uid)

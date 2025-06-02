@@ -108,7 +108,7 @@ class Volumes(BaseCommand):
             return response
         except CTERAException as error:
             logging.getLogger('cterasdk.edge').error("Volume deletion failed. %s", {'name': name})
-            raise CTERAException('Volume deletion falied', error)
+            raise CTERAException('Volume deletion failed', error)
 
     def delete_all(self):
         """ Delete all volumes """

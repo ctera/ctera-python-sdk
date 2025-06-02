@@ -1,5 +1,5 @@
 import asyncio
-from . import errors
+from .errors import XMLHandler, JSONHandler
 from .base import BaseClient, BaseResponse, run_threadsafe
 from .common import Serializers, Deserializers
 from . import async_requests, decorators
@@ -10,35 +10,34 @@ class AsyncClient(BaseClient):
     """Asynchronous Client"""
 
     @decorators.authenticated
-    async def get(self, path, *, on_response=None, **kwargs):
+    async def get(self, path, *, on_response=None, on_error=None, **kwargs):
         request = async_requests.GetRequest(self._builder(path), **kwargs)
-        return await self.async_request(request, on_response=on_response)
+        return await self.a_request(request, on_response=on_response, on_error=on_error)
 
     @decorators.authenticated
-    async def put(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
+    async def put(self, path, data, *, data_serializer=None, on_response=None, on_error=None, **kwargs):
         request = async_requests.PutRequest(self._builder(path), data=data_serializer(data), **kwargs)
-        return await self.async_request(request, on_response=on_response)
+        return await self.a_request(request, on_response=on_response, on_error=on_error)
 
     @decorators.authenticated
-    async def post(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
+    async def post(self, path, data, *, data_serializer=None, on_response=None, on_error=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=data_serializer(data), **kwargs)
-        return await self.async_request(request, on_response=on_response)
+        return await self.a_request(request, on_response=on_response, on_error=on_error)
 
     @decorators.authenticated
-    async def form_data(self, path, data, *, on_response=None, **kwargs):
+    async def form_data(self, path, data, *, on_response=None, on_error=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=Serializers.FormData(data), **kwargs)
-        return await self.async_request(request, on_response=on_response)
+        return await self.a_request(request, on_response=on_response, on_error=on_error)
 
     @decorators.authenticated
-    async def delete(self, path, *, on_response=None, **kwargs):
+    async def delete(self, path, *, on_response=None, on_error=None, **kwargs):
         request = async_requests.DeleteRequest(self._builder(path), **kwargs)
-        return await self.async_request(request, on_response=on_response)
+        return await self.a_request(request, on_response=on_response, on_error=on_error)
 
-    async def _request(self, request, *, on_response=None):
+    async def _request(self, request, *, on_response=None, on_error=None):
         on_response = on_response if on_response else AsyncResponse.new()
         response = await self._session.await_promise(self.join_headers(request), on_response=on_response)
-        error_message = await response.text() if response.status > 399 else None
-        return errors.accept(response, error_message)
+        return response if response.ok else await on_error.a_accept(response)
 
 
 class AsyncFolders(AsyncClient):
@@ -57,30 +56,34 @@ class AsyncWebDAV(AsyncClient):
     """WebDAV"""
 
     async def download(self, path, **kwargs):
-        return await super().get(path, **kwargs)
+        return await super().get(path, on_error=XMLHandler(), **kwargs)
 
+    @decorators.authenticated
     async def propfind(self, path, depth):
         request = async_requests.PropfindRequest(self._builder(path), headers={'depth': str(depth)})
-        response = await self.async_request(request)
+        response = await self.a_request(request, on_error=XMLHandler())
         return await response.dav()
 
+    @decorators.authenticated
     async def mkcol(self, path):
         request = async_requests.MkcolRequest(self._builder(path))
-        response = await self.async_request(request)
+        response = await self.a_request(request, on_error=XMLHandler())
         return await response.text()
 
+    @decorators.authenticated
     async def copy(self, source, destination, *, overwrite=False):
         request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
-        response = await self.async_request(request)
+        response = await self.a_request(request, on_error=XMLHandler())
         return await response.xml()
 
+    @decorators.authenticated
     async def move(self, source, destination, *, overwrite=False):
         request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
-        response = await self.async_request(request)
+        response = await self.a_request(request, on_error=XMLHandler())
         return await response.xml()
 
     async def delete(self, path):  # pylint: disable=arguments-differ
-        response = await super().delete(path)
+        response = await super().delete(path, on_error=XMLHandler())
         return await response.text()
 
     def _webdav_headers(self, destination, overwrite):
@@ -97,38 +100,38 @@ class AsyncJSON(AsyncClient):
         self.headers.persist_headers({'Content-Type': 'application/json'})
 
     async def get(self, path, **kwargs):
-        response = await super().get(path, **kwargs)
+        response = await super().get(path, on_error=JSONHandler(), **kwargs)
         return await response.json()
 
     async def put(self, path, data, **kwargs):
-        response = await super().put(path, data, data_serializer=Serializers.JSON, **kwargs)
+        response = await super().put(path, data, data_serializer=Serializers.JSON, on_error=JSONHandler(), **kwargs)
         return await response.json()
 
     async def post(self, path, data, **kwargs):
-        response = await super().post(path, data, data_serializer=Serializers.JSON, **kwargs)
+        response = await super().post(path, data, data_serializer=Serializers.JSON, on_error=JSONHandler(), **kwargs)
         return await response.json()
 
     async def delete(self, path, **kwargs):
-        response = await super().delete(path, **kwargs)
+        response = await super().delete(path, on_error=JSONHandler(), **kwargs)
         return await response.json()
 
 
 class AsyncXML(AsyncClient):
 
     async def get(self, path, **kwargs):
-        response = await super().get(path, **kwargs)
+        response = await super().get(path, on_error=XMLHandler(), **kwargs)
         return await response.xml()
 
     async def put(self, path, data, **kwargs):
-        response = await super().put(path, data, data_serializer=Serializers.XML, **kwargs)
+        response = await super().put(path, data, data_serializer=Serializers.XML, on_error=XMLHandler(), **kwargs)
         return await response.xml()
 
     async def post(self, path, data, **kwargs):
-        response = await super().post(path, data, data_serializer=Serializers.XML, **kwargs)
+        response = await super().post(path, data, data_serializer=Serializers.XML, on_error=XMLHandler(), **kwargs)
         return await response.xml()
 
     async def delete(self, path, **kwargs):
-        response = await super().delete(path, **kwargs)
+        response = await super().delete(path, on_error=XMLHandler(), **kwargs)
         return await response.xml()
 
 
@@ -167,7 +170,7 @@ class AsyncAPI(AsyncExtended):
 class AsyncResponse(BaseResponse):
     """Asynchronous Response Object"""
 
-    async def async_iter_content(self, chunk_size=None):
+    async def a_iter_content(self, chunk_size=None):
         async for chunk in self._response.content.iter_chunked(chunk_size if chunk_size else 5120):
             yield chunk
 
@@ -198,45 +201,44 @@ class Client(BaseClient):
     """Synchronous Client"""
 
     @decorators.authenticated
-    def handle(self, path, *, on_response=None, **kwargs):
+    def handle(self, path, *, on_response=None, on_error=None, **kwargs):
         request = async_requests.GetRequest(self._builder(path), **kwargs)
-        return self.request(request, on_response=on_response)
+        return self.request(request, on_response=on_response, on_error=on_error)
 
     @decorators.authenticated
-    def get(self, path, *, on_response=None, **kwargs):
+    def get(self, path, *, on_response=None, on_error=None, **kwargs):
         request = async_requests.GetRequest(self._builder(path), **kwargs)
-        return self.request(request, on_response=on_response)
+        return self.request(request, on_response=on_response, on_error=on_error)
 
     @decorators.authenticated
-    def put(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
+    def put(self, path, data, *, data_serializer=None, on_response=None, on_error=None, **kwargs):
         request = async_requests.PutRequest(self._builder(path), data=data_serializer(data), **kwargs)
-        return self.request(request, on_response=on_response)
+        return self.request(request, on_response=on_response, on_error=on_error)
 
     @decorators.authenticated
-    def post(self, path, data, *, data_serializer=None, on_response=None, **kwargs):
+    def post(self, path, data, *, data_serializer=None, on_response=None, on_error=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=data_serializer(data), **kwargs)
-        return self.request(request, on_response=on_response)
+        return self.request(request, on_response=on_response, on_error=on_error)
 
     @decorators.authenticated
-    def form_data(self, path, data, *, on_response=None, **kwargs):
+    def form_data(self, path, data, *, on_response=None, on_error=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=Serializers.FormData(data), **kwargs)
-        return self.request(request, on_response=on_response)
+        return self.request(request, on_response=on_response, on_error=on_error)
 
     @decorators.authenticated
-    def multipart(self, path, form, *, on_response=None, **kwargs):
+    def multipart(self, path, form, *, on_response=None, on_error=None, **kwargs):
         request = async_requests.PostRequest(self._builder(path), data=form.data, **kwargs)
-        return self.request(request, on_response=on_response)
+        return self.request(request, on_response=on_response, on_error=on_error)
 
     @decorators.authenticated
-    def delete(self, path, *, on_response=None, **kwargs):
+    def delete(self, path, *, on_response=None, on_error=None, **kwargs):
         request = async_requests.DeleteRequest(self._builder(path), **kwargs)
-        return self.request(request, on_response=on_response)
+        return self.request(request, on_response=on_response, on_error=on_error)
 
-    def _request(self, request, *, on_response=None):
+    def _request(self, request, *, on_response=None, on_error=None):
         on_response = on_response if on_response else SyncResponse.new()
         response = execute(self._session.await_promise, self.join_headers(request), on_response=on_response)
-        error_message = response.text() if response.status > 399 else None
-        return errors.accept(response, error_message)
+        return response if response.ok else on_error.accept(response)
 
     def close(self):  # pylint: disable=invalid-overridden-method
         return execute(super().close)
@@ -257,30 +259,34 @@ class Upload(Client):
 class WebDAV(Client):
 
     def download(self, path, **kwargs):
-        return super().handle(path, **kwargs)
+        return super().handle(path, on_error=XMLHandler(), **kwargs)
 
+    @decorators.authenticated
     def propfind(self, path, depth):
         request = async_requests.PropfindRequest(self._builder(path), headers={'depth': str(depth)})
-        response = self.request(request)
+        response = self.request(request, on_error=XMLHandler())
         return response.dav()
 
+    @decorators.authenticated
     def mkcol(self, path):
         request = async_requests.MkcolRequest(self._builder(path))
-        response = self.request(request)
+        response = self.request(request, on_error=XMLHandler())
         return response.text()
 
+    @decorators.authenticated
     def copy(self, source, destination, *, overwrite=False):
         request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
-        response = self.request(request)
+        response = self.request(request, on_error=XMLHandler())
         return response.xml()
 
+    @decorators.authenticated
     def move(self, source, destination, *, overwrite=False):
         request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
-        response = self.request(request)
+        response = self.request(request, on_error=XMLHandler())
         return response.xml()
 
     def delete(self, path):  # pylint: disable=arguments-differ
-        response = super().delete(path)
+        response = super().delete(path, on_error=XMLHandler())
         return response.text()
 
     def _webdav_headers(self, destination, overwrite):
@@ -298,23 +304,23 @@ class XML(Client):
         self._type = {'Content-Type': 'text/plain'}
 
     def get(self, path, **kwargs):
-        response = super().get(path, **kwargs)
+        response = super().get(path, on_error=XMLHandler(), **kwargs)
         return response.xml()
 
     def put(self, path, data, **kwargs):
-        response = super().put(path, data, data_serializer=Serializers.XML, headers=self._type, **kwargs)
+        response = super().put(path, data, data_serializer=Serializers.XML, headers=self._type, on_error=XMLHandler(), **kwargs)
         return response.xml()
 
     def post(self, path, data, **kwargs):
-        response = super().post(path, data, data_serializer=Serializers.XML, headers=self._type, **kwargs)
+        response = super().post(path, data, data_serializer=Serializers.XML, headers=self._type, on_error=XMLHandler(), **kwargs)
         return response.xml()
 
     def form_data(self, path, data, **kwargs):
-        response = super().form_data(path, data, **kwargs)
+        response = super().form_data(path, data, on_error=XMLHandler(), **kwargs)
         return response.xml()
 
     def delete(self, path, **kwargs):
-        response = super().delete(path, **kwargs)
+        response = super().delete(path, on_error=XMLHandler(), **kwargs)
         return response.xml()
 
 
@@ -322,19 +328,19 @@ class JSON(Client):
     """JSON Serializer and Deserializer"""
 
     def get(self, path, **kwargs):
-        response = super().get(path, **kwargs)
+        response = super().get(path, on_error=JSONHandler(), **kwargs)
         return response.json()
 
     def put(self, path, data, **kwargs):
-        response = super().put(path, data, data_serializer=Serializers.JSON, **kwargs)
+        response = super().put(path, data, data_serializer=Serializers.JSON, on_error=JSONHandler(), **kwargs)
         return response.json()
 
     def post(self, path, data, **kwargs):
-        response = super().post(path, data, data_serializer=Serializers.JSON, **kwargs)
+        response = super().post(path, data, data_serializer=Serializers.JSON, on_error=JSONHandler(), **kwargs)
         return response.json()
 
     def delete(self, path, **kwargs):
-        response = super().delete(path, **kwargs)
+        response = super().delete(path, on_error=JSONHandler(), **kwargs)
         return response.json()
 
 
@@ -380,7 +386,7 @@ class Migrate(JSON):
     """CTERA Migrate Service"""
 
     def login(self):
-        response = Client.get(self, '/auth/user')
+        response = Client.get(self, '/auth/user', on_error=JSONHandler())
         self.headers.persist_response_header(response, 'x-mt-x')
         return response.json()
 
@@ -403,7 +409,7 @@ class SyncResponse(AsyncResponse):
     def iter_content(self, chunk_size=None):
         while True:
             try:
-                yield execute(super().async_iter_content(chunk_size).__anext__)
+                yield execute(super().a_iter_content(chunk_size).__anext__)
             except StopAsyncIteration:
                 break
 

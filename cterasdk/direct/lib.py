@@ -9,7 +9,7 @@ from .exceptions import UnAuthorized, UnprocessableContent, BlocksNotFoundError,
     DownloadConnectionError, DecryptKeyError, DecryptBlockError, NotFoundError, DecompressBlockError, BlockValidationException, \
     BlockListConnectionError, DirectIOError
 
-from ..exceptions import ClientResponseException
+from ..exceptions import HTTPError
 
 
 logger = logging.getLogger('cterasdk.direct')
@@ -70,9 +70,9 @@ async def get_object(client, file_id, chunk):
         except IOError as error:
             error_message = 'io'
             exception = DownloadError(error, file_id, chunk)
-        except ClientResponseException as error:
+        except HTTPError as error:
             error_message = 'unknown'
-            exception = DownloadError(error.response, file_id, chunk)
+            exception = DownloadError(error.error, file_id, chunk)
 
         error_messages = {
             "connection": "Connection error",
@@ -243,12 +243,12 @@ async def get_chunks(api, credentials, file_id):
                 logger.error('Could not find blocks for file ID: %s.', file_id)
                 raise BlocksNotFoundError(file_id)
             return Metadata(file_id, response)
-        except ClientResponseException as error:
-            if error.response.status == 400:
+        except HTTPError as error:
+            if error.code == 400:
                 raise NotFoundError(file_id)
-            if error.response.status == 401:
+            if error.code == 401:
                 raise UnAuthorized(file_id)
-            if error.response.status == 422:
+            if error.code == 422:
                 raise UnprocessableContent(file_id)
             raise error
         except ConnectionError:

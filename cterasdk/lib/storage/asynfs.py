@@ -33,6 +33,6 @@ async def overwrite(p, handle):
         if isinstance(fd, bytes):
             await fd.write(handle)
         else:
-            async for chunk in handle.async_iter_content(chunk_size=8192):
+            async for chunk in handle.a_iter_content(chunk_size=8192):
                 await fd.write(chunk)
     return p.as_posix()

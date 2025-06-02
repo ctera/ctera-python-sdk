@@ -1,4 +1,5 @@
 from unittest import mock
+from http import HTTPStatus
 import munch
 from cterasdk.asynchronous.core import notifications
 from cterasdk.core.types import CloudFSFolderFindingHelper, UserAccount
@@ -95,11 +96,19 @@ class TestAsyncCoreNotifications(base_core.BaseAsyncCoreTest):
         self.assertEqual(ret, post_response)
 
     async def test_ancestors_error(self):
+        url = '/xyz'
         self._init_global_admin()
-        self._global_admin.v2.api.post = mock.AsyncMock(side_effect=exceptions.ClientResponseException(munch.Munch({})))
-        with self.assertRaises(exceptions.ClientResponseException) as error:
+        self._global_admin.v2.api.post = mock.AsyncMock(side_effect=exceptions.HTTPError(
+            HTTPStatus.FORBIDDEN,
+            munch.Munch(
+                dict(request=munch.Munch(
+                    dict(url=url)
+                ))
+            )
+        ))
+        with self.assertRaises(exceptions.HTTPError) as error:
             await notifications.Notifications(self._global_admin).ancestors(self._descendant)
-        self.assertEqual(error.exception.message, 'An error occurred while processing the HTTP request.')
+        self.assertEqual(error.exception.error.request.url, url)
 
     @staticmethod
     def _create_parameter(folder_ids=None, cursor=None, max_results=None, timeout=None):

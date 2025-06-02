@@ -1,6 +1,6 @@
 import logging
 import threading
-from . import async_requests
+from . import async_requests, errors
 from .settings import ClientSessionSettings, TraceSettings
 from ..common import utils
 
@@ -103,11 +103,13 @@ class BaseClient:
     def baseurl(self):
         return self._builder()
 
-    def request(self, request, *, on_response=None):
-        return self._request(request, on_response=on_response)
+    def request(self, request, *, on_response=None, on_error=None):
+        on_error = on_error if on_error else errors.DefaultHandler()
+        return self._request(request, on_response=on_response, on_error=on_error)
 
-    async def async_request(self, request, *, on_response=None):
-        return await self._request(request, on_response=on_response)
+    async def a_request(self, request, *, on_response=None, on_error=None):
+        on_error = on_error if on_error else errors.DefaultHandler()
+        return await self._request(request, on_response=on_response, on_error=on_error)
 
     async def close(self):
         await self._session.close()

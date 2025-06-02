@@ -182,7 +182,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
             volumes.Volumes(self._filer).delete(self._volume_1_name)
         self._filer.tasks.by_name.assert_called_once_with(' '.join(['Mounting', self._volume_1_name, 'file system']))
         self._filer.api.delete.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
-        self.assertEqual('Volume deletion falied', error.exception.message)
+        self.assertEqual('Volume deletion failed', error.exception.message)
 
     def test_delete_all_volume_success(self):
         delete_response = 'Success'

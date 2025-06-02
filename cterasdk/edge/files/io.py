@@ -2,6 +2,7 @@ import logging
 from ...cio.common import encode_request_parameter
 from ...cio import edge as fs
 from ...cio import exceptions
+from ...exceptions import HTTPError
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -23,8 +24,11 @@ def walk(edge, path):
 
 
 def exists(edge, path):
-    entries = edge.io.propfind(path.absolute, 0)
-    return fs.exists(entries, path.reference.as_posix())
+    try:
+        edge.io.propfind(path.absolute, 0)
+        return True
+    except HTTPError:
+        return False
 
 
 def mkdir(edge, path):

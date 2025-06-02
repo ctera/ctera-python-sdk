@@ -17,10 +17,18 @@ def listdir(core, path, depth=None, include_deleted=False, search_criteria=None,
         return core.api.execute('', 'fetchResources', param)
 
 
-def root(core, path):
+def exists(core, path):
+    try:
+        metadata(core, path)
+        return True
+    except exceptions.ResourceNotFoundError:
+        return False
+
+
+def metadata(core, path):
     response = listdir(core, path, 0)
     if response.root is None:
-        raise exceptions.RemoteStorageException(path.absolute)
+        raise exceptions.ResourceNotFoundError(path.absolute)
     return response.root
 
 
@@ -82,7 +90,7 @@ def move(core, *paths, destination=None):
 
 
 def retrieve_remote_dir(core, directory):
-    resource = root(core, directory)
+    resource = metadata(core, directory)
     if not resource.isFolder:
         raise exceptions.RemoteStorageException('The destination path is not a directory', None, path=directory.absolute)
     return str(resource.cloudFolderInfo.uid)
@@ -199,7 +207,7 @@ def add_share_recipients(core, path, recipients):
 
 
 def _obtain_valid_recipients(core, path, recipients):
-    resource_info = root(core, path)
+    resource_info = metadata(core, path)
     valid_recipients = []
     for recipient in filter(fs.valid_recipient, recipients):
         if not recipient.type == CollaboratorType.EXT:
@@ -213,7 +221,7 @@ def _obtain_valid_recipients(core, path, recipients):
 
 
 def unshare(core, path):
-    resource_info = root(core, path)
+    resource_info = metadata(core, path)
     with fs.unshare(resource_info, path) as param:
         return core.api.execute('', 'shareResource', param)
 

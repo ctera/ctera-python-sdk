@@ -29,7 +29,14 @@ def tracer():
         :param aiohttp.ClientSession session: Session.
         :param cterasdk.transcriber.postman.Command ctx: Command.
         """
-        ctx.request.request_headers({k: v for k, v in params.headers.items() if k in ['Cookie', 'Authorization', 'Content-Type']})
+        ctx.request.request_headers({k: v for k, v in params.headers.items() if k in [
+            'Cookie',
+            'Authorization',
+            'Content-Type',
+            'Depth',
+            'Overwrite',
+            'Destination'
+        ]})
 
     async def on_request_chunk_sent(session, ctx, params):
         # pylint: disable=unused-argument

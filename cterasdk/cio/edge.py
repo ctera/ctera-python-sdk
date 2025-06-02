@@ -58,10 +58,6 @@ def format_listdir_response(parent, response):
     return entries
 
 
-def exists(entries, path):
-    return True if len(entries) == 1 and fetch_reference(entries[0].href) == path else False
-
-
 @contextmanager
 def makedir(path):
     directory = path.absolute

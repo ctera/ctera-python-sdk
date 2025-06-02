@@ -1,9 +1,10 @@
 import asyncio
 import errno
+from http import HTTPStatus
 from unittest import mock
 import munch
 from cterasdk import ctera_direct
-from cterasdk import exceptions, Object
+from cterasdk import exceptions
 from . import base
 
 
@@ -35,8 +36,9 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_error_400(self):
-        self._direct._client._api.get.side_effect = exceptions.ClientResponseException(  # pylint: disable=protected-access
-            BaseDirectMetadata._create_error_object(400)
+        self._direct._client._api.get.side_effect = exceptions.HTTPError(  # pylint: disable=protected-access
+            HTTPStatus.BAD_REQUEST,
+            BaseDirectMetadata._create_error_object()
         )
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(ctera_direct.exceptions.NotFoundError) as error:
@@ -46,8 +48,9 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_error_401(self):
-        self._direct._client._api.get.side_effect = exceptions.ClientResponseException(  # pylint: disable=protected-access
-            BaseDirectMetadata._create_error_object(401)
+        self._direct._client._api.get.side_effect = exceptions.HTTPError(  # pylint: disable=protected-access
+            HTTPStatus.UNAUTHORIZED,
+            BaseDirectMetadata._create_error_object()
         )
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(ctera_direct.exceptions.UnAuthorized) as error:
@@ -57,8 +60,9 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_error_422(self):
-        self._direct._client._api.get.side_effect = exceptions.ClientResponseException(  # pylint: disable=protected-access
-            BaseDirectMetadata._create_error_object(422)
+        self._direct._client._api.get.side_effect = exceptions.HTTPError(  # pylint: disable=protected-access
+            HTTPStatus.UNPROCESSABLE_ENTITY,
+            BaseDirectMetadata._create_error_object()
         )
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(ctera_direct.exceptions.UnprocessableContent) as error:
@@ -68,13 +72,15 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_unknown_error(self):
-        self._direct._client._api.get.side_effect = exceptions.ClientResponseException(  # pylint: disable=protected-access
-            BaseDirectMetadata._create_error_object(500)
+        url = '/xyz'
+        self._direct._client._api.get.side_effect = exceptions.HTTPError(  # pylint: disable=protected-access
+            HTTPStatus.INTERNAL_SERVER_ERROR,
+            BaseDirectMetadata._create_error_object()
         )
         with mock.patch('asyncio.sleep'):
-            with self.assertRaises(exceptions.ClientResponseException) as error:
+            with self.assertRaises(exceptions.HTTPError) as error:
                 await self._direct.metadata(self._file_id)
-        self.assertEqual(error.exception.message, 'An error occurred while processing the HTTP request.')
+        self.assertEqual(error.exception.error.request.url, url)
 
     async def test_get_file_metadata_connection_error(self):
         self._direct._client._api.get.side_effect = ConnectionError  # pylint: disable=protected-access
@@ -97,8 +103,9 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self.assertEqual(error.exception.filename, self._file_id)
 
     @staticmethod
-    def _create_error_object(status):
-        param = Object()
-        param.response = Object()
-        param.response.status = status
-        return param
+    def _create_error_object():
+        return munch.Munch(
+            dict(request=munch.Munch(
+                dict(url='/xyz')
+            ))
+        )

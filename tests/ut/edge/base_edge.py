@@ -23,10 +23,12 @@ class BaseEdgeTest(base.BaseTest):
         self._filer.api.execute = mock.MagicMock(return_value=execute_response)
         self._filer.api.delete = mock.MagicMock(return_value=delete_response)
 
-    def _init_webdav(self, upload_response=None, mkcol_response=None, copy_response=None, move_response=None, delete_response=None):
+    def _init_webdav(self, upload_response=None, propfind_response=None, mkcol_response=None,
+                     copy_response=None, move_response=None, delete_response=None):
         self._filer._ctera_clients = mock.PropertyMock()  # pylint: disable=protected-access
         self._filer._ctera_clients.io = mock.PropertyMock()  # pylint: disable=protected-access
         self._filer._ctera_clients.io.upload = mock.PropertyMock(return_value=upload_response)  # pylint: disable=protected-access
+        self._filer._ctera_clients.io.propfind = mock.PropertyMock(return_value=propfind_response)  # pylint: disable=protected-access
         self._filer._ctera_clients.io.mkdir = mock.PropertyMock(return_value=mkcol_response)  # pylint: disable=protected-access
         self._filer._ctera_clients.io.move = mock.PropertyMock(return_value=move_response)  # pylint: disable=protected-access
         self._filer._ctera_clients.io.copy = mock.PropertyMock(return_value=copy_response)  # pylint: disable=protected-access
