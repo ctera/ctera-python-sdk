@@ -25,7 +25,7 @@ async def walk(edge, path):
 
 async def exists(edge, path):
     try:
-        entries = await edge.io.propfind(path.absolute, 0)
+        await edge.io.propfind(path.absolute, 0)
         return True
     except HTTPError as e:
         return False
