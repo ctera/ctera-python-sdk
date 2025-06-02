@@ -1,7 +1,7 @@
 import logging
 import time
 
-from ..exceptions import CTERAException, ClientResponseException
+from ..exceptions import CTERAException, HTTPError
 from .base_command import BaseCommand
 
 
@@ -36,7 +36,7 @@ class Startup(BaseCommand):
                 logging.getLogger('cterasdk.core').debug('Current server status. %s', {'status': current_status})
                 attempt = attempt + 1
                 time.sleep(seconds)
-            except (ConnectionError, TimeoutError, ClientResponseException) as e:
+            except (ConnectionError, TimeoutError, HTTPError) as e:
                 logging.getLogger('cterasdk.core').debug('Exception. %s', e.__dict__)
                 attempt = attempt + 1
                 time.sleep(seconds)

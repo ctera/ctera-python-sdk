@@ -4,6 +4,9 @@ import functools
 from ..exceptions import SessionExpired, NotLoggedIn
 
 
+logger = logging.getLogger('cterasdk.common')
+
+
 def authenticated(execute_request):
     @functools.wraps(execute_request)
     def authenticate_then_execute(self, *args, **kwargs):
@@ -11,8 +14,8 @@ def authenticated(execute_request):
             try:
                 return execute_request(self, *args, **kwargs)
             except SessionExpired:
-                logging.getLogger('cterasdk.common').error('Session expired.')
+                logger.error('Session expired.')
                 self.cookies.clear()
-        logging.getLogger('cterasdk.common').error('Not logged in.')
+        logger.error('Not logged in.')
         raise NotLoggedIn()
     return authenticate_then_execute

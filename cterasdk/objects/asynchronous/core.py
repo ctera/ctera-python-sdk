@@ -40,10 +40,6 @@ class IO:
         return self._upload.upload
 
     @property
-    def propfind(self):
-        return self._webdav.propfind
-
-    @property
     def download(self):
         return self._webdav.get
 

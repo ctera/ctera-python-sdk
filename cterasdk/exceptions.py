@@ -42,10 +42,19 @@ class NotLoggedIn(CTERAException):
         super().__init__('Not logged in.')
 
 
-class ClientResponseException(CTERAException):
+class HTTPError(CTERAException):
+    """
+    HTTP Error
 
-    def __init__(self, error_object):
-        super().__init__('An error occurred while processing the HTTP request.', error_object)
+    :ivar int code: Status code
+    :ivar str name: Reason
+    :ivar cterasdk.clients.errors.Error error: Error object
+    """
+    def __init__(self, status, error):
+        super().__init__(error.request.url)
+        self.code = status.value
+        self.name = status.name
+        self.error = error
 
 
 class NotificationsError(CTERAException):

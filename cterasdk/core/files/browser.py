@@ -73,6 +73,14 @@ class FileBrowser(BaseCommand):
         """
         return io.listdir(self._core, self.normalize(path), depth=depth, include_deleted=include_deleted)
 
+    def exists(self, path):
+        """
+        Check if item exists
+
+        :param str path: Path
+        """
+        return io.exists(self._core, self.normalize(path))
+
     def versions(self, path):
         """
         List snapshots of a file or directory

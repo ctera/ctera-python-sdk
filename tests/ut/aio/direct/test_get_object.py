@@ -1,9 +1,10 @@
 import asyncio
+from http import HTTPStatus
 import errno
 from unittest import mock
 import munch
 from cterasdk.direct.lib import get_object
-from cterasdk import exceptions, ctera_direct, Object
+from cterasdk import exceptions, ctera_direct
 from . import base
 
 
@@ -54,23 +55,26 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
 
     async def test_get_client_error(self):
         chunk = BaseDirectMetadata._create_chunk()
-        self._direct._client._client.get.side_effect = exceptions.ClientResponseException(  # pylint: disable=protected-access
-            self._create_error_object(500)
+        self._direct._client._client.get.side_effect = exceptions.HTTPError(  # pylint: disable=protected-access
+            HTTPStatus.INTERNAL_SERVER_ERROR,
+            BaseDirectMetadata._create_error_object(HTTPStatus.INTERNAL_SERVER_ERROR.value)
         )
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(ctera_direct.exceptions.DownloadError) as error:
                 await get_object(self._direct._client._client, self._file_id, chunk)  # pylint: disable=protected-access
         self.assertEqual(error.exception.errno, errno.EIO)
-        self.assertEqual(error.exception.strerror.status, 500)
+        self.assertEqual(error.exception.strerror.response.status, 500)
         self.assertEqual(error.exception.filename, self._file_id)
         self.assert_equal_objects(error.exception.block, BaseDirectMetadata._create_block_info(self._file_id, chunk))
 
     @staticmethod
     def _create_error_object(status):
-        param = Object()
-        param.response = Object()
-        param.response.status = status
-        return param
+        return munch.Munch(
+            dict(
+                request=munch.Munch(dict(url='/xyz')),
+                response=munch.Munch(dict(status=status))
+            )
+        )
 
     @staticmethod
     def _create_block_info(file_id, chunk):

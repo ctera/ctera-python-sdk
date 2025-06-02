@@ -13,7 +13,23 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path
         """
-        return await io.listdir(self._edge, path)
+        return await io.listdir(self._edge, self.normalize(path))
+
+    async def walk(self, path):
+        """
+        Walk Directory Contents
+
+        :param str path: Path to walk
+        """
+        return io.walk(self._edge, path)
+
+    async def exists(self, path):
+        """
+        Check if item exists
+
+        :param str path: Path
+        """
+        return await io.exists(self._edge, self.normalize(path))
 
     async def handle(self, path):
         """

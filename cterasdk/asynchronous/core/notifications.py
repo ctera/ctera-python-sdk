@@ -6,7 +6,7 @@ from .types import Event
 from .base_command import BaseCommand
 from ...common import Object
 from ...lib import CursorResponse
-from ...exceptions import ClientResponseException, NotificationsError
+from ...exceptions import HTTPError, NotificationsError
 
 
 class Notifications(BaseCommand):
@@ -81,7 +81,7 @@ class Notifications(BaseCommand):
         logging.getLogger('cterasdk.metadata.connector').debug('Getting ancestors. %s', {'guid': param.guid, 'folder_id': param.folder_id})
         try:
             return await self._core.v2.api.post('/metadata/ancestors', param)
-        except ClientResponseException:
+        except HTTPError:
             logging.getLogger('cterasdk.metadata.connector').error('Could not retrieve ancestors. %s',
                                                                    {'folder_id': param.folder_id, 'guid': param.guid})
             raise

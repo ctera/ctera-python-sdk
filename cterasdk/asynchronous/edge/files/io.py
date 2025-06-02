@@ -2,14 +2,33 @@ import logging
 from ....cio.common import encode_request_parameter
 from ....cio import edge as fs
 from ....cio import exceptions
+from ....exceptions import HTTPError
 
 
 logger = logging.getLogger('cterasdk.edge')
 
 
 async def listdir(edge, path):
-    with fs.listdir(path) as param:
-        return await edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
+    return fs.format_listdir_response(path.reference.as_posix(), await edge.io.propfind(path.absolute, 1))
+
+
+async def walk(edge, path):
+    paths = [fs.EdgePath.instance('/', path)]
+    while len(paths) > 0:
+        path = paths.pop(0)
+        entries = await listdir(edge, path)
+        for e in entries:
+            if e.is_dir:
+                paths.append(fs.EdgePath.instance('/', e))
+            yield e
+
+
+async def exists(edge, path):
+    try:
+        await edge.io.propfind(path.absolute, 0)
+        return True
+    except HTTPError:
+        return False
 
 
 async def mkdir(edge, path):

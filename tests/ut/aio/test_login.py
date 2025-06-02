@@ -1,4 +1,6 @@
 from unittest import mock
+from http import HTTPStatus
+import munch
 from cterasdk.common import Object
 from cterasdk import exceptions
 from tests.ut.aio import base_core
@@ -26,7 +28,14 @@ class TestAsyncCoreLogin(base_core.BaseAsyncCoreTest):
 
     async def test_login_failure(self):
         self._init_global_admin()
-        self._global_admin.v1.api.form_data = mock.AsyncMock(side_effect=exceptions.ClientResponseException(Object()))
+        self._global_admin.v1.api.form_data = mock.AsyncMock(side_effect=exceptions.HTTPError(
+            HTTPStatus.FORBIDDEN,
+            munch.Munch(
+                dict(request=munch.Munch(
+                    dict(url='/xyz')
+                ))
+            )
+        ))
         with self.assertRaises(exceptions.CTERAException):
             await self._global_admin.login(self._username, self._password)
 
