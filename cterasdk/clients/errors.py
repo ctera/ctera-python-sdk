@@ -1,8 +1,8 @@
+from abc import ABC, abstractmethod
 from http import HTTPStatus
 from ..exceptions import HTTPError
 from ..common import Object
 from ..convert import fromjsonstr, fromxmlstr
-from abc import ABC, abstractmethod
 
 
 class Error(Object):
@@ -122,7 +122,7 @@ def raise_error(status, error):
         HTTPStatus.INTERNAL_SERVER_ERROR: InternalServerError,
         HTTPStatus.BAD_GATEWAY: BadGateway,
         HTTPStatus.SERVICE_UNAVAILABLE: ServiceUnavailable,
-        HTTPStatus.GATEWAY_TIMEOUT: GatewayTimeout    
+        HTTPStatus.GATEWAY_TIMEOUT: GatewayTimeout
     }
     exception = exceptions.get(status, HTTPError)
     raise exception(error)

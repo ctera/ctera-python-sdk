@@ -117,7 +117,7 @@ def fromdavxmlstr(s):
 
     root.value = None
     root.parent = None
-    
+
     q = queue.Queue()
     q.put(root)
     while not q.empty():
@@ -168,7 +168,7 @@ def fromxmlstr(s):  # pylint: disable=too-many-branches,too-many-statements
 
     root.value = None
     root.parent = None
-    
+
     q = queue.Queue()
     q.put(root)
     while not q.empty():

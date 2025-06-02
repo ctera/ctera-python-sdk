@@ -27,7 +27,7 @@ async def exists(edge, path):
     try:
         await edge.io.propfind(path.absolute, 0)
         return True
-    except HTTPError as e:
+    except HTTPError:
         return False
 
 

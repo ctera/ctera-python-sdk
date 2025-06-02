@@ -1,6 +1,6 @@
-import munch
 from unittest import mock
 from http import HTTPStatus
+import munch
 from cterasdk.common import Object
 from cterasdk import exceptions
 from tests.ut.aio import base_core

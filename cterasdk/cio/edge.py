@@ -44,7 +44,7 @@ def format_listdir_response(parent, response):
     for e in response:
         path = fetch_reference(e.href)
         if parent != path:
-            is_dir = True if e.getcontenttype == 'httpd/unix-directory' else False
+            is_dir = e.getcontenttype == 'httpd/unix-directory'
             param = Object(
                 path=path,
                 name=Path(path).name,
@@ -54,7 +54,7 @@ def format_listdir_response(parent, response):
                 last_modified=datetime.strptime(e.getlastmodified, "%a, %d %b %Y %H:%M:%S GMT").isoformat(),
                 size=e.getcontentlength
             )
-            entries.append(param)    
+            entries.append(param)
     return entries
 
 
