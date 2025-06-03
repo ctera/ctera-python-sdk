@@ -86,11 +86,11 @@ class FileBrowser(BaseCommand):
         """
         return await io.versions(self._core, self.normalize(path))
 
-    async def walk(self, path, include_deleted=False):
+    async def walk(self, path=None, include_deleted=False):
         """
         Walk Directory Contents
 
-        :param str path: Path to walk
+        :param str,optional path: Path to walk, defaults to the root directory
         :param bool,optional include_deleted: Include deleted files, defaults to False
         """
         return io.walk(self._core, self._scope, path, include_deleted=include_deleted)

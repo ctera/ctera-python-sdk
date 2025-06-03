@@ -24,6 +24,8 @@ class EdgePath(common.BasePath):
             super().__init__(scope, reference.path)
         elif isinstance(reference, str):
             super().__init__(scope, reference)
+        elif reference is None:
+            super().__init__(scope, '')
         else:
             message = 'Path validation failed: ensure the path exists and is correctly formatted.'
             logger.error(message)
@@ -35,15 +37,15 @@ class EdgePath(common.BasePath):
 
 
 def fetch_reference(href):
-    namespace = 'localFiles/'
-    return unquote(href[href.index(namespace)+len(namespace):])
+    namespace = '/localFiles'
+    return unquote(href[href.index(namespace)+len(namespace) + 1:])
 
 
 def format_listdir_response(parent, response):
     entries = []
     for e in response:
         path = fetch_reference(e.href)
-        if parent != path:
+        if path and parent != path:
             is_dir = e.getcontenttype == 'httpd/unix-directory'
             param = Object(
                 path=path,

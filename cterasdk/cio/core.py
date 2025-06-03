@@ -26,6 +26,8 @@ class CorePath(common.BasePath):
             super().__init__(*CorePath._from_server_object(reference))
         elif isinstance(reference, str):
             super().__init__(scope, reference)
+        elif reference is None:
+            super().__init__(scope, '')
         else:
             message = 'Path validation failed: ensure the path exists and is correctly formatted.'
             logger.error(message)
