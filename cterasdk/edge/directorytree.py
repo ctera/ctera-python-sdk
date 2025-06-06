@@ -35,9 +35,9 @@ class DirectoryTree:
         node, parts = self._lookup(path)
         if not parts:
             if is_dir and not DirectoryTree._is_dir(node):
-                raise CTERAException('Expected to find a directory but found file', None, path=path)
+                raise CTERAException(f'Expected to find a directory but found file: {path}')
             if DirectoryTree._is_dir(node) and not is_dir:
-                raise CTERAException('Expected to find a file but found a directory', None, path=path)
+                raise CTERAException(f'Expected to find a file but found a directory: {path}')
             node.isIncluded = include
             node.children = None
         else:
@@ -53,7 +53,7 @@ class DirectoryTree:
                 node.isIncluded = False
                 node.children = None
         else:
-            raise CTERAException('Could not find directory path', None, path=path)
+            raise CTERAException(f'Could not find directory path: {path}')
 
     def select_all(self):
         self.root.isIncluded = True
@@ -66,7 +66,7 @@ class DirectoryTree:
     def _check_root_dir(self, path):
         parts = path.split('/')
         if self.root.name != parts[0]:
-            raise CTERAException('Invalid root directory', None, input=parts[0], should_start_with=self.root.name)
+            raise CTERAException(f'Invalid root directory: {parts[0]}.')
 
     def _lookup(self, path):
         parts = path.split('/')[1:]

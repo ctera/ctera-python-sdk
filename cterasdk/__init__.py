@@ -1,9 +1,9 @@
 # pylint: disable=wrong-import-position
 import cterasdk.settings  # noqa: E402, F401
+import cterasdk.exceptions  # noqa: E402, F401
 
 from .common import Object, PolicyRule  # noqa: E402, F401
 from .convert import fromjsonstr, tojsonstr, fromxmlstr, toxmlstr  # noqa: E402, F401
-from .exceptions import CTERAException  # noqa: E402, F401
 from .core import query  # noqa: E402, F401
 from .edge import types as edge_types  # noqa: E402, F401
 from .edge import enum as edge_enum  # noqa: E402, F401

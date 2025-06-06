@@ -38,7 +38,7 @@ class TestCoreReports(base_admin.BaseCoreTest):
     def test_generate_report_failure(self):
         with self.assertRaises(exceptions.InputError) as error:
             reports.Reports(self._global_admin).generate('Expected Failure')
-        self.assertEqual('Invalid report type', error.exception.message)
+        self.assertEqual('Invalid report type', error.exception.args[1])
 
     def _assert_called_once_with(self, report_name):
         self._global_admin.api.get.assert_called_once_with(f'/reports/{report_name}')

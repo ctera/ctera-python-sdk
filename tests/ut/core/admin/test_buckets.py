@@ -34,8 +34,9 @@ class TestCoreBuckets(base_admin.BaseCoreTest):
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exceptions.CTERAException) as error:
             buckets.Buckets(self._global_admin).get(self._bucket_name)
-        self._global_admin.api.get_multi.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
-        self.assertEqual('Could not find bucket', error.exception.message)
+        ref = f'/locations/{self._bucket_name}'
+        self._global_admin.api.get_multi.assert_called_once_with(ref, mock.ANY)
+        self.assertEqual(f'Object not found: {ref}', str(error.exception))
 
     def test_add_bucket(self):
         add_response = 'Success'
@@ -88,7 +89,7 @@ class TestCoreBuckets(base_admin.BaseCoreTest):
         self._global_admin.api.get = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
             buckets.Buckets(self._global_admin).modify(self._bucket_name)
-        self.assertEqual('Failed to get bucket', error.exception.message)
+        self.assertEqual(f'Bucket not found: /locations/{self._bucket_name}', str(error.exception))
 
     @staticmethod
     def _get_bucket_param(**kwargs):

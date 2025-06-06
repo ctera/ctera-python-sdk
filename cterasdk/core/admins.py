@@ -7,6 +7,9 @@ from ..common import union
 from . import query
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Administrators(BaseCommand):
     """
     Portal Global Administrators User Management APIs
@@ -19,7 +22,7 @@ class Administrators(BaseCommand):
         try:
             return self._core.api.get(ref)
         except CTERAException as error:
-            raise CTERAException('Failed to get the user', error)
+            raise CTERAException(f'Could not retrieve user: {ref}') from error
 
     def get(self, name, include=None):
         """
@@ -34,7 +37,7 @@ class Administrators(BaseCommand):
         include = ['/' + attr for attr in include]
         user_object = self._core.api.get_multi(baseurl, include)
         if user_object.name is None:
-            raise ObjectNotFoundException('Could not find user', baseurl, username=name)
+            raise ObjectNotFoundException(baseurl)
         return user_object
 
     def list_admins(self, include=None):
@@ -78,9 +81,9 @@ class Administrators(BaseCommand):
         if password_change:
             param.requirePasswordChangeOn = DateTimeUtils.get_expiration_date(password_change).strftime('%Y-%m-%d')
 
-        logging.getLogger('cterasdk.core').info('Creating a global administrator. %s', {'user': name})
+        logger.info('Creating a global administrator. %s', {'user': name})
         response = self._core.api.add('/administrators', param)
-        logging.getLogger('cterasdk.core').info('Global administrator created. %s', {'user': name, 'email': email, 'role': role})
+        logger.info('Global administrator created. %s', {'user': name, 'email': email, 'role': role})
 
         return response
 
@@ -117,13 +120,14 @@ class Administrators(BaseCommand):
         if comment is not None:
             user.comment = comment
 
+        ref = f'/administrators/{current_username}'
         try:
-            response = self._core.api.put('/administrators/' + current_username, user)
-            logging.getLogger('cterasdk.core').info("User modified. %s", {'username': user.name})
+            response = self._core.api.put(ref, user)
+            logger.info("User modified. %s", {'username': user.name})
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error("Failed to modify user.")
-            raise CTERAException('Failed to modify user', error)
+            logger.error('Could not modify user: %s', ref)
+            raise CTERAException(f'Could not modify user: {ref}') from error
 
     def delete(self, name):
         """
@@ -131,9 +135,8 @@ class Administrators(BaseCommand):
 
         :param str username: Global administrator username
         """
-        logging.getLogger('cterasdk.core').info('Deleting user. %s', {'user': name})
+        logger.info('Deleting user. %s', {'user': name})
         baseurl = f'/administrators/{name}'
         response = self._core.api.execute(baseurl, 'delete', True)
-        logging.getLogger('cterasdk.core').info('User deleted. %s', {'user': name})
-
+        logger.info('User deleted. %s', {'user': name})
         return response

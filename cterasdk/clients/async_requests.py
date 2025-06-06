@@ -56,7 +56,7 @@ class Session:
             logger.warning(error)
             raise ConnectionError(error)
         except asyncio.TimeoutError as error:
-            logger.warning('Request timed out while making an HTTP request.')
+            logger.debug('Request timed out while making an HTTP request.')
             raise TimeoutError(error)
 
     @property

@@ -22,7 +22,7 @@ class Firmware(BaseCommand):
         """
         upload_task_info = self._upload_firmware(file_path)
         if upload_task_info.rc != 0:
-            raise CTERAException(message='Failed to upload the new firmware', path=file_path)
+            raise CTERAException(f'Failed to upload firmware: {file_path}')
         self._wait_for_completion(upload_task_info.taskPointer)
         if reboot:
             self._edge.power.reboot(wait=wait_for_reboot)
@@ -45,7 +45,4 @@ class Firmware(BaseCommand):
             if not is_running:
                 if task_status.status == UploadTaskStatus.COMPLETE:
                     return
-                raise CTERAException(
-                    message=f'Filer failed to receive the new firmware - {task_status.statusMessage}',
-                    instance=task_status
-                )
+                raise CTERAException(f'An error occurred during firmware upgrade. Status: {task_status.statusMessage}')

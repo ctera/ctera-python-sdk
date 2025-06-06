@@ -1,6 +1,7 @@
 from .base_command import BaseCommand
 from ...common import union, Object
-from ...exceptions import ObjectNotFoundException, ContextError
+from ...exceptions import ObjectNotFoundException
+from ...exceptions.session import ContextError
 
 
 class Users(BaseCommand):
@@ -25,7 +26,7 @@ class Users(BaseCommand):
         include = ['/' + attr for attr in include]
         user_object = await self._core.v1.api.get_multi(baseurl, include)
         if user_object.name is None:
-            raise ObjectNotFoundException('Could not find user', baseurl, user_directory=user_account.directory, username=user_account.name)
+            raise ObjectNotFoundException(baseurl)
         return user_object
 
     async def generate_ticket(self, username, tenant):
@@ -36,7 +37,7 @@ class Users(BaseCommand):
         :param str portal: Tenant
         """
         if self.session().in_tenant_context():
-            raise ContextError('Context error: Browse the Global Administration to invoke this API.')
+            raise ContextError('Browse the Global Administration to invoke this API')
         param = Object()
         param.username = username
         param.portal = tenant

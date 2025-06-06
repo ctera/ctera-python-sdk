@@ -5,6 +5,9 @@ from .types import DeduplicationStatus
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Dedup(BaseCommand):
     """ Edge Filer Local Deduplication APIs """
 
@@ -19,7 +22,7 @@ class Dedup(BaseCommand):
         :param bool reboot: Reboot, defaults to ``False``
         :param bool,optional wait: Wait for reboot to complete, defaults to False
         """
-        logging.getLogger('cterasdk.edge').info("Enabling local deduplication.")
+        logger.info("Enabling local deduplication.")
         response = self._edge.api.put('/config/dedup/useLocalMapFileDedup', True)
         self._wait_for_reboot(reboot, wait)
         return response
@@ -31,7 +34,7 @@ class Dedup(BaseCommand):
         :param bool reboot: Reboot, defaults to ``False``
         :param bool,optional wait: Wait for reboot to complete, defaults to False
         """
-        logging.getLogger('cterasdk.edge').info("Disabling local deduplication.")
+        logger.info("Disabling local deduplication.")
         response = self._edge.api.put('/config/dedup/useLocalMapFileDedup', False)
         self._wait_for_reboot(reboot, wait)
         return response
@@ -59,7 +62,7 @@ class Regeneration(BaseCommand):
         """
         Run the regeneration process
         """
-        logging.getLogger('cterasdk.edge').info("Executing the dedup regeneration process.")
+        logger.info("Executing the dedup regeneration process.")
         return self._edge.api.execute('/config/dedup', 'regenerate', Object())
 
     def status(self):

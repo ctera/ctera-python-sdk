@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
-from ..exceptions import HTTPError
+from ..exceptions.transport import (
+    BadRequest, Unauthorized, Forbidden, NotFound, Unprocessable,
+    InternalServerError, BadGateway, ServiceUnavailable, GatewayTimeout, HTTPError
+)
 from ..common import Object
 from ..convert import fromjsonstr, fromxmlstr
 
@@ -56,60 +59,6 @@ class JSONHandler(ErrorHandler):
 
     def _accept(self, response, message):
         return Error(response, fromjsonstr(message) or message)
-
-
-class BadRequest(HTTPError):
-
-    def __init__(self, error):
-        super().__init__(HTTPStatus.BAD_REQUEST, error)
-
-
-class Unauthorized(HTTPError):
-
-    def __init__(self, error):
-        super().__init__(HTTPStatus.UNAUTHORIZED, error)
-
-
-class Forbidden(HTTPError):
-
-    def __init__(self, error):
-        super().__init__(HTTPStatus.FORBIDDEN, error)
-
-
-class NotFound(HTTPError):
-
-    def __init__(self, error):
-        super().__init__(HTTPStatus.NOT_FOUND, error)
-
-
-class Unprocessable(HTTPError):
-
-    def __init__(self, error):
-        super().__init__(HTTPStatus.UNPROCESSABLE_ENTITY, error)
-
-
-class InternalServerError(HTTPError):
-
-    def __init__(self, error):
-        super().__init__(HTTPStatus.INTERNAL_SERVER_ERROR, error)
-
-
-class BadGateway(HTTPError):
-
-    def __init__(self, error):
-        super().__init__(HTTPStatus.BAD_GATEWAY, error)
-
-
-class ServiceUnavailable(HTTPError):
-
-    def __init__(self, error):
-        super().__init__(HTTPStatus.SERVICE_UNAVAILABLE, error)
-
-
-class GatewayTimeout(HTTPError):
-
-    def __init__(self, error):
-        super().__init__(HTTPStatus.GATEWAY_TIMEOUT, error)
 
 
 def raise_error(status, error):

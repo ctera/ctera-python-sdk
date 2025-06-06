@@ -5,6 +5,9 @@ from ..common import Object
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class SSH(BaseCommand):
     """ Edge Filer SSH daemon APIs """
 
@@ -31,11 +34,11 @@ class SSH(BaseCommand):
 
         param.publicKey = public_key
 
-        logging.getLogger('cterasdk.edge').info("Enabling SSH daemon.")
+        logger.info("Enabling SSH daemon.")
         self._edge.api.execute('/config/device', 'startSSHD', param)
-        logging.getLogger('cterasdk.edge').info("SSH daemon enabled.")
+        logger.info("SSH daemon enabled.")
 
     def disable(self):
-        logging.getLogger('cterasdk.edge').info("Disabling SSH daemon.")
+        logger.info("Disabling SSH daemon.")
         self._edge.api.execute('/config/device', 'stopSSHD')
-        logging.getLogger('cterasdk.edge').info("SSH daemon disabled.")
+        logger.info("SSH daemon disabled.")

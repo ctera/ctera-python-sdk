@@ -66,7 +66,7 @@ class TestCoreZones(base_admin.BaseCoreTest):
                                                                       or_filter=False)
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual('Zone not found', error.exception.message)
+        self.assertEqual(f'Zone not found: {self._zone_name}', str(error.exception))
 
     def test_add_zone_default_args_success(self):
         execute_response = TestCoreZones._get_add_zone_response('OK')
@@ -86,7 +86,7 @@ class TestCoreZones(base_admin.BaseCoreTest):
         expected_param = self._get_zone_param()
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual('Zone creation failed', error.exception.message)
+        self.assertEqual(f'Zone creation failed: {str(execute_response)}', str(error.exception))
 
     def test_add_folders_success(self):
         self._init_global_admin()
@@ -138,7 +138,7 @@ class TestCoreZones(base_admin.BaseCoreTest):
         expected_param = self._get_add_folders_param()
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual('Failed adding folders to zone', error.exception.message)
+        self.assertEqual(f'Failed adding folders to zone: {self._zone_name}', str(error.exception))
 
     def test_add_devices_success(self):
         self._init_global_admin()
@@ -184,7 +184,7 @@ class TestCoreZones(base_admin.BaseCoreTest):
         expected_param = self._get_add_devices_param()
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual('Failed adding devices to zone', error.exception.message)
+        self.assertEqual(f"Failed adding devices: [{', '.join(self._device_names)}] to zone: {self._zone_name}", str(error.exception))
 
     def _get_add_devices_param(self):
         param = self._get_zone_param(zone_id=self._zone_id)

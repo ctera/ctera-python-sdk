@@ -26,7 +26,7 @@ class TestEdgeSupport(base_edge.BaseEdgeTest):
         self._init_filer()
         with self.assertRaises(exceptions.InputError) as error:
             support.Support(self._filer).set_debug_level(*['Expected Failure'])
-        self.assertEqual('Invalid debug level', error.exception.message)
+        self.assertEqual('Invalid debug level', error.exception.args[1])
 
     def test_get_support_report(self):
         cterasdk.settings.io.downloads = '~'

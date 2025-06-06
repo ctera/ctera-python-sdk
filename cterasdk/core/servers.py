@@ -7,6 +7,9 @@ from . import query
 from ..exceptions import CTERAException, ObjectNotFoundException
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Servers(BaseCommand):
     """
     Global Admin Servers APIs
@@ -19,10 +22,11 @@ class Servers(BaseCommand):
         self.tasks = Tasks(self._core)
 
     def _get_entire_object(self, server):
+        ref = f'/servers/{server}'
         try:
-            return self._core.api.get(f'/servers/{server}')
+            return self._core.api.get(ref)
         except CTERAException as error:
-            raise CTERAException('Failed to retrieve server', error)
+            raise CTERAException(f'Server not found: {ref}')
 
     def get(self, name, include=None):
         """
@@ -36,7 +40,7 @@ class Servers(BaseCommand):
         include = ['/' + attr for attr in include]
         server = self._core.api.get_multi(f'/servers/{name}', include)
         if server.name is None:
-            raise ObjectNotFoundException('Could not find server', f'/servers/{name}', name=name)
+            raise ObjectNotFoundException(f'/servers/{name}')
         return server
 
     def list_servers(self, include=None):
@@ -87,13 +91,14 @@ class Servers(BaseCommand):
         if allow_user_login is not None:
             server.allowUserLogin = allow_user_login
 
+        ref = f'/servers/{name}'
         try:
-            response = self._core.api.put(f'/servers/{name}', server)
-            logging.getLogger('cterasdk.core').info("Server modified. %s", {'server': name})
+            response = self._core.api.put(ref, server)
+            logger.info("Server modified. %s", {'server': name})
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error("Could not modify server.")
-            raise CTERAException('Could not modify server', error)
+            logger.error("Server modification failed: %s", ref)
+            raise CTERAException(f'Server modification failed: {ref}')
 
 
 class Tasks(BaseCommand):

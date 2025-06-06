@@ -87,7 +87,7 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._filer.api.add = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).add(self._username, self._password)
-        self.assertEqual('User creation failed', error.exception.message)
+        self.assertEqual(f'User creation failed: {self._username}', str(error.exception))
 
     def test_modify_user(self):
         get_response = Object()
@@ -105,11 +105,12 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self.assertEqual(ret, put_response)
 
     def test_modify_user_not_found(self):
+        ref = f'/config/auth/users/{self._username}'
         self._filer.api.get = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).modify(self._username)
-        self._filer.api.get.assert_called_once_with('/config/auth/users/' + self._username)
-        self.assertEqual('Failed to get the user', error.exception.message)
+        self._filer.api.get.assert_called_once_with(ref)
+        self.assertEqual(f'User not found: {ref}', str(error.exception))
 
     def test_modify_user_update_failed(self):
         get_response = Object()
@@ -119,12 +120,13 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).modify(self._username, self._password, self._full_name, self._email, self._uid)
 
-        self._filer.api.get.assert_called_once_with('/config/auth/users/' + self._username)
+        ref = f'/config/auth/users/{self._username}'
+        self._filer.api.get.assert_called_once_with(ref)
         self._filer.api.put.assert_called_once_with('/config/auth/users/' + self._username, mock.ANY)
         expected_param = self._get_user_object(self._full_name, self._email, self._uid)
         actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual('Failed to modify user', error.exception.message)
+        self.assertEqual(f'User modification failed: {ref}', str(error.exception))
 
     def test_delete_user(self):
         user = self._get_user_object()
@@ -140,7 +142,7 @@ class TestEdgeUsers(base_edge.BaseEdgeTest):
         self._filer.api.delete = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._filer).delete(self._username)
-        self.assertEqual('User deletion failed', error.exception.message)
+        self.assertEqual(f'User deletion failed: /config/auth/users/{self._username}', str(error.exception))
 
     def _get_user_object(self, full_name=None, email=None, uid=None):
         o = Object()

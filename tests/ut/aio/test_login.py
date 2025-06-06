@@ -28,7 +28,7 @@ class TestAsyncCoreLogin(base_core.BaseAsyncCoreTest):
 
     async def test_login_failure(self):
         self._init_global_admin()
-        self._global_admin.v1.api.form_data = mock.AsyncMock(side_effect=exceptions.HTTPError(
+        self._global_admin.v1.api.form_data = mock.AsyncMock(side_effect=exceptions.transport.HTTPError(
             HTTPStatus.FORBIDDEN,
             munch.Munch(
                 dict(request=munch.Munch(

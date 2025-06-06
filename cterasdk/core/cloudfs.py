@@ -10,6 +10,9 @@ from ..common import union, Object
 from ..exceptions import CTERAException, ObjectNotFoundException
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class CloudFS(BaseCommand):
     """
     CloudFS APIs
@@ -36,10 +39,11 @@ class FolderGroups(BaseCommand):
     default = ['name', 'owner']
 
     def _get_entire_object(self, name):
+        ref = f'/foldersGroups/{name}'
         try:
-            return self._core.api.get(f'/foldersGroups/{name}')
+            return self._core.api.get(ref)
         except CTERAException as error:
-            raise CTERAException('Failed to get folder group', error)
+            raise CTERAException(f'Folder group not found: {ref}') from error
 
     def get(self, name, include=None):
         """
@@ -52,7 +56,7 @@ class FolderGroups(BaseCommand):
         include = ['/' + attr for attr in include]
         folder_group = self._core.api.get_multi(f'/foldersGroups/{name}', include)
         if folder_group.name is None:
-            raise ObjectNotFoundException('Could not find folder group', f'/foldersGroups/{name}', name=name)
+            raise ObjectNotFoundException(f'/foldersGroups/{name}')
         return folder_group
 
     def all(self, include=None, user=None):
@@ -92,10 +96,10 @@ class FolderGroups(BaseCommand):
 
         try:
             response = self._core.api.execute('', 'createFolderGroup', param)
-            logging.getLogger('cterasdk.core').info('Folder group created. %s', {'name': name, 'owner': param.owner})
+            logger.info('Folder group created. %s', {'name': name, 'owner': param.owner})
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('Folder group creation failed. %s', {'name': name, 'owner': str(user)})
+            logger.error('Folder group creation failed. %s', {'name': name, 'owner': str(user)})
             raise error
 
     def modify(self, current_name, new_name):
@@ -109,13 +113,14 @@ class FolderGroups(BaseCommand):
         if new_name:
             param.name = new_name
 
+        ref = f'/foldersGroups/{current_name}'
         try:
-            response = self._core.api.put(f'/foldersGroups/{current_name}', param)
-            logging.getLogger('cterasdk.core').info('Folder group updated. %s', {'name': current_name})
+            response = self._core.api.put(ref, param)
+            logger.info('Folder group modified: %s', current_name)
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('Folder group update failed. %s', {'name': current_name})
-            raise error
+            logger.error('Folder group modification failed: %s', current_name)
+            raise CTERAException(f'Folder group modification failed: {ref}')
 
     def delete(self, name):
         """
@@ -124,9 +129,9 @@ class FolderGroups(BaseCommand):
         :param str name: Name of the folder group to remove
         """
 
-        logging.getLogger('cterasdk.core').info('Deleting folder group. %s', {'name': name})
+        logger.info('Deleting folder group. %s', {'name': name})
         self._core.api.execute('/foldersGroups/' + name, 'deleteGroup', True)
-        logging.getLogger('cterasdk.core').info('Folder group deleted. %s', {'name': name})
+        logger.info('Folder group deleted. %s', {'name': name})
 
 
 class CloudDrives(BaseCommand):
@@ -176,13 +181,13 @@ class CloudDrives(BaseCommand):
 
         try:
             response = self._core.api.execute('', 'addCloudDrive', param)
-            logging.getLogger('cterasdk.core').info(
+            logger.info(
                 'Cloud drive folder created. %s',
                 {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls}
             )
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error(
+            logger.error(
                 'Cloud drive folder creation failed. %s',
                 {'name': name, 'folder_group': group, 'owner': owner, 'win_acls': winacls}
             )
@@ -225,10 +230,10 @@ class CloudDrives(BaseCommand):
             param.extendedAttributes = xattrs
         try:
             response = self._core.api.put(f'/{param.baseObjectRef}', param)
-            logging.getLogger('cterasdk.core').info('Cloud drive folder updated. %s', {'name': current_name})
+            logger.info('Cloud drive folder updated. %s', {'name': current_name})
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('Cloud drive folder update failed. %s', {'name': current_name})
+            logger.error('Cloud drive folder update failed. %s', {'name': current_name})
             raise error
 
     def all(self, include=None, list_filter=ListFilter.NonDeleted, user=None):
@@ -274,8 +279,8 @@ class CloudDrives(BaseCommand):
         try:
             return next(iterator)
         except StopIteration:
-            logging.getLogger('cterasdk.core').info('Could not find cloud folder. %s', {'folder': name, 'owner': str(owner)})
-            raise CTERAException('Could not find cloud folder', None, folder=name, owner=str(owner))
+            logger.info('Could not find cloud folder. %s', {'folder': name, 'owner': str(owner)})
+            raise CTERAException(f"Unable to locate the Cloud Drive folder '{name}' owned by '{str(owner)}.")
 
     def delete(self, name, owner, *, permanently=False):
         """
@@ -286,13 +291,13 @@ class CloudDrives(BaseCommand):
         :param bool,optional permanently: Delete permanently
         """
         cloudfolder = self.find(name, owner, include=['uid', 'isDeleted'])
-        logging.getLogger('cterasdk.core').info('Deleting cloud drive folder. %s',
+        logger.info('Deleting cloud drive folder. %s',
                                                 {'name': name, 'owner': str(owner), 'permanently': permanently})
         if permanently:
             return self._core.api.execute(f'/objs/{cloudfolder.uid}', 'deleteFolderPermanently')
         if not cloudfolder.isDeleted:
             return self._core.api.execute(f'/objs/{cloudfolder.uid}', 'delete')
-        logging.getLogger('cterasdk.core').info('Cloud Drive folder was already deleted. %s', {'name': cloudfolder.name})
+        logger.info('Cloud Drive folder was already deleted. %s', {'name': cloudfolder.name})
         return None
 
     def recover(self, name, owner):
@@ -303,12 +308,12 @@ class CloudDrives(BaseCommand):
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the Cloud Drive Folder to delete
         """
         display_name = self._core.users.get(owner, ['displayName']).displayName
-        logging.getLogger('cterasdk.core').info('Recovering cloud drive folder. %s', {'name': name, 'owner': str(owner)})
+        logger.info('Recovering cloud drive folder. %s', {'name': name, 'owner': str(owner)})
         return self._core.files.undelete(f'Users/{display_name}/{name}')
 
     def setfacl(self, paths, acl, recursive=False):
         """
-        Changing the file or Folder ACLs
+        Changing the file or folder ACLs
 
         :param list(str) paths:  List of folder paths
         :param str acl: Access control list (ACL) represented as an SDDL String
@@ -322,8 +327,8 @@ class CloudDrives(BaseCommand):
         try:
             return self._core.api.execute('', 'setFoldersACL', param)
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('setFoldersACL failed. %s', {'error': error})
-            raise CTERAException('Failed to setFoldersACL', error)
+            logger.error('An error occurred attempting to update access control entries.')
+            raise CTERAException('ACL modification failed.') from error
 
     def setoacl(self, paths, owner_sid, recursive=False):
         """
@@ -341,8 +346,8 @@ class CloudDrives(BaseCommand):
         try:
             return self._core.api.execute('', 'setOwnerACL', param)
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('setOwnerACL failed. %s', {'error': error})
-            raise CTERAException('Failed to setOwnerACL', error)
+            logger.error('An error occurred attempting to update owner.')
+            raise CTERAException('Owner modification failed.') from error
 
 
 class Backups(BaseCommand):
@@ -370,13 +375,13 @@ class Backups(BaseCommand):
         param.enableBackupExtendedAttributes = xattr
         try:
             response = self._core.api.add('/backups', param)
-            logging.getLogger('cterasdk.core').info(
+            logger.info(
                 'Backup folder created. %s',
                 {'name': name, 'owner': param.owner, 'folder_group': group, 'xattr': xattr}
             )
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error(
+            logger.error(
                 'Backup folder creation failed. %s',
                 {'name': name, 'folder_group': group, 'owner': owner, 'xattr': xattr}
             )
@@ -404,10 +409,10 @@ class Backups(BaseCommand):
             param.enableBackupExtendedAttributes = xattr
         try:
             response = self._core.api.put(f'/backups/{current_name}', param)
-            logging.getLogger('cterasdk.core').info('Backup folder updated. %s', {'name': current_name})
+            logger.info('Backup folder updated. %s', {'name': current_name})
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('Backup folder update failed. %s', {'name': current_name})
+            logger.error('Backup folder update failed. %s', {'name': current_name})
             raise error
 
     def all(self, include=None, list_filter=ListFilter.NonDeleted, user=None):
@@ -438,9 +443,9 @@ class Backups(BaseCommand):
 
         :param str name: Name of the Backup Folder to delete
         """
-        logging.getLogger('cterasdk.core').info('Deleting Backup folder. %s', {'name': name})
+        logger.info('Deleting Backup folder. %s', {'name': name})
         response = self._core.api.execute(f'/backups/{name}', 'delete')
-        logging.getLogger('cterasdk.core').info('Backup folder deleted. %s', {'name': name})
+        logger.info('Backup folder deleted. %s', {'name': name})
         return response
 
 
@@ -461,17 +466,17 @@ class Zones(BaseCommand):
         query_filter = query.FilterBuilder('name').eq(name)
         param = query.QueryParamBuilder().include_classname().startFrom(0).countLimit(1).addFilter(query_filter).orFilter(False).build()
 
-        logging.getLogger('cterasdk.core').info('Retrieving zone. %s', {'name': name})
+        logger.info('Retrieving zone. %s', {'name': name})
 
         response = self._core.api.execute('', 'getZonesDisplayInfo', param)
 
         objects = response.objects
         if len(objects) < 1:
-            logging.getLogger('cterasdk.core').error('Zone not found. %s', {'name': name})
-            raise CTERAException('Zone not found', None, name=name)
+            logger.error('Zone not found. %s', {'name': name})
+            raise CTERAException(f'Zone not found: {name}')
 
         zone = objects[0]
-        logging.getLogger('cterasdk.core').info('Zone found. %s', {'name': name, 'id': zone.zoneId})
+        logger.info('Zone found. %s', {'name': name, 'id': zone.zoneId})
         return zone
 
     def all(self, filters=None):
@@ -512,14 +517,14 @@ class Zones(BaseCommand):
         """
         param = self._zone_param(name, policy_type, description)
 
-        logging.getLogger('cterasdk.core').info('Adding zone. %s', {'name': name})
+        logger.info('Adding zone. %s', {'name': name})
 
         response = self._core.api.execute('', 'addZone', param)
         try:
             self._process_response(response)
-            logging.getLogger('cterasdk.core').info('Zone added. %s', {'name': name})
+            logger.info('Zone added. %s', {'name': name})
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('Zone creation failed. %s', {'rc': response.rc})
+            logger.error('Zone creation failed. %s', {'rc': response.rc})
             raise error
 
     def delete(self, name):
@@ -529,10 +534,10 @@ class Zones(BaseCommand):
         :param str name: The name of the zone to delete
         """
         zone = self._core.cloudfs.zones.get(name)
-        logging.getLogger('cterasdk.core').info('Deleting zone. %s', {'zone': name})
+        logger.info('Deleting zone. %s', {'zone': name})
         response = self._core.api.execute('', 'deleteZones', [zone.zoneId])
         if response == 'ok':
-            logging.getLogger('cterasdk.core').info('Zone deleted. %s', {'zone': name})
+            logger.info('Zone deleted. %s', {'zone': name})
 
     def add_devices(self, name, device_names):
         """
@@ -550,13 +555,13 @@ class Zones(BaseCommand):
         for portal_device in portal_devices:
             param.delta.devicesDelta.added.append(portal_device.uid)
 
-        logging.getLogger('cterasdk.core').info('Adding devices to zone. %s', {'zone': info.name})
+        logger.info('Adding devices to zone. %s', {'zone': info.name})
 
         try:
             self._save(param)
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('Failed adding devices to zone.')
-            raise CTERAException('Failed adding devices to zone', error, zone=name, devices=device_names)
+            logger.error('Failed adding devices to zone.')
+            raise CTERAException(f"Failed adding devices: [{', '.join(device_names)}] to zone: {name}") from error
 
     def add_folders(self, name, folder_finding_helpers):
         """
@@ -586,13 +591,13 @@ class Zones(BaseCommand):
         try:
             self._save(param)
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('Failed adding folders to zone.')
-            raise CTERAException('Failed adding folders to zone', error, zone=name)
+            logger.error('Failed adding folders to zone.')
+            raise CTERAException(f'Failed adding folders to zone: {name}') from error
 
     def _zone_info(self, zid):
-        logging.getLogger('cterasdk.core').debug('Obtaining zone info. %s', {'id': zid})
+        logger.debug('Obtaining zone info. %s', {'id': zid})
         response = self._core.api.execute('', 'getZoneBasicInfo', zid)
-        logging.getLogger('cterasdk.core').debug('Obtained zone info. %s', {'id': zid})
+        logger.debug('Obtained zone info. %s', {'id': zid})
         return response
 
     def _find_folders(self, folder_finding_helpers):
@@ -616,21 +621,21 @@ class Zones(BaseCommand):
     def _save(self, param):
         zone_name = param.basicInfo.name
 
-        logging.getLogger('cterasdk.core').debug('Applying changes to zone. %s', {'zone': param.basicInfo.name})
+        logger.debug('Applying changes to zone. %s', {'zone': param.basicInfo.name})
 
         response = self._core.api.execute('', 'saveZone', param)
         try:
             self._process_response(response)
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('Failed applying changes to zone. %s', {'zone': zone_name, 'rc': response.rc})
+            logger.error('Failed applying changes to zone. %s', {'zone': zone_name, 'rc': response.rc})
             raise error
 
-        logging.getLogger('cterasdk.core').debug('Zone changes applied successfully. %s', {'zone': zone_name})
+        logger.debug('Zone changes applied successfully. %s', {'zone': zone_name})
 
     @staticmethod
     def _process_response(response):
         if response.rc != 'OK':
-            raise CTERAException('Zone creation failed', response)
+            raise CTERAException(f'Zone creation failed: {response}')
 
     @staticmethod
     def _zone_param(name, policy_type, description=None, zid=None):
@@ -693,9 +698,9 @@ class Exports(BaseCommand):
         param.description = description
         param.name = name
         param.cloudDrive = self._core.cloudfs.drives.find(drive_name, drive_owner, include=['baseObjectRef']).baseObjectRef
-        logging.getLogger('cterasdk.core').info('Adding Bucket. %s', {'name': name})
+        logger.info('Adding Bucket. %s', {'name': name})
         response = self._core.api.add('/buckets', param)
-        logging.getLogger('cterasdk.core').info('Bucket Added. %s', {'name': name})
+        logger.info('Bucket Added. %s', {'name': name})
         return response
 
     def modify(self, name, description):
@@ -708,9 +713,9 @@ class Exports(BaseCommand):
 
         bucket = self.get(name)
         bucket.description = description
-        logging.getLogger('cterasdk.core').info("Modifying Bucket. %s", {'name': name})
+        logger.info("Modifying Bucket. %s", {'name': name})
         response = self._core.api.put(f'/buckets/{name}', bucket)
-        logging.getLogger('cterasdk.core').info("Bucket modified. %s", {'name': name})
+        logger.info("Bucket modified. %s", {'name': name})
         return response
 
     def delete(self, name):
@@ -719,7 +724,7 @@ class Exports(BaseCommand):
 
         :param str name: Bucket name
         """
-        logging.getLogger('cterasdk.core').info('Deleting Bucket. %s', {'name': name})
+        logger.info('Deleting Bucket. %s', {'name': name})
         response = self._core.api.delete(f'/buckets/{name}')
-        logging.getLogger('cterasdk.core').info('Bucket deleted. %s', {'name': name})
+        logger.info('Bucket deleted. %s', {'name': name})
         return response

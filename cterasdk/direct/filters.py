@@ -1,5 +1,8 @@
 import logging
-from .exceptions import BlockInfo
+from ..exceptions.direct import BlockInfo
+
+
+logger = logging.getLogger('cterasdk.direct')
 
 
 def blocks(file, array):
@@ -7,7 +10,7 @@ def blocks(file, array):
     Filter Blocks by Block Number.
 
     :param list[cterasdk.direct.types.File] file: File Object.
-    :param list[cterasdk.direct.exceptions.BlockInfo] array: List of BlockInfo objects,
+    :param list[cterasdk.direct.types.BlockInfo] array: List of BlockInfo objects,
      or list of integers identifying the block position.
     :returns: List of Chunks.
     :rtype: list[cterasdk.direct.types.Chunk]
@@ -45,9 +48,9 @@ def span(file, byte_range):
 def validate_byte_range(file, byte_range):
     size = file.size
     if byte_range.start > size:
-        logging.getLogger('cterasdk.direct').error('Byte range start %s is greater than the file size %s.', byte_range.start, size)
+        logger.error('Byte range start %s is greater than the file size %s.', byte_range.start, size)
         return False
     if not byte_range.eof and byte_range.end >= size:
-        logging.getLogger('cterasdk.direct').debug('Byte range end is greater than file size.')
+        logger.debug('Byte range end is greater than file size.')
         byte_range.eof = True
     return True

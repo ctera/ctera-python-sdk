@@ -5,6 +5,9 @@ from .enum import License
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Licenses(BaseCommand):
     """ Edge Filer License Configuration APIs """
 
@@ -15,7 +18,7 @@ class Licenses(BaseCommand):
     @staticmethod
     def infer(ctera_license):
         if License.__dict__.get(ctera_license) is None:
-            logging.getLogger('cterasdk.edge').error('Invalid license type. %s', {'license': ctera_license})
+            logger.error('Invalid license type. %s', {'license': ctera_license})
             options = [v for k, v in License.__dict__.items() if not k.startswith('_')]
             raise InputError('Invalid license type', ctera_license, options)
 
@@ -30,11 +33,11 @@ class Licenses(BaseCommand):
         """
         inferred_license = Licenses.infer(ctera_license)
 
-        logging.getLogger('cterasdk.edge').info('Applying license. %s', {'license': ctera_license})
+        logger.info('Applying license. %s', {'license': ctera_license})
 
         self._edge.api.put('/config/device/activeLicenseType', inferred_license)
 
-        logging.getLogger('cterasdk.edge').info('License applied. %s', {'license': ctera_license})
+        logger.info('License applied. %s', {'license': ctera_license})
 
     def get(self):
         """
@@ -63,9 +66,9 @@ class LocalLicenses(BaseCommand):
 
         :param str code: License code
         """
-        logging.getLogger('cterasdk.edge').info('Installing license. %s', {'code': code})
+        logger.info('Installing license. %s', {'code': code})
         response = self._edge.api.add('/config/device/licenses', code)
-        logging.getLogger('cterasdk.edge').info("License added. %s", {'code': code})
+        logger.info("License added. %s", {'code': code})
         return response
 
     def clear(self):

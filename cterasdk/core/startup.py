@@ -1,8 +1,12 @@
 import logging
 import time
 
-from ..exceptions import CTERAException, HTTPError
+from ..exceptions import CTERAException
+from ..exceptions.transport import HTTPError
 from .base_command import BaseCommand
+
+
+logger = logging.getLogger('cterasdk.core')
 
 
 class Startup(BaseCommand):
@@ -27,16 +31,16 @@ class Startup(BaseCommand):
         while True:
             try:
                 if attempt >= retries:
-                    logging.getLogger('cterasdk.core').error('Timed out. Server did not start in a timely manner.')
+                    logger.error('Timed out. Server did not start in a timely manner.')
                     raise CTERAException('Timed out. Server did not start in a timely manner')
                 current_status = self.status()
                 if current_status == Startup.Started:
-                    logging.getLogger('cterasdk.core').info('Server started.')
+                    logger.info('Server started.')
                     break
-                logging.getLogger('cterasdk.core').debug('Current server status. %s', {'status': current_status})
+                logger.debug('Current server status. %s', {'status': current_status})
                 attempt = attempt + 1
                 time.sleep(seconds)
             except (ConnectionError, TimeoutError, HTTPError) as e:
-                logging.getLogger('cterasdk.core').debug('Exception. %s', e.__dict__)
+                logger.debug('Exception. %s', e.__dict__)
                 attempt = attempt + 1
                 time.sleep(seconds)

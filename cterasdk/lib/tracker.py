@@ -4,6 +4,9 @@ import time
 from ..exceptions import CTERAException
 
 
+logger = logging.getLogger('cterasdk.common')
+
+
 class ErrorStatus(CTERAException):
 
     def __init__(self, status):
@@ -28,38 +31,38 @@ class StatusTracker:
     def track(self):
         running = True
         while running:
-            logging.getLogger('cterasdk.common').debug('Retrieving status. %s', {'ref': self.ref, 'attempt': (self.attempt + 1)})
+            logger.debug('Retrieving status. %s', {'ref': self.ref, 'attempt': (self.attempt + 1)})
             self.status = self.CTERAHost.api.get(self.ref)
-            logging.getLogger('cterasdk.common').debug('Current status. %s', {'ref': self.ref, 'status': self.status})
+            logger.debug('Current status. %s', {'ref': self.ref, 'status': self.status})
             self.increment()
             running = self.running()
         return self.resolve()
 
     def resolve(self):
         if self.successful():
-            logging.getLogger('cterasdk.common').debug('Success. %s', {'ref': self.ref, 'status': self.status})
+            logger.debug('Success. %s', {'ref': self.ref, 'status': self.status})
             return self.status
 
         if self.failed():
-            logging.getLogger('cterasdk.common').debug('Failure. %s', {'ref': self.ref, 'status': self.status})
+            logger.debug('Failure. %s', {'ref': self.ref, 'status': self.status})
             raise ErrorStatus(self.status)
 
-        logging.getLogger('cterasdk.common').debug('Unknown status. %s', {'ref': self.ref, 'status': self.status})
-        raise CTERAException('Unknown status', None, status=self.status)
+        logger.debug('Unknown status. %s', {'ref': self.ref, 'status': self.status})
+        raise CTERAException(f'Unknown status: {self.status}')
 
     def successful(self):
         return self.status in self.success
 
     def running(self):
         if self.status in self.progress:
-            logging.getLogger('cterasdk.common').debug('In progress. %s', {'ref': self.ref, 'status': self.status})
+            logger.debug('In progress. %s', {'ref': self.ref, 'status': self.status})
             return True
 
         if self.status in self.transient:
-            logging.getLogger('cterasdk.common').debug('Transient state. %s', {'ref': self.ref, 'status': self.status})
+            logger.debug('Transient state. %s', {'ref': self.ref, 'status': self.status})
             return True
 
-        logging.getLogger('cterasdk.common').debug('End state. %s', {'ref': self.ref, 'status': self.status})
+        logger.debug('End state. %s', {'ref': self.ref, 'status': self.status})
         return False
 
     def failed(self):
@@ -68,10 +71,10 @@ class StatusTracker:
     def increment(self):
         self.attempt = self.attempt + 1
         if self.attempt >= self.retries:
-            logging.getLogger('cterasdk.common').error('Status did not meet success criteria. %s', {'ref': self.ref, 'status': self.status})
-            raise CTERAException('Timed out. Status did not meet success criteria', None, ref=self.ref, status=self.status)
+            logger.error('Success criteria for %s was not met. Status: %s', self.ref, self.status)
+            raise CTERAException(f'Success criteria for {self.ret} was not met. Status: {self.status}')
 
-        logging.getLogger('cterasdk.common').debug('Sleep. %s', {'seconds': self.seconds})
+        logger.debug('Sleeping for %s seconds.', self.seconds)
         time.sleep(self.seconds)
 
 

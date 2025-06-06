@@ -6,6 +6,9 @@ from ..common import Object, union
 from . import enum, query, decorator
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Portals(BaseCommand):
     """
     Global Admin Portals APIs
@@ -24,7 +27,7 @@ class Portals(BaseCommand):
         include = ['/' + attr for attr in include]
         tenant = self._core.api.get_multi('/portals/' + name, include)
         if tenant.name is None:
-            raise ObjectNotFoundException('Could not find tenant', f'/portals/{name}', name=name)
+            raise ObjectNotFoundException(f'/portals/{name}')
         return tenant
 
     def list_tenants(self, include=None, portal_type=None):
@@ -78,11 +81,11 @@ class Portals(BaseCommand):
         param.companyName = company
         param.comment = comment
 
-        logging.getLogger('cterasdk.core').info('Creating Team Portal. %s', {'name': name})
+        logger.info('Creating Team Portal. %s', {'name': name})
 
         response = self._core.api.add('/teamPortals', param)
 
-        logging.getLogger('cterasdk.core').info('Team Portal created. %s', {'name': name})
+        logger.info('Team Portal created. %s', {'name': name})
 
         return response
 
@@ -101,11 +104,11 @@ class Portals(BaseCommand):
 
         :param str name: Name of the tenant to delete
         """
-        logging.getLogger('cterasdk.core').info('Deleting Portal. %s', {'name': name})
+        logger.info('Deleting Portal. %s', {'name': name})
 
         response = self._core.api.execute('/teamPortals/' + name, 'delete')
 
-        logging.getLogger('cterasdk.core').info('Portal deleted. %s', {'name': name})
+        logger.info('Portal deleted. %s', {'name': name})
 
         return response
 
@@ -115,11 +118,11 @@ class Portals(BaseCommand):
 
         :param str name: Name of the tenant to undelete
         """
-        logging.getLogger('cterasdk.core').info('Recovering Portal. %s', {'name': name})
+        logger.info('Recovering Portal. %s', {'name': name})
 
         response = self._core.api.execute('/teamPortals/' + name, 'moveFromTrashcan')
 
-        logging.getLogger('cterasdk.core').info('Portal recovered. %s', {'name': name})
+        logger.info('Portal recovered. %s', {'name': name})
 
         return response
 
@@ -147,7 +150,7 @@ class Portals(BaseCommand):
         param = Object()
         param.objectId = None
         param.type = 'portals'
-        logging.getLogger('cterasdk.core').info('Applying provisioning changes.')
+        logger.info('Applying provisioning changes.')
         task = self._core.api.execute('', 'updatePortals', param)
         if wait:
             task = self._core.tasks.wait(task)

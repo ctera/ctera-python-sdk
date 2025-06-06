@@ -18,6 +18,7 @@ Subpackages
     cterasdk.core
     cterasdk.direct
     cterasdk.edge
+    cterasdk.exceptions
     cterasdk.lib
     cterasdk.objects
 

@@ -53,7 +53,7 @@ class TestCoreBackups(base_admin.BaseCoreTest):   # pylint: disable=too-many-pub
         expected_param = TestCoreBackups._get_backup_folder_object(self._name, self._group_ref, self._user_ref, True)
         actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(error_message, error.exception.message)
+        self.assertEqual(error_message, str(error.exception))
 
     def test_modify_backup_folder_success(self):
         put_response = 'Success'

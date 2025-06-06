@@ -30,7 +30,7 @@ class TestEdgeShell(base_edge.BaseEdgeTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             shell.Shell(self._filer).run_command(self._shell_command)
         self._filer.tasks.wait.assert_called_once_with(self._task_id)
-        self.assertEqual('An error occurred while executing task', error.exception.message)
+        self.assertEqual('An error occurred while executing task', str(error.exception))
 
     def _get_task_manager_result_object(self):
         task_param = Object()

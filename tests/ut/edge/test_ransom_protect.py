@@ -69,7 +69,7 @@ class TestEdgeRansomProtect(base_edge.BaseEdgeTest):
         self._init_filer(get_response=get_response)
         with self.assertRaises(exceptions.CTERAException) as error:
             ransom_protect.RansomProtect(self._filer).modify()
-        self.assertEqual('Ransom Protect must be enabled to modify its configuration', error.exception.message)
+        self.assertEqual('Ransom Protect must be enabled to modify its configuration', str(error.exception))
 
     @staticmethod
     def _get_ransom_protect_config(block_users=None, detection_threshold=None, detection_interval=None):

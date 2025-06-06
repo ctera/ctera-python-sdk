@@ -108,8 +108,9 @@ class Config(BaseCommand):
         if database:
             logger.info('Completed parsing the Edge Filer configuration. %s', {'firmware': database.firmware})
             return database
-        logger.error("Failed parsing the Edge Filer's configuration.")
-        raise CTERAException("Failed parsing the Edge Filer's configuration")
+        message = "An error occurred attempting to parse the Edge Filer's configuration."
+        logger.error(message)
+        raise CTERAException(message)
 
     def export(self, destination=None):
         """

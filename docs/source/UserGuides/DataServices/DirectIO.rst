@@ -168,7 +168,7 @@ Streamer API
             try:
                 await start_stream(file_id, offset)
                 success = True
-            except ctera_direct.exceptions.StreamError as error:
+            except cterasdk.exceptions.direct.StreamError as error:
                 await handle_error(error)
                 offset = error.offset  # Try to play from where stream was interrupted.
 

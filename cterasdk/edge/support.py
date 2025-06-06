@@ -6,6 +6,9 @@ from ..exceptions import InputError
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class DebugLevel:
     none = "none"
     error = "error"
@@ -59,8 +62,8 @@ class Support(BaseCommand):
     def get_support_report(self):
         """ Download support report """
         filename = 'Support-' + self._edge.host() + datetime.now().strftime('_%Y-%m-%dT%H_%M_%S') + '.zip'
-        logging.getLogger('cterasdk.edge').info('Downloading support report. %s', {'host': self._edge.host()})
+        logger.info('Downloading support report. %s', {'host': self._edge.host()})
         handle = self._edge.api.handle('/supportreport')
         filepath = synfs.write(commonfs.downloads(), filename, handle)
-        logging.getLogger('cterasdk.edge').info('Support report downloaded. %s', {'filepath': filepath})
+        logger.info('Support report downloaded. %s', {'filepath': filepath})
         return filepath

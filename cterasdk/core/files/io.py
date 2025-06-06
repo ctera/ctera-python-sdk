@@ -1,7 +1,7 @@
 import logging
 from ...cio.common import encode_request_parameter
 from ...cio import core as fs
-from ...cio import exceptions
+from ...exceptions.io import ResourceNotFoundError, RemoteStorageException, ResourceExistsError
 from ...core import query
 from ..enum import CollaboratorType
 from ...lib import FetchResourcesResponse
@@ -21,14 +21,14 @@ def exists(core, path):
     try:
         metadata(core, path)
         return True
-    except exceptions.ResourceNotFoundError:
+    except ResourceNotFoundError:
         return False
 
 
 def metadata(core, path):
     response = listdir(core, path, 0)
     if response.root is None:
-        raise exceptions.ResourceNotFoundError(path.absolute)
+        raise ResourceNotFoundError(path.absolute)
     return response.root
 
 
@@ -60,7 +60,7 @@ def makedirs(core, path):
         path = fs.CorePath.instance(path.scope, '/'.join(directories[:i]))
         try:
             mkdir(core, path)
-        except exceptions.ResourceExistsError:
+        except ResourceExistsError:
             logger.debug('Resource already exists: %s', path.reference.as_posix())
 
 
@@ -92,7 +92,7 @@ def move(core, *paths, destination=None):
 def retrieve_remote_dir(core, directory):
     resource = metadata(core, directory)
     if not resource.isFolder:
-        raise exceptions.RemoteStorageException('The destination path is not a directory', None, path=directory.absolute)
+        raise RemoteStorageException('The destination path is not a directory', path=directory.absolute)
     return str(resource.cloudFolderInfo.uid)
 
 

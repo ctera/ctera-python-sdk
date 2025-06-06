@@ -1,5 +1,5 @@
 import aiohttp
-from ...exceptions import SessionExpired
+from ...exceptions.session import SessionExpired
 
 
 def tracer():

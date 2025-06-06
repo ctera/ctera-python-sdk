@@ -4,6 +4,9 @@ from .enum import Mode
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class AFP(BaseCommand):
     """ Edge Filer AFP APIs """
 
@@ -15,8 +18,6 @@ class AFP(BaseCommand):
         """
         Disable AFP
         """
-        logging.getLogger('cterasdk.edge').info('Disabling AFP server.')
-
+        logger.info('Disabling AFP server.')
         self._edge.api.put('/config/fileservices/afp/mode', Mode.Disabled)
-
-        logging.getLogger('cterasdk.edge').info('AFP server disabled.')
+        logger.info('AFP server disabled.')

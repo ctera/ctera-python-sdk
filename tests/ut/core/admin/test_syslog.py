@@ -55,7 +55,7 @@ class TestCoreSyslog(base_admin.BaseCoreTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             syslog.Syslog(self._global_admin).modify()
         self._global_admin.api.get.assert_called_once_with('/settings/logsSettings/syslogConfig')
-        self.assertEqual('Syslog configuration cannot be modified when disabled', error.exception.message)
+        self.assertEqual('Syslog configuration cannot be modified when disabled', str(error.exception))
 
     def _default_settings(self):
         param = Object()

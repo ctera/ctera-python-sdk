@@ -4,6 +4,9 @@ from .enum import Mode
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class NTP(BaseCommand):
     """ Edge Filer NTP configuration """
 
@@ -20,17 +23,17 @@ class NTP(BaseCommand):
 
         :param list[str] servers: List of NTP servers address
         """
-        logging.getLogger('cterasdk.edge').info("Enabling time synchronization with ntp servers.")
+        logger.info("Enabling time synchronization with ntp servers.")
         self._edge.api.put('/config/time/NTPMode', Mode.Enabled)
-        logging.getLogger('cterasdk.edge').info("Time synchronization enabled.")
+        logger.info("Time synchronization enabled.")
 
         if servers:
-            logging.getLogger('cterasdk.edge').info("Updating time servers. %s", {'servers': servers})
+            logger.info("Updating time servers. %s", {'servers': servers})
             self._edge.api.put('/config/time/NTPServer', servers)
-            logging.getLogger('cterasdk.edge').info("Time servers updated. %s", {'servers': servers})
+            logger.info("Time servers updated. %s", {'servers': servers})
 
     def disable(self):
         """ Disable NTP """
-        logging.getLogger('cterasdk.edge').info("Disabling time synchronization with ntp servers.")
+        logger.info("Disabling time synchronization with ntp servers.")
         self._edge.api.put('/config/time/NTPMode', Mode.Disabled)
-        logging.getLogger('cterasdk.edge').info("Time synchronization disabled.")
+        logger.info("Time synchronization disabled.")

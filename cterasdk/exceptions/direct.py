@@ -66,27 +66,6 @@ class DecryptKeyError(DirectIOError):
         super().__init__(errno.EIO, 'Failed to decrypt secret key', filename)
 
 
-class BlockInfo:
-    """
-    Block Info
-
-    :ivar int file_id: File ID
-    :ivar int number: Block number
-    :ivar int offset: Block offset
-    :ivar int length: Block length
-    """
-    def __init__(self, file_id, chunk):
-        """
-        Initialize an Block Info Object for Direct IO Error Object.
-
-        :param cterasdk.direct.types.Chunk chunk: Chunk.
-        """
-        self.file_id = file_id
-        self.number = chunk.index
-        self.offset = chunk.offset
-        self.length = chunk.length
-
-
 class BlockError(DirectIOError):
     """
     Direct IO Block Error
@@ -132,3 +111,24 @@ class BlockValidationException(BlockError):
 
     def __init__(self, file_id, chunk):
         super().__init__(errno.EIO, 'Expected block length does not match decrypted and decompressed block length', file_id, chunk)
+
+
+class BlockInfo:
+    """
+    Block Info
+
+    :ivar int file_id: File ID
+    :ivar int number: Block number
+    :ivar int offset: Block offset
+    :ivar int length: Block length
+    """
+    def __init__(self, file_id, chunk):
+        """
+        Initialize an Block Info Object for Direct IO Error Object.
+
+        :param cterasdk.direct.types.Chunk chunk: Chunk.
+        """
+        self.file_id = file_id
+        self.number = chunk.index
+        self.offset = chunk.offset
+        self.length = chunk.length

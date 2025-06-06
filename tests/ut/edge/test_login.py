@@ -28,12 +28,12 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
         self._filer.api.form_data = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             login.Login(self._filer).login(self._username, self._password)
-        self.assertEqual(error_message, error.exception.message)
+        self.assertEqual(error_message, str(error.exception))
 
     def test_login_required(self):
-        with self.assertRaises(exceptions.NotLoggedIn) as error:
+        with self.assertRaises(exceptions.session.NotLoggedIn) as error:
             self._filer.api.get('/config/device')
-        self.assertEqual('Not logged in.', error.exception.message)
+        self.assertEqual('Authentication error: Not logged in.', str(error.exception))
 
     def test_logout_success_after_login_success(self):
         self._init_filer()
@@ -62,4 +62,4 @@ class TestEdgeLogin(base_edge.BaseEdgeTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             login.Login(self._filer).logout()
         self._filer.api.form_data.assert_called_once_with('/logout', {'foo': 'bar'})
-        self.assertEqual(error_message, error.exception.message)
+        self.assertEqual(error_message, str(error.exception))

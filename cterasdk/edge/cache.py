@@ -6,31 +6,34 @@ from .enum import OperationMode
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Cache(BaseCommand):
     """ Edge Filer cache configuration """
 
     def enable(self):
         """ Enable caching """
-        logging.getLogger('cterasdk.edge').info('Enabling caching.')
+        logger.info('Enabling caching.')
         self._set_operation_mode(OperationMode.CachingGateway)
 
     def disable(self):
         """ Disable caching """
-        logging.getLogger('cterasdk.edge').info('Disabling caching.')
+        logger.info('Disabling caching.')
         self._set_operation_mode(OperationMode.Disabled)
 
     def force_eviction(self):
         """ Force eviction """
-        logging.getLogger('cterasdk.edge').info("Starting file eviction.")
+        logger.info("Starting file eviction.")
         self._edge.api.execute("/config/cloudsync", "forceExecuteEvictor", None)
-        logging.getLogger('cterasdk.edge').info("Eviction started.")
+        logger.info("Eviction started.")
 
     def is_enabled(self):
         return self._edge.api.get('/config/cloudsync/cloudExtender/operationMode') == OperationMode.CachingGateway
 
     def _set_operation_mode(self, mode):
         self._edge.api.put('/config/cloudsync/cloudExtender/operationMode', mode)
-        logging.getLogger('cterasdk.edge').info('Device opreation mode changed. %s', {'mode': mode})
+        logger.info('Device opreation mode changed. %s', {'mode': mode})
 
     def pin(self, path):
         """
@@ -39,7 +42,7 @@ class Cache(BaseCommand):
         :param str path: Directory path
         """
         directory_tree = self._fetch_pinning_config()
-        logging.getLogger('cterasdk.edge').info('Pinning folder. %s', {'path': path})
+        logger.info('Pinning folder. %s', {'path': path})
         directory_tree.include_folder(path)
         self._update_pinning_config(directory_tree)
 
@@ -50,7 +53,7 @@ class Cache(BaseCommand):
         :param str path: Directory path
         """
         directory_tree = self._fetch_pinning_config()
-        logging.getLogger('cterasdk.edge').info('Excluding sub-folder. %s', {'path': path})
+        logger.info('Excluding sub-folder. %s', {'path': path})
         directory_tree.exclude_folder(path)
         self._update_pinning_config(directory_tree)
 
@@ -61,21 +64,21 @@ class Cache(BaseCommand):
         :param str path: Directory path
         """
         directory_tree = self._fetch_pinning_config()
-        logging.getLogger('cterasdk.edge').info('Removing pin from previously pinned folder. %s', {'path': path})
+        logger.info('Removing pin from previously pinned folder. %s', {'path': path})
         directory_tree.remove_selection(path)
         self._update_pinning_config(directory_tree)
 
     def pin_all(self):
         """ Pin all folders """
         directory_tree = self._fetch_pinning_config()
-        logging.getLogger('cterasdk.edge').info('Pinning all folders.')
+        logger.info('Pinning all folders.')
         directory_tree.select_all()
         self._update_pinning_config(directory_tree)
 
     def unpin_all(self):
         """ Remove all folder pins """
         directory_tree = self._fetch_pinning_config()
-        logging.getLogger('cterasdk.edge').info('Removing all folder pins.')
+        logger.info('Removing all folder pins.')
         directory_tree.unselect_all()
         self._update_pinning_config(directory_tree)
 
@@ -93,7 +96,7 @@ class Cache(BaseCommand):
         :param str path: Directory path
         """
         directory_tree = self._fetch_pinning_config()
-        logging.getLogger('cterasdk.edge').info('Recursively pinning folder and all subfolders. %s', {'path': path})
+        logger.info('Recursively pinning folder and all subfolders. %s', {'path': path})
         directory_tree.include_folder_recursive(path)
         self._update_pinning_config(directory_tree)
 
@@ -104,6 +107,6 @@ class Cache(BaseCommand):
         :param str path: Directory path
         """
         directory_tree = self._fetch_pinning_config()
-        logging.getLogger('cterasdk.edge').info('Recursively unpinning folder and all subfolders. %s', {'path': path})
+        logger.info('Recursively unpinning folder and all subfolders. %s', {'path': path})
         directory_tree.exclude_folder_recursive(path)
         self._update_pinning_config(directory_tree)

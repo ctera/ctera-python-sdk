@@ -1,5 +1,8 @@
 import logging
-from .exceptions import DirectIOAPIError, BlockError, StreamError
+from ..exceptions.direct import DirectIOAPIError, BlockError, StreamError
+
+
+logger = logging.getLogger('cterasdk.direct')
 
 
 class Streamer:
@@ -35,7 +38,7 @@ class Streamer:
             for download in self._downloads:
                 block = await download
                 fragment = block.fragment(self._byte_range)
-                logging.getLogger('cterasdk.direct').debug('Streamer Fragment. %s', {'offset': fragment.offset, 'length': fragment.length})
+                logger.debug('Streamer Fragment. %s', {'offset': fragment.offset, 'length': fragment.length})
                 yield fragment
                 self._offset = fragment.offset + fragment.length
         except DirectIOAPIError as error:

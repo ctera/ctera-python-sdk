@@ -7,6 +7,9 @@ from ..base_command import BaseCommand
 from . import io
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class FileBrowser(BaseCommand):
 
     def __init__(self, core):
@@ -278,6 +281,5 @@ class Backups(FileBrowser):
             destination = destination if destination is not None else f'{commonfs.downloads()}/{device}.xml'
             return self.download(f'backups/{device}/Device Configuration/db.xml', destination)
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('Failed downloading configuration file. %s',
-                                                     {'device': device, 'error': error.response.reason})
+            logger.error('Failed downloading configuration file. %s', {'device': device, 'error': error.response.reason})
             raise error

@@ -72,7 +72,7 @@ class TestCoreDirectoryServices(base_admin.BaseCoreTest):  # pylint: disable=too
         self._init_global_admin()
         with self.assertRaises(exceptions.CTERAException) as error:
             directoryservice.DirectoryService(self._global_admin).set_advanced_mapping(None)
-        self.assertEqual('Failed to apply mapping. Not connected to directory services.', error.exception.message)
+        self.assertEqual('Failed to apply mapping. Not connected to directory services.', str(error.exception))
 
     def test_set_advanced_mapping(self):
         put_response = 'Success'
@@ -123,16 +123,16 @@ class TestCoreDirectoryServices(base_admin.BaseCoreTest):  # pylint: disable=too
 
     def test_fetch_invalid_domain(self):
         self._init_global_admin(get_response=['invalid.domain'])
-        with self.assertRaises(exceptions.CTERAException) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             directoryservice.DirectoryService(self._global_admin).fetch(self._accounts)
-        self.assertEqual('Invalid domain', error.exception.message)
+        self.assertEqual(f'Invalid domain: {self._domain}', error.exception.args[1])
 
     def test_fetch_invalid_account_type(self):
         self._init_global_admin(get_response=[self._domain])
         bad_account = munch.Munch({'name': self._account_user_name, 'directory': self._domain, 'account_type': 'bad_type'})
-        with self.assertRaises(exceptions.CTERAException) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             directoryservice.DirectoryService(self._global_admin).fetch([bad_account])
-        self.assertEqual('Invalid account type', error.exception.message)
+        self.assertEqual(f'Invalid account type: {bad_account["account_type"]}', error.exception.args[1])
 
     def test_connect(self):
         mock_session = self.patch_call("cterasdk.objects.services.Management.session")
@@ -173,7 +173,7 @@ class TestCoreDirectoryServices(base_admin.BaseCoreTest):  # pylint: disable=too
         self._init_global_admin()
         with self.assertRaises(exceptions.CTERAException) as error:
             directoryservice.DirectoryService(self._global_admin).set_access_control(self._acl)
-        self.assertEqual('Failed to apply access control. Not connected to directory services.', error.exception.message)
+        self.assertEqual('Failed to apply access control. Not connected to directory services.', str(error.exception))
 
     def test_set_access_control_with_default(self):
         mock_search_users = self.patch_call("cterasdk.core.directoryservice.DirectoryService._search_users")
@@ -209,7 +209,7 @@ class TestCoreDirectoryServices(base_admin.BaseCoreTest):  # pylint: disable=too
             directoryservice.DirectoryService(self._global_admin)._search_users(self._domain,  # pylint: disable=protected-access
                                                                                 self._account_user_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
-        self.assertEqual('Could not find results that match your search criteria', error.exception.message)
+        self.assertEqual(f'Could not find user: {self._account_user_name}@{self._domain}', str(error.exception))
 
     def test_group_search_not_found(self):
         self._init_global_admin(execute_response=None)
@@ -217,7 +217,7 @@ class TestCoreDirectoryServices(base_admin.BaseCoreTest):  # pylint: disable=too
             directoryservice.DirectoryService(self._global_admin)._search_groups(self._domain,  # pylint: disable=protected-access
                                                                                  self._account_group_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
-        self.assertEqual('Could not find results that match your search criteria', error.exception.message)
+        self.assertEqual(f'Could not find group: {self._account_group_name}@{self._domain}', str(error.exception))
 
     def test_user_search_no_match(self):
         self._init_global_admin(execute_response=[munch.Munch({'name': 'random'})])
@@ -225,7 +225,7 @@ class TestCoreDirectoryServices(base_admin.BaseCoreTest):  # pylint: disable=too
             directoryservice.DirectoryService(self._global_admin)._search_users(self._domain,  # pylint: disable=protected-access
                                                                                 self._account_user_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
-        self.assertEqual('Search returned multiple results, but none matched your search criteria', error.exception.message)
+        self.assertEqual('Search returned multiple results, but none matched the specified criteria.', str(error.exception))
 
     def test_user_search_found(self):
         self._init_global_admin(execute_response=[munch.Munch({'name': self._account_user_name})])

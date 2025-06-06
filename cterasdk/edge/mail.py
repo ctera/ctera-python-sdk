@@ -4,6 +4,9 @@ from ..common import Object
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Mail(BaseCommand):
     """ Edge Filer Mail Server configuration APIs """
 
@@ -33,17 +36,17 @@ class Mail(BaseCommand):
         if settings.useTLS != use_tls:
             settings.useTLS = use_tls
 
-        logging.getLogger('cterasdk.edge').info('Enabling mail server.')
+        logger.info('Enabling mail server.')
 
         self._edge.api.put('/config/logging/alert', settings)
 
-        logging.getLogger('cterasdk.edge').info(
+        logger.info(
             'Updated mail server settings. %s',
             {'SMTPServer': smtp_server, 'port': port, 'username': username, 'useTLS': use_tls}
         )
 
     def disable(self):
         """ Disable e-mail delivery using a custom SMTP server """
-        logging.getLogger('cterasdk.edge').info('Disabling mail server.')
+        logger.info('Disabling mail server.')
         self._edge.api.put('/config/logging/alert/useCustomServer', False)
-        logging.getLogger('cterasdk.edge').info('Mail server disabled.')
+        logger.info('Mail server disabled.')

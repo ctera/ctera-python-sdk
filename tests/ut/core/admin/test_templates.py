@@ -45,7 +45,7 @@ class TestCoreTemplates(base_admin.BaseCoreTest):
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
-        self.assertEqual('Could not find template', error.exception.message)
+        self.assertEqual(f'Object not found: /deviceTemplates/{self._name}', str(error.exception))
 
     def test_list_templates_default_attrs(self):
         with mock.patch("cterasdk.core.templates.query.iterator") as query_iterator_mock:

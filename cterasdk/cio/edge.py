@@ -4,7 +4,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from ..common import Object
 from ..objects.uri import unquote
-from . import common, exceptions
+from . import common
+from ..exceptions.io import CTERAException, ResourceExistsError, RestrictedPathError
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -66,10 +67,10 @@ def makedir(path):
     logger.info('Creating directory: %s', path.absolute)
     try:
         yield path.absolute
-    except exceptions.CTERAException as error:
+    except CTERAException as error:
         try:
             accept_response(error.response.message.msg, directory)
-        except exceptions.ResourceExistsError:
+        except ResourceExistsError:
             logger.info('Directory already exists: %s', directory)
     logger.info('Directory created: %s', directory)
 
@@ -126,15 +127,15 @@ def upload(name, destination, fd):
 
 def accept_response(response, reference):
     error = {
-        "File exists": exceptions.ResourceExistsError(),
-        "Creating a folder in this location is forbidden": exceptions.RestrictedPathError(),
+        "File exists": ResourceExistsError(),
+        "Creating a folder in this location is forbidden": RestrictedPathError(),
     }.get(response, None)
     try:
         if error:
             raise error
-    except exceptions.ResourceExistsError as error:
+    except ResourceExistsError as error:
         logger.warning('Resource already exists: a file or folder with this name already exists. %s', {'path': reference})
         raise error
-    except exceptions.RestrictedPathError as error:
+    except RestrictedPathError as error:
         logger.error('Creating a folder in the specified location is forbidden. %s', {'name': reference})
         raise error

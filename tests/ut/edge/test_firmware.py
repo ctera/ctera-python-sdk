@@ -52,8 +52,7 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
             )
         )
         self._filer.api.get.assert_not_called()
-        self.assertEqual(error.exception.message, 'Failed to upload the new firmware')
-        self.assertEqual(error.exception.path, TestEdgeFirmware._file_path)
+        self.assertEqual(str(error.exception), f'Failed to upload firmware: {TestEdgeFirmware._file_path}')
 
     def test_upgrade_process_failed(self):
         self._init_filer(
@@ -70,7 +69,8 @@ class TestEdgeFirmware(base_edge.BaseEdgeTest):
             )
         )
         self._filer.api.get.assert_called_with(TestEdgeFirmware._task_pointer)
-        self.assertEqual(error.exception.message, 'Filer failed to receive the new firmware - Failure')
+        self.assertEqual(str(error.exception),
+                         f'An error occurred during firmware upgrade. Status: {TestEdgeFirmware._status_msg_failure}')
 
     @staticmethod
     def _get_upgrade_cmd_response(rc):

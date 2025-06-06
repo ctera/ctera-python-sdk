@@ -42,7 +42,7 @@ class TestCorePortals(base_admin.BaseCoreTest):
         self._init_global_admin(get_multi_response=self._get_portal_object(name=None))
         with self.assertRaises(exceptions.CTERAException) as error:
             portals.Portals(self._global_admin).get(self._name)
-        self.assertEqual('Could not find tenant', error.exception.message)
+        self.assertEqual(f'Object not found: /portals/{self._name}', str(error.exception))
 
     @staticmethod
     def _get_query_portals_response(execute_path, execute_name, execute_param):

@@ -101,9 +101,9 @@ class PrivateKey:
             if commonfs.exists(key):
                 return PrivateKey.from_file(key, password)
             return PrivateKey.from_string(key, password)
-        except ValueError as e:
+        except ValueError as error:
             logger.error('Failed loading private key.')
-            raise CTERAException('Failed loading private key', e, reason=str(e))
+            raise CTERAException('Failed loading private key.') from error
 
 
 class X509Certificate:
@@ -160,9 +160,9 @@ class X509Certificate:
             if commonfs.exists(cert):
                 return X509Certificate.from_file(cert)
             return X509Certificate.from_string(cert)
-        except ValueError as e:
+        except ValueError as error:
             logger.error('Failed loading certificate.')
-            raise CTERAException('Failed loading certificate', e, reason=str(e))
+            raise CTERAException('Failed loading certificate.') from error
 
     def __str__(self):
         return str(

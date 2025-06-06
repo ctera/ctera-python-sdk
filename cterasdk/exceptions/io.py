@@ -1,14 +1,21 @@
-from ..exceptions import CTERAException
+from . import CTERAException
 
 
 class RemoteStorageException(CTERAException):
-    """Base Exception for Remote File Storage"""
+    """
+    Base Exception for Remote File Storage
+
+    :ivar str path: Path
+    """
+    def __init__(self, message, path):
+        super().__init__(message)
+        self.path = path
 
 
 class ResourceNotFoundError(RemoteStorageException):
 
     def __init__(self, path):
-        super().__init__('Remote directory not found. Please verify the path and try again.', None, path=path)
+        super().__init__('Remote directory not found. Please verify the path and try again.', path)
 
 
 class ResourceExistsError(CTERAException):

@@ -5,6 +5,9 @@ from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class StorageClasses(BaseCommand):
     """ Portal Storage Classes APIs """
 
@@ -14,11 +17,11 @@ class StorageClasses(BaseCommand):
 
         :param str name: Name
         """
-        logging.getLogger('cterasdk.core').info("Adding storage class. %s", {'name': name})
+        logger.info("Adding storage class. %s", {'name': name})
         param = Object()
         param.name = name
         response = self._core.api.add('/storageClasses', param)
-        logging.getLogger('cterasdk.core').info("Storage class added. %s", {'name': name})
+        logger.info("Storage class added. %s", {'name': name})
         return response
 
     def all(self):
@@ -40,9 +43,10 @@ class StorageClasses(BaseCommand):
         :returns: Storage class
         :rtype: cterasdk.common.object.Object
         """
+        ref = f'/storageClasses/{name}'
         if not self._core.session().in_tenant_context():
-            return self._core.api.get(f'/storageClasses/{name}')
+            return self._core.api.get(ref)
         for storage_class in self.all():
             if storage_class.name == name:
                 return storage_class
-        raise CTERAException('Could not find storage class.', name=name)
+        raise CTERAException(f'Storage class not found: {ref}')

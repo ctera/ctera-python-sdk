@@ -5,6 +5,9 @@ from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Array(BaseCommand):
     """ Edge Filer Array APIs """
 
@@ -30,13 +33,14 @@ class Array(BaseCommand):
         param.members = [drive.name for drive in self._edge.drive.get_status()] if members is None else members
 
         try:
-            logging.getLogger('cterasdk.edge').info("Creating a storage array.")
-            response = self._edge.api.add("/config/storage/arrays", param)
-            logging.getLogger('cterasdk.edge').info("Storage array created.")
+            ref = "/config/storage/arrays"
+            logger.info("Creating a storage array.")
+            response = self._edge.api.add(ref, param)
+            logger.info("Storage array created: %s/%s", ref, array_name)
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.edge').error("Storage array creation failed.")
-            raise CTERAException("Storage array creation failed.", error)
+            logger.error(f"Storage array creation failed: %s", array_name)
+            raise CTERAException(f"Storage array creation failed: {array_name}") from error
 
     def delete(self, array_name):
         """
@@ -44,14 +48,15 @@ class Array(BaseCommand):
 
         :param str name: The name of the array to delete
         """
+        ref = f"/config/storage/arrays/{array_name}"
         try:
-            logging.getLogger('cterasdk.edge').info("Deleting a storage array.")
-            response = self._edge.api.delete("/config/storage/arrays/" + array_name)
-            logging.getLogger('cterasdk.edge').info("Storage array deleted. %s", {'array_name': array_name})
+            logger.info("Deleting a storage array.")
+            response = self._edge.api.delete(ref)
+            logger.info("Storage array deleted: %s", ref)
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.edge').error("Storage array deletion failed.")
-            raise CTERAException("Storage array deletion failed.", error)
+            logger.error("Storage array deletion failed: %s", ref)
+            raise CTERAException(f"Storage array deletion failed: {ref}") from error
 
     def delete_all(self):
         """

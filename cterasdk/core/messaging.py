@@ -4,6 +4,9 @@ from .base_command import BaseCommand
 from ..common import Object
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Messaging(BaseCommand):
     """
     Portal Messaging Service Management APIs
@@ -46,9 +49,9 @@ class Messaging(BaseCommand):
                     nodes.append(param)
             if len(nodes) in messaging_obj.globalStatus.validServerNumber:
                 response = self._core.api.put('microservices/messaging/currentNodes', nodes)
-                logging.getLogger('cterasdk.core').info('Nodes added to cluster successfully')
+                logger.info('Nodes added to cluster successfully')
                 return response
-            logging.getLogger('cterasdk.core').error('Wrong number of servers. expected:"1" or "3", %s', {'given': len(servers)})
+            logger.error('Wrong number of servers. expected:"1" or "3", %s', {'given': len(servers)})
         else:
-            logging.getLogger('cterasdk.core').error('Can not add new servers: %s', {messaging_obj.globalStatus.cantAddServersReason})
+            logger.error('Can not add new servers: %s', {messaging_obj.globalStatus.cantAddServersReason})
         return None

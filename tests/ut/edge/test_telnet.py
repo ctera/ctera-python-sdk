@@ -43,7 +43,7 @@ class TestEdgeTelnet(base_edge.BaseEdgeTest):
         actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self.assertEqual('Failed enabling telnet access', error.exception.message)
+        self.assertEqual(f'Failed to enable telnet. Reason: {execute_response}', str(error.exception))
 
     def test_disable_telnet(self):
         self._init_filer()

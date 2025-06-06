@@ -11,6 +11,9 @@ from .base_command import BaseCommand
 from .types import TCPService
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Services(BaseCommand):
     """ Edge Filer Cloud Services configuration APIs """
     _UNTRUSTED_CERTIFICATE_ERRORS = [
@@ -49,7 +52,7 @@ class Services(BaseCommand):
     def _before_connect_to_services(self, ctera_license, server):
         Services._validate_license(ctera_license)
         if self._edge.network.proxy.is_enabled():
-            logging.getLogger('cterasdk.edge').debug('Skipping TCP connection verification over port 995.')
+            logger.debug('Skipping TCP connection verification over port 995.')
         else:
             self._check_cttp_traffic(address=server)
 
@@ -119,9 +122,9 @@ class Services(BaseCommand):
         self._set_sso(False)
 
     def _set_sso(self, sso_state):
-        logging.getLogger('cterasdk.edge').info('%s single sign-on from CTERA Portal.', ('Enabling' if sso_state else 'Disabling'))
+        logger.info('%s single sign-on from CTERA Portal.', ('Enabling' if sso_state else 'Disabling'))
         self._edge.api.put('/config/gui/adminRemoteAccessSSO', sso_state)
-        logging.getLogger('cterasdk.edge').info('Single sign-on %s.', ('enabled' if sso_state else 'disabled'))
+        logger.info('Single sign-on %s.', ('enabled' if sso_state else 'disabled'))
 
     def _connect_to_services(self, param, ctera_license):
         task = self._attach(param)
@@ -131,11 +134,11 @@ class Services(BaseCommand):
                   [enum.ServicesConnectionState.ResolvingServers, enum.ServicesConnectionState.Connecting,
                    enum.ServicesConnectionState.Attaching, enum.ServicesConnectionState.Authenticating],
                   [], [enum.ServicesConnectionState.Disconnected], 20, 1)
-            logging.getLogger('cterasdk.edge').info("Connected to Portal.")
+            logger.info("Connected to Portal.")
         except TaskError as error:
             description = error.task.description
-            logging.getLogger('cterasdk.edge').error("Connection failed. Reason: %s", description)
-            raise CTERAException("Connection failed", None, reason=description)
+            logger.error("Connection failed. Reason: %s", description)
+            raise CTERAException(f"Connection failed. Reason: {description}")
         self._edge.licenses.apply(ctera_license)
 
     @staticmethod
@@ -143,13 +146,13 @@ class Services(BaseCommand):
         try:
             Licenses.infer(ctera_license)
         except InputError as error:
-            logging.getLogger('cterasdk.edge').error('Connection failed. Invalid license type. %s', {'license': ctera_license})
+            logger.error('Connection failed. Invalid license type. %s', {'license': ctera_license})
             raise error
 
     def _check_cttp_traffic(self, address, port=995):
         tcp_connect_result = self._edge.network.tcp_connect(TCPService(address, port))
         if not tcp_connect_result.is_open:
-            logging.getLogger('cterasdk.edge').error("Unable to establish connection over port %s", str(tcp_connect_result.port))
+            logger.error("Unable to establish connection over port %s", str(tcp_connect_result.port))
             raise ConnectionError(f'Unable to establish CTTP connection {tcp_connect_result.host}:{tcp_connect_result.port}')
 
     def _check_connection(self, server):
@@ -165,12 +168,12 @@ class Services(BaseCommand):
         try:
             if obj.result.hasWebSSO:
                 message = "Connection failed. You must activate this Edge Filer using an activation code."
-                logging.getLogger('cterasdk.edge').error(message)
+                logger.error(message)
                 raise CTERAException(message)
 
             if not obj.result.hasWebSSO and obj.rc == "connectOK":
                 return True
-            raise CTERAException("Connection failed", None, reason=obj.rc)
+            raise CTERAException(f"Connection failed. Reason: {obj.rc}")
         except AttributeError:
             pass
 
@@ -181,7 +184,7 @@ class Services(BaseCommand):
             if obj.rc in Services._UNTRUSTED_CERTIFICATE_ERRORS:
                 proceed = False
                 if cterasdk.settings.edge.syn.services.ssl == 'prompt':
-                    logging.getLogger('cterasdk.edge').warning(msg=obj.msg)
+                    logger.warning(msg=obj.msg)
                     proceed = ask(f"Connect {self._edge.host()} to {server}?")
                 if cterasdk.settings.edge.syn.services.ssl is False or proceed:
                     self._trust_cert[server] = True
@@ -191,6 +194,6 @@ class Services(BaseCommand):
         return False
 
     def _attach(self, param):
-        logging.getLogger('cterasdk.edge').info("Connecting to Portal. %s", {'server': param.server, 'user': param.user})
+        logger.info("Connecting to Portal. %s", {'server': param.server, 'user': param.user})
         obj = self._edge.api.execute("/status/services", "attachAndSave", param)
         return obj.id

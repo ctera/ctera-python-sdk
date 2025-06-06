@@ -2,6 +2,9 @@ import logging
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Timezone(BaseCommand):
     """ Edge Filer Timezone configuration """
 
@@ -19,8 +22,8 @@ class Timezone(BaseCommand):
 
         :param str timezone: New timezone to set
         """
-        logging.getLogger('cterasdk.edge').info("Updating timezone. %s", {'timezone': timezone})
+        logger.info("Updating timezone. %s", {'timezone': timezone})
 
         self._edge.api.put('/config/time/TimeZone', timezone)
 
-        logging.getLogger('cterasdk.edge').info("Timezone updated. %s", {'timezone': timezone})
+        logger.info("Timezone updated. %s", {'timezone': timezone})

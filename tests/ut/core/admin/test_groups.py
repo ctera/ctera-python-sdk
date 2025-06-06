@@ -43,13 +43,14 @@ class TestCoreGroups(base_admin.BaseCoreTest):
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exceptions.CTERAException) as error:
             groups.Groups(self._global_admin).get(self._local_group)
-        self._global_admin.api.get_multi.assert_called_once_with(f'/localGroups/{self._groupname}', mock.ANY)
+        ref = f'/localGroups/{self._groupname}'
+        self._global_admin.api.get_multi.assert_called_once_with(ref, mock.ANY)
         expected_include = ['/' + attr for attr in groups.Groups.default]
         actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
-        self.assertEqual('Could not find group', error.exception.message)
+        self.assertEqual(f'Object not found: {ref}', str(error.exception))
 
     def _get_group_object(self, **kwargs):
         group_object = Object()
@@ -102,8 +103,9 @@ class TestCoreGroups(base_admin.BaseCoreTest):
         self._global_admin.api.get = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
             groups.Groups(self._global_admin).modify(self._groupname)
-        self._global_admin.api.get.assert_called_once_with(f'/localGroups/{self._groupname}')
-        self.assertEqual('Failed to retrieve group', error.exception.message)
+        ref = f'/localGroups/{self._groupname}'
+        self._global_admin.api.get.assert_called_once_with(ref)
+        self.assertEqual(f'Group not found: {ref}', str(error.exception))
 
     def test_modify_failure(self):
         get_response = self._get_group_object(name=self._groupname)
@@ -111,11 +113,12 @@ class TestCoreGroups(base_admin.BaseCoreTest):
         self._global_admin.api.execute = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
             groups.Groups(self._global_admin).modify(self._groupname, self._new_groupname, self._description)
-        self._global_admin.api.execute.assert_called_once_with(f'/localGroups/{self._groupname}', 'updateGroup', mock.ANY)
+        ref = f'/localGroups/{self._groupname}'
+        self._global_admin.api.execute.assert_called_once_with(ref, 'updateGroup', mock.ANY)
         expected_param = self._get_update_group_object(name=self._new_groupname, description=self._description)
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual('Failed to modify group', error.exception.message)
+        self.assertEqual(f'Group modification failed: {ref}', str(error.exception))
 
     def _get_add_group_object(self, **kwargs):
         param = Object()

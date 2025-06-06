@@ -31,4 +31,4 @@ class TestCoreStartup(base_admin.BaseCoreTest):
         self._init_setup(get_response=get_response)
         with self.assertRaises(exceptions.CTERAException) as error:
             startup.Startup(self._global_admin).wait(retries=2, seconds=1)
-        self.assertEqual('Timed out. Server did not start in a timely manner', error.exception.message)
+        self.assertEqual('Timed out. Server did not start in a timely manner', str(error.exception))

@@ -2,6 +2,9 @@ import logging
 from abc import abstractmethod
 
 
+logger = logging.getLogger('cterasdk.common')
+
+
 class BaseIterator:
     """Abstract Iterator"""
 
@@ -22,7 +25,7 @@ class BaseIterator:
             self._objects.extend(page)
             if self._objects:
                 return self.object
-        logging.getLogger('cterasdk.common').debug('Stopping iteration.')
+        logger.debug('Stopping iteration.')
         raise StopIteration
 
     @property

@@ -1,8 +1,8 @@
 import logging
 from ...cio.common import encode_request_parameter
 from ...cio import edge as fs
-from ...cio import exceptions
-from ...exceptions import HTTPError
+from ...exceptions.transport import HTTPError
+from ...exceptions.io import RestrictedPathError
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -43,7 +43,7 @@ def makedirs(edge, path):
         path = fs.EdgePath(path.scope, '/'.join(directories[:i]))
         try:
             mkdir(edge, path)
-        except exceptions.RestrictedPathError:
+        except RestrictedPathError:
             logger.warning('Creating a folder in the specified location is forbidden: %s', path.reference.as_posix())
 
 
