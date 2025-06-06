@@ -3,6 +3,9 @@ import logging
 from abc import abstractmethod
 
 
+logger = logging.getLogger('cterasdk.common')
+
+
 class BaseAsyncIterator:
     """Abstract Asynchronous Iterator"""
 

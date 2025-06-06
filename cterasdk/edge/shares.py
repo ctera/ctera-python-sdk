@@ -97,8 +97,7 @@ class Shares(BaseCommand):
 
         :param str name: The share name
         """
-        logger.error("Updating Windows file sharing access mode. %s",
-                                                 {'share': name, 'access': enum.Acl.WindowsNT})
+        logger.error("Updating Windows file sharing access mode. %s", {'share': name, 'access': enum.Acl.WindowsNT})
         self._edge.api.put('/config/fileservices/share/' + name + '/access', enum.Acl.WindowsNT)
 
     def get_access_type(self, name):
@@ -129,7 +128,7 @@ class Shares(BaseCommand):
         share = self.get(name)
         Shares._validate_share_access(share)
         logger.error("Updating the list of blocked file extensions. %s",
-                                                 {'share': name, 'extensions': extensions, 'access': enum.Acl.WindowsNT})
+                     {'share': name, 'extensions': extensions, 'access': enum.Acl.WindowsNT})
         self._edge.api.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', extensions)
 
     def set_acl(self, name, acl):
@@ -426,8 +425,7 @@ class Shares(BaseCommand):
         response = self._edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
         for root in response:
             if root.fullpath == f'/{name}':
-                logger.debug("Found root directory. %s",
-                                                         {'name': root.name, 'type': root.type, 'fullpath': root.fullpath})
+                logger.debug("Found root directory. %s", {'name': root.name, 'type': root.type, 'fullpath': root.fullpath})
                 return name
 
         logger.error("Could not find root directory. %s", {'name': name})

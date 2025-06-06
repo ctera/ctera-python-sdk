@@ -1,6 +1,3 @@
-from ..convert import tojsonstr
-
-
 class CTERAException(Exception):
     """
     Base Exception.
@@ -44,7 +41,7 @@ class UserConsentError(CTERAException):
     """Console"""
 
 
-from . import (
+from . import (  # noqa: E402, F401
     backup,
     direct,
     io,

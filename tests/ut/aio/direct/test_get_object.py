@@ -4,7 +4,7 @@ import errno
 from unittest import mock
 import munch
 from cterasdk.direct.lib import get_object
-from cterasdk import exceptions, ctera_direct
+from cterasdk import exceptions
 from . import base
 
 

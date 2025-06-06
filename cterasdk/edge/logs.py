@@ -30,11 +30,9 @@ class Logs(BaseCommand):
         log_config.LogKeepPeriod = retention
         if min_severity:
             log_config.minSeverity = min_severity
-        logger.info('Updating log settings. %s',
-                                                {'retention': retention, 'min_severity': log_config.minSeverity})
+        logger.info('Updating log settings. %s', {'retention': retention, 'min_severity': log_config.minSeverity})
         self._edge.api.put('/config/logging/general', log_config)
-        logger.info('Log settings updated. %s',
-                                                {'retention': retention, 'min_severity': log_config.minSeverity})
+        logger.info('Log settings updated. %s', {'retention': retention, 'min_severity': log_config.minSeverity})
 
     def logs(self, topic, include=None, minSeverity=enum.Severity.INFO):
         """

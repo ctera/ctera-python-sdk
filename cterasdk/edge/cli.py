@@ -17,8 +17,8 @@ class CLI(BaseCommand):
         :return str: Response
         """
         logger.warning('Usage of the CLI module is discouraged. '
-                                                   'Review available modules to determine if there are existing ones that '
-                                                   'support this action.')
+                       'Review available modules to determine if there are existing ones that '
+                       'support this action.')
         logger.info("Executing CLI command. %s", {'cli_command': cli_command})
         response = self._edge.api.execute('/config/device', 'debugCmd', cli_command)
         logger.info("CLI command executed. %s", {'cli_command': cli_command})

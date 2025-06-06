@@ -129,7 +129,7 @@ class Plans(BaseCommand):
             return response
         except CTERAException as error:
             logger.error("Plan modification failed: %s", ref)
-            raise CTERAException(f'Plan modification failed: {ref}')
+            raise CTERAException(f'Plan modification failed: {ref}') from error
 
     @staticmethod
     def _assign_services(plan, services):

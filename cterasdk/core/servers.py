@@ -26,7 +26,7 @@ class Servers(BaseCommand):
         try:
             return self._core.api.get(ref)
         except CTERAException as error:
-            raise CTERAException(f'Server not found: {ref}')
+            raise CTERAException(f'Server not found: {ref}') from error
 
     def get(self, name, include=None):
         """
@@ -98,7 +98,7 @@ class Servers(BaseCommand):
             return response
         except CTERAException as error:
             logger.error("Server modification failed: %s", ref)
-            raise CTERAException(f'Server modification failed: {ref}')
+            raise CTERAException(f'Server modification failed: {ref}') from error
 
 
 class Tasks(BaseCommand):

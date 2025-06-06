@@ -166,15 +166,13 @@ class Volumes(BaseCommand):
     def _volume_size(size, device_name, device_size):
         if size is not None:
             if size > device_size:
-                logger.error('You cannot exceed the available storage capacity. %s',
-                                                         {'size': size, 'free_size': device_size})
+                logger.error('You cannot exceed the available storage capacity. %s', {'size': size, 'free_size': device_size})
                 raise InputError("You cannot exceed the available storage capacity", size, device_size)
             return size
 
         if device_size > 0:
             logger.info('You did not specify a volume size.')
-            logger.info('Allocating available storage capacity. %s',
-                                                    {'name': device_name, 'free_size': device_size})
+            logger.info('Allocating available storage capacity. %s', {'name': device_name, 'free_size': device_size})
             return device_size
 
         logger.error('Insufficient storage space. %s', {'name': device_name})

@@ -151,7 +151,7 @@ class Users(BaseCommand):
             return response
         except CTERAException as error:
             logger.error('User modification failed: %s', ref)
-            raise CTERAException(f'User modification failed: {ref}')
+            raise CTERAException(f'User modification failed: {ref}') from error
 
     def apply_changes(self, wait=False):
         """

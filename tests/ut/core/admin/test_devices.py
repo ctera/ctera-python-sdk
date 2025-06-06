@@ -44,7 +44,7 @@ class TestCoreDevices(base_admin.BaseCoreTest):
         self._init_global_admin(get_multi_response=o)
         with self.assertRaises(exceptions.CTERAException) as error:
             devices.Devices(self._global_admin).device(o.name)
-        self.assertEqual(f'Object not found: /portals/None/devices/None', str(error.exception))
+        self.assertEqual('Object not found: /portals/None/devices/None', str(error.exception))
 
     def test_filers_no_device_types(self):
         self._test_filers(None, enum.DeviceType.Gateways)

@@ -120,7 +120,7 @@ class FolderGroups(BaseCommand):
             return response
         except CTERAException as error:
             logger.error('Folder group modification failed: %s', current_name)
-            raise CTERAException(f'Folder group modification failed: {ref}')
+            raise CTERAException(f'Folder group modification failed: {ref}') from error
 
     def delete(self, name):
         """
@@ -291,8 +291,7 @@ class CloudDrives(BaseCommand):
         :param bool,optional permanently: Delete permanently
         """
         cloudfolder = self.find(name, owner, include=['uid', 'isDeleted'])
-        logger.info('Deleting cloud drive folder. %s',
-                                                {'name': name, 'owner': str(owner), 'permanently': permanently})
+        logger.info('Deleting cloud drive folder. %s', {'name': name, 'owner': str(owner), 'permanently': permanently})
         if permanently:
             return self._core.api.execute(f'/objs/{cloudfolder.uid}', 'deleteFolderPermanently')
         if not cloudfolder.isDeleted:

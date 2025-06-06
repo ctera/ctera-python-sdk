@@ -55,11 +55,9 @@ class Buckets(BaseCommand):
         param.dedicated = bool(dedicated_to)
         param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
 
-        logger.info('Adding bucket. %s',
-                                                {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
+        logger.info('Adding bucket. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
         response = self._core.api.add('/locations', param)
-        logger.info('Bucket added. %s',
-                                                {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
+        logger.info('Bucket added. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
         return response
 
     def modify(self, current_name, new_name=None, read_only=None, dedicated_to=None, verify_ssl=None):

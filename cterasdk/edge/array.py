@@ -39,7 +39,7 @@ class Array(BaseCommand):
             logger.info("Storage array created: %s/%s", ref, array_name)
             return response
         except CTERAException as error:
-            logger.error(f"Storage array creation failed: %s", array_name)
+            logger.error("Storage array creation failed: %s", array_name)
             raise CTERAException(f"Storage array creation failed: {array_name}") from error
 
     def delete(self, array_name):

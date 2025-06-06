@@ -181,7 +181,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             volumes.Volumes(self._filer).delete(self._volume_1_name)
         self._filer.tasks.by_name.assert_called_once_with(' '.join(['Mounting', self._volume_1_name, 'file system']))
-        ref  = f'/config/storage/volumes/{self._volume_1_name}'
+        ref = f'/config/storage/volumes/{self._volume_1_name}'
         self._filer.api.delete.assert_called_once_with(ref)
         self.assertEqual(f'Volume deletion failed: {ref}', str(error.exception))
 
