@@ -91,7 +91,7 @@ async def move(core, *paths, destination=None):
 async def retrieve_remote_dir(core, directory):
     resource = await metadata(core, directory)
     if not resource.isFolder:
-        raise RemoteStorageException('The destination path is not a directory', None, path=directory.absolute)
+        raise RemoteStorageException('The destination path is not a directory', path=directory.absolute)
     return str(resource.cloudFolderInfo.uid)
 
 

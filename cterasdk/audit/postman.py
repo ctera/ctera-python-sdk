@@ -63,7 +63,7 @@ class Request(Object):
         self.header = [Header(k, v) for k, v in d.items()]
 
     def request_body(self, data):
-        self.body = data
+        self.body = data  # pylint: disable=attribute-defined-outside-init
 
 
 class Header(Object):
