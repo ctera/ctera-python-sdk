@@ -45,6 +45,7 @@ class UserConsentError(CTERAException):
 
 
 from . import (
+    backup,
     direct,
     io,
     notifications,
