@@ -1,4 +1,4 @@
-from . import CTERAException
+from .base import CTERAException
 
 
 class RemoteStorageException(CTERAException):

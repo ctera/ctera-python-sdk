@@ -290,7 +290,7 @@ class Shares(BaseCommand):
             self._edge.api.delete(ref)
             logger.info("Share deleted: %s", ref)
         except Exception as error:
-            logger.error(f"Share deletion failed: {ref}")
+            logger.error("Share deletion failed: %s", ref)
             raise CTERAException(f'Share deletion failed: {ref}') from error
 
     def get_trusted_nfs_clients(self, name):

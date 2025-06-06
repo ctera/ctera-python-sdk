@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from . import CTERAException
+from .base import CTERAException
 
 
 class HTTPError(CTERAException):

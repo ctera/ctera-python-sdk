@@ -42,7 +42,7 @@ class SMB(BaseCommand):
             self._edge.api.put('/config/fileservices/cifs/packetSigning', packet_signing)
             logger.info('SMB packet signing configuration updated: %s', packet_signing)
         except CTERAException as error:
-            logger.error(f'Invalid SMB packet signing configuration: {packet_signing}')
+            logger.error('Invalid SMB packet signing configuration: %s', packet_signing)
             raise CTERAException(f'Invalid packet SMB signing configuration: {packet_signing}') from error
 
     def disable(self):

@@ -2,6 +2,7 @@ import logging
 
 from ..common import Object
 from ..exceptions import CTERAException
+from ..exceptions.backup import NotFound, AttachEncrypted, IncorrectPassphrase, ClocksOutOfSync
 from .enum import BackupConfStatusID
 from .base_command import BaseCommand
 from .directorytree import DirectoryTree
@@ -36,34 +37,6 @@ class EncryptionMode:
     """
     Recoverable = 'RecoverableKeyEncryption'
     Secret = 'SecretKeyEncryption'
-
-
-class NotFound(CTERAException):
-    """ Not found exception """
-
-
-class AttachEncrypted(CTERAException):
-    """ Attach Encrypted exception """
-
-    def __init__(self, encryptionMode, encryptedFolderKey, passPhraseSalt):
-        super().__init__()
-        self.encryptionMode = encryptionMode
-        self.encryptedFolderKey = encryptedFolderKey
-        self.passPhraseSalt = passPhraseSalt
-
-
-class IncorrectPassphrase(CTERAException):
-    """ Incorrect Passphrase exception """
-
-    def __init__(self):
-        super().__init__('Incorrect passphrase')
-
-
-class ClocksOutOfSync(CTERAException):
-    """ Clocks Out of Sync exception """
-
-    def __init__(self):
-        super().__init__('Clocks are out of sync')
 
 
 class Backup(BaseCommand):

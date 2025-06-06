@@ -1,14 +1,13 @@
-class CTERAException(Exception):
-    """
-    Base Exception.
+from . import (  # noqa: E402, F401
+    backup,
+    direct,
+    io,
+    notifications,
+    session,
+    transport
+)
 
-    :parm str message: Error message
-    """
-    def __init__(self, message=None):
-        super().__init__(message)
-
-    def __repr__(self):
-        return str(self)
+from .base import CTERAException
 
 
 class ObjectNotFoundException(CTERAException):
@@ -39,13 +38,3 @@ class InputError(ValueError):
 
 class UserConsentError(CTERAException):
     """Console"""
-
-
-from . import (  # noqa: E402, F401
-    backup,
-    direct,
-    io,
-    notifications,
-    session,
-    transport
-)

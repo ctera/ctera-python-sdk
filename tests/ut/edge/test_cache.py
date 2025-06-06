@@ -64,7 +64,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             cache.Cache(self._filer).pin(self._pin_invalid_folder_path)
         self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
-        self.assertEqual(f"Invalid root directory: {self._pin_invalid_folder_path.split('/')[0]}.", str(error.exception))
+        self.assertEqual(f"Invalid root directory: {self._pin_invalid_folder_path.split('/', maxsplit=1)[0]}.", str(error.exception))
 
     def test_pin_exclude_subfolder(self):
         get_response = self._create_dir_tree(self._pin_valid_folder_path, True)
@@ -135,7 +135,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             cache.Cache(self._filer).pin_recursive(self._pin_invalid_folder_path)
         self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
-        self.assertEqual(f"Invalid root directory: {self._pin_invalid_folder_path.split('/')[0]}.", str(error.exception))
+        self.assertEqual(f"Invalid root directory: {self._pin_invalid_folder_path.split('/', maxsplit=1)[0]}.", str(error.exception))
 
     def test_unpin_recursive(self):
         get_response = self._create_dir_tree(self._pin_valid_folder_path, True)
@@ -155,7 +155,7 @@ class TestEdgeCaching(base_edge.BaseEdgeTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             cache.Cache(self._filer).unpin_recursive(self._pin_invalid_folder_path)
         self._filer.api.get.assert_called_once_with('/config/cloudsync/cloudExtender/selectedFolders')
-        self.assertEqual(f"Invalid root directory: {self._pin_invalid_folder_path.split('/')[0]}.", str(error.exception))
+        self.assertEqual(f"Invalid root directory: {self._pin_invalid_folder_path.split('/', maxsplit=1)[0]}.", str(error.exception))
 
     def _get_dir_entry(self, name, include):
         param = Object()
