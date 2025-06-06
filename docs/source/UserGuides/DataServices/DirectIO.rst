@@ -186,22 +186,22 @@ Streamer API
 Exceptions
 ==========
 
-.. autoclass:: cterasdk.direct.exceptions.direct.DirectIOError
+.. autoclass:: cterasdk.exceptions.direct.DirectIOError
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.direct.exceptions.direct.DirectIOAPIError
+.. autoclass:: cterasdk.exceptions.direct.DirectIOAPIError
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.direct.exceptions.direct.BlockError
+.. autoclass:: cterasdk.exceptions.direct.BlockError
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.direct.exceptions.direct.StreamError
+.. autoclass:: cterasdk.exceptions.direct.StreamError
    :noindex:
    :members:
    :show-inheritance:

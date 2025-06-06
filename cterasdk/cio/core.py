@@ -272,6 +272,7 @@ def handle(path):
 
 @contextmanager
 def upload(core, name, destination, size, fd):
+    fd, size = common.encode_stream(fd, size)
     param = dict(
         name=name,
         Filename=name,

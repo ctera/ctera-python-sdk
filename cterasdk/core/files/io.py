@@ -151,7 +151,7 @@ def upload(name, size, destination, fd):
         """
         Upload file from metadata and file handle.
 
-        :param cterasdk.objects.synchronous.core.Portal core: POrtal object.
+        :param cterasdk.objects.synchronous.core.Portal core: Portal object.
         """
         target = retrieve_remote_dir(core, destination)
         with fs.upload(core, name, destination, size, fd) as param:

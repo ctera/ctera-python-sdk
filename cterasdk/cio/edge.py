@@ -116,6 +116,7 @@ def handle_many(directory, objects):
 
 @contextmanager
 def upload(name, destination, fd):
+    fd, *_ = common.encode_stream(fd, 0)
     param = dict(
         name=name,
         fullpath=f'{destination.absolute}/{name}',

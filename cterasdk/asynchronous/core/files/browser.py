@@ -134,14 +134,14 @@ class FileBrowser(BaseCommand):
 
 class CloudDrive(FileBrowser):
 
-    async def upload(self, name, size, destination, handle):
+    async def upload(self, name, destination, handle, size=None):
         """
         Upload from file handle.
 
         :param str name: File name.
-        :param str size: File size.
         :param str destination: Path to remote directory.
         :param object handle: Handle.
+        :param str,optional size: File size, defaults to content length
         """
         upload_function = io.upload(name, size, self.normalize(destination), handle)
         return await upload_function(self._core)
@@ -155,7 +155,7 @@ class CloudDrive(FileBrowser):
         """
         with open(path, 'rb') as handle:
             metadata = commonfs.properties(path)
-            response = await self.upload(metadata['name'], metadata['size'], destination, handle)
+            response = await self.upload(metadata['name'], destination, handle, metadata['size'])
         return response
 
     async def mkdir(self, path):

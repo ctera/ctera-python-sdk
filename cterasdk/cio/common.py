@@ -65,6 +65,14 @@ class BasePath:
         return self.absolute
 
 
+def encode_stream(fd, size):
+    if isinstance(fd, str):
+        fd = fd.encode('utf-8')
+    if isinstance(fd, bytes):
+        size = str(len(fd))
+    return fd, size
+
+
 def encode_request_parameter(param):
     return dict(
         inputXML=utf8_decode(toxmlstr(param))
