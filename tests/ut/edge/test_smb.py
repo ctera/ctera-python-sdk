@@ -55,14 +55,14 @@ class TestEdgeSMB(base_edge.BaseEdgeTest):
     def test_set_packet_signing_raise_input_error(self):
         with self.assertRaises(exceptions.InputError) as error:
             smb.SMB(self._filer).set_packet_signing('Invalid argument')
-        self.assertEqual('Invalid packet signing option', error.exception.message)
+        self.assertEqual('Invalid packet signing option', error.exception.args[1])
 
     def test_set_packet_signing_raise_error(self):
         expected_exception = exceptions.CTERAException()
         self._filer.api.put = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             smb.SMB(self._filer).set_packet_signing(CIFSPacketSigning.Disabled)
-        self.assertEqual('Invalid packet signing co', error.exception.message)
+        self.assertEqual(f'Invalid packet SMB signing configuration: {CIFSPacketSigning.Disabled}', str(error.exception))
 
     def test_get_configuration(self):
         self._init_filer(get_response=TestEdgeSMB._get_cifs_configuration_response())
@@ -89,7 +89,7 @@ class TestEdgeSMB(base_edge.BaseEdgeTest):
         expected_param = TestEdgeSMB._get_cifs_configuration_response(CIFSPacketSigning.Required, 20, True, False, False)
         actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual('Failed to update SMB configuration.', error.exception.message)
+        self.assertEqual("An error occurred while trying to modify the SMB server's configuration.", str(error.exception))
 
     def test_modify_smb_disabled_raise(self):
         param = Object()
@@ -97,7 +97,7 @@ class TestEdgeSMB(base_edge.BaseEdgeTest):
         self._init_filer(get_response=param)
         with self.assertRaises(exceptions.CTERAException) as error:
             smb.SMB(self._filer).modify(CIFSPacketSigning.Required)
-        self.assertEqual('SMB must be enabled in order to modify its configuration', error.exception.message)
+        self.assertEqual('SMB must be enabled in order to modify its configuration', str(error.exception))
 
     @staticmethod
     def _get_cifs_configuration_response(packet_signing=None, idle_disconnect_time=None, compatibility_mode=None,

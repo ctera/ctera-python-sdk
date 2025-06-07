@@ -4,6 +4,9 @@ from ..common import Object
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Drive(BaseCommand):
     """
     Edge Filer Drive APIs
@@ -36,7 +39,7 @@ class Drive(BaseCommand):
 
         self._edge.api.execute("/proc/storage", "format", param)
 
-        logging.getLogger('cterasdk.edge').info('Formatting drive. %s', {'drive': name})
+        logger.info('Formatting drive. %s', {'drive': name})
 
     def format_all(self):
         """ Format all drives """

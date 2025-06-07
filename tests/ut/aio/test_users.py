@@ -36,7 +36,7 @@ class TestAsyncCoreUsers(base_core.BaseAsyncCoreTest):
         self._init_global_admin(get_multi_response=TestAsyncCoreUsers._user_object(**{'name': None}))
         with self.assertRaises(exceptions.ObjectNotFoundException) as error:
             await users.Users(self._global_admin).get(self._local_user)
-        self.assertEqual(error.exception.message, 'Could not find user')
+        self.assertEqual(str(error.exception), f'Object not found: /users/{self._username}')
 
     @staticmethod
     def _user_object(**kwargs):

@@ -5,6 +5,9 @@ from ..lib import X509Certificate, PrivateKey, create_certificate_chain
 from ..common import Object
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 def initialize(edge):
     """
     Conditional intialization of the Edge Filer SSL Module.
@@ -52,9 +55,9 @@ class SSL(BaseCommand):
         certificates = [X509Certificate.load_certificate(certificate) for certificate in certificates]
         certificate_chain = [certificate.pem_data.decode('utf-8') for certificate in create_certificate_chain(*certificates)]
         server_certificate = ''.join([key_object.pem_data.decode('utf-8')] + certificate_chain)
-        logging.getLogger('cterasdk.edge').info("Uploading Web Server SSL certificate.")
+        logger.info("Uploading Web Server SSL certificate.")
         response = self._edge.api.put(path, f"\n{server_certificate}")
-        logging.getLogger('cterasdk.edge').info("Uploaded Web Server SSL certificate.")
+        logger.info("Uploaded Web Server SSL certificate.")
         return response
 
 
@@ -79,13 +82,13 @@ class SSLv1(SSL):
 
         :param str certificate: The PEM-encoded certificate or a path to the PEM-encoded server certificate file
         """
-        logging.getLogger('cterasdk.edge').info('Setting trusted object storage CA certificate')
+        logger.info('Setting trusted object storage CA certificate')
         param = Object()
         param._classname = 'ExtTrustedCA'  # pylint: disable=protected-access
         param.certificate = X509Certificate.load_certificate(certificate).pem_data.decode('utf-8')
-        logging.getLogger('cterasdk.edge').info("Uploading object storage certificate.")
+        logger.info("Uploading object storage certificate.")
         response = self._edge.api.put('/config/extStorageTrustedCA', param)
-        logging.getLogger('cterasdk.edge').info("Uploaded object storage certificate.")
+        logger.info("Uploaded object storage certificate.")
         return response
 
     def import_certificate(self, private_key, *certificates):
@@ -120,9 +123,9 @@ class ServerCertificate(BaseCommand):
         """
         Generate a Self Signed Certificate.
         """
-        logging.getLogger('cterasdk.edge').info("Generating a Self Signed Certificate.")
+        logger.info("Generating a Self Signed Certificate.")
         response = self._edge.api.execute('/config/certificates', 'createSelfSign')
-        logging.getLogger('cterasdk.edge').info("Generated a Self Signed Certificate.")
+        logger.info("Generated a Self Signed Certificate.")
         return response
 
     def import_certificate(self, private_key, *certificates):
@@ -167,9 +170,9 @@ class TrustedCAs(BaseCommand):
             fingerprint = ca
 
         if fingerprint:
-            logging.getLogger('cterasdk.edge').info("Removing Trusted CA. %s", {'fingerprint': fingerprint})
+            logger.info("Removing Trusted CA. %s", {'fingerprint': fingerprint})
             response = self._edge.api.delete(f'/config/certificates/trustedCACertificates/{fingerprint}')
-            logging.getLogger('cterasdk.edge').info("Removed Trusted CA. %s", {'fingerprint': fingerprint})
+            logger.info("Removed Trusted CA. %s", {'fingerprint': fingerprint})
             return response
 
         raise ValueError('Could not identify CA fingerprint.')
@@ -178,6 +181,6 @@ class TrustedCAs(BaseCommand):
         """
         Remove all Trusted CAs.
         """
-        logging.getLogger('cterasdk.edge').info("Removing all Trusted CAs.")
+        logger.info("Removing all Trusted CAs.")
         for ca in self.all():
             self.remove(ca)

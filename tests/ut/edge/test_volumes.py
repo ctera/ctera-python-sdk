@@ -98,7 +98,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
                 mock.call('/status/storage/disks')
             ]
         )
-        self.assertEqual('Could not find any drives or arrays', error.exception.message)
+        self.assertEqual('Could not find any drives or arrays', str(error.exception))
 
     def test_add_volume_invalid_device_name(self):
         self._init_filer()
@@ -111,12 +111,12 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
                 mock.call('/status/storage/disks')
             ]
         )
-        self.assertEqual('Invalid device name', error.exception.message)
+        self.assertEqual('Invalid device name', error.exception.args[1])
 
     def test_add_volume_must_specify_device_name(self):
         self._init_filer()
         self._filer.api.get = mock.MagicMock(side_effect=TestEdgeVolumes._mock_no_arrays_multiple_drive)
-        with self.assertRaises(exceptions.CTERAException) as error:
+        with self.assertRaises(exceptions.InputError) as error:
             volumes.Volumes(self._filer).add(self._volume_1_name)
         self._filer.api.get.assert_has_calls(
             [
@@ -124,7 +124,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
                 mock.call('/status/storage/disks')
             ]
         )
-        self.assertEqual('You must specify a drive or an array name', error.exception.message)
+        self.assertEqual('You must specify a drive or an array name', error.exception.args[1])
 
     def test_add_volume_with_device_success(self):
         add_response = 'Success'
@@ -161,7 +161,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
                 mock.call('/status/storage/disks')
             ]
         )
-        self.assertEqual('You cannot exceed the available storage capacity', error.exception.message)
+        self.assertEqual('You cannot exceed the available storage capacity', error.exception.args[1])
 
     def test_delete_volume_success(self):
         delete_response = 'Success'
@@ -181,8 +181,9 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             volumes.Volumes(self._filer).delete(self._volume_1_name)
         self._filer.tasks.by_name.assert_called_once_with(' '.join(['Mounting', self._volume_1_name, 'file system']))
-        self._filer.api.delete.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
-        self.assertEqual('Volume deletion failed', error.exception.message)
+        ref = f'/config/storage/volumes/{self._volume_1_name}'
+        self._filer.api.delete.assert_called_once_with(ref)
+        self.assertEqual(f'Volume deletion failed: {ref}', str(error.exception))
 
     def test_delete_all_volume_success(self):
         delete_response = 'Success'
@@ -220,7 +221,7 @@ class TestEdgeVolumes(base_edge.BaseEdgeTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             volumes.Volumes(self._filer).modify(self._volume_1_name, 9999)
         self._filer.api.get.assert_called_once_with('/config/storage/volumes/' + self._volume_1_name)
-        self.assertEqual('Failed to get the volume', error.exception.message)
+        self.assertEqual(f'Volume not found: {self._volume_1_name}', str(error.exception))
 
     @staticmethod
     def _get_volume_response(name, size):

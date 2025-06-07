@@ -54,7 +54,7 @@ class TestEdgeRSync(base_edge.BaseEdgeTest):
         self._init_filer(get_response=param)
         with self.assertRaises(exceptions.CTERAException) as error:
             rsync.RSync(self._filer).modify()
-        self.assertEqual('RSync must be enabled in order to modify its configuration', error.exception.message)
+        self.assertEqual('RSync must be enabled in order to modify its configuration', str(error.exception))
 
     @staticmethod
     def _get_rsync_configuration_response(port=None, max_connections=None):

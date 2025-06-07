@@ -75,7 +75,7 @@ class TestCoreServers(base_admin.BaseCoreTest):
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
-        self.assertEqual('Could not find server', error.exception.message)
+        self.assertEqual(f'Object not found: /servers/{self._server}', str(error.exception))
 
     def test_modify_server_not_found(self):
         self._init_global_admin()
@@ -83,16 +83,17 @@ class TestCoreServers(base_admin.BaseCoreTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             servers.Servers(self._global_admin).modify(self._server)
         self._global_admin.api.get.assert_called_once_with(f'/servers/{self._server}')
-        self.assertEqual('Failed to retrieve server', error.exception.message)
+        self.assertEqual(f'Server not found: /servers/{self._server}', str(error.exception))
 
     def test_modify_server_update_failure(self):
         self._init_global_admin(get_response=self._server)
         self._global_admin.api.put = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
             servers.Servers(self._global_admin).modify(self._server)
-        self._global_admin.api.get.assert_called_once_with(f'/servers/{self._server}')
+        ref = f'/servers/{self._server}'
+        self._global_admin.api.get.assert_called_once_with(ref)
         self._global_admin.api.put.assert_called_once_with(f'/servers/{self._server}', self._server)
-        self.assertEqual('Could not modify server', error.exception.message)
+        self.assertEqual(f'Server modification failed: {ref}', str(error.exception))
 
     def test_modify_success(self):
         new_server_name = 'server1'

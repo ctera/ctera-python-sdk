@@ -5,6 +5,9 @@ from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class FTP(BaseCommand):
     """ Edge Filer FTP configuration APIs """
 
@@ -29,9 +32,9 @@ class FTP(BaseCommand):
         return self._edge.api.get('/config/fileservices/ftp/mode') == Mode.Disabled
 
     def _set_mode(self, enabled):
-        logging.getLogger('cterasdk.edge').info('%s FTP server.', ('Enabling' if enabled else 'Disabling'))
+        logger.info('%s FTP server.', ('Enabling' if enabled else 'Disabling'))
         self._edge.api.put('/config/fileservices/ftp/mode', Mode.Enabled if enabled else Mode.Disabled)
-        logging.getLogger('cterasdk.edge').info('FTP server %s.', ('enabled' if enabled else 'disabled'))
+        logger.info('FTP server %s.', ('enabled' if enabled else 'disabled'))
 
     def modify(
             self,

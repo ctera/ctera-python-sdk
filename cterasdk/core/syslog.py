@@ -10,6 +10,9 @@ from ..lib import X509Certificate, PrivateKey
 from ..clients.common import MultipartForm
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Syslog(BaseCommand):
     """
     Portal Syslog Management APIs
@@ -87,11 +90,11 @@ class Syslog(BaseCommand):
         param.port = port
         param.protocol = protocol
         param.useClientCertificate = False
-        logging.getLogger('cterasdk.core').info('Enabling syslog.')
+        logger.info('Enabling syslog.')
         response = self._core.api.put('/settings/logsSettings/syslogConfig', param)
         if protocol == IPProtocol.TCP and ca_cert is not None:
             self.import_ca(ca_cert)
-        logging.getLogger('cterasdk.core').info('Syslog enabled.')
+        logger.info('Syslog enabled.')
         return response
 
     def modify(self, server=None, port=None, protocol=None, min_severity=None):
@@ -115,9 +118,9 @@ class Syslog(BaseCommand):
         if min_severity:
             current_config.minSeverity = min_severity
 
-        logging.getLogger('cterasdk.core').info("Updating syslog server configuration.")
+        logger.info("Updating syslog server configuration.")
         self._core.api.put('/settings/logsSettings/syslogConfig', current_config)
-        logging.getLogger('cterasdk.core').info(
+        logger.info(
             "Syslog server configured. %s",
             {
                 'server': current_config.server,
@@ -128,7 +131,7 @@ class Syslog(BaseCommand):
         )
 
     def disable(self):
-        logging.getLogger('cterasdk.core').info('Disabling syslog.')
+        logger.info('Disabling syslog.')
         response = self._core.api.put('/settings/logsSettings/syslogConfig/mode', Mode.Disabled)
-        logging.getLogger('cterasdk.core').info('Syslog disabled.')
+        logger.info('Syslog disabled.')
         return response

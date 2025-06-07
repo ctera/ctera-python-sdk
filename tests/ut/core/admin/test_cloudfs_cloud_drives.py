@@ -146,7 +146,7 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
         self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
 
-        self.assertEqual(error_message, error.exception.message)
+        self.assertEqual(error_message, str(error.exception))
 
     def test_delete_with_local_owner(self):
         self._init_global_admin()
@@ -229,7 +229,7 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.CloudDrives(self._global_admin).setfacl(self._nt_acl_folders.foldersPath, self._nt_acl_folders.sddlString,
                                                             self._nt_acl_folders.isRecursive)
-        self.assertEqual('Failed to setFoldersACL', error.exception.message)
+        self.assertEqual('ACL modification failed.', str(error.exception))
 
     def test_set_owner_acl_success(self):
         execute_response = 'Success'
@@ -247,7 +247,7 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.CloudDrives(self._global_admin).setoacl(self._nt_acl_owner.foldersPath, self._nt_acl_owner.ownerSid,
                                                             self._nt_acl_owner.isRecursive)
-        self.assertEqual('Failed to setOwnerACL', error.exception.message)
+        self.assertEqual('Owner modification failed.', str(error.exception))
 
     def test_modify_cloudfolder_failure(self):
         mock_find_cloudfolder = self.patch_call('cterasdk.core.cloudfs.CloudDrives.find')

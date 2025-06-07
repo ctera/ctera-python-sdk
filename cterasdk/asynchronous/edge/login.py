@@ -16,9 +16,9 @@ class Login(BaseCommand):
         host = self._edge.host()
         try:
             await self._edge.api.form_data('/login', {'username': username, 'password': password})
-            logging.getLogger('cterasdk.edge').info("User logged in. %s", {'host': host, 'user': username})
+            logger.info("User logged in. %s", {'host': host, 'user': username})
         except CTERAException:
-            logging.getLogger('cterasdk.edge').error("Login failed. %s", {'host': host, 'user': username})
+            logger.error("Login failed. %s", {'host': host, 'user': username})
             raise
 
     async def logout(self):
@@ -29,7 +29,7 @@ class Login(BaseCommand):
         user = self._edge.session().account.name
         try:
             await self._edge.api.form_data('/logout', {'foo': 'bar'})
-            logging.getLogger('cterasdk.edge').info("User logged out. %s", {'host': host, 'user': user})
+            logger.info("User logged out. %s", {'host': host, 'user': user})
         except CTERAException:
-            logging.getLogger('cterasdk.edge').error("Logout failed. %s", {'host': host, 'user': user})
+            logger.error("Logout failed. %s", {'host': host, 'user': user})
             raise

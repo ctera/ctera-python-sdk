@@ -109,13 +109,14 @@ class TestCoreUsers(base_admin.BaseCoreTest):
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exceptions.CTERAException) as error:
             users.Users(self._global_admin).get(self._local_user_account)
-        self._global_admin.api.get_multi.assert_called_once_with('/users/' + self._local_user_account.name, mock.ANY)
+        ref = '/users/' + self._local_user_account.name
+        self._global_admin.api.get_multi.assert_called_once_with(ref, mock.ANY)
         expected_include = ['/' + attr for attr in users.Users.default]
         actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
-        self.assertEqual('Could not find user', error.exception.message)
+        self.assertEqual(f'Object not found: {ref}', str(error.exception))
 
     def test_modify_local_user(self):
         current_user_object = self._get_user_object(
@@ -277,14 +278,14 @@ class TestCoreAdministrators(base_admin.BaseCoreTest):
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exceptions.CTERAException) as error:
             admins.Administrators(self._global_admin).get(self._local_user_account.name)
-        self._global_admin.api.get_multi.assert_called_once_with(
-            '/administrators/' + self._local_user_account.name, mock.ANY)
+        ref = '/administrators/' + self._local_user_account.name
+        self._global_admin.api.get_multi.assert_called_once_with(ref, mock.ANY)
         expected_include = ['/' + attr for attr in admins.Administrators.default]
         actual_include = self._global_admin.api.get_multi.call_args[0][1]
         self.assertEqual(len(expected_include), len(actual_include))
         for attr in expected_include:
             self.assertIn(attr, actual_include)
-        self.assertEqual('Could not find user', error.exception.message)
+        self.assertEqual(f'Object not found: {ref}', str(error.exception))
 
     def test_modify_admin_user(self):
         current_user_object = self._get_admin_object(

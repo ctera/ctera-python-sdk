@@ -2,9 +2,13 @@ import logging
 
 from ..common import Object
 from ..exceptions import CTERAException
+from ..exceptions.backup import NotFound, AttachEncrypted, IncorrectPassphrase, ClocksOutOfSync
 from .enum import BackupConfStatusID
 from .base_command import BaseCommand
 from .directorytree import DirectoryTree
+
+
+logger = logging.getLogger('cterasdk.edge')
 
 
 class AttachRC:
@@ -35,34 +39,6 @@ class EncryptionMode:
     Secret = 'SecretKeyEncryption'
 
 
-class NotFound(CTERAException):
-    """ Not found exception """
-
-
-class AttachEncrypted(CTERAException):
-    """ Attach Encrypted exception """
-
-    def __init__(self, encryptionMode, encryptedFolderKey, passPhraseSalt):
-        super().__init__()
-        self.encryptionMode = encryptionMode
-        self.encryptedFolderKey = encryptedFolderKey
-        self.passPhraseSalt = passPhraseSalt
-
-
-class IncorrectPassphrase(CTERAException):
-    """ Incorrect Passphrase exception """
-
-    def __init__(self):
-        super().__init__('Incorrect passphrase')
-
-
-class ClocksOutOfSync(CTERAException):
-    """ Clocks Out of Sync exception """
-
-    def __init__(self):
-        super().__init__('Clocks are out of sync')
-
-
 class Backup(BaseCommand):
     """ Edge Filer backup configuration APIs """
 
@@ -76,7 +52,7 @@ class Backup(BaseCommand):
 
         :param str,optional passphrase: Passphrase for the backup, defaults to None
         """
-        logging.getLogger('cterasdk.edge').info('Configuring cloud backup.')
+        logger.info('Configuring cloud backup.')
 
         try:
             settings = self._attach(passphrase)
@@ -85,7 +61,7 @@ class Backup(BaseCommand):
 
         self._configure_backup_settings(settings)
 
-        logging.getLogger('cterasdk.edge').info('Cloud backup configuration completed successfully.')
+        logger.info('Cloud backup configuration completed successfully.')
 
     def is_configured(self):
         """
@@ -98,28 +74,28 @@ class Backup(BaseCommand):
 
     def start(self):
         """ Start backup """
-        logging.getLogger('cterasdk.edge').info("Starting cloud backup.")
+        logger.info("Starting cloud backup.")
         self._edge.api.execute("/status/sync", "start")
 
     def suspend(self):
         """ Suspend backup """
-        logging.getLogger('cterasdk.edge').info("Suspending cloud backup.")
+        logger.info("Suspending cloud backup.")
         self._edge.api.execute("/status/sync", "pause")
 
     def unsuspend(self):
         """ Unsuspend backup """
-        logging.getLogger('cterasdk.edge').info("Suspending cloud backup.")
+        logger.info("Suspending cloud backup.")
         self._edge.api.execute("/status/sync", "resume")
 
     def _attach(self, sharedSecret):
         try:
-            logging.getLogger('cterasdk.edge').debug('Attaching to a backup folder.')
+            logger.debug('Attaching to a backup folder.')
             settings = self._attach_folder()
         except AttachEncrypted as param:
-            logging.getLogger('cterasdk.edge').debug('Attaching to an encrypted backup folder.')
+            logger.debug('Attaching to an encrypted backup folder.')
             settings = self._attach_encrypted_folder(param.encryptedFolderKey, param.passPhraseSalt, sharedSecret)
             settings.encryptionMode = param.encryptionMode
-        logging.getLogger('cterasdk.edge').debug('Successfully attached to a backup folder.')
+        logger.debug('Successfully attached to a backup folder.')
 
         return settings
 
@@ -153,36 +129,36 @@ class Backup(BaseCommand):
             return param
 
         if rc == AttachRC.NotFound:
-            logging.getLogger('cterasdk.edge').debug('Could not find an existing backup folder.')
+            logger.debug('Could not find an existing backup folder.')
             raise NotFound()
 
         if rc == AttachRC.IsEncrypted:
             raise AttachEncrypted(response.encryptionMode, response.encryptedFolderKey, response.passPhraseSalt)
 
         if rc == AttachRC.CheckCodeInCorrect:
-            logging.getLogger('cterasdk.edge').error('Incorrect passphrase.')
+            logger.error('Incorrect passphrase.')
             raise IncorrectPassphrase()
 
         if rc == AttachRC.ClocksOutOfSync:
-            logging.getLogger('cterasdk.edge').error('Intializing backup failed. Clocks are out of sync. %s', {'rc': rc})
+            logger.error('Intializing backup failed. Clocks are out of sync (rc=%s).', rc)
             raise ClocksOutOfSync()
 
         if rc == AttachRC.InternalServerError:
-            logging.getLogger('cterasdk.edge').error('Attach failed. %s', {'rc': rc})
+            logger.error('Attach failed (rc=%s).', rc)
         elif rc == AttachRC.PermissionDenied:
-            logging.getLogger('cterasdk.edge').error('Attach failed. %s', {'rc': rc})
+            logger.error('Attach failed (rc=%s).', rc)
         else:
-            logging.getLogger('cterasdk.edge').error('Unknown error, %s', {'rc': rc})
-        raise CTERAException('Failed to attach to backup folder', None, rc=rc)
+            logger.error('Unknown error (rc=%s)', rc)
+        raise CTERAException(f'Failed to attach to backup folder (rc={rc}).')
 
     def _create_folder(self, passphrase):
         param = Object()
         if passphrase is not None:
-            logging.getLogger('cterasdk.edge').debug('Creting a passphrase-encrypted backup folder.')
+            logger.debug('Creting a passphrase-encrypted backup folder.')
             param.encryptionMode = EncryptionMode.Secret
             param.sharedSecret = passphrase
         else:
-            logging.getLogger('cterasdk.edge').debug('Creating a backup folder.')
+            logger.debug('Creating a backup folder.')
             param.encryptionMode = EncryptionMode.Recoverable
 
         task = self._edge.api.execute('/status/services', 'createFolder', param)
@@ -200,19 +176,19 @@ class Backup(BaseCommand):
         rc = response.createFolderRC
 
         if rc == CreateFolderRC.OK:
-            logging.getLogger('cterasdk.edge').debug('Backup folder created successfully.')
+            logger.debug('Backup folder created successfully.')
             param = Object()
             param.sharedSecret = response.sharedSecret
             param.passPhraseSalt = response.passPhraseSalt
             return param
 
         if rc == CreateFolderRC.InternalServerError:
-            logging.getLogger('cterasdk.edge').error('Backup folder creation failed. %s', {'rc': rc})
+            logger.error('Backup folder creation failed (rc=%s).', rc)
         elif rc == CreateFolderRC.PermissionDenied:
-            logging.getLogger('cterasdk.edge').error('Backup folder creation failed. %s', {'rc': rc})
+            logger.error('Backup folder creation failed (rc=%s).', rc)
         elif rc == CreateFolderRC.FolderAlreadyExists:
             return None
-        raise CTERAException('Failed to create backup folder', None, rc=rc)
+        raise CTERAException(f'Failed to create backup folder (rc={rc})')
 
     def _wait(self, task):
         task = self._edge.tasks.wait(task)
@@ -227,7 +203,7 @@ class Backup(BaseCommand):
         backup_settings.sharedSecret = param.sharedSecret
         backup_settings.passPhraseSalt = param.passPhraseSalt
 
-        logging.getLogger('cterasdk.edge').debug('Configuring backup settings.')
+        logger.debug('Configuring backup settings.')
 
         self._edge.api.put('/config/backup', backup_settings)
 
@@ -239,7 +215,7 @@ class BackupFiles(BaseCommand):
     def unselect_all(self):
         """ Unselect all files from backup """
         backup_config = self._fetch_backup_config(BackupFiles.ALL_FILES)
-        logging.getLogger('cterasdk.edge').info('Unselecting all files from backup.')
+        logger.info('Unselecting all files from backup.')
         directory_tree = DirectoryTree(backup_config.directoryTree)
         directory_tree.unselect_all()
         backup_config.directoryTree = directory_tree.root
@@ -250,10 +226,10 @@ class BackupFiles(BaseCommand):
         if name:
             for backup_config in backup_configs:
                 if backup_config.name == name:
-                    logging.getLogger('cterasdk.edge').info('Found backup config. %s', {'name': name})
+                    logger.info('Found backup config: %s', name)
                     return backup_config
-            logging.getLogger('cterasdk.edge').error('Could not find backup config. %s', {'name': name})
-            raise CTERAException('Could not find backup config', None, name=name)
+            logger.error('Could not find backup config: %s', name)
+            raise CTERAException(f'Could not find backup config: {name}')
         return backup_configs
 
     def _update_backup_config(self, backup_config):

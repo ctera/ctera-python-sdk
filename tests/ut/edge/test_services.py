@@ -115,12 +115,13 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         expected_param = self._get_is_web_sso_param(False)
         actual_param = self._filer.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual('Connection failed. You must activate this Edge Filer using an activation code.', error.exception.message)
+        self.assertEqual('Connection failed. You must activate this Edge Filer using an activation code.', str(error.exception))
 
     def test_connect_default_args_task_failure(self):
         self._init_filer()
         self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
-        self._filer.tasks.wait = mock.MagicMock(side_effect=TestEdgeServices._get_task_error())
+        task_error_side_effect = TestEdgeServices._get_task_error()
+        self._filer.tasks.wait = mock.MagicMock(side_effect=task_error_side_effect)
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
 
         with self.assertRaises(exceptions.CTERAException) as error:
@@ -142,7 +143,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         expected_param = self._get_attach_and_save_param(False, use_activation_code=False)
         actual_param = self._filer.api.execute.call_args_list[1][0][2]  # Access attachAndSave call param
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual('Connection failed', error.exception.message)
+        self.assertEqual(f'Connection failed. Reason: {task_error_side_effect.task.description}', str(error.exception))
 
     def test_reconnect(self):
         self._init_filer()

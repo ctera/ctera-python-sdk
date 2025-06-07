@@ -8,6 +8,9 @@ from ..exceptions import InputError
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Task(TaskBase):
 
     def _get_task_id(self, ref):
@@ -21,7 +24,7 @@ class Task(TaskBase):
                 uid = ref[start: end]
         if uid is not None:
             return '/proc/bgtasks/' + uid
-        logging.getLogger('cterasdk.edge').error('Could not parse task id. %s', {'ref': ref})
+        logger.error('Could not parse task id. %s', {'ref': ref})
         raise InputError('Invalid task id', ref, [64, '64', '/proc/bgtasks/64'])
 
     def get_task_status(self):

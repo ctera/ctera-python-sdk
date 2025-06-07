@@ -57,7 +57,7 @@ class TestEdgeNFS(base_edge.BaseEdgeTest):
         self._init_filer(get_response=param)
         with self.assertRaises(exceptions.CTERAException) as error:
             nfs.NFS(self._filer).modify()
-        self.assertEqual('NFS must be enabled in order to modify its configuration', error.exception.message)
+        self.assertEqual('NFS must be enabled in order to modify its configuration', str(error.exception))
 
     def test_modify_all_parameters(self):
         """Test modifying all NFS parameters"""
@@ -88,7 +88,7 @@ class TestEdgeNFS(base_edge.BaseEdgeTest):
 
         with self.assertRaises(exceptions.CTERAException) as error:
             nfs.NFS(self._filer).modify(krb5_enabled=True)
-        self.assertEqual('NFSv4 must be enabled in order to enable Kerberos', error.exception.message)
+        self.assertEqual('NFSv4 must be enabled in order to enable Kerberos', str(error.exception))
 
     @staticmethod
     def _get_nfs_configuration_response(

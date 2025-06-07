@@ -5,6 +5,9 @@ from .types import RoleSettings
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Roles(BaseCommand):
     """
     Role Settings APIs
@@ -36,7 +39,7 @@ class Roles(BaseCommand):
         role = Roles.find(role)
         if role:
             return RoleSettings.from_server_object(self._core.api.get(f'/rolesSettings/{role}'))
-        logging.getLogger('cterasdk.core').warning('Could not find role. %s', {'role': role})
+        logger.warning('Could not find role. %s', {'role': role})
         return None
 
     def modify(self, role, settings):
@@ -53,9 +56,9 @@ class Roles(BaseCommand):
         if role:
             if settings.sudo:
                 settings = RoleSettings(name=name, **{attr: True for attr in settings.__dict__.keys() if attr != 'name'})
-            logging.getLogger('cterasdk.core').info('Updating role settings. %s', {'role': role})
+            logger.info('Updating role settings. %s', {'role': role})
             response = self._core.api.put(f'/rolesSettings/{role}', settings.to_server_object())
-            logging.getLogger('cterasdk.core').info('Role settings updated. %s', {'role': role})
+            logger.info('Role settings updated. %s', {'role': role})
             return RoleSettings.from_server_object(response)
-        logging.getLogger('cterasdk.core').warning('Could not find role. %s', {'role': role})
+        logger.warning('Could not find role. %s', {'role': role})
         return None

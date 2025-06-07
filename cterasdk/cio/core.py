@@ -5,8 +5,8 @@ from ..objects.uri import quote, unquote
 from ..common import Object, DateTimeUtils
 from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode
 from ..core.types import PortalAccount, UserAccount, GroupAccount
-from ..exceptions import CTERAException
-from . import common, exceptions
+from ..exceptions.io import ResourceExistsError, PathValidationError, NameSyntaxError, ReservedNameError
+from . import common
 
 
 logger = logging.getLogger('cterasdk.core')
@@ -26,6 +26,8 @@ class CorePath(common.BasePath):
             super().__init__(*CorePath._from_server_object(reference))
         elif isinstance(reference, str):
             super().__init__(scope, reference)
+        elif reference is None:
+            super().__init__(scope, '')
         else:
             message = 'Path validation failed: ensure the path exists and is correctly formatted.'
             logger.error(message)
@@ -270,6 +272,7 @@ def handle(path):
 
 @contextmanager
 def upload(core, name, destination, size, fd):
+    fd, size = common.encode_stream(fd, size)
     param = dict(
         name=name,
         Filename=name,
@@ -410,7 +413,7 @@ def search_collaboration_member(account, cloud_folder_uid):
     elif account.account_type == PortalAccountType.Group:
         param.searchType = SearchType.Groups
     else:
-        raise CTERAException("Invalid account type", None, account_type=account.account_type)
+        raise ValueError(f'Invalid account type: {account.account_type}')
 
     param.searchTerm = account.name
     param.resourceUid = cloud_folder_uid
@@ -483,23 +486,23 @@ def accept_response(response, reference):
     Check if response contains an error.
     """
     error = {
-        "FileWithTheSameNameExist": exceptions.ResourceExistsError(),
-        "DestinationNotExists": exceptions.PathValidationError(),
-        "InvalidName": exceptions.NameSyntaxError(),
-        "ReservedName": exceptions.ReservedNameError()
+        "FileWithTheSameNameExist": ResourceExistsError(),
+        "DestinationNotExists": PathValidationError(),
+        "InvalidName": NameSyntaxError(),
+        "ReservedName": ReservedNameError()
     }.get(response, None)
     try:
         if error:
             raise error
-    except exceptions.ResourceExistsError as error:
+    except ResourceExistsError as error:
         logger.info('Resource already exists: a file or folder with this name already exists. %s', {'path': reference})
         raise error
-    except exceptions.PathValidationError as error:
+    except PathValidationError as error:
         logger.error('Path validation failed: the specified destination path does not exist. %s', {'path': reference})
         raise error
-    except exceptions.NameSyntaxError as error:
+    except NameSyntaxError as error:
         logger.error('Invalid name: the name contains characters that are not allowed. %s', {'name': reference})
         raise error
-    except exceptions.ReservedNameError as error:
+    except ReservedNameError as error:
         logger.error('Reserved name error: the name is reserved and cannot be used. %s', {'name': reference})
         raise error

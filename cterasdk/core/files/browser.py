@@ -7,6 +7,9 @@ from ..base_command import BaseCommand
 from . import io
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class FileBrowser(BaseCommand):
 
     def __init__(self, core):
@@ -89,11 +92,11 @@ class FileBrowser(BaseCommand):
         """
         return io.versions(self._core, self.normalize(path))
 
-    def walk(self, path, include_deleted=False):
+    def walk(self, path=None, include_deleted=False):
         """
         Walk Directory Contents
 
-        :param str path: Path to walk
+        :param str,optional path: Path to walk, defaults to the root directory
         :param bool,optional include_deleted: Include deleted files, defaults to False
         """
         return io.walk(self._core, self._scope, path, include_deleted=include_deleted)
@@ -137,14 +140,14 @@ class FileBrowser(BaseCommand):
 
 class CloudDrive(FileBrowser):
 
-    def upload(self, name, size, destination, handle):
+    def upload(self, name, destination, handle, size=None):
         """
         Upload from file handle.
 
         :param str name: File name.
-        :param str size: File size.
         :param str destination: Path to remote directory.
-        :param object handle: Handle.
+        :param object handle: File handle, String, or Bytes.
+        :param str,optional size: File size, defaults to content length
         """
         upload_function = io.upload(name, size, self.normalize(destination), handle)
         return upload_function(self._core)
@@ -158,7 +161,7 @@ class CloudDrive(FileBrowser):
         """
         with open(path, 'rb') as handle:
             metadata = commonfs.properties(path)
-            response = self.upload(metadata['name'], metadata['size'], destination, handle)
+            response = self.upload(metadata['name'], destination, handle, metadata['size'])
         return response
 
     def mkdir(self, path):
@@ -278,6 +281,5 @@ class Backups(FileBrowser):
             destination = destination if destination is not None else f'{commonfs.downloads()}/{device}.xml'
             return self.download(f'backups/{device}/Device Configuration/db.xml', destination)
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error('Failed downloading configuration file. %s',
-                                                     {'device': device, 'error': error.response.reason})
+            logger.error('Failed downloading configuration file. %s', {'device': device, 'error': error.response.reason})
             raise error

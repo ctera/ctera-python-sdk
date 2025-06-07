@@ -36,7 +36,7 @@ class TestAsyncCoreNotifications(base_core.BaseAsyncCoreTest):
 
     async def test_get_notifications_error(self):
         self._init_global_admin(post_response=None)
-        with self.assertRaises(exceptions.NotificationsError) as error:
+        with self.assertRaises(exceptions.notifications.NotificationsError) as error:
             await notifications.Notifications(self._global_admin).get()
         self._global_admin.v2.api.post.assert_called_once_with('/metadata/list', mock.ANY)
         self.assertEqual(error.exception.cloudfolders, None)
@@ -98,7 +98,7 @@ class TestAsyncCoreNotifications(base_core.BaseAsyncCoreTest):
     async def test_ancestors_error(self):
         url = '/xyz'
         self._init_global_admin()
-        self._global_admin.v2.api.post = mock.AsyncMock(side_effect=exceptions.HTTPError(
+        self._global_admin.v2.api.post = mock.AsyncMock(side_effect=exceptions.transport.HTTPError(
             HTTPStatus.FORBIDDEN,
             munch.Munch(
                 dict(request=munch.Munch(
@@ -106,7 +106,7 @@ class TestAsyncCoreNotifications(base_core.BaseAsyncCoreTest):
                 ))
             )
         ))
-        with self.assertRaises(exceptions.HTTPError) as error:
+        with self.assertRaises(exceptions.transport.HTTPError) as error:
             await notifications.Notifications(self._global_admin).ancestors(self._descendant)
         self.assertEqual(error.exception.error.request.url, url)
 

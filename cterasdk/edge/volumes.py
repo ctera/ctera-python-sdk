@@ -8,6 +8,9 @@ from ..lib import track
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Volumes(BaseCommand):
     """ Edge Filer Volumes configuration APIs """
 
@@ -45,12 +48,12 @@ class Volumes(BaseCommand):
             param.encrypted = True
             param.encPassphrase = passphrase
 
-        logging.getLogger('cterasdk.edge').info(
+        logger.info(
             'Creating volume. %s',
             {'name': name, 'device': device_name, 'size': size, 'filesystem': filesystem, 'passphrase': passphrase}
         )
 
-        ref = '/status/storage/volumes/' + param.name + '/status'
+        ref = f'/status/storage/volumes/{param.name}/status'
 
         response = self._edge.api.add('/config/storage/volumes', param)
 
@@ -62,7 +65,7 @@ class Volumes(BaseCommand):
             [VolumeStatus.Mounting, VolumeStatus.Checking, VolumeStatus.Repairing], [VolumeStatus.Corrupted, VolumeStatus.Unknown]
         )
 
-        logging.getLogger('cterasdk.edge').info('Volume created. %s', {'name': name, 'size': size, 'status': status})
+        logger.info('Volume created. %s', {'name': name, 'size': size, 'status': status})
 
         return response
 
@@ -79,17 +82,17 @@ class Volumes(BaseCommand):
         try:
             volume = self.get(name)
         except CTERAException as error:
-            raise CTERAException('Failed to get the volume', error)
+            raise CTERAException(f'Volume not found: {name}') from error
 
         volume.size = size
+        ref = f'/config/storage/volumes/{name}'
         try:
-            response = self._edge.api.put('/config/storage/volumes/' + name, volume)
-            logging.getLogger('cterasdk.edge').info("Volume modified. %s", {'volume': volume.name})
+            response = self._edge.api.put(ref, volume)
+            logger.info("Volume modified: %s", ref)
             return response
         except CTERAException as error:
-            msg = "Failed to modify volume."
-            logging.getLogger('cterasdk.edge').error(msg)
-            raise CTERAException(msg, error)
+            logger.error("Volume modification failed: %s", ref)
+            raise CTERAException(f"Volume modification failed: {ref}") from error
 
     def delete(self, name):
         """
@@ -99,16 +102,14 @@ class Volumes(BaseCommand):
         """
         self._wait_pending_mount(name)
         try:
-            logging.getLogger('cterasdk.edge').info('Deleting volume. %s', {'name': name})
-
-            response = self._edge.api.delete('/config/storage/volumes/' + name)
-
-            logging.getLogger('cterasdk.edge').info("Volume deleted. %s", {'name': name})
-
+            ref = f'/config/storage/volumes/{name}'
+            logger.info('Deleting volume: %s', ref)
+            response = self._edge.api.delete(ref)
+            logger.info("Volume deleted: %s", ref)
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.edge').error("Volume deletion failed. %s", {'name': name})
-            raise CTERAException('Volume deletion failed', error)
+            logger.error("Volume deletion failed: %s", ref)
+            raise CTERAException(f'Volume deletion failed: {ref}') from error
 
     def delete_all(self):
         """ Delete all volumes """
@@ -120,7 +121,7 @@ class Volumes(BaseCommand):
             for volume in volumes:
                 self.delete(volume.name)
         else:
-            logging.getLogger('cterasdk.edge').info('No volumes found.')
+            logger.info('No volumes found.')
 
     def _devices(self):
         arrays = self._edge.api.get('/status/storage/arrays')
@@ -134,7 +135,7 @@ class Volumes(BaseCommand):
             ctera_devices[drive.name] = drive.availableCapacity
 
         if len(ctera_devices) == 0:
-            logging.getLogger('cterasdk.edge').error('Could not find any drives or arrays.')
+            logger.error('Could not find any drives or arrays.')
 
             raise CTERAException('Could not find any drives or arrays')
 
@@ -145,39 +146,37 @@ class Volumes(BaseCommand):
         if device_name is not None:
             device_size = ctera_devices.get(device_name)
             if device_size is not None:
-                logging.getLogger('cterasdk.edge').debug('Found drive. %s', {'name': device_name, 'size': device_size})
+                logger.debug('Found drive. %s', {'name': device_name, 'size': device_size})
                 return (device_name, device_size)
 
             device_names = [k for k, v in ctera_devices.items()]
-            logging.getLogger('cterasdk.edge').error('Invalid device name. %s', {'name': device_name})
+            logger.error('Invalid device name. %s', {'name': device_name})
             raise InputError('Invalid device name', device_name, device_names)
 
         if len(ctera_devices) == 1:
             device_name, device_size = ctera_devices.popitem()
-            logging.getLogger('cterasdk.edge').debug('Found drive. %s', {'name': device_name, 'size': device_size})
+            logger.debug('Found drive. %s', {'name': device_name, 'size': device_size})
             return device_name, device_size
 
         device_names = [k for k, v in ctera_devices.items()]
-        logging.getLogger('cterasdk.edge').error('You must specify a drive or an array name. %s', {'options': device_names})
-        raise CTERAException('You must specify a drive or an array name', None, options=device_names)
+        logger.error('You must specify a drive or an array name. %s', {'options': device_names})
+        raise InputError('You must specify a drive or an array name', options=device_names)
 
     @staticmethod
     def _volume_size(size, device_name, device_size):
         if size is not None:
             if size > device_size:
-                logging.getLogger('cterasdk.edge').error('You cannot exceed the available storage capacity. %s',
-                                                         {'size': size, 'free_size': device_size})
+                logger.error('You cannot exceed the available storage capacity. %s', {'size': size, 'free_size': device_size})
                 raise InputError("You cannot exceed the available storage capacity", size, device_size)
             return size
 
         if device_size > 0:
-            logging.getLogger('cterasdk.edge').info('You did not specify a volume size.')
-            logging.getLogger('cterasdk.edge').info('Allocating available storage capacity. %s',
-                                                    {'name': device_name, 'free_size': device_size})
+            logger.info('You did not specify a volume size.')
+            logger.info('Allocating available storage capacity. %s', {'name': device_name, 'free_size': device_size})
             return device_size
 
-        logging.getLogger('cterasdk.edge').error('Insufficient storage space. %s', {'name': device_name})
-        raise CTERAException('Insufficient storage space', None, device=device_name, free_size=device_size)
+        logger.error('Insufficient storage space. %s', {'name': device_name})
+        raise CTERAException(f'Insufficient storage space (freespace={device_size}) on device: {device_name}')
 
     @staticmethod
     def _volume_filesystem(filesystem):
@@ -187,7 +186,7 @@ class Volumes(BaseCommand):
         raise InputError('Invalid file system type', filesystem, ['xfs', 'next3', 'ext3'])
 
     def _wait_pending_filesystem_mounts(self):
-        logging.getLogger('cterasdk.edge').debug('Checking for pending mount tasks.')
+        logger.debug('Checking for pending mount tasks.')
 
         tasks = self._edge.tasks.running()
         for mount in tasks:
@@ -195,7 +194,7 @@ class Volumes(BaseCommand):
                 self._wait_mount(mount.id)
 
     def _wait_pending_mount(self, volume):
-        logging.getLogger('cterasdk.edge').debug('Checking for pending mount tasks. %s', {'volume': volume})
+        logger.debug('Checking for pending mount tasks. %s', {'volume': volume})
 
         tasks = self._edge.tasks.by_name(' '.join(['Mounting', volume, 'file system']))
         for mount in tasks:
@@ -205,4 +204,4 @@ class Volumes(BaseCommand):
         try:
             self._edge.tasks.wait(tid)
         except TaskError:
-            logging.getLogger('cterasdk.edge').debug('Failed mounting volume. %s', {'tid': tid})
+            logger.debug('Failed mounting volume. %s', {'tid': tid})

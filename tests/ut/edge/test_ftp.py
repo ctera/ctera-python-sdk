@@ -52,7 +52,7 @@ class TestEdgeFTP(base_edge.BaseEdgeTest):
         self._init_filer(get_response=param)
         with self.assertRaises(exceptions.CTERAException) as error:
             ftp.FTP(self._filer).modify()
-        self.assertEqual('FTP must be enabled in order to modify its configuration', error.exception.message)
+        self.assertEqual('FTP must be enabled in order to modify its configuration', str(error.exception))
 
     @staticmethod
     def _get_ftp_configuration_response(allow_anonymous_ftp=None, anonymous_download_limit=None, anonymous_ftp_folder=None,

@@ -8,6 +8,9 @@ from .base_command import BaseCommand
 from .types import NFSv3AccessControlEntry, RemoveNFSv3AccessControlEntry, ShareAccessControlEntry, RemoveShareAccessControlEntry
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Shares(BaseCommand):
 
     def get(self, name=None):
@@ -83,10 +86,10 @@ class Shares(BaseCommand):
 
         try:
             self._edge.api.add('/config/fileservices/share', param)
-            logging.getLogger('cterasdk.edge').info("Share created. %s", {'name': name})
-        except Exception as error:
-            logging.getLogger('cterasdk.edge').error("Share creation failed.")
-            raise CTERAException('Share creation failed', error)
+            logger.info("Share created. %s", {'name': param.name})
+        except CTERAException as error:
+            logger.error("Share creation failed: %s", param.name)
+            raise CTERAException(f'Share creation failed: {param.name}') from error
 
     def set_share_winacls(self, name):
         """
@@ -94,8 +97,7 @@ class Shares(BaseCommand):
 
         :param str name: The share name
         """
-        logging.getLogger('cterasdk.edge').error("Updating Windows file sharing access mode. %s",
-                                                 {'share': name, 'access': enum.Acl.WindowsNT})
+        logger.error("Updating Windows file sharing access mode. %s", {'share': name, 'access': enum.Acl.WindowsNT})
         self._edge.api.put('/config/fileservices/share/' + name + '/access', enum.Acl.WindowsNT)
 
     def get_access_type(self, name):
@@ -113,7 +115,7 @@ class Shares(BaseCommand):
         :param str name: The share name
         :param cterasdk.edge.enum.Acl access: The Windows File Sharing authentication mode
         """
-        logging.getLogger('cterasdk.edge').info("Updating Windows file sharing access mode. %s", {'share': name, 'access': access})
+        logger.info("Updating Windows file sharing access mode. %s", {'share': name, 'access': access})
         self._edge.api.put('/config/fileservices/share/' + name + '/access', access)
 
     def block_files(self, name, extensions):
@@ -124,10 +126,9 @@ class Shares(BaseCommand):
         :param list[str] extensions: List of file extensions to block
         """
         share = self.get(name)
-        if share.access != enum.Acl.WindowsNT:
-            raise CTERAException('Cannot block file types on non Windows-ACL enabled shares', None, share=share.name, access=share.access)
-        logging.getLogger('cterasdk.edge').error("Updating the list of blocked file extensions. %s",
-                                                 {'share': name, 'extensions': extensions, 'access': enum.Acl.WindowsNT})
+        Shares._validate_share_access(share)
+        logger.error("Updating the list of blocked file extensions. %s",
+                     {'share': name, 'extensions': extensions, 'access': enum.Acl.WindowsNT})
         self._edge.api.put('/config/fileservices/share/' + share.name + '/screenedFileTypes', extensions)
 
     def set_acl(self, name, acl):
@@ -272,11 +273,11 @@ class Shares(BaseCommand):
 
         try:
             self._edge.api.put('/config/fileservices/share/' + name, share)
-            logging.getLogger('cterasdk.edge').info("Share modified. %s", {'name': name})
+            logger.info("Share modified. %s", {'name': name})
         except Exception as error:
-            msg = f'Failed to modify the share {name}'
-            logging.getLogger('cterasdk.edge').error(msg)
-            raise CTERAException(msg, error)
+            message = f'Could not modify share: {name}'
+            logger.error(message)
+            raise CTERAException(message) from error
 
     def delete(self, name):
         """
@@ -284,12 +285,13 @@ class Shares(BaseCommand):
 
         :param str name: The share name
         """
+        ref = f'/config/fileservices/share/{name}'
         try:
-            self._edge.api.delete('/config/fileservices/share/' + name)
-            logging.getLogger('cterasdk.edge').info("Share deleted. %s", {'name': name})
+            self._edge.api.delete(ref)
+            logger.info("Share deleted: %s", ref)
         except Exception as error:
-            logging.getLogger('cterasdk.edge').error("Share deletion failed.")
-            raise CTERAException('Share deletion failed', error)
+            logger.error("Share deletion failed: %s", ref)
+            raise CTERAException(f'Share deletion failed: {ref}') from error
 
     def get_trusted_nfs_clients(self, name):
         """
@@ -374,9 +376,8 @@ class Shares(BaseCommand):
         :param list[str] extensions: List of file extensions to block
         """
         share = self.get(name)
-        if share.access != enum.Acl.WindowsNT:
-            raise CTERAException('Cannot block file types on non Windows-ACL enabled shares', None, share=share.name, access=share.access)
-        logging.getLogger('cterasdk.edge').info(
+        Shares._validate_share_access(share)
+        logger.info(
             "Updating the list of blocked file extensions. %s",
             {'share': name, 'extensions': extensions, 'access': enum.Acl.WindowsNT}
         )
@@ -390,12 +391,11 @@ class Shares(BaseCommand):
         :param list[str] extensions: List of file extensions to add
         """
         share = self.get(name)
-        if share.access != enum.Acl.WindowsNT:
-            raise CTERAException('Cannot block file types on non Windows-ACL enabled shares', None, share=share.name, access=share.access)
+        Shares._validate_share_access(share)
 
         new_list = list(set(share.screenedFileTypes + extensions))
 
-        logging.getLogger('cterasdk.edge').info(
+        logger.info(
             "Updating the list of blocked file extensions. %s",
             {'share': name, 'extensions': new_list, 'access': enum.Acl.WindowsNT}
         )
@@ -409,12 +409,11 @@ class Shares(BaseCommand):
         :param list[str] extensions: List of file extensions to remove
         """
         share = self.get(name)
-        if share.access != enum.Acl.WindowsNT:
-            raise CTERAException('Cannot block file types on non Windows-ACL enabled shares', None, share=share.name, access=share.access)
+        Shares._validate_share_access(share)
 
         new_list = list(set(share.screenedFileTypes) - set(extensions))
 
-        logging.getLogger('cterasdk.edge').info(
+        logger.info(
             "Updating the list of blocked file extensions. %s",
             {'share': name, 'extensions': new_list, 'access': enum.Acl.WindowsNT}
         )
@@ -426,14 +425,18 @@ class Shares(BaseCommand):
         response = self._edge.api.execute('/status/fileManager', 'listPhysicalFolders', param)
         for root in response:
             if root.fullpath == f'/{name}':
-                logging.getLogger('cterasdk.edge').debug("Found root directory. %s",
-                                                         {'name': root.name, 'type': root.type, 'fullpath': root.fullpath})
+                logger.debug("Found root directory. %s", {'name': root.name, 'type': root.type, 'fullpath': root.fullpath})
                 return name
 
-        logging.getLogger('cterasdk.edge').error("Could not find root directory. %s", {'name': name})
+        logger.error("Could not find root directory. %s", {'name': name})
 
         options = [root.fullpath[1:] for root in response]
         raise InputError('Invalid root directory.', name, options)
+
+    @staticmethod
+    def _validate_share_access(share):
+        if share.access != enum.Acl.WindowsNT:
+            raise CTERAException('Cannot block file types on non Windows-ACL enabled shares.')
 
     @staticmethod
     def _validate_acl(acl):

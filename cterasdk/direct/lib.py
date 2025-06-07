@@ -5,11 +5,12 @@ from .types import Metadata, Block
 from .credentials import KeyPair, Bearer
 from .crypto import decrypt_key, decrypt_block
 from .decompressor import decompress
-from .exceptions import UnAuthorized, UnprocessableContent, BlocksNotFoundError, DownloadError, DownloadTimeout, BlockListTimeout, \
-    DownloadConnectionError, DecryptKeyError, DecryptBlockError, NotFoundError, DecompressBlockError, BlockValidationException, \
-    BlockListConnectionError, DirectIOError
-
-from ..exceptions import HTTPError
+from ..exceptions.transport import HTTPError
+from ..exceptions.direct import (
+    UnAuthorized, UnprocessableContent, BlocksNotFoundError, DownloadError, DownloadTimeout, BlockListTimeout,
+    DownloadConnectionError, DecryptKeyError, DecryptBlockError, NotFoundError, DecompressBlockError,
+    BlockValidationException, BlockListConnectionError, DirectIOError
+)
 
 
 logger = logging.getLogger('cterasdk.direct')

@@ -86,11 +86,11 @@ class FileBrowser(BaseCommand):
         """
         return await io.versions(self._core, self.normalize(path))
 
-    async def walk(self, path, include_deleted=False):
+    async def walk(self, path=None, include_deleted=False):
         """
         Walk Directory Contents
 
-        :param str path: Path to walk
+        :param str,optional path: Path to walk, defaults to the root directory
         :param bool,optional include_deleted: Include deleted files, defaults to False
         """
         return io.walk(self._core, self._scope, path, include_deleted=include_deleted)
@@ -134,14 +134,14 @@ class FileBrowser(BaseCommand):
 
 class CloudDrive(FileBrowser):
 
-    async def upload(self, name, size, destination, handle):
+    async def upload(self, name, destination, handle, size=None):
         """
         Upload from file handle.
 
         :param str name: File name.
-        :param str size: File size.
         :param str destination: Path to remote directory.
         :param object handle: Handle.
+        :param str,optional size: File size, defaults to content length
         """
         upload_function = io.upload(name, size, self.normalize(destination), handle)
         return await upload_function(self._core)
@@ -155,7 +155,7 @@ class CloudDrive(FileBrowser):
         """
         with open(path, 'rb') as handle:
             metadata = commonfs.properties(path)
-            response = await self.upload(metadata['name'], metadata['size'], destination, handle)
+            response = await self.upload(metadata['name'], destination, handle, metadata['size'])
         return response
 
     async def mkdir(self, path):

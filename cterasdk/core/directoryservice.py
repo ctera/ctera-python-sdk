@@ -2,9 +2,12 @@ import logging
 
 from .base_command import BaseCommand
 from ..common import Object
-from ..exceptions import CTERAException
+from ..exceptions import CTERAException, InputError
 from .enum import PortalAccountType, SearchType, DirectoryServiceType, DirectoryServiceFetchMode, Role, DirectorySearchEntityType
 from .types import AccessControlEntry, AccessControlRule, UserAccount, GroupAccount
+
+
+logger = logging.getLogger('cterasdk.core')
 
 
 class DirectoryService(BaseCommand):
@@ -68,13 +71,13 @@ class DirectoryService(BaseCommand):
             param.ipAddresses.ipAddress2 = domain_controllers.secondary
 
         tenant = self._core.session().account.tenant
-        logging.getLogger('cterasdk.core').info('Connecting Portal to directory services. %s', {
+        logger.info('Connecting Portal to directory services. %s', {
             'tenant': tenant,
             'type': type,
             'domain': domain
         })
         self._connect_to_directory_services(param)
-        logging.getLogger('cterasdk.core').info('Connected Portal to directory services. %s', {'tennat': tenant, 'domain': domain})
+        logger.info('Connected Portal to directory services. %s', {'tennat': tenant, 'domain': domain})
 
         if mapping:
             self._configure_advanced_mapping(mapping)
@@ -109,11 +112,11 @@ class DirectoryService(BaseCommand):
         param = Object()
         param._classname = 'ADIDMapping'  # pylint: disable=protected-access
         param.map = mapping
-        logging.getLogger('cterasdk.core').debug('Updating advanced mapping. %s', {
+        logger.debug('Updating advanced mapping. %s', {
             'domains': [mapping.domainFlatName for mapping in param.map]
         })
         response = self._core.api.put('/directoryConnector/idMapping', param)
-        logging.getLogger('cterasdk.core').info('Updated advanced mapping.')
+        logger.info('Updated advanced mapping.')
         return response
 
     def get_access_control(self):
@@ -157,14 +160,14 @@ class DirectoryService(BaseCommand):
                 account = self._search_groups(ace.account.directory, ace.account.name)
             access_control_rules.append(AccessControlRule(account, ace.role))
 
-        logging.getLogger('cterasdk.core').info('Updating access control rules.')
+        logger.info('Updating access control rules.')
         response = self._core.api.put('/directoryConnector/accessControlRules', access_control_rules)
-        logging.getLogger('cterasdk.core').info('Updated access control rules.')
+        logger.info('Updated access control rules.')
 
         if default is not None:
-            logging.getLogger('cterasdk.core').info('Updating default role.')
+            logger.info('Updating default role.')
             response = self._core.api.put('/directoryConnector/noMatchRole', default)
-            logging.getLogger('cterasdk.core').info('Updated default role')
+            logger.info('Updated default role')
 
         return response
 
@@ -209,12 +212,13 @@ class DirectoryService(BaseCommand):
         param = []
         for active_directory_account in active_directory_accounts:
             if active_directory_account.directory not in domains:
-                logging.getLogger('cterasdk.core').error('Invalid domain name. %s', {'domain': active_directory_account.directory})
-                raise CTERAException('Invalid domain', None, domain=active_directory_account.directory, domains=domains)
+                logger.error('Invalid domain name. %s', {'domain': active_directory_account.directory})
+                raise InputError(f'Invalid domain: {active_directory_account.directory}', active_directory_account.directory, domains)
 
             if active_directory_account.account_type not in account_types:
-                logging.getLogger('cterasdk.core').error('Invalid account type. %s', {'type': active_directory_account.account_type})
-                raise CTERAException('Invalid account type', None, type=active_directory_account.account_type, options=account_types)
+                logger.error('Invalid account type. %s', {'type': active_directory_account.account_type})
+                raise InputError(f'Invalid account type: {active_directory_account.account_type}', active_directory_account.account_type,
+                                 account_types)
 
         for active_directory_account in active_directory_accounts:
             if active_directory_account.account_type == PortalAccountType.User:
@@ -222,9 +226,9 @@ class DirectoryService(BaseCommand):
             elif active_directory_account.account_type == PortalAccountType.Group:
                 param.append(self._search_groups(active_directory_account.directory, active_directory_account.name))
 
-        logging.getLogger('cterasdk.core').info('Starting to fetch users and groups.')
+        logger.info('Starting to fetch users and groups.')
         response = self._core.api.execute('', 'syncAD', param)
-        logging.getLogger('cterasdk.core').info('Started fetching users and groups.')
+        logger.info('Started fetching users and groups.')
 
         return response
 
@@ -240,35 +244,19 @@ class DirectoryService(BaseCommand):
         param.name = name
         param.domain = domain
 
-        logging.getLogger('cterasdk.core').info(
-            'Searching %(search_type)s: %(info)s',
-            dict(search_type=search_type, info={'domain': domain, 'name': name})
-        )
+        logger.info('Searching %(search_type)s: %(info)s', dict(search_type=search_type, info={'domain': domain, 'name': name}))
 
         objects = self._core.api.execute('', 'searchAD', param)
         if not objects:
-            logging.getLogger('cterasdk.core').info('Could not find results that match your search criteria. %s',
-                                                    {'domain': domain, 'name': name})
-            raise CTERAException(
-                'Could not find results that match your search criteria',
-                None,
-                domain=domain,
-                type=search_type,
-                account=name
-            )
+            logger.info('Could not find %s: %s@%s.', search_type, name, domain)
+            raise CTERAException(f'Could not find {search_type[:-1]}: {name}@{domain}')
 
         for principal in objects:
             if principal.name == name:
-                logging.getLogger('cterasdk.core').info('Found. %s', {'domain': domain, 'name': name})
+                logger.info('Found. %s', {'domain': domain, 'name': name})
                 return principal
 
-        raise CTERAException(
-            'Search returned multiple results, but none matched your search criteria',
-            None,
-            domain=domain,
-            type=search_type,
-            account=name
-        )
+        raise CTERAException('Search returned multiple results, but none matched the specified criteria.')
 
     def disconnect(self):
         """

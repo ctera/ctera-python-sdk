@@ -6,6 +6,9 @@ from ..lib import X509Certificate, PrivateKey, TempfileServices, create_certific
 from ..lib.storage import commonfs, synfs
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class SSL(BaseCommand):
     """
     Portal SSL Certificate APIs
@@ -17,9 +20,9 @@ class SSL(BaseCommand):
 
         :return cterasdk.common.object.Object: An object including the SSL certificate details
         """
-        logging.getLogger('cterasdk.core').info('Retrieving SSL certificate')
+        logger.info('Retrieving SSL certificate')
         response = self._core.api.get('/settings/ca')
-        logging.getLogger('cterasdk.core').info('Retrieved SSL certificate')
+        logger.info('Retrieved SSL certificate')
         return response
 
     @property
@@ -37,10 +40,10 @@ class SSL(BaseCommand):
          File destination, defaults to the default directory
         """
         directory, filename = commonfs.generate_file_destination(destination, 'certificate.zip')
-        logging.getLogger('cterasdk.core').info('Exporting SSL certificate.')
+        logger.info('Exporting SSL certificate.')
         handle = self._core.ctera.handle('/preview/exportCertificate')
         filepath = synfs.write(directory, filename, handle)
-        logging.getLogger('cterasdk.core').info('Exported SSL certificate. %s', {'filepath': filepath})
+        logger.info('Exported SSL certificate. %s', {'filepath': filepath})
         return filepath
 
     @staticmethod
@@ -95,7 +98,7 @@ class SSL(BaseCommand):
 
     def _import_certificate(self, zipfile):
         commonfs.properties(zipfile)
-        logging.getLogger('cterasdk.core').info('Uploading SSL certificate.')
+        logger.info('Uploading SSL certificate.')
         with open(zipfile, 'rb') as fd:
             response = self._core.api.form_data(
                 '/settings/importCertificate',
@@ -105,6 +108,6 @@ class SSL(BaseCommand):
                 )
             )
             if not isinstance(response, str):
-                logging.getLogger('cterasdk.core').error('Failed uploading SSL certificate. %s', {'reason': response.msg})
-            logging.getLogger('cterasdk.core').info('Uploaded SSL certificate.')
+                logger.error('Failed uploading SSL certificate. %s', {'reason': response.msg})
+            logger.info('Uploaded SSL certificate.')
             self._core.startup.wait()

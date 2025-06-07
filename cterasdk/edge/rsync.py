@@ -5,6 +5,9 @@ from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class RSync(BaseCommand):
     """ Edge Filer RSync configuration """
 
@@ -30,9 +33,9 @@ class RSync(BaseCommand):
 
     def _set_mode(self, enabled):
         """ Disable RSync """
-        logging.getLogger('cterasdk.edge').info('%s RSync server.', ('Enabling' if enabled else 'Disabling'))
+        logger.info('%s RSync server.', ('Enabling' if enabled else 'Disabling'))
         self._edge.api.put('/config/fileservices/rsync/server', Mode.Enabled if enabled else Mode.Disabled)
-        logging.getLogger('cterasdk.edge').info('RSync server %s.', ('enabled' if enabled else 'disabled'))
+        logger.info('RSync server %s.', ('enabled' if enabled else 'disabled'))
 
     def modify(
             self,

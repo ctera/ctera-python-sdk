@@ -2,6 +2,9 @@ import logging
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Mail(BaseCommand):
     """ Portal Mail Server Configuration APIs """
 
@@ -25,18 +28,18 @@ class Mail(BaseCommand):
         settings = self._core.api.get('/settings')
         settings.enableEmailSending = True
         settings = Mail._configure_settings(settings, host, port, sender, username, password, use_tls)
-        logging.getLogger('cterasdk.core').info('Enabling Mail Server.')
+        logger.info('Enabling Mail Server.')
         response = self._core.api.put('/settings', settings)
-        logging.getLogger('cterasdk.core').info('Mail Server enabled.')
+        logger.info('Mail Server enabled.')
         return response
 
     def disable(self):
         """
         Disable Mail Server Notifications
         """
-        logging.getLogger('cterasdk.core').info('Disabling Mail Server.')
+        logger.info('Disabling Mail Server.')
         response = self._core.api.put('/settings/enableEmailSending', False)
-        logging.getLogger('cterasdk.core').info('Mail Server disabled.')
+        logger.info('Mail Server disabled.')
         return response
 
     @staticmethod
@@ -67,7 +70,7 @@ class Mail(BaseCommand):
         """
         settings = self._core.api.get('/settings')
         settings = Mail._configure_settings(settings, host, port, sender, username, password, use_tls)
-        logging.getLogger('cterasdk.core').info('Modifying Mail Server settings.')
+        logger.info('Modifying Mail Server settings.')
         response = self._core.api.put('/settings', settings)
-        logging.getLogger('cterasdk.core').info('Mail Server settings modified.')
+        logger.info('Mail Server settings modified.')
         return response

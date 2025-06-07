@@ -6,6 +6,9 @@ from ..common import union, convert_size, DataUnit, PolicyRuleConverter
 from . import query
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Plans(BaseCommand):
     """
     Portal Plan APIs
@@ -25,10 +28,11 @@ class Plans(BaseCommand):
 
         :param str name: Name of the subscription plan
         """
+        ref = f'/plans/{name}'
         try:
-            return self._core.api.get('/plans/' + name)
+            return self._core.api.get(ref)
         except CTERAException as error:
-            raise CTERAException('Could not find subscription plan', error)
+            raise CTERAException(f'Plan not found: {ref}') from error
 
     def by_name(self, names, include=None):
         """
@@ -75,7 +79,7 @@ class Plans(BaseCommand):
         include = ['/' + attr for attr in include]
         plan = self._core.api.get_multi('/plans/' + name, include)
         if plan.name is None:
-            raise ObjectNotFoundException('Could not find subscription plan', f'/plans/{name}', name=name)
+            raise ObjectNotFoundException(f'/plans/{name}')
         return plan
 
     def add(self, name, services=None, retention=None, quotas=None):
@@ -93,11 +97,11 @@ class Plans(BaseCommand):
         Plans._assign_quotas(plan, quotas)
         try:
             response = self._core.api.add('/plans', plan)
-            logging.getLogger('cterasdk.core').info("Plan created. %s", {'plan': name})
+            logger.info("Plan created. %s", {'plan': name})
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error("Plan creation failed.")
-            raise CTERAException('Plan creation failed', error)
+            logger.error("Plan creation failed: %s", name)
+            raise CTERAException(f'Plan creation failed: {name}') from error
 
     def modify(self, name, services=None, retention=None, quotas=None, apply_changes=True):
         """
@@ -112,9 +116,11 @@ class Plans(BaseCommand):
         Plans._assign_services(plan, services)
         Plans._assign_retention(plan, retention)
         Plans._assign_quotas(plan, quotas)
+
+        ref = f'/plans/{name}'
         try:
-            response = self._core.api.put('/plans/' + name, plan)
-            logging.getLogger('cterasdk.core').info("Plan modified. %s", {'plan': name})
+            response = self._core.api.put(ref, plan)
+            logger.info("Plan modified. %s", {'plan': name})
             if apply_changes:
                 if self._core.session().in_tenant_context():
                     self._core.users.apply_changes(True)
@@ -122,8 +128,8 @@ class Plans(BaseCommand):
                     self._core.portals.apply_changes(True)
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error("Could not modify subscription plan.")
-            raise CTERAException('Could not modify subscription plan', error)
+            logger.error("Plan modification failed: %s", ref)
+            raise CTERAException(f'Plan modification failed: {ref}') from error
 
     @staticmethod
     def _assign_services(plan, services):
@@ -188,13 +194,14 @@ class Plans(BaseCommand):
 
         :param str username: The name of the subscription plan
         """
+        ref = f'/plans/{name}'
         try:
-            response = self._core.api.delete('/plans/' + name)
-            logging.getLogger('cterasdk.core').info("Plan deleted. %s", {'name': name})
+            response = self._core.api.delete(ref)
+            logger.info("Plan deleted: %s", name)
             return response
         except CTERAException as error:
-            logging.getLogger('cterasdk.core').error("Plan deletion failed.")
-            raise CTERAException('Plan deletion failed', error)
+            logger.error("Plan deletion failed: %s", ref)
+            raise CTERAException(f'Plan deletion failed: {ref}') from error
 
 
 class PlanAutoAssignPolicy(BaseCommand):
@@ -222,8 +229,8 @@ class PlanAutoAssignPolicy(BaseCommand):
 
         not_found = [plan for plan in plans if plan not in portal_plans.keys()]
         if not_found:
-            logging.getLogger('cterasdk.core').error('Could not find one or more plans. %s', {'plans': not_found})
-            raise CTERAException('Could not find one or more plans', None, plans=not_found)
+            logger.error('Could not find one or more plans: %s', not_found)
+            raise CTERAException(f'Could not find one or more plans: {not_found}')
 
         policy = self.get_policy()
 
@@ -237,7 +244,7 @@ class PlanAutoAssignPolicy(BaseCommand):
         policy.planAutoAssignmentRules = policy_rules
 
         response = self._core.api.execute('', 'setPlanAutoAssignmentRules', policy)
-        logging.getLogger('cterasdk.core').info('Set plans auto assignment rules.')
+        logger.info('Set plans auto assignment rules.')
 
         if apply_changes:
             self._core.users.apply_changes(True)

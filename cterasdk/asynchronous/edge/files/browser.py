@@ -15,11 +15,11 @@ class FileBrowser(BaseCommand):
         """
         return await io.listdir(self._edge, self.normalize(path))
 
-    async def walk(self, path):
+    async def walk(self, path=None):
         """
         Walk Directory Contents
 
-        :param str path: Path to walk
+        :param str, defaults to the root directory path: Path to walk
         """
         return io.walk(self._edge, path)
 

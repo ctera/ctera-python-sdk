@@ -2,7 +2,8 @@ from .base_command import BaseCommand
 from .enum import DeviceType
 from . import remote, query
 from ..common import union
-from ..exceptions import CTERAException, ObjectNotFoundException
+from ..exceptions import ObjectNotFoundException
+from ..exceptions.session import ContextError
 
 
 class Devices(BaseCommand):
@@ -16,7 +17,7 @@ class Devices(BaseCommand):
         session = self._core.session()
         if not tenant:
             if not session.in_tenant_context():
-                raise CTERAException('You must specify a tenant name or browse the tenant first.')
+                raise ContextError('Browse a Tenant, or specify the Tenant name to invoke this API')
             tenant = self._core.session().current_tenant()
         resource_uri = f'/portals/{tenant}/devices/{device_name}'  # regular auth: support both tenant and Administration context
         return resource_uri
@@ -39,7 +40,7 @@ class Devices(BaseCommand):
 
         dev = self._core.api.get_multi(resource_uri, include)
         if dev.name is None:
-            raise ObjectNotFoundException('Device not found', resource_uri, tenant=tenant, name=device_name)
+            raise ObjectNotFoundException(resource_uri)
 
         return remote.remote_command(self._core, dev)
 

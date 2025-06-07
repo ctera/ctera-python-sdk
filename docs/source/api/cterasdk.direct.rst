@@ -12,7 +12,6 @@ Submodules
 .. toctree::
 
    cterasdk.direct.client
-   cterasdk.direct.exceptions
    cterasdk.direct.stream
    cterasdk.direct.types
 

@@ -9,6 +9,9 @@ from ..clients.common import MultipartForm
 from ..exceptions import CTERAException
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Setup(BaseCommand):
     """
     Global Admin Setup APIs
@@ -53,12 +56,12 @@ class Setup(BaseCommand):
 
             params.settings = Setup.default_settings()
             params.settings.dnsSuffix = domain
-            logging.getLogger('cterasdk.core').info('Initializing Portal. %s', {'domain': domain, 'user': name})
+            logger.info('Initializing Portal. %s', {'domain': domain, 'user': name})
             self._core.ctera.execute('/public', 'init', params)
             SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Portal)
-            logging.getLogger('cterasdk.core').info('Portal initialized.')
+            logger.info('Portal initialized.')
         elif self.stage == SetupWizardStage.Finish:
-            logging.getLogger('cterasdk.core').warning('Portal already initialized. %s', {'host': self._core.host()})
+            logger.warning('Portal already initialized. %s', {'host': self._core.host()})
         self._core.startup.wait()
 
     def _init_slave(self, ipaddr, secret):
@@ -71,7 +74,7 @@ class Setup(BaseCommand):
         elif response == SlaveAuthenticaionMethod.PrivateKey:
             params.slaveSettings.masterKey = secret
         else:
-            logging.getLogger('cterasdk.core').error('Unknown authentication method. %s', {'method': response})
+            logger.error('Unknown authentication method. %s', {'method': response})
         self._init_server(params, True)
 
     def _init_server(self, params, wait=False):
@@ -83,14 +86,14 @@ class Setup(BaseCommand):
             if params.serverMode == ServerMode.Slave:
                 form.add('masterIpAddr', params.slaveSettings.masterIpAddr)
 
-            logging.getLogger('cterasdk.core').info('Initializing server. %s', {'host': self._core.host(), 'mode': params.serverMode})
+            logger.info('Initializing server. %s', {'host': self._core.host(), 'mode': params.serverMode})
             self._core.ctera.multipart('/setup', form)
             if wait:
                 status = SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Server)
                 self.stage = status.wizard
-                logging.getLogger('cterasdk.core').info('Server initialized. %s', {'host': self._core.host(), 'mode': params.serverMode})
+                logger.info('Server initialized. %s', {'host': self._core.host(), 'mode': params.serverMode})
         else:
-            logging.getLogger('cterasdk.core').warning('Server already initialized. %s', {'host': self._core.host()})
+            logger.warning('Server already initialized. %s', {'host': self._core.host()})
 
     def init_application_server(self, ipaddr, secret):
         """
@@ -100,7 +103,7 @@ class Setup(BaseCommand):
         :param str secret: A password or a PEM-encoded private key
         """
         self._init_slave(ipaddr, secret)
-        logging.getLogger('cterasdk.core').info('Initializing Application Server. %s', {'host': ipaddr})
+        logger.info('Initializing Application Server. %s', {'host': ipaddr})
         self._core.startup.wait()
 
     @staticmethod
@@ -148,29 +151,29 @@ class SetupWizardStatusMonitor:
         while current_stage == stage:
             try:
                 self._increment()
-                logging.getLogger('cterasdk.core').debug('Obtaining wizard status. %s', {'attempt': self._attempt})
+                logger.debug('Obtaining wizard status. %s', {'attempt': self._attempt})
                 status = self._core.setup.get_setup_status()
-                logging.getLogger('cterasdk.core').debug('Current wizard status. %s', {
+                logger.debug('Current wizard status. %s', {
                     'stage': status.wizard,
                     'status': status.currentWizardProgress,
                     'description': status.description
                 })
                 if status.currentWizardProgress == SetupWizardStatus.Failed:
-                    raise CTERAException('Initialization failed.', status)
+                    raise CTERAException(f'Initialization failed: {status}')
                 current_stage = status.wizard
             except (ConnectionError, TimeoutError) as e:
-                logging.getLogger('cterasdk.core').debug('Exception. %s', e.__dict__)
-        logging.getLogger('cterasdk.core').debug('Wizard update. %s', {'previous_stage': stage, 'current_stage': current_stage})
+                logger.debug('Exception. %s', e.__dict__)
+        logger.debug('Wizard update. %s', {'previous_stage': stage, 'current_stage': current_stage})
         return status
 
     def _increment(self):
         self._attempt = self._attempt + 1
         if self._attempt >= self._retries:
             SetupWizardStatusMonitor._unreachable()
-        logging.getLogger('cterasdk.core').debug('Sleep. %s', {'seconds': self._seconds})
+        logger.debug('Sleep. %s', {'seconds': self._seconds})
         time.sleep(self._seconds)
 
     @staticmethod
     def _unreachable():
-        logging.getLogger('cterasdk.core').error('Timed out. Setup did not complete in a timely manner.')
+        logger.error('Timed out. Setup did not complete in a timely manner.')
         raise CTERAException('Timed out. Setup did not complete in a timely manner')

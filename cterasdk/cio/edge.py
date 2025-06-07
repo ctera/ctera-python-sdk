@@ -4,7 +4,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from ..common import Object
 from ..objects.uri import unquote
-from . import common, exceptions
+from . import common
+from ..exceptions.io import CTERAException, ResourceExistsError, RestrictedPathError
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -24,6 +25,8 @@ class EdgePath(common.BasePath):
             super().__init__(scope, reference.path)
         elif isinstance(reference, str):
             super().__init__(scope, reference)
+        elif reference is None:
+            super().__init__(scope, '')
         else:
             message = 'Path validation failed: ensure the path exists and is correctly formatted.'
             logger.error(message)
@@ -35,15 +38,15 @@ class EdgePath(common.BasePath):
 
 
 def fetch_reference(href):
-    namespace = 'localFiles/'
-    return unquote(href[href.index(namespace)+len(namespace):])
+    namespace = '/localFiles'
+    return unquote(href[href.index(namespace)+len(namespace) + 1:])
 
 
 def format_listdir_response(parent, response):
     entries = []
     for e in response:
         path = fetch_reference(e.href)
-        if parent != path:
+        if path and parent != path:
             is_dir = e.getcontenttype == 'httpd/unix-directory'
             param = Object(
                 path=path,
@@ -64,10 +67,10 @@ def makedir(path):
     logger.info('Creating directory: %s', path.absolute)
     try:
         yield path.absolute
-    except exceptions.CTERAException as error:
+    except CTERAException as error:
         try:
             accept_response(error.response.message.msg, directory)
-        except exceptions.ResourceExistsError:
+        except ResourceExistsError:
             logger.info('Directory already exists: %s', directory)
     logger.info('Directory created: %s', directory)
 
@@ -113,6 +116,7 @@ def handle_many(directory, objects):
 
 @contextmanager
 def upload(name, destination, fd):
+    fd, *_ = common.encode_stream(fd, 0)
     param = dict(
         name=name,
         fullpath=f'{destination.absolute}/{name}',
@@ -124,15 +128,15 @@ def upload(name, destination, fd):
 
 def accept_response(response, reference):
     error = {
-        "File exists": exceptions.ResourceExistsError(),
-        "Creating a folder in this location is forbidden": exceptions.RestrictedPathError(),
+        "File exists": ResourceExistsError(),
+        "Creating a folder in this location is forbidden": RestrictedPathError(),
     }.get(response, None)
     try:
         if error:
             raise error
-    except exceptions.ResourceExistsError as error:
+    except ResourceExistsError as error:
         logger.warning('Resource already exists: a file or folder with this name already exists. %s', {'path': reference})
         raise error
-    except exceptions.RestrictedPathError as error:
+    except RestrictedPathError as error:
         logger.error('Creating a folder in the specified location is forbidden. %s', {'name': reference})
         raise error

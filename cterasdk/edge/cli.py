@@ -3,6 +3,9 @@ import logging
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class CLI(BaseCommand):
     """ CLI APIs """
 
@@ -13,10 +16,10 @@ class CLI(BaseCommand):
         :param str cli_command: Command
         :return str: Response
         """
-        logging.getLogger('cterasdk.edge').warning('Usage of the CLI module is discouraged. '
-                                                   'Review available modules to determine if there are existing ones that '
-                                                   'support this action.')
-        logging.getLogger('cterasdk.edge').info("Executing CLI command. %s", {'cli_command': cli_command})
+        logger.warning('Usage of the CLI module is discouraged. '
+                       'Review available modules to determine if there are existing ones that '
+                       'support this action.')
+        logger.info("Executing CLI command. %s", {'cli_command': cli_command})
         response = self._edge.api.execute('/config/device', 'debugCmd', cli_command)
-        logging.getLogger('cterasdk.edge').info("CLI command executed. %s", {'cli_command': cli_command})
+        logger.info("CLI command executed. %s", {'cli_command': cli_command})
         return response

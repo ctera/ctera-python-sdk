@@ -159,7 +159,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self._init_filer(get_response=1)
         with self.assertRaises(exceptions.CTERAException) as error:
             directoryservice.DirectoryService(self._filer).set_advanced_mapping([])
-        self.assertEqual('Failed to configure advanced mapping. Not connected to directory services.', error.exception.message)
+        self.assertEqual('Failed to configure advanced mapping. Not connected to directory services.', str(error.exception))
 
     def test_domains(self):
         self._init_filer(execute_response=TestEdgeDirectoryService._create_get_domains_response(self._domain_flat_name))

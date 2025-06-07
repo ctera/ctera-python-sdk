@@ -5,6 +5,9 @@ from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class Telnet(BaseCommand):
     """ Edge Filer Telnet configuration APIs """
 
@@ -13,19 +16,19 @@ class Telnet(BaseCommand):
         param = Object()
         param.code = code
 
-        logging.getLogger('cterasdk.edge').info("Enabling telnet access.")
+        logger.info("Enabling telnet access.")
 
         response = self._edge.api.execute("/config/device", "startTelnetd", param)
         if response == 'telnetd already running':
-            logging.getLogger('cterasdk.edge').info("Telnet access already enabled.")
+            logger.info("Telnet already enabled.")
         elif response != "OK":
-            logging.getLogger('cterasdk.edge').error("Failed enabling telnet access. %s", {'reason': response})
-            raise CTERAException("Failed enabling telnet access", None, reason=response)
+            logger.error("Failed enabling telnet access. %s", {'reason': response})
+            raise CTERAException(f"Failed to enable telnet. Reason: {response}")
         else:
-            logging.getLogger('cterasdk.edge').info("Telnet access enabled.")
+            logger.info("Telnet enabled.")
 
     def disable(self):
         """ Disable Telnet """
-        logging.getLogger('cterasdk.edge').info("Disabling telnet access.")
+        logger.info("Disabling telnet access.")
         self._edge.api.execute("/config/device", "stopTelnetd")
-        logging.getLogger('cterasdk.edge').info("Telnet access disabled.")
+        logger.info("Telnet disabled.")

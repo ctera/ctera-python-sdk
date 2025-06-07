@@ -3,6 +3,9 @@ import logging
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Activation(BaseCommand):
     """ Portal activation """
 
@@ -21,8 +24,8 @@ class Activation(BaseCommand):
         if tenant:
             params['portal'] = tenant
 
-        logging.getLogger('cterasdk.core').info('Generating device activation code. %s', {'user': username, 'portal': tenant})
+        logger.info('Generating device activation code. %s', {'user': username, 'portal': tenant})
         response = self._core.api.get('/ssoActivation', params=params)
-        logging.getLogger('cterasdk.core').info('Generated device activation code. %s', {'user': username, 'portal': tenant})
+        logger.info('Generated device activation code. %s', {'user': username, 'portal': tenant})
 
         return response.code

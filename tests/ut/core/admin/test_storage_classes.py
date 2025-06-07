@@ -62,4 +62,4 @@ class TestCoreStorageClasses(base_admin.BaseCoreTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             storage_classes.StorageClasses(self._global_admin).get(self._storage_class_name)
             self._global_admin.api.execute.assert_called_once_with('', 'getStorageClasses')
-        self.assertEqual('Could not find storage class.', error.exception.message)
+        self.assertEqual(f'Storage class not found: /storageClasses/{self._storage_class_name}', str(error.exception))

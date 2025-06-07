@@ -4,6 +4,9 @@ from . import query
 from ..exceptions import CTERAException
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class RansomProtect(BaseCommand):
     """
     Ransomware Protect APIs
@@ -19,15 +22,15 @@ class RansomProtect(BaseCommand):
 
     def enable(self):
         """Enable Ransom Protect service"""
-        logging.getLogger('cterasdk.edge').info('Enabling Ransom Protect.')
+        logger.info('Enabling Ransom Protect.')
         self._edge.api.put('/config/ransomProtect/enabled', True)
-        logging.getLogger('cterasdk.edge').info('Ransom Protect enabled.')
+        logger.info('Ransom Protect enabled.')
 
     def disable(self):
         """Enable Ransom Protect service"""
-        logging.getLogger('cterasdk.edge').info('Disabling Ransom Protect.')
+        logger.info('Disabling Ransom Protect.')
         self._edge.api.put('/config/ransomProtect/enabled', False)
-        logging.getLogger('cterasdk.edge').info('Ransom Protect disabled.')
+        logger.info('Ransom Protect disabled.')
 
     def is_disabled(self):
         """Check if Ransom Protect is disabled"""

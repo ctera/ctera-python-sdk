@@ -1,7 +1,7 @@
-cterasdk.direct.exceptions module
+cterasdk.exceptions.direct module
 =================================
 
-.. automodule:: cterasdk.direct.exceptions
+.. automodule:: cterasdk.exceptions.direct
     :members:
     :undoc-members:
     :show-inheritance:

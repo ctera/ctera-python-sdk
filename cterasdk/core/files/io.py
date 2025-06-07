@@ -1,7 +1,7 @@
 import logging
 from ...cio.common import encode_request_parameter
 from ...cio import core as fs
-from ...cio import exceptions
+from ...exceptions.io import ResourceNotFoundError, ResourceExistsError, NotADirectory
 from ...core import query
 from ..enum import CollaboratorType
 from ...lib import FetchResourcesResponse
@@ -18,18 +18,22 @@ def listdir(core, path, depth=None, include_deleted=False, search_criteria=None,
 
 
 def exists(core, path):
-    try:
-        metadata(core, path)
-        return True
-    except exceptions.ResourceNotFoundError:
-        return False
+    present, *_ = metadata(core, path, suppress_error=True)
+    return present
 
 
-def metadata(core, path):
+def metadata(core, path, suppress_error=False):
+    """
+    Get item metadata.
+
+    :returns: A tuple indicating if a file exists, and its metadata
+    """
     response = listdir(core, path, 0)
     if response.root is None:
-        raise exceptions.ResourceNotFoundError(path.absolute)
-    return response.root
+        if not suppress_error:
+            raise ResourceNotFoundError(path.absolute)
+        return False, None
+    return True, response.root
 
 
 def versions(core, path):
@@ -60,7 +64,7 @@ def makedirs(core, path):
         path = fs.CorePath.instance(path.scope, '/'.join(directories[:i]))
         try:
             mkdir(core, path)
-        except exceptions.ResourceExistsError:
+        except ResourceExistsError:
             logger.debug('Resource already exists: %s', path.reference.as_posix())
 
 
@@ -89,11 +93,11 @@ def move(core, *paths, destination=None):
         return core.api.execute('', 'moveResources', param)
 
 
-def retrieve_remote_dir(core, directory):
-    resource = metadata(core, directory)
-    if not resource.isFolder:
-        raise exceptions.RemoteStorageException('The destination path is not a directory', None, path=directory.absolute)
-    return str(resource.cloudFolderInfo.uid)
+def ensure_directory(core, directory, suppress_error=False):
+    present, resource = metadata(core, directory, suppress_error=True)
+    if (not present or not resource.isFolder) and not suppress_error:
+        raise NotADirectory(directory.absolute)
+    return resource.isFolder if present else False, resource
 
 
 def handle(path):
@@ -133,8 +137,17 @@ def handle_many(directory, *objects):
         :param object handle: File handle.
         """
         with fs.handle_many(directory, objects) as param:
-            return core.io.download_zip(retrieve_remote_dir(core, directory), encode_request_parameter(param))
+            _, resource = ensure_directory(core, directory)
+            return core.io.download_zip(str(resource.cloudFolderInfo.uid), encode_request_parameter(param))
     return wrapper
+
+
+def _validate_destination(core, name, destination):
+    is_dir, resource = ensure_directory(core, destination, suppress_error=True)
+    if not is_dir:
+        is_dir, resource = ensure_directory(core, destination.parent)
+        return resource.cloudFolderInfo.uid, destination.name, destination.parent
+    return resource.cloudFolderInfo.uid, name, destination
 
 
 def upload(name, size, destination, fd):
@@ -151,11 +164,11 @@ def upload(name, size, destination, fd):
         """
         Upload file from metadata and file handle.
 
-        :param cterasdk.objects.synchronous.core.Portal core: POrtal object.
+        :param cterasdk.objects.synchronous.core.Portal core: Portal object.
         """
-        target = retrieve_remote_dir(core, destination)
-        with fs.upload(core, name, destination, size, fd) as param:
-            return core.io.upload(target, param)
+        uid, filename, directory = _validate_destination(core, name, destination)
+        with fs.upload(core, filename, directory, size, fd) as param:
+            return core.io.upload(str(uid), param)
     return wrapper
 
 
@@ -207,7 +220,7 @@ def add_share_recipients(core, path, recipients):
 
 
 def _obtain_valid_recipients(core, path, recipients):
-    resource_info = metadata(core, path)
+    _, resource_info = metadata(core, path)
     valid_recipients = []
     for recipient in filter(fs.valid_recipient, recipients):
         if not recipient.type == CollaboratorType.EXT:
@@ -221,7 +234,7 @@ def _obtain_valid_recipients(core, path, recipients):
 
 
 def unshare(core, path):
-    resource_info = metadata(core, path)
+    _, resource_info = metadata(core, path)
     with fs.unshare(resource_info, path) as param:
         return core.api.execute('', 'shareResource', param)
 

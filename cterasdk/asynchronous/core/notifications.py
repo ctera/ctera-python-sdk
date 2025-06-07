@@ -6,7 +6,11 @@ from .types import Event
 from .base_command import BaseCommand
 from ...common import Object
 from ...lib import CursorResponse
-from ...exceptions import HTTPError, NotificationsError
+from ...exceptions.transport import HTTPError
+from ...exceptions.notifications import NotificationsError
+
+
+logger = logging.getLogger('cterasdk.notifications')
 
 
 class Notifications(BaseCommand):
@@ -30,11 +34,11 @@ class Notifications(BaseCommand):
         """
         param = await self._create_parameter(cloudfolders, cursor)
         param.max_results = max_results if max_results is not None else 2000
-        logging.getLogger('cterasdk.metadata.connector').debug('Listing updates.')
+        logger.debug('Listing updates.')
         response = await self._core.v2.api.post('/metadata/list', param)
         if response is not None:
             return CursorResponse(response)
-        logging.getLogger('cterasdk.metadata.connector').error('An error occurred while trying to retrieve notifications.')
+        logger.error('An error occurred while trying to retrieve notifications.')
         raise NotificationsError(cloudfolders, cursor)
 
     async def _create_parameter(self, cloudfolders, cursor):
@@ -64,7 +68,7 @@ class Notifications(BaseCommand):
         param = Object()
         param = await self._create_parameter(cloudfolders, cursor)
         param.timeout = timeout if timeout else 10000
-        logging.getLogger('cterasdk.metadata.connector').debug('Checking for updates. %s', {'timeout': param.timeout})
+        logger.debug('Checking for updates. %s', {'timeout': param.timeout})
         return (await self._core.v2.api.post('/metadata/longpoll', param)).changes
 
     async def ancestors(self, descendant):
@@ -78,12 +82,11 @@ class Notifications(BaseCommand):
         param = Object()
         param.folder_id = descendant.folder_id
         param.guid = descendant.guid
-        logging.getLogger('cterasdk.metadata.connector').debug('Getting ancestors. %s', {'guid': param.guid, 'folder_id': param.folder_id})
+        logger.debug('Getting ancestors. %s', {'guid': param.guid, 'folder_id': param.folder_id})
         try:
             return await self._core.v2.api.post('/metadata/ancestors', param)
         except HTTPError:
-            logging.getLogger('cterasdk.metadata.connector').error('Could not retrieve ancestors. %s',
-                                                                   {'folder_id': param.folder_id, 'guid': param.guid})
+            logger.error('Could not retrieve ancestors. %s', {'folder_id': param.folder_id, 'guid': param.guid})
             raise
 
 
@@ -128,7 +131,7 @@ async def retrieve_events(server_queue, core, cloudfolders, cursor):
     :param list[CloudFSFolderFindingHelper] cloudfolders: List of Cloud Drive folders.
     :param str cursor: Cursor
     """
-    logging.getLogger('cterasdk.metadata.connector').debug('Event Retrieval Service.')
+    logger.debug('Event Retrieval Service.')
     last_response = LastResponse(cursor)
     try:
         while True:
@@ -142,9 +145,9 @@ async def retrieve_events(server_queue, core, cloudfolders, cursor):
             except ConnectionError as error:
                 await on_connection_error(error)
             except TimeoutError:
-                logging.getLogger('cterasdk.metadata.connector').debug('Request timed out. Retrying.')
+                logger.debug('Request timed out. Retrying.')
     except asyncio.CancelledError:
-        logging.getLogger('cterasdk.metadata.connector').debug('Cancelling Event Retrieval.')
+        logger.debug('Cancelling Event Retrieval.')
 
 
 async def forward_events(server_queue, client_queue, save_cursor):
@@ -155,7 +158,7 @@ async def forward_events(server_queue, client_queue, save_cursor):
     :param asyncio.Queue client_queue: Client queue.
     :param callback save_cursor: Callback function to persist the cursor.
     """
-    logging.getLogger('cterasdk.metadata.connector').debug('Event Forwarder Service.')
+    logger.debug('Event Forwarder Service.')
     try:
         while True:
             batch = await server_queue.get()
@@ -163,7 +166,7 @@ async def forward_events(server_queue, client_queue, save_cursor):
             await process_events(client_queue)
             await persist_cursor(save_cursor, batch.cursor)
     except asyncio.CancelledError:
-        logging.getLogger('cterasdk.metadata.connector').debug('Cancelling Event Forwarding.')
+        logger.debug('Cancelling Event Forwarding.')
 
 
 async def enqueue_events(events, queue):
@@ -174,9 +177,9 @@ async def enqueue_events(events, queue):
     :param cterasdk.asynchronous.core.iterator.CursorAsyncIterator events: Event Iterator.
     """
     for event in events:
-        logging.getLogger('cterasdk.metadata.connector').debug('Enqueuing Event.')
+        logger.debug('Enqueuing Event.')
         await queue.put(Event.from_server_object(event))
-        logging.getLogger('cterasdk.metadata.connector').debug('Enqueued Event.')
+        logger.debug('Enqueued Event.')
 
 
 async def process_events(queue):
@@ -185,9 +188,9 @@ async def process_events(queue):
 
     :param asyncio.Queue queue: Queue.
     """
-    logging.getLogger('cterasdk.metadata.connector').debug('Joining Queue.')
+    logger.debug('Joining Queue.')
     await queue.join()
-    logging.getLogger('cterasdk.metadata.connector').debug('Completed Processing.')
+    logger.debug('Completed Processing.')
 
 
 async def persist_cursor(save_cursor, cursor):
@@ -197,19 +200,18 @@ async def persist_cursor(save_cursor, cursor):
     :param callback save_cursor: Asynchronous callback function to persist the cursor.
     :param str cursor: Cursor
     """
-    logging.getLogger('cterasdk.metadata.connector').debug("Persisting Cursor. Calling function: '%s'", save_cursor)
+    logger.debug("Persisting Cursor. Calling function: '%s'", save_cursor)
     try:
         await save_cursor(cursor)
-        logging.getLogger('cterasdk.metadata.connector').debug("Called Persist Cursor Function.")
+        logger.debug("Called Persist Cursor Function.")
     except Exception:  # pylint: disable=broad-exception-caught
-        logging.getLogger('cterasdk.metadata.connector').error("An error occurred while trying to persist cursor. Function: '%s'",
-                                                               save_cursor)
+        logger.error("An error occurred while trying to persist cursor. Function: '%s'", save_cursor)
 
 
 async def on_connection_error(error):
     seconds = 5
-    logging.getLogger('cterasdk.metadata.connector').error('Connection error. Reason: %s.', str(error))
-    logging.getLogger('cterasdk.metadata.connector').debug("Retrying in %s seconds.", seconds)
+    logger.error('Connection error. Reason: %s.', str(error))
+    logger.debug("Retrying in %s seconds.", seconds)
     await asyncio.sleep(seconds)
 
 

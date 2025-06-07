@@ -168,7 +168,7 @@ Streamer API
             try:
                 await start_stream(file_id, offset)
                 success = True
-            except ctera_direct.exceptions.StreamError as error:
+            except cterasdk.exceptions.direct.StreamError as error:
                 await handle_error(error)
                 offset = error.offset  # Try to play from where stream was interrupted.
 
@@ -186,22 +186,22 @@ Streamer API
 Exceptions
 ==========
 
-.. autoclass:: cterasdk.direct.exceptions.DirectIOError
+.. autoclass:: cterasdk.exceptions.direct.DirectIOError
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.direct.exceptions.DirectIOAPIError
+.. autoclass:: cterasdk.exceptions.direct.DirectIOAPIError
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.direct.exceptions.BlockError
+.. autoclass:: cterasdk.exceptions.direct.BlockError
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.direct.exceptions.StreamError
+.. autoclass:: cterasdk.exceptions.direct.StreamError
    :noindex:
    :members:
    :show-inheritance:

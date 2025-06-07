@@ -5,6 +5,9 @@ from ..exceptions import CTERAException
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class NFS(BaseCommand):
     """ Edge Filer NFS configuration """
 
@@ -29,9 +32,9 @@ class NFS(BaseCommand):
         return self._edge.api.get('/config/fileservices/nfs/mode') == Mode.Disabled
 
     def _set_mode(self, enabled):
-        logging.getLogger('cterasdk.edge').info('%s NFS server.', ('Enabling' if enabled else 'Disabling'))
+        logger.info('%s NFS server.', ('Enabling' if enabled else 'Disabling'))
         self._edge.api.put('/config/fileservices/nfs/mode', Mode.Enabled if enabled else Mode.Disabled)
-        logging.getLogger('cterasdk.edge').info('NFS server %s.', ('enabled' if enabled else 'disabled'))
+        logger.info('NFS server %s.', ('enabled' if enabled else 'disabled'))
 
     def modify(
             self,

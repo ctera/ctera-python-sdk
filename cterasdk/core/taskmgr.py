@@ -6,12 +6,15 @@ from ..exceptions import InputError
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Task(TaskBase):
 
     def _get_task_id(self, ref):
         match = re.search('servers/[^/]*/bgTasks/[1-9][0-9]*$', ref)
         if not match:
-            logging.getLogger('cterasdk.core').error('Invalid task id. %s', {'ref': ref})
+            logger.error('Invalid task id. %s', {'ref': ref})
             raise InputError('Invalid task id', ref, ['servers/server/bgTasks/107781'])
         return match.group(0)
 

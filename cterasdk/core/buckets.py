@@ -6,6 +6,9 @@ from .base_command import BaseCommand
 from . import query
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Buckets(BaseCommand):
     """
     Portal Storage Node APIs
@@ -14,10 +17,11 @@ class Buckets(BaseCommand):
     default = ['name']
 
     def _get_entire_object(self, name):
+        ref = f'/locations/{name}'
         try:
-            return self._core.api.get(f'/locations/{name}')
+            return self._core.api.get(ref)
         except CTERAException as error:
-            raise CTERAException('Failed to get bucket', error)
+            raise CTERAException(f'Bucket not found: {ref}') from error
 
     def _get_tenant_base_object_ref(self, name):
         return self._core.portals.get(name, include=['baseObjectRef']).baseObjectRef
@@ -33,7 +37,7 @@ class Buckets(BaseCommand):
         include = ['/' + attr for attr in include]
         bucket = self._core.api.get_multi('/locations/' + name, include)
         if bucket.name is None:
-            raise ObjectNotFoundException('Could not find bucket', f'/locations/{name}', name=name)
+            raise ObjectNotFoundException(f'/locations/{name}')
         return bucket
 
     def add(self, name, bucket, read_only=False, dedicated_to=None):
@@ -51,11 +55,9 @@ class Buckets(BaseCommand):
         param.dedicated = bool(dedicated_to)
         param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
 
-        logging.getLogger('cterasdk.core').info('Adding bucket. %s',
-                                                {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
+        logger.info('Adding bucket. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
         response = self._core.api.add('/locations', param)
-        logging.getLogger('cterasdk.core').info('Bucket added. %s',
-                                                {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
+        logger.info('Bucket added. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
         return response
 
     def modify(self, current_name, new_name=None, read_only=None, dedicated_to=None, verify_ssl=None):
@@ -86,9 +88,9 @@ class Buckets(BaseCommand):
                 param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
         if verify_ssl is not None:
             param.trustAllCertificates = not verify_ssl
-        logging.getLogger('cterasdk.core').info("Modifying bucket. %s", {'name': current_name})
+        logger.info("Modifying bucket. %s", {'name': current_name})
         response = self._core.api.put(f'/locations/{current_name}', param)
-        logging.getLogger('cterasdk.core').info("Bucket modified. %s", {'name': current_name})
+        logger.info("Bucket modified. %s", {'name': current_name})
         return response
 
     def list_buckets(self, include=None):
@@ -108,9 +110,9 @@ class Buckets(BaseCommand):
 
         :param str name: Name of the bucket
         """
-        logging.getLogger('cterasdk.core').info('Deleting bucket. %s', {'name': name})
+        logger.info('Deleting bucket. %s', {'name': name})
         response = self._core.api.delete(f'/locations/{name}')
-        logging.getLogger('cterasdk.core').info('Bucket deleted. %s', {'name': name})
+        logger.info('Bucket deleted. %s', {'name': name})
         return response
 
     def read_write(self, name):
@@ -119,7 +121,7 @@ class Buckets(BaseCommand):
 
         :param str name: Name of the bucket
         """
-        logging.getLogger('cterasdk.core').info('Setting bucket to read-write. %s', {'name': name})
+        logger.info('Setting bucket to read-write. %s', {'name': name})
         return self._read_only(name, False)
 
     def read_only(self, name):
@@ -128,7 +130,7 @@ class Buckets(BaseCommand):
 
         :param str name: Name of the bucket
         """
-        logging.getLogger('cterasdk.core').info('Setting bucket to read-delete only. %s', {'name': name})
+        logger.info('Setting bucket to read-delete only. %s', {'name': name})
         return self._read_only(name, True)
 
     def _read_only(self, name, enabled):

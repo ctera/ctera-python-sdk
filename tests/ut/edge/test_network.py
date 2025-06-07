@@ -261,7 +261,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
                 self._static_routes[0].GwIP,
                 self._static_routes[0].DestIpMask.replace("_", "/")
             )
-        self.assertEqual('Static route creation failed', error.exception.message)
+        self.assertEqual('Static route creation failed', str(error.exception))
 
     def test_get_all_static_routes(self):
         get_response = 'Success'
@@ -283,7 +283,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._filer.api.delete = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             network.Network(self._filer).routes.remove(self._static_routes[0].DestIpMask.replace("_", "/"))
-        self.assertEqual('Static route deletion failed', error.exception.message)
+        self.assertEqual('Static route deletion failed', str(error.exception))
 
     def test_clean_all_static_routes_success(self):
         expected_exception = 'Success'
@@ -303,7 +303,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
 
         with self.assertRaises(exceptions.CTERAException) as error:
             network.Network(self._filer).routes.clear()
-        self.assertEqual('Failed to clear static routes', error.exception.message)
+        self.assertEqual('Failed to clear static routes', str(error.exception))
 
     def test_get_proxy_config(self):
         get_response = 'Success'

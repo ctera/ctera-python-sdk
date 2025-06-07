@@ -1,7 +1,7 @@
 import logging
 from ....cio.common import encode_request_parameter
 from ....cio import core as fs
-from ....cio import exceptions
+from ....exceptions.io import ResourceNotFoundError, NotADirectory, ResourceExistsError
 from .. import query
 from ....lib import FetchResourcesResponse
 
@@ -17,18 +17,22 @@ async def listdir(core, path, depth=None, include_deleted=False, search_criteria
 
 
 async def exists(core, path):
-    try:
-        await metadata(core, path)
-        return True
-    except exceptions.ResourceNotFoundError:
-        return False
+    present, *_ = await metadata(core, path, suppress_error=True)
+    return present
 
 
-async def metadata(core, path):
+async def metadata(core, path, suppress_error=False):
+    """
+    Get item metadata.
+
+    :returns: A tuple indicating if a file exists, and its metadata
+    """
     response = await listdir(core, path, 0)
     if response.root is None:
-        raise exceptions.ResourceNotFoundError(path.absolute)
-    return response.root
+        if not suppress_error:
+            raise ResourceNotFoundError(path.absolute)
+        return False, None
+    return True, response.root
 
 
 async def versions(core, path):
@@ -59,7 +63,7 @@ async def makedirs(core, path):
         path = fs.CorePath.instance(path.scope, '/'.join(directories[:i]))
         try:
             await mkdir(core, path)
-        except exceptions.ResourceExistsError:
+        except ResourceExistsError:
             logger.debug('Resource already exists: %s', path.reference.as_posix())
 
 
@@ -88,11 +92,11 @@ async def move(core, *paths, destination=None):
         return await core.v1.api.execute('', 'moveResources', param)
 
 
-async def retrieve_remote_dir(core, directory):
-    resource = await metadata(core, directory)
-    if not resource.isFolder:
-        raise exceptions.RemoteStorageException('The destination path is not a directory', None, path=directory.absolute)
-    return str(resource.cloudFolderInfo.uid)
+async def ensure_directory(core, directory, suppress_error=False):
+    present, resource = await metadata(core, directory, suppress_error=True)
+    if (not present or not resource.isFolder) and not suppress_error:
+        raise NotADirectory(directory.absolute)
+    return resource.isFolder if present else False, resource
 
 
 def handle(path):
@@ -132,8 +136,17 @@ def handle_many(directory, *objects):
         :param object handle: File handle.
         """
         with fs.handle_many(directory, objects) as param:
-            return await core.io.download_zip(await retrieve_remote_dir(core, directory), encode_request_parameter(param))
+            _, resource = await ensure_directory(core, directory)
+            return await core.io.download_zip(str(resource.cloudFolderInfo.uid), encode_request_parameter(param))
     return wrapper
+
+
+async def _validate_destination(core, name, destination):
+    is_dir, resource = await ensure_directory(core, destination, suppress_error=True)
+    if not is_dir:
+        is_dir, resource = await ensure_directory(core, destination.parent)
+        return resource.cloudFolderInfo.uid, destination.name, destination.parent
+    return resource.cloudFolderInfo.uid, name, destination
 
 
 def upload(name, size, destination, fd):
@@ -150,11 +163,11 @@ def upload(name, size, destination, fd):
         """
         Upload file from metadata and file handle.
 
-        :param cterasdk.objects.synchronous.core.Portal core: POrtal object.
+        :param cterasdk.objects.synchronous.core.Portal core: Portal object.
         """
-        target = await retrieve_remote_dir(core, destination)
-        with fs.upload(core, name, destination, size, fd) as param:
-            return await core.io.upload(target, param)
+        uid, filename, directory = await _validate_destination(core, name, destination)
+        with fs.upload(core, filename, directory, size, fd) as param:
+            return await core.io.upload(str(uid), param)
     return wrapper
 
 

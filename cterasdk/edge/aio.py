@@ -2,6 +2,9 @@ import logging
 from .base_command import BaseCommand
 
 
+logger = logging.getLogger('cterasdk.edge')
+
+
 class AIO(BaseCommand):
     """
     Edge Filer AIO APIs
@@ -20,26 +23,26 @@ class AIO(BaseCommand):
         """
         Enable AIO
         """
-        logging.getLogger('cterasdk.edge').info('Enabling asynchronous io.')
+        logger.info('Enabling asynchronous io.')
         self._async_io(True, 1, 1)
-        logging.getLogger('cterasdk.edge').info('Asynchronous io enabled.')
+        logger.info('Asynchronous io enabled.')
 
     def disable(self):
         """
         Disable AIO
         """
-        logging.getLogger('cterasdk.edge').info('Disabling asynchronous io.')
+        logger.info('Disabling asynchronous io.')
         self._async_io(False, 0, 0)
-        logging.getLogger('cterasdk.edge').info('Asynchronous io disabled.')
+        logger.info('Asynchronous io disabled.')
 
     def _async_io(self, robustMutexes, aioReadThreshold, aioWriteThreshold):
-        logging.getLogger('cterasdk.edge').debug('Obtaining CIFS server settings.')
+        logger.debug('Obtaining CIFS server settings.')
 
         cifs = self._edge.api.get('/config/fileservices/cifs')
         cifs.robustMutexes = robustMutexes
         cifs.aioReadThreshold = aioReadThreshold
         cifs.aioWriteThreshold = aioWriteThreshold
 
-        logging.getLogger('cterasdk.edge').debug('Updating CIFS server settings.')
+        logger.debug('Updating CIFS server settings.')
 
         self._edge.api.put('/config/fileservices/cifs', cifs)

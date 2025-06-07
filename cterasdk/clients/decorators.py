@@ -1,7 +1,7 @@
 import logging
 import functools
 
-from ..exceptions import SessionExpired, NotLoggedIn
+from ..exceptions.session import SessionExpired, NotLoggedIn
 
 
 logger = logging.getLogger('cterasdk.common')

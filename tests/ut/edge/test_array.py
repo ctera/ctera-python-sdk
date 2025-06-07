@@ -60,7 +60,7 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
         self._filer.api.add = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             array.Array(self._filer).add(self._array_name, self._array_level, self._array_members)
-        self.assertEqual('Storage array creation failed.', error.exception.message)
+        self.assertEqual(f'Storage array creation failed: {self._array_name}', str(error.exception))
 
     def test_delete_array_success(self):
         delete_response = 'Success'
@@ -74,7 +74,7 @@ class TestEdgeArray(base_edge.BaseEdgeTest):
         self._filer.api.delete = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             array.Array(self._filer).delete(self._array_name)
-        self.assertEqual('Storage array deletion failed.', error.exception.message)
+        self.assertEqual(f'Storage array deletion failed: /config/storage/arrays/{self._array_name}', str(error.exception))
 
     def test_delete_all(self):
         self.patch_call("cterasdk.edge.array.Array.delete")

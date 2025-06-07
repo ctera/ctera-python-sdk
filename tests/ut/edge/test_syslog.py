@@ -83,7 +83,7 @@ class TestEdgeSyslog(base_edge.BaseEdgeTest):
         self._init_filer(get_response=param)
         with self.assertRaises(exceptions.CTERAException) as error:
             syslog.Syslog(self._filer).modify()
-        self.assertEqual('Syslog configuration cannot be modified when disabled', error.exception.message)
+        self.assertEqual('Syslog configuration cannot be modified when disabled', str(error.exception))
 
     def _get_syslog_object(self, server=None, port=None, protocol=None, min_severity=None):
         syslog_param = Object()

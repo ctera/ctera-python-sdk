@@ -2,7 +2,8 @@ import logging
 
 from .base_command import BaseCommand
 from .types import UserAccount
-from ..exceptions import CTERAException, ObjectNotFoundException, ContextError
+from ..exceptions import CTERAException, ObjectNotFoundException
+from ..exceptions.session import ContextError
 from ..common import Object, DateTimeUtils
 from ..common import union
 from . import query
@@ -30,7 +31,7 @@ class Users(BaseCommand):
         try:
             return self._core.api.get(ref)
         except CTERAException as error:
-            raise CTERAException('Failed to get the user', error)
+            raise CTERAException(f'Could not retrieve user: {ref}') from error
 
     def get(self, user_account, include=None):
         """
@@ -46,7 +47,7 @@ class Users(BaseCommand):
         include = ['/' + attr for attr in include]
         user_object = self._core.api.get_multi(baseurl, include)
         if user_object.name is None:
-            raise ObjectNotFoundException('Could not find user', baseurl, user_directory=user_account.directory, username=user_account.name)
+            raise ObjectNotFoundException(baseurl)
         return user_object
 
     def list_local_users(self, include=None):
@@ -143,13 +144,14 @@ class Users(BaseCommand):
         if comment is not None:
             user.comment = comment
 
+        ref = f'/users/{current_username}'
         try:
-            response = self._core.api.put('/users/' + current_username, user)
+            response = self._core.api.put(ref, user)
             logger.info("User modified. %s", {'username': user.name})
             return response
         except CTERAException as error:
-            logger.error("Failed to modify user.")
-            raise CTERAException('Failed to modify user', error)
+            logger.error('User modification failed: %s', ref)
+            raise CTERAException(f'User modification failed: {ref}') from error
 
     def apply_changes(self, wait=False):
         """
@@ -187,7 +189,7 @@ class Users(BaseCommand):
         :param str portal: Tenant
         """
         if self.session().in_tenant_context():
-            raise ContextError('Context error: Navigate to the Portal Administration to invoke this API.')
+            raise ContextError('Browse the Global Administration to invoke this API')
         param = Object()
         param.username = username
         param.portal = tenant

@@ -8,6 +8,9 @@ from ..common import Object
 from . import query
 
 
+logger = logging.getLogger('cterasdk.core')
+
+
 class Logs(BaseCommand):
     """
     Portal Logs APIs
@@ -132,9 +135,9 @@ class Alerts(BaseCommand):
 
         :param list[cterasdk.core.types.Alert] alerts: List of alerts
         """
-        logging.getLogger('cterasdk.core').info('Updating log based alerts.')
+        logger.info('Updating log based alerts.')
         response = self._core.api.put(self._context, alerts)
-        logging.getLogger('cterasdk.core').info('Log based alerts updated.')
+        logger.info('Log based alerts updated.')
         return response
 
     def get(self):

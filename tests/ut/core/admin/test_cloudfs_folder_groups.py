@@ -62,8 +62,9 @@ class TestCoreFolderGroups(base_admin.BaseCoreTest):   # pylint: disable=too-man
         self._init_global_admin(get_multi_response=get_multi_response)
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.FolderGroups(self._global_admin).get(self._name)
-        self._global_admin.api.get_multi.assert_called_once_with(f'/foldersGroups/{self._name}', mock.ANY)
-        self.assertEqual('Could not find folder group', error.exception.message)
+        ref = f'/foldersGroups/{self._name}'
+        self._global_admin.api.get_multi.assert_called_once_with(ref, mock.ANY)
+        self.assertEqual(f'Object not found: {ref}', str(error.exception))
 
     def test_add_folder_group_no_owner(self):
         self._init_global_admin(execute_response='Success')
@@ -99,7 +100,7 @@ class TestCoreFolderGroups(base_admin.BaseCoreTest):   # pylint: disable=too-man
         self._global_admin.api.execute = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.FolderGroups(self._global_admin).add(self._name)
-        self.assertEqual(error_message, error.exception.message)
+        self.assertEqual(error_message, str(error.exception))
 
     def test_add_folder_group_no_owner_fixed_block_size(self):
         self._init_global_admin(execute_response='Success')
@@ -129,35 +130,34 @@ class TestCoreFolderGroups(base_admin.BaseCoreTest):   # pylint: disable=too-man
         self._global_admin.api.execute = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.FolderGroups(self._global_admin).add(self._name, deduplication_method_type=self.fixed_block_size)
-        self.assertEqual(error_message, error.exception.message)
+        self.assertEqual(error_message, str(error.exception))
 
     def test_modify_folder_group(self):
         get_response = munch.Munch(dict(name=self._name))
         self._init_global_admin(get_response=get_response, put_response='Success')
         ret = cloudfs.FolderGroups(self._global_admin).modify(self._name, self._new_name)
-        self._global_admin.api.get.assert_called_once_with(f'/foldersGroups/{self._name}')
-        self._global_admin.api.put.assert_called_once_with(f'/foldersGroups/{self._name}', mock.ANY)
+        ref = f'/foldersGroups/{self._name}'
+        self._global_admin.api.get.assert_called_once_with(ref)
+        self._global_admin.api.put.assert_called_once_with(ref, mock.ANY)
         expected_param = munch.Munch(dict(name=self._new_name))
         actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, 'Success')
 
     def test_modify_folder_group_user_not_exists(self):
-        error_message = "Failed to get folder group"
-        expected_exception = exceptions.CTERAException(message=error_message)
+        expected_exception = exceptions.CTERAException()
         self._global_admin.api.get = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.FolderGroups(self._global_admin).modify(self._name, self._new_name)
-        self.assertEqual(error_message, error.exception.message)
+        self.assertEqual(f'Folder group not found: /foldersGroups/{self._name}', str(error.exception))
 
     def test_modify_folder_group_update_failure(self):
-        error_message = "Expected Failure"
-        expected_exception = exceptions.CTERAException(message=error_message)
+        expected_exception = exceptions.CTERAException()
         self._global_admin.api.get = mock.MagicMock(return_value=munch.Munch(dict(name=self._name)))
         self._global_admin.api.put = mock.MagicMock(side_effect=expected_exception)
         with self.assertRaises(exceptions.CTERAException) as error:
             cloudfs.FolderGroups(self._global_admin).modify(self._name, self._new_name)
-        self.assertEqual(error_message, error.exception.message)
+        self.assertEqual(f'Folder group modification failed: /foldersGroups/{self._name}', str(error.exception))
 
     def test_delete(self):
         self._init_global_admin(execute_response='Success')

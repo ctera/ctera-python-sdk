@@ -1,7 +1,10 @@
 import logging
 import gzip
 import snappy
-from .exceptions import DirectIOError
+from ..exceptions.direct import DirectIOError
+
+
+logger = logging.getLogger('cterasdk.direct')
 
 
 def decompress(compressed_block):
@@ -16,14 +19,14 @@ def decompress(compressed_block):
         try:
             return gzip.decompress(compressed_block)
         except gzip.BadGzipFile:
-            logging.getLogger('cterasdk.direct').error('Failed to Decompress Block. Bad Gzip.')
+            logger.error('Failed to Decompress Block. Bad Gzip.')
             raise DirectIOError()
 
     try:
         return decompress_with_magic_header(compressed_block) \
             if compressed_block.startswith(b'\x82SNAPPY\x00') else snappy.uncompress(compressed_block)  # Snappy Magic
     except snappy.UncompressError:
-        logging.getLogger('cterasdk.direct').error('Failed to Decompress Block.')
+        logger.error('Failed to Decompress Block.')
         raise DirectIOError()
 
 
@@ -35,7 +38,7 @@ def decompress_with_magic_header(compressed_block):
     :returns: Decompressed Block
     :rtype: bytes
     """
-    logging.getLogger('cterasdk.direct').debug('Decompressing Block.')
+    logger.debug('Decompressing Block.')
     decompressed_block = bytearray()
     size_of_data = len(compressed_block)
     chunk_size, chunk_start = 4, 16

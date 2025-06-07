@@ -1,4 +1,4 @@
-from ..exceptions import ConsentException
+from ..exceptions import UserConsentError
 
 
 def ask(question):
@@ -11,7 +11,7 @@ def ask(question):
             try:
                 answer = input(question)
             except EOFError:
-                raise ConsentException()
+                raise UserConsentError()
 
     except KeyboardInterrupt:
         answer = 'n'
