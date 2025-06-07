@@ -18,6 +18,12 @@ class ResourceNotFoundError(RemoteStorageException):
         super().__init__('Remote directory not found. Please verify the path and try again.', path)
 
 
+class NotADirectory(RemoteStorageException):
+
+    def __init__(self, path):
+        super().__init__('Target validation error: Resource exists but it is not a directory.', path)
+
+
 class ResourceExistsError(CTERAException):
 
     def __init__(self):

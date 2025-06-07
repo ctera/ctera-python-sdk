@@ -1,7 +1,7 @@
 import logging
 from ...cio.common import encode_request_parameter
 from ...cio import core as fs
-from ...exceptions.io import ResourceNotFoundError, RemoteStorageException, ResourceExistsError
+from ...exceptions.io import ResourceNotFoundError, ResourceExistsError, NotADirectory
 from ...core import query
 from ..enum import CollaboratorType
 from ...lib import FetchResourcesResponse
@@ -18,18 +18,17 @@ def listdir(core, path, depth=None, include_deleted=False, search_criteria=None,
 
 
 def exists(core, path):
-    try:
-        metadata(core, path)
-        return True
-    except ResourceNotFoundError:
-        return False
+    exists, *_ = metadata(core, path, suppress_error=True)
+    return exists
 
 
-def metadata(core, path):
+def metadata(core, path, suppress_error=False):
     response = listdir(core, path, 0)
     if response.root is None:
-        raise ResourceNotFoundError(path.absolute)
-    return response.root
+        if not suppress_error:
+            raise ResourceNotFoundError(path.absolute)
+        return False, None
+    return True, response.root
 
 
 def versions(core, path):
@@ -89,11 +88,11 @@ def move(core, *paths, destination=None):
         return core.api.execute('', 'moveResources', param)
 
 
-def retrieve_remote_dir(core, directory):
-    resource = metadata(core, directory)
-    if not resource.isFolder:
-        raise RemoteStorageException('The destination path is not a directory', path=directory.absolute)
-    return str(resource.cloudFolderInfo.uid)
+def ensure_directory(core, directory, suppress_error=False):
+    exists, resource = metadata(core, directory, suppress_error=True)
+    if (not exists or not resource.isFolder) and not suppress_error:
+        raise NotADirectory(directory.absolute)
+    return resource.isFolder if exists else False, resource
 
 
 def handle(path):
@@ -133,8 +132,17 @@ def handle_many(directory, *objects):
         :param object handle: File handle.
         """
         with fs.handle_many(directory, objects) as param:
-            return core.io.download_zip(retrieve_remote_dir(core, directory), encode_request_parameter(param))
+            _, resource = ensure_directory(core, directory)
+            return core.io.download_zip(str(resource.cloudFolderInfo.uid), encode_request_parameter(param))
     return wrapper
+
+
+def _validate_destination(core, name, destination):
+    is_dir, resource = ensure_directory(core, destination, suppress_error=True)
+    if not is_dir:
+        is_dir, resource = ensure_directory(core, destination.parent)
+        return resource.cloudFolderInfo.uid, destination.name, destination.parent
+    return resource.cloudFolderInfo.uid, name, destination
 
 
 def upload(name, size, destination, fd):
@@ -153,9 +161,9 @@ def upload(name, size, destination, fd):
 
         :param cterasdk.objects.synchronous.core.Portal core: Portal object.
         """
-        target = retrieve_remote_dir(core, destination)
-        with fs.upload(core, name, destination, size, fd) as param:
-            return core.io.upload(target, param)
+        uid, filename, directory = _validate_destination(core, name, destination)
+        with fs.upload(core, filename, directory, size, fd) as param:
+            return core.io.upload(str(uid), param)
     return wrapper
 
 
@@ -207,7 +215,7 @@ def add_share_recipients(core, path, recipients):
 
 
 def _obtain_valid_recipients(core, path, recipients):
-    resource_info = metadata(core, path)
+    _, resource_info = metadata(core, path)
     valid_recipients = []
     for recipient in filter(fs.valid_recipient, recipients):
         if not recipient.type == CollaboratorType.EXT:
@@ -221,7 +229,7 @@ def _obtain_valid_recipients(core, path, recipients):
 
 
 def unshare(core, path):
-    resource_info = metadata(core, path)
+    _, resource_info = metadata(core, path)
     with fs.unshare(resource_info, path) as param:
         return core.api.execute('', 'shareResource', param)
 

@@ -1,8 +1,8 @@
 import logging
 from ....cio.common import encode_request_parameter
 from ....cio import edge as fs
-from ....exceptions.transport import HTTPError
-from ....exceptions.io import RestrictedPathError
+from ....exceptions.transport import NotFound
+from ....exceptions.io import RestrictedPathError, ResourceNotFoundError, NotADirectory
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -24,11 +24,24 @@ async def walk(edge, path):
 
 
 async def exists(edge, path):
+    exists, *_ = await metadata(edge, path, suppress_error=True)
+    return exists
+
+
+async def metadata(edge, path, suppress_error=False):
     try:
-        await edge.io.propfind(path.absolute, 0)
-        return True
-    except HTTPError:
-        return False
+        return True, fs.format_listdir_response(None, await edge.io.propfind(path.absolute, 0))[0]
+    except NotFound as error:
+        if not suppress_error:
+            raise ResourceNotFoundError(path.absolute) from error
+        return False, None
+
+
+async def ensure_directory(edge, directory, suppress_error=False):
+    exists, resource = await metadata(edge, directory, suppress_error=True)
+    if (not exists or not resource.is_dir) and not suppress_error:
+        raise NotADirectory(directory.absolute)
+    return resource.is_dir if exists else False, resource
 
 
 async def mkdir(edge, path):
@@ -103,6 +116,14 @@ def handle_many(directory, *objects):
     return wrapper
 
 
+async def _validate_destination(edge, name, destination):
+    is_dir, *_ = await ensure_directory(edge, destination, suppress_error=True)
+    if not is_dir:
+        is_dir, *_ = await ensure_directory(edge, destination.parent)
+        return destination.name, destination.parent
+    return name, destination
+
+
 def upload(name, destination, fd):
     """
     Create upload function
@@ -119,6 +140,7 @@ def upload(name, destination, fd):
 
         :param cterasdk.objects.synchronous.edge.Edge edge: Edge Filer object.
         """
-        with fs.upload(name, destination, fd) as param:
+        filename, directory = await _validate_destination(edge, name, destination)
+        with fs.upload(filename, directory, fd) as param:
             return await edge.io.upload('/actions/upload', param)
     return wrapper

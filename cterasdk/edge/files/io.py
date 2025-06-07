@@ -1,8 +1,8 @@
 import logging
 from ...cio.common import encode_request_parameter
 from ...cio import edge as fs
-from ...exceptions.transport import HTTPError
-from ...exceptions.io import RestrictedPathError
+from ...exceptions.transport import NotFound
+from ...exceptions.io import RestrictedPathError, ResourceNotFoundError, NotADirectory
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -24,11 +24,24 @@ def walk(edge, path):
 
 
 def exists(edge, path):
+    exists, *_ = metadata(edge, path, suppress_error=True)
+    return exists
+
+
+def metadata(edge, path, suppress_error=False):
     try:
-        edge.io.propfind(path.absolute, 0)
-        return True
-    except HTTPError:
-        return False
+        return True, fs.format_listdir_response(None, edge.io.propfind(path.absolute, 0))[0]
+    except NotFound as error:
+        if not suppress_error:
+            raise ResourceNotFoundError(path.absolute) from error
+        return False, None
+
+
+def ensure_directory(edge, directory, suppress_error=False):
+    exists, resource = metadata(edge, directory, suppress_error=True)
+    if (not exists or not resource.is_dir) and not suppress_error:
+        raise NotADirectory(directory.absolute)
+    return resource.is_dir if exists else False, resource
 
 
 def mkdir(edge, path):
@@ -103,6 +116,14 @@ def handle_many(directory, *objects):
     return wrapper
 
 
+def _validate_destination(edge, name, destination):
+    is_dir, *_ = ensure_directory(edge, destination, suppress_error=True)
+    if not is_dir:
+        is_dir, *_ = ensure_directory(edge, destination.parent)
+        return destination.name, destination.parent
+    return name, destination
+
+
 def upload(name, destination, fd):
     """
     Create upload function
@@ -119,6 +140,7 @@ def upload(name, destination, fd):
 
         :param cterasdk.objects.synchronous.edge.Edge edge: Edge Filer object.
         """
-        with fs.upload(name, destination, fd) as param:
+        filename, directory = _validate_destination(edge, name, destination)
+        with fs.upload(filename, directory, fd) as param:
             return edge.io.upload('/actions/upload', param)
     return wrapper
