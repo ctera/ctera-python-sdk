@@ -18,8 +18,8 @@ def listdir(core, path, depth=None, include_deleted=False, search_criteria=None,
 
 
 def exists(core, path):
-    e, *_ = metadata(core, path, suppress_error=True)
-    return e
+    present, *_ = metadata(core, path, suppress_error=True)
+    return present
 
 
 def metadata(core, path, suppress_error=False):
@@ -94,10 +94,10 @@ def move(core, *paths, destination=None):
 
 
 def ensure_directory(core, directory, suppress_error=False):
-    exists, resource = metadata(core, directory, suppress_error=True)
-    if (not exists or not resource.isFolder) and not suppress_error:
+    present, resource = metadata(core, directory, suppress_error=True)
+    if (not present or not resource.isFolder) and not suppress_error:
         raise NotADirectory(directory.absolute)
-    return resource.isFolder if exists else False, resource
+    return resource.isFolder if present else False, resource
 
 
 def handle(path):

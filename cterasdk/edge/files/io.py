@@ -24,8 +24,8 @@ def walk(edge, path):
 
 
 def exists(edge, path):
-    e, *_ = metadata(edge, path, suppress_error=True)
-    return e
+    present, *_ = metadata(edge, path, suppress_error=True)
+    return present
 
 
 def metadata(edge, path, suppress_error=False):
@@ -43,10 +43,10 @@ def metadata(edge, path, suppress_error=False):
 
 
 def ensure_directory(edge, directory, suppress_error=False):
-    exists, resource = metadata(edge, directory, suppress_error=True)
-    if (not exists or not resource.is_dir) and not suppress_error:
+    present, resource = metadata(edge, directory, suppress_error=True)
+    if (not present or not resource.is_dir) and not suppress_error:
         raise NotADirectory(directory.absolute)
-    return resource.is_dir if exists else False, resource
+    return resource.is_dir if present else False, resource
 
 
 def mkdir(edge, path):

@@ -24,8 +24,8 @@ async def walk(edge, path):
 
 
 async def exists(edge, path):
-    e, *_ = await metadata(edge, path, suppress_error=True)
-    return e
+    present, *_ = await metadata(edge, path, suppress_error=True)
+    return present
 
 
 async def metadata(edge, path, suppress_error=False):
@@ -43,10 +43,10 @@ async def metadata(edge, path, suppress_error=False):
 
 
 async def ensure_directory(edge, directory, suppress_error=False):
-    exists, resource = await metadata(edge, directory, suppress_error=True)
-    if (not exists or not resource.is_dir) and not suppress_error:
+    present, resource = await metadata(edge, directory, suppress_error=True)
+    if (not present or not resource.is_dir) and not suppress_error:
         raise NotADirectory(directory.absolute)
-    return resource.is_dir if exists else False, resource
+    return resource.is_dir if present else False, resource
 
 
 async def mkdir(edge, path):
