@@ -24,11 +24,16 @@ async def walk(edge, path):
 
 
 async def exists(edge, path):
-    exists, *_ = await metadata(edge, path, suppress_error=True)
-    return exists
+    e, *_ = await metadata(edge, path, suppress_error=True)
+    return e
 
 
 async def metadata(edge, path, suppress_error=False):
+    """
+    Get item metadata.
+
+    :returns: A tuple indicating if a file exists, and its metadata
+    """
     try:
         return True, fs.format_listdir_response(None, await edge.io.propfind(path.absolute, 0))[0]
     except NotFound as error:

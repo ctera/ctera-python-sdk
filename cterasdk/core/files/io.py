@@ -18,11 +18,16 @@ def listdir(core, path, depth=None, include_deleted=False, search_criteria=None,
 
 
 def exists(core, path):
-    exists, *_ = metadata(core, path, suppress_error=True)
-    return exists
+    e, *_ = metadata(core, path, suppress_error=True)
+    return e
 
 
 def metadata(core, path, suppress_error=False):
+    """
+    Get item metadata.
+
+    :returns: A tuple indicating if a file exists, and its metadata
+    """
     response = listdir(core, path, 0)
     if response.root is None:
         if not suppress_error:

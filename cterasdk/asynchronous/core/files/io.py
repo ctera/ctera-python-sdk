@@ -17,11 +17,16 @@ async def listdir(core, path, depth=None, include_deleted=False, search_criteria
 
 
 async def exists(core, path):
-    exists, *_ = await metadata(core, path, suppress_error=True)
-    return exists
+    e, *_ = await metadata(core, path, suppress_error=True)
+    return e
 
 
 async def metadata(core, path, suppress_error=False):
+    """
+    Get item metadata.
+
+    :returns: A tuple indicating if a file exists, and its metadata
+    """
     response = await listdir(core, path, 0)
     if response.root is None:
         if not suppress_error:
