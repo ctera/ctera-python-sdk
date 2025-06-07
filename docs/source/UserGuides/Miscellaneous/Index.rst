@@ -85,7 +85,7 @@ I/O
 Notification Service
 --------------------
 
-.. autoclass:: cterasdk.exceptions.notifications.NotificationError
+.. autoclass:: cterasdk.exceptions.notifications.NotificationsError
    :noindex:
    :members:
    :show-inheritance:
