@@ -172,6 +172,76 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         services.Services(self._filer).disable_sso()
         self._filer.api.put.assert_called_once_with('/config/gui/adminRemoteAccessSSO', False)
 
+    def test_connect_with_test_false(self):
+        self._init_filer()
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
+        self._filer.tasks.wait = mock.MagicMock()
+        self._filer.network.tcp_connect = mock.MagicMock()
+
+        services.Services(self._filer).connect(self._server, self._user, self._password, test=False)
+
+        # Should not call tcp_connect or isWebSsoEnabled when test=False
+        self._filer.network.tcp_connect.assert_not_called()
+        self._filer.api.execute.assert_called_once_with('/status/services', 'attachAndSave', mock.ANY)
+        self._filer.tasks.wait.assert_called_once_with(TestEdgeServices._background_task_id)
+        
+        expected_param = self._get_attach_and_save_param(False, use_activation_code=False)
+        actual_param = self._filer.api.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def test_connect_tcp_timeout_handled(self):
+        self._init_filer()
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
+        self._filer.tasks.wait = mock.MagicMock()
+        self._filer.network.tcp_connect = mock.MagicMock(side_effect=TimeoutError("Timeout on reading data from socket"))
+
+        services.Services(self._filer).connect(self._server, self._user, self._password)
+
+        # Should proceed despite timeout error
+        self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
+        self._filer.api.execute.assert_has_calls(
+            [
+                mock.call('/status/services', 'isWebSsoEnabled', mock.ANY),
+                mock.call('/status/services', 'attachAndSave', mock.ANY)
+            ]
+        )
+        self._filer.tasks.wait.assert_called_once_with(TestEdgeServices._background_task_id)
+
+    def test_connect_portal_test_timeout_handled(self):
+        self._init_filer()
+        self._filer.api.execute = mock.MagicMock(side_effect=[TimeoutError("Timeout on reading data from socket"), TestEdgeServices._attach_and_save_response()])
+        self._filer.tasks.wait = mock.MagicMock()
+        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
+
+        services.Services(self._filer).connect(self._server, self._user, self._password)
+
+        # Should proceed despite portal connection test timeout
+        self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
+        self._filer.api.execute.assert_has_calls(
+            [
+                mock.call('/status/services', 'isWebSsoEnabled', mock.ANY),
+                mock.call('/status/services', 'attachAndSave', mock.ANY)
+            ]
+        )
+        self._filer.tasks.wait.assert_called_once_with(TestEdgeServices._background_task_id)
+
+    def test_activate_with_test_false(self):
+        self._init_filer()
+        self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
+        self._filer.tasks.wait = mock.MagicMock()
+        self._filer.network.tcp_connect = mock.MagicMock()
+
+        services.Services(self._filer).activate(self._server, self._user, self._code, test=False)
+
+        # Should not call tcp_connect when test=False
+        self._filer.network.tcp_connect.assert_not_called()
+        self._filer.api.execute.assert_called_once_with('/status/services', 'attachAndSave', mock.ANY)
+        self._filer.tasks.wait.assert_called_once_with(TestEdgeServices._background_task_id)
+        
+        expected_param = self._get_attach_and_save_param(False, use_activation_code=True)
+        actual_param = self._filer.api.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+
     def _get_services_connection_status(self):
         param = Object()
         param.connection = Object()

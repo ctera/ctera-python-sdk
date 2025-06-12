@@ -49,14 +49,20 @@ class Services(BaseCommand):
         """
         return self._edge.api.get('/status/services/CTERAPortal/connectionState') == enum.ServicesConnectionState.Connected
 
-    def _before_connect_to_services(self, ctera_license, server):
+    def _before_connect_to_services(self, ctera_license, server, test=True):
         Services._validate_license(ctera_license)
-        if self._edge.network.proxy.is_enabled():
-            logger.debug('Skipping TCP connection verification over port 995.')
+        if test and not self._edge.network.proxy.is_enabled():
+            try:
+                self._check_cttp_traffic(address=server)
+            except TimeoutError:
+                # Swallow the port-995 probe failure and try HTTPS API directly
+                logger.warning("Warning: port 995 probe timed out; proceeding anyway")
+        elif not test:
+            logger.debug('Skipping TCP connection verification over port 995 (test=False).')
         else:
-            self._check_cttp_traffic(address=server)
+            logger.debug('Skipping TCP connection verification over port 995.')
 
-    def connect(self, server, user, password, ctera_license=enum.License.EV16):
+    def connect(self, server, user, password, ctera_license=enum.License.EV16, test=True):
         """
         Connect to a Portal.\n
         The connect method will first validate the `license` argument,
@@ -68,9 +74,15 @@ class Services(BaseCommand):
         :param str user: User for the Portal connection
         :param str password: Password for the Portal connection
         :param cterasdk.edge.enum.License,optional ctera_license: CTERA License, defaults to cterasdk.edge.enum.License.EV16
+        :param bool,optional test: Test connection before attempting to connect, defaults to True
         """
-        self._before_connect_to_services(ctera_license, server)
-        self._check_connection(server)
+        self._before_connect_to_services(ctera_license, server, test)
+        if test:
+            try:
+                self._check_connection(server)
+            except TimeoutError:
+                # Swallow the portal connection test failure and try direct connection
+                logger.warning("Warning: portal connection test timed out; proceeding anyway")
 
         param = Object()
         param.server = server
@@ -79,7 +91,7 @@ class Services(BaseCommand):
         param.trustCertificate = self._trust_cert.get(server, False)
         self._connect_to_services(param, ctera_license)
 
-    def activate(self, server, user, code, ctera_license=enum.License.EV16):
+    def activate(self, server, user, code, ctera_license=enum.License.EV16, test=True):
         """
         Enroll the Edge Filer with CTERA Portal using an activation code
 
@@ -87,8 +99,9 @@ class Services(BaseCommand):
         :param str user: User for  the Portal connection
         :param str code: Activation code for the Portal connection
         :param cterasdk.edge.enum.License,optional ctera_license: CTERA License, defaults to cterasdk.edge.enum.License.EV16
+        :param bool,optional test: Test connection before attempting to connect, defaults to True
         """
-        self._before_connect_to_services(ctera_license, server)
+        self._before_connect_to_services(ctera_license, server, test)
 
         param = Object()
         param.server = server
