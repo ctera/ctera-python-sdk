@@ -78,3 +78,19 @@ root directory.
 .. code-block:: console
 
    $ tox
+
+Compatibility Notice
+====================
+
+Future versions of the CTERA Python SDK may introduce breaking changes.
+A breaking change is any modification insupported functionality between released versions that may require
+users to update existing integrations or configurations to upgrade successfully.
+While efforts are made to minimize disruption, such changes are sometimes necessary to maintain and improve the software.
+
+Notice of breaking changes will be detailed in the CTERA Python SDK changelog.
+Users are responsible for reviewing the changelog for each new version and thoroughly
+testing the software before deploying it in production.
+
+By using the CTERA Python SDK, users acknowledge and agree that the SDK and its
+contributors are not liable for any damages, losses, or issues arising from the use or upgrade of the software,
+including those resulting from breaking changes.
