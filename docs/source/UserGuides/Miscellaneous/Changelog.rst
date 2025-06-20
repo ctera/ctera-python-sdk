@@ -1,8 +1,8 @@
 Changelog
 =========
 
-2.20.10 (2025-06-07)
---------------------
+2.20.10
+-------
 
 Improvements
 ^^^^^^^^^^^^
@@ -13,8 +13,8 @@ Improvements
 
 *Related issues and pull requests on GitHub:* `#300 <https://github.com/ctera/ctera-python-sdk/pull/300>`_
 
-2.20.9 (2025-06-06)
--------------------
+2.20.9
+------
 
 Improvements
 ^^^^^^^^^^^^
@@ -26,8 +26,8 @@ Improvements
 *Related issues and pull requests on GitHub:* `#299 <https://github.com/ctera/ctera-python-sdk/pull/299>`_
 
 
-2.20.8 (2025-06-04)
--------------------
+2.20.8
+------
 
 What's New
 ^^^^^^^^^^
@@ -37,20 +37,20 @@ What's New
 *Related issues and pull requests on GitHub:* `#298 <https://github.com/ctera/ctera-python-sdk/pull/298>`_
 
 
-2.20.7 (2025-06-02)
--------------------
+2.20.7
+------
 
 Improvements
 ^^^^^^^^^^^^
 
-* Updated ``cterasdk.common.object.Object`` to inherit from ``MutableMapping``, enabling dictionary-like access.
+* Updated :py:class:`cterasdk.common.object.Object` to inherit from ``MutableMapping``, enabling dictionary-like access.
 * Added support for the HTTP PROPFIND method.
 
 *Related issues and pull requests on GitHub:* `#297 <https://github.com/ctera/ctera-python-sdk/pull/297>`_
 
 
-2.20.6 (2025-05-30)
--------------------
+2.20.6
+------
 
 Bug Fixes
 ^^^^^^^^^
@@ -60,8 +60,8 @@ Bug Fixes
 *Related issues and pull requests on GitHub:* `#296 <https://github.com/ctera/ctera-python-sdk/pull/296>`_
 
 
-2.20.5 (2025-05-20)
--------------------
+2.20.5
+------
 
 Bug Fixes
 ^^^^^^^^^
@@ -69,8 +69,8 @@ Bug Fixes
 * Fixed an issue where ``AsyncGlobalAdmin`` could not browse Team Portal tenants.
 
 
-2.20.4 (2025-05-19)
--------------------
+2.20.4
+------
 
 Bug Fixes
 ^^^^^^^^^
@@ -80,8 +80,8 @@ Bug Fixes
 *Related issues and pull requests on GitHub:* `#295 <https://github.com/ctera/ctera-python-sdk/pull/295>`_
 
 
-2.20.3 (2025-05-18)
--------------------
+2.20.3
+------
 
 What's New
 ^^^^^^^^^^
