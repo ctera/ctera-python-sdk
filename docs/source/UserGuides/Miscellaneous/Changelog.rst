@@ -10,6 +10,8 @@ Improvements
 * Added a compatibility notice.
 * Included the changelog in the CTERA Python SDK documentation.
 
+*Related issues and pull requests on GitHub:* `#301 <https://github.com/ctera/ctera-python-sdk/pull/301>`_
+
 2.20.10
 -------
 
