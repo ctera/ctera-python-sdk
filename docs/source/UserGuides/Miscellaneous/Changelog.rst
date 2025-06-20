@@ -87,14 +87,15 @@ What's New
 ^^^^^^^^^^
 
 * This version introduces a new ``AsyncEdge`` object for asynchronous access to the CTERA Edge Filer.
-* Supported file browser operations include:  
-  ``listdir``, ``handle``, ``handle_many``, ``download``, ``download_many``,  
+* Supported file browser operations include:
+  ``listdir``, ``handle``, ``handle_many``, ``download``, ``download_many``,
   ``upload``, ``upload_file``, ``mkdir``, ``makedirs``, ``copy``, ``move``, and ``delete``.
 
 Improvements
 ^^^^^^^^^^^^
 
-* Logging is no longer enabled by default. As of this version, it is the responsibility of the client application to configure logging explicitly.  
+* Logging is no longer enabled by default. As of this version, it is the responsibility of the
+  client application to configure logging explicitly.
   This change aligns with best practices for libraries and allows greater flexibility in how logs are managed.
 
 * Introduced improved configuration settings to support both synchronous and asynchronous access to the CTERA Portal and Edge Filers.
@@ -110,3 +111,4 @@ Improvements
       cterasdk.settings.edge.asyn.settings.connector.ssl = False  # AsyncEdge
 
 *Related issues and pull requests on GitHub:* `#294 <https://github.com/ctera/ctera-python-sdk/pull/294>`_
+
