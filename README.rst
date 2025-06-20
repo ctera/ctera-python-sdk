@@ -79,9 +79,8 @@ root directory.
 
    $ tox
 
-
-Disclaimer
-==========
+Compatibility Notice
+====================
 
 Future versions of the CTERA Python SDK may introduce breaking changes.
 A breaking change is any modification insupported functionality between released versions that may require
