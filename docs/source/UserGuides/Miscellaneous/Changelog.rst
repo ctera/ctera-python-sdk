@@ -1,6 +1,15 @@
 Changelog
 =========
 
+2.20.11
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Added a compatibility notice.
+* Included the changelog in the CTERA Python SDK documentation.
+
 2.20.10
 -------
 
