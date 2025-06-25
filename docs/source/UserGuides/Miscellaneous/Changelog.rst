@@ -1,6 +1,18 @@
 Changelog
 =========
 
+2.20.12
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Support for overriding timeout settings on a per-request basis.
+* Increased the ``sock_read`` timeout to 2 minutes when invoking :py:func:`cterasdk.edge.network.Network.tcp_connect`.
+
+Related issues and pull requests on GitHub: `#302 <https://github.com/ctera/ctera-python-sdk/pull/302>`_
+
+
 2.20.11
 -------
 
