@@ -1,6 +1,18 @@
 Changelog
 =========
 
+2.20.13
+-------
+
+Bug Fixes
+^^^^^^^^^
+
+* Increased the HTTP request timeout when long polling for changes.
+* Updated the default socket connection and read timeouts for synchronous Edge Filer access to 30 and 60 seconds, respectively.
+
+Related issues and pull requests on GitHub: `#303 <https://github.com/ctera/ctera-python-sdk/pull/303>`_
+
+
 2.20.12
 -------
 
