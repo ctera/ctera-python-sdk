@@ -126,11 +126,7 @@ class Network(BaseCommand):
 
         logger.info("Testing connection. %s", {'host': service.host, 'port': service.port})
 
-        task = self._edge.api.execute("/status/network", "tcpconnect", param, {
-            'timeout': {
-                'sock_read': 120
-            }
-        })
+        task = self._edge.api.execute("/status/network", "tcpconnect", param)
         try:
             task = self._edge.tasks.wait(task)
             logger.debug("Obtained connection status. %s", {'status': task.result.rc})

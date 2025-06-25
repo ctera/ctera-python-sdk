@@ -33,7 +33,12 @@ core:
 # CTERA Edge Filer synchronous client configuration.
 edge:
   syn:
-    <<: *default_settings
+    settings:
+      <<: *cookie_jar
+      <<: *connector
+      timeout:
+        sock_connect: 30
+        sock_read: 60
     services:
       ssl: prompt
   asyn:

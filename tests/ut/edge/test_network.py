@@ -49,12 +49,6 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._proxy_user = 'admin'
         self._proxy_pass = 'password'
 
-        self._timeout = {
-            'timeout': {
-                'sock_read': 120
-            }
-        }
-
     def test_network_status(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
@@ -143,7 +137,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
 
         ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
-        self._filer.api.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY, self._timeout)
+        self._filer.api.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
         self._filer.tasks.wait.assert_called_once_with(self._task_id)
 
         expected_param = self._get_tcp_connect_object()
@@ -163,7 +157,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
 
         ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
-        self._filer.api.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY, self._timeout)
+        self._filer.api.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
         self._filer.tasks.wait.assert_called_once_with(self._task_id)
 
         expected_param = self._get_tcp_connect_object()
@@ -206,7 +200,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
 
         ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
-        self._filer.api.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY, self._timeout)
+        self._filer.api.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
         self._filer.tasks.wait.assert_called_once_with(self._task_id)
 
         expected_param = self._get_tcp_connect_object()

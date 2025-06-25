@@ -77,7 +77,9 @@ class TestAsyncCoreNotifications(base_core.BaseAsyncCoreTest):
     async def test_changes_defaults_no_changes(self):
         self._init_global_admin(post_response=TestAsyncCoreNotifications._create_changes_response(False))
         await notifications.Notifications(self._global_admin).changes(self._cursor)
-        self._global_admin.v2.api.post.assert_called_once_with('/metadata/longpoll', mock.ANY)
+        self._global_admin.v2.api.post.assert_called_once_with('/metadata/longpoll', mock.ANY, timeout={
+            'sock_read': 20000
+        })
         expected_param = TestAsyncCoreNotifications._create_parameter(cursor=self._cursor, timeout=10000)
         actual_param = self._global_admin.v2.api.post.call_args[0][1]
         self.assert_equal_objects(actual_param, expected_param)
