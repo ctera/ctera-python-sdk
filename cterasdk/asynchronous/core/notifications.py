@@ -69,7 +69,11 @@ class Notifications(BaseCommand):
         param = await self._create_parameter(cloudfolders, cursor)
         param.timeout = timeout if timeout else 10000
         logger.debug('Checking for updates. %s', {'timeout': param.timeout})
-        return (await self._core.v2.api.post('/metadata/longpoll', param)).changes
+        return (await self._core.v2.api.post('/metadata/longpoll', param, **{
+            'timeout': {
+                'sock_read': param.timeout + 10000
+            }
+        })).changes
 
     async def ancestors(self, descendant):
         """
