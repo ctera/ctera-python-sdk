@@ -59,31 +59,31 @@ class AsyncWebDAV(AsyncClient):
         return await super().get(path, on_error=XMLHandler(), **kwargs)
 
     @decorators.authenticated
-    async def propfind(self, path, depth):
-        request = async_requests.PropfindRequest(self._builder(path), headers={'depth': str(depth)})
+    async def propfind(self, path, depth, **kwargs):
+        request = async_requests.PropfindRequest(self._builder(path), headers={'depth': str(depth)}, **kwargs)
         response = await self.a_request(request, on_error=XMLHandler())
         return await response.dav()
 
     @decorators.authenticated
-    async def mkcol(self, path):
-        request = async_requests.MkcolRequest(self._builder(path))
+    async def mkcol(self, path, **kwargs):
+        request = async_requests.MkcolRequest(self._builder(path), **kwargs)
         response = await self.a_request(request, on_error=XMLHandler())
         return await response.text()
 
     @decorators.authenticated
-    async def copy(self, source, destination, *, overwrite=False):
-        request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
+    async def copy(self, source, destination, *, overwrite=False, **kwargs):
+        request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite), **kwargs)
         response = await self.a_request(request, on_error=XMLHandler())
         return await response.xml()
 
     @decorators.authenticated
-    async def move(self, source, destination, *, overwrite=False):
-        request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
+    async def move(self, source, destination, *, overwrite=False, **kwargs):
+        request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite), **kwargs)
         response = await self.a_request(request, on_error=XMLHandler())
         return await response.xml()
 
-    async def delete(self, path):  # pylint: disable=arguments-differ
-        response = await super().delete(path, on_error=XMLHandler())
+    async def delete(self, path, **kwargs):  # pylint: disable=arguments-differ
+        response = await super().delete(path, on_error=XMLHandler(), **kwargs)
         return await response.text()
 
     def _webdav_headers(self, destination, overwrite):
@@ -138,21 +138,21 @@ class AsyncXML(AsyncClient):
 class AsyncExtended(AsyncXML):
     """CTERA Schema"""
 
-    async def get_multi(self, path, paths):
-        return await self.database(path, 'get-multi', paths)
+    async def get_multi(self, path, paths, **kwargs):
+        return await self.database(path, 'get-multi', paths, **kwargs)
 
-    async def execute(self, path, name, param=None):  # schema method
-        return await self._execute(path, 'user-defined', name, param)
+    async def execute(self, path, name, param=None, **kwargs):  # schema method
+        return await self._execute(path, 'user-defined', name, param, **kwargs)
 
-    async def database(self, path, name, param=None):  # schema method
-        return await self._execute(path, 'db', name, param)
+    async def database(self, path, name, param=None, **kwargs):  # schema method
+        return await self._execute(path, 'db', name, param, **kwargs)
 
-    async def _execute(self, path, _type, name, param):
+    async def _execute(self, path, _type, name, param, **kwargs):
         data = Object()
         data.type = _type
         data.name = name
         data.param = param
-        return await super().post(path, data)
+        return await super().post(path, data, **kwargs)
 
 
 class AsyncAPI(AsyncExtended):
@@ -262,31 +262,31 @@ class WebDAV(Client):
         return super().handle(path, on_error=XMLHandler(), **kwargs)
 
     @decorators.authenticated
-    def propfind(self, path, depth):
-        request = async_requests.PropfindRequest(self._builder(path), headers={'depth': str(depth)})
+    def propfind(self, path, depth, **kwargs):
+        request = async_requests.PropfindRequest(self._builder(path), headers={'depth': str(depth)}, **kwargs)
         response = self.request(request, on_error=XMLHandler())
         return response.dav()
 
     @decorators.authenticated
-    def mkcol(self, path):
-        request = async_requests.MkcolRequest(self._builder(path))
+    def mkcol(self, path, **kwargs):
+        request = async_requests.MkcolRequest(self._builder(path), **kwargs)
         response = self.request(request, on_error=XMLHandler())
         return response.text()
 
     @decorators.authenticated
-    def copy(self, source, destination, *, overwrite=False):
-        request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
+    def copy(self, source, destination, *, overwrite=False, **kwargs):
+        request = async_requests.CopyRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite), **kwargs)
         response = self.request(request, on_error=XMLHandler())
         return response.xml()
 
     @decorators.authenticated
-    def move(self, source, destination, *, overwrite=False):
-        request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite))
+    def move(self, source, destination, *, overwrite=False, **kwargs):
+        request = async_requests.MoveRequest(self._builder(source), headers=self._webdav_headers(destination, overwrite), **kwargs)
         response = self.request(request, on_error=XMLHandler())
         return response.xml()
 
-    def delete(self, path):  # pylint: disable=arguments-differ
-        response = super().delete(path, on_error=XMLHandler())
+    def delete(self, path, **kwargs):  # pylint: disable=arguments-differ
+        response = super().delete(path, on_error=XMLHandler(), **kwargs)
         return response.text()
 
     def _webdav_headers(self, destination, overwrite):
@@ -347,27 +347,27 @@ class JSON(Client):
 class Extended(XML):
     """CTERA Schema"""
 
-    def get_multi(self, path, paths):
-        return self.database(path, 'get-multi', paths)
+    def get_multi(self, path, paths, **kwargs):
+        return self.database(path, 'get-multi', paths, **kwargs)
 
-    def show_multi(self, path, paths):
-        print(Serializers.JSON(self.get_multi(path, paths), no_log=False))
+    def show_multi(self, path, paths, **kwargs):
+        print(Serializers.JSON(self.get_multi(path, paths, **kwargs), no_log=False))
 
-    def execute(self, path, name, param=None):  # schema method
-        return self._execute(path, 'user-defined', name, param)
+    def execute(self, path, name, param=None, **kwargs):  # schema method
+        return self._execute(path, 'user-defined', name, param, **kwargs)
 
-    def database(self, path, name, param=None):  # schema method
-        return self._execute(path, 'db', name, param)
+    def database(self, path, name, param=None, **kwargs):  # schema method
+        return self._execute(path, 'db', name, param, **kwargs)
 
-    def add(self, path, param=None):
-        return self.database(path, 'add', param)
+    def add(self, path, param=None, **kwargs):
+        return self.database(path, 'add', param, **kwargs)
 
-    def _execute(self, path, _type, name, param):
+    def _execute(self, path, _type, name, param, **kwargs):
         data = Object()
         data.type = _type
         data.name = name
         data.param = param
-        return super().post(path, data)
+        return super().post(path, data, **kwargs)
 
 
 class API(Extended):

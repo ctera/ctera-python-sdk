@@ -103,7 +103,14 @@ class BaseRequest:
     def __init__(self, method, url, **kwargs):
         self.method = method
         self.url = url
-        self.kwargs = kwargs
+        self.kwargs = self._accept(**kwargs)
+
+    def _accept(self, **kwargs):
+        timeout = kwargs.get('timeout', None)
+        if timeout:
+            logger.debug('Setting request timeout. %s', timeout)
+            kwargs['timeout'] = aiohttp.ClientTimeout(**timeout)
+        return kwargs
 
 
 class GetRequest(BaseRequest):
