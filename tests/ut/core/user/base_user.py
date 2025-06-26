@@ -13,7 +13,8 @@ class BaseCoreServicesTest(base.BaseTest):
         self._services = ServicesPortal("")
         self._base = '/ServicesPortal/webdav'
 
-    def encode_path(self, path):
+    @staticmethod
+    def encode_path(path):
         return quote(path)
 
     def _init_services(self, execute_response=None, form_data_response=None):

@@ -22,5 +22,5 @@ class BaseCoreServicesFilesCopy(base_user.BaseCoreServicesTest):
         self.assertEqual(ret, execute_response)
 
     def _create_copy_resource_param(self):
-        destinations = [self.encode_path(self._dest + '/' + self._filename)]
-        return self._create_action_resource_param([self.encode_path(self._source)], destinations)
+        destinations = [base_user.BaseCoreServicesTest.encode_path(self._dest + '/' + self._filename)]
+        return self._create_action_resource_param([base_user.BaseCoreServicesTest.encode_path(self._source)], destinations)
