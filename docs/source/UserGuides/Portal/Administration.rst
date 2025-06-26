@@ -241,7 +241,7 @@ Delete a Team Portal
 
 .. code-block:: python
 
-   admin.portals.delete_tenant('acme')
+   admin.portals.delete('acme')
 
 Recover a Team Portal
 ---------------------
@@ -251,7 +251,7 @@ Recover a Team Portal
 
 .. code-block:: python
 
-   admin.portals.undelete_tenant('acme')
+   admin.portals.undelete('acme')
 
 Subscription Plans
 ==================
