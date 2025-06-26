@@ -1,6 +1,16 @@
 Changelog
 =========
 
+2.20.14
+-------
+
+Bug Fixes
+^^^^^^^^^
+
+* CTERA Portal: Added support for special characters when copying, moving, renaming, sharing, and deleting files.
+
+Related issues and pull requests on GitHub: `#304 <https://github.com/ctera/ctera-python-sdk/pull/304>`_
+
 2.20.13
 -------
 
