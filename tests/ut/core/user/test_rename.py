@@ -22,6 +22,6 @@ class BaseCoreServicesFilesRename(base_user.BaseCoreServicesTest):
         self.assertEqual(ret, execute_response)
 
     def _create_rename_resource_param(self):
-        sources = [self._parent_directory + '/' + self._current_filename]
-        destinations = [self._parent_directory + '/' + self._new_filename]
+        sources = [base_user.BaseCoreServicesTest.encode_path(self._parent_directory + '/' + self._current_filename)]
+        destinations = [base_user.BaseCoreServicesTest.encode_path(self._parent_directory + '/' + self._new_filename)]
         return self._create_action_resource_param(sources, destinations)

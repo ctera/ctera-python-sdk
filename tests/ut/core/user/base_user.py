@@ -1,4 +1,5 @@
 from unittest import mock
+from urllib.parse import quote
 
 from cterasdk.common import Object
 from cterasdk.objects import ServicesPortal
@@ -11,6 +12,10 @@ class BaseCoreServicesTest(base.BaseTest):
         super().setUp()
         self._services = ServicesPortal("")
         self._base = '/ServicesPortal/webdav'
+
+    @staticmethod
+    def encode_path(path):
+        return quote(path)
 
     def _init_services(self, execute_response=None, form_data_response=None):
         self._services.api.execute = mock.MagicMock(return_value=execute_response)

@@ -210,7 +210,7 @@ def makedir(path):
 @contextmanager
 def rename(path, name):
     param = ActionResourcesParam.instance()
-    param.add(SrcDstParam.instance(src=path.absolute, dest=path.parent.join(name).absolute))
+    param.add(SrcDstParam.instance(src=path.absolute_encode, dest=path.parent.join(name).absolute_encode))
     logger.info('Renaming item: %s to: %s', path.reference.as_posix(), name)
     yield param
 
@@ -219,7 +219,7 @@ def _delete_or_recover(paths, *, message=None):
     param = ActionResourcesParam.instance()
     paths = [paths] if not isinstance(paths, list) else paths
     for path in paths:
-        param.add(SrcDstParam.instance(src=path.absolute))
+        param.add(SrcDstParam.instance(src=path.absolute_encode))
         if message:
             logger.info('%s: %s', message, path.reference.as_posix())
     yield param
@@ -239,7 +239,7 @@ def _copy_or_move(paths, destination, *, message=None):
     param = ActionResourcesParam.instance()
     paths = [paths] if not isinstance(paths, list) else paths
     for path in paths:
-        param.add(SrcDstParam.instance(src=path.absolute, dest=destination.join(path.name).absolute))
+        param.add(SrcDstParam.instance(src=path.absolute_encode, dest=destination.join(path.name).absolute_encode))
         if message:
             logger.info('%s from: %s to: %s', message, path.reference.as_posix(), destination.join(path.name).reference.as_posix())
     yield param
@@ -260,7 +260,7 @@ def public_link(path, access, expire_in):
     access = {'RO': 'ReadOnly', 'RW': 'ReadWrite', 'PO': 'PreviewOnly'}.get(access)
     expire_on = DateTimeUtils.get_expiration_date(expire_in).strftime('%Y-%m-%d')
     logger.info('Creating Public Link for: %s. Access: %s. Expires: %s', path.reference.as_posix(), access, expire_on)
-    param = CreateShareParam.instance(path=path.absolute, access=access, expire_on=expire_on)
+    param = CreateShareParam.instance(path=path.absolute_encode, access=access, expire_on=expire_on)
     yield param
 
 
@@ -320,7 +320,7 @@ def share(path, as_project, allow_reshare, allow_sync, shares=None):
 
     param = Object()
     param._classname = 'ShareResourceParam'  # pylint: disable=protected-access
-    param.url = path.absolute
+    param.url = path.absolute_encode
     param.teamProject = as_project
     param.allowReshare = allow_reshare
     param.shouldSync = allow_sync

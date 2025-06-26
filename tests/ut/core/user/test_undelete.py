@@ -20,4 +20,4 @@ class BaseCoreServicesFilesUndelete(base_user.BaseCoreServicesTest):
         self.assertEqual(ret, execute_response)
 
     def _create_undelete_resource_param(self):
-        return self._create_action_resource_param([self._path])
+        return self._create_action_resource_param([base_user.BaseCoreServicesTest.encode_path(self._path)])
