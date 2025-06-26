@@ -20,4 +20,4 @@ class BaseCoreServicesFilesDelete(base_user.BaseCoreServicesTest):
         self.assertEqual(ret, execute_response)
 
     def _create_delete_resource_param(self):
-        return self._create_action_resource_param([self._path])
+        return self._create_action_resource_param([self.encode_path(self._path)])
