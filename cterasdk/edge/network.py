@@ -19,6 +19,7 @@ class Network(BaseCommand):
         self.proxy = Proxy(self._edge)
         self.mtu = MTU(self._edge)
         self.routes = StaticRoutes(self._edge)
+        self.hosts = Hosts(self._edge)
 
     def get_status(self):
         """
@@ -306,3 +307,26 @@ class StaticRoutes(BaseCommand):
         except CTERAException as error:
             logger.error("Failed to clear static routes")
             raise CTERAException('Failed to clear static routes') from error
+
+
+class Hosts(BaseCommand):
+    """Edge Filer Static Route Configuration APIs"""
+
+    def get(self):
+        """
+        Get the Edge Filer's hosts file entries.
+        """
+        return self._edge.api.get('/config/network/hostsFileEntries')
+
+    def add(self, ipaddr, hostname):
+        """
+        Add entry to the Edge Filer's hosts file.
+
+        :param str ipaddr: IP Address
+        :param str hostname: Hostname
+        """
+        param = Object(ip=ipaddr, hostName=hostname)
+        return self._edge.api.add('/config/network/hostsFileEntries', param)
+
+    def delete(self, hostname):
+        return self._edge.api.delete(f'/config/network/hostsFileEntries/{hostname}')
