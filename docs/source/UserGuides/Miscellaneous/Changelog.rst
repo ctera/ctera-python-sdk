@@ -7,7 +7,9 @@ Changelog
 Improvements
 ^^^^^^^^^^^^
 
-* Support retrieving, adding, and removing Edge Filer hosts file entries
+* Support retrieving, adding, and removing Edge Filer hosts file entries.
+* Add documentation for the Edge Filer Ransomware Protection APIs.
+* Add support for managing the Edge Filer's Antivirus (Bit Defender).
 
 Bug Fixes
 ^^^^^^^^^
@@ -17,7 +19,8 @@ Bug Fixes
 
 Related issues and pull requests on GitHub: `#306 <https://github.com/ctera/ctera-python-sdk/pull/306>`_,
 `#307 <https://github.com/ctera/ctera-python-sdk/pull/307>`_,
-`#308 <https://github.com/ctera/ctera-python-sdk/pull/308>`_
+`#308 <https://github.com/ctera/ctera-python-sdk/pull/308>`_,
+`#309 <https://github.com/ctera/ctera-python-sdk/pull/309>`_
 
 
 2.20.14
