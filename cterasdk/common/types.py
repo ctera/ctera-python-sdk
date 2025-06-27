@@ -187,7 +187,7 @@ class ThrottlingRule:
 
     def __str__(self):
         return str(dict(upload_kbps=self.upload, download_kbps=self.download,
-                        start=self.schedule.start, end=self.schedule.end, days=[day_of_week(day) for day in self.schedule.days]))
+                        start=self.schedule.start, end=self.schedule.end, days=[day_of_week(day) for day in self.schedule.days or list(range(0,7))]))
 
 
 class ThrottlingRuleBuilder:

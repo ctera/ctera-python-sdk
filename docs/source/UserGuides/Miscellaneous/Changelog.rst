@@ -4,13 +4,20 @@ Changelog
 2.20.15
 -------
 
+Improvements
+^^^^^^^^^^^^
+
+* Support retrieving, adding, and removing Edge Filer hosts file entries
+
 Bug Fixes
 ^^^^^^^^^
 
 * Fixed a documentation error related to deleting and undeleting Team Portal tenants.
+* Fixed an error when printing Edge Filer throttling policy rules set to "Every Day".
 
 Related issues and pull requests on GitHub: `#306 <https://github.com/ctera/ctera-python-sdk/pull/306>`_,
-`#307 <https://github.com/ctera/ctera-python-sdk/pull/307>`_
+`#307 <https://github.com/ctera/ctera-python-sdk/pull/307>`_,
+`#308 <https://github.com/ctera/ctera-python-sdk/pull/308>`_
 
 
 2.20.14
