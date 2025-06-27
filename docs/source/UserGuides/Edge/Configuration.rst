@@ -1020,6 +1020,32 @@ Diagnostics
 
    edge.network.iperf('192.168.1.145', protocol=edge_enum.IPProtocol.UDP)  # Use UDP
 
+
+Ransomware Protection
+=====================
+
+.. automethod:: cterasdk.edge.ransom_protect.RansomProtect.get_configuration
+   :noindex:
+
+.. automethod:: cterasdk.edge.ransom_protect.RansomProtect.enable
+   :noindex:
+
+.. automethod:: cterasdk.edge.ransom_protect.RansomProtect.disable
+   :noindex:
+
+.. automethod:: cterasdk.edge.ransom_protect.RansomProtect.is_disabled
+   :noindex:
+
+.. automethod:: cterasdk.edge.ransom_protect.RansomProtect.modify
+   :noindex:
+
+.. automethod:: cterasdk.edge.ransom_protect.RansomProtect.incidents
+   :noindex:
+
+.. automethod:: cterasdk.edge.ransom_protect.RansomProtect.details
+   :noindex:
+
+
 Mail Server
 ===========
 
