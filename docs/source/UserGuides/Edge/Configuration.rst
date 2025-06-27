@@ -1021,6 +1021,54 @@ Diagnostics
    edge.network.iperf('192.168.1.145', protocol=edge_enum.IPProtocol.UDP)  # Use UDP
 
 
+Antivirus
+=========
+
+.. automethod:: cterasdk.edge.antivirus.Antivirus.enable
+   :noindex:
+
+.. code-block:: python
+
+   edge.antivirus.settings.enable()
+
+.. automethod:: cterasdk.edge.antivirus.Antivirus.disable
+   :noindex:
+
+.. code-block:: python
+
+   edge.antivirus.settings.disable()
+
+.. automethod:: cterasdk.edge.antivirus.Antivirus.update
+   :noindex:
+
+.. code-block:: python
+
+   edge.antivirus.settings.update()
+
+.. automethod:: cterasdk.edge.antivirus.Antivirus.status
+   :noindex:
+
+.. code-block:: python
+
+   edge.antivirus.settings.status()
+
+.. automethod:: cterasdk.edge.antivirus.Settings.get
+   :noindex:
+
+.. code-block:: python
+
+   edge.antivirus.settings.get()
+
+.. automethod:: cterasdk.edge.antivirus.Settings.update
+   :noindex:
+
+.. code-block:: python
+
+   edge.antivirus.settings.update(edge_types.AntivirusUpdateSchedule.daily(5, 0))  # Daily at 5:00 am
+   edge.antivirus.settings.update(edge_types.AntivirusUpdateSchedule.weekly(common_enum.DayOfWeek.Tuesday, 2, 15))  # Tuesdays at 2:15 am
+   edge.antivirus.settings.update(edge_types.AntivirusUpdateSchedule.monthly(15, 15, 30))  # Every 15th at 3:30 pm
+
+
 Ransomware Protection
 =====================
 

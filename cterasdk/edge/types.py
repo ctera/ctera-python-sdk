@@ -1,3 +1,4 @@
+from datetime import datetime
 from collections import namedtuple
 from . import enum
 from ..common import Object
@@ -313,3 +314,44 @@ class DeduplicationStatus(Object):
 
         self.dedup = dedup
         self.savings = f"{savings:.2%}"
+
+
+class AntivirusUpdateSchedule(Object):
+    """
+    Edge Filer Antivirus Update Schedule
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @staticmethod
+    def daily(hour, minute):
+        """
+        Daily update.
+
+        :param int hour: Hour
+        :param int minute: Minute
+        """
+        return AntivirusUpdateSchedule(mode='daily', daily=Object(hour=hour, minute=minute))
+
+    @staticmethod
+    def weekly(day, hour, minute):
+        """
+        Weekly update.
+
+        :param cterasdk.common.enum.DayOfWeek day: Day
+        :param int hour: Hour
+        :param int minute: Minute
+        """
+        return AntivirusUpdateSchedule(mode='weekly', weekly=Object(day=day, hour=hour, minute=minute))
+
+    @staticmethod
+    def monthly(day, hour, minute):
+        """
+        Monthly update.
+
+        :param int day: Day
+        :param int hour: Hour
+        :param int minute: Minute
+        """
+        return AntivirusUpdateSchedule(mode='monthly', monthly=Object(day=day, hour=hour, minute=minute))
