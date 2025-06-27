@@ -366,10 +366,10 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         add_response = 'Success'
         self._init_filer(add_response=add_response)
         ret = network.Network(self._filer).hosts.add(self._hosts_ipaddr, self._hosts_hostname)
-        self._filer.api.add.assert_called_once_with(f'/config/network/hostsFileEntries', mock.ANY)
+        self._filer.api.add.assert_called_once_with('/config/network/hostsFileEntries', mock.ANY)
         actual_param = self._filer.api.add.call_args[0][1]
         expected_param = munch.Munch(dict(ip=self._hosts_ipaddr, hostName=self._hosts_hostname))
-        self._assert_equal_objects(actual_param, expected_param )
+        self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
     def test_delete_hosts_file_entry(self):
