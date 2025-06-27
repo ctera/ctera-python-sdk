@@ -6,7 +6,7 @@ from .. import authenticators
 from ...lib.session.edge import Session
 
 from ...edge import (
-    afp, aio, array, audit, backup, cache, cli, config, connection, ctera_migrate,
+    afp, aio, antivirus, array, audit, backup, cache, cli, config, connection, ctera_migrate,
     dedup, directoryservice, drive, files, firmware, ftp, groups, licenses, login,
     logs, mail, network, nfs, ntp, power, remote, rsync, ransom_protect, services,
     shares, shell, smb, snmp, ssh, ssl, support, sync, syslog, taskmgr, telnet,
@@ -75,6 +75,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self._ctera_clients = Clients(self, Portal)
         self.afp = afp.AFP(self)
         self.aio = aio.AIO(self)
+        self.antivirus = antivirus.Antivirus(self)
         self.array = array.Array(self)
         self.audit = audit.Audit(self)
         self.backup = backup.Backup(self)
