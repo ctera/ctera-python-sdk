@@ -9,7 +9,8 @@ Bug Fixes
 
 * Fixed a documentation error related to deleting and undeleting Team Portal tenants.
 
-Related issues and pull requests on GitHub: `#305 <https://github.com/ctera/ctera-python-sdk/pull/305>`_
+Related issues and pull requests on GitHub: `#306 <https://github.com/ctera/ctera-python-sdk/pull/306>`_,
+`#307 <https://github.com/ctera/ctera-python-sdk/pull/307>`_
 
 
 2.20.14
@@ -20,7 +21,7 @@ Bug Fixes
 
 * CTERA Portal: Added support for special characters when copying, moving, renaming, sharing, and deleting files.
 
-Related issues and pull requests on GitHub: `#304 <https://github.com/ctera/ctera-python-sdk/pull/304>`_
+Related issues and pull requests on GitHub: `#305 <https://github.com/ctera/ctera-python-sdk/pull/305>`_
 
 2.20.13
 -------
