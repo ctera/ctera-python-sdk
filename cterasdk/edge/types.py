@@ -1,4 +1,3 @@
-from datetime import datetime
 from collections import namedtuple
 from . import enum
 from ..common import Object
@@ -320,9 +319,6 @@ class AntivirusUpdateSchedule(Object):
     """
     Edge Filer Antivirus Update Schedule
     """
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     @staticmethod
     def daily(hour, minute):
