@@ -949,6 +949,31 @@ Static Routes
    edge.network.routes.clear()
 
 
+Hosts
+-----
+
+.. automethod:: cterasdk.edge.network.Hosts.get
+   :noindex:
+
+.. code-block:: python
+
+   edge.network.hosts.get() # get a list of hosts file entries
+
+.. automethod:: cterasdk.edge.network.Hosts.add
+   :noindex:
+
+.. code-block:: python
+
+   edge.network.hosts.add('192.168.28.153', 'tenant.ctera.com')
+
+.. automethod:: cterasdk.edge.network.Hosts.delete
+   :noindex:
+
+.. code-block:: python
+
+   edge.network.hosts.delete('tenant.ctera.com')
+
+
 Diagnostics
 -----------
 

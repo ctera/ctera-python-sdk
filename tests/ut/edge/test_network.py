@@ -49,6 +49,9 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._proxy_user = 'admin'
         self._proxy_pass = 'password'
 
+        self._hosts_ipaddr = '192.168.0.1'
+        self._hosts_hostname = 'address.ctera.com'
+
     def test_network_status(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
@@ -351,3 +354,27 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         if password:
             m.password = password
         return m
+
+    def test_get_hosts_file(self):
+        get_response = 'Success'
+        self._init_filer(get_response=get_response)
+        ret = network.Network(self._filer).hosts.get()
+        self._filer.api.get.assert_called_once_with('/config/network/hostsFileEntries')
+        self.assertEqual(ret, get_response)
+
+    def test_add_hosts_file_entry(self):
+        add_response = 'Success'
+        self._init_filer(add_response=add_response)
+        ret = network.Network(self._filer).hosts.add(self._hosts_ipaddr, self._hosts_hostname)
+        self._filer.api.add.assert_called_once_with('/config/network/hostsFileEntries', mock.ANY)
+        actual_param = self._filer.api.add.call_args[0][1]
+        expected_param = munch.Munch(dict(ip=self._hosts_ipaddr, hostName=self._hosts_hostname))
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, add_response)
+
+    def test_delete_hosts_file_entry(self):
+        delete_response = 'Success'
+        self._init_filer(delete_response=delete_response)
+        ret = network.Network(self._filer).hosts.delete(self._hosts_hostname)
+        self._filer.api.delete.assert_called_once_with(f'/config/network/hostsFileEntries/{self._hosts_hostname}')
+        self.assertEqual(ret, delete_response)
