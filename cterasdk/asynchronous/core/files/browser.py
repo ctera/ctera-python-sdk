@@ -203,9 +203,16 @@ class CloudDrive(FileBrowser):
         """
         Move one or more files or folders
 
-        :param list[str] paths: List of paths
-        :param str destination: Destination
+        :param list[str] paths: List of paths, or list of (source, destination) tuples
+        :param str destination: Destination (used when paths are not tuples)
         """
-        if destination is None:
-            raise ValueError('Move destination was not specified.')
-        return await io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
+        # Check if we're using the new tuple format
+        if paths and isinstance(paths[0], tuple):
+            # New format: move((src1, dst1), (src2, dst2), ...)
+            for source, dest in paths:
+                await io.move(self._core, self.normalize(source), destination=self.normalize(dest))
+        else:
+            # Original format: move(src1, src2, ..., destination=dst)
+            if destination is None:
+                raise ValueError('Move destination was not specified.')
+            return await io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
