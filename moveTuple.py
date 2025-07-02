@@ -12,8 +12,8 @@ def move_special_char_file():
     try:
         admin.login('Administrator', 'Password1!')
 
-        source_file = "Users/enduser1/My Files/HPE + CTERA 2023 Edited.pptx"
-        source_file2 = "Users/enduser1/My Files/CTERA Company Profile.pdf"
+        source_file = "Users/enduser1/My Files/test_file_1.txt"
+        source_file2 = "Users/enduser1/My Files/test_file_2.txt"
         destination_dir = "Users/enduser1/My Files/moved1/"
         destination_dir2 = "Users/enduser1/My Files/moved2/"
 
