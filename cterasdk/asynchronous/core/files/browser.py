@@ -215,8 +215,8 @@ class CloudDrive(FileBrowser):
                 task_ref = await io.move(self._core, self.normalize(source), destination=self.normalize(dest))
                 task_refs.append(task_ref)
             return task_refs if len(task_refs) > 1 else task_refs[0]
-        else:
-            # Original format: move(src1, src2, ..., destination=dst)
-            if destination is None:
-                raise ValueError('Move destination was not specified.')
-            return await io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
+
+        # Original format: move(src1, src2, ..., destination=dst)
+        if destination is None:
+            raise ValueError('Move destination was not specified.')
+        return await io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
