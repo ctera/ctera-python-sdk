@@ -13,7 +13,7 @@ def move_special_char_file():
         admin.login('Administrator', 'Password1!')
 
         source_file = "Users/enduser1/My Files/HPE + CTERA 2023 Edited.pptx"
-        source_file2 = "Users/enduser1/My Files/CTERA%2520Company%2520Profile.pdf"
+        source_file2 = "Users/enduser1/My Files/CTERA Company Profile.pdf"
         destination_dir = "Users/enduser1/My Files/moved1/"
         destination_dir2 = "Users/enduser1/My Files/moved2/"
 
