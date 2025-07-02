@@ -211,14 +211,13 @@ class CloudDrive(FileBrowser):
 
         :param list[str] paths: List of paths, or list of (source, destination) tuples
         :param str destination: Destination (used when paths are not tuples)
-        :returns: Task reference (single) or list of task references (when using tuples with multiple files)
         """
         if paths and isinstance(paths[0], tuple):
-            task_refs = []
+            results = []
             for source, dest in paths:
-                task_ref = io.move(self._core, self.normalize(source), destination=self.normalize(dest))
-                task_refs.append(task_ref)
-            return task_refs if len(task_refs) > 1 else task_refs[0]
+                result = io.move(self._core, self.normalize(source), destination=self.normalize(dest))
+                results.append(result)
+            return results if len(results) > 1 else results[0]
 
         if destination is None:
             raise ValueError('Move destination was not specified.')
