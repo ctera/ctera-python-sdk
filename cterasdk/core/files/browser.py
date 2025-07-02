@@ -215,8 +215,10 @@ class CloudDrive(FileBrowser):
         # Check if we're using the new tuple format
         if paths and isinstance(paths[0], tuple):
             # New format: move((src1, dst1), (src2, dst2), ...)
+            task_ref = None
             for source, dest in paths:
-                io.move(self._core, self.normalize(source), destination=self.normalize(dest))
+                task_ref = io.move(self._core, self.normalize(source), destination=self.normalize(dest))
+            return task_ref
         else:
             # Original format: move(src1, src2, ..., destination=dst)
             if destination is None:
