@@ -20,6 +20,8 @@ class TaskError(CTERAException):
     def __init__(self, task):
         super().__init__()
         self.task = task
+        if hasattr(task, 'file_details'):
+            self.file_details = task.file_details
 
 
 class TaskBase(ABC):
@@ -40,7 +42,12 @@ class TaskBase(ABC):
     def get_task_status(self):
         raise NotImplementedError("Subclass must implement get_task_status")
 
-    def wait(self):
+    def wait(self, file_paths=None):
+        """
+        Wait for task completion
+
+        :param list file_paths: Optional list of file paths for detailed tracking
+        """
         task = None
         while self.running:
             logger.debug('Obtaining task status. %s', {'path': self.path, 'attempt': (self.attempt + 1)})
@@ -48,7 +55,44 @@ class TaskBase(ABC):
             logger.debug('Task status. %s', tojsonstr(task, False))
             self.increment()
             self.running = task.status == TaskRunningStatus.Running
-        return TaskBase.resolve(task)
+
+        if file_paths:
+            task.file_details = TaskBase._extract_file_details(task, file_paths)
+
+        resolved_task = TaskBase.resolve(task)
+
+        if file_paths and hasattr(task, 'file_details'):
+            resolved_task.file_details = task.file_details
+
+        return resolved_task
+
+    @staticmethod
+    def _extract_file_details(task, file_paths):
+        """Extract individual file operation details from task info"""
+        details = []
+        progress_str = getattr(task, 'progstring', '') or getattr(task, 'description', '') or ''
+
+        for file_path in file_paths:
+            file_detail = {
+                'path': file_path,
+                'status': 'completed' if task.status == TaskRunningStatus.Completed else 'failed',
+                'error': None
+            }
+
+            if task.status in [TaskRunningStatus.Failed, TaskRunningStatus.Warnings]:
+                if hasattr(task, 'errorDetails') and task.errorDetails:
+                    file_detail['error'] = str(task.errorDetails)
+                elif 'failed' in progress_str.lower() or 'error' in progress_str.lower():
+                    file_detail['error'] = progress_str
+                elif task.status == TaskRunningStatus.Failed:
+                    file_detail['error'] = f"Task failed: {getattr(task, 'errorType', 'Unknown error')}"
+                else:
+                    file_detail['status'] = 'warning'
+                    file_detail['error'] = "Completed with warnings"
+
+            details.append(file_detail)
+
+        return details
 
     @staticmethod
     def resolve(task):

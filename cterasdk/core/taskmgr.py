@@ -36,13 +36,14 @@ class Tasks(BaseCommand):
         task = Task(self._core, ref)
         return task.get_task_status()
 
-    def wait(self, ref, retries=100, seconds=1):
+    def wait(self, ref, retries=100, seconds=1, file_paths=None):
         """
         Wait for background task to complete
 
         :param str ref: Task reference
         :param int,optional retries: Number of retries when sampling the task status, defaults to 100
         :param int,optional seconds: Number of seconds to wait between retries, defaults to 1
+        :param list,optional file_paths: Optional file paths for detailed tracking, defaults to None
         """
         task = Task(self._core, ref, retries, seconds)
-        return task.wait()
+        return task.wait(file_paths)
