@@ -109,9 +109,13 @@ class FileBrowser(BaseCommand):
         """
         Copy one or more files or folders
 
-        :param list[str] paths: List of paths
-        :param str destination: Destination
+        :param list[str] paths: List of paths, or list of (source, destination) tuples
+        :param str destination: Destination (used when paths are not tuples)
         """
+        if paths and isinstance(paths[0], tuple):
+            normalized_tuples = [(self.normalize(source), self.normalize(dest)) for source, dest in paths]
+            return await io.copy(self._core, *normalized_tuples, destination=None)
+
         if destination is None:
             raise ValueError('Copy destination was not specified.')
         return await io.copy(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
@@ -207,11 +211,8 @@ class CloudDrive(FileBrowser):
         :param str destination: Destination (used when paths are not tuples)
         """
         if paths and isinstance(paths[0], tuple):
-            results = []
-            for source, dest in paths:
-                result = await io.move(self._core, self.normalize(source), destination=self.normalize(dest))
-                results.append(result)
-            return results if len(results) > 1 else results[0]
+            normalized_tuples = [(self.normalize(source), self.normalize(dest)) for source, dest in paths]
+            return await io.move(self._core, *normalized_tuples, destination=None)
 
         if destination is None:
             raise ValueError('Move destination was not specified.')

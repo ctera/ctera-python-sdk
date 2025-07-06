@@ -238,10 +238,19 @@ def recover(*paths):
 def _copy_or_move(paths, destination, *, message=None):
     param = ActionResourcesParam.instance()
     paths = [paths] if not isinstance(paths, list) else paths
-    for path in paths:
-        param.add(SrcDstParam.instance(src=path.absolute_encode, dest=destination.join(path.name).absolute_encode))
-        if message:
-            logger.info('%s from: %s to: %s', message, path.reference.as_posix(), destination.join(path.name).reference.as_posix())
+
+    # Handle tuple paths: (source, destination) pairs
+    if paths and isinstance(paths[0], tuple):
+        for source, dest in paths:
+            param.add(SrcDstParam.instance(src=source.absolute_encode, dest=dest.absolute_encode))
+            if message:
+                logger.info('%s from: %s to: %s', message, source.reference.as_posix(), dest.reference.as_posix())
+    else:
+        # Handle regular paths with shared destination
+        for path in paths:
+            param.add(SrcDstParam.instance(src=path.absolute_encode, dest=destination.join(path.name).absolute_encode))
+            if message:
+                logger.info('%s from: %s to: %s', message, path.reference.as_posix(), destination.join(path.name).reference.as_posix())
     yield param
 
 
