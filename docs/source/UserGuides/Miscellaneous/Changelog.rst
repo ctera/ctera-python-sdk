@@ -8,7 +8,6 @@ Improvements
 ^^^^^^^^^^^^
 
 * Added support for enabling or disabling Direct Mode on CTERA Portal Storage Nodes.
-* Introduced a method for setting the Advanced Domain Mapping configuration. **Note:** This method requires the full list of mappings to be provided and will overwrite the existing configuration.
 
 Bug Fixes
 ^^^^^^^^^
