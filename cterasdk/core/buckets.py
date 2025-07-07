@@ -40,7 +40,7 @@ class Buckets(BaseCommand):
             raise ObjectNotFoundException(f'/locations/{name}')
         return bucket
 
-    def add(self, name, bucket, read_only=False, dedicated_to=None):
+    def add(self, name, bucket, read_only=False, dedicated_to=None, direct_upload=False):
         """
         Add a Bucket
 
@@ -48,19 +48,21 @@ class Buckets(BaseCommand):
         :param cterasdk.core.types.Bucket bucket: Storage bucket to add
         :param bool,optional read_only: Set bucket to read-delete only, defaults to False
         :param str,optional dedicated_to: Name of a tenant, defaults to ``None``
+        :param bool,optional direct_upload: Enable direct upload, defaults to False
         """
         param = bucket.to_server_object()
         param.name = name
         param.readOnly = read_only
         param.dedicated = bool(dedicated_to)
         param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
+        param.directUpload = direct_upload
 
         logger.info('Adding bucket. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
         response = self._core.api.add('/locations', param)
         logger.info('Bucket added. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
         return response
 
-    def modify(self, current_name, new_name=None, read_only=None, dedicated_to=None, verify_ssl=None):
+    def modify(self, current_name, new_name=None, read_only=None, dedicated_to=None, verify_ssl=None, direct_upload=None):
         """
         Modify a Bucket
 
@@ -70,6 +72,7 @@ class Buckets(BaseCommand):
         :param bool,optional dedicated: Dedicate bucket to a tenant
         :param bool,optional verify_ssl: ``False`` to trust all certificate, ``True`` to verify.
         :param str,optional dedicated_to: Tenant name
+        :param bool,optional direct_upload: Enable direct upload
         """
         param = self._get_entire_object(current_name)
         if new_name:
@@ -88,6 +91,8 @@ class Buckets(BaseCommand):
                 param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
         if verify_ssl is not None:
             param.trustAllCertificates = not verify_ssl
+        if direct_upload is not None:
+            param.directUpload = direct_upload
         logger.info("Modifying bucket. %s", {'name': current_name})
         response = self._core.api.put(f'/locations/{current_name}', param)
         logger.info("Bucket modified. %s", {'name': current_name})
