@@ -449,6 +449,8 @@ Active Directory
 
    edge.directoryservice.set_advanced_mapping(advanced_mapping)  # this function will skip domains that are not found
 
+.. note::  This method sets the advanced mapping of domains and requires the full list of mappings.
+   It does not append to the existing configuration—any existing mappings will be overwritten.
 .. note:: to retrieve a list of domain flat names, use :py:func:`cterasdk.edge.directoryservice.domains()`
 
 .. automethod:: cterasdk.edge.directoryservice.DirectoryService.disconnect
