@@ -17,11 +17,8 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self._password = 'password'
         self._workgroup = "CTERA"
         self._domain_flat_name = "CTERA"
-        self._domain_flat_name_2 = "MYDOMAIN"
         self._mapping_min = 2000000
         self._mapping_max = 5000000
-        self._mapping_min_2 = 1000000
-        self._mapping_max_2 = 1500000
         self._dc = '192.168.0.1'
         self._ports = [389, 3268, 445]
 
@@ -147,43 +144,13 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         advanced_mapping = [
             TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, self._mapping_min, self._mapping_max)
         ]
-        existing_mappings = []
-        get_response_side_effect = TestEdgeDirectoryService._get_set_advanced_mapping_side_effect(0, existing_mappings)
-        self._init_filer(execute_response=execute_response)
-        self._filer.api.get = mock.MagicMock(side_effect=get_response_side_effect)
+        self._init_filer(get_response=0, execute_response=execute_response)
         directoryservice.DirectoryService(self._filer).set_advanced_mapping(advanced_mapping)
-        self._filer.api.get.assert_has_calls([
-            mock.call('/status/fileservices/cifs/joinStatus'),
-            mock.call('/config/fileservices/cifs/idMapping/map')
-        ])
+        self._filer.api.get.assert_called_once_with('/status/fileservices/cifs/joinStatus')
         self._filer.api.execute.assert_called_once_with('/status/fileservices/cifs', 'enumDiscoveredDomains')
         self._filer.api.put.assert_called_once_with('/config/fileservices/cifs/idMapping/map', mock.ANY)
         actual_param = self._filer.api.put.call_args[0][1]
         self._assert_equal_objects(advanced_mapping[0], actual_param[0])
-
-    def test_set_advanced_mapping_with_existing_mappings(self):
-        execute_response = TestEdgeDirectoryService._create_get_domains_response(self._domain_flat_name, self._domain_flat_name_2)
-        advanced_mapping = [
-            TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name, self._mapping_min, self._mapping_max)
-        ]
-        existing_mappings = [
-            TestEdgeDirectoryService._get_advanced_mapping_object(self._domain_flat_name_2, self._mapping_min_2, self._mapping_max_2)
-        ]
-        get_response_side_effect = TestEdgeDirectoryService._get_set_advanced_mapping_side_effect(0, existing_mappings)
-        self._init_filer(execute_response=execute_response)
-        self._filer.api.get = mock.MagicMock(side_effect=get_response_side_effect)
-        directoryservice.DirectoryService(self._filer).set_advanced_mapping(advanced_mapping)
-        self._filer.api.get.assert_has_calls([
-            mock.call('/status/fileservices/cifs/joinStatus'),
-            mock.call('/config/fileservices/cifs/idMapping/map')
-        ])
-        self._filer.api.execute.assert_called_once_with('/status/fileservices/cifs', 'enumDiscoveredDomains')
-        self._filer.api.put.assert_called_once_with('/config/fileservices/cifs/idMapping/map', mock.ANY)
-        actual_param = self._filer.api.put.call_args[0][1]
-        self.assertEqual(len(actual_param), 2)
-        domain_names = [mapping.domainFlatName for mapping in actual_param]
-        self.assertIn(self._domain_flat_name, domain_names)
-        self.assertIn(self._domain_flat_name_2, domain_names)
 
     def test_set_advanced_mapping_raise(self):
         self._init_filer(get_response=1)
@@ -281,15 +248,5 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
                 return domain_controllers
             if path == '/config/fileservices/cifs':
                 return cifs_param
-            return None
-        return get_response
-
-    @staticmethod
-    def _get_set_advanced_mapping_side_effect(join_status, existing_mappings):
-        def get_response(path):
-            if path == '/status/fileservices/cifs/joinStatus':
-                return join_status
-            if path == '/config/fileservices/cifs/idMapping/map':
-                return existing_mappings
             return None
         return get_response
