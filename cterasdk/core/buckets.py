@@ -40,7 +40,7 @@ class Buckets(BaseCommand):
             raise ObjectNotFoundException(f'/locations/{name}')
         return bucket
 
-    def add(self, name, bucket, read_only=False, dedicated_to=None, direct_upload=False):
+    def add(self, name, bucket, read_only=False, dedicated_to=None, direct=None):
         """
         Add a Bucket
 
@@ -48,21 +48,22 @@ class Buckets(BaseCommand):
         :param cterasdk.core.types.Bucket bucket: Storage bucket to add
         :param bool,optional read_only: Set bucket to read-delete only, defaults to False
         :param str,optional dedicated_to: Name of a tenant, defaults to ``None``
-        :param bool,optional direct_upload: Enable direct upload, defaults to False
+        :param bool,optional direct: Enable CTERA Direct IO
         """
         param = bucket.to_server_object()
         param.name = name
         param.readOnly = read_only
         param.dedicated = bool(dedicated_to)
         param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
-        param.directUpload = direct_upload
+        if direct is not None:
+            param.directUpload = direct
 
-        logger.info('Adding bucket. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
+        logger.info('Adding %s bucket: %s', bucket.__class__.__name__, name)
         response = self._core.api.add('/locations', param)
-        logger.info('Bucket added. %s', {'name': name, 'bucket': bucket.bucket, 'type': bucket.__class__.__name__})
+        logger.info('Bucket added: %s', name)
         return response
 
-    def modify(self, current_name, new_name=None, read_only=None, dedicated_to=None, verify_ssl=None, direct_upload=None):
+    def modify(self, current_name, new_name=None, read_only=None, dedicated_to=None, verify_ssl=None, direct=None):
         """
         Modify a Bucket
 
@@ -72,7 +73,7 @@ class Buckets(BaseCommand):
         :param bool,optional dedicated: Dedicate bucket to a tenant
         :param bool,optional verify_ssl: ``False`` to trust all certificate, ``True`` to verify.
         :param str,optional dedicated_to: Tenant name
-        :param bool,optional direct_upload: Enable direct upload
+        :param bool,optional direct: Set CTERA Direct IO
         """
         param = self._get_entire_object(current_name)
         if new_name:
@@ -91,11 +92,11 @@ class Buckets(BaseCommand):
                 param.dedicatedPortal = self._get_tenant_base_object_ref(dedicated_to) if dedicated_to else None
         if verify_ssl is not None:
             param.trustAllCertificates = not verify_ssl
-        if direct_upload is not None:
-            param.directUpload = direct_upload
-        logger.info("Modifying bucket. %s", {'name': current_name})
+        if direct is not None:
+            param.directUpload = direct
+        logger.info("Modifying bucket: %s", current_name)
         response = self._core.api.put(f'/locations/{current_name}', param)
-        logger.info("Bucket modified. %s", {'name': current_name})
+        logger.info("Bucket modified: %s", current_name)
         return response
 
     def list_buckets(self, include=None):

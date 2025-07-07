@@ -45,7 +45,7 @@ class TestCoreBuckets(base_admin.BaseCoreTest):
         bucket = AmazonS3(self._bucket_name, self._access_key, self._secret_key)
         ret = buckets.Buckets(self._global_admin).add(
             self._bucket_name, bucket, read_only=True,
-            dedicated_to=self._tenant_name, direct_upload=True)
+            dedicated_to=self._tenant_name, direct=True)
         self._global_admin.api.get_multi.assert_called_once_with(f'/portals/{self._tenant_name}', mock.ANY)
         expected_include = ['/' + attr for attr in portals.Portals.default + ['baseObjectRef']]
         actual_include = self._global_admin.api.get_multi.call_args[0][1]
@@ -61,7 +61,7 @@ class TestCoreBuckets(base_admin.BaseCoreTest):
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
 
-    def test_add_bucket_default_direct_upload(self):
+    def test_add_bucket_default_attrs(self):
         add_response = 'Success'
         self._init_global_admin(add_response=add_response)
         bucket = AmazonS3(self._bucket_name, self._access_key, self._secret_key)
@@ -69,7 +69,7 @@ class TestCoreBuckets(base_admin.BaseCoreTest):
         self._global_admin.api.add.assert_called_once_with('/locations', mock.ANY)
         expected_param = TestCoreBuckets._customize_bucket(bucket.to_server_object(), name=self._bucket_name,
                                                            readOnly=False, dedicated=False,
-                                                           dedicatedPortal=None, trustAllCertificates=False, directUpload=False)
+                                                           dedicatedPortal=None, trustAllCertificates=False)
         actual_param = self._global_admin.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, add_response)
@@ -81,6 +81,16 @@ class TestCoreBuckets(base_admin.BaseCoreTest):
         self._global_admin.api.get.assert_called_once_with(f'/locations/{self._bucket_name}')
         self._global_admin.api.put.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
         expected_param = TestCoreBuckets._get_bucket_param(name=self._bucket_new_name, readOnly=True, dedicated=False, dedicatedPortal=None)
+        actual_param = self._global_admin.api.put.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def test_modify_bucket_direct_mode(self):
+        get_response = munch.Munch({'name': self._bucket_name, 'directUpload': False})
+        self._init_global_admin(get_response=get_response)
+        buckets.Buckets(self._global_admin).modify(self._bucket_name, direct=True)
+        self._global_admin.api.get.assert_called_once_with(f'/locations/{self._bucket_name}')
+        self._global_admin.api.put.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
+        expected_param = TestCoreBuckets._get_bucket_param(name=self._bucket_name, directUpload=True)
         actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
 
@@ -106,63 +116,6 @@ class TestCoreBuckets(base_admin.BaseCoreTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             buckets.Buckets(self._global_admin).modify(self._bucket_name)
         self.assertEqual(f'Bucket not found: /locations/{self._bucket_name}', str(error.exception))
-
-    def test_modify_bucket_direct_upload(self):
-        put_response = 'Success'
-        get_response = munch.Munch({'name': self._bucket_name})
-        self._init_global_admin(get_response=get_response, put_response=put_response)
-        ret = buckets.Buckets(self._global_admin).modify(self._bucket_name, direct_upload=True)
-        self._global_admin.api.get.assert_called_once_with(f'/locations/{self._bucket_name}')
-        self._global_admin.api.put.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
-        expected_param = TestCoreBuckets._get_bucket_param(name=self._bucket_name, directUpload=True)
-        actual_param = self._global_admin.api.put.call_args[0][1]
-        self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(ret, put_response)
-
-    def test_modify_bucket_direct_upload_false(self):
-        put_response = 'Success'
-        get_response = munch.Munch({'name': self._bucket_name})
-        self._init_global_admin(get_response=get_response, put_response=put_response)
-        ret = buckets.Buckets(self._global_admin).modify(self._bucket_name, direct_upload=False)
-        self._global_admin.api.get.assert_called_once_with(f'/locations/{self._bucket_name}')
-        self._global_admin.api.put.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
-        expected_param = TestCoreBuckets._get_bucket_param(name=self._bucket_name, directUpload=False)
-        actual_param = self._global_admin.api.put.call_args[0][1]
-        self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(ret, put_response)
-
-    def test_modify_bucket_without_direct_upload(self):
-        put_response = 'Success'
-        get_response = munch.Munch({'name': self._bucket_name})
-        self._init_global_admin(get_response=get_response, put_response=put_response)
-        ret = buckets.Buckets(self._global_admin).modify(self._bucket_name, new_name=self._bucket_new_name)
-        self._global_admin.api.get.assert_called_once_with(f'/locations/{self._bucket_name}')
-        self._global_admin.api.put.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
-        expected_param = TestCoreBuckets._get_bucket_param(name=self._bucket_new_name)
-        actual_param = self._global_admin.api.put.call_args[0][1]
-        self._assert_equal_objects(actual_param, expected_param)
-        # Verify that directUpload is not set when not provided
-        self.assertFalse(hasattr(actual_param, 'directUpload'))
-        self.assertEqual(ret, put_response)
-
-    def test_modify_bucket_all_params_with_direct_upload(self):
-        put_response = 'Success'
-        get_response = munch.Munch({'name': self._bucket_name})
-        get_multi_response = munch.Munch({'name': self._tenant_name, 'baseObjectRef': self._tenant_base_object_ref})
-        self._init_global_admin(get_response=get_response, get_multi_response=get_multi_response, put_response=put_response)
-        ret = buckets.Buckets(self._global_admin).modify(
-            self._bucket_name, new_name=self._bucket_new_name,
-            read_only=True, dedicated_to=self._tenant_name,
-            verify_ssl=False, direct_upload=True)
-        self._global_admin.api.get.assert_called_once_with(f'/locations/{self._bucket_name}')
-        self._global_admin.api.put.assert_called_once_with(f'/locations/{self._bucket_name}', mock.ANY)
-        expected_param = TestCoreBuckets._get_bucket_param(
-            name=self._bucket_new_name, readOnly=True,
-            dedicated=True, dedicatedPortal=self._tenant_base_object_ref,
-            trustAllCertificates=True, directUpload=True)
-        actual_param = self._global_admin.api.put.call_args[0][1]
-        self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(ret, put_response)
 
     @staticmethod
     def _get_bucket_param(**kwargs):
