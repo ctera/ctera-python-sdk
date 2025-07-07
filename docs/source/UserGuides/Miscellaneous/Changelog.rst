@@ -9,7 +9,13 @@ Improvements
 
 * Added support for enabling or disabling Direct Mode on CTERA Portal Storage Nodes.
 
-Related issues and pull requests on GitHub: `#310 <https://github.com/ctera/ctera-python-sdk/pull/310>`_
+Bug Fixes
+^^^^^^^^^
+
+* Removed redundant call when retrieving the list of domain mappings.
+
+Related issues and pull requests on GitHub: `#310 <https://github.com/ctera/ctera-python-sdk/pull/310>`_,
+`#311 <https://github.com/ctera/ctera-python-sdk/pull/311>`_
 
 2.20.15
 -------

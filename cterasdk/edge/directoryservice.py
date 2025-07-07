@@ -108,7 +108,6 @@ class DirectoryService(BaseCommand):
             raise CTERAException('Failed to configure advanced mapping. Not connected to directory services.')
 
         domains = self.domains()
-        advanced_mapping = self._edge.api.get('/config/fileservices/cifs/idMapping/map')
         advanced_mapping = []
         for mapping in mappings:
             if mapping.domainFlatName in domains:
