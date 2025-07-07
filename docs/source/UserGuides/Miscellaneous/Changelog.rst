@@ -1,6 +1,16 @@
 Changelog
 =========
 
+2.20.16
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Added support for enabling or disabling Direct Mode on CTERA Portal Storage Nodes.
+
+Related issues and pull requests on GitHub: `#310 <https://github.com/ctera/ctera-python-sdk/pull/310>`_
+
 2.20.15
 -------
 
