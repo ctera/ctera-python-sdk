@@ -118,9 +118,10 @@ class FileBrowser(BaseCommand):
         :param list[str] paths: List of paths
         :param str destination: Destination
         """
-        if destination is None:
+        try:
+            return io.copy(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
+        except ValueError:
             raise ValueError('Copy destination was not specified.')
-        return io.copy(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
 
     def permalink(self, path):
         """
@@ -212,9 +213,10 @@ class CloudDrive(FileBrowser):
         :param list[str] paths: List of paths
         :param str destination: Destination
         """
-        if destination is None:
+        try:
+            return io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
+        except ValueError:
             raise ValueError('Move destination was not specified.')
-        return io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
 
     def get_share_info(self, path):
         """

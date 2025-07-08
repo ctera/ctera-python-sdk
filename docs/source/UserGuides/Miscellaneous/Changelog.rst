@@ -8,6 +8,7 @@ Improvements
 ^^^^^^^^^^^^
 
 * Added support for enabling or disabling Direct Mode on CTERA Portal Storage Nodes.
+* Support copying and moving multiple sources to multiple destinations on CTERA Portal.
 
 Bug Fixes
 ^^^^^^^^^
@@ -16,6 +17,23 @@ Bug Fixes
 
 Related issues and pull requests on GitHub: `#310 <https://github.com/ctera/ctera-python-sdk/pull/310>`_,
 `#311 <https://github.com/ctera/ctera-python-sdk/pull/311>`_
+`#312 <https://github.com/ctera/ctera-python-sdk/pull/312>`_
+
+.. code:: python
+
+  """
+  Copy multiple sources: the 'Sample.docx' file and the 'Spreadsheets' directory to 'My Files/Archive'
+  """
+  user.files.copy('My Files/Documents/Sample.docx', 'My Files/Spreadsheets', destination='My Files/Archive')
+
+  """
+  Copy multiple sources to different destinations under a different name.
+  """
+  user.files.copy(
+    ("Docs/Report_January.docx", "Archive/Jan_Report_Final.docx"),
+    ("Budget/Budget_2024.xlsx", "Finance/2024_Annual_Budget.xlsx"),
+    ("Presentations/Presentation.pptx", "Sales/Q2_Sales_Pitch.pptx")
+  )
 
 2.20.15
 -------

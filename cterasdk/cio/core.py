@@ -70,6 +70,9 @@ class CorePath(common.BasePath):
     def instance(scope, entries):
         if isinstance(entries, list):
             return [CorePath(scope, e) for e in entries]
+        if isinstance(entries, tuple):
+            source, destination = entries
+            return (CorePath(scope, source), CorePath(scope, destination))
         return CorePath(scope, entries)
 
 
@@ -237,11 +240,16 @@ def recover(*paths):
 
 def _copy_or_move(paths, destination, *, message=None):
     param = ActionResourcesParam.instance()
-    paths = [paths] if not isinstance(paths, list) else paths
     for path in paths:
-        param.add(SrcDstParam.instance(src=path.absolute_encode, dest=destination.join(path.name).absolute_encode))
-        if message:
-            logger.info('%s from: %s to: %s', message, path.reference.as_posix(), destination.join(path.name).reference.as_posix())
+        src, dest = path, destination
+        if isinstance(path, tuple):
+            src, dest = path
+        else:
+            if not dest.reference.name:
+                raise ValueError(f'Error: No destination specified for: {src}')
+            dest = dest.join(src.name)
+        param.add(SrcDstParam.instance(src=src.absolute_encode, dest=dest.absolute_encode))
+        logger.info('%s from: %s to: %s', message, src.reference.as_posix(), dest.reference.as_posix())
     yield param
 
 
