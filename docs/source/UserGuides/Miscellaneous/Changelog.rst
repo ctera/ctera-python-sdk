@@ -1,6 +1,16 @@
 Changelog
 =========
 
+2.20.17
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Added support to validate if deduplication is enabled on the CTERA Edge Filer
+
+Related issues and pull requests on GitHub: `#313 <https://github.com/ctera/ctera-python-sdk/pull/313>`_,
+
 2.20.16
 -------
 
