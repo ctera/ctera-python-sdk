@@ -5,7 +5,6 @@ from ..objects.uri import quote, unquote
 from ..common import Object, DateTimeUtils
 from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode
 from ..core.types import PortalAccount, UserAccount, GroupAccount
-from ..exceptions import InputError
 from ..exceptions.io import ResourceExistsError, PathValidationError, NameSyntaxError, ReservedNameError
 from . import common
 
