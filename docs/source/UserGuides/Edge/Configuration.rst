@@ -170,6 +170,14 @@ Volume Management
 Deduplication
 -------------
 
+.. automethod:: cterasdk.edge.dedup.Dedup.is_enabled
+   :noindex:
+
+.. code-block:: python
+
+   """Check if deduplication is enabled"""
+   edge.dedup.is_enabled()
+
 .. automethod:: cterasdk.edge.dedup.Dedup.enable
    :noindex:
 

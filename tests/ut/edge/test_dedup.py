@@ -13,6 +13,13 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
         super().setUp()
         self._mock_reboot = self.patch_call('cterasdk.edge.power.Power.reboot')
 
+    def test_is_enabled(self):
+        get_response = True
+        self._init_filer(get_response=get_response)
+        ret = dedup.Dedup(self._filer).is_enabled()
+        self._filer.api.get.assert_called_once_with('/config/dedup/useLocalMapFileDedup')
+        self.assertEqual(ret, True)
+
     def test_enable_reboot_wait(self):
         put_response = 'Success'
         self._init_filer(put_response=put_response)

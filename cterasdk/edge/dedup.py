@@ -15,6 +15,16 @@ class Dedup(BaseCommand):
         super().__init__(edge)
         self.regen = Regeneration(self._edge)
 
+    def is_enabled(self):
+        """
+        Check if deduplication is enabled
+
+        :return: True is deduplication is enabled, else False
+        :rtype: bool
+        """
+        response = self._edge.api.get('/config/dedup/useLocalMapFileDedup')
+        return False if response is None else response
+
     def enable(self, reboot=False, wait=False):
         """
         Enable local deduplication
