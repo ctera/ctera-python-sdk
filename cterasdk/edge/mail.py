@@ -43,7 +43,7 @@ class Mail(BaseCommand):
         if username is not None and password is not None:
             settings.useAuth = True
             settings.auth = Object()
-            settings.auth._classname = 'AuthSettings'
+            settings.auth._classname = 'AuthSettings'  # pylint: disable=protected-access
             settings.auth.username = username
             settings.auth.password = password
 
@@ -55,7 +55,7 @@ class Mail(BaseCommand):
 
         if recipients is not None:
             settings.emails = recipients
-    
+
         if min_severity is not None:
             settings.minSeverity = min_severity
 
@@ -84,7 +84,7 @@ class Alerts(BaseCommand):
         :returns: Alert settings
         :rtype: cterasdk.edge.types.AlertSettings
         """
-        return AlertSettings.from_server_object(self._edge.api.get(f'/config/logging/alert/specificAlerts'))
+        return AlertSettings.from_server_object(self._edge.api.get('/config/logging/alert/specificAlerts'))
 
     def modify(self, alerts):
         """
@@ -92,4 +92,4 @@ class Alerts(BaseCommand):
 
         :param cterasdk.edge.types.AlertSettings alerts: Alert Settings
         """
-        return AlertSettings.from_server_object(self._edge.api.put(f'/config/logging/alert/specificAlerts', alerts.to_server_object()))
+        return AlertSettings.from_server_object(self._edge.api.put('/config/logging/alert/specificAlerts', alerts.to_server_object()))

@@ -1135,7 +1135,7 @@ Mail Server
 
 
 Email Alerts
-^^^^^^^^^^^^
+------------
 
 .. automethod:: cterasdk.edge.mail.Alerts.get
    :noindex:

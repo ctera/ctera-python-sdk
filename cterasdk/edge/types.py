@@ -371,10 +371,10 @@ class AlertSettings(Object):  # pylint: disable=too-many-instance-attributes
     """
     # pylint: disable=too-many-arguments, too-many-locals
     def __init__(self, firmware_upgrade, device_startup, backup_success,
-             storage_volume_usage, storage_volume_usage_percent,
-             overdue_backup, overdue_backup_days,
-             delayed_synchronization, delayed_synchronization_hours,
-             disconnected, disconnected_hours):
+                 storage_volume_usage, storage_volume_usage_percent,
+                 overdue_backup, overdue_backup_days,
+                 delayed_synchronization, delayed_synchronization_hours,
+                 disconnected, disconnected_hours):
         super().__init__()
         self.firmware_upgrade = firmware_upgrade
         self.device_startup = device_startup
