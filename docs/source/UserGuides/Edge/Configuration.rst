@@ -1118,7 +1118,13 @@ Mail Server
 
    """Use default port number, use authentication and require TLS"""
 
-   edge.mail.enable('smtp.ctera.com', username = 'user', password = 'secret', useTLS = True)
+   edge.mail.enable('smtp.ctera.com', username='user', password='secret', useTLS=True)
+
+   """Configure e-mail sender, recipients and minimum severity"""
+   edge.mail.enable('smtp.ctera.com', username='user', password='secret', useTLS=True, sender='alert-no-reply@ctera.com', recipients=[
+      'recipient_one@acme.com',
+      'recipient_two@acme.com',
+   ], min_severity=edge_enum.Severity.ERROR)
 
 .. automethod:: cterasdk.edge.mail.Mail.disable
    :noindex:
@@ -1126,6 +1132,33 @@ Mail Server
 .. code-block:: python
 
    edge.mail.disable()
+
+
+Email Alerts
+^^^^^^^^^^^^
+
+.. automethod:: cterasdk.edge.mail.Alerts.get
+   :noindex:
+
+.. automethod:: cterasdk.edge.mail.Alerts.modify
+   :noindex:
+
+.. code-block:: python
+
+   alerts = edge.mail.alerts.get()
+   alerts.firmware_upgrade = True
+   alerts.device_startup = True
+   alerts.backup_success = False
+   alerts.storage_volume_usage = True
+   alerts.storage_volume_usage_percent = 85
+   alerts.overdue_backup = False
+   alerts.delayed_synchronization = True
+   alerts.delayed_synchronization_hours = 1
+   alerts.disconnected = True
+   alerts.disconnected_hours = 1
+   edge.mail.alerts.modify(alerts)
+
+.. note:: See :py:class:`cterasdk.edge.types.AlertSettings` for alert description
 
 Logging
 =======
