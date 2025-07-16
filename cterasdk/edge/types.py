@@ -351,3 +351,72 @@ class AntivirusUpdateSchedule(Object):
         :param int minute: Minute
         """
         return AntivirusUpdateSchedule(mode='monthly', monthly=Object(day=day, hour=hour, minute=minute))
+
+
+class AlertSettings(Object):  # pylint: disable=too-many-instance-attributes
+    """
+    Alert Settings
+
+    :ivar bool firmware_upgrade: Enables alerting when a firmware upgrade occurs.
+    :ivar bool device_startup: Enables alerting on Edge Filer shutdowns and startups.
+    :ivar bool backup_success: Enables alerting upon successful backup completion.
+    :ivar bool storage_volume_usage: Enables alerting for high storage volume utilization.
+    :ivar int storage_volume_usage_percent: Volume usage percentage threshold that triggers an alert.
+    :ivar bool overdue_backup: Enables alerting when a Cloud Backup is overdue.
+    :ivar int overdue_backup_days: Number of days since last Cloud Backup after which an alert is triggered.
+    :ivar bool delayed_synchronization: Enables alerting when synchronization is delayed.
+    :ivar int delayed_synchronization_hours: Number of hours of synchronization delay to trigger an alert.
+    :ivar bool disconnected: Enables alerting when the Edge Filer disconnects from the CTERA Portal.
+    :ivar int disconnected_hours: Number of hours of disconnection duration to trigger an alert.
+    """
+    # pylint: disable=too-many-arguments, too-many-locals
+    def __init__(self, firmware_upgrade, device_startup, backup_success,
+                 storage_volume_usage, storage_volume_usage_percent,
+                 overdue_backup, overdue_backup_days,
+                 delayed_synchronization, delayed_synchronization_hours,
+                 disconnected, disconnected_hours):
+        super().__init__()
+        self.firmware_upgrade = firmware_upgrade
+        self.device_startup = device_startup
+        self.backup_success = backup_success
+        self.storage_volume_usage = storage_volume_usage
+        self.storage_volume_usage_percent = storage_volume_usage_percent
+        self.overdue_backup = overdue_backup
+        self.overdue_backup_days = overdue_backup_days
+        self.delayed_synchronization = delayed_synchronization
+        self.delayed_synchronization_hours = delayed_synchronization_hours
+        self.disconnected = disconnected
+        self.disconnected_hours = disconnected_hours
+
+    def to_server_object(self):
+        param = Object()
+        param._classname = 'SpecificAlerts'  # pylint: disable=protected-access
+        param.NotifyFirmwareUpgrade = self.firmware_upgrade
+        param.NotifyDeviceStarted = self.device_startup
+        param.NotifyBackupSuccess = self.backup_success
+        param.VolumeFullAlert = self.storage_volume_usage
+        param.VolumeFullPercent = self.storage_volume_usage_percent
+        param.BackupFailAlert = self.overdue_backup
+        param.BackupFailDays = self.overdue_backup_days
+        param.CloudSyncFailAlert = self.delayed_synchronization
+        param.CloudSyncFailHours = self.delayed_synchronization_hours
+        param.CloudConnectFailAlert = self.disconnected
+        param.CloudConnectFailHours = self.disconnected_hours
+        return param
+
+    @staticmethod
+    def from_server_object(server_object):
+        params = {
+            'firmware_upgrade': server_object.NotifyFirmwareUpgrade,
+            'device_startup': server_object.NotifyDeviceStarted,
+            'backup_success': server_object.NotifyBackupSuccess,
+            'storage_volume_usage': server_object.VolumeFullAlert,
+            'storage_volume_usage_percent': server_object.VolumeFullPercent,
+            'overdue_backup': server_object.BackupFailAlert,
+            'overdue_backup_days': server_object.BackupFailDays,
+            'delayed_synchronization': server_object.CloudSyncFailAlert,
+            'delayed_synchronization_hours': server_object.CloudSyncFailHours,
+            'disconnected': server_object.CloudConnectFailAlert,
+            'disconnected_hours': server_object.CloudConnectFailHours,
+        }
+        return AlertSettings(**params)

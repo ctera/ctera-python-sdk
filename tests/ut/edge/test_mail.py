@@ -80,6 +80,7 @@ class TestEdgeMailServer(base_edge.BaseEdgeTest):
         if username is not None and password is not None:
             mail_param.useAuth = True
             mail_param.auth = Object()
+            mail_param.auth._classname = 'AuthSettings'  # pylint: disable=protected-access
             mail_param.auth.username = username
             mail_param.auth.password = password
 

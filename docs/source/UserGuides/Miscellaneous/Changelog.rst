@@ -1,6 +1,21 @@
 Changelog
 =========
 
+2.20.18
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Added support for managing email alerts on Edge Filers.
+
+Bug Fixes
+^^^^^^^^^
+
+* Fixed an issue where email server credentials were not stored correctly due to a missing class name in the object.
+
+Related issues and pull requests on GitHub: `#314 <https://github.com/ctera/ctera-python-sdk/pull/314>`_
+
 2.20.17
 -------
 
