@@ -1,8 +1,9 @@
 import logging
 import asyncio
 
+from ..lib.retries import execute_with_retries
 from .types import Metadata, Block
-from .credentials import KeyPair, Bearer
+from .credentials import create_authorization_header
 from .crypto import decrypt_key, decrypt_block
 from .decompressor import decompress
 from ..exceptions.transport import HTTPError
@@ -16,27 +17,7 @@ from ..exceptions.direct import (
 logger = logging.getLogger('cterasdk.direct')
 
 
-async def retry(coro, retries=3, backoff=1):
-    """
-    Retry Coroutine.
-
-    :param coroutine coro: Asynchronous Coroutine.
-    :param int retries: Retries.
-    :param int backoff: Seconds.
-    """
-    attempts = 0
-    while attempts < retries:
-        try:
-            return await coro()
-        except DirectIOError as error:
-            attempts = attempts + 1
-            if attempts == retries:
-                raise error
-            wait = backoff * (2 ** (attempts - 1))
-            logger.debug('Download of block failed on attempt %s. Retrying in %s seconds...', attempts, wait)
-            await asyncio.sleep(wait)
-
-
+@execute_with_retries(retries=3, backoff=1)
 async def get_object(client, file_id, chunk):
     """
     Get Object from a Signed URL.
@@ -46,54 +27,50 @@ async def get_object(client, file_id, chunk):
     :returns: Object
     :rtype: bytes
     """
-    async def get_object_coro():
+    message = (
+        f"Downloading block #{chunk.index} "
+        f"(offset={chunk.offset}, length={chunk.length})"
+    )
 
-        message = (
-            f"Downloading block #{chunk.index} "
-            f"(offset={chunk.offset}, length={chunk.length})"
-        )
+    if file_id:
+        message += f" for file ID {file_id}"
 
-        if file_id:
-            message += f" for file ID {file_id}"
+    error_message, exception = None, None
 
-        error_message, exception = None, None
+    logger.debug(message)
+    try:
+        response = await client.get(chunk.url)
+        return await response.read()
+    except ConnectionError:
+        error_message = 'connection'
+        exception = DownloadConnectionError(file_id, chunk)
+    except asyncio.TimeoutError:
+        error_message = 'timeout'
+        exception = DownloadTimeout(file_id, chunk)
+    except IOError as error:
+        error_message = 'io'
+        exception = DownloadError(error, file_id, chunk)
+    except HTTPError as error:
+        error_message = 'unknown'
+        exception = DownloadError(error.error, file_id, chunk)
 
-        logger.debug(message)
-        try:
-            response = await client.get(chunk.url)
-            return await response.read()
-        except ConnectionError:
-            error_message = 'connection'
-            exception = DownloadConnectionError(file_id, chunk)
-        except asyncio.TimeoutError:
-            error_message = 'timeout'
-            exception = DownloadTimeout(file_id, chunk)
-        except IOError as error:
-            error_message = 'io'
-            exception = DownloadError(error, file_id, chunk)
-        except HTTPError as error:
-            error_message = 'unknown'
-            exception = DownloadError(error.error, file_id, chunk)
+    error_messages = {
+        "connection": "Connection error",
+        "timeout": "Timed out",
+        "io": "I/O error",
+        "unknown": "Unknown error"
+    }
 
-        error_messages = {
-            "connection": "Connection error",
-            "timeout": "Timed out",
-            "io": "I/O error",
-            "unknown": "Unknown error"
-        }
+    message = (
+        f"Failed to download block #{chunk.index} "
+        f"(offset={chunk.offset}, length={chunk.length})"
+    )
+    if file_id:
+        message = message + f" for file ID {file_id}"
 
-        message = (
-            f"Failed to download block #{chunk.index} "
-            f"(offset={chunk.offset}, length={chunk.length})"
-        )
-        if file_id:
-            message = message + f" for file ID {file_id}"
-
-        message = message + f": {error_messages.get(error_message, 'Unknown error')}."
-        logger.error(message)
-        raise exception
-
-    return await retry(get_object_coro)
+    message = message + f": {error_messages.get(error_message, 'Unknown error')}."
+    logger.error(message)
+    raise exception
 
 
 async def decrypt_object(file_id, encrypted_object, encryption_key, chunk):
@@ -206,27 +183,7 @@ def decrypt_encryption_key(file_id, wrapped_key, secret_access_key):
         raise DecryptKeyError(file_id)
 
 
-def create_authorization_header(credentials):
-    """
-    Create Authorization Header.
-
-    :param cterasdk.direct.credentials.BaseCredentials credentials: Credentials
-    :returns: Authorization header as a dictionary.
-    :rtype: dict
-    """
-    authorization_header = None
-
-    if isinstance(credentials, Bearer):
-        logger.debug('Initializing client using bearer token')
-        authorization_header = f'Bearer {credentials.bearer}'
-
-    elif isinstance(credentials, KeyPair):
-        logger.debug('Initializing client using key pair.')
-        authorization_header = f'Bearer {credentials.access_key_id}'
-
-    return {'Authorization': authorization_header}
-
-
+@execute_with_retries(retries=3, backoff=1)
 async def get_chunks(api, credentials, file_id):
     """
     Get Chunks.
@@ -236,27 +193,24 @@ async def get_chunks(api, credentials, file_id):
     :returns: Wrapped key and file chunks.
     :rtype: cterasdk.direct.types.Metadata
     """
-    async def get_chunks_coro():
-        logger.debug('Listing blocks for file ID: %s', file_id)
-        try:
-            response = await api.get(f'{file_id}', headers=create_authorization_header(credentials))
-            if not response.chunks:
-                logger.error('Could not find blocks for file ID: %s.', file_id)
-                raise BlocksNotFoundError(file_id)
-            return Metadata(file_id, response)
-        except HTTPError as error:
-            if error.code == 400:
-                raise NotFoundError(file_id)
-            if error.code == 401:
-                raise UnAuthorized(file_id)
-            if error.code == 422:
-                raise UnprocessableContent(file_id)
-            raise error
-        except ConnectionError:
-            logger.error('Failed to list blocks for file ID: %s due to a connection error.', file_id)
-            raise BlockListConnectionError(file_id)
-        except asyncio.TimeoutError:
-            logger.error('Timed out while listing blocks for file ID: %s.', file_id)
-            raise BlockListTimeout(file_id)
-
-    return await retry(get_chunks_coro)
+    logger.debug('Listing blocks for file ID: %s', file_id)
+    try:
+        response = await api.get(f'{file_id}', headers=create_authorization_header(credentials))
+        if not response.chunks:
+            logger.error('Could not find blocks for file ID: %s.', file_id)
+            raise BlocksNotFoundError(file_id)
+        return Metadata(file_id, response)
+    except HTTPError as error:
+        if error.code == 400:
+            raise NotFoundError(file_id)
+        if error.code == 401:
+            raise UnAuthorized(file_id)
+        if error.code == 422:
+            raise UnprocessableContent(file_id)
+        raise error
+    except ConnectionError:
+        logger.error('Failed to list blocks for file ID: %s due to a connection error.', file_id)
+        raise BlockListConnectionError(file_id)
+    except asyncio.TimeoutError:
+        logger.error('Timed out while listing blocks for file ID: %s.', file_id)
+        raise BlockListTimeout(file_id)
