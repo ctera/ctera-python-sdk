@@ -23,7 +23,7 @@ def execute_with_retries(retries=None, backoff=None, max_backoff=None):
                 try:
                     logger.debug("Try %s out of %s of function: '%s'", try_num + 1, retries, func.__name__)
                     return await func(*args, **kwargs)
-                except Exception as e:
+                except Exception as e:  # pylint: disable=broad-exception-caught
                     logger.debug("Try %s of %s of function '%s' failed. Backing off for %s second(s).", try_num + 1, retries,
                                  func.__name__, delay)
                     if try_num == retries - 1:

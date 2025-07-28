@@ -173,7 +173,7 @@ class Sync(BaseCommand):
         :rtype: str
         """
         param = Object()
-        param._classname = 'evictFolderParam'
+        param._classname = 'evictFolderParam'  # pylint: disable=protected-access
         param.path = path
         ref = self._edge.api.execute('/config/cloudsync', 'evictFolder', param)
         if wait:

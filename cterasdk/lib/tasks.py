@@ -14,9 +14,9 @@ logger = logging.getLogger('cterasdk.common')
 
 class AwaitableTask(ABC):
 
-    def __init__(self, ctera, task_reference):
+    def __init__(self, ctera, ref):
         self._ctera = ctera
-        self._ref = self._task_reference(task_reference)
+        self._ref = self._task_reference(ref)
 
     @property
     def ref(self):
@@ -57,7 +57,7 @@ class AwaitableTask(ABC):
                                          self._ctera.tasks.awaitable_task(self.ref)) from error
 
     @abstractmethod
-    def _task_reference(self):
+    def _task_reference(self, ref):
         raise NotImplementedError("Subclass must implement the '_task_reference' function.")
 
     @abstractmethod
