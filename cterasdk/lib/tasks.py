@@ -4,7 +4,6 @@ import logging
 import asyncio
 from abc import ABC, abstractmethod
 
-from ..common import Object
 from ..common.enum import TaskRunningStatus
 from ..exceptions.common import TaskWaitTimeoutError, AwaitableTaskException
 from ..exceptions.transport import HTTPError
@@ -67,7 +66,7 @@ class AwaitableTask(ABC):
 
     @abstractmethod
     async def a_status(self):
-        raise NotImplementedError("Subclass must implement the 'a_status' function.") 
+        raise NotImplementedError("Subclass must implement the 'a_status' function.")
 
 
 class AwaitableEdgeTask(AwaitableTask):

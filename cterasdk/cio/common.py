@@ -82,7 +82,7 @@ def encode_request_parameter(param):
 def await_or_future(ctera, ref, wait):
     """
     Wait for task completion, or return an awaitable task object.
-    
+
     :param str ref: Task reference
     :param bool wait: ``True`` to wait for task completion, ``False`` to return an awaitable task object
     """
@@ -94,7 +94,7 @@ def await_or_future(ctera, ref, wait):
 async def a_await_or_future(ctera, ref, wait):
     """
     Wait for task completion, or return an awaitable task object.
-    
+
     :param str ref: Task reference
     :param bool wait: ``True`` to wait for task completion, ``False`` to return an awaitable task object
     """

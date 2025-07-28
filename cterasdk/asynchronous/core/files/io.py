@@ -165,6 +165,7 @@ def upload(name, size, destination, fd):
     :rtype: callable
     """
     fs.destination_prerequisite_conditions(destination, name)
+
     async def wrapper(core):
         """
         Upload file from metadata and file handle.

@@ -17,7 +17,7 @@ class TaskException(CTERAException):
     """
     Task Exception
 
-    :param cterasdk.common.object.Object task: Task object 
+    :param cterasdk.common.object.Object task: Task object
     """
     def __init__(self, message, task):
         super().__init__(message)
