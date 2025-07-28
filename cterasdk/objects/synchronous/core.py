@@ -9,7 +9,7 @@ from ...core import (
     activation, admins, antivirus, buckets, cli, cloudfs, connection, credentials,
     devices, directoryservice, domains, files, firmwares, groups, kms, licenses,
     login, logs, mail, messaging, plans, portals, reports, roles, servers, settings,
-    setup, ssl, startup, storage_classes, syslog, taskmgr, templates, users,
+    setup, ssl, startup, storage_classes, syslog, tasks, templates, users,
 )
 
 
@@ -68,7 +68,7 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
         self.roles = roles.Roles(self)
         self.settings = settings.Settings(self)
         self.storage_classes = storage_classes.StorageClasses(self)
-        self.tasks = taskmgr.Tasks(self)
+        self.tasks = tasks.Tasks(self)
         self.templates = templates.Templates(self)
         self.users = users.Users(self)
 

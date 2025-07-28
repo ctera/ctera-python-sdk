@@ -4,7 +4,7 @@ from cterasdk import exceptions
 from cterasdk.edge import directoryservice
 from cterasdk.edge.types import TCPService, TCPConnectResult
 from cterasdk.common import Object
-from cterasdk.lib import task_manager_base
+from cterasdk.exceptions.common import TaskException
 from tests.ut.edge import base_edge
 
 
@@ -99,7 +99,7 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         get_response_side_effect = TestEdgeDirectoryService._get_response_side_effect(self._get_workgroup_param(), None)
         self._filer.api.get = mock.MagicMock(side_effect=get_response_side_effect)
         self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
-        self._filer.api.execute = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
+        self._filer.api.execute = mock.MagicMock(side_effect=TaskException('Task failed', self._task_id))
 
         with self.assertRaises(exceptions.CTERAException):
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, check_connection=True)

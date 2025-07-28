@@ -1,11 +1,11 @@
 from unittest import mock
 
 from cterasdk import exceptions
-from cterasdk.lib import task_manager_base
 from cterasdk.edge import services
 from cterasdk.edge.enum import ServicesConnectionState
 from cterasdk.edge.types import TCPService, TCPConnectResult
 from cterasdk.common import Object
+from cterasdk.exceptions.common import TaskException
 from tests.ut.edge import base_edge
 
 
@@ -198,7 +198,7 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
 
     @staticmethod
     def _get_task_error():
-        error = task_manager_base.TaskError(TestEdgeServices._background_task_id)
+        error = TaskException('Task failed', TestEdgeServices._background_task_id)
         error.task = Object()
         error.task.description = 'Reason for Failure'
         return error

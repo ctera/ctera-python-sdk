@@ -151,7 +151,7 @@ class Portals(BaseCommand):
         param.objectId = None
         param.type = 'portals'
         logger.info('Applying provisioning changes.')
-        task = self._core.api.execute('', 'updatePortals', param)
+        ref = self._core.api.execute('', 'updatePortals', param)
         if wait:
-            task = self._core.tasks.wait(task)
-        return task
+            return self._core.tasks.wait(ref)
+        return self._core.tasks.awaitable_task(ref)

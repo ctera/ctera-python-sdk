@@ -39,7 +39,7 @@ class PathValidationError(CTERAException):
 class NameSyntaxError(CTERAException):
 
     def __init__(self):
-        super().__init__('Invalid name: the name contains characters that are not allowed.')
+        super().__init__('Invalid name: the name contains characters that are not allowed "\\ / : ? & < > \" |".')
 
 
 class ReservedNameError(CTERAException):
@@ -52,3 +52,9 @@ class RestrictedPathError(CTERAException):
 
     def __init__(self):
         super().__init__('Creating a folder in the specified location is forbidden.')
+
+
+class RestrictedRoot(CTERAException):
+
+    def __init__(self):
+        super().__init__('Storing files to the root directory is forbidden.')

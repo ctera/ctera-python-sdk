@@ -3,9 +3,9 @@ import munch
 
 from cterasdk.edge import network
 from cterasdk.edge.types import TCPService, TCPConnectResult
-from cterasdk.lib import task_manager_base
 from cterasdk.edge.enum import Mode, IPProtocol, Traffic
 from cterasdk.common import Object
+from cterasdk.exceptions.common import TaskException
 from cterasdk import exceptions
 from tests.ut.edge import base_edge
 
@@ -199,7 +199,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_tcp_connect_task_error(self):
         execute_response = self._task_id
         self._init_filer(execute_response=execute_response)
-        self._filer.tasks.wait = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
+        self._filer.tasks.wait = mock.MagicMock(side_effect=TaskException('Task failed', self._task_id))
 
         ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 

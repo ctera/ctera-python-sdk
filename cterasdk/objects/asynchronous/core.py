@@ -4,7 +4,7 @@ from ..endpoints import EndpointBuilder
 from ...clients import clients
 from .. import authenticators
 from ...lib.session.core import Session
-from ...asynchronous.core import files, login, cloudfs, notifications, portals, settings, users
+from ...asynchronous.core import files, login, cloudfs, notifications, portals, settings, tasks, users
 
 
 class Clients:
@@ -62,6 +62,7 @@ class AsyncPortal(AsyncManagement):
         self.files = files.CloudDrive(self)
         self.notifications = notifications.Notifications(self)
         self.settings = settings.Settings(self)
+        self.tasks = tasks.Tasks(self)
         self.users = users.Users(self)
 
     @property

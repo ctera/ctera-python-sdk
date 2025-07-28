@@ -96,3 +96,28 @@ class ScheduleType:
     Monthly = 'monthly'
     Interval = 'interval'
     Window = 'window'
+
+
+class TaskRunningStatus:
+    """
+    Task Status
+
+    :ivar str Disabled: Task is disabled.
+    :ivar str Running: Task is currently running.
+    :ivar str Completed: Task completed successfully.
+    :ivar str Failed: Task failed.
+    :ivar str Retrying: Task is retrying after a failure.
+    :ivar str Waiting: Task is waiting to be run.
+    :ivar str Stopping: Task is in the process of stopping.
+    :ivar str Stopped: Task has been stopped.
+    :ivar str Warnings: Task completed with warnings.
+    """
+    Disabled = 'disabled'
+    Running = 'running'
+    Completed = 'completed'
+    Failed = 'failed'
+    Retrying = 'retrying'
+    Waiting = 'waiting'
+    Stopping = 'stopping'
+    Stopped = 'stopped'
+    Warnings = 'completed with warnings'

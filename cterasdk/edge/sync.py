@@ -1,7 +1,6 @@
 import logging
 
 from ..lib import track, ErrorStatus
-from .taskmgr import Task
 from .enum import Mode, SyncStatus, Acl
 from .base_command import BaseCommand
 from ..common import Object, ThrottlingRule, FilterBackupSet, FileFilterBuilder
@@ -174,11 +173,12 @@ class Sync(BaseCommand):
         :rtype: str
         """
         param = Object()
+        param._classname = 'evictFolderParam'
         param.path = path
         ref = self._edge.api.execute('/config/cloudsync', 'evictFolder', param)
         if wait:
-            Task(self._edge, ref).wait()
-        return ref
+            return self._edge.tasks.wait(ref)
+        return self._edge.tasks.awaitable_task(ref)
 
 
 class CloudSyncBandwidthThrottling(BaseCommand):

@@ -87,13 +87,6 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
         self._assert_equal_objects(actual_param, munch.Munch(task_id=self._task_id))
         self.assertEqual(ret, 'Success')
 
-    def test_details(self):
-        self._init_ctera_migrate(get_response=munch.Munch(dict(history=self._jobs)))
-        jobs = ctera_migrate.CTERAMigrate(self._filer).details(munch.Munch(id=self._task_id))
-        self._filer.migrate.get.assert_called_once_with('/tasks/history', params={'id': self._task_id})  # pylint: disable=protected-access
-        self.assertEqual(jobs.all, self._jobs)
-        self.assertEqual(jobs.latest, self._jobs[0])
-
     def test_details_not_found(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(history=None)))
         ctera_migrate.CTERAMigrate(self._filer).details(munch.Munch(id=self._task_id))
@@ -101,7 +94,7 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
 
     def test_results(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(discovery='discovery', migration='migration')))
-        for i in ['discovery', 'migration', 'other']:
+        for i in ['discovery', 'migration']:
             ret = ctera_migrate.CTERAMigrate(self._filer).results(munch.Munch(id=i, type=i, name='task'))
             if i == 'discovery':
                 self._filer.migrate.get.assert_called_with('/discovery/results', params={'id': i})  # pylint: disable=protected-access

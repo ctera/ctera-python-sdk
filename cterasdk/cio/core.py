@@ -5,7 +5,7 @@ from ..objects.uri import quote, unquote
 from ..common import Object, DateTimeUtils
 from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode
 from ..core.types import PortalAccount, UserAccount, GroupAccount
-from ..exceptions.io import ResourceExistsError, PathValidationError, NameSyntaxError, ReservedNameError
+from ..exceptions.io import ResourceExistsError, PathValidationError, NameSyntaxError, ReservedNameError, RestrictedRoot
 from . import common
 
 
@@ -276,6 +276,13 @@ def public_link(path, access, expire_in):
 def handle(path):
     logger.info('Getting file handle: %s', path.reference)
     yield path.reference
+
+
+def destination_prerequisite_conditions(destination, name):
+    if not destination.reference.root:
+        raise RestrictedRoot()
+    if any(c in name for c in ['\\', '/', ':', '?', '&', '<', '>', '"', '|']):
+        raise NameSyntaxError()
 
 
 @contextmanager

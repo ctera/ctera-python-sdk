@@ -100,8 +100,8 @@ class Backup(BaseCommand):
         return settings
 
     def _attach_folder(self):
-        task = self._edge.api.execute('/status/services', 'attachFolder')
-        return self._attach_response(task)
+        ref = self._edge.api.execute('/status/services', 'attachFolder')
+        return self._attach_response(ref)
 
     def _attach_encrypted_folder(self, encryptedFolderKey, passPhraseSalt, sharedSecret):
         param = Object()
@@ -109,8 +109,8 @@ class Backup(BaseCommand):
         param.passPhraseSalt = passPhraseSalt
         param.sharedSecret = sharedSecret
 
-        task = self._edge.api.execute('/status/services', 'attachEncryptedFolder', param)
-        return self._attach_response(task)
+        ref = self._edge.api.execute('/status/services', 'attachEncryptedFolder', param)
+        return self._attach_response(ref)
 
     def _attach_response(self, task):
         response = self._wait(task)
@@ -161,14 +161,14 @@ class Backup(BaseCommand):
             logger.debug('Creating a backup folder.')
             param.encryptionMode = EncryptionMode.Recoverable
 
-        task = self._edge.api.execute('/status/services', 'createFolder', param)
-        settings = self._create_response(task)
+        ref = self._edge.api.execute('/status/services', 'createFolder', param)
+        settings = self._create_response(ref)
         settings.encryptionMode = param.encryptionMode
 
         return settings
 
-    def _create_response(self, task):
-        response = self._wait(task)
+    def _create_response(self, ref):
+        response = self._wait(ref)
         return Backup._process_create_response(response)
 
     @staticmethod
@@ -190,8 +190,8 @@ class Backup(BaseCommand):
             return None
         raise CTERAException(f'Failed to create backup folder (rc={rc})')
 
-    def _wait(self, task):
-        task = self._edge.tasks.wait(task)
+    def _wait(self, ref):
+        task = self._edge.tasks.wait(ref)
         return task.result
 
     def _configure_backup_settings(self, param):

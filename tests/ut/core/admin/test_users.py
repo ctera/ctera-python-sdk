@@ -24,6 +24,7 @@ class TestCoreUsers(base_admin.BaseCoreTest):
         self._role = 'EndUser'
         self._domain = 'ctera.local'
         self._domain_user_account = UserAccount(self._username, self._domain)
+        self._task_reference = 'servers/MainDB/bgTasks/918908'
 
     def test_get_user_default_attrs(self):
         get_multi_response = self._get_user_object(name=self._local_user_account.name)
@@ -165,14 +166,14 @@ class TestCoreUsers(base_admin.BaseCoreTest):
         self.assertEqual(ret, execute_response)
 
     def test_apply_changes(self):
-        execute_response = 'Success'
+        execute_response = self._task_reference
         self._init_global_admin(execute_response=execute_response)
         ret = users.Users(self._global_admin).apply_changes()
         self._global_admin.api.execute.assert_called_once_with('', 'updateAccounts', mock.ANY)
         expected_param = TestCoreUsers._get_apply_changes_param()
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(ret, execute_response)
+        self.assertEqual(ret.ref, execute_response)
 
     @staticmethod
     def _get_apply_changes_param():

@@ -17,7 +17,7 @@ from ..exceptions.direct import (
 logger = logging.getLogger('cterasdk.direct')
 
 
-@execute_with_retries(retries=3, backoff=1)
+@execute_with_retries(retries=3, backoff=1, max_backoff=10)
 async def get_object(client, file_id, chunk):
     """
     Get Object from a Signed URL.
@@ -183,7 +183,7 @@ def decrypt_encryption_key(file_id, wrapped_key, secret_access_key):
         raise DecryptKeyError(file_id)
 
 
-@execute_with_retries(retries=3, backoff=1)
+@execute_with_retries(retries=3, backoff=1, max_backoff=10)
 async def get_chunks(api, credentials, file_id):
     """
     Get Chunks.

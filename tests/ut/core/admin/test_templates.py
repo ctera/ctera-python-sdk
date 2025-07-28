@@ -21,6 +21,7 @@ class TestCoreTemplates(base_admin.BaseCoreTest):
         self._name = 'Template'
         self._classname = 'DeviceTemplate'
         self._description = 'description'
+        self._task_reference = 'servers/MainDB/bgTasks/918908'
 
     def test_get_template_default_attrs(self):
         get_multi_response = self._get_template_object(name=self._name)
@@ -64,7 +65,7 @@ class TestCoreTemplates(base_admin.BaseCoreTest):
         self.assertEqual(ret, delete_response)
 
     def test_set_default_template_no_wait(self):
-        execute_response = 'Success'
+        execute_response = self._task_reference
         self._init_global_admin(execute_response=execute_response)
         ret = templates.Templates(self._global_admin).set_default(self._name)
         self._global_admin.api.execute.assert_has_calls([
@@ -74,7 +75,7 @@ class TestCoreTemplates(base_admin.BaseCoreTest):
         self.assertEqual(ret, execute_response)
 
     def test_remove_default_template_no_wait(self):
-        execute_response = 'Success'
+        execute_response = self._task_reference
         get_multi_response = self._get_template_object(name=self._name, isDefault=True)
         self._init_global_admin(get_multi_response=get_multi_response, execute_response=execute_response)
         ret = templates.Templates(self._global_admin).remove_default(self._name)

@@ -9,7 +9,7 @@ from ...edge import (
     afp, aio, antivirus, array, audit, backup, cache, cli, config, connection, ctera_migrate,
     dedup, directoryservice, drive, files, firmware, ftp, groups, licenses, login,
     logs, mail, network, nfs, ntp, power, remote, rsync, ransom_protect, services,
-    shares, shell, smb, snmp, ssh, ssl, support, sync, syslog, taskmgr, telnet,
+    shares, shell, smb, snmp, ssh, ssl, support, sync, syslog, tasks, telnet,
     timezone, users, volumes,
 )
 
@@ -109,7 +109,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.support = support.Support(self)
         self.sync = sync.Sync(self)
         self.syslog = syslog.Syslog(self)
-        self.tasks = taskmgr.Tasks(self)
+        self.tasks = tasks.Tasks(self)
         self.telnet = telnet.Telnet(self)
         self.timezone = timezone.Timezone(self)
         self.users = users.Users(self)
