@@ -68,9 +68,17 @@ class AwaitableTask(ABC):
     async def a_status(self):
         raise NotImplementedError("Subclass must implement the 'a_status' function.")
 
+    def __str__(self):
+        return self._ref
+
+    def __repr__(self):
+        return str(self)
+
 
 class AwaitableEdgeTask(AwaitableTask):
-
+    """
+    Awaitable Edge Filer Task Object
+    """
     def _task_reference(self, ref):
         uid = None
         if isinstance(ref, int):
@@ -86,14 +94,22 @@ class AwaitableEdgeTask(AwaitableTask):
         raise ValueError(f'Failed to parse task identifier from reference: {ref}')
 
     def status(self):
+        """
+        Synchronous function to retrieve task status.
+        """
         return self._ctera.api.get(self._ref)
 
     async def a_status(self):
+        """
+        Asynchronous function to retrieve task status.
+        """
         return await self._ctera.api.get(self._ref)
 
 
 class AwaitablePortalTask(AwaitableTask):
-
+    """
+    Awaitable Portal Task Object
+    """
     def _task_reference(self, ref):
         match = re.search('servers/[^/]*/bgTasks/[1-9][0-9]*$', ref)
         if not match:
@@ -102,11 +118,17 @@ class AwaitablePortalTask(AwaitableTask):
         return match.group(0)
 
     def status(self):
+        """
+        Synchronous function to retrieve task status.
+        """
         if self._ctera.session().in_tenant_context():
             return self._ctera.api.execute('', 'getTaskStatus', self._ref)
         return self._ctera.api.get(f'{self._ref}')
 
     async def a_status(self):
+        """
+        Asynchronous function to retrieve task status.
+        """
         if self._ctera.session().in_tenant_context():
             return await self._ctera.v1.api.execute('', 'getTaskStatus', self._ref)
         return await self._ctera.v1.api.get(f'{self._ref}')
