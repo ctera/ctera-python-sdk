@@ -94,16 +94,14 @@ class TestMigrationTool(base_edge.BaseEdgeTest):
 
     def test_results(self):
         self._init_ctera_migrate(get_response=munch.Munch(dict(discovery='discovery', migration='migration')))
-        for i in ['discovery', 'migration']:
-            ret = ctera_migrate.CTERAMigrate(self._filer).results(munch.Munch(id=i, type=i, name='task'))
+        for i, j in [('discovery', 1), ('migration', 2)]:
+            ret = ctera_migrate.CTERAMigrate(self._filer).results(munch.Munch(type=i), munch.Munch(job_id=j))
             if i == 'discovery':
-                self._filer.migrate.get.assert_called_with('/discovery/results', params={'id': i})  # pylint: disable=protected-access
+                self._filer.migrate.get.assert_called_with('/discovery/results', params={'id': j})  # pylint: disable=protected-access
                 self.assertEqual(ret, 'discovery')
             elif i == 'migration':
-                self._filer.migrate.get.assert_called_with('/migration/results', params={'id': i})  # pylint: disable=protected-access
+                self._filer.migrate.get.assert_called_with('/migration/results', params={'id': j})  # pylint: disable=protected-access
                 self.assertEqual(ret, 'migration')
-            else:
-                self.assertEqual(ret, None)
 
     def test_list_discovery_tasks(self):
         tasks = munch.Munch(dict(discovery=TestMigrationTool._create_discovery_task_object(),
