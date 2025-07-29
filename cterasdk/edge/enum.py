@@ -419,7 +419,7 @@ class SourceType:
 
 class TaskType:
     """
-    Migration Tool Task Type
+    CTERA Migrate Task Type
 
     :ivar str Discovery: Discovery
     :ivar str Migration: Migration

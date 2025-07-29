@@ -169,8 +169,8 @@ class Sync(BaseCommand):
 
         :param str path: Directory path
         :param bool wait: Wait for eviction task to complete, defaults to ``False``
-        :returns: A reference to the background task
-        :rtype: str
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitableEdgeTask`
         """
         param = Object()
         param._classname = 'evictFolderParam'  # pylint: disable=protected-access

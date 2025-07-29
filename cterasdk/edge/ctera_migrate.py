@@ -1,8 +1,10 @@
 import logging
 
+from datetime import datetime
 from .base_command import BaseCommand
 from ..common import Object
 from .enum import TaskType, SourceType
+from ..lib.storage import commonfs, synfs
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -93,46 +95,74 @@ class CTERAMigrate(BaseCommand):
 
     def details(self, task):
         """
-        Get task details
+        Retrieve the jobs of a discovery or migration task.
+
+        :param cterasdk.common.object.Object task: Task object.
         """
         response = self._edge.migrate.get('/tasks/history', params={'id': task.id})  # pylint: disable=protected-access
         if response.history:
-            return Jobs(response.history)
+            return response.history
         logger.error('Task not found. %s', {'task_id': task.id})
         return None
 
-    def results(self, task):
+    def _format_export_date(self, timestamp):
+        date_format = '%Y%m%d-%H%M%S'
+        return datetime.strftime(datetime.fromtimestamp(timestamp), date_format)
+
+    def _format_export(self, task, job, share=None):
         if task.type == 'discovery':
-            return self._edge.migrate.get('/discovery/results',  # pylint: disable=protected-access
-                                          params={'id': task.id}).discovery
+            if share is not None:
+                return f'discovery-{task.name}-share-{share}.csv'
+            return (
+                f'discovery-{task.name}-{task.source}'
+                f'-{self._format_export_date(job.start_time)}-{self._format_export_date(job.finish_time)}.csv'
+            )
         if task.type == 'migration':
-            return self._edge.migrate.get('/migration/results',  # pylint: disable=protected-access
-                                          params={'id': task.id}).migration
-        logger.error('Could not determine task type. %s', {'id': task.id, 'type': task.type, 'name': task.name})
+            return f'{self._format_export_date(job.finish_time)}-migration-migrate_{task.source}-{task.id}.log'
         return None
 
+    def _save_export(self, name, handle, destination=None):
+        directory, filename = commonfs.generate_file_destination(destination, name)
+        return synfs.write(directory, filename, handle)
 
-class Jobs:
-    """Class representing task jobs"""
+    def results(self, task, job, *, export=False, destination=None):
+        """
+        Retrieve the results of a job execution.
 
-    def __init__(self, jobs):
-        self._all = jobs
+        :param cterasdk.common.object.Object task: Task object.
+        :param cterasdk.common.object.Object job: Job object.
+        :param bool,optional export: Export to file, defaults to ``False``
+        :param str,optional destination: File destination, defaults to the default downloads directory
+        """
+        params={'id': job.job_id}
+        if export:
+            params['format'] = 'csv'
+            handle = self._edge.migrate.handle(f'/{task.type}/results', params=params)
+            name = self._format_export(task, job)
+            return self._save_export(name, handle, destination)
+        else:
+            response = self._edge.migrate.get(f'/{task.type}/results', params={'id': job.job_id})  # pylint: disable=protected-access
+            return getattr(response, task.type)
 
-    @property
-    def latest(self):
+    def log(self, task, job, share=None, destination=None):
         """
-        Get the latest job of a task
-        """
-        if self._all:
-            return self._all[0]
-        return None
+        Download the log of a job execution.
 
-    @property
-    def all(self):
+        :param cterasdk.common.object.Object task: Task object.
+        :param cterasdk.common.object.Object job: Job object.
+        :param str,optional share: Share name, required for discovery jobs.
+        :param str,optional destination: File destination, defaults to the default downloads directory
         """
-        Get all jobs of a task
-        """
-        return self._all
+        name = None
+        params={'id': job.job_id}
+        if task.type == 'discovery':
+            if share is None:
+                raise TypeError('Share name parameter is required for discovery jobs.')
+            else:
+                params['share'] = share
+        handle = self._edge.migrate.handle(f'/{task.type}/log', params=params)
+        name = self._format_export(task, job, share)
+        return self._save_export(name, handle, destination)
 
 
 class TaskManager:

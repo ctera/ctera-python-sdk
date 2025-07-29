@@ -112,6 +112,8 @@ class FileBrowser(BaseCommand):
         :param list[str] paths: List of paths
         :param str destination: Destination
         :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
             return await io.copy(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination), wait=wait)
@@ -183,6 +185,8 @@ class CloudDrive(FileBrowser):
         :param str path: Path of the file or directory to rename
         :param str name: The name to rename to
         :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         return await io.rename(self._core, self.normalize(path), name, wait=wait)
 
@@ -192,6 +196,8 @@ class CloudDrive(FileBrowser):
 
         :param str path: Path
         :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         return await io.remove(self._core, *[self.normalize(path) for path in paths], wait=wait)
 
@@ -201,6 +207,8 @@ class CloudDrive(FileBrowser):
 
         :param str path: Path
         :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         return await io.recover(self._core, *[self.normalize(path) for path in paths], wait=wait)
 
@@ -211,6 +219,8 @@ class CloudDrive(FileBrowser):
         :param list[str] paths: List of paths
         :param str destination: Destination
         :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
             return await io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination), wait=wait)
