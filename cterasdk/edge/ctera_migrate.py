@@ -124,7 +124,7 @@ class CTERAMigrate(BaseCommand):
         return None
 
     @staticmethod
-    def _save_export(self, name, handle, destination=None):
+    def _save_export(name, handle, destination=None):
         directory, filename = commonfs.generate_file_destination(destination, name)
         return synfs.write(directory, filename, handle)
 
