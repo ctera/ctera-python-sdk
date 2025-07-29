@@ -58,7 +58,7 @@ class Dedup(BaseCommand):
         """
         size = self._edge.api.execute('/config/cloudsync/cloudExtender', 'allFilesTotalUsedBytes')
         usage = self._edge.api.execute('/config/cloudsync/cloudExtender', 'storageUsedBytes')
-        return DeduplicationStatus(size, usage)
+        return DeduplicationStatus(self.is_enabled(), size, usage)
 
     def _wait_for_reboot(self, reboot, wait):
         if reboot:

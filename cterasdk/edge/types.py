@@ -297,12 +297,14 @@ class DeduplicationStatus(Object):
     """
     Edge Filer Local Deduplication Status Object
 
+    :ivar bool enabled: ``True`` if deduplication is enabled, ``False`` otherwise
     :ivar int size: Logical Size in Bytes
     :ivar int usage: Actual Size in Bytes
     """
 
-    def __init__(self, size, usage):
+    def __init__(self, enabled, size, usage):
         super().__init__()
+        self.enabled = enabled
         self.size = size
         self.usage = usage
 
