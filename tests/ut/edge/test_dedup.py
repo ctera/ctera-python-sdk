@@ -40,6 +40,7 @@ class TestEdgeDedup(base_edge.BaseEdgeTest):
         self._init_filer()
         self._filer.api.execute = mock.MagicMock(side_effect=self._execute_side_effect)
         ret = dedup.Dedup(self._filer).status()
+        self._filer.api.get.assert_called_once_with('/config/dedup/useLocalMapFileDedup')
         self._filer.api.execute.assert_has_calls([
             mock.call('/config/cloudsync/cloudExtender', 'allFilesTotalUsedBytes'),
             mock.call('/config/cloudsync/cloudExtender', 'storageUsedBytes')
