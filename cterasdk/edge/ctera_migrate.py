@@ -105,22 +105,25 @@ class CTERAMigrate(BaseCommand):
         logger.error('Task not found. %s', {'task_id': task.id})
         return None
 
-    def _format_export_date(self, timestamp):
+    @staticmethod
+    def _format_export_date(timestamp):
         date_format = '%Y%m%d-%H%M%S'
         return datetime.strftime(datetime.fromtimestamp(timestamp), date_format)
 
-    def _format_export(self, task, job, share=None):
+    @staticmethod
+    def _format_export(task, job, share=None):
         if task.type == 'discovery':
             if share is not None:
                 return f'discovery-{task.name}-share-{share}.csv'
             return (
                 f'discovery-{task.name}-{task.source}'
-                f'-{self._format_export_date(job.start_time)}-{self._format_export_date(job.finish_time)}.csv'
+                f'-{CTERAMigrate._format_export_date(job.start_time)}-{CTERAMigrate._format_export_date(job.finish_time)}.csv'
             )
         if task.type == 'migration':
-            return f'{self._format_export_date(job.finish_time)}-migration-migrate_{task.source}-{task.id}.log'
+            return f'{CTERAMigrate._format_export_date(job.finish_time)}-migration-migrate_{task.source}-{task.id}.log'
         return None
 
+    @staticmethod
     def _save_export(self, name, handle, destination=None):
         directory, filename = commonfs.generate_file_destination(destination, name)
         return synfs.write(directory, filename, handle)
@@ -134,15 +137,14 @@ class CTERAMigrate(BaseCommand):
         :param bool,optional export: Export to file, defaults to ``False``
         :param str,optional destination: File destination, defaults to the default downloads directory
         """
-        params={'id': job.job_id}
+        params = {'id': job.job_id}
         if export:
             params['format'] = 'csv'
             handle = self._edge.migrate.handle(f'/{task.type}/results', params=params)
-            name = self._format_export(task, job)
-            return self._save_export(name, handle, destination)
-        else:
-            response = self._edge.migrate.get(f'/{task.type}/results', params={'id': job.job_id})  # pylint: disable=protected-access
-            return getattr(response, task.type)
+            name = CTERAMigrate._format_export(task, job)
+            return CTERAMigrate._save_export(name, handle, destination)
+        response = self._edge.migrate.get(f'/{task.type}/results', params={'id': job.job_id})  # pylint: disable=protected-access
+        return getattr(response, task.type)
 
     def log(self, task, job, share=None, destination=None):
         """
@@ -154,15 +156,14 @@ class CTERAMigrate(BaseCommand):
         :param str,optional destination: File destination, defaults to the default downloads directory
         """
         name = None
-        params={'id': job.job_id}
+        params = {'id': job.job_id}
         if task.type == 'discovery':
             if share is None:
                 raise TypeError('Share name parameter is required for discovery jobs.')
-            else:
-                params['share'] = share
+            params['share'] = share
         handle = self._edge.migrate.handle(f'/{task.type}/log', params=params)
-        name = self._format_export(task, job, share)
-        return self._save_export(name, handle, destination)
+        name = CTERAMigrate._format_export(task, job, share)
+        return CTERAMigrate._save_export(name, handle, destination)
 
 
 class TaskManager:
