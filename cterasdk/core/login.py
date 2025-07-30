@@ -1,7 +1,8 @@
 import logging
 
 from .base_command import BaseCommand
-from ..exceptions import CTERAException
+from ..exceptions.transport import Forbidden
+from ..exceptions.auth import AuthenticationError
 
 
 logger = logging.getLogger('cterasdk.core')
@@ -14,18 +15,19 @@ class Login(BaseCommand):
 
     def login(self, username, password):
         """
-        Log into the portal
+        Log in to CTERA Portal
 
-        :param str username: User name to log in
+        :param str username: User name
         :param str password: User password
+        :raises: :class:`cterasdk.exceptions.auth.AuthenticationError`
         """
         host = self._core.host()
         try:
             self._core.api.form_data('/login', {'j_username': username, 'j_password': password})
             logger.info("User logged in. %s", {'host': host, 'user': username})
-        except CTERAException:
+        except Forbidden as error:
             logger.error('Login failed. %s', {'host': host, 'user': username})
-            raise
+            raise AuthenticationError() from error
 
     def sso(self, ctera_ticket):
         """
@@ -38,7 +40,7 @@ class Login(BaseCommand):
 
     def logout(self):
         """
-        Log out of the portal
+        Log out of CTERA Portal
         """
         username = self._core.session().account.name
         self._core.api.form_data('/logout', {})

@@ -213,9 +213,10 @@ Exceptions Hierarchy
 * IOError
     * DirectIOError
         * DirectIOAPIError
-            * NotFoundError
-            * UnAuthorized
-            * UnprocessableContent
+            * ObjectNotFoundError
+            * AuthorizationError
+            * UnsupportedStorageError
+            * InvalidRequest
             * BlocksNotFoundError
             * BlockListConnectionError
             * BlockListTimeout

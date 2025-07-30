@@ -274,8 +274,8 @@ class Shares(BaseCommand):
         try:
             self._edge.api.put('/config/fileservices/share/' + name, share)
             logger.info("Share modified. %s", {'name': name})
-        except Exception as error:
-            message = f'Could not modify share: {name}'
+        except CTERAException as error:
+            message = f'Share modification failed: {name}'
             logger.error(message)
             raise CTERAException(message) from error
 
@@ -289,7 +289,7 @@ class Shares(BaseCommand):
         try:
             self._edge.api.delete(ref)
             logger.info("Share deleted: %s", ref)
-        except Exception as error:
+        except CTERAException as error:
             logger.error("Share deletion failed: %s", ref)
             raise CTERAException(f'Share deletion failed: {ref}') from error
 

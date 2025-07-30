@@ -105,6 +105,6 @@ class Users(BaseCommand):
             response = self._edge.api.delete(ref)
             logger.info("User deleted: %s", ref)
             return response
-        except Exception as error:
+        except CTERAException as error:
             logger.error("User deletion failed: %s", ref)
             raise CTERAException(f'User deletion failed: {ref}') from error

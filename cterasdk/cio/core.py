@@ -3,9 +3,10 @@ import logging
 from contextlib import contextmanager
 from ..objects.uri import quote, unquote
 from ..common import Object, DateTimeUtils
-from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode
+from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, FileAccessError
 from ..core.types import PortalAccount, UserAccount, GroupAccount
 from ..exceptions.io import ResourceExistsError, PathValidationError, NameSyntaxError, ReservedNameError, RestrictedRoot
+from ..lib.iterator import DefaultResponse
 from . import common
 
 
@@ -175,6 +176,17 @@ class FetchResourcesParamBuilder:
 
     def build(self):
         return self.param
+
+
+class FetchResourcesResponse(DefaultResponse):
+
+    def __init__(self, response):
+        accept_response(response.errorType)
+        super().__init__()
+
+    @property
+    def objects(self):
+        return self._response.items
 
 
 @contextmanager
@@ -496,28 +508,28 @@ def obtain_current_accounts(param):
     return current_accounts
 
 
-def accept_response(response, reference):
+def accept_response(error_type):
     """
     Check if response contains an error.
     """
     error = {
-        "FileWithTheSameNameExist": ResourceExistsError(),
-        "DestinationNotExists": PathValidationError(),
-        "InvalidName": NameSyntaxError(),
-        "ReservedName": ReservedNameError()
-    }.get(response, None)
+        FileAccessError.FileWithTheSameNameExist: ResourceExistsError(),
+        FileAccessError.DestinationNotExists: PathValidationError(),
+        FileAccessError.InvalidName: NameSyntaxError(),
+        FileAccessError.ReservedName: ReservedNameError()
+    }.get(error_type, None)
     try:
         if error:
             raise error
     except ResourceExistsError as error:
-        logger.info('Resource already exists: a file or folder with this name already exists. %s', {'path': reference})
+        logger.info('Resource already exists: a file or folder with this name already exists.')
         raise error
     except PathValidationError as error:
-        logger.error('Path validation failed: the specified destination path does not exist. %s', {'path': reference})
+        logger.error('Path validation failed: the specified destination path does not exist.')
         raise error
     except NameSyntaxError as error:
-        logger.error('Invalid name: the name contains characters that are not allowed. %s', {'name': reference})
+        logger.error('Invalid name: the name contains characters that are not allowed.')
         raise error
     except ReservedNameError as error:
-        logger.error('Reserved name error: the name is reserved and cannot be used. %s', {'name': reference})
+        logger.error('Reserved name error: the name is reserved and cannot be used.')
         raise error

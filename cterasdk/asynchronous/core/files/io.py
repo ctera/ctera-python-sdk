@@ -3,7 +3,6 @@ from ....cio.common import encode_request_parameter, a_await_or_future
 from ....cio import core as fs
 from ....exceptions.io import ResourceNotFoundError, NotADirectory, ResourceExistsError
 from .. import query
-from ....lib import FetchResourcesResponse
 
 
 logger = logging.getLogger('cterasdk.core')
@@ -12,7 +11,7 @@ logger = logging.getLogger('cterasdk.core')
 async def listdir(core, path, depth=None, include_deleted=False, search_criteria=None, limit=None):
     with fs.fetch_resources(path, depth, include_deleted, search_criteria, limit) as param:
         if param.depth > 0:
-            return query.iterator(core, '', param, 'fetchResources', callback_response=FetchResourcesResponse)
+            return query.iterator(core, '', param, 'fetchResources', callback_response=fs.FetchResourcesResponse)
         return await core.v1.api.execute('', 'fetchResources', param)
 
 
@@ -54,7 +53,7 @@ async def walk(core, scope, path, include_deleted=False):
 async def mkdir(core, path):
     with fs.makedir(path) as param:
         response = await core.v1.api.execute('', 'makeCollection', param)
-    fs.accept_response(response, path.reference.as_posix())
+    fs.accept_response(response)
 
 
 async def makedirs(core, path):

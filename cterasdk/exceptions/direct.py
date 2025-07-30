@@ -24,22 +24,28 @@ class DirectIOAPIError(DirectIOError):
         super().__init__(error, strerror, filename)
 
 
-class NotFoundError(DirectIOAPIError):
+class ObjectNotFoundError(DirectIOAPIError):
 
     def __init__(self, filename):
-        super().__init__(errno.EBADF, 'File not found', filename)
+        super().__init__(errno.ENOENT, 'File not found', filename)
 
 
-class UnAuthorized(DirectIOAPIError):
+class AuthorizationError(DirectIOAPIError):
 
     def __init__(self, filename):
         super().__init__(errno.EACCES, 'Unauthorized: You do not have the necessary permissions to access this resource', filename)
 
 
-class UnprocessableContent(DirectIOAPIError):
+class UnsupportedStorageError(DirectIOAPIError):
 
     def __init__(self, filename):
         super().__init__(errno.ENOTSUP, 'Not all blocks of the requested file are stored on a storage node set to Direct Mode', filename)
+
+
+class InvalidRequest(DirectIOAPIError):
+
+    def __init__(self, filename):
+        super().__init__(errno.EIO, 'Request failed due to internal error: invalid request', filename)
 
 
 class BlocksNotFoundError(DirectIOAPIError):

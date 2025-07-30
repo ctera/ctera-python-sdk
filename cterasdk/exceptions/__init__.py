@@ -1,4 +1,5 @@
 from . import (  # noqa: E402, F401
+    auth,
     backup,
     common,
     direct,

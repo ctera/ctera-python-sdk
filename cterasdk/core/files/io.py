@@ -4,7 +4,6 @@ from ...cio import core as fs
 from ...exceptions.io import ResourceNotFoundError, ResourceExistsError, NotADirectory
 from ...core import query
 from ..enum import CollaboratorType
-from ...lib import FetchResourcesResponse
 
 
 logger = logging.getLogger('cterasdk.core')
@@ -13,7 +12,7 @@ logger = logging.getLogger('cterasdk.core')
 def listdir(core, path, depth=None, include_deleted=False, search_criteria=None, limit=None):
     with fs.fetch_resources(path, depth, include_deleted, search_criteria, limit) as param:
         if param.depth > 0:
-            return query.iterator(core, '', param, 'fetchResources', callback_response=FetchResourcesResponse)
+            return query.iterator(core, '', param, 'fetchResources', callback_response=fs.FetchResourcesResponse)
         return core.api.execute('', 'fetchResources', param)
 
 
@@ -42,6 +41,7 @@ def versions(core, path):
 
 
 def walk(core, scope, path, include_deleted=False):
+    ensure_directory(core, path)
     paths = [fs.CorePath.instance(scope, path)]
     while len(paths) > 0:
         path = paths.pop(0)
@@ -55,7 +55,7 @@ def walk(core, scope, path, include_deleted=False):
 def mkdir(core, path):
     with fs.makedir(path) as param:
         response = core.api.execute('', 'makeCollection', param)
-    fs.accept_response(response, path.reference.as_posix())
+    fs.accept_response(response)
 
 
 def makedirs(core, path):
