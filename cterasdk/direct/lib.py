@@ -6,7 +6,7 @@ from .types import Metadata, Block
 from .credentials import create_authorization_header
 from .crypto import decrypt_key, decrypt_block
 from .decompressor import decompress
-from ..exceptions.transport import BadRequest, Unauthorized, Unprocessable, InternalServerError
+from ..exceptions.transport import BadRequest, Unauthorized, Unprocessable, InternalServerError, HTTPError
 from ..exceptions.direct import (
     AuthorizationError, BlockListConnectionError, BlockListTimeout, BlockValidationException, BlocksNotFoundError,
     DecompressBlockError, DecryptBlockError, DecryptKeyError, DirectIOError, DownloadConnectionError,
@@ -200,12 +200,12 @@ async def get_chunks(api, credentials, file_id):
             logger.error('Could not find blocks for file ID: %s.', file_id)
             raise BlocksNotFoundError(file_id)
         return Metadata(file_id, response)
-    except BadRequest:
-        raise ObjectNotFoundError(file_id) from BadRequest
-    except Unauthorized:
-        raise AuthorizationError(file_id) from Unauthorized
-    except Unprocessable:
-        raise UnsupportedStorageError(file_id) from Unprocessable
+    except BadRequest as error:
+        raise ObjectNotFoundError(file_id) from error
+    except Unauthorized as error:
+        raise AuthorizationError(file_id) from error
+    except Unprocessable as error:
+        raise UnsupportedStorageError(file_id) from error
     except InternalServerError as error:
         raise InvalidRequest(file_id) from error
     except ConnectionError:

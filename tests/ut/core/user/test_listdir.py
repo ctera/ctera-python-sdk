@@ -55,6 +55,7 @@ class BaseCoreServicesFilesList(base_user.BaseCoreServicesTest):
     def _fetch_resources_response(response, files):
         for file in files:
             resource_info = BaseCoreServicesFilesList._create_resource_info(file)
+            response.errorType = None
             response.items.append(resource_info)
         return response
 

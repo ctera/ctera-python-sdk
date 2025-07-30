@@ -15,18 +15,18 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self._file_id = 12345
 
     async def test_retries_on_error(self):
-        self._direct._client._api.get.return_value = munch.Munch({'chunks': None})  # pylint: disable=protected-access
+        self._direct._api.get.return_value = munch.Munch({'chunks': None})  # pylint: disable=protected-access
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(exceptions.direct.BlocksNotFoundError):
                 await self._direct.metadata(self._file_id)
-        self._direct._client._api.get.assert_has_calls(  # pylint: disable=protected-access
+        self._direct._api.get.assert_has_calls(  # pylint: disable=protected-access
             self._retries * [
                 mock.call(f'{self._file_id}', headers=self._authorization_header),
             ]
         )
 
     async def test_get_file_metadata_not_found(self):
-        self._direct._client._api.get.return_value = munch.Munch({'chunks': None})  # pylint: disable=protected-access
+        self._direct._api.get.return_value = munch.Munch({'chunks': None})  # pylint: disable=protected-access
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(exceptions.direct.BlocksNotFoundError) as error:
                 await self._direct.metadata(self._file_id)
@@ -35,36 +35,33 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_error_400(self):
-        self._direct._client._api.get.side_effect = exceptions.transport.HTTPError(  # pylint: disable=protected-access
-            HTTPStatus.BAD_REQUEST,
+        self._direct._api.get.side_effect = exceptions.transport.BadRequest(  # pylint: disable=protected-access
             BaseDirectMetadata._create_error_object()
         )
         with mock.patch('asyncio.sleep'):
-            with self.assertRaises(exceptions.direct.NotFoundError) as error:
+            with self.assertRaises(exceptions.direct.ObjectNotFoundError) as error:
                 await self._direct.metadata(self._file_id)
-        self.assertEqual(error.exception.errno, errno.EBADF)
+        self.assertEqual(error.exception.errno, errno.ENOENT)
         self.assertEqual(error.exception.strerror, 'File not found')
         self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_error_401(self):
-        self._direct._client._api.get.side_effect = exceptions.transport.HTTPError(  # pylint: disable=protected-access
-            HTTPStatus.UNAUTHORIZED,
+        self._direct._api.get.side_effect = exceptions.transport.Unauthorized(  # pylint: disable=protected-access
             BaseDirectMetadata._create_error_object()
         )
         with mock.patch('asyncio.sleep'):
-            with self.assertRaises(exceptions.direct.UnAuthorized) as error:
+            with self.assertRaises(exceptions.direct.AuthorizationError) as error:
                 await self._direct.metadata(self._file_id)
         self.assertEqual(error.exception.errno, errno.EACCES)
         self.assertEqual(error.exception.strerror, 'Unauthorized: You do not have the necessary permissions to access this resource')
         self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_error_422(self):
-        self._direct._client._api.get.side_effect = exceptions.transport.HTTPError(  # pylint: disable=protected-access
-            HTTPStatus.UNPROCESSABLE_ENTITY,
+        self._direct._api.get.side_effect = exceptions.transport.Unprocessable(  # pylint: disable=protected-access
             BaseDirectMetadata._create_error_object()
         )
         with mock.patch('asyncio.sleep'):
-            with self.assertRaises(exceptions.direct.UnprocessableContent) as error:
+            with self.assertRaises(exceptions.direct.UnsupportedStorageError) as error:
                 await self._direct.metadata(self._file_id)
         self.assertEqual(error.exception.errno, errno.ENOTSUP)
         self.assertEqual(error.exception.strerror, 'Not all blocks of the requested file are stored on a storage node set to Direct Mode')
@@ -72,17 +69,18 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
 
     async def test_get_file_metadata_unknown_error(self):
         url = '/xyz'
-        self._direct._client._api.get.side_effect = exceptions.transport.HTTPError(  # pylint: disable=protected-access
-            HTTPStatus.INTERNAL_SERVER_ERROR,
+        self._direct._api.get.side_effect = exceptions.transport.InternalServerError(  # pylint: disable=protected-access
             BaseDirectMetadata._create_error_object()
         )
         with mock.patch('asyncio.sleep'):
-            with self.assertRaises(exceptions.transport.HTTPError) as error:
+            with self.assertRaises(exceptions.direct.InvalidRequest) as error:
                 await self._direct.metadata(self._file_id)
-        self.assertEqual(error.exception.error.request.url, url)
+        self.assertEqual(error.exception.errno, errno.EIO)
+        self.assertEqual(error.exception.strerror, 'Request failed due to internal error: invalid request')
+        self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_connection_error(self):
-        self._direct._client._api.get.side_effect = ConnectionError  # pylint: disable=protected-access
+        self._direct._api.get.side_effect = ConnectionError  # pylint: disable=protected-access
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(exceptions.direct.BlockListConnectionError) as error:
                 await self._direct.metadata(self._file_id)
@@ -92,7 +90,7 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_timeout(self):
-        self._direct._client._api.get.side_effect = asyncio.TimeoutError  # pylint: disable=protected-access
+        self._direct._api.get.side_effect = asyncio.TimeoutError  # pylint: disable=protected-access
         with mock.patch('asyncio.sleep'):
             with self.assertRaises(exceptions.direct.BlockListTimeout) as error:
                 await self._direct.metadata(self._file_id)

@@ -182,7 +182,7 @@ class FetchResourcesResponse(DefaultResponse):
 
     def __init__(self, response):
         accept_response(response.errorType)
-        super().__init__()
+        super().__init__(response)
 
     @property
     def objects(self):
