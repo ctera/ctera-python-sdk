@@ -1,6 +1,5 @@
 import asyncio
 import errno
-from http import HTTPStatus
 from unittest import mock
 import munch
 from cterasdk import exceptions
@@ -68,7 +67,6 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
         self.assertEqual(error.exception.filename, self._file_id)
 
     async def test_get_file_metadata_unknown_error(self):
-        url = '/xyz'
         self._direct._api.get.side_effect = exceptions.transport.InternalServerError(  # pylint: disable=protected-access
             BaseDirectMetadata._create_error_object()
         )
