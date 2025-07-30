@@ -7,4 +7,4 @@ class AuthenticationError(CTERAException):
     """
 
     def __init__(self):
-        super().__init__(f"Authentication failed: Invalid username or password")
+        super().__init__("Authentication failed: Invalid username or password")

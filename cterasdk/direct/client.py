@@ -79,7 +79,6 @@ class DirectIO:
         executor = self.executor(filters.span(meta, byte_range), meta.encryption_key, file_id, max_workers)
         return Streamer(executor, byte_range)
 
-
     def executor(self, chunks, encryption_key, file_id=None, max_workers=None):
         """
         Download Executor.
