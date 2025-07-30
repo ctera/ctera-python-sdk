@@ -135,14 +135,24 @@ class FolderGroups(BaseCommand):
 
 
 class CloudDrives(BaseCommand):
-    """ Cloud Drive Folder APIs """
+    """ Cloud Drive Folder APIs
+
+    :ivar cterasdk.core.cloudfs.Locks locks: Global file locking APIs
+    """
 
     default = ['name', 'group', 'owner']
+
+    default_extensions = ["ppt", "pptx", "xls", "xlsx", "doc", "docx", "indd", "idlk", "dwl", "dwl2", "dwt", "dwg", "rvt", "dat"]
+
+    def __init__(self, core):
+        super().__init__(core)
+        self.locks = Locks(self._core)
 
     def _get_entire_object(self, name, owner):
         return self._core.api.get(f'{self.find(name, owner, include=["baseObjectRef"]).baseObjectRef}')
 
-    def add(self, name, group, owner, winacls=True, description=None, quota=None, compliance_settings=None, xattrs=None):
+    def add(self, name, group, owner, winacls=True, description=None,
+            quota=None, compliance_settings=None, xattrs=None, gfl=False, lock_extensions=None):
         """
         Create a new Cloud Drive Folder (Cloud Volume)
 
@@ -156,6 +166,10 @@ class CloudDrives(BaseCommand):
          Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
         :param cterasdk.common.object.Object,optional xattrs: Extended attributes, defaults to MacOS.
          Use :func:`cterasdk.core.types.ExtendedAttributesBuilder` to build the extended attributes object
+        :param bool,optional gfl: Enable global file locking
+        :param list[str],optional lock_extensions: List of file extensions (without leading dot) for which global file locking is enforced.
+        :returns: Path to the Cloud Drive folder
+        :rtype: str
         """
         param = Object()
         param.name = name
@@ -179,22 +193,31 @@ class CloudDrives(BaseCommand):
         else:
             param.extendedAttributes = ExtendedAttributesBuilder.default().build()
 
+        if gfl:
+            param.globalFileLockSettings = Object()
+            param.globalFileLockSettings._classname = 'GlobalFileLockSettings'  # pylint: disable=protected-access
+            param.globalFileLockSettings.enabled = True
+            param.globalFileLockSettings.globalFileLockExtensions = (
+                lock_extensions if lock_extensions else CloudDrives.default_extensions
+            )
+
         try:
             response = self._core.api.execute('', 'addCloudDrive', param)
             logger.info(
                 'Cloud drive folder created. %s',
                 {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls}
             )
-            return response
+            return re.search(r'/Users\/(.+)', response).group()
         except CTERAException as error:
             logger.error(
                 'Cloud drive folder creation failed. %s',
-                {'name': name, 'folder_group': group, 'owner': owner, 'win_acls': winacls}
+                {'name': name, 'folder_group': group, 'owner': str(owner), 'win_acls': winacls}
             )
             raise error
 
     def modify(self, current_name, owner, new_name=None, new_owner=None, new_group=None,  # pylint: disable=too-many-arguments
-               description=None, winacls=None, quota=None, compliance_settings=None, xattrs=None):
+               description=None, winacls=None, quota=None, compliance_settings=None, xattrs=None,
+               gfl=None, lock_extensions=None):
         """
         Modify a Cloud Drive Folder (Cloud Volume)
 
@@ -210,6 +233,8 @@ class CloudDrives(BaseCommand):
          Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
         :param cterasdk.common.object.Object,optional xattrs: Extended attributes.
          Use :func:`cterasdk.core.types.ExtendedAttributesBuilder` to build the extended attributes object
+        :param bool,optional gfl: Enable global file locking
+        :param list[str],optional lock_extensions: List of file extensions (without leading dot) for which global file locking is enforced.
         """
         param = self._get_entire_object(current_name, owner)
         if new_name:
@@ -228,6 +253,13 @@ class CloudDrives(BaseCommand):
             param.wormSettings = compliance_settings
         if xattrs:
             param.extendedAttributes = xattrs
+        if gfl is not None:
+            param.globalFileLockSettings.enabled = gfl
+            if lock_extensions:
+                param.globalFileLockSettings.globalFileLockExtensions = (
+                    lock_extensions if lock_extensions else CloudDrives.default_extensions
+                )
+
         try:
             response = self._core.api.put(f'/{param.baseObjectRef}', param)
             logger.info('Cloud drive folder updated. %s', {'name': current_name})
@@ -727,3 +759,16 @@ class Exports(BaseCommand):
         response = self._core.api.delete(f'/buckets/{name}')
         logger.info('Bucket deleted. %s', {'name': name})
         return response
+
+
+class Locks(BaseCommand):
+
+    def all(self):
+        """
+        List Locked Files
+
+        :returns: Iterator for all locked files
+        """
+        builder = query.QueryParamBuilder().include_classname()
+        param = builder.build()
+        return query.iterator(self._core, '', param, 'getLockedFilesInfo')
