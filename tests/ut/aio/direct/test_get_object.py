@@ -80,7 +80,7 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
     def _create_block_info(file_id, chunk):
         return munch.Munch({
             'file_id': file_id,
-            'number': chunk.index,
+            'number': chunk.number,
             'offset': chunk.offset,
             'length': chunk.length
         })
@@ -89,7 +89,7 @@ class BaseDirectMetadata(base.BaseAsyncDirect):
     def _create_chunk():
         return munch.Munch({
             'url': 'https://s3.amazonaws.com/test',
-            'index': 1,
+            'number': 1,
             'offset': 0,
             'length': 4096
         })
