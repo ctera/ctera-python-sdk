@@ -151,7 +151,7 @@ class CloudDrives(BaseCommand):
     def _get_entire_object(self, name, owner):
         return self._core.api.get(f'{self.find(name, owner, include=["baseObjectRef"]).baseObjectRef}')
 
-    def add(self, name, group, owner, winacls=True, description=None,
+    def add(self, name, group, owner, winacls=True, description=None,  # pylint: disable=too-many-arguments
             quota=None, compliance_settings=None, xattrs=None, gfl=False, lock_extensions=None):
         """
         Create a new Cloud Drive Folder (Cloud Volume)
@@ -215,8 +215,8 @@ class CloudDrives(BaseCommand):
             )
             raise error
 
-    def modify(self, current_name, owner, new_name=None, new_owner=None, new_group=None,  # pylint: disable=too-many-arguments
-               description=None, winacls=None, quota=None, compliance_settings=None, xattrs=None,
+    def modify(self, current_name, owner, new_name=None,  # pylint: disable=too-many-arguments, too-many-locals
+               new_owner=None, new_group=None, description=None, winacls=None, quota=None, compliance_settings=None, xattrs=None,
                gfl=None, lock_extensions=None):
         """
         Modify a Cloud Drive Folder (Cloud Volume)
