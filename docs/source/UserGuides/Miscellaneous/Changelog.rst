@@ -13,7 +13,7 @@ Improvements
 * Added support for exporting data discovery and migration jobs to CSV format.
 * Introduced an asynchronous task management module for operations such as copying, moving, renaming, deleting, or undeleting files.
 * Background tasks now return awaitable objects: :py:class:`cterasdk.lib.tasks.AwaitableEdgeTask`,
-:py:class:`cterasdk.lib.tasks.AwaitablePortalTask`.
+  :py:class:`cterasdk.lib.tasks.AwaitablePortalTask`.
 
 Bug Fixes
 ^^^^^^^^^
