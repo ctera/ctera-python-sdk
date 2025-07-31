@@ -38,7 +38,7 @@ class Streamer:
             for download in self._downloads:
                 block = await download
                 fragment = block.fragment(self._byte_range)
-                logger.debug('Streamer Fragment. %s', {'offset': fragment.offset, 'length': fragment.length})
+                logger.debug('Streamer fragment. %s', {'offset': fragment.offset, 'length': fragment.length})
                 yield fragment
                 self._offset = fragment.offset + fragment.length
         except DirectIOAPIError as error:

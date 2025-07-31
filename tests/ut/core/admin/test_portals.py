@@ -24,6 +24,7 @@ class TestCorePortals(base_admin.BaseCoreTest):
         self._billing_id = 'billing-id'
         self._company = 'The Acme Corporation'
         self._tenant_attrs = ['externalPortalId', 'companyName']
+        self._task_reference = 'servers/MainDB/bgTasks/918908'
         mock_session = self.patch_call("cterasdk.objects.services.Management.session")
         mock_session.return_value = munch.Munch({'update_current_tenant': lambda x: x})
 
@@ -181,14 +182,14 @@ class TestCorePortals(base_admin.BaseCoreTest):
         self._global_admin.api.put.assert_called_once_with('/currentPortal', '')
 
     def test_apply_changes(self):
-        execute_response = 'Success'
+        execute_response = self._task_reference
         self._init_global_admin(execute_response=execute_response)
         ret = portals.Portals(self._global_admin).apply_changes()
         self._global_admin.api.execute.assert_called_once_with('', 'updatePortals', mock.ANY)
         expected_param = TestCorePortals._get_apply_changes_param()
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(ret, execute_response)
+        self.assertEqual(ret.ref, execute_response)
 
     @staticmethod
     def _get_apply_changes_param():

@@ -64,8 +64,28 @@ Migration
 
 .. code-block:: python
 
-   edge.ctera_migrate.results(task)
+   """Retrieve tasks and all jobs associated with a task"""
+   tasks = edge.ctera_migrate.list_tasks()
+   jobs = edge.ctera_migrate.details(tasks[0])
 
+   """Retrieve the results of a job execution"""
+   edge.ctera_migrate.results(tasks[0], jobs[0])
+   edge.ctera_migrate.results(tasks[0], jobs[0], export=True)  # export to file
+   edge.ctera_migrate.results(tasks[0], jobs[0], export=True, destination='c:/users/bwayne/downloads/discovery.csv')
+
+.. automethod:: cterasdk.edge.ctera_migrate.CTERAMigrate.log
+   :noindex:
+
+.. code-block:: python
+
+   """Retrieve tasks and all jobs associated with a task"""
+   tasks = edge.ctera_migrate.list_tasks()
+   jobs = edge.ctera_migrate.details(tasks[0])
+
+   """Retrieve the results of a job execution"""
+   edge.ctera_migrate.log(tasks[0], jobs[0])
+   edge.ctera_migrate.log(tasks[0], jobs[0], share='smb-project-nexus')  # export to file
+   edge.ctera_migrate.log(tasks[0], jobs[0], share='smb-project-nexus', destination='c:/users/bwayne/downloads/discovery.csv')
 
 Discovery
 =========

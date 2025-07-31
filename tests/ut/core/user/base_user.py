@@ -12,6 +12,7 @@ class BaseCoreServicesTest(base.BaseTest):
         super().setUp()
         self._services = ServicesPortal("")
         self._base = '/ServicesPortal/webdav'
+        self._task_reference = 'servers/MainDB/bgTasks/918908'
 
     @staticmethod
     def encode_path(path):

@@ -2,8 +2,8 @@ from unittest import mock
 
 from cterasdk import exceptions
 from cterasdk.edge import shell
-from cterasdk.lib import task_manager_base
 from cterasdk.common import Object
+from cterasdk.exceptions.common import TaskException
 from tests.ut.edge import base_edge
 
 
@@ -26,11 +26,11 @@ class TestEdgeShell(base_edge.BaseEdgeTest):
     def test_run_shell_command_task_error(self):
         execute_response = self._task_id
         self._init_filer(execute_response=execute_response)
-        self._filer.tasks.wait = mock.MagicMock(side_effect=task_manager_base.TaskError(self._task_id))
+        self._filer.tasks.wait = mock.MagicMock(side_effect=TaskException('Task failed', self._task_id))
         with self.assertRaises(exceptions.CTERAException) as error:
             shell.Shell(self._filer).run_command(self._shell_command)
         self._filer.tasks.wait.assert_called_once_with(self._task_id)
-        self.assertEqual('An error occurred while executing task', str(error.exception))
+        self.assertEqual('An error occurred while executing Shell command.', str(error.exception))
 
     def _get_task_manager_result_object(self):
         task_param = Object()

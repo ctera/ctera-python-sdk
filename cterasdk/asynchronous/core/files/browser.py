@@ -105,15 +105,18 @@ class FileBrowser(BaseCommand):
         """
         return await io.public_link(self._core, self.normalize(path), access, expire_in)
 
-    async def copy(self, *paths, destination=None):
+    async def copy(self, *paths, destination=None, wait=False):
         """
         Copy one or more files or folders
 
         :param list[str] paths: List of paths
         :param str destination: Destination
+        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
-            return await io.copy(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
+            return await io.copy(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination), wait=wait)
         except ValueError:
             raise ValueError('Copy destination was not specified.')
 
@@ -175,39 +178,51 @@ class CloudDrive(FileBrowser):
         """
         return await io.makedirs(self._core, self.normalize(path))
 
-    async def rename(self, path, name):
+    async def rename(self, path, name, *, wait=False):
         """
         Rename a file
 
         :param str path: Path of the file or directory to rename
         :param str name: The name to rename to
+        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return await io.rename(self._core, self.normalize(path), name)
+        return await io.rename(self._core, self.normalize(path), name, wait=wait)
 
-    async def delete(self, *paths):
+    async def delete(self, *paths, wait=False):
         """
         Delete one or more files or folders
 
         :param str path: Path
+        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return await io.remove(self._core, *[self.normalize(path) for path in paths])
+        return await io.remove(self._core, *[self.normalize(path) for path in paths], wait=wait)
 
-    async def undelete(self, *paths):
+    async def undelete(self, *paths, wait=False):
         """
         Recover one or more files or folders
 
         :param str path: Path
+        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return await io.recover(self._core, *[self.normalize(path) for path in paths])
+        return await io.recover(self._core, *[self.normalize(path) for path in paths], wait=wait)
 
-    async def move(self, *paths, destination=None):
+    async def move(self, *paths, destination=None, wait=False):
         """
         Move one or more files or folders
 
         :param list[str] paths: List of paths
         :param str destination: Destination
+        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
-            return await io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
+            return await io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination), wait=wait)
         except ValueError:
             raise ValueError('Move destination was not specified.')

@@ -89,13 +89,6 @@ class QueryLogsResponse(DefaultResponse):
         return self._response.logs
 
 
-class FetchResourcesResponse(DefaultResponse):
-
-    @property
-    def objects(self):
-        return self._response.items
-
-
 class CursorResponse(BaseResponse):
 
     @property

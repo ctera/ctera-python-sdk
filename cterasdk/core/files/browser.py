@@ -111,15 +111,18 @@ class FileBrowser(BaseCommand):
         """
         return io.public_link(self._core, self.normalize(path), access, expire_in)
 
-    def copy(self, *paths, destination=None):
+    def copy(self, *paths, destination=None, wait=True):
         """
         Copy one or more files or folders
 
         :param list[str] paths: List of paths
         :param str destination: Destination
+        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
-            return io.copy(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
+            return io.copy(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination), wait=wait)
         except ValueError:
             raise ValueError('Copy destination was not specified.')
 
@@ -181,40 +184,52 @@ class CloudDrive(FileBrowser):
         """
         return io.makedirs(self._core, self.normalize(path))
 
-    def rename(self, path, name):
+    def rename(self, path, name, *, wait=True):
         """
         Rename a file
 
         :param str path: Path of the file or directory to rename
         :param str name: The name to rename to
+        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return io.rename(self._core, self.normalize(path), name)
+        return io.rename(self._core, self.normalize(path), name, wait=wait)
 
-    def delete(self, *paths):
+    def delete(self, *paths, wait=True):
         """
         Delete one or more files or folders
 
         :param str path: Path
+        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return io.remove(self._core, *[self.normalize(path) for path in paths])
+        return io.remove(self._core, *[self.normalize(path) for path in paths], wait=wait)
 
-    def undelete(self, *paths):
+    def undelete(self, *paths, wait=True):
         """
         Recover one or more files or folders
 
         :param str path: Path
+        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return io.recover(self._core, *[self.normalize(path) for path in paths])
+        return io.recover(self._core, *[self.normalize(path) for path in paths], wait=wait)
 
-    def move(self, *paths, destination=None):
+    def move(self, *paths, destination=None, wait=True):
         """
         Move one or more files or folders
 
         :param list[str] paths: List of paths
         :param str destination: Destination
+        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
-            return io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination))
+            return io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination), wait=wait)
         except ValueError:
             raise ValueError('Move destination was not specified.')
 

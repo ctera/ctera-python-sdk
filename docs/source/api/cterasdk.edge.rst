@@ -58,7 +58,7 @@ Submodules
    cterasdk.edge.support
    cterasdk.edge.sync
    cterasdk.edge.syslog
-   cterasdk.edge.taskmgr
+   cterasdk.edge.tasks
    cterasdk.edge.telnet
    cterasdk.edge.timezone
    cterasdk.edge.types

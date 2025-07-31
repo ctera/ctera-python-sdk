@@ -56,17 +56,17 @@ class CompressionLib:
 
 class Chunk(Object):
 
-    def __init__(self, index, offset, url, length):
+    def __init__(self, number, offset, url, length):
         """
         Initialize a Chunk.
 
-        :param int index: Chunk index.
+        :param int number: Chunk number.
         :param int offset: Chunk offset.
         :param str url: Signed URL.
         :param int length: Object length.
         """
         super().__init__(
-            index=index,
+            number=number,
             offset=offset,
             url=url,
             length=length
@@ -109,8 +109,8 @@ class Metadata(Object):
         """
         offset = 0
         chunks = []
-        for index, chunk in enumerate(server_object, 1):
-            chunks.append(Chunk(index, offset, chunk.url, chunk.len))
+        for number, chunk in enumerate(server_object, 1):
+            chunks.append(Chunk(number, offset, chunk.url, chunk.len))
             offset = offset + chunk.len
         return chunks
 

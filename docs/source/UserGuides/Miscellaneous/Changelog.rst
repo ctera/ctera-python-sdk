@@ -1,6 +1,45 @@
 Changelog
 =========
 
+Improvements
+^^^^^^^^^^^^
+
+* Refactored the CTERA Direct I/O module to reduce duplicate code and improve exception handling.
+* Added support for configuring Cloud Drive folders with Global File Locking.
+* Improved authentication error handling by catching HTTP exceptions and raising :py:class:`cterasdk.exceptions.auth.AuthenticationError`.
+* Added an attribute to indicate whether deduplication is enabled when retrieving the deduplication status.
+* Raise an exception when uploading a file with invalid characters in its name.
+* Raise an exception when attempting to upload files to the Cloud Drive root directory.
+* Added support for exporting data discovery and migration jobs to CSV format.
+* Introduced an asynchronous task management module for operations such as copying, moving, renaming, deleting, or undeleting files.
+* Background tasks now return awaitable objects: :py:class:`cterasdk.lib.tasks.AwaitableEdgeTask`,
+  :py:class:`cterasdk.lib.tasks.AwaitablePortalTask`.
+
+Bug Fixes
+^^^^^^^^^
+
+* Fixed an `AttributeError` when a connection error occurs while waiting for an Edge Filer to reboot.
+
+Related issues and pull requests on GitHub: `#315 <https://github.com/ctera/ctera-python-sdk/pull/315>`_
+
+.. code:: python
+
+  # Background task: 'Apply Provisioning Changes'
+  result = admin.users.apply_changes(wait=True)  # Wait for provisioning changes to complete and return the result
+
+  awaitable_task = admin.users.apply_changes()  # Return an awaitable task object without waiting
+  result = awaitable_task.status()              # Get the current status of the task
+  result = awaitable_task.wait()                # Wait for task completion
+  result = awaitable_task.wait(timeout=5)       # Wait up to 5 seconds for the task to complete
+
+  # Moving files and folders
+  result = user.files.move(('My Files/doc.docx', 'Documents/Guide.docx'))  # Move a file and wait for completion
+
+  awaitable_task = user.files.move(('My Files/doc.docx', 'Documents/Guide.docx'), wait=False)  # Return an awaitable task object
+  result = awaitable_task.wait()  # Wait for the move operation to complete
+
+..
+
 2.20.18
 -------
 

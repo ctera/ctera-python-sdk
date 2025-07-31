@@ -45,7 +45,7 @@ Submodules
    cterasdk.core.ssl
    cterasdk.core.startup
    cterasdk.core.syslog
-   cterasdk.core.taskmgr
+   cterasdk.core.tasks
    cterasdk.core.templates
    cterasdk.core.types
    cterasdk.core.admins

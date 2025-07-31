@@ -298,7 +298,7 @@ class TemplateAutoAssignPolicy(BaseCommand):
 
         :param bool,optional wait: Wait for all changes to apply, defaults to `False`
         """
-        task = self._core.api.execute('', 'applyAutoAssignmentRules')
+        ref = self._core.api.execute('', 'applyAutoAssignmentRules')
         if wait:
-            task = self._core.tasks.wait(task)
-        return task
+            return self._core.tasks.wait(ref)
+        return self._core.tasks.awaitable_task(ref)

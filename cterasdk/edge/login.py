@@ -1,6 +1,7 @@
 import logging
 
-from ..exceptions import CTERAException
+from ..exceptions.transport import InternalServerError
+from ..exceptions.auth import AuthenticationError
 from .base_command import BaseCommand
 
 
@@ -16,13 +17,21 @@ class Login(BaseCommand):
         return self._edge.api.get('/nosession/logininfo')
 
     def login(self, username, password):
+        """
+        Log in to CTERA Edge Filer
+
+        :param str username: User name
+        :param str password: User password
+        :raises: :class:`cterasdk.exceptions.auth.AuthenticationError`
+        """
         host = self._edge.host()
         try:
             self._edge.api.form_data('/login', {'username': username, 'password': password})
             logger.info("User logged in. %s", {'host': host, 'user': username})
             self._edge.ctera_migrate.login()
-        except CTERAException:
-            logger.error("Login failed. %s", {'host': host, 'user': username})
+        except InternalServerError as e:
+            if e.error.response.error.msg == 'Wrong username or password':
+                raise AuthenticationError() from e
             raise
 
     def sso(self, ticket):
@@ -38,9 +47,5 @@ class Login(BaseCommand):
     def logout(self):
         host = self._edge.host()
         user = self._edge.session().account.name
-        try:
-            self._edge.api.form_data('/logout', {'foo': 'bar'})
-            logger.info("User logged out. %s", {'host': host, 'user': user})
-        except CTERAException:
-            logger.error("Logout failed. %s", {'host': host, 'user': user})
-            raise
+        self._edge.api.form_data('/logout', {'foo': 'bar'})
+        logger.info("User logged out. %s", {'host': host, 'user': user})

@@ -11,6 +11,9 @@ Submodules
 
 .. toctree::
 
+   cterasdk.exceptions.auth
+   cterasdk.exceptions.backup
+   cterasdk.exceptions.common
    cterasdk.exceptions.direct
    cterasdk.exceptions.io
    cterasdk.exceptions.notifications

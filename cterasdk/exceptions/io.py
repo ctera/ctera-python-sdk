@@ -7,7 +7,7 @@ class RemoteStorageException(CTERAException):
 
     :ivar str path: Path
     """
-    def __init__(self, message, path):
+    def __init__(self, message, path=None):
         super().__init__(message)
         self.path = path
 
@@ -24,31 +24,37 @@ class NotADirectory(RemoteStorageException):
         super().__init__('Target validation error: Resource exists but it is not a directory.', path)
 
 
-class ResourceExistsError(CTERAException):
+class ResourceExistsError(RemoteStorageException):
 
     def __init__(self):
         super().__init__('Resource already exists: a file or folder with this name already exists.')
 
 
-class PathValidationError(CTERAException):
+class PathValidationError(RemoteStorageException):
 
     def __init__(self):
         super().__init__('Path validation failed: the specified destination path does not exist.')
 
 
-class NameSyntaxError(CTERAException):
+class NameSyntaxError(RemoteStorageException):
 
     def __init__(self):
-        super().__init__('Invalid name: the name contains characters that are not allowed.')
+        super().__init__('Invalid name: the name contains characters that are not allowed "\\ / : ? & < > \" |".')
 
 
-class ReservedNameError(CTERAException):
+class ReservedNameError(RemoteStorageException):
 
     def __init__(self):
         super().__init__('Reserved name error: the name is reserved and cannot be used.')
 
 
-class RestrictedPathError(CTERAException):
+class RestrictedPathError(RemoteStorageException):
 
     def __init__(self):
         super().__init__('Creating a folder in the specified location is forbidden.')
+
+
+class RestrictedRoot(RemoteStorageException):
+
+    def __init__(self):
+        super().__init__('Storing files to the root directory is forbidden.', '/')

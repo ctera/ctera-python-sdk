@@ -1,9 +1,9 @@
 import logging
 
-from ..lib.task_manager_base import TaskError
 from .enum import VolumeStatus
 from ..common import Object
 from ..exceptions import CTERAException, InputError
+from ..exceptions.common import TaskException
 from ..lib import track
 from .base_command import BaseCommand
 
@@ -203,5 +203,5 @@ class Volumes(BaseCommand):
     def _wait_mount(self, tid):
         try:
             self._edge.tasks.wait(tid)
-        except TaskError:
+        except TaskException:
             logger.debug('Failed mounting volume. %s', {'tid': tid})

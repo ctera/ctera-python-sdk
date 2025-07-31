@@ -1,9 +1,9 @@
 import logging
 
 from ..exceptions import CTERAException
+from ..exceptions.common import TaskException
 from .enum import Mode, IPProtocol, Traffic
 from .types import TCPConnectResult
-from ..lib.task_manager_base import TaskError
 from ..common import Object, parse_to_ipaddress
 from .base_command import BaseCommand
 
@@ -127,20 +127,20 @@ class Network(BaseCommand):
 
         logger.info("Testing connection. %s", {'host': service.host, 'port': service.port})
 
-        task = self._edge.api.execute("/status/network", "tcpconnect", param)
+        ref = self._edge.api.execute("/status/network", "tcpconnect", param)
         try:
-            task = self._edge.tasks.wait(task)
-            logger.debug("Obtained connection status. %s", {'status': task.result.rc})
+            task = self._edge.tasks.wait(ref)
+            logger.debug("Connection status: %s", task.result.rc)
             if task.result.rc == "Open":
                 return TCPConnectResult(service.host, service.port, True)
-        except TaskError:
+        except TaskException:
             pass
 
         logger.warning("Couldn't establish TCP connection. %s", {'address': service.host, 'port': service.port})
 
         return TCPConnectResult(service.host, service.port, False)
 
-    def iperf(self, address, port=5201, threads=1, protocol=IPProtocol.TCP, direction=Traffic.Upload, retries=120, seconds=1):
+    def iperf(self, address, port=5201, threads=1, protocol=IPProtocol.TCP, direction=Traffic.Upload, timeout=None):
         """
         Invoke a network throughput test
 
@@ -149,8 +149,7 @@ class Network(BaseCommand):
         :param int,optional threads: The number of threads, defaults to 1
         :param cterasdk.edge.enum.IPProtocol,optional protocol: IP protocol, defaults to `'TCP'`
         :param cterasdk.edge.enum.Traffic,optional direction: Traffic direction, defaults to `'Upload'`
-        :param int,optional retries: Number of retries when sampling the iperf task status, defaults to 120
-        :param int,optional seconds: Number of seconds to wait between retries, defaults to 1
+        :param float,optional timeout: Timeout (in seconds).
         :returns: A string containing the iperf output
         :rtype: str
         """
@@ -161,11 +160,11 @@ class Network(BaseCommand):
         param.threads = threads
         param.reverse = direction == Traffic.Download
         param.protocol = None if protocol == IPProtocol.TCP else IPProtocol.UDP
-        task = self._edge.api.execute("/status/network", "iperf", param)
+        ref = self._edge.api.execute("/status/network", "iperf", param)
         try:
-            task = self._edge.tasks.wait(task, retries, seconds)
+            task = self._edge.tasks.wait(ref, timeout)
             return task.result.res
-        except TaskError as error:
+        except TaskException as error:
             return error.task.result.res
 
 

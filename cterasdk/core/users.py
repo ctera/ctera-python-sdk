@@ -158,15 +158,17 @@ class Users(BaseCommand):
         Apply provisioning changes.\n
 
         :param bool,optional wait: Wait for all changes to apply
+        :returns: Task status object, or an awaitable task object
+        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         param = Object()
         param.objectId = None
         param.type = 'users'
         logger.info('Applying provisioning changes.')
-        task = self._core.api.execute('', 'updateAccounts', param)
+        ref = self._core.api.execute('', 'updateAccounts', param)
         if wait:
-            task = self._core.tasks.wait(task)
-        return task
+            return self._core.tasks.wait(ref)
+        return self._core.tasks.awaitable_task(ref)
 
     def delete(self, user):
         """

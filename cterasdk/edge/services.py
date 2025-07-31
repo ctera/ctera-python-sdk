@@ -1,11 +1,11 @@
 import logging
 import cterasdk.settings
 
-from ..lib.task_manager_base import TaskError
 from .licenses import Licenses
 from ..lib import ask, track
 from ..common import Object
 from ..exceptions import CTERAException, InputError
+from ..exceptions.common import TaskException
 from . import enum
 from .base_command import BaseCommand
 from .types import TCPService
@@ -127,15 +127,15 @@ class Services(BaseCommand):
         logger.info('Single sign-on %s.', ('enabled' if sso_state else 'disabled'))
 
     def _connect_to_services(self, param, ctera_license):
-        task = self._attach(param)
+        ref = self._attach(param)
         try:
-            self._edge.tasks.wait(task)
+            self._edge.tasks.wait(ref)
             track(self._edge, '/status/services/CTERAPortal/connectionState', [enum.ServicesConnectionState.Connected],
                   [enum.ServicesConnectionState.ResolvingServers, enum.ServicesConnectionState.Connecting,
                    enum.ServicesConnectionState.Attaching, enum.ServicesConnectionState.Authenticating],
                   [], [enum.ServicesConnectionState.Disconnected], 20, 1)
             logger.info("Connected to Portal.")
-        except TaskError as error:
+        except TaskException as error:
             description = error.task.description
             logger.error("Connection failed. Reason: %s", description)
             raise CTERAException(f"Connection failed. Reason: {description}")

@@ -1,9 +1,8 @@
 import logging
-from ....cio.common import encode_request_parameter
+from ....cio.common import encode_request_parameter, a_await_or_future
 from ....cio import core as fs
 from ....exceptions.io import ResourceNotFoundError, NotADirectory, ResourceExistsError
 from .. import query
-from ....lib import FetchResourcesResponse
 
 
 logger = logging.getLogger('cterasdk.core')
@@ -12,7 +11,7 @@ logger = logging.getLogger('cterasdk.core')
 async def listdir(core, path, depth=None, include_deleted=False, search_criteria=None, limit=None):
     with fs.fetch_resources(path, depth, include_deleted, search_criteria, limit) as param:
         if param.depth > 0:
-            return query.iterator(core, '', param, 'fetchResources', callback_response=FetchResourcesResponse)
+            return query.iterator(core, '', param, 'fetchResources', callback_response=fs.FetchResourcesResponse)
         return await core.v1.api.execute('', 'fetchResources', param)
 
 
@@ -54,7 +53,7 @@ async def walk(core, scope, path, include_deleted=False):
 async def mkdir(core, path):
     with fs.makedir(path) as param:
         response = await core.v1.api.execute('', 'makeCollection', param)
-    fs.accept_response(response, path.reference.as_posix())
+    fs.accept_response(response)
 
 
 async def makedirs(core, path):
@@ -67,29 +66,34 @@ async def makedirs(core, path):
             logger.debug('Resource already exists: %s', path.reference.as_posix())
 
 
-async def rename(core, path, name):
+async def rename(core, path, name, *, wait=False):
     with fs.rename(path, name) as param:
-        return await core.v1.api.execute('', 'moveResources', param)
+        ref = await core.v1.api.execute('', 'moveResources', param)
+        return await a_await_or_future(core, ref, wait)
 
 
-async def remove(core, *paths):
+async def remove(core, *paths, wait=False):
     with fs.delete(*paths) as param:
-        return await core.v1.api.execute('', 'deleteResources', param)
+        ref = await core.v1.api.execute('', 'deleteResources', param)
+        return await a_await_or_future(core, ref, wait)
 
 
-async def recover(core, *paths):
+async def recover(core, *paths, wait=False):
     with fs.recover(*paths) as param:
-        return await core.v1.api.execute('', 'restoreResources', param)
+        ref = await core.v1.api.execute('', 'restoreResources', param)
+        return await a_await_or_future(core, ref, wait)
 
 
-async def copy(core, *paths, destination=None):
+async def copy(core, *paths, destination=None, wait=False):
     with fs.copy(*paths, destination=destination) as param:
-        return await core.v1.api.execute('', 'copyResources', param)
+        ref = await core.v1.api.execute('', 'copyResources', param)
+        return await a_await_or_future(core, ref, wait)
 
 
-async def move(core, *paths, destination=None):
+async def move(core, *paths, destination=None, wait=False):
     with fs.move(*paths, destination=destination) as param:
-        return await core.v1.api.execute('', 'moveResources', param)
+        ref = await core.v1.api.execute('', 'moveResources', param)
+        return await a_await_or_future(core, ref, wait)
 
 
 async def ensure_directory(core, directory, suppress_error=False):
@@ -159,6 +163,8 @@ def upload(name, size, destination, fd):
     :returns: Callable function to start the upload.
     :rtype: callable
     """
+    fs.destination_prerequisite_conditions(destination, name)
+
     async def wrapper(core):
         """
         Upload file from metadata and file handle.

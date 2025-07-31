@@ -95,19 +95,19 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
         self._filer.api.execute.assert_called_once_with('/config/cloudsync', 'evictFolder', mock.ANY)
         self._filer.api.get.assert_called_once_with(execute_response)
         actual_param = self._filer.api.execute.call_args[0][2]
-        expected_param = munch.Munch(dict(path=self._path))
+        expected_param = munch.Munch(dict(_classname='evictFolderParam', path=self._path))
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(ret, execute_response)
+        self.assertEqual(ret, get_response)
 
     def test_evict_no_wait(self):
-        execute_response = 'Success'
+        execute_response = '/proc/bgtasks/6192'
         self._init_filer(execute_response=execute_response)
         ret = sync.Sync(self._filer).evict(self._path)
         self._filer.api.execute.assert_called_once_with('/config/cloudsync', 'evictFolder', mock.ANY)
         actual_param = self._filer.api.execute.call_args[0][2]
-        expected_param = munch.Munch(dict(path=self._path))
+        expected_param = munch.Munch(dict(_classname='evictFolderParam', path=self._path))
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(ret, execute_response)
+        self.assertEqual(ret.ref, execute_response)
 
     def test_get_linux_avoid_using_fanotify(self):
         for avoid in [True, False]:

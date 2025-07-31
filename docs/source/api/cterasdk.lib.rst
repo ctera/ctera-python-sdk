@@ -17,6 +17,7 @@ Submodules
    cterasdk.lib.platform
    cterasdk.lib.registry
    cterasdk.lib.storage
+   cterasdk.lib.tasks
    cterasdk.lib.tempfile
    cterasdk.lib.tracker
    cterasdk.lib.version

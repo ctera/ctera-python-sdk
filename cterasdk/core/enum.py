@@ -644,3 +644,50 @@ class Reports:
     Portals = 'portalsStatisticsReport'
     Folders = 'foldersStatisticsReport'
     FolderGroups = 'folderGroupsStatisticsReport'
+
+
+class FileAccessError:
+    """
+    File Access Error
+
+    :ivar Conflict: Conflict occurred during file operation.
+    :ivar PermissionDenied: Operation denied due to insufficient permissions.
+    :ivar MoveDeletedFile: Attempted to move a file that was deleted.
+    :ivar CopyToSubFolder: Cannot copy a folder into one of its subfolders.
+    :ivar QuotaViolation: Operation exceeds allowed storage quota.
+    :ivar DestinationNotExists: Destination folder does not exist.
+    :ivar CancelledByUser: Operation was cancelled by the user.
+    :ivar InternalError: An internal error occurred.
+    :ivar UserPasswordRequired: User password is required to proceed.
+    :ivar PassphraseRequire: A passphrase is required.
+    :ivar CopyFileToRoot: Attempted to copy a file to the root directory.
+    :ivar FileWithTheSameNameExist: A file with the same name already exists.
+    :ivar RejectedByPolicy: Operation was rejected by a policy rule.
+    :ivar RejectedByWormSettings: Operation not allowed by WORM (Write Once Read Many) settings.
+    :ivar TooManyFailedAuthenticationAttemps: Too many failed authentication attempts.
+    :ivar UserActionTimeout: Timed out waiting for user action.
+    :ivar InvalidName: Provided name is invalid.
+    :ivar ReservedName: The name provided is reserved and cannot be used.
+    :ivar CannotRunPermanentDeleteWhenFsckIsRunning: FSCK is running, cannot perform permanent delete.
+    :ivar ResourceLocked: The resource is currently locked.
+    """
+    Conflict = "Conflict"
+    PermissionDenied = "PermissionDenied"
+    MoveDeletedFile = "MoveDeletedFile"
+    CopyToSubFolder = "CopyToSubFolder"
+    QuotaViolation = "QuotaViolation"
+    DestinationNotExists = "DestinationNotExists"
+    CancelledByUser = "CancelledByUser"
+    InternalError = "InternalError"
+    UserPasswordRequired = "UserPasswordRequired"
+    PassphraseRequire = "PassphraseRequire"
+    CopyFileToRoot = "CopyFileToRoot"
+    FileWithTheSameNameExist = "FileWithTheSameNameExist"
+    RejectedByPolicy = "RejectedByPolicy"
+    RejectedByWormSettings = "RejectedByWormSettings"
+    TooManyFailedAuthenticationAttemps = "TooManyFailedAuthenticationAttemps"
+    UserActionTimeout = "UserActionTimeout"
+    InvalidName = "InvalidName"
+    ReservedName = "ReservedName"
+    CannotRunPermanentDeleteWhenFsckIsRunning = "CannotRunPermanentDeleteWhenFsckIsRunning"
+    ResourceLocked = "ResourceLocked"

@@ -22,6 +22,8 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         self._description = 'description'
         self._user_uid = 1337
         self._folder_uid = 7331
+        self._cloudfolder_path = f'/Users/John Smith/{self._cloudfolder_name}'
+        self._add_cloudfolder_response = f'teamPortals/portal/cloudDrives/{self._cloudfolder_path}'
 
         self._nt_acl_folders = Object()
         self._nt_acl_folders._classname = 'SDDLFoldersParam'  # pylint: disable=protected-access
@@ -61,7 +63,7 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         return builder.build()
 
     def test_add_cloud_drive_with_local_owner_no_winacls_param(self):
-        self._init_global_admin(get_response='admin', execute_response='Success')
+        self._init_global_admin(get_response='admin', execute_response=self._add_cloudfolder_response)
         self._mock_get_user_base_object_ref()
         self._mock_get_folder_group()
 
@@ -75,10 +77,27 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self.assertEqual(ret, 'Success')
+        self.assertEqual(ret, self._cloudfolder_path)
+
+    def test_add_cloud_drive_with_locking_default_extensions(self):
+        self._init_global_admin(get_response='admin', execute_response=self._add_cloudfolder_response)
+        self._mock_get_user_base_object_ref()
+        self._mock_get_folder_group()
+
+        ret = cloudfs.CloudDrives(self._global_admin).add(self._name, self._group, self._local_user_account, gfl=True)
+
+        self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['baseObjectRef'])
+        self._global_admin.cloudfs.groups.get.assert_called_once_with(self._group, ['baseObjectRef'])
+        self._global_admin.api.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
+
+        expected_param = self._get_add_cloud_drive_object(gfl=True)
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+
+        self.assertEqual(ret, self._cloudfolder_path)
 
     def test_add_cloud_drive_with_local_owner_no_winacls_param_with_description(self):
-        self._init_global_admin(get_response='admin', execute_response='Success')
+        self._init_global_admin(get_response='admin', execute_response=self._add_cloudfolder_response)
         self._mock_get_user_base_object_ref()
         self._mock_get_folder_group()
 
@@ -92,11 +111,11 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self.assertEqual(ret, 'Success')
+        self.assertEqual(ret, self._cloudfolder_path)
 
     def test_add_cloud_drive_with_local_owner_winacls_true(self):
         get_response = 'admin'
-        self._init_global_admin(get_response=get_response, execute_response='Success')
+        self._init_global_admin(get_response=get_response, execute_response=self._add_cloudfolder_response)
         self._mock_get_user_base_object_ref()
         self._mock_get_folder_group()
 
@@ -110,11 +129,11 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self.assertEqual(ret, 'Success')
+        self.assertEqual(ret, self._cloudfolder_path)
 
     def test_add_cloud_drive_with_local_owner_winacls_false(self):
         get_response = 'admin'
-        self._init_global_admin(get_response=get_response, execute_response='Success')
+        self._init_global_admin(get_response=get_response, execute_response=self._add_cloudfolder_response)
         self._mock_get_user_base_object_ref()
         self._mock_get_folder_group()
 
@@ -129,11 +148,11 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
 
-        self.assertEqual(ret, 'Success')
+        self.assertEqual(ret, self._cloudfolder_path)
 
     def test_add_cloud_drive_with_local_owner_raise(self):
         get_response = 'admin'
-        self._init_global_admin(get_response=get_response, execute_response='Success')
+        self._init_global_admin(get_response=get_response)
         self._mock_get_user_base_object_ref()
         self._mock_get_folder_group()
 
@@ -172,7 +191,8 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['displayName'])
         self._global_admin.files.undelete.assert_called_once_with(f'Users/{self._owner}/{self._name}')
 
-    def _get_add_cloud_drive_object(self, winacls=True, description=None, quota=None, compliance_settings=None, xattrs=None):
+    def _get_add_cloud_drive_object(self, winacls=True, description=None, quota=None, compliance_settings=None, xattrs=None,
+                                    gfl=None, lock_extensions=None):
         add_cloud_drive_param = Object()
         add_cloud_drive_param.name = self._name
         add_cloud_drive_param.owner = self._owner
@@ -183,6 +203,13 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
             add_cloud_drive_param.description = description
         add_cloud_drive_param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
         add_cloud_drive_param.extendedAttributes = xattrs if xattrs else ExtendedAttributesBuilder.default().build()
+        if gfl:
+            add_cloud_drive_param.globalFileLockSettings = Object()
+            add_cloud_drive_param.globalFileLockSettings._classname = 'GlobalFileLockSettings'  # pylint: disable=protected-access
+            add_cloud_drive_param.globalFileLockSettings.enabled = True
+            add_cloud_drive_param.globalFileLockSettings.globalFileLockExtensions = (
+                lock_extensions if lock_extensions else cloudfs.CloudDrives.default_extensions
+            )
         return add_cloud_drive_param
 
     def _mock_get_user_base_object_ref(self):

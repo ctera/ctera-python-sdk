@@ -1475,6 +1475,13 @@ Cloud Drive Folders
    owner_sid = 'S-1-12-1-1536910496-1126310805-1188065941-1612002142'
    admin.cloudfs.drives.setoacl(folders_paths, owner_sid, True)
 
+
+Global File Locking
+-------------------
+
+.. automethod:: cterasdk.core.cloudfs.Locks.all
+   :noindex:
+
 Zones
 -----
 

@@ -1,7 +1,7 @@
 import logging
 import time
 
-from ..exceptions import CTERAException
+from ..exceptions.transport import HTTPError
 from .base_command import BaseCommand
 
 
@@ -17,7 +17,7 @@ class Power(BaseCommand):
 
         :param bool,optional wait: Wait for reboot to complete, defaults to False
         """
-        logger.info("Rebooting device. %s", {'host': self._edge.host()})
+        logger.info("Rebooting Edge Filer. %s", {'host': self._edge.host()})
         self._edge.api.execute("/status/device", "reboot", None)
         if wait:
             Boot(self._edge).wait()
@@ -33,7 +33,7 @@ class Power(BaseCommand):
         :param bool,optional wait: Wait for reset to complete, defaults to False
         """
         self._edge.api.execute("/status/device", "reset2default", None)
-        logger.info("Resetting device to default settings. %s", {'host': self._edge.host()})
+        logger.info("Resetting Edge Filer to default settings. %s", {'host': self._edge.host()})
         if wait:
             Boot(self._edge).wait()
 
@@ -50,22 +50,26 @@ class Boot:
         while True:
             try:
                 self._increment()
-                logger.debug('Checking if device is up and running. %s', {'attempt': self._attempt})
+                logger.debug("Status check, (try %s)", self._attempt + 1)
                 self._edge.test()
-                logger.info("Device is back up and running.")
+                logger.info("Edge Filer is up and running.")
                 break
-            except (CTERAException, ConnectionError, TimeoutError) as e:
-                logger.debug('Exception. %s', {'exception': e.__class__.__name__, 'message': e.message})
+            except ConnectionError:
+                logger.debug('Connection error while checking status.')
+            except TimeoutError:
+                logger.debug('Status check timed out.')
+            except HTTPError as e:
+                logger.debug("Status check failed with HTTP %s: %s", e.code, e.name)
 
     def _increment(self):
         self._attempt = self._attempt + 1
         if self._attempt >= self._retries:
             self._unreachable()
-        logger.debug('Sleep. %s', {'seconds': self._seconds})
+        logger.debug("Try %s failed; Sleeping for %s second(s).", self._attempt, self._seconds)
         time.sleep(self._seconds)
 
     def _unreachable(self):
         host = self._edge.host()
         port = self._edge.port()
-        logger.error('Timed out. Could not reach host. %s', {'host': host, 'port': port})
-        raise ConnectionError(f'Timed out. Could not reach host {host}:{port}.')
+        logger.error("Connection timed out after retries. %s", {'host': host, 'port': port})
+        raise ConnectionError(f'Connection to {host}:{port} timed out after retries.')
