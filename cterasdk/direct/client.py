@@ -2,7 +2,7 @@ import asyncio
 import cterasdk.settings
 
 from . import filters
-from .credentials import KeyPair, Bearer
+from .credentials import KeyPair, Bearer, create_bearer_token
 from .lib import get_chunks, decrypt_encryption_key, process_chunks
 from .types import ByteRange
 from .stream import Streamer
@@ -29,9 +29,10 @@ class DirectIO:
                               authenticator=lambda *_: True)
         self._client = AsyncClient(DefaultBuilder(), settings=cterasdk.settings.io.direct.storage.settings, authenticator=lambda *_: True)
         self._credentials = Bearer(bearer) if bearer else KeyPair(access_key_id, secret_access_key)
+        self._bearer = create_bearer_token(self._credentials)
 
     async def _chunks(self, file_id):
-        metadata = await get_chunks(self._api, self._credentials, file_id)
+        metadata = await get_chunks(self._api, self._bearer, file_id)
         if metadata.encrypted:
             metadata.encryption_key = decrypt_encryption_key(
                 metadata.file_id,
@@ -49,19 +50,19 @@ class DirectIO:
         meta = await self._chunks(file_id)
         return meta.serialize()
 
-    async def blocks(self, file_id, blocks, max_workers):
+    async def blocks(self, file_id, byte_range=None, max_workers=None):
         """
         Blocks API.
 
         :param int file_id: File ID.
-        :param list[cterasdk.direct.exceptions.BlockInfo] blocks: List of BlockInfo objects,
-         or list of integers identifying the block position.
-        :param int max_workers: Max concurrent tasks. A task will be dispatched for each block if no limited was specified.
+        :param cterasdk.direct.types.ByteRange,optional byte_range: Byte Range.
+        :param int max_workers: Max concurrent tasks
         :returns: List of Blocks.
         :rtype: list[cterasdk.direct.types.Block]
         """
         meta = await self._chunks(file_id)
-        executor = self.executor(filters.blocks(meta, blocks), meta.encryption_key, meta.file_id, max_workers)
+        byte_range = byte_range if byte_range is not None else ByteRange.default()
+        executor = self.executor(filters.span(meta, byte_range), meta.encryption_key, meta.file_id, max_workers)
         return await executor()
 
     async def streamer(self, file_id, byte_range=None):
@@ -69,7 +70,7 @@ class DirectIO:
         Stream API.
 
         :param int file_id: File ID.
-        :param cterasdk.direct.types.ByteRange byte_range: Byte Range.
+        :param cterasdk.direct.types.ByteRange,optional byte_range: Byte Range.
         :returns: Streamer Object
         :rtype: cterasdk.direct.stream.Streamer
         """

@@ -1,24 +1,7 @@
 import logging
-from ..exceptions.direct import BlockInfo
 
 
 logger = logging.getLogger('cterasdk.direct')
-
-
-def blocks(file, array):
-    """
-    Filter Blocks by Block Number.
-
-    :param list[cterasdk.direct.types.File] file: File Object.
-    :param list[cterasdk.direct.types.BlockInfo] array: List of BlockInfo objects,
-     or list of integers identifying the block position.
-    :returns: List of Chunks.
-    :rtype: list[cterasdk.direct.types.Chunk]
-    """
-    if array is not None:
-        numbers = [block.number if isinstance(block, BlockInfo) else block for block in array]
-        return [file.chunks[number - 1] for number in numbers]
-    return file.chunks
 
 
 def span(file, byte_range):

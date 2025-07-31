@@ -3,7 +3,6 @@ import asyncio
 
 from ..lib.retries import execute_with_retries
 from .types import Metadata, Block
-from .credentials import create_authorization_header
 from .crypto import decrypt_key, decrypt_block
 from .decompressor import decompress
 from ..exceptions.transport import BadRequest, Unauthorized, Unprocessable, InternalServerError, HTTPError
@@ -28,7 +27,7 @@ async def get_object(client, file_id, chunk):
     :rtype: bytes
     """
     message = (
-        f"Downloading block #{chunk.index} "
+        f"Downloading block #{chunk.number} "
         f"(offset={chunk.offset}, length={chunk.length})"
     )
 
@@ -62,7 +61,7 @@ async def get_object(client, file_id, chunk):
     }
 
     message = (
-        f"Failed to download block #{chunk.index} "
+        f"Failed to download block #{chunk.number} "
         f"(offset={chunk.offset}, length={chunk.length})"
     )
     if file_id:
@@ -125,7 +124,7 @@ async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
     """
     async def process(client, chunk, encryption_key):
         message = (
-            f"Processing block {chunk.index} "
+            f"Processing block #{chunk.number} "
             f"(offset={chunk.offset}, length={chunk.length})"
         )
         if file_id:
@@ -134,7 +133,7 @@ async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
         encrypted_object = await get_object(client, file_id, chunk)
         decrypted_object = await decrypt_object(file_id, encrypted_object, encryption_key, chunk)
         decompressed_object = await decompress_object(file_id, decrypted_object, chunk)
-        return Block(file_id, chunk.index, chunk.offset, decompressed_object, chunk.length)
+        return Block(file_id, chunk.number, chunk.offset, decompressed_object, chunk.length)
 
     if semaphore is not None:
         async with semaphore:
@@ -184,18 +183,19 @@ def decrypt_encryption_key(file_id, wrapped_key, secret_access_key):
 
 
 @execute_with_retries(retries=3, backoff=1, max_backoff=10)
-async def get_chunks(api, credentials, file_id):
+async def get_chunks(api, bearer, file_id):
     """
     Get Chunks.
 
     :param cterasdk.clients.clients.AsyncJSON api: Asynchronous JSON Client.
+    :param str bearer: Bearer Token.
     :param int file_id: File ID.
     :returns: Wrapped key and file chunks.
     :rtype: cterasdk.direct.types.Metadata
     """
     logger.debug('Listing blocks for file ID: %s', file_id)
     try:
-        response = await api.get(f'{file_id}', headers=create_authorization_header(credentials))
+        response = await api.get(f'{file_id}', headers={'Authorization': bearer})
         if not response.chunks:
             logger.error('Could not find blocks for file ID: %s.', file_id)
             raise BlocksNotFoundError(file_id)

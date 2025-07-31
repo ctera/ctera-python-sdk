@@ -23,7 +23,7 @@ class Bearer(BaseCredentials):
         self.bearer = bearer
 
 
-def create_authorization_header(credentials):
+def create_bearer_token(credentials):
     """
     Create Authorization Header.
 
@@ -31,14 +31,14 @@ def create_authorization_header(credentials):
     :returns: Authorization header as a dictionary.
     :rtype: dict
     """
-    authorization_header = None
+    token = None
 
     if isinstance(credentials, Bearer):
-        logger.debug('Initializing client using bearer token')
-        authorization_header = f'Bearer {credentials.bearer}'
+        logger.debug('Initializing client using Bearer token')
+        token = f'Bearer {credentials.bearer}'
 
     elif isinstance(credentials, KeyPair):
-        logger.debug('Initializing client using key pair.')
-        authorization_header = f'Bearer {credentials.access_key_id}'
+        logger.debug('Initializing client using Key Pair.')
+        token = f'Bearer {credentials.access_key_id}'
 
-    return {'Authorization': authorization_header}
+    return token

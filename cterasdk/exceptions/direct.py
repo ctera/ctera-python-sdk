@@ -135,6 +135,6 @@ class BlockInfo:
         :param cterasdk.direct.types.Chunk chunk: Chunk.
         """
         self.file_id = file_id
-        self.number = chunk.index
+        self.number = chunk.number
         self.offset = chunk.offset
         self.length = chunk.length
