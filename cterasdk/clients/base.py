@@ -1,8 +1,11 @@
 import logging
+import platform
 import threading
+import aiohttp
 from . import async_requests, errors
 from .settings import ClientSessionSettings, TraceSettings
 from ..common import utils
+from ..version import __version__
 
 
 logger = logging.getLogger('cterasdk.http')
@@ -27,7 +30,13 @@ class PersistentHeaders:
     """Headers to include in every request"""
 
     def __init__(self):
-        self._headers = {}
+        self._headers = {
+            'User-Agent': (
+                f"CTERA Python SDK/{__version__}; aiohttp/{aiohttp.__version__};"
+                f" ({' '.join([platform.system(), str(platform.release())])}; {platform.machine()};"
+                f" Python {'.'.join(platform.python_version_tuple())});"
+            )
+        }
 
     @property
     def all(self):
