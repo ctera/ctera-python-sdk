@@ -87,11 +87,11 @@ class Metadata(Object):
         """
         super().__init__(
             file_id=file_id,
-            encrypted=server_object.encrypt_info.data_encrypted,
+            encrypted=getattr(server_object, 'encrypt_info', None) and server_object.encrypt_info.data_encrypted or False,
             compressed=server_object.compression_type != CompressionLib.Off,
             chunks=Metadata._format_chunks(server_object.chunks)
         )
-        self.encryption_key = server_object.encrypt_info.wrapped_key if self.encrypted else None
+        self.encryption_key = getattr(server_object, 'encrypt_info', None) and server_object.encrypt_info.wrapped_key if self.encrypted else None
         self.compression_library = server_object.compression_type if self.compressed else None
         last_chunk = self.chunks[-1]
         self.size = last_chunk.offset + last_chunk.length
