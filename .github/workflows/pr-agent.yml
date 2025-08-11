@@ -1,0 +1,21 @@
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+  issue_comment:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  pr_agent:
+    uses: ctera/ctera-pr-agent/.github/workflows/pr-agent-reusable.yml@main
+    with:
+      api_type: ${{ vars.API_TYPE }}
+      api_base: ${{ vars.API_BASE }}
+      api_version: ${{ vars.API_VERSION }}
+      model: ${{ vars.MODEL }}
+    secrets:
+      openai_key: ${{ secrets.AZURE_OPENAI_KEY }}
+      token: ${{ secrets.GITHUB_TOKEN }}
