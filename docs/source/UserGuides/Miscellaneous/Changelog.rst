@@ -7,6 +7,9 @@ Improvements
 * Added a unique ``User-Agent`` header to all requests made by the CTERA Python SDK  
 * Raised an exception on upload errors to CTERA Portal  
 * Raised :py:class:`cterasdk.exceptions.session.SessionExpired` upon session expiration  
+* Lists the Cloud Drive root by default if no `path` argument was provided to :py:func:`cterasdk.core.files.browser.FileBrowser.listdir`
+* Add :py:class:`cterasdk.exceptions.notifications.AncestorsError` exception
+* Add :py:class:`cterasdk.exceptions.transport.TLSError` exception
 
 Bug Fixes
 ^^^^^^^^^

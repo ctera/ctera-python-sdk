@@ -4,6 +4,7 @@ import logging
 import aiohttp
 
 from yarl import URL
+from ..exceptions.transport import TLSError
 
 
 logger = logging.getLogger('cterasdk.http')
@@ -45,7 +46,7 @@ class Session:
             return asyncio.create_task(on_response(response))
         except aiohttp.ClientSSLError as error:
             logger.warning(error)
-            raise
+            raise TLSError(error.host, error.port) from error
         except aiohttp.ClientProxyConnectionError as error:
             logger.warning(error)
             raise

@@ -133,3 +133,17 @@ class GatewayTimeout(HTTPError):
 
     def __init__(self, error):
         super().__init__(HTTPStatus.GATEWAY_TIMEOUT, error)
+
+
+class TLSError(CTERAException):
+    """
+    TLS Error
+
+    :ivar str host: Host
+    :ivar int port: Port
+    """
+
+    def __init__(self, host, port):
+        super().__init__(f"TLS handshake to '{host}:{port}' failed.")
+        self.host = host
+        self.port = port
