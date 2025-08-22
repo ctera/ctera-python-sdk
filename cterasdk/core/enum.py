@@ -649,7 +649,7 @@ class Reports:
 class UploadError:
     """
     Upload Error
-    
+
     :ivar QuotaViolation: User is out of quota.
     :ivar RejectedByPolicy: Rejected by Cloud Drive policy rule.
     """

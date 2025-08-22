@@ -4,7 +4,6 @@ import logging
 import asyncio
 from abc import ABC, abstractmethod
 
-from ..common import Object
 from ..common.enum import TaskRunningStatus
 from ..exceptions.common import TaskWaitTimeoutError, AwaitableTaskException
 from ..exceptions.transport import HTTPError

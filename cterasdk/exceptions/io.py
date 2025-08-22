@@ -73,28 +73,28 @@ class UploadException(RemoteStorageException):
     :ivar str path: Path
     """
     def __init__(self, message, path):
-        super().__init__(f'Upload failed: {message}', path)
+        super().__init__(f'Upload failed: {message}.', path)
 
 
 class OutOfQuota(UploadException):
 
     def __init__(self, entity, path):
-        super().__init__(f'{entity} is out of quota.', path)
+        super().__init__(f'{entity} is out of quota', path)
 
 
 class RejectedByPolicy(UploadException):
 
     def __init__(self, path):
-        super().__init__('Rejected by Cloud Drive policy rule.', path)
+        super().__init__('Rejected by Cloud Drive policy rule', path)
 
 
 class NoStorageBucket(UploadException):
 
     def __init__(self, path):
-        super().__init__('No available storage location.', path)
+        super().__init__('No available storage location', path)
 
 
 class WindowsACLError(UploadException):
 
     def __init__(self, path):
-        super().__init__('Unable to store file in a Windows ACL-enabled cloud folder..', path)
+        super().__init__('Unable to store file in a Windows ACL-enabled cloud folder', path)
