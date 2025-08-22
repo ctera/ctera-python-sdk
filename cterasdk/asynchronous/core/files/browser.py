@@ -61,11 +61,11 @@ class FileBrowser(BaseCommand):
         handle = await self.handle_many(target, *objects)
         return await asynfs.write(directory, name, handle)
 
-    async def listdir(self, path, depth=None, include_deleted=False):
+    async def listdir(self, path=None, depth=None, include_deleted=False):
         """
         List Directory
 
-        :param str path: Path
+        :param str,optional path: Path, defaults to the Cloud Drive root
         :param bool,optional include_deleted: Include deleted files, defaults to False
         """
         return await io.listdir(self._core, self.normalize(path), depth=depth, include_deleted=include_deleted)
