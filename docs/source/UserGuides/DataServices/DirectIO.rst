@@ -85,7 +85,7 @@ During testing, you may need to disable TLS verification if the Portal or Object
 Blocks API
 ==========
 
-.. automethod:: cterasdk.direct.client.Client.blocks
+.. automethod:: cterasdk.direct.client.DirectIO.blocks
    :noindex:
 
 
@@ -122,7 +122,7 @@ Blocks API
 Streamer API
 ============
 
-.. automethod:: cterasdk.direct.client.Client.streamer
+.. automethod:: cterasdk.direct.client.DirectIO.streamer
    :noindex:
 
 .. code-block:: python

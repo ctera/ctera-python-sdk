@@ -40,6 +40,8 @@ async def versions(core, path):
 
 
 async def walk(core, scope, path, include_deleted=False):
+    target = fs.CorePath.instance(scope, path)
+    await ensure_directory(core, target)
     paths = [fs.CorePath.instance(scope, path)]
     while len(paths) > 0:
         path = paths.pop(0)
@@ -53,7 +55,7 @@ async def walk(core, scope, path, include_deleted=False):
 async def mkdir(core, path):
     with fs.makedir(path) as param:
         response = await core.v1.api.execute('', 'makeCollection', param)
-    fs.accept_response(response)
+    fs.accept_error(response)
 
 
 async def makedirs(core, path):
@@ -173,7 +175,7 @@ def upload(name, size, destination, fd):
         """
         uid, filename, directory = await _validate_destination(core, name, destination)
         with fs.upload(core, filename, directory, size, fd) as param:
-            return await core.io.upload(str(uid), param)
+            return fs.validate_transfer_success(await core.io.upload(str(uid), param), destination.join(name).reference.as_posix())
     return wrapper
 
 

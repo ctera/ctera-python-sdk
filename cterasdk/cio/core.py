@@ -3,9 +3,12 @@ import logging
 from contextlib import contextmanager
 from ..objects.uri import quote, unquote
 from ..common import Object, DateTimeUtils
-from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, FileAccessError
+from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, FileAccessError, \
+    UploadError
 from ..core.types import PortalAccount, UserAccount, GroupAccount
-from ..exceptions.io import ResourceExistsError, PathValidationError, NameSyntaxError, ReservedNameError, RestrictedRoot
+from ..exceptions.io import ResourceExistsError, PathValidationError, NameSyntaxError, \
+    ReservedNameError, RestrictedRoot, InsufficientPermission
+from ..exceptions.io import UploadException, OutOfQuota, RejectedByPolicy, NoStorageBucket, WindowsACLError
 from ..lib.iterator import DefaultResponse
 from . import common
 
@@ -181,7 +184,7 @@ class FetchResourcesParamBuilder:
 class FetchResourcesResponse(DefaultResponse):
 
     def __init__(self, response):
-        accept_response(response.errorType)
+        accept_error(response.errorType)
         super().__init__(response)
 
     @property
@@ -291,7 +294,7 @@ def handle(path):
 
 
 def destination_prerequisite_conditions(destination, name):
-    if not destination.reference.root:
+    if not len(destination.reference.parts) > 0:
         raise RestrictedRoot()
     if any(c in name for c in ['\\', '/', ':', '?', '&', '<', '>', '"', '|']):
         raise NameSyntaxError()
@@ -309,6 +312,26 @@ def upload(core, name, destination, size, fd):
     )
     logger.info('Uploading: %s to: %s', name, destination.reference)
     yield param
+
+
+def validate_transfer_success(response, path):
+    if response.rc:
+        logger.error('Upload of file: "%s" failed.', path)
+        if response.msg == UploadError.UserQuotaViolation:
+            raise OutOfQuota('User', path)
+        if response.msg == UploadError.PortalQuotaViolation:
+            raise OutOfQuota('Team Portal', path)
+        if response.msg == UploadError.FolderQuotaViolation:
+            raise OutOfQuota('Cloud drive folder', path)
+        if response.msg == UploadError.RejectedByPolicy:
+            raise RejectedByPolicy(path)
+        if response.msg == UploadError.WindowsACL:
+            raise WindowsACLError(path)
+        if response.msg.startswith(UploadError.NoStorageBucket):
+            raise NoStorageBucket(path)
+        raise UploadException(f'Upload failed. Reason: {response.msg}', path)
+    if not response.rc and response.msg == 'OK':
+        logger.info('Upload successful. Saved to: %s', path)
 
 
 @contextmanager
@@ -508,7 +531,7 @@ def obtain_current_accounts(param):
     return current_accounts
 
 
-def accept_response(error_type):
+def accept_error(error_type):
     """
     Check if response contains an error.
     """
@@ -516,7 +539,8 @@ def accept_response(error_type):
         FileAccessError.FileWithTheSameNameExist: ResourceExistsError(),
         FileAccessError.DestinationNotExists: PathValidationError(),
         FileAccessError.InvalidName: NameSyntaxError(),
-        FileAccessError.ReservedName: ReservedNameError()
+        FileAccessError.ReservedName: ReservedNameError(),
+        FileAccessError.PermissionDenied: InsufficientPermission()
     }.get(error_type, None)
     try:
         if error:

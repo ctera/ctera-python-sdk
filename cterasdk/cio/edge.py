@@ -69,7 +69,7 @@ def makedir(path):
         yield path.absolute
     except CTERAException as error:
         try:
-            accept_response(error.response.message.msg, directory)
+            accept_error(error.response.message.msg, directory)
         except ResourceExistsError:
             logger.info('Directory already exists: %s', directory)
     logger.info('Directory created: %s', directory)
@@ -126,7 +126,7 @@ def upload(name, destination, fd):
     yield param
 
 
-def accept_response(response, reference):
+def accept_error(response, reference):
     error = {
         "File exists": ResourceExistsError(),
         "Creating a folder in this location is forbidden": RestrictedPathError(),

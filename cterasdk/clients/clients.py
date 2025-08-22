@@ -49,7 +49,8 @@ class AsyncFolders(AsyncClient):
 class AsyncUpload(AsyncClient):
 
     async def upload(self, path, data, **kwargs):
-        return await super().form_data(path, data, **kwargs)
+        response = await super().form_data(path, data, **kwargs)
+        return await response.xml()
 
 
 class AsyncWebDAV(AsyncClient):
@@ -253,7 +254,8 @@ class Folders(Client):
 class Upload(Client):
 
     def upload(self, path, data, **kwargs):
-        return super().form_data(path, data, **kwargs)
+        response = super().form_data(path, data, **kwargs)
+        return response.xml()
 
 
 class WebDAV(Client):
