@@ -41,8 +41,9 @@ def versions(core, path):
 
 
 def walk(core, scope, path, include_deleted=False):
-    ensure_directory(core, path)
-    paths = [fs.CorePath.instance(scope, path)]
+    target = fs.CorePath.instance(scope, path)
+    ensure_directory(core, target)
+    paths = [target]
     while len(paths) > 0:
         path = paths.pop(0)
         entries = listdir(core, path, include_deleted=include_deleted)
@@ -55,7 +56,7 @@ def walk(core, scope, path, include_deleted=False):
 def mkdir(core, path):
     with fs.makedir(path) as param:
         response = core.api.execute('', 'makeCollection', param)
-    fs.accept_response(response)
+    fs.accept_error(response)
 
 
 def makedirs(core, path):
@@ -175,7 +176,7 @@ def upload(name, size, destination, fd):
         """
         uid, filename, directory = _validate_destination(core, name, destination)
         with fs.upload(core, filename, directory, size, fd) as param:
-            return core.io.upload(str(uid), param)
+            return fs.validate_transfer_success(core.io.upload(str(uid), param), destination.join(name).reference.as_posix())
     return wrapper
 
 

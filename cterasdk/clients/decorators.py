@@ -16,6 +16,7 @@ def authenticated(execute_request):
             except SessionExpired:
                 logger.error('Session expired.')
                 self.cookies.clear()
+                raise
         logger.error('Not logged in.')
         raise NotLoggedIn()
     return authenticate_then_execute

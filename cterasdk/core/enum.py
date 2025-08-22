@@ -646,6 +646,21 @@ class Reports:
     FolderGroups = 'folderGroupsStatisticsReport'
 
 
+class UploadError:
+    """
+    Upload Error
+
+    :ivar QuotaViolation: User is out of quota.
+    :ivar RejectedByPolicy: Rejected by Cloud Drive policy rule.
+    """
+    FolderQuotaViolation = 'Folder is out of quota'
+    UserQuotaViolation = 'User is out of quota'
+    PortalQuotaViolation = 'Portal is out of quota'
+    RejectedByPolicy = "Rejected by Cloud Drive policy rule"
+    NoStorageBucket = "No available storage location"
+    WindowsACL = "Illegal access to NTACL folder"
+
+
 class FileAccessError:
     """
     File Access Error
