@@ -1,6 +1,15 @@
 Changelog
 =========
 
+2.20.20
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Add unique User-Agent header to all requests made by the CTERA Python SDK
+
+
 2.20.19
 -------
 

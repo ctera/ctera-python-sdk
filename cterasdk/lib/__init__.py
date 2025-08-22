@@ -1,7 +1,6 @@
 from .cmd import Command  # noqa: E402, F401
 from .consent import ask  # noqa: E402, F401
 from .tempfile import TempfileServices  # noqa: E402, F401
-from .version import Version  # noqa: E402, F401
 from .iterator import QueryIterator, BaseResponse, \
     DefaultResponse, KeyValueQueryIterator, QueryLogsResponse, CursorResponse  # noqa: E402, F401
 from .tracker import track, ErrorStatus  # noqa: E402, F401
