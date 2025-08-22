@@ -5,7 +5,7 @@ class SessionExpired(CTERAException):
     """Session expiration"""
 
     def __init__(self):
-        super().__init__('Authentication error: Session expired.')
+        super().__init__('Authentication error: Session expired. Please log in again.')
 
 
 class NotLoggedIn(CTERAException):

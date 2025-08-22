@@ -1,14 +1,48 @@
 Changelog
 =========
 
-2.20.20
--------
-
 Improvements
 ^^^^^^^^^^^^
 
-* Add unique User-Agent header to all requests made by the CTERA Python SDK
+* Added a unique ``User-Agent`` header to all requests made by the CTERA Python SDK  
+* Raised an exception on upload errors to CTERA Portal  
+* Raised :py:class:`cterasdk.exceptions.session.SessionExpired` upon session expiration  
 
+Bug Fixes
+^^^^^^^^^
+
+- Corrected Direct I/O object class reference in the documentation  
+
+.. code:: python
+
+   """Catching upload exceptions"""
+   try:
+       ...
+   except cterasdk.exceptions.io.OutOfQuota as e:
+       print('Failure due to quota violation.')
+   except cterasdk.exceptions.io.RejectedByPolicy as e:
+       print('Failure due to Cloud Drive policy violation.')
+   except cterasdk.exceptions.io.NoStorageBucket as e:
+       print('No backend storage bucket is available.')
+   except cterasdk.exceptions.io.WindowsACLError as e:
+       print('Attempt to upload a file to a Windows ACL-enabled cloud drive folder.')
+   except cterasdk.exceptions.io.UploadException:
+       print('Base exception for any upload errors.')
+
+   """Catching expired sessions"""
+   try:
+      ...
+   except cterasdk.exceptions.session.SessionExpired as e:
+       print('Session expired. Re-authenticate to establish a new session.')
+
+..
+
+Starting with this version, the CTERA Python SDK ``User-Agent`` header is formatted as follows:
+.. code::
+
+    CTERA Python SDK/2.20.20; aiohttp/3.9.5; (Windows 10; AMD64; Python 3.11.4);
+
+..
 
 2.20.19
 -------

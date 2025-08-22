@@ -56,7 +56,7 @@ class DirectIO:
 
         :param int file_id: File ID.
         :param cterasdk.direct.types.ByteRange,optional byte_range: Byte Range.
-        :param int max_workers: Max concurrent tasks
+        :param int,optional max_workers: Max concurrent tasks
         :returns: List of Blocks.
         :rtype: list[cterasdk.direct.types.Block]
         """
@@ -65,18 +65,19 @@ class DirectIO:
         executor = self.executor(filters.span(meta, byte_range), meta.encryption_key, meta.file_id, max_workers)
         return await executor()
 
-    async def streamer(self, file_id, byte_range=None):
+    async def streamer(self, file_id, byte_range=None, max_workers=None):
         """
         Stream API.
 
         :param int file_id: File ID.
         :param cterasdk.direct.types.ByteRange,optional byte_range: Byte Range.
+        :param int,optional max_workers: Max concurrent tasks
         :returns: Streamer Object
         :rtype: cterasdk.direct.stream.Streamer
         """
         meta = await self._chunks(file_id)
         byte_range = byte_range if byte_range is not None else ByteRange.default()
-        max_workers = cterasdk.settings.io.direct.streamer.max_workers
+        max_workers = max_workers if max_workers else cterasdk.settings.io.direct.streamer.max_workers
         executor = self.executor(filters.span(meta, byte_range), meta.encryption_key, file_id, max_workers)
         return Streamer(executor, byte_range)
 
