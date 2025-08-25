@@ -5,16 +5,18 @@ Improvements
 ^^^^^^^^^^^^
 
 * Added a unique ``User-Agent`` header to all requests made by the CTERA Python SDK  
-* Raised an exception on upload errors to CTERA Portal  
+* Raised exceptions on upload errors to CTERA Portal  
 * Raised :py:class:`cterasdk.exceptions.session.SessionExpired` upon session expiration  
-* Lists the Cloud Drive root by default if no `path` argument was provided to :py:func:`cterasdk.core.files.browser.FileBrowser.listdir`
-* Add :py:class:`cterasdk.exceptions.notifications.AncestorsError` exception
-* Add :py:class:`cterasdk.exceptions.transport.TLSError` exception
+* Listed the Cloud Drive root by default if no ``path`` argument was provided to :py:func:`cterasdk.core.files.browser.FileBrowser.listdir`  
+* Added :py:class:`cterasdk.exceptions.notifications.AncestorsError` exception  
+* Added :py:class:`cterasdk.exceptions.transport.TLSError` exception  
+* Suppressed session expiration exceptions on logout  
+* Added support for resolving file conflicts on copy and move operations using :py:class:`cterasdk.core.types.ConflictResolver`  
 
 Bug Fixes
 ^^^^^^^^^
 
-- Corrected Direct I/O object class reference in the documentation  
+* Corrected Direct I/O object class references in the documentation  
 
 .. code:: python
 
@@ -34,18 +36,34 @@ Bug Fixes
 
    """Catching expired sessions"""
    try:
-      ...
+       ...
    except cterasdk.exceptions.session.SessionExpired as e:
        print('Session expired. Re-authenticate to establish a new session.')
 
-..
+* Starting with this version, the CTERA Python SDK ``User-Agent`` header is formatted as follows:
 
-Starting with this version, the CTERA Python SDK ``User-Agent`` header is formatted as follows:
 .. code::
 
-    CTERA Python SDK/2.20.20; aiohttp/3.9.5; (Windows 10; AMD64; Python 3.11.4);
+   CTERA Python SDK/2.20.20; aiohttp/3.9.5; (Windows 10; AMD64; Python 3.11.4);
 
-..
+* Introduced support for resolving conflicts during copy and move operations  
+
+.. code:: python
+
+   """Override destination on conflict"""
+   resolver = core_types.ConflictResolver.override()
+   user.files.copy(('My Files/Gelato.pptx', 'My Files/Slides/Gelato.pptx'), resolver=resolver)
+
+   """Resume job from cursor"""
+   objects = (
+       'My Files/Gelato.pptx', 'My Files/Slides/Gelato.pptx',
+       'Spreadsheets/Q1Summary.xlsx', 'Sheets/Q1Summary.pptx'
+   )
+   try:
+       user.files.copy(objects)
+   except cterasdk.exceptions.io.FileConflict as e:
+       resolver = core_types.ConflictResolver.override()  # override destination
+       user.files.copy(objects, resolver=resolver, cursor=e.cursor)  # resume copy from cursor
 
 2.20.19
 -------
