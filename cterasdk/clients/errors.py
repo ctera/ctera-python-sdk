@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 from ..exceptions.transport import (
-    BadRequest, Unauthorized, Forbidden, NotFound, Unprocessable,
+    BadRequest, Unauthorized, Forbidden, NotFound, NotAllowed, PreConditionFailed, Unprocessable,
     InternalServerError, BadGateway, ServiceUnavailable, GatewayTimeout, HTTPError
 )
 from ..common import Object
@@ -67,6 +67,8 @@ def raise_error(status, error):
         HTTPStatus.UNAUTHORIZED: Unauthorized,
         HTTPStatus.FORBIDDEN: Forbidden,
         HTTPStatus.NOT_FOUND: NotFound,
+        HTTPStatus.METHOD_NOT_ALLOWED: NotAllowed,
+        HTTPStatus.PRECONDITION_FAILED: PreConditionFailed,
         HTTPStatus.UNPROCESSABLE_ENTITY: Unprocessable,
         HTTPStatus.INTERNAL_SERVER_ERROR: InternalServerError,
         HTTPStatus.BAD_GATEWAY: BadGateway,

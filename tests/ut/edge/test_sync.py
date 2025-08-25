@@ -89,7 +89,10 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
 
     def test_evict_wait(self):
         execute_response = '/proc/bgtasks/6192'
-        get_response = munch.Munch(dict(id=1, name='task', status='completed', startTime='start', endTime='end'))
+        get_response = munch.Munch(dict(id=1, name='task', status='completed',
+                                        startTime='2025-08-25T00:04:59.601200',
+                                        elapsedTime=5, percentage=1, description='background task',
+                                        endTime='2025-08-25T00:05:59.601200', result=None))
         self._init_filer(get_response=get_response, execute_response=execute_response)
         ret = sync.Sync(self._filer).evict(self._path, wait=True)
         self._filer.api.execute.assert_called_once_with('/config/cloudsync', 'evictFolder', mock.ANY)
@@ -97,7 +100,7 @@ class TestEdgeSync(base_edge.BaseEdgeTest):
         actual_param = self._filer.api.execute.call_args[0][2]
         expected_param = munch.Munch(dict(_classname='evictFolderParam', path=self._path))
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(ret, get_response)
+        self.assertEqual(ret.description, get_response.description)
 
     def test_evict_no_wait(self):
         execute_response = '/proc/bgtasks/6192'

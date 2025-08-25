@@ -2,6 +2,7 @@ import logging
 
 from .base_command import BaseCommand
 from ..exceptions.transport import Forbidden
+from ..exceptions.session import SessionExpired
 from ..exceptions.auth import AuthenticationError
 
 
@@ -43,5 +44,8 @@ class Login(BaseCommand):
         Log out of CTERA Portal
         """
         username = self._core.session().account.name
-        self._core.api.form_data('/logout', {})
-        logger.info("User logged out. %s", {'host': self._core.host(), 'user': username})
+        try:
+            self._core.api.form_data('/logout', {})
+            logger.info("User logged out. %s", {'host': self._core.host(), 'user': username})
+        except SessionExpired:
+            logger.info("Session expired and is no longer active.")

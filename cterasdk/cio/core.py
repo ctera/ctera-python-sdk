@@ -3,11 +3,12 @@ import logging
 from contextlib import contextmanager
 from ..objects.uri import quote, unquote
 from ..common import Object, DateTimeUtils
-from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, FileAccessError, \
-    UploadError
+from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, \
+    UploadError, ResourceAction, ResourceScope
 from ..core.types import PortalAccount, UserAccount, GroupAccount
 from ..exceptions.io import ResourceExistsError, PathValidationError, NameSyntaxError, \
-    ReservedNameError, RestrictedRoot, InsufficientPermission
+    ReservedNameError, RestrictedRoot, PermissionDenied, FileConflict, RemoteStorageError, NotADirectory, \
+    UnwriteableScope
 from ..exceptions.io import UploadException, OutOfQuota, RejectedByPolicy, NoStorageBucket, WindowsACLError
 from ..lib.iterator import DefaultResponse
 from . import common
@@ -97,6 +98,13 @@ class SrcDstParam(Object):
         SrcDstParam.__instance = self  # pylint: disable=unused-private-member
 
 
+class ResourceActionCursor(Object):
+
+    def __init__(self):
+        super().__init__()
+        self._classname = self.__class__.__name__
+
+
 class ActionResourcesParam(Object):
 
     __instance = None
@@ -110,10 +118,14 @@ class ActionResourcesParam(Object):
         super().__init__()
         self._classname = self.__class__.__name__
         self.urls = []
+        self.startFrom = None
         ActionResourcesParam.__instance = self  # pylint: disable=unused-private-member
 
     def add(self, param):
         self.urls.append(param)
+
+    def start_from(self, cursor):
+        self.startFrom = cursor
 
 
 class CreateShareParam(Object):
@@ -253,8 +265,20 @@ def recover(*paths):
     return _delete_or_recover(list(paths), message='Recovering item')
 
 
-def _copy_or_move(paths, destination, *, message=None):
+def _add_cursor_and_resolver(param, cursor, resolver):
+    if cursor:
+        param.startFrom = cursor
+
+    if cursor and resolver:
+        if resolver.all:
+            param.startFrom.fileMoveConflictResolutaion = [resolver.build()]
+        else:
+            param.startFrom.skipHandler = resolver.handler
+
+
+def _copy_or_move(paths, destination, resolver, cursor):
     param = ActionResourcesParam.instance()
+    _add_cursor_and_resolver(param, cursor, resolver)
     for path in paths:
         src, dest = path, destination
         if isinstance(path, tuple):
@@ -264,18 +288,17 @@ def _copy_or_move(paths, destination, *, message=None):
                 raise ValueError(f'Error: No destination specified for: {src}')
             dest = dest.join(src.name)
         param.add(SrcDstParam.instance(src=src.absolute_encode, dest=dest.absolute_encode))
-        logger.info('%s from: %s to: %s', message, src.reference.as_posix(), dest.reference.as_posix())
     yield param
 
 
 @contextmanager
-def copy(*paths, destination=None):
-    return _copy_or_move(list(paths), destination, message='Copying item')
+def copy(*paths, destination=None, resolver=None, cursor=None):
+    return _copy_or_move(list(paths), destination, resolver, cursor)
 
 
 @contextmanager
-def move(*paths, destination=None):
-    return _copy_or_move(list(paths), destination, message='Moving item')
+def move(*paths, destination=None, resolver=None, cursor=None):
+    return _copy_or_move(list(paths), destination, resolver, cursor)
 
 
 @contextmanager
@@ -294,10 +317,22 @@ def handle(path):
 
 
 def destination_prerequisite_conditions(destination, name):
-    if not len(destination.reference.parts) > 0:
-        raise RestrictedRoot()
     if any(c in name for c in ['\\', '/', ':', '?', '&', '<', '>', '"', '|']):
-        raise NameSyntaxError()
+        raise NameSyntaxError(destination.join(name).reference.as_posix())
+
+
+def ensure_directory(present, resource, directory, suppress_error):
+    if (not present or not resource.isFolder) and not suppress_error:
+        raise NotADirectory(directory.reference.as_posix())
+
+
+def ensure_writeable(resource, directory):
+    if resource.scope == ResourceScope.Root:
+        raise RestrictedRoot()
+    if resource.scope not in [ResourceScope.Personal, ResourceScope.Project, ResourceScope.InsideCloudFolder]:
+        raise UnwriteableScope(directory.reference.as_posix(), resource.scope)
+    if resource.permission != FileAccessMode.RW:
+        raise PermissionDenied(directory.reference.as_posix(), ResourceAction.Write)
 
 
 @contextmanager
@@ -531,29 +566,81 @@ def obtain_current_accounts(param):
     return current_accounts
 
 
-def accept_error(error_type):
+file_access_errors = {
+    "Conflict": FileConflict,
+    "PermissionDenied": PermissionDenied,
+    "DestinationNotExists": PathValidationError,
+    "FileWithTheSameNameExist": ResourceExistsError,
+    "InvalidName": NameSyntaxError,
+    "ReservedName": ReservedNameError
+}
+
+
+def await_or_future(core, ref, wait):
+    """
+    Wait for task completion, or return an awaitable task object.
+
+    :param str ref: Task reference
+    :param bool wait: ``True`` to wait for task completion, ``False`` to return an awaitable task object
+    """
+    if wait:
+        task = core.tasks.wait(ref)
+        accept_error(task.error_type, **error_metadata(task))
+        return task
+    return core.tasks.awaitable_task(ref)
+
+
+async def a_await_or_future(ctera, ref, wait):
+    """
+    Wait for task completion, or return an awaitable task object.
+
+    :param str ref: Task reference
+    :param bool wait: ``True`` to wait for task completion, ``False`` to return an awaitable task object
+    """
+    if wait:
+        task = await ctera.tasks.wait(ref)
+        accept_error(task.error_type, **error_metadata(task))
+        return task
+    return ctera.tasks.awaitable_task(ref)
+
+
+def error_metadata(task):
+    metadata = dict(
+        action=task.name
+    )
+    if task.name in [ResourceAction.Copy, ResourceAction.Move]:
+        metadata.update(dict(cursor=task.cursor))
+        if task.cursor.destResource:
+            metadata.update(dict(name=task.cursor.destResource.name))
+    return metadata
+
+
+def accept_error(error_type, **kwargs):
     """
     Check if response contains an error.
     """
-    error = {
-        FileAccessError.FileWithTheSameNameExist: ResourceExistsError(),
-        FileAccessError.DestinationNotExists: PathValidationError(),
-        FileAccessError.InvalidName: NameSyntaxError(),
-        FileAccessError.ReservedName: ReservedNameError(),
-        FileAccessError.PermissionDenied: InsufficientPermission()
-    }.get(error_type, None)
-    try:
-        if error:
+    if error_type not in [None, 'OK']:
+        exception_classname = file_access_errors.get(error_type, RemoteStorageError)
+        try:
+            raise exception_classname(**kwargs)
+        except ResourceExistsError as error:
+            logger.info('Resource already exists: a file or folder with this name already exists.')
             raise error
-    except ResourceExistsError as error:
-        logger.info('Resource already exists: a file or folder with this name already exists.')
-        raise error
-    except PathValidationError as error:
-        logger.error('Path validation failed: the specified destination path does not exist.')
-        raise error
-    except NameSyntaxError as error:
-        logger.error('Invalid name: the name contains characters that are not allowed.')
-        raise error
-    except ReservedNameError as error:
-        logger.error('Reserved name error: the name is reserved and cannot be used.')
-        raise error
+        except PathValidationError as error:
+            logger.error('Path validation failed: the specified destination path does not exist.')
+            raise error
+        except NameSyntaxError as error:
+            logger.error('Invalid name: the name contains characters that are not allowed.')
+            raise error
+        except ReservedNameError as error:
+            logger.error('Reserved name error: the name is reserved and cannot be used.')
+            raise error
+        except PermissionDenied as error:
+            logger.error('Permission denied: Inappropriate permissions to access this resource.')
+            raise error
+        except FileConflict as error:
+            logger.error('Conflict: a file with the same name already exists: %s', error.name)
+            raise error
+        except RemoteStorageError as error:
+            logger.error('An error occurred while performing operation.')
+            raise error

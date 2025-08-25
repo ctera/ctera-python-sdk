@@ -646,12 +646,29 @@ class Reports:
     FolderGroups = 'folderGroupsStatisticsReport'
 
 
+class ConflictHandler:
+    """
+    Conflict Handler
+
+    :ivar str Skip: Skip.
+    :ivar str Override: Override target.
+    :ivar str Rename: Append date to file name.
+    """
+    Skip = 'Skip'
+    Override = 'Override'
+    Rename = 'Rename'
+
+
 class UploadError:
     """
     Upload Error
 
-    :ivar QuotaViolation: User is out of quota.
-    :ivar RejectedByPolicy: Rejected by Cloud Drive policy rule.
+    :ivar str UserQuotaViolation: User is out of quota.
+    :ivar str FolderQuotaViolation: Directory is out of quota.
+    :ivar str PortalQuotaViolation: Team Portal is out of quota.
+    :ivar str RejectedByPolicy: Rejected by Cloud Drive policy rule.
+    :ivar str NoStorageBucket: No available storage bucket.
+    :ivar str WindowsACL: Illegal access to Windows ACL-enabled cloud drive folder.
     """
     FolderQuotaViolation = 'Folder is out of quota'
     UserQuotaViolation = 'User is out of quota'
@@ -661,48 +678,52 @@ class UploadError:
     WindowsACL = "Illegal access to NTACL folder"
 
 
-class FileAccessError:
+class ResourceAction:
     """
-    File Access Error
+    Resource Action
 
-    :ivar Conflict: Conflict occurred during file operation.
-    :ivar PermissionDenied: Operation denied due to insufficient permissions.
-    :ivar MoveDeletedFile: Attempted to move a file that was deleted.
-    :ivar CopyToSubFolder: Cannot copy a folder into one of its subfolders.
-    :ivar QuotaViolation: Operation exceeds allowed storage quota.
-    :ivar DestinationNotExists: Destination folder does not exist.
-    :ivar CancelledByUser: Operation was cancelled by the user.
-    :ivar InternalError: An internal error occurred.
-    :ivar UserPasswordRequired: User password is required to proceed.
-    :ivar PassphraseRequire: A passphrase is required.
-    :ivar CopyFileToRoot: Attempted to copy a file to the root directory.
-    :ivar FileWithTheSameNameExist: A file with the same name already exists.
-    :ivar RejectedByPolicy: Operation was rejected by a policy rule.
-    :ivar RejectedByWormSettings: Operation not allowed by WORM (Write Once Read Many) settings.
-    :ivar TooManyFailedAuthenticationAttemps: Too many failed authentication attempts.
-    :ivar UserActionTimeout: Timed out waiting for user action.
-    :ivar InvalidName: Provided name is invalid.
-    :ivar ReservedName: The name provided is reserved and cannot be used.
-    :ivar CannotRunPermanentDeleteWhenFsckIsRunning: FSCK is running, cannot perform permanent delete.
-    :ivar ResourceLocked: The resource is currently locked.
+    :ivar str Delete: Delete.
+    :ivar str Copy: Copy.
+    :ivar str Move: Move.
+    :ivar str Undelete: Undelete.
     """
-    Conflict = "Conflict"
-    PermissionDenied = "PermissionDenied"
-    MoveDeletedFile = "MoveDeletedFile"
-    CopyToSubFolder = "CopyToSubFolder"
-    QuotaViolation = "QuotaViolation"
-    DestinationNotExists = "DestinationNotExists"
-    CancelledByUser = "CancelledByUser"
-    InternalError = "InternalError"
-    UserPasswordRequired = "UserPasswordRequired"
-    PassphraseRequire = "PassphraseRequire"
-    CopyFileToRoot = "CopyFileToRoot"
-    FileWithTheSameNameExist = "FileWithTheSameNameExist"
-    RejectedByPolicy = "RejectedByPolicy"
-    RejectedByWormSettings = "RejectedByWormSettings"
-    TooManyFailedAuthenticationAttemps = "TooManyFailedAuthenticationAttemps"
-    UserActionTimeout = "UserActionTimeout"
-    InvalidName = "InvalidName"
-    ReservedName = "ReservedName"
-    CannotRunPermanentDeleteWhenFsckIsRunning = "CannotRunPermanentDeleteWhenFsckIsRunning"
-    ResourceLocked = "ResourceLocked"
+    Delete = 'Delete'
+    Undelete = 'Undelete'
+    Copy = 'Copy'
+    Move = 'Move'
+    Write = 'Write'
+
+
+class ResourceScope:
+    """
+    Resource Scope
+
+    :ivar str Root: Root.
+    :ivar str ProjectsContainer: ProjectsContainer.
+    :ivar str Project: Project.
+    :ivar str SharedContainer: SharedContainer.
+    :ivar str SharedDomain: SharedDomain.
+    :ivar str Shared: Shared.
+    :ivar str BackupsContainer: BackupsContainer.
+    :ivar str Backup: Backup.
+    :ivar str Personal: Personal.
+    :ivar str UsersContainer: UsersContainer.
+    :ivar str UsersFoldersContainer: UsersFoldersContainer.
+    :ivar str CloudDrivesContainer: CloudDrivesContainer.
+    :ivar str OfflineFolder: OfflineFolder.
+    :ivar str InsideCloudFolder: InsideCloudFolder.
+    """
+    Root = "Root"
+    ProjectsContainer = "ProjectsContainer"
+    Project = "Project"
+    SharedContainer = "SharedContainer"
+    SharedDomain = "SharedDomain"
+    Shared = "Shared"
+    BackupsContainer = "BackupsContainer"
+    Backup = "Backup"
+    Personal = "Personal"
+    UsersContainer = "UsersContainer"
+    UsersFoldersContainer = "UsersFoldersContainer"
+    CloudDrivesContainer = "CloudDrivesContainer"
+    OfflineFolder = "OfflineFolder"
+    InsideCloudFolder = "InsideCloudFolder"

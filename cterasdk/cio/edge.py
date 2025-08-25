@@ -5,7 +5,8 @@ from pathlib import Path
 from ..common import Object
 from ..objects.uri import unquote
 from . import common
-from ..exceptions.io import CTERAException, ResourceExistsError, RestrictedPathError
+from ..exceptions.transport import HTTPError
+from ..exceptions.io import ResourceExistsError, RestrictedPathError, RemoteStorageError
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -67,9 +68,9 @@ def makedir(path):
     logger.info('Creating directory: %s', path.absolute)
     try:
         yield path.absolute
-    except CTERAException as error:
+    except HTTPError as error:
         try:
-            accept_error(error.response.message.msg, directory)
+            accept_error(error.error.response.error.msg, path=directory)
         except ResourceExistsError:
             logger.info('Directory already exists: %s', directory)
     logger.info('Directory created: %s', directory)
@@ -126,17 +127,27 @@ def upload(name, destination, fd):
     yield param
 
 
-def accept_error(response, reference):
-    error = {
-        "File exists": ResourceExistsError(),
-        "Creating a folder in this location is forbidden": RestrictedPathError(),
-    }.get(response, None)
-    try:
-        if error:
+file_access_errors = {
+    "File exists": ResourceExistsError,
+    "Creating a folder in this location is forbidden": RestrictedPathError
+}
+
+
+def accept_error(error_message, **kwargs):
+    """
+    Check if response contains an error.
+    """
+    if error_message not in ['OK']:
+        exception_classname = file_access_errors.get(error_message, RemoteStorageError)
+        try:
+            if exception_classname:
+                raise exception_classname(**kwargs)
+        except ResourceExistsError as error:
+            logger.warning('Resource already exists: a file or folder with this name already exists.')
             raise error
-    except ResourceExistsError as error:
-        logger.warning('Resource already exists: a file or folder with this name already exists. %s', {'path': reference})
-        raise error
-    except RestrictedPathError as error:
-        logger.error('Creating a folder in the specified location is forbidden. %s', {'name': reference})
-        raise error
+        except RestrictedPathError as error:
+            logger.error('Creating a folder in the specified location is forbidden.')
+            raise error
+        except RemoteStorageError as error:
+            logger.error('An error occurred while performing operation.')
+            raise error

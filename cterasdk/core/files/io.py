@@ -1,7 +1,7 @@
 import logging
-from ...cio.common import encode_request_parameter, await_or_future
+from ...cio.common import encode_request_parameter
 from ...cio import core as fs
-from ...exceptions.io import ResourceNotFoundError, ResourceExistsError, NotADirectory
+from ...exceptions.io import ResourceNotFoundError, ResourceExistsError
 from ...core import query
 from ..enum import CollaboratorType
 
@@ -55,8 +55,9 @@ def walk(core, scope, path, include_deleted=False):
 
 def mkdir(core, path):
     with fs.makedir(path) as param:
-        response = core.api.execute('', 'makeCollection', param)
-    fs.accept_error(response)
+        error_type = core.api.execute('', 'makeCollection', param)
+        print(error_type)
+    fs.accept_error(error_type, path=path.reference.as_posix())
 
 
 def makedirs(core, path):
@@ -69,40 +70,34 @@ def makedirs(core, path):
             logger.debug('Resource already exists: %s', path.reference.as_posix())
 
 
-def rename(core, path, name, *, wait=True):
+def rename(core, path, name):
     with fs.rename(path, name) as param:
-        ref = core.api.execute('', 'moveResources', param)
-        return await_or_future(core, ref, wait)
+        return core.api.execute('', 'moveResources', param)
 
 
-def remove(core, *paths, wait=True):
+def remove(core, *paths):
     with fs.delete(*paths) as param:
-        ref = core.api.execute('', 'deleteResources', param)
-        return await_or_future(core, ref, wait)
+        return core.api.execute('', 'deleteResources', param)
 
 
-def recover(core, *paths, wait=True):
+def recover(core, *paths):
     with fs.recover(*paths) as param:
-        ref = core.api.execute('', 'restoreResources', param)
-        return await_or_future(core, ref, wait)
+        return core.api.execute('', 'restoreResources', param)
 
 
-def copy(core, *paths, destination=None, wait=True):
-    with fs.copy(*paths, destination=destination) as param:
-        ref = core.api.execute('', 'copyResources', param)
-        return await_or_future(core, ref, wait)
+def copy(core, *paths, destination=None, resolver=None, cursor=None):
+    with fs.copy(*paths, destination=destination, resolver=resolver, cursor=cursor) as param:
+        return core.api.execute('', 'copyResources', param)
 
 
-def move(core, *paths, destination=None, wait=True):
-    with fs.move(*paths, destination=destination) as param:
-        ref = core.api.execute('', 'moveResources', param)
-        return await_or_future(core, ref, wait)
+def move(core, *paths, destination=None, resolver=None, cursor=None):
+    with fs.move(*paths, destination=destination, resolver=resolver, cursor=cursor) as param:
+        return core.api.execute('', 'moveResources', param)
 
 
 def ensure_directory(core, directory, suppress_error=False):
     present, resource = metadata(core, directory, suppress_error=True)
-    if (not present or not resource.isFolder) and not suppress_error:
-        raise NotADirectory(directory.absolute)
+    fs.ensure_directory(present, resource, directory, suppress_error)
     return resource.isFolder if present else False, resource
 
 
@@ -152,7 +147,9 @@ def _validate_destination(core, name, destination):
     is_dir, resource = ensure_directory(core, destination, suppress_error=True)
     if not is_dir:
         is_dir, resource = ensure_directory(core, destination.parent)
+        fs.ensure_writeable(resource, destination.parent)
         return resource.cloudFolderInfo.uid, destination.name, destination.parent
+    fs.ensure_writeable(resource, destination)
     return resource.cloudFolderInfo.uid, name, destination
 
 

@@ -108,9 +108,10 @@ class TestAsyncCoreNotifications(base_core.BaseAsyncCoreTest):
                 ))
             )
         ))
-        with self.assertRaises(exceptions.transport.HTTPError) as error:
+        with self.assertRaises(exceptions.notifications.AncestorsError) as error:
             await notifications.Notifications(self._global_admin).ancestors(self._descendant)
-        self.assertEqual(error.exception.error.request.url, url)
+        self.assertEqual(str(error.exception),
+                         f'Could not retrieve ancestors for: {self._descendant.folder_id}:{self._descendant.guid}')
 
     @staticmethod
     def _create_parameter(folder_ids=None, cursor=None, max_results=None, timeout=None):

@@ -86,7 +86,6 @@ Versions
 
 .. code:: python
 
-   """When logged in as a Global Administrator"""
    versions = admin.files.versions('Users/John Smith/My Files/Documents')
    for version in versions:
        if not version.current:
@@ -94,7 +93,6 @@ Versions
                print(version.calculatedTimestamp, item.name)
 
 
-   """When logged in as a Team Portal Administrator End User"""
    versions = user.files.versions('My Files/Documents')
    for version in versions:
        if not version.current:
@@ -109,10 +107,8 @@ Download
 
 .. code:: python
 
-   """When logged in as a Global Administrator"""
    admin.files.download('Users/John Smith/My Files/Documents/Sample.docx')
 
-   """When logged in as a Team Portal Administrator End User"""
    user.files.download('My Files/Documents/Sample.docx')
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.download_many
@@ -120,10 +116,8 @@ Download
 
 .. code:: python
 
-   """When logged in as a Global Administrator"""
    admin.files.download_many('Users/John Smith/My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
 
-   """When logged in as a Team Portal Administrator End User"""
    user.files.download_many('My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
 
 Copy
@@ -132,9 +126,12 @@ Copy
 .. automethod:: cterasdk.core.files.browser.FileBrowser.copy
    :noindex:
 
+   To resolve file conflicts, use :py:class:`cterasdk.core.types.ConflictResolver`
+
 .. code:: python
 
-   """When logged in as a Team Portal Administrator End User"""
+   admin.files.copy(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'], destination='Users/John Smith/The/quick/brown/fox')
+
    user.files.copy(*['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.xlsx'], destination='The/quick/brown/fox')
 
 
@@ -153,11 +150,9 @@ Create Public Link
    - NA: No Access
    """
 
-   """When logged in as a Team Portal Administrator End User"""
    """Create a Read Only public link to a file that expires in 30 days"""
    user.files.public_link('My Files/Documents/Sample.docx')
 
-   """When logged in as a Team Portal Administrator End User"""
    """Create a Read Write public link to a folder that expires in 45 days"""
    user.files.public_link('My Files/Documents/Sample.docx', 'RW', 45)
 
@@ -170,13 +165,9 @@ Get Permalink
 
 .. code:: python
 
-   """When logged in as a Team Portal Administrator End User"""
-   """Create permalink to a file"""
-   user.files.permalink('My Files/Documents/Sample.docx')
+   user.files.permalink('My Files/Documents/Sample.docx')  # file
 
-   """When logged in as a Team Portal Administrator End User"""
-   """Create permalink to a folder"""
-   user.files.permalink('My Files/Documents')
+   user.files.permalink('My Files/Documents')  # folder
 
 
 Create Directories
@@ -187,10 +178,8 @@ Create Directories
 
 .. code:: python
 
-   """When logged in as a Global Administrator"""
    admin.files.mkdir('Users/John Smith/My Files/Documents')
 
-   """When logged in as a Team Portal Administrator End User"""
    user.files.mkdir('My Files/Documents')
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.makedirs
@@ -198,10 +187,8 @@ Create Directories
 
 .. code:: python
 
-   """When logged in as a Global Administrator"""
    admin.files.makedirs('Users/John Smith/My Files/The/quick/brown/fox')
 
-   """When logged in as a Team Portal Administrator End User"""
    user.files.makedirs('The/quick/brown/fox')
 
 Rename
@@ -212,10 +199,8 @@ Rename
 
 .. code:: python
 
-   """When logged in as a Global Administrator"""
    admin.files.rename('Users/John Smith/My Files/Documents/Sample.docx', 'Wizard Of Oz.docx')
 
-   """When logged in as a tenant user or admin"""
    user.files.makedirs('My Files/Documents/Sample.docx', 'Wizard Of Oz.docx')
 
 Delete
@@ -226,10 +211,8 @@ Delete
 
 .. code:: python
 
-   """When logged in as a Global Administrator"""
    admin.files.delete(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'])
 
-   """When logged in as a Team Portal Administrator End User"""
    user.files.delete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
 
 Undelete
@@ -240,10 +223,8 @@ Undelete
 
 .. code:: python
 
-   """When logged in as a Global Administrator"""
    admin.files.undelete(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'])
 
-   """When logged in as a Team Portal Administrator End User"""
    user.files.undelete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
 
 Move
@@ -252,12 +233,12 @@ Move
 .. automethod:: cterasdk.core.files.browser.CloudDrive.move
    :noindex:
 
+   To resolve file conflicts, use :py:class:`cterasdk.core.types.ConflictResolver`
+
 .. code:: python
 
-   """When logged in as a Global Administrator"""
    admin.files.move(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'], destination='Users/John Smith/The/quick/brown/fox')
 
-   """When logged in as a Team Portal Administrator End User"""
    user.files.move(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'], destination='The/quick/brown/fox')
 
 Upload
@@ -267,10 +248,8 @@ Upload
 
 .. code:: python
 
-   """When logged in as a Global Administrator"""
    admin.files.upload(r'C:\Users\admin\Downloads\Tree.jpg', 'Users/John Smith/My Files/Images')
 
-   """When logged in as a Team Portal Administrator End User"""
    user.files.upload(r'C:\Users\admin\Downloads\Tree.jpg', 'My Files/Images')
 
 
@@ -282,7 +261,6 @@ Collaboration Shares
 
 .. code:: python
 
-   """When logged in as a Team Portal Administrator End User"""
 
    """
    Share with a local user and a local group.
@@ -302,7 +280,6 @@ Collaboration Shares
 
 .. code:: python
 
-   """When logged in as a Team Portal Administrator End User"""
 
    """
    Share with an external recipient
@@ -322,7 +299,6 @@ Collaboration Shares
 
 .. code:: python
 
-   """When logged in as a Team Portal Administrator End User"""
 
    """
    Share with a domain groups
@@ -342,7 +318,6 @@ Collaboration Shares
 
 .. code:: python
 
-   """When logged in as a Team Portal Administrator End User"""
 
    """
    Add collaboration shares members.
@@ -360,7 +335,6 @@ Collaboration Shares
 
 .. code:: python
 
-   """When logged in as a Team Portal Administrator End User"""
 
    """Remove 'Alice' and 'Engineering' from the List of Recipients"""
    alice = core_types.UserAccount('alice')

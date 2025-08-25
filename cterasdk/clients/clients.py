@@ -273,7 +273,7 @@ class WebDAV(Client):
     def mkcol(self, path, **kwargs):
         request = async_requests.MkcolRequest(self._builder(path), **kwargs)
         response = self.request(request, on_error=XMLHandler())
-        return response.text()
+        return response.xml()
 
     @decorators.authenticated
     def copy(self, source, destination, *, overwrite=False, **kwargs):

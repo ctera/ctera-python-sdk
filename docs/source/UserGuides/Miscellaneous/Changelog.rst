@@ -4,11 +4,76 @@ Changelog
 2.20.20
 -------
 
+Related issues and pull requests on GitHub: `#316 <https://github.com/ctera/ctera-python-sdk/pull/316>`_,
+`#317 <https://github.com/ctera/ctera-python-sdk/pull/317>`_
+`#318 <https://github.com/ctera/ctera-python-sdk/pull/318>`_
+
+
 Improvements
 ^^^^^^^^^^^^
 
-* Add unique User-Agent header to all requests made by the CTERA Python SDK
+* Added a unique ``User-Agent`` header to all requests made by the CTERA Python SDK
+* Raised exceptions on upload errors to CTERA Portal
+* Raised :py:class:`cterasdk.exceptions.session.SessionExpired` upon session expiration
+* Listed the Cloud Drive root by default if no ``path`` argument was
+  provided to :py:func:`cterasdk.core.files.browser.FileBrowser.listdir`
+* Added :py:class:`cterasdk.exceptions.notifications.AncestorsError` exception
+* Added :py:class:`cterasdk.exceptions.transport.TLSError` exception
+* Suppressed session expiration exceptions on logout
+* Added support for resolving file conflicts on copy and move
+  operations using :py:class:`cterasdk.core.types.ConflictResolver`
 
+Bug Fixes
+^^^^^^^^^
+
+* Corrected Direct I/O object class references in the documentation
+
+.. code:: python
+
+   """Catching upload exceptions"""
+   try:
+       ...
+   except cterasdk.exceptions.io.OutOfQuota as e:
+       print('Failure due to quota violation.')
+   except cterasdk.exceptions.io.RejectedByPolicy as e:
+       print('Failure due to Cloud Drive policy violation.')
+   except cterasdk.exceptions.io.NoStorageBucket as e:
+       print('No backend storage bucket is available.')
+   except cterasdk.exceptions.io.WindowsACLError as e:
+       print('Attempt to upload a file to a Windows ACL-enabled cloud drive folder.')
+   except cterasdk.exceptions.io.UploadException:
+       print('Base exception for any upload errors.')
+
+   """Catching expired sessions"""
+   try:
+       ...
+   except cterasdk.exceptions.session.SessionExpired as e:
+       print('Session expired. Re-authenticate to establish a new session.')
+
+* Starting with this version, the CTERA Python SDK ``User-Agent`` header is formatted as follows:
+
+.. code::
+
+   CTERA Python SDK/2.20.20; aiohttp/3.9.5; (Windows 10; AMD64; Python 3.11.4);
+
+* Introduced support for resolving conflicts during copy and move operations
+
+.. code:: python
+
+   """Override destination on conflict"""
+   resolver = core_types.ConflictResolver.override()
+   user.files.copy(('My Files/Gelato.pptx', 'My Files/Slides/Gelato.pptx'), resolver=resolver)
+
+   """Resume job from cursor"""
+   objects = (
+       'My Files/Gelato.pptx', 'My Files/Slides/Gelato.pptx',
+       'Spreadsheets/Q1Summary.xlsx', 'Sheets/Q1Summary.pptx'
+   )
+   try:
+       user.files.copy(objects)
+   except cterasdk.exceptions.io.FileConflict as e:
+       resolver = core_types.ConflictResolver.override()  # override destination
+       user.files.copy(objects, resolver=resolver, cursor=e.cursor)  # resume copy from cursor
 
 2.20.19
 -------

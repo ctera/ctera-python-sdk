@@ -77,27 +77,3 @@ def encode_request_parameter(param):
     return dict(
         inputXML=utf8_decode(toxmlstr(param))
     )
-
-
-def await_or_future(ctera, ref, wait):
-    """
-    Wait for task completion, or return an awaitable task object.
-
-    :param str ref: Task reference
-    :param bool wait: ``True`` to wait for task completion, ``False`` to return an awaitable task object
-    """
-    if wait:
-        return ctera.tasks.wait(ref)
-    return ctera.tasks.awaitable_task(ref)
-
-
-async def a_await_or_future(ctera, ref, wait):
-    """
-    Wait for task completion, or return an awaitable task object.
-
-    :param str ref: Task reference
-    :param bool wait: ``True`` to wait for task completion, ``False`` to return an awaitable task object
-    """
-    if wait:
-        return await ctera.tasks.wait(ref)
-    return ctera.tasks.awaitable_task(ref)
