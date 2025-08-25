@@ -32,7 +32,7 @@ class ResourceExistsError(RemoteStorageError):
 
 class PathValidationError(RemoteStorageError):
 
-    def __init__(self, path=None, **kwargs):
+    def __init__(self, path=None, **kwargs):  # pylint: disable=unused-argument
         super().__init__('Path validation failed: the specified destination path does not exist.', path)
 
 

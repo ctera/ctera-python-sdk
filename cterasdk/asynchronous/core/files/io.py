@@ -1,7 +1,7 @@
 import logging
 from ....cio.common import encode_request_parameter
 from ....cio import core as fs
-from ....exceptions.io import ResourceNotFoundError, NotADirectory, ResourceExistsError
+from ....exceptions.io import ResourceNotFoundError, ResourceExistsError
 from .. import query
 
 
