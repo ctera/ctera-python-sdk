@@ -23,6 +23,6 @@ class AncestorsError(CTERAException):
     :ivar str guid: File GUID
     """
     def __init__(self, folder_id, guid):
-        super().__init__('Could not retrieve ancestors for: {folder_id}:{guid}')
+        super().__init__(f'Could not retrieve ancestors for: {folder_id}:{guid}')
         self.folder_id = folder_id
         self.guid = guid
