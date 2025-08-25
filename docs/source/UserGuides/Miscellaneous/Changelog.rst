@@ -18,7 +18,7 @@ Improvements
 Bug Fixes
 ^^^^^^^^^
 
-* Corrected Direct I/O object class references in the documentation  
+* Corrected Direct I/O object class references in the documentation
 
 .. code:: python
 
