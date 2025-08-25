@@ -26,6 +26,7 @@ class BaseCoreServicesTest(base.BaseTest):
         action_resource_param = Object()
         action_resource_param._classname = 'ActionResourcesParam'  # pylint: disable=protected-access
         action_resource_param.urls = []
+        action_resource_param.startFrom = None
         for idx, source in enumerate(sources):
             param = Object()
             param._classname = 'SrcDstParam'  # pylint: disable=protected-access

@@ -26,6 +26,7 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
     def _get_expected_copy_params(self, src, dst):
         o = Object()
         o._classname = 'ActionResourcesParam'  # pylint: disable=protected-access
+        o.startFrom = None
         src_dst_obj = Object()
         src_dst_obj._classname = 'SrcDstParam'  # pylint: disable=protected-access
         src_path = self._get_object_path(src)
