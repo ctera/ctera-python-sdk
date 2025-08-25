@@ -37,7 +37,7 @@ Session
 I/O
 ---
 
-.. autoclass:: cterasdk.exceptions.io.RemoteStorageException
+.. autoclass:: cterasdk.exceptions.io.RemoteStorageError
    :noindex:
    :members:
    :show-inheritance:

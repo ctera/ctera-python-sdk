@@ -1,5 +1,6 @@
-from ....cio.core import CorePath
+from ....cio.core import CorePath, a_await_or_future
 from ....lib.storage import asynfs, commonfs
+from ....exceptions.io import FileConflict
 from ..base_command import BaseCommand
 from . import io
 
@@ -105,18 +106,34 @@ class FileBrowser(BaseCommand):
         """
         return await io.public_link(self._core, self.normalize(path), access, expire_in)
 
-    async def copy(self, *paths, destination=None, wait=False):
+    async def _try_with_resolver(self, func, *paths, destination=None, resolver=None, cursor=None, wait=False):
+        async def wrapper(resume_from=None):
+            ref = await func(self._core, *paths, destination=destination, resolver=resolver, cursor=resume_from)
+            return await a_await_or_future(self._core, ref, wait)
+        
+        try:
+            return await wrapper(cursor)
+        except FileConflict as e:
+            if resolver:
+                return await wrapper(e.cursor)
+            raise
+
+    async def copy(self, *paths, destination=None, resolver=None, cursor=None, wait=False):
         """
         Copy one or more files or folders
 
         :param list[str] paths: List of paths
         :param str destination: Destination
+        :param cterasdk.core.types.ConflictResolver resolver: Conflict resolver, defaults to ``None``
+        :param cterasdk.common.object.Object cursor: Resume copy from cursor
         :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
         :returns: Task status object, or an awaitable task object
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
-            return await io.copy(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination), wait=wait)
+            return await self._try_with_resolver(io.copy, *[self.normalize(path) for path in paths],
+                                           destination=self.normalize(destination),
+                                           resolver=resolver, cursor=cursor, wait=wait)
         except ValueError:
             raise ValueError('Copy destination was not specified.')
 
@@ -188,7 +205,8 @@ class CloudDrive(FileBrowser):
         :returns: Task status object, or an awaitable task object
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return await io.rename(self._core, self.normalize(path), name, wait=wait)
+        ref = await io.rename(self._core, self.normalize(path), name)
+        return await a_await_or_future(self._core, ref, wait)
 
     async def delete(self, *paths, wait=False):
         """
@@ -199,7 +217,8 @@ class CloudDrive(FileBrowser):
         :returns: Task status object, or an awaitable task object
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return await io.remove(self._core, *[self.normalize(path) for path in paths], wait=wait)
+        ref = await io.remove(self._core, *[self.normalize(path) for path in paths])
+        return await a_await_or_future(self._core, ref, wait)
 
     async def undelete(self, *paths, wait=False):
         """
@@ -210,19 +229,24 @@ class CloudDrive(FileBrowser):
         :returns: Task status object, or an awaitable task object
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return await io.recover(self._core, *[self.normalize(path) for path in paths], wait=wait)
+        ref = await io.recover(self._core, *[self.normalize(path) for path in paths])
+        return await a_await_or_future(self._core, ref, wait)
 
-    async def move(self, *paths, destination=None, wait=False):
+    async def move(self, *paths, destination=None, resolver=None, cursor=None, wait=False):
         """
         Move one or more files or folders
 
         :param list[str] paths: List of paths
         :param str destination: Destination
+        :param cterasdk.core.types.ConflictResolver resolver: Conflict resolver, defaults to ``None``
+        :param cterasdk.common.object.Object cursor: Resume copy from cursor
         :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
         :returns: Task status object, or an awaitable task object
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
-            return await io.move(self._core, *[self.normalize(path) for path in paths], destination=self.normalize(destination), wait=wait)
+            return await self._try_with_resolver(io.move, *[self.normalize(path) for path in paths],
+                                           destination=self.normalize(destination),
+                                           resolver=resolver, cursor=cursor, wait=wait)
         except ValueError:
             raise ValueError('Move destination was not specified.')

@@ -1,10 +1,21 @@
 import re
 import json
 import logging
+from datetime import datetime
 from collections.abc import MutableMapping
 
 
 logger = logging.getLogger('cterasdk.common')
+
+
+class ObjectEncoder(json.JSONEncoder):
+
+    def default(self, o):
+        if isinstance(o, datetime):
+            return o.isoformat()
+        if o.get('__dict__', None):
+            return o.__dict__
+        return super().default(o)
 
 
 class Object(MutableMapping):  # pylint: disable=too-many-instance-attributes
@@ -29,7 +40,7 @@ class Object(MutableMapping):  # pylint: disable=too-many-instance-attributes
         return len(self.__dict__)
 
     def __str__(self):
-        return json.dumps(self, default=lambda o: o.__dict__, indent=5)
+        return json.dumps(self, cls=ObjectEncoder, indent=5)
 
     def __repr__(self):
         return str(self)

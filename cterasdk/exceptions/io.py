@@ -1,7 +1,7 @@
 from .base import CTERAException
 
 
-class RemoteStorageException(CTERAException):
+class RemoteStorageError(CTERAException):
     """
     Base Exception for Remote File Storage
 
@@ -12,61 +12,70 @@ class RemoteStorageException(CTERAException):
         self.path = path
 
 
-class ResourceNotFoundError(RemoteStorageException):
+class ResourceNotFoundError(RemoteStorageError):
 
     def __init__(self, path):
         super().__init__('Remote directory not found. Please verify the path and try again.', path)
 
 
-class NotADirectory(RemoteStorageException):
+class NotADirectory(RemoteStorageError):
 
     def __init__(self, path):
         super().__init__('Target validation error: Resource exists but it is not a directory.', path)
 
 
-class ResourceExistsError(RemoteStorageException):
+class ResourceExistsError(RemoteStorageError):
 
     def __init__(self):
         super().__init__('Resource already exists: a file or folder with this name already exists.')
 
 
-class PathValidationError(RemoteStorageException):
+class PathValidationError(RemoteStorageError):
 
     def __init__(self):
         super().__init__('Path validation failed: the specified destination path does not exist.')
 
 
-class NameSyntaxError(RemoteStorageException):
+class NameSyntaxError(RemoteStorageError):
 
-    def __init__(self):
-        super().__init__('Invalid name: the name contains characters that are not allowed "\\ / : ? & < > \" |".')
+    def __init__(self, path):
+        super().__init__('Invalid name: the name contains characters that are not allowed "\\ / : ? & < > \" |".', path)
 
 
-class ReservedNameError(RemoteStorageException):
+class ReservedNameError(RemoteStorageError):
 
     def __init__(self):
         super().__init__('Reserved name error: the name is reserved and cannot be used.')
 
 
-class RestrictedPathError(RemoteStorageException):
+class RestrictedPathError(RemoteStorageError):
 
     def __init__(self):
         super().__init__('Creating a folder in the specified location is forbidden.')
 
 
-class RestrictedRoot(RemoteStorageException):
+class RestrictedRoot(RemoteStorageError):
 
     def __init__(self):
         super().__init__('Storing files to the root directory is forbidden.', '/')
 
 
-class InsufficientPermission(RemoteStorageException):
+class InsufficientPermission(RemoteStorageError):
 
     def __init__(self):
         super().__init__('Permission denied: You must have appropriate permissions to access this resource.')
 
 
-class UploadException(RemoteStorageException):
+class FileConflict(RemoteStorageError):
+
+    def __init__(self, action, name, cursor):
+        super().__init__('Conflict: a file with the same name already exists.')
+        self.action = action
+        self.name = name
+        self.cursor = cursor
+
+
+class UploadException(RemoteStorageError):
     """
     Upload Exception
 

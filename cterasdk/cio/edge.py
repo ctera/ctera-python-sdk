@@ -5,7 +5,8 @@ from pathlib import Path
 from ..common import Object
 from ..objects.uri import unquote
 from . import common
-from ..exceptions.io import CTERAException, ResourceExistsError, RestrictedPathError
+from ..exceptions.transport import HTTPError
+from ..exceptions.io import ResourceExistsError, RestrictedPathError
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -67,7 +68,7 @@ def makedir(path):
     logger.info('Creating directory: %s', path.absolute)
     try:
         yield path.absolute
-    except CTERAException as error:
+    except HTTPError as error:
         try:
             accept_error(error.response.message.msg, directory)
         except ResourceExistsError:

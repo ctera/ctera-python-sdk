@@ -1,5 +1,5 @@
 import logging
-from ....cio.common import encode_request_parameter, a_await_or_future
+from ....cio.common import encode_request_parameter
 from ....cio import core as fs
 from ....exceptions.io import ResourceNotFoundError, NotADirectory, ResourceExistsError
 from .. import query
@@ -68,34 +68,29 @@ async def makedirs(core, path):
             logger.debug('Resource already exists: %s', path.reference.as_posix())
 
 
-async def rename(core, path, name, *, wait=False):
+async def rename(core, path, name):
     with fs.rename(path, name) as param:
-        ref = await core.v1.api.execute('', 'moveResources', param)
-        return await a_await_or_future(core, ref, wait)
+        return await core.v1.api.execute('', 'moveResources', param)
 
 
-async def remove(core, *paths, wait=False):
+async def remove(core, *paths):
     with fs.delete(*paths) as param:
-        ref = await core.v1.api.execute('', 'deleteResources', param)
-        return await a_await_or_future(core, ref, wait)
+        return await core.v1.api.execute('', 'deleteResources', param)
 
 
-async def recover(core, *paths, wait=False):
+async def recover(core, *paths):
     with fs.recover(*paths) as param:
-        ref = await core.v1.api.execute('', 'restoreResources', param)
-        return await a_await_or_future(core, ref, wait)
+        return await core.v1.api.execute('', 'restoreResources', param)
 
 
-async def copy(core, *paths, destination=None, wait=False):
-    with fs.copy(*paths, destination=destination) as param:
-        ref = await core.v1.api.execute('', 'copyResources', param)
-        return await a_await_or_future(core, ref, wait)
+async def copy(core, *paths, destination=None, resolver=None, cursor=None):
+    with fs.copy(*paths, destination=destination, resolver=resolver, cursor=cursor) as param:
+        return await core.v1.api.execute('', 'copyResources', param)
 
 
-async def move(core, *paths, destination=None, wait=False):
-    with fs.move(*paths, destination=destination) as param:
-        ref = await core.v1.api.execute('', 'moveResources', param)
-        return await a_await_or_future(core, ref, wait)
+async def move(core, *paths, destination=None, resolver=None, cursor=None):
+    with fs.move(*paths, destination=destination, resolver=resolver, cursor=cursor) as param:
+        return await core.v1.api.execute('', 'moveResources', param)
 
 
 async def ensure_directory(core, directory, suppress_error=False):

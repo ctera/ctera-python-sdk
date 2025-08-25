@@ -3,11 +3,11 @@ import logging
 from contextlib import contextmanager
 from ..objects.uri import quote, unquote
 from ..common import Object, DateTimeUtils
-from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, FileAccessError, \
+from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, \
     UploadError
 from ..core.types import PortalAccount, UserAccount, GroupAccount
 from ..exceptions.io import ResourceExistsError, PathValidationError, NameSyntaxError, \
-    ReservedNameError, RestrictedRoot, InsufficientPermission
+    ReservedNameError, RestrictedRoot, InsufficientPermission, FileConflict, RemoteStorageError
 from ..exceptions.io import UploadException, OutOfQuota, RejectedByPolicy, NoStorageBucket, WindowsACLError
 from ..lib.iterator import DefaultResponse
 from . import common
@@ -97,6 +97,13 @@ class SrcDstParam(Object):
         SrcDstParam.__instance = self  # pylint: disable=unused-private-member
 
 
+class ResourceActionCursor(Object):
+
+    def __init__(self):
+        super().__init__()
+        self._classname = self.__class__.__name__
+
+
 class ActionResourcesParam(Object):
 
     __instance = None
@@ -114,6 +121,9 @@ class ActionResourcesParam(Object):
 
     def add(self, param):
         self.urls.append(param)
+
+    def start_from(self, cursor):
+        self.startFrom = cursor
 
 
 class CreateShareParam(Object):
@@ -253,8 +263,20 @@ def recover(*paths):
     return _delete_or_recover(list(paths), message='Recovering item')
 
 
-def _copy_or_move(paths, destination, *, message=None):
+def _add_cursor_and_resolver(param, cursor, resolver):
+    if cursor:
+        param.startFrom = cursor
+
+    if cursor and resolver:
+        if resolver.all:
+            param.startFrom.fileMoveConflictResolutaion = [resolver.build()]
+        else:
+            param.startFrom.skipHandler = resolver.handler
+
+
+def _copy_or_move(paths, destination, resolver, cursor):
     param = ActionResourcesParam.instance()
+    _add_cursor_and_resolver(param, cursor, resolver)
     for path in paths:
         src, dest = path, destination
         if isinstance(path, tuple):
@@ -264,18 +286,17 @@ def _copy_or_move(paths, destination, *, message=None):
                 raise ValueError(f'Error: No destination specified for: {src}')
             dest = dest.join(src.name)
         param.add(SrcDstParam.instance(src=src.absolute_encode, dest=dest.absolute_encode))
-        logger.info('%s from: %s to: %s', message, src.reference.as_posix(), dest.reference.as_posix())
     yield param
 
 
 @contextmanager
-def copy(*paths, destination=None):
-    return _copy_or_move(list(paths), destination, message='Copying item')
+def copy(*paths, destination=None, resolver=None, cursor=None):
+    return _copy_or_move(list(paths), destination, resolver, cursor)
 
 
 @contextmanager
-def move(*paths, destination=None):
-    return _copy_or_move(list(paths), destination, message='Moving item')
+def move(*paths, destination=None, resolver=None, cursor=None):
+    return _copy_or_move(list(paths), destination, resolver, cursor)
 
 
 @contextmanager
@@ -531,29 +552,67 @@ def obtain_current_accounts(param):
     return current_accounts
 
 
-def accept_error(error_type):
+file_access_errors = {
+    "Conflict": FileConflict,
+    "PermissionDenied": InsufficientPermission,
+    "DestinationNotExists": PathValidationError,
+    "FileWithTheSameNameExist": ResourceExistsError,
+    "InvalidName": NameSyntaxError,
+    "ReservedName": ReservedNameError
+}
+
+
+def await_or_future(core, ref, wait):
+    """
+    Wait for task completion, or return an awaitable task object.
+
+    :param str ref: Task reference
+    :param bool wait: ``True`` to wait for task completion, ``False`` to return an awaitable task object
+    """
+    if wait:
+        task = core.tasks.wait(ref)
+        accept_error(task.error_type, action=task.name.lower(), name=task.cursor.destResource.name, cursor=task.cursor)
+        return task
+    return core.tasks.awaitable_task(ref)
+
+
+async def a_await_or_future(ctera, ref, wait):
+    """
+    Wait for task completion, or return an awaitable task object.
+
+    :param str ref: Task reference
+    :param bool wait: ``True`` to wait for task completion, ``False`` to return an awaitable task object
+    """
+    if wait:
+        task = await ctera.tasks.wait(ref)
+        accept_error(task.error_type, action=task.name.lower(), name=task.cursor.destResource.name, cursor=task.cursor)
+        return task
+    return ctera.tasks.awaitable_task(ref)
+
+
+def accept_error(error_type, **kwargs):
     """
     Check if response contains an error.
     """
-    error = {
-        FileAccessError.FileWithTheSameNameExist: ResourceExistsError(),
-        FileAccessError.DestinationNotExists: PathValidationError(),
-        FileAccessError.InvalidName: NameSyntaxError(),
-        FileAccessError.ReservedName: ReservedNameError(),
-        FileAccessError.PermissionDenied: InsufficientPermission()
-    }.get(error_type, None)
-    try:
-        if error:
+    if not error_type in [None, 'OK']:
+        exception_classname = file_access_errors.get(error_type, RemoteStorageError)
+        try:
+            raise exception_classname(**kwargs)
+        except ResourceExistsError as error:
+            logger.info('Resource already exists: a file or folder with this name already exists.')
             raise error
-    except ResourceExistsError as error:
-        logger.info('Resource already exists: a file or folder with this name already exists.')
-        raise error
-    except PathValidationError as error:
-        logger.error('Path validation failed: the specified destination path does not exist.')
-        raise error
-    except NameSyntaxError as error:
-        logger.error('Invalid name: the name contains characters that are not allowed.')
-        raise error
-    except ReservedNameError as error:
-        logger.error('Reserved name error: the name is reserved and cannot be used.')
-        raise error
+        except PathValidationError as error:
+            logger.error('Path validation failed: the specified destination path does not exist.')
+            raise error
+        except NameSyntaxError as error:
+            logger.error('Invalid name: the name contains characters that are not allowed.')
+            raise error
+        except ReservedNameError as error:
+            logger.error('Reserved name error: the name is reserved and cannot be used.')
+            raise error
+        except FileConflict as error:
+            logger.error('Conflict: a file with the same name already exists: %s', error.name)
+            raise error
+        except RemoteStorageError as error:
+            logger.error('An error occurred while performing operation.')
+            raise error

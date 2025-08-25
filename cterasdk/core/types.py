@@ -4,7 +4,7 @@ from ..common import DateTimeUtils, StringCriteriaBuilder, PredefinedListCriteri
 from ..lib.storage import commonfs
 
 from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, \
-                  BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes
+                  BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes, ConflictHandler
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
@@ -827,3 +827,37 @@ class RoleSettings(Object):  # pylint: disable=too-many-instance-attributes
             'can_manage_compliance_settings': server_object.canManageComplianceSetting
         }
         return RoleSettings(**params)
+
+
+class ConflictResolver:
+
+    def __init__(self, handler, all):
+        self._all = all
+        self._handler = handler
+
+    @property
+    def all(self):
+        return self._all
+
+    @property
+    def handler(self):
+        return self._handler
+
+    def build(self):
+        param = Object()
+        param._classname = 'FileMoveConflictResolutaion'
+        param.errorType = 'Conflict'
+        param.handler = self._handler
+        return param
+
+    @staticmethod
+    def ignore(all=True):
+        return ConflictResolver(ConflictHandler.Skip, all)
+
+    @staticmethod
+    def override(all=True):
+        return ConflictResolver(ConflictHandler.Override, all)
+
+    @staticmethod
+    def rename(all=True):
+        return ConflictResolver(ConflictHandler.Rename, all)

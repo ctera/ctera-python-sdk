@@ -2,14 +2,89 @@ import re
 import time
 import logging
 import asyncio
+from datetime import datetime
 from abc import ABC, abstractmethod
 
+from ..common import Object
 from ..common.enum import TaskRunningStatus
 from ..exceptions.common import TaskWaitTimeoutError, AwaitableTaskException
 from ..exceptions.transport import HTTPError
 
 
 logger = logging.getLogger('cterasdk.common')
+
+
+class BaseTask(Object):
+    """
+    Base Task
+
+    :ivar int id: Task ID
+    :ivar str name: Task name
+    :ivar datetime.datetime start_time: Start time
+    :ivar int elapsed_time: Elapsed time
+    :ivar cterasdk.common.enum.TaskRunningStatus status: Status
+    :ivar int percentage: Percentage
+    :ivar datetime.datetime end_time: End time
+    :ivar cterasdk.common.object.Object result: Task result
+    """
+    def __init__(self, task):
+        self.id = task.id
+        self.name = task.name
+        self.start_time = datetime.fromisoformat(task.startTime)
+        self.elapsed_time = task.elapsedTime
+        self.status = task.status
+        self.percentage = task.percentage
+        self.end_time = datetime.fromisoformat(task.endTime) if task.endTime is not None else None
+        self.result = task.result
+
+
+class EdgeTask(BaseTask):
+    """
+    Edge Task
+
+    :ivar str description: Task description
+    """
+    def __init__(self, task):
+        super().__init__(task)
+        self.description = task.description
+
+
+class PortalTask(BaseTask):
+    """
+    Portal Task
+
+    :ivar str progress_str: Task progress description
+    :ivar int tenant: Tenant UID
+    """
+    def __init__(self, task):
+        super().__init__(task)
+        self.progress_str = task.progstring
+        self.tenant = task.portalUid
+
+
+class FilesystemTask(PortalTask):
+    """
+    Filesystem Task
+
+    :ivar int files_processed: Files processed
+    :ivar int bytes_processed: Bytes processed
+    :ivar int total_files: Total files
+    :ivar int total_bytes: Total bytes
+    :ivar str error_type: Task error
+    :ivar str file_in_progress: File in progress
+    :ivar int user_uid: User UID
+    :ivar cterasdk.common.object.Object cursor: Cursor
+    """
+    def __init__(self, task):
+        super().__init__(task)
+        self.files_processed = task.filesProcessed
+        self.bytes_processed = task.bytesProcessed
+        self.total_files = task.totalFiles
+        self.total_bytes = task.totalBytes
+        self.error_type = task.errorType
+        self.file_in_progress = task.fileInProgress
+        self.user_uid = task.userUid
+        self.cursor = task.cursor
 
 
 class AwaitableTask(ABC):
@@ -61,6 +136,10 @@ class AwaitableTask(ABC):
         raise NotImplementedError("Subclass must implement the '_task_reference' function.")
 
     @abstractmethod
+    def _task_status_object(self, task):
+        raise NotImplementedError("Subclass must implement the '_task_status_object' function.")
+
+    @abstractmethod
     def status(self):
         raise NotImplementedError("Subclass must implement the 'status' function.")
 
@@ -93,17 +172,20 @@ class AwaitableEdgeTask(AwaitableTask):
         logger.error('Failed to parse task identifier from reference: %s', ref)
         raise ValueError(f'Failed to parse task identifier from reference: {ref}')
 
+    def _task_status_object(self, task):
+        return EdgeTask(task)
+
     def status(self):
         """
         Synchronous function to retrieve task status.
         """
-        return self._ctera.api.get(self._ref)
+        return self._task_status_object(self._ctera.api.get(self._ref))
 
     async def a_status(self):
         """
         Asynchronous function to retrieve task status.
         """
-        return await self._ctera.api.get(self._ref)
+        return self._task_status_object(await self._ctera.api.get(self._ref))
 
 
 class AwaitablePortalTask(AwaitableTask):
@@ -117,21 +199,26 @@ class AwaitablePortalTask(AwaitableTask):
             raise ValueError(f'Failed to parse task identifier from reference: {ref}')
         return match.group(0)
 
+    def _task_status_object(self, task):
+        if task._classname == 'FileManagerBgTask':
+            return FilesystemTask(task)
+        return PortalTask(task)
+
     def status(self):
         """
         Synchronous function to retrieve task status.
         """
         if self._ctera.session().in_tenant_context():
-            return self._ctera.api.execute('', 'getTaskStatus', self._ref)
-        return self._ctera.api.get(f'{self._ref}')
+            return self._task_status_object(self._ctera.api.execute('', 'getTaskStatus', self._ref))
+        return self._task_status_object(self._ctera.api.get(f'{self._ref}'))
 
     async def a_status(self):
         """
         Asynchronous function to retrieve task status.
         """
         if self._ctera.session().in_tenant_context():
-            return await self._ctera.v1.api.execute('', 'getTaskStatus', self._ref)
-        return await self._ctera.v1.api.get(f'{self._ref}')
+            return self._task_status_object(await self._ctera.v1.api.execute('', 'getTaskStatus', self._ref))
+        return self._task_status_object(await self._ctera.v1.api.get(f'{self._ref}'))
 
 
 def _before_wait(timeout, poll_interval):
