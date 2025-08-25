@@ -831,13 +831,13 @@ class RoleSettings(Object):  # pylint: disable=too-many-instance-attributes
 
 class ConflictResolver:
 
-    def __init__(self, handler, all):
-        self._all = all
+    def __init__(self, handler, apply_all):
+        self._apply_all = apply_all
         self._handler = handler
 
     @property
     def all(self):
-        return self._all
+        return self._apply_all
 
     @property
     def handler(self):
@@ -851,13 +851,13 @@ class ConflictResolver:
         return param
 
     @staticmethod
-    def ignore(all=True):
-        return ConflictResolver(ConflictHandler.Skip, all)
+    def ignore(apply_all=True):
+        return ConflictResolver(ConflictHandler.Skip, apply_all)
 
     @staticmethod
-    def override(all=True):
-        return ConflictResolver(ConflictHandler.Override, all)
+    def override(apply_all=True):
+        return ConflictResolver(ConflictHandler.Override, apply_all)
 
     @staticmethod
-    def rename(all=True):
-        return ConflictResolver(ConflictHandler.Rename, all)
+    def rename(apply_all=True):
+        return ConflictResolver(ConflictHandler.Rename, apply_all)

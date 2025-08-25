@@ -28,6 +28,7 @@ class BaseTask(Object):
     :ivar cterasdk.common.object.Object result: Task result
     """
     def __init__(self, task):
+        super().__init__()
         self.id = task.id
         self.name = task.name
         self.start_time = datetime.fromisoformat(task.startTime)
@@ -200,7 +201,7 @@ class AwaitablePortalTask(AwaitableTask):
         return match.group(0)
 
     def _task_status_object(self, task):
-        if task._classname == 'FileManagerBgTask':
+        if task._classname == 'FileManagerBgTask':  # pylint: disable=protected-access
             return FilesystemTask(task)
         return PortalTask(task)
 

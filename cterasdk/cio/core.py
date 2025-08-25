@@ -117,6 +117,7 @@ class ActionResourcesParam(Object):
         super().__init__()
         self._classname = self.__class__.__name__
         self.urls = []
+        self.startFrom = None
         ActionResourcesParam.__instance = self  # pylint: disable=unused-private-member
 
     def add(self, param):
@@ -318,7 +319,7 @@ def destination_prerequisite_conditions(destination, name):
     if not len(destination.reference.parts) > 0:
         raise RestrictedRoot()
     if any(c in name for c in ['\\', '/', ':', '?', '&', '<', '>', '"', '|']):
-        raise NameSyntaxError()
+        raise NameSyntaxError(destination.join(name).reference.as_posix())
 
 
 @contextmanager
