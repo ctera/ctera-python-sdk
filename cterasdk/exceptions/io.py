@@ -26,14 +26,14 @@ class NotADirectory(RemoteStorageError):
 
 class ResourceExistsError(RemoteStorageError):
 
-    def __init__(self):
-        super().__init__('Resource already exists: a file or folder with this name already exists.')
+    def __init__(self, path):
+        super().__init__('Resource already exists: a file or folder with this name already exists.', path)
 
 
 class PathValidationError(RemoteStorageError):
 
-    def __init__(self):
-        super().__init__('Path validation failed: the specified destination path does not exist.')
+    def __init__(self, path=None, **kwargs):
+        super().__init__('Path validation failed: the specified destination path does not exist.', path)
 
 
 class NameSyntaxError(RemoteStorageError):
@@ -44,8 +44,8 @@ class NameSyntaxError(RemoteStorageError):
 
 class ReservedNameError(RemoteStorageError):
 
-    def __init__(self):
-        super().__init__('Reserved name error: the name is reserved and cannot be used.')
+    def __init__(self, path):
+        super().__init__('Reserved name error: the name is reserved and cannot be used.', path)
 
 
 class RestrictedPathError(RemoteStorageError):
@@ -60,10 +60,18 @@ class RestrictedRoot(RemoteStorageError):
         super().__init__('Storing files to the root directory is forbidden.', '/')
 
 
-class InsufficientPermission(RemoteStorageError):
+class PermissionDenied(RemoteStorageError):
 
-    def __init__(self):
-        super().__init__('Permission denied: You must have appropriate permissions to access this resource.')
+    def __init__(self, action, path=None):
+        super().__init__('Permission denied: Inappropriate permissions to access this resource.', path)
+        self.action = action
+
+
+class UnwriteableScope(RemoteStorageError):
+
+    def __init__(self, path, scope):
+        super().__init__("Write access denied. This target is protected and cannot be modified.", path)
+        self.scope = scope
 
 
 class FileConflict(RemoteStorageError):

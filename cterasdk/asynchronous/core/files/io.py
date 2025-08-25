@@ -95,8 +95,7 @@ async def move(core, *paths, destination=None, resolver=None, cursor=None):
 
 async def ensure_directory(core, directory, suppress_error=False):
     present, resource = await metadata(core, directory, suppress_error=True)
-    if (not present or not resource.isFolder) and not suppress_error:
-        raise NotADirectory(directory.absolute)
+    fs.ensure_directory(present, resource, directory, suppress_error)
     return resource.isFolder if present else False, resource
 
 
@@ -146,7 +145,9 @@ async def _validate_destination(core, name, destination):
     is_dir, resource = await ensure_directory(core, destination, suppress_error=True)
     if not is_dir:
         is_dir, resource = await ensure_directory(core, destination.parent)
+        fs.ensure_writeable(resource, destination.parent)
         return resource.cloudFolderInfo.uid, destination.name, destination.parent
+    fs.ensure_writeable(resource, destination)
     return resource.cloudFolderInfo.uid, name, destination
 
 

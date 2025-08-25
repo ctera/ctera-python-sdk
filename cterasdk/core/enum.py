@@ -676,3 +676,54 @@ class UploadError:
     RejectedByPolicy = "Rejected by Cloud Drive policy rule"
     NoStorageBucket = "No available storage location"
     WindowsACL = "Illegal access to NTACL folder"
+
+
+class ResourceAction:
+    """
+    Resource Action
+
+    :ivar str Delete: Delete.
+    :ivar str Copy: Copy.
+    :ivar str Move: Move.
+    :ivar str Undelete: Undelete.
+    """
+    Delete = 'Delete'
+    Undelete = 'Undelete'
+    Copy = 'Copy'
+    Move = 'Move'
+    Write = 'Write'
+
+
+class ResourceScope:
+    """
+    Resource Scope
+
+    :ivar str Root: Root.
+    :ivar str ProjectsContainer: ProjectsContainer.
+    :ivar str Project: Project.
+    :ivar str SharedContainer: SharedContainer.
+    :ivar str SharedDomain: SharedDomain.
+    :ivar str Shared: Shared.
+    :ivar str BackupsContainer: BackupsContainer.
+    :ivar str Backup: Backup.
+    :ivar str Personal: Personal.
+    :ivar str UsersContainer: UsersContainer.
+    :ivar str UsersFoldersContainer: UsersFoldersContainer.
+    :ivar str CloudDrivesContainer: CloudDrivesContainer.
+    :ivar str OfflineFolder: OfflineFolder.
+    :ivar str InsideCloudFolder: InsideCloudFolder.
+    """
+    Root = "Root"
+    ProjectsContainer = "ProjectsContainer"
+    Project = "Project"
+    SharedContainer = "SharedContainer"
+    SharedDomain = "SharedDomain"
+    Shared = "Shared"
+    BackupsContainer = "BackupsContainer"
+    Backup = "Backup"
+    Personal = "Personal"
+    UsersContainer = "UsersContainer"
+    UsersFoldersContainer = "UsersFoldersContainer"
+    CloudDrivesContainer = "CloudDrivesContainer"
+    OfflineFolder = "OfflineFolder"
+    InsideCloudFolder = "InsideCloudFolder"

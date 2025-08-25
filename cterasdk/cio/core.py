@@ -4,10 +4,11 @@ from contextlib import contextmanager
 from ..objects.uri import quote, unquote
 from ..common import Object, DateTimeUtils
 from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, \
-    UploadError
+    UploadError, ResourceAction, ResourceScope
 from ..core.types import PortalAccount, UserAccount, GroupAccount
 from ..exceptions.io import ResourceExistsError, PathValidationError, NameSyntaxError, \
-    ReservedNameError, RestrictedRoot, InsufficientPermission, FileConflict, RemoteStorageError
+    ReservedNameError, RestrictedRoot, PermissionDenied, FileConflict, RemoteStorageError, NotADirectory, \
+    UnwriteableScope
 from ..exceptions.io import UploadException, OutOfQuota, RejectedByPolicy, NoStorageBucket, WindowsACLError
 from ..lib.iterator import DefaultResponse
 from . import common
@@ -316,10 +317,22 @@ def handle(path):
 
 
 def destination_prerequisite_conditions(destination, name):
-    if not len(destination.reference.parts) > 0:
-        raise RestrictedRoot()
     if any(c in name for c in ['\\', '/', ':', '?', '&', '<', '>', '"', '|']):
         raise NameSyntaxError(destination.join(name).reference.as_posix())
+
+
+def ensure_directory(present, resource, directory, suppress_error):
+    if (not present or not resource.isFolder) and not suppress_error:
+        raise NotADirectory(directory.reference.as_posix())
+
+
+def ensure_writeable(resource, directory):
+    if resource.scope == ResourceScope.Root:
+        raise RestrictedRoot()
+    if resource.scope not in [ResourceScope.Personal, ResourceScope.Project, ResourceScope.InsideCloudFolder]:
+        raise UnwriteableScope(directory.reference.as_posix(), resource.scope)
+    if resource.permission != FileAccessMode.RW:
+        raise PermissionDenied(directory.reference.as_posix(), ResourceAction.Write)
 
 
 @contextmanager
@@ -555,7 +568,7 @@ def obtain_current_accounts(param):
 
 file_access_errors = {
     "Conflict": FileConflict,
-    "PermissionDenied": InsufficientPermission,
+    "PermissionDenied": PermissionDenied,
     "DestinationNotExists": PathValidationError,
     "FileWithTheSameNameExist": ResourceExistsError,
     "InvalidName": NameSyntaxError,
@@ -572,7 +585,7 @@ def await_or_future(core, ref, wait):
     """
     if wait:
         task = core.tasks.wait(ref)
-        accept_error(task.error_type, action=task.name.lower(), name=task.cursor.destResource.name, cursor=task.cursor)
+        accept_error(task.error_type, **error_metadata(task))
         return task
     return core.tasks.awaitable_task(ref)
 
@@ -586,9 +599,20 @@ async def a_await_or_future(ctera, ref, wait):
     """
     if wait:
         task = await ctera.tasks.wait(ref)
-        accept_error(task.error_type, action=task.name.lower(), name=task.cursor.destResource.name, cursor=task.cursor)
+        accept_error(task.error_type, **error_metadata(task))
         return task
     return ctera.tasks.awaitable_task(ref)
+
+
+def error_metadata(task):
+    metadata = dict(
+        action=task.name
+    )
+    if task.name in [ResourceAction.Copy, ResourceAction.Move]:
+        metadata.update(dict(cursor=task.cursor))
+        if task.cursor.destResource:
+            metadata.update(dict(name=task.cursor.destResource.name))
+    return metadata
 
 
 def accept_error(error_type, **kwargs):
@@ -610,6 +634,9 @@ def accept_error(error_type, **kwargs):
             raise error
         except ReservedNameError as error:
             logger.error('Reserved name error: the name is reserved and cannot be used.')
+            raise error
+        except PermissionDenied as error:
+            logger.error('Permission denied: Inappropriate permissions to access this resource.')
             raise error
         except FileConflict as error:
             logger.error('Conflict: a file with the same name already exists: %s', error.name)
