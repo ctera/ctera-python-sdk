@@ -4,14 +4,16 @@ Changelog
 Improvements
 ^^^^^^^^^^^^
 
-* Added a unique ``User-Agent`` header to all requests made by the CTERA Python SDK  
-* Raised exceptions on upload errors to CTERA Portal  
-* Raised :py:class:`cterasdk.exceptions.session.SessionExpired` upon session expiration  
-* Listed the Cloud Drive root by default if no ``path`` argument was provided to :py:func:`cterasdk.core.files.browser.FileBrowser.listdir`  
-* Added :py:class:`cterasdk.exceptions.notifications.AncestorsError` exception  
-* Added :py:class:`cterasdk.exceptions.transport.TLSError` exception  
-* Suppressed session expiration exceptions on logout  
-* Added support for resolving file conflicts on copy and move operations using :py:class:`cterasdk.core.types.ConflictResolver`  
+* Added a unique ``User-Agent`` header to all requests made by the CTERA Python SDK
+* Raised exceptions on upload errors to CTERA Portal
+* Raised :py:class:`cterasdk.exceptions.session.SessionExpired` upon session expiration
+* Listed the Cloud Drive root by default if no ``path`` argument was
+  provided to :py:func:`cterasdk.core.files.browser.FileBrowser.listdir`
+* Added :py:class:`cterasdk.exceptions.notifications.AncestorsError` exception
+* Added :py:class:`cterasdk.exceptions.transport.TLSError` exception
+* Suppressed session expiration exceptions on logout
+* Added support for resolving file conflicts on copy and move
+  operations using :py:class:`cterasdk.core.types.ConflictResolver`
 
 Bug Fixes
 ^^^^^^^^^
@@ -46,7 +48,7 @@ Bug Fixes
 
    CTERA Python SDK/2.20.20; aiohttp/3.9.5; (Windows 10; AMD64; Python 3.11.4);
 
-* Introduced support for resolving conflicts during copy and move operations  
+* Introduced support for resolving conflicts during copy and move operations
 
 .. code:: python
 
