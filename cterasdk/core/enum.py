@@ -676,4 +676,3 @@ class UploadError:
     RejectedByPolicy = "Rejected by Cloud Drive policy rule"
     NoStorageBucket = "No available storage location"
     WindowsACL = "Illegal access to NTACL folder"
-

@@ -110,7 +110,7 @@ class FileBrowser(BaseCommand):
         async def wrapper(resume_from=None):
             ref = await func(self._core, *paths, destination=destination, resolver=resolver, cursor=resume_from)
             return await a_await_or_future(self._core, ref, wait)
-        
+
         try:
             return await wrapper(cursor)
         except FileConflict as e:
@@ -132,8 +132,8 @@ class FileBrowser(BaseCommand):
         """
         try:
             return await self._try_with_resolver(io.copy, *[self.normalize(path) for path in paths],
-                                           destination=self.normalize(destination),
-                                           resolver=resolver, cursor=cursor, wait=wait)
+                                                 destination=self.normalize(destination),
+                                                 resolver=resolver, cursor=cursor, wait=wait)
         except ValueError:
             raise ValueError('Copy destination was not specified.')
 
@@ -246,7 +246,7 @@ class CloudDrive(FileBrowser):
         """
         try:
             return await self._try_with_resolver(io.move, *[self.normalize(path) for path in paths],
-                                           destination=self.normalize(destination),
-                                           resolver=resolver, cursor=cursor, wait=wait)
+                                                 destination=self.normalize(destination),
+                                                 resolver=resolver, cursor=cursor, wait=wait)
         except ValueError:
             raise ValueError('Move destination was not specified.')

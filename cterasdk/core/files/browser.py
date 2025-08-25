@@ -116,7 +116,7 @@ class FileBrowser(BaseCommand):
         def wrapper(resume_from=None):
             ref = func(self._core, *paths, destination=destination, resolver=resolver, cursor=resume_from)
             return await_or_future(self._core, ref, wait)
-        
+
         try:
             return wrapper(cursor)
         except FileConflict as e:

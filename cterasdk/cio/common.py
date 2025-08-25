@@ -77,4 +77,3 @@ def encode_request_parameter(param):
     return dict(
         inputXML=utf8_decode(toxmlstr(param))
     )
-
