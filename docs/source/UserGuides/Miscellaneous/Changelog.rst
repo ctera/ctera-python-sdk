@@ -4,11 +4,6 @@ Changelog
 2.20.20
 -------
 
-Related issues and pull requests on GitHub: `#316 <https://github.com/ctera/ctera-python-sdk/pull/316>`_,
-`#317 <https://github.com/ctera/ctera-python-sdk/pull/317>`_
-`#318 <https://github.com/ctera/ctera-python-sdk/pull/318>`_
-
-
 Improvements
 ^^^^^^^^^^^^
 
@@ -74,6 +69,10 @@ Bug Fixes
    except cterasdk.exceptions.io.FileConflict as e:
        resolver = core_types.ConflictResolver.override()  # override destination
        user.files.copy(objects, resolver=resolver, cursor=e.cursor)  # resume copy from cursor
+
+Related issues and pull requests on GitHub: `#316 <https://github.com/ctera/ctera-python-sdk/pull/316>`_,
+`#317 <https://github.com/ctera/ctera-python-sdk/pull/317>`_
+`#318 <https://github.com/ctera/ctera-python-sdk/pull/318>`_
 
 2.20.19
 -------
