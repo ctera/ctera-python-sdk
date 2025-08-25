@@ -19,117 +19,66 @@ class HTTPError(CTERAException):
 
 
 class BadRequest(HTTPError):
-    """
-    Bad Request
-
-    :ivar int code: Status code
-    :ivar str name: Reason
-    :ivar cterasdk.clients.errors.Error error: Error object
-    """
 
     def __init__(self, error):
         super().__init__(HTTPStatus.BAD_REQUEST, error)
 
 
 class Unauthorized(HTTPError):
-    """
-    Unauthorized
-
-    :ivar int code: Status code
-    :ivar str name: Reason
-    :ivar cterasdk.clients.errors.Error error: Error object
-    """
 
     def __init__(self, error):
         super().__init__(HTTPStatus.UNAUTHORIZED, error)
 
 
 class Forbidden(HTTPError):
-    """
-    Unauthorized
-
-    :ivar int code: Status code
-    :ivar str name: Reason
-    :ivar cterasdk.clients.errors.Error error: Error object
-    """
 
     def __init__(self, error):
         super().__init__(HTTPStatus.FORBIDDEN, error)
 
 
 class NotFound(HTTPError):
-    """
-    NotFound
-
-    :ivar int code: Status code
-    :ivar str name: Reason
-    :ivar cterasdk.clients.errors.Error error: Error object
-    """
 
     def __init__(self, error):
         super().__init__(HTTPStatus.NOT_FOUND, error)
 
 
-class Unprocessable(HTTPError):
-    """
-    Unprocessable
+class NotAllowed(HTTPError):
 
-    :ivar int code: Status code
-    :ivar str name: Reason
-    :ivar cterasdk.clients.errors.Error error: Error object
-    """
+    def __init__(self, error):
+        super().__init__(HTTPStatus.METHOD_NOT_ALLOWED, error)
+
+
+class PreConditionFailed(HTTPError):
+
+    def __init__(self, error):
+        super().__init__(HTTPStatus.PRECONDITION_FAILED, error)
+
+
+class Unprocessable(HTTPError):
 
     def __init__(self, error):
         super().__init__(HTTPStatus.UNPROCESSABLE_ENTITY, error)
 
 
 class InternalServerError(HTTPError):
-    """
-    InternalServerError
-
-    :ivar int code: Status code
-    :ivar str name: Reason
-    :ivar cterasdk.clients.errors.Error error: Error object
-    """
 
     def __init__(self, error):
         super().__init__(HTTPStatus.INTERNAL_SERVER_ERROR, error)
 
 
 class BadGateway(HTTPError):
-    """
-    BadGateway
-
-    :ivar int code: Status code
-    :ivar str name: Reason
-    :ivar cterasdk.clients.errors.Error error: Error object
-    """
 
     def __init__(self, error):
         super().__init__(HTTPStatus.BAD_GATEWAY, error)
 
 
 class ServiceUnavailable(HTTPError):
-    """
-    ServiceUnavailable
-
-    :ivar int code: Status code
-    :ivar str name: Reason
-    :ivar cterasdk.clients.errors.Error error: Error object
-    """
 
     def __init__(self, error):
         super().__init__(HTTPStatus.SERVICE_UNAVAILABLE, error)
 
 
 class GatewayTimeout(HTTPError):
-    """
-    GatewayTimeout
-
-    :ivar int code: Status code
-    :ivar str name: Reason
-    :ivar cterasdk.clients.errors.Error error: Error object
-    """
 
     def __init__(self, error):
         super().__init__(HTTPStatus.GATEWAY_TIMEOUT, error)

@@ -50,8 +50,8 @@ class ReservedNameError(RemoteStorageError):
 
 class RestrictedPathError(RemoteStorageError):
 
-    def __init__(self):
-        super().__init__('Creating a folder in the specified location is forbidden.')
+    def __init__(self, path):
+        super().__init__('Creating a folder in the specified location is forbidden.', path)
 
 
 class RestrictedRoot(RemoteStorageError):
