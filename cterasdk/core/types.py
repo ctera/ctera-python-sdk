@@ -845,7 +845,7 @@ class ConflictResolver:
 
     def build(self):
         param = Object()
-        param._classname = 'FileMoveConflictResolutaion'
+        param._classname = 'FileMoveConflictResolutaion'  # pylint: disable=protected-access
         param.errorType = 'Conflict'
         param.handler = self._handler
         return param
