@@ -1,7 +1,9 @@
 import logging
 
 from .base_command import BaseCommand
-from ...exceptions import CTERAException
+from ...exceptions.transport import Forbidden
+from ...exceptions.session import SessionExpired
+from ...exceptions.auth import AuthenticationError
 
 
 logger = logging.getLogger('cterasdk.core')
@@ -23,9 +25,9 @@ class Login(BaseCommand):
         try:
             await self._core.v1.api.form_data('/login', {'j_username': username, 'j_password': password})
             logger.info("User logged in. %s", {'host': host, 'user': username})
-        except CTERAException:
-            logger.error("Login failed. %s", {'host': host, 'user': username})
-            raise
+        except Forbidden as error:
+            logger.error('Login failed. %s', {'host': host, 'user': username})
+            raise AuthenticationError() from error
 
     async def sso(self, ctera_ticket):
         """
@@ -40,5 +42,8 @@ class Login(BaseCommand):
         """
         Log out of the portal
         """
-        await self._core.v1.api.form_data('/logout', {})
-        logger.info("User logged out. %s", {'host': self._core.host()})
+        try:
+            await self._core.v1.api.form_data('/logout', {})
+            logger.info("User logged out. %s", {'host': self._core.host()})
+        except SessionExpired:
+            logger.info("Session expired and is no longer active.")
