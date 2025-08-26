@@ -131,6 +131,10 @@ class AsyncXML(AsyncClient):
         response = await super().post(path, data, data_serializer=Serializers.XML, on_error=XMLHandler(), **kwargs)
         return await response.xml()
 
+    async def form_data(self, path, data, **kwargs):
+        response = await super().form_data(path, data, on_error=XMLHandler(), **kwargs)
+        return await response.xml()
+
     async def delete(self, path, **kwargs):
         response = await super().delete(path, on_error=XMLHandler(), **kwargs)
         return await response.xml()

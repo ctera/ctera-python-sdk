@@ -114,6 +114,16 @@ HTTP Transport
    :members:
    :show-inheritance:
 
+.. autoclass:: cterasdk.exceptions.transport.NotAllowed
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.transport.PreConditionFailed
+   :noindex:
+   :members:
+   :show-inheritance:
+
 .. autoclass:: cterasdk.exceptions.transport.Unprocessable
    :noindex:
    :members:

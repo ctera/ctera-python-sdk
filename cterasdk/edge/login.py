@@ -30,6 +30,7 @@ class Login(BaseCommand):
             logger.info("User logged in. %s", {'host': host, 'user': username})
             self._edge.ctera_migrate.login()
         except InternalServerError as e:
+            logger.error("Login failed. %s", {'host': host, 'user': username})
             if e.error.response.error.msg == 'Wrong username or password':
                 raise AuthenticationError() from e
             raise
