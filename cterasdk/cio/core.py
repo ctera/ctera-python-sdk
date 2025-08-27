@@ -619,7 +619,7 @@ def accept_error(error_type, **kwargs):
     """
     Check if response contains an error.
     """
-    if error_type not in [None, 'OK']:
+    if error_type not in [None, 'Ok']:
         exception_classname = file_access_errors.get(error_type, RemoteStorageError)
         try:
             raise exception_classname(**kwargs)

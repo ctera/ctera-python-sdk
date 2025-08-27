@@ -53,19 +53,23 @@ async def walk(core, scope, path, include_deleted=False):
 
 
 async def mkdir(core, path):
+    ref = path.reference.as_posix()
     with fs.makedir(path) as param:
         response = await core.v1.api.execute('', 'makeCollection', param)
-    fs.accept_error(response)
+    fs.accept_error(response, path=ref)
+    return ref
 
 
 async def makedirs(core, path):
+    ref = path.reference.as_posix()
     directories = path.parts
     for i in range(1, len(directories) + 1):
         path = fs.CorePath.instance(path.scope, '/'.join(directories[:i]))
         try:
             await mkdir(core, path)
         except ResourceExistsError:
-            logger.debug('Resource already exists: %s', path.reference.as_posix())
+            logger.debug('Resource already exists: %s', ref)
+    return ref
 
 
 async def rename(core, path, name):
