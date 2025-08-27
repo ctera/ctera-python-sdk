@@ -78,6 +78,10 @@ class AsyncPortal(AsyncManagement):
         return self.clients.io
 
     @property
+    def _session_id_key(self):
+        return 'JSESSIONID'
+
+    @property
     def _login_object(self):
         return login.Login(self)
 

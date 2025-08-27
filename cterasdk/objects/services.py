@@ -99,6 +99,23 @@ class AsyncManagement(CTERA):  # pylint: disable=abstract-method
             self._ctera_session.stop_session()
         await self.default.close()
 
+    @property
+    @abstractmethod
+    def _session_id_key(self):
+        return NotImplementedError("Subclass must implement the '_session_id_key' property")
+
+    def get_session_id(self):
+        """
+        Get Session Identifier
+
+        :return str: Session ID
+        """
+        return self._default.cookies.get(self._session_id_key)
+
+    async def set_session_id(self, session_id):
+        self._default.cookies.update({self._session_id_key: session_id}, self._default.baseurl)
+        await self._ctera_session.async_start_session(self)
+
     async def set_jwt_header(self, jwt_token):
         """
         Set JWT Bearer token for authentication
