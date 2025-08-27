@@ -99,6 +99,15 @@ class AsyncManagement(CTERA):  # pylint: disable=abstract-method
             self._ctera_session.stop_session()
         await self.default.close()
 
+    async def set_jwt_header(self, jwt_token):
+        """
+        Set JWT Bearer token for authentication
+
+        :param str jwt_token: JWT Bearer token
+        """
+        self._default.headers.persist_headers({'Authorization': f'Bearer {jwt_token}'})
+        await self._ctera_session.async_start_session(self)
+
     async def __aexit__(self, exc_type, exc, tb):
         await self.default.close()
 
@@ -154,6 +163,15 @@ class Management(CTERA):
 
     def set_session_id(self, session_id):
         self._default.cookies.update({self._session_id_key: session_id}, self._default.baseurl)
+        self._ctera_session.start_session(self)
+
+    def set_jwt_header(self, jwt_token):
+        """
+        Set JWT Bearer token for authentication
+
+        :param str jwt_token: JWT Bearer token
+        """
+        self._default.headers.persist_headers({'Authorization': f'Bearer {jwt_token}'})
         self._ctera_session.start_session(self)
 
     def __exit__(self, exc_type, exc_value, exc_tb):

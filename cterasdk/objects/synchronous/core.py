@@ -106,11 +106,10 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
     def public_info(self):
         return self.ctera.get('/public/publicInfo')
 
-    @property
-    def _omit_fields(self):
-        return super()._omit_fields + ['activation', 'admins', 'cloudfs', 'credentials', 'devices', 'directoryservice', 'domains', 'files',
-                                       'firmwares', 'groups', 'logs', 'plans', 'reports', 'roles', 'settings', 'tasks', 'templates',
-                                       'users']
+
+
+
+
 
 
 class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
@@ -168,3 +167,6 @@ class ServicesPortal(Portal):
         self._login_object.sso(ctera_ticket)
         self.session().start_session(self)
         self.api.web_session()
+
+
+

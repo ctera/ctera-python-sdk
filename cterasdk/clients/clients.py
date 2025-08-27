@@ -135,6 +135,8 @@ class AsyncXML(AsyncClient):
         return await response.xml()
 
 
+
+
 class AsyncExtended(AsyncXML):
     """CTERA Schema"""
 
@@ -342,6 +344,9 @@ class JSON(Client):
     def delete(self, path, **kwargs):
         response = super().delete(path, on_error=JSONHandler(), **kwargs)
         return response.json()
+
+
+
 
 
 class Extended(XML):

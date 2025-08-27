@@ -17,6 +17,9 @@ def core(ctera_session, url, context):
     return False
 
 
+
+
+
 def _edge_no_session_resources():
     return _no_session_resources('', '/admingui/api/login', '/ssologin', '/api/nosession/logininfo',
                                  '/api/nosession/createfirstuser', '/migration/rest/v1/auth/user')
@@ -24,6 +27,9 @@ def _edge_no_session_resources():
 
 def _core_no_session_resources(context):
     return _no_session_resources(context, '/api/login', '/public', '/setup', '/startup', '/sso')
+
+
+
 
 
 def _no_session_resources(context, *paths):
