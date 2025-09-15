@@ -37,7 +37,6 @@ class SNMP(BaseCommand):
         param.readCommunity = community_str
         if username is not None and auth_password is not None and privacy_password is not None:
             param.snmpV3 = Object()
-            param.snmpV3._classname = 'SnmpV3Config'  # pylint: disable=protected-access
             param.snmpV3.mode = enum.Mode.Enabled
             param.snmpV3.username = username
             param.snmpV3.authenticationPassword = auth_password
@@ -54,15 +53,9 @@ class SNMP(BaseCommand):
         logger.info("Disabled SNMP.")
 
     def get_configuration(self):
-        """
-        Get current SNMP configuration
-        
-        :return: Current SNMP configuration
-        :rtype: cterasdk.common.object.Object
-        """
         return self._edge.api.get('/config/snmp')
 
-    def modify(self, port=161, community_str=None, username=None, auth_password=None, privacy_password=None):
+    def modify(self, port=None, community_str=None, username=None, auth_password=None, privacy_password=None):
         """
         Modify current SNMP configuration. Only configurations that are not `None` will be changed. SNMP must be enabled
 
@@ -75,12 +68,12 @@ class SNMP(BaseCommand):
         current_config = self.get_configuration()
         if current_config.mode == enum.Mode.Disabled:
             raise CTERAException("SNMP configuration cannot be modified when disabled")
-        current_config.port = port
+        if port:
+            current_config.port = port
         if community_str:
             current_config.readCommunity = community_str
         if username is not None and auth_password is not None and privacy_password is not None:
             current_config.snmpV3 = Object()
-            current_config.snmpV3._classname = 'SnmpV3Config'  # pylint: disable=protected-access
             current_config.snmpV3.mode = enum.Mode.Enabled
             current_config.snmpV3.username = username
             current_config.snmpV3.authenticationPassword = auth_password

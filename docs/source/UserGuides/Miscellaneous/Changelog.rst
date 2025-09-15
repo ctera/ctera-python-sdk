@@ -26,7 +26,6 @@ Improvements
 Bug Fixes
 ^^^^^^^^^
 
-* Fixed SNMPv3 configuration on Edge Filers - added missing XML class name for proper serialization
 * Corrected Direct I/O object class references in the documentation
 
 .. code:: python

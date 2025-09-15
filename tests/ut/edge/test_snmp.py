@@ -76,7 +76,6 @@ class TestEdgeSNMP(base_edge.BaseEdgeTest):
         param.readCommunity = community_str
         if username is not None and auth_password is not None and privacy_password is not None:
             param.snmpV3 = Object()
-            param.snmpV3._classname = 'SnmpV3Config'  # pylint: disable=protected-access
             param.snmpV3.mode = Mode.Enabled
             param.snmpV3.username = username
             param.snmpV3.authenticationPassword = auth_password
