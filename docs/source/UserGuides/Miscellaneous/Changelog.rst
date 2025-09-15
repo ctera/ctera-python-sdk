@@ -1,6 +1,17 @@
 Changelog
 =========
 
+2.20.21
+-------
+
+Related issues and pull requests on GitHub: `#319 <https://github.com/ctera/ctera-python-sdk/pull/319>`_
+
+Bug Fixes
+^^^^^^^^^
+
+* Fixed SNMPv3 configuration on Edge Filers - added missing XML class name for proper serialization
+* Fixed whitespace in SNMP docstring to resolve flake8 W293 warning
+
 2.20.20
 -------
 
@@ -26,7 +37,6 @@ Improvements
 Bug Fixes
 ^^^^^^^^^
 
-* Fixed SNMPv3 configuration on Edge Filers - added missing XML class name for proper serialization
 * Corrected Direct I/O object class references in the documentation
 
 .. code:: python
