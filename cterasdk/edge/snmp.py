@@ -56,7 +56,7 @@ class SNMP(BaseCommand):
     def get_configuration(self):
         """
         Get current SNMP configuration
-        
+
         :return: Current SNMP configuration
         :rtype: cterasdk.common.object.Object
         """
