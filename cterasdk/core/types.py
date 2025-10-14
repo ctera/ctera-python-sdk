@@ -76,6 +76,10 @@ class PortalAccount(ABC):
                 return True
         return False
 
+    @property
+    def upn(self):
+        return f'{self.name}@{self.directory}' if self.directory else self.name
+
     def __str__(self):
         return (self.directory if self.directory else '') + '\\' + self.name
 

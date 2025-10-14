@@ -678,22 +678,6 @@ class UploadError:
     WindowsACL = "Illegal access to NTACL folder"
 
 
-class ResourceAction:
-    """
-    Resource Action
-
-    :ivar str Delete: Delete.
-    :ivar str Copy: Copy.
-    :ivar str Move: Move.
-    :ivar str Undelete: Undelete.
-    """
-    Delete = 'Delete'
-    Undelete = 'Undelete'
-    Copy = 'Copy'
-    Move = 'Move'
-    Write = 'Write'
-
-
 class ResourceScope:
     """
     Resource Scope
@@ -727,3 +711,22 @@ class ResourceScope:
     CloudDrivesContainer = "CloudDrivesContainer"
     OfflineFolder = "OfflineFolder"
     InsideCloudFolder = "InsideCloudFolder"
+
+
+class ResourceError:
+    """
+    Resource Error
+
+    :ivar str Conflict: Conflict.
+    :ivar str PermissionDenied: Permission denied.
+    :ivar str DestinationNotExists: Path validation error.
+    :ivar str FileWithTheSameNameExist: File exists.
+    :ivar str InvalidName: Invalid name.
+    :ivar str ReservedName: Reserved name.
+    """
+    Conflict = "Conflict"
+    PermissionDenied = "PermissionDenied"
+    DestinationNotExists = "DestinationNotExists"
+    FileWithTheSameNameExist = "FileWithTheSameNameExist"
+    InvalidName = "InvalidName"
+    ReservedName = "ReservedName"

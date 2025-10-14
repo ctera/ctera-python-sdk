@@ -426,3 +426,14 @@ class TaskType:
     """
     Discovery = 0
     Migration = 1
+
+
+class ResourceError:
+    """
+    Resource Error
+
+    :ivar str FileExists: File exists
+    :ivar str Forbidden: Migration
+    """
+    FileExists = 'File exists'
+    Forbidden = 'Creating a folder in this location is forbidden'

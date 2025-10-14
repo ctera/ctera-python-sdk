@@ -30,6 +30,10 @@ class BasePath:
         return self._reference
 
     @property
+    def relative(self):
+        return self._reference.as_posix()
+
+    @property
     def name(self):
         return self._reference.name
 

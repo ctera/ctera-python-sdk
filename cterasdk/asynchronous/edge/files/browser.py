@@ -1,6 +1,6 @@
 from ..base_command import BaseCommand
-from ....cio.edge import EdgePath
-from ....lib.storage import asynfs, commonfs
+from ....cio.edge import EdgePath, ListDirectory, RecursiveIterator, GetMetadata, Open, OpenMany, Upload, \
+     UploadFile, CreateDirectory, Copy, Move, Delete, Download, DownloadMany
 from . import io
 
 
@@ -13,7 +13,8 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path
         """
-        return await io.listdir(self._edge, self.normalize(path))
+        for o in await ListDirectory(io.listdir, self._edge, self.normalize(path)).a_execute():
+            yield o
 
     async def walk(self, path=None):
         """
@@ -21,7 +22,8 @@ class FileBrowser(BaseCommand):
 
         :param str, defaults to the root directory path: Path to walk
         """
-        return io.walk(self._edge, path)
+        async for o in RecursiveIterator(io.listdir, self._edge, self.normalize(path)).a_generate():
+            yield o
 
     async def exists(self, path):
         """
@@ -29,7 +31,8 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path
         """
-        return await io.exists(self._edge, self.normalize(path))
+        async with GetMetadata(io.listdir, self._edge, self.normalize(path), True) as (exists, *_):
+            return exists
 
     async def handle(self, path):
         """
@@ -37,8 +40,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path to a file
         """
-        handle_function = io.handle(self.normalize(path))
-        return await handle_function(self._edge)
+        return await Open(io.handle, self._edge, self.normalize(path)).a_execute()
 
     async def handle_many(self, directory, *objects):
         """
@@ -47,8 +49,7 @@ class FileBrowser(BaseCommand):
         :param str directory: Path to a folder
         :param args objects: List of files and folders
         """
-        handle_many_function = io.handle_many(self.normalize(directory), *objects)
-        return await handle_many_function(self._edge)
+        return await OpenMany(io.handle_many, self._edge, directory, *objects).a_execute()
 
     async def download(self, path, destination=None):
         """
@@ -58,9 +59,7 @@ class FileBrowser(BaseCommand):
         :param str,optional destination:
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
-        directory, name = commonfs.determine_directory_and_filename(path, destination=destination)
-        handle = await self.handle(path)
-        return await asynfs.write(directory, name, handle)
+        return await Download(io.handle, self._edge, self.normalize(path), destination).a_execute()
 
     async def download_many(self, target, objects, destination=None):
         """
@@ -78,9 +77,7 @@ class FileBrowser(BaseCommand):
             Optional. Path to the destination file or directory. If a directory is provided,
             the original filename will be preserved. Defaults to the default download directory.
         """
-        directory, name = commonfs.determine_directory_and_filename(target, objects, destination=destination, archive=True)
-        handle = await self.handle_many(target, *objects)
-        return await asynfs.write(directory, name, handle)
+        return await DownloadMany(io.handle_many, self._edge, self.normalize(target), objects, destination).a_execute()
 
     async def upload(self, name, destination, handle):
         """
@@ -90,8 +87,7 @@ class FileBrowser(BaseCommand):
         :param str destination: Path to remote directory.
         :param object handle: Handle.
         """
-        upload_function = io.upload(name, self.normalize(destination), handle)
-        return await upload_function(self._edge)
+        return await Upload(io.upload, self._edge, io.listdir, name, self.normalize(destination), handle).a_execute()
 
     async def upload_file(self, path, destination):
         """
@@ -100,10 +96,7 @@ class FileBrowser(BaseCommand):
         :param str path: Local path
         :param str destination: Remote path
         """
-        metadata = commonfs.properties(path)
-        with open(path, 'rb') as handle:
-            response = await self.upload(metadata['name'], destination, handle)
-        return response
+        return await UploadFile(io.upload, self._edge, io.listdir, path, self.normalize(destination)).a_execute()
 
     async def mkdir(self, path):
         """
@@ -111,7 +104,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Directory path
         """
-        return await io.mkdir(self._edge, self.normalize(path))
+        return await CreateDirectory(io.mkdir, self._edge, self.normalize(path)).a_execute()
 
     async def makedirs(self, path):
         """
@@ -119,7 +112,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Directory path
         """
-        return await io.makedirs(self._edge, self.normalize(path))
+        return await CreateDirectory(io.mkdir, self._edge, self.normalize(path), True).a_execute()
 
     async def copy(self, path, destination=None, overwrite=False):
         """
@@ -131,7 +124,7 @@ class FileBrowser(BaseCommand):
         """
         if destination is None:
             raise ValueError('Copy destination was not specified.')
-        return await io.copy(self._edge, self.normalize(path), self.normalize(destination), overwrite)
+        return await Copy(io.copy, self._edge, self.normalize(path), self.normalize(destination), overwrite).a_execute()
 
     async def move(self, path, destination=None, overwrite=False):
         """
@@ -143,15 +136,15 @@ class FileBrowser(BaseCommand):
         """
         if destination is None:
             raise ValueError('Move destination was not specified.')
-        return await io.move(self._edge, self.normalize(path), self.normalize(destination), overwrite)
+        return await Move(io.move, self._edge, self.normalize(path), self.normalize(destination), overwrite).a_execute()
 
-    async def delete(self, *paths):
+    async def delete(self, path):
         """
         Delete a file
 
         :param str path: File path
         """
-        return await io.remove(self._edge, *[self.normalize(path) for path in paths])
+        return await Delete(io.delete, self._edge, self.normalize(path)).a_execute()
 
     @staticmethod
     def normalize(path):
