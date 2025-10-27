@@ -13,7 +13,7 @@ class ObjectEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, datetime):
             return o.isoformat()
-        if o.get('__dict__', None):
+        if hasattr(o, '__dict__'):
             return o.__dict__
         return super().default(o)
 
