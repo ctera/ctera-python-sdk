@@ -242,12 +242,12 @@ class CloudDrive(FileBrowser):
         Share a file or a folder
 
         :param str path: The path of the file or folder to share
-        :param list[cterasdk.core.types.ShareRecipient] recipients: A list of share recipients
+        :param list[cterasdk.core.types.Collaborator] recipients: A list of share recipients
         :param bool,optional as_project: Share as a team project, defaults to True when the item is a cloud folder else False
         :param bool,optional allow_reshare: Allow recipients to re-share this item, defaults to True
         :param bool,optional allow_sync: Allow recipients to sync this item, defaults to True when the item is a cloud folder else False
         :return: A list of all recipients added to the collaboration share
-        :rtype: list[cterasdk.core.types.ShareRecipient]
+        :rtype: list[cterasdk.core.types.Collaborator]
         """
         return io.share(self._core, self.normalize(path), recipients, as_project, allow_reshare, allow_sync)
 
@@ -256,9 +256,9 @@ class CloudDrive(FileBrowser):
         Add share recipients
 
         :param str path: The path of the file or folder
-        :param list[cterasdk.core.types.ShareRecipient] recipients: A list of share recipients
+        :param list[cterasdk.core.types.Collaborator] recipients: A list of share recipients
         :return: A list of all recipients added
-        :rtype: list[cterasdk.core.types.ShareRecipient]
+        :rtype: list[cterasdk.core.types.Collaborator]
         """
         return io.add_share_recipients(self._core, self.normalize(path), recipients)
 

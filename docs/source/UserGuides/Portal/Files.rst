@@ -271,8 +271,8 @@ Collaboration Shares
    alice = core_types.UserAccount('alice')
    engineers = core_types.GroupAccount('Engineers')
 
-   alice_rcpt = core_types.ShareRecipient.local_user(alice).expire_in(30).read_only()
-   engineers_rcpt = core_types.ShareRecipient.local_group(engineers).read_write()
+   alice_rcpt = core_types.Collaborator.local_user(alice).expire_in(30).read_only()
+   engineers_rcpt = core_types.Collaborator.local_group(engineers).read_write()
 
    user.files.share('Codebase', [alice_rcpt, engineers_rcpt])
 
@@ -285,14 +285,14 @@ Collaboration Shares
    Share with an external recipient
    - Grant the external user with preview only access for 10 days
    """
-   jsmith = core_types.ShareRecipient.external('jsmith@hotmail.com').expire_in(10).preview_only()
+   jsmith = core_types.Collaborator.external('jsmith@hotmail.com').expire_in(10).preview_only()
    user.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
    """
    Share with an external recipient, and require 2 factor authentication
    - Grant the external user with read only access for 5 days, and require 2 factor authentication over e-mail
    """
-   jsmith = core_types.ShareRecipient.external('jsmith@hotmail.com', True).expire_in(5).read_only()
+   jsmith = core_types.Collaborator.external('jsmith@hotmail.com', True).expire_in(5).read_only()
    user.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
 ..
@@ -308,8 +308,8 @@ Collaboration Shares
    albany_group = core_types.GroupAccount('Albany', 'ctera.com')
    cleveland_group = core_types.GroupAccount('Cleveland', 'ctera.com')
 
-   albany_rcpt = core_types.ShareRecipient.domain_group(albany_group).read_write()
-   cleveland_rcpt = core_types.ShareRecipient.domain_group(cleveland_group).read_only()
+   albany_rcpt = core_types.Collaborator.domain_group(albany_group).read_write()
+   cleveland_rcpt = core_types.Collaborator.domain_group(cleveland_group).read_only()
 
    user.files.share('Cloud/Albany', [albany_rcpt, cleveland_rcpt])
 
@@ -325,7 +325,7 @@ Collaboration Shares
    - Grant the 'Engineering' local group with read-write permission
    """
    engineering = core_types.GroupAccount('Engineering')
-   engineering_rcpt = core_types.ShareRecipient.local_group(engineering).read_write()
+   engineering_rcpt = core_types.Collaborator.local_group(engineering).read_write()
    user.files.add_share_recipients('My Files/Projects/2020/ProjectX', [engineering_rcpt])
 
 .. note:: if the share recipients provided as an argument already exist, they will be skipped and not updated

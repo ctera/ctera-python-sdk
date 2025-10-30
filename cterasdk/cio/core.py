@@ -6,11 +6,8 @@ from ..objects.uri import quote, unquote
 from ..common import Object, DateTimeUtils
 from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, \
     UploadError, ResourceScope, ResourceError
-from ..core.types import PortalAccount, UserAccount, GroupAccount
-from ..exceptions.io import PathValidationError, NameSyntaxError, \
-    ReservedNameError, RestrictedRoot, PermissionDenied, FileConflict, NotADirectory, \
-    UnwriteableScope
-from ..exceptions.io import UploadException, QuotaViolation, RejectedByPolicy, NoStorageBucket, WindowsACLError, ResourceNotFoundError
+from ..core.types import PortalAccount, UserAccount, GroupAccount, Collaborator
+from .. import exceptions
 from ..lib.iterator import DefaultResponse
 from ..lib.storage import synfs, asynfs, commonfs
 from . import common
@@ -58,7 +55,7 @@ class CorePath(common.BasePath):
         elif classname == 'SnapshotResp':
             href = f'{reference.url}{reference.path}'
         else:
-            raise ValueError('Could not determine server object: {classname}')
+            raise ValueError(f'Could not determine server object: {classname}')
 
         href = unquote(href)
         match = re.search('^/?(ServicesPortal|admin)/webdav', href)
@@ -217,7 +214,7 @@ class FetchResourcesResponse(DefaultResponse):
 
 def destination_prerequisite_conditions(destination, name):
     if any(c in name for c in ['\\', '/', ':', '?', '&', '<', '>', '"', '|']):
-        raise NameSyntaxError(destination.join(name).relative)
+        raise exceptions.io.core.FilenameError(destination.join(name).relative)
 
 
 class EnsureDirectory(PortalCommand):
@@ -236,17 +233,17 @@ class EnsureDirectory(PortalCommand):
     def _handle_response(self, r):
         exists, resource = r
         if (not exists or not resource.isFolder) and not self.suppress_error:
-            raise NotADirectory(self.path.relative)
+            raise NotADirectoryError(self.path.relative)
         return resource.isFolder if exists else False, resource
 
 
 def ensure_writeable(resource, directory):
     if resource.scope == ResourceScope.Root:
-        raise RestrictedRoot()
+        raise exceptions.io.core.ROFSError('/')
     if resource.scope not in [ResourceScope.Personal, ResourceScope.Project, ResourceScope.InsideCloudFolder]:
-        raise UnwriteableScope(directory.relative, resource.scope)
+        raise exceptions.io.core.ROFSError(directory.relative)
     if resource.permission != FileAccessMode.RW:
-        raise PermissionDenied(directory.relative)
+        raise exceptions.io.core.PrivilegeError(directory.relative)
 
 
 class Upload(PortalCommand):
@@ -299,19 +296,15 @@ class Upload(PortalCommand):
         path = self.destination.join(self.name).relative
         if r.rc:
             logger.error('Upload failed: %s', path)
-            if r.msg == UploadError.UserQuotaViolation:
-                raise QuotaViolation('User', path)
-            if r.msg == UploadError.PortalQuotaViolation:
-                raise QuotaViolation('Team Portal', path)
-            if r.msg == UploadError.FolderQuotaViolation:
-                raise QuotaViolation('Cloud drive folder', path)
+            if r.msg in [UploadError.UserQuotaViolation, UploadError.PortalQuotaViolation, UploadError.FolderQuotaViolation]:
+                raise exceptions.io.core.QuotaError(path)
             if r.msg == UploadError.RejectedByPolicy:
-                raise RejectedByPolicy(path)
+                raise exceptions.io.core.FileRejectedError(path)
             if r.msg == UploadError.WindowsACL:
-                raise WindowsACLError(path)
+                raise exceptions.io.core.NTACLError(path)
             if r.msg.startswith(UploadError.NoStorageBucket):
-                raise NoStorageBucket(path)
-            raise UploadException(f'Reason: {r.msg}', path)
+                raise exceptions.io.core.StorageBackendError(path)
+            raise exceptions.io.core.WriteError(r.msg, path)
         if not r.rc and r.msg == 'OK':
             logger.info('Upload success. Saved to: %s', path)
         return path
@@ -358,11 +351,10 @@ def _is_subfolder(path):
     return (sharing_on_user_behalf and depth > 3) or (not sharing_on_user_behalf and depth > 1)
 
 
-def create_share_parameter(path, as_project, allow_reshare, allow_sync, shares=None):
+def create_collaboration_parameter(path, as_project, allow_reshare, allow_sync):
     if _is_subfolder(path):
         as_project = False  # Can't be a team project
         allow_sync = False  # Can't allow sync of a sub-folder
-
     param = Object()
     param._classname = 'ShareResourceParam'  # pylint: disable=protected-access
     param.url = path.absolute_encode
@@ -370,76 +362,49 @@ def create_share_parameter(path, as_project, allow_reshare, allow_sync, shares=N
     param.allowReshare = allow_reshare
     param.shouldSync = allow_sync
     param.shares = []
-    if shares is not None:
-        for recipient in shares:
-            settings = Object()
-            settings._classname = 'ShareConfig'  # pylint: disable=protected-access
-            settings.accessMode = recipient.accessMode
-            settings.expiration = recipient.expiration
-            settings.protectionLevel = recipient.protectionLevel
-            settings.invitee = recipient.invitee
-            param.shares.append(settings)
     return param
 
 
-def add_share_recipient(param, recipient):
+def create_collaborator(member):
     settings = Object()
     settings._classname = 'ShareConfig'  # pylint: disable=protected-access
-    settings.accessMode = recipient.access
-    if not recipient.access == FileAccessMode.NA:
-        settings.expiration = recipient.expiration_date
+    settings.accessMode = member.access
+    if not member.access == FileAccessMode.NA:
+        settings.expiration = member.expiration_date
     invitee = None
-    if recipient.type == CollaboratorType.EXT:
+    if member.type == CollaboratorType.EXT:
         invitee = Object()
         invitee._classname = 'Collaborator'  # pylint: disable=protected-access
-        invitee.type = recipient.type
-        invitee.email = recipient.account
-        if recipient.two_factor:
+        invitee.type = member.type
+        invitee.email = member.account
+        if member.two_factor:
             settings.protectionLevel = ProtectionLevel.Email
         else:
             settings.protectionLevel = ProtectionLevel.Public
     else:
-        invitee = recipient.collaborator
+        invitee = member.collaborator
     settings.invitee = invitee
-    param.shares.append(settings)
+    return settings
 
 
-def find_recipients_to_remove(param, path, current_accounts, accounts):
-    current_accounts = obtain_current_accounts(param)
-    accounts_to_keep, accounts_to_remove = [], []
-    if current_accounts:
-        for idx, current_account in enumerate(current_accounts):
-            if current_account not in accounts:
-                accounts_to_keep.append(param.shares[idx])
-            else:
-                logger.debug('Found recipient to remove: %s', str(current_account))
-                accounts_to_remove.append(current_account)
-        if not accounts_to_remove:
-            logger.debug('Share recipients not found: %s', [str(member) for member in accounts])
-        else:
-            logger.debug('Removing share recipients: %s', [str(account) for account in accounts_to_remove])
-    else:
-        logger.debug('Share has no recipients. %s', path.relative)
-    return accounts_to_keep, accounts_to_remove
-
-
-def find_recipients_to_add(path, param, current_accounts, valid_recipients):
-    current_accounts = obtain_current_accounts(param)
+def extend_collaborators(collaborators, valid_members):
+    current_accounts = obtain_current_accounts(collaborators)
     accounts_to_add = []
-    if valid_recipients:
-        for recipient in valid_recipients:
-            if recipient.account not in current_accounts:
-                logger.debug('New share recipient: %s', str(recipient.account))
-                accounts_to_add.append(recipient)
+    if valid_members:
+        for member in valid_members:
+            if member.account not in current_accounts:
+                logger.debug('New member: %s', str(member.account))
+                accounts_to_add.append(member)
             else:
-                logger.debug('Share recipient already exists: %s', str(recipient.account))
+                logger.debug('Member exists: %s', str(member.account))
         if accounts_to_add:
-            logger.debug('Adding share recipients: %s', [str(recipient.account) for recipient in accounts_to_add])
+            logger.debug('Adding member: %s', [str(member.account) for member in accounts_to_add])
         else:
-            logger.warning('Could not find new share recipients: %s', path.relative)
-        return accounts_to_add
-    logger.warning('Could not find valid share recipients: %s', path.relative)
-    return accounts_to_add
+            logger.warning('No new members found.')
+        collaborators.extend([create_collaborator(account) for account in accounts_to_add])
+        return collaborators
+    logger.warning('No valid members found.')
+    return collaborators
 
 
 class SearchMember(PortalCommand):
@@ -522,9 +487,9 @@ def valid_recipient(recipient):
     return is_valid
 
 
-def obtain_current_accounts(param):
+def obtain_current_accounts(collaborators):
     current_accounts = []
-    for collaborator in param.shares:
+    for collaborator in collaborators:
         if collaborator.invitee.type == CollaboratorType.EXT:
             current_accounts.append(collaborator.invitee.email)
         else:
@@ -552,6 +517,10 @@ class Open(PortalCommand):
     async def _a_execute(self):
         with self.trace_execution():
             return await self._function(self._receiver, self.get_parameter())
+
+    def _handle_exception(self, e):
+        if isinstance(e, exceptions.transport.NotFound):
+            raise exceptions.io.core.FileNotFoundError(self.path.relative) from e
 
 
 class Download(PortalCommand):
@@ -679,7 +648,7 @@ class ResourceIterator(ListDirectory):
         try:
             return super().execute()
         except FetchResourcesError as e:
-            self._handle_exception(e)
+            return self._handle_exception(e)
 
     def _fetch_resources(self):
         return self._function(self._receiver, '', self.get_parameter(), 'fetchResources', callback_response=FetchResourcesResponse)
@@ -688,7 +657,7 @@ class ResourceIterator(ListDirectory):
         with self.trace_execution():
             return self._fetch_resources()
 
-    def _a_execute(self):
+    async def _a_execute(self):
         return super()._a_execute()
 
     def _handle_exception(self, e):
@@ -715,7 +684,7 @@ class GetMetadata(ListDirectory):
     def _handle_response(self, r):
         if r.root is None:
             if not self.suppress_error:
-                raise ResourceNotFoundError(self.path.relative)
+                raise exceptions.io.core.ObjectNotFoundError(self.path.relative)
             return False, None
         return True, r.root
 
@@ -723,7 +692,7 @@ class GetMetadata(ListDirectory):
 class GetPermalink(GetMetadata):
 
     def _handle_response(self, r):
-        _, metadata = r
+        _, metadata = super()._handle_response(r)
         return metadata.permalink
 
 
@@ -781,6 +750,9 @@ class ListVersions(PortalCommand):
         with self.trace_execution():
             return await self._function(self._receiver, self.get_parameter())
 
+    def _handle_exception(self, e):
+        raise exceptions.io.core.GetSnapshotsError(self.path.relative) from e
+
 
 class CreateDirectory(PortalCommand):
     """Create Directory"""
@@ -830,15 +802,16 @@ class CreateDirectory(PortalCommand):
         if r is None or r == 'Ok':
             return path
         if r == ResourceError.FileWithTheSameNameExist:
-            raise FileExistsError(path)
+            raise exceptions.io.core.FileExistsError(path)
         if r == ResourceError.DestinationNotExists:
-            raise PathValidationError(path)
+            raise exceptions.io.core.FolderNotFoundError(self.path.parent.relative)
         if r == ResourceError.ReservedName:
-            raise ReservedNameError(path)
+            raise exceptions.io.core.ReservedNameError(path)
         if r == ResourceError.InvalidName:
-            raise NameSyntaxError(path)
+            raise exceptions.io.core.FilenameError(path)
         if r == ResourceError.PermissionDenied:
-            raise PermissionDenied(path)
+            raise exceptions.io.core.ReservedNameError(path)
+        raise exceptions.io.core.CreateDirectoryError(path)
 
 
 class GetShareMetadata(PortalCommand):
@@ -862,8 +835,10 @@ class GetShareMetadata(PortalCommand):
             return await self._function(self._receiver, self.get_parameter())
 
     def _handle_exception(self, e):
-        # Catch internal server error: e.error.response.error.msg: 'Resource does not exist'
-        return super()._handle_exception(e)
+        path = self.path.relative
+        if e.error.response.error.msg == 'Resource does not exist':
+            raise exceptions.io.core.ObjectNotFoundError(path) from e
+        raise exceptions.io.core.GetShareMetadataError(path) from e
 
 
 class Link(PortalCommand):
@@ -893,6 +868,12 @@ class Link(PortalCommand):
 
     def _handle_response(self, r):
         return r.publicLink
+
+    def _handle_exception(self, e):
+        path = self.path.relative
+        if e.error.response.error.msg == 'Resource does not exist':
+            raise exceptions.io.core.ObjectNotFoundError(path) from e
+        raise exceptions.io.core.CreateLinkError(path) from e
 
 
 class FilterShareMembers(PortalCommand):
@@ -932,32 +913,45 @@ class Share(PortalCommand):
         logger.info('Sharing: %s', self.path.relative)
 
     def get_parameter(self):
-        return create_share_parameter(self.path, self.as_project, self.allow_reshare, self.allow_sync)
+        param = create_collaboration_parameter(self.path, self.as_project, self.allow_reshare, self.allow_sync)
+        for member in self.members:
+            param.shares.append(create_collaborator(member) if isinstance(member, Collaborator) else member)
+        return param
 
     def _execute(self):
-        if self.members:
-            param = self.get_parameter()
-            for recipient in self.members:
-                add_share_recipient(param, recipient)
-            with self.trace_execution():
-                self._function(self._receiver, param)
-            return self.members
+        param = self.get_parameter()
+        with self.trace_execution():
+            self._function(self._receiver, param)
 
     async def _a_execute(self):
-        pass
+        param = self.get_parameter()
+        with self.trace_execution():
+            await self._function(self._receiver, param)
+
+    def _handle_response(self, r):
+        return self.members
 
 
-class AddMembers(PortalCommand):
+def collaborators_from_server_object(server_collaborators):
+        collaborators = []
+        for collaborator in server_collaborators:
+            settings = Object()
+            settings._classname = 'ShareConfig'  # pylint: disable=protected-access
+            settings.accessMode = collaborator.accessMode
+            settings.expiration = collaborator.expiration
+            settings.protectionLevel = collaborator.protectionLevel
+            settings.invitee = collaborator.invitee
+            collaborators.append(settings)
+        return collaborators
 
-    def __init__(self, function, receiver, path, metadata, members):
-        super().__init__(function, receiver)
-        self.path = path
-        self.metadata = metadata
-        self.members = members
-        self._new_members = None
 
-    def get_parameter(self):
-        return create_share_parameter(self.path, self.metadata.teamProject, self.metadata.allowReshare, self.metadata.shouldSync, self.metadata.shares)
+class AddMembers(Share):
+
+    def __init__(self, function, receiver, path, metadata, new_members):
+        collaborators = collaborators_from_server_object(metadata.shares)
+        self._new_members = new_members
+        super().__init__(function, receiver, path, extend_collaborators(collaborators, new_members), metadata.teamProject,
+                         metadata.allowReshare, metadata.shouldSync)
 
     def _before_command(self):
         logger.info('Granting access for: (%s) to: %s',
@@ -965,67 +959,58 @@ class AddMembers(PortalCommand):
                     self.path.relative)
 
     def _execute(self):
-        current_accounts = obtain_current_accounts(self.metadata)
-        param = self.get_parameter()
-        self._new_members = find_recipients_to_add(self.path, self.metadata, current_accounts, self.members)
         if self._new_members:
-            for recipient in self._new_members:
-                add_share_recipient(param, recipient)
-            with self.trace_execution():
-                self._function(self._receiver, param)
-        return self.members
+            return super()._execute()
 
     async def _a_execute(self):
-        pass
+        if self._new_members:
+            return await super()._a_execute()
 
 
-class RemoveMembers(PortalCommand):
+class RemoveMembers(Share):
 
     def __init__(self, function, receiver, path, metadata, members):
-        super().__init__(function, receiver)
-        self.path = path
-        self.metadata = metadata
-        self.members = members
-        self._to_remove = None
+        members, revoke = self._filter_collaborators(metadata.shares, members)
+        super().__init__(function, receiver, path, collaborators_from_server_object(members), metadata.teamProject, metadata.allowReshare, metadata.shouldSync)
+        self._revoke = revoke
 
     def _before_command(self):
-        logger.info('Revoking access for: (%s) from: %s', ','.join(m.upn for m in self._to_remove), self.path.relative)
-
-    def get_parameter(self):
-        return create_share_parameter(self.path, self.metadata.teamProject, self.metadata.allowReshare, self.metadata.shouldSync, self.members)
+        logger.info('Revoking access for: (%s) from: %s', ','.join(m.upn for m in self._revoke), self.path.relative)
 
     def _execute(self):
-        current_accounts = obtain_current_accounts(self.metadata)
-        self.members, self._to_remove = find_recipients_to_remove(self.metadata, self.path, current_accounts, self.members)
-        if self._to_remove:
-            param = self.get_parameter()
-            with self.trace_execution():
-                self._function(self._receiver, param)
-        return self._to_remove
+        if self._revoke:
+            return super()._execute()
 
     async def _a_execute(self):
-        pass
+        if self._revoke:
+            return await super()._a_execute()
+
+    def _filter_collaborators(self, collaborators, accounts):
+        current_accounts = obtain_current_accounts(collaborators)
+        accounts_to_keep, accounts_to_remove = [], []
+        if current_accounts:
+            for idx, current_account in enumerate(current_accounts):
+                if current_account not in accounts:
+                    accounts_to_keep.append(collaborators[idx])
+                else:
+                    logger.debug('Found member: %s', str(current_account))
+                    accounts_to_remove.append(current_account)
+            if not accounts_to_remove:
+                logger.debug('Member not found: %s', [str(member) for member in accounts])
+            else:
+                logger.debug('Removing member: %s', [str(account) for account in accounts_to_remove])
+        else:
+            logger.debug('No members.')
+        return accounts_to_keep, accounts_to_remove
 
 
-class UnShare(PortalCommand):
+class UnShare(Share):
 
     def __init__(self, function, receiver, path):
-        super().__init__(function, receiver)
-        self.path = path
-
-    def get_parameter(self):
-        return create_share_parameter(self.path, True, True, True)
+        super().__init__(function, receiver, path, [], True, True, True)
 
     def _before_command(self):
         logger.info('Revoking Share: %s', self.path.relative)
-
-    def _execute(self):
-        with self.trace_execution():
-            return self._function(self._receiver, self.get_parameter())
-
-    async def _a_execute(self):
-        with self.trace_execution():
-            return await self._function(self._receiver, self.get_parameter())
 
 
 class BackgroundPortalCommand(PortalCommand):
@@ -1166,24 +1151,26 @@ class ResolverCommand(BackgroundPortalCommand):
 
     def execute(self):
         try:
-            super().execute()
-        except FileConflict as e:
+            return super().execute()
+        except exceptions.io.core.FileExistsError as e:
             if self.resolver:
                 return self._try_with_resolver(e.cursor)
+            return self._handle_exception(e)
 
     async def a_execute(self):
         try:
-            await super().a_execute()
-        except FileConflict as e:
+            return await super().a_execute()
+        except exceptions.io.core.FileExistsError as e:
             if self.resolver:
                 return await self._a_try_with_resolver(e.cursor)
+            return self._handle_exception(e)
 
     def _handle_response(self, r):
         if not self.block:
             return r
 
         if r.error_type == 'Conflict':
-            raise FileConflict(r.cursor)
+            raise exceptions.io.core.FileExistsError(r.cursor)
 
 
 class Copy(ResolverCommand):

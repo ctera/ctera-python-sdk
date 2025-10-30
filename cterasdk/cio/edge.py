@@ -1,13 +1,11 @@
 import logging
 from datetime import datetime
-from contextlib import contextmanager
 from pathlib import Path
 from ..common import Object
 from ..edge.enum import ResourceError
 from ..objects.uri import unquote
 from . import common
-from ..exceptions.transport import NotFound
-from ..exceptions.io import StorageError, ResourceExistsError, RestrictedPathError, ResourceNotFoundError, NotADirectory
+from .. import exceptions
 from .actions import EdgeCommand
 from ..lib.storage import synfs, asynfs, commonfs
 
@@ -42,32 +40,6 @@ class EdgePath(common.BasePath):
             source, destination = reference
             return (EdgePath(scope, source), EdgePath(scope, destination))
         return EdgePath(scope, reference)
-
-
-file_access_errors = {
-    "File exists": ResourceExistsError,
-    "Creating a folder in this location is forbidden": RestrictedPathError
-}
-
-
-def accept_error(error_message, **kwargs):
-    """
-    Check if response contains an error.
-    """
-    if error_message not in ['OK']:
-        exception_classname = file_access_errors.get(error_message, StorageError)
-        try:
-            if exception_classname:
-                raise exception_classname(**kwargs)
-        except ResourceExistsError as error:
-            logger.warning('Resource already exists: a file or folder with this name already exists.')
-            raise error
-        except RestrictedPathError as error:
-            logger.error('Creating a folder in the specified location is forbidden.')
-            raise error
-        except StorageError as error:
-            logger.error('An error occurred while performing operation.')
-            raise error
 
 
 class Open(EdgeCommand):
@@ -268,8 +240,8 @@ class GetMetadata(ListDirectory):
 
     def _handle_exception(self, e):
         if not self.suppress_error:
-            if isinstance(e, NotFound):
-                raise ResourceNotFoundError(self.path.relative)
+            if isinstance(e, exceptions.transport.NotFound):
+                raise exceptions.io.edge.FileNotFoundError(self.path.relative) from e
         return False, None
 
 
@@ -289,7 +261,7 @@ class EnsureDirectory(EdgeCommand):
     def _handle_response(self, r):
         exists, resource = r if r is not None else (False, None)
         if (not exists or not resource.is_dir) and not self.suppress_error:
-            raise NotADirectory(self.path.relative)
+            raise exceptions.io.edge.NotADirectoryError(self.path.relative)
         return resource.is_dir if exists else False, resource
 
 
@@ -324,7 +296,7 @@ class CreateDirectory(EdgeCommand):
                 for path in self._parents_generator():
                     try:
                         CreateDirectory(self._function, self._receiver, path).execute()
-                    except (FileExistsError, RestrictedPathError):
+                    except (exceptions.io.edge.FileExistsError, exceptions.io.edge.ROFSError):
                         pass
             return self._function(self._receiver, self.path.absolute)
 
@@ -334,7 +306,7 @@ class CreateDirectory(EdgeCommand):
                 for path in self._parents_generator():
                     try:
                         await CreateDirectory(self._function, self._receiver, path).a_execute()
-                    except (FileExistsError, RestrictedPathError):
+                    except (exceptions.io.edge.FileExistsError, exceptions.io.edge.ROFSError):
                         pass
             return await self._function(self._receiver, self.path.absolute)
 
@@ -344,9 +316,9 @@ class CreateDirectory(EdgeCommand):
 
     def _handle_exception(self, e):
         if e.error.response.error.msg == ResourceError.FileExists:
-            raise FileExistsError(self.path.relative)
+            raise exceptions.io.edge.FileExistsError(self.path.relative)
         if e.error.response.error.msg == ResourceError.Forbidden:
-            raise RestrictedPathError(path=self.path.relative)
+            raise exceptions.io.edge.ROFSError(path=self.path.relative)
 
 
 class Copy(EdgeCommand):
