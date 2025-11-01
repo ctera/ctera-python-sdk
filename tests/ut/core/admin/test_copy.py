@@ -16,7 +16,7 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
         src = 'cloud/Users'
         dst = 'public'
         self._init_global_admin(execute_response=expected_response)
-        actual_response = io.copy(self._global_admin, self._get_object_path(src), destination=self._get_object_path(dst))
+        actual_response = self._global_admin.files.copy(self._get_object_path(src), destination=self._get_object_path(dst))
         self.assertEqual(expected_response, actual_response)
         self._global_admin.api.execute.assert_called_once_with('', 'copyResources', mock.ANY)
         expected_copy_param = self._get_expected_copy_params(src, dst)

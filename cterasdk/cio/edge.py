@@ -339,11 +339,8 @@ class Copy(EdgeCommand):
             self.path, self.destination = self.path, self.destination.join(self.path.name)
         return (self.path.absolute, self.destination.absolute)
 
-    def _action_message():
-        return 'Copying'
-
     def _before_command(self):
-        logger.info('%s: %s to: %s', self._action_message(), self.path.relative, self.destination.relative)
+        logger.info('%s: %s to: %s', 'Copying', self.path.relative, self.destination.relative)
 
     def _execute(self):
         source, destination = self.get_parameter()
@@ -359,8 +356,8 @@ class Copy(EdgeCommand):
 class Move(Copy):
     """Move"""
 
-    def _action_message(self):
-        return 'Moving'
+    def _before_command(self):
+        logger.info('%s: %s to: %s', 'Moving', self.path.relative, self.destination.relative)
 
 
 class Rename(Move):

@@ -1,3 +1,5 @@
+# pylint: disable=too-many-lines
+
 import re
 import logging
 import asyncio
@@ -981,11 +983,11 @@ class RemoveMembers(Share):
 
     def _execute(self):
         if self._revoke:
-            return super()._execute()
+            super()._execute()
 
     async def _a_execute(self):
         if self._revoke:
-            return await super()._a_execute()
+            await super()._a_execute()
 
     @staticmethod
     def _filter_collaborators(collaborators, accounts):
@@ -1191,6 +1193,7 @@ class Copy(ResolverCommand):
                 dest = CorePath.instance('', cursor.destResource).relative
                 raise exceptions.io.core.CopyError(self.paths, cursor) from exceptions.io.core.FileConflictError(dest)
             raise exceptions.io.core.CopyError(self.paths, cursor)
+        return r
 
 
 class Move(ResolverCommand):
@@ -1232,3 +1235,4 @@ class Move(ResolverCommand):
                 dest = CorePath.instance('', cursor.destResource).relative
                 raise exceptions.io.core.MoveError(self.paths, cursor) from exceptions.io.core.FileConflictError(dest)
             raise exceptions.io.core.MoveError(self.paths, cursor)
+        return r
