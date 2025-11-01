@@ -3,7 +3,6 @@ from pathlib import Path
 
 from cterasdk.common.object import Object
 from cterasdk.cio.core import CorePath
-from cterasdk.core.files import io
 from tests.ut.core.admin import base_admin
 
 
