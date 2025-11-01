@@ -37,6 +37,7 @@ async def handle_many(core, param, directory):
     async with fs.EnsureDirectory(listdir, core, directory) as (_, resource):
         return await core.io.download_zip(str(resource.cloudFolderInfo.uid), param)
 
+
 async def upload(core, cloudfolder, param):
     return await core.io.upload(cloudfolder, param)
 

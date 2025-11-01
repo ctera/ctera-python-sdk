@@ -3,7 +3,6 @@ from contextlib import contextmanager
 from ..exceptions.transport import HTTPError
 
 
-
 class RemoteCommand(ABC):
     """Command on a Remote Resource"""
 

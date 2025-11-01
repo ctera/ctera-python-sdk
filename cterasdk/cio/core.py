@@ -339,7 +339,7 @@ class UploadFile(PortalCommand):
         with open(self.path, 'rb') as handle:
             with self.trace_execution():
                 return await Upload(self._function, self._receiver, self._metadata_function, metadata['name'],
-                              self.destination, metadata['size'], handle).a_execute()
+                                    self.destination, metadata['size'], handle).a_execute()
 
 
 def _is_sharing_on_user_behalf(path):
@@ -793,7 +793,7 @@ class CreateDirectory(PortalCommand):
 
 
 class GetShareMetadata(PortalCommand):
-    
+
     def __init__(self, function, receiver, path):
         super().__init__(function, receiver)
         self.path = path
@@ -942,16 +942,16 @@ class Share(PortalCommand):
 
 
 def collaborators_from_server_object(server_collaborators):
-        collaborators = []
-        for collaborator in server_collaborators:
-            settings = Object()
-            settings._classname = 'ShareConfig'  # pylint: disable=protected-access
-            settings.accessMode = collaborator.accessMode
-            settings.expiration = collaborator.expiration
-            settings.protectionLevel = collaborator.protectionLevel
-            settings.invitee = collaborator.invitee
-            collaborators.append(settings)
-        return collaborators
+    collaborators = []
+    for collaborator in server_collaborators:
+        settings = Object()
+        settings._classname = 'ShareConfig'  # pylint: disable=protected-access
+        settings.accessMode = collaborator.accessMode
+        settings.expiration = collaborator.expiration
+        settings.protectionLevel = collaborator.protectionLevel
+        settings.invitee = collaborator.invitee
+        collaborators.append(settings)
+    return collaborators
 
 
 class AddMembers(Share):
@@ -980,7 +980,8 @@ class RemoveMembers(Share):
 
     def __init__(self, function, receiver, path, metadata, members):
         members, revoke = self._filter_collaborators(metadata.shares, members)
-        super().__init__(function, receiver, path, collaborators_from_server_object(members), metadata.teamProject, metadata.allowReshare, metadata.shouldSync)
+        super().__init__(function, receiver, path, collaborators_from_server_object(members), metadata.teamProject,
+                         metadata.allowReshare, metadata.shouldSync)
         self._revoke = revoke
 
     def _before_command(self):
@@ -1086,7 +1087,7 @@ class MultiResourceCommand(BackgroundPortalCommand):
 
     def get_parameter(self):
         param = ActionResourcesParam.instance()
-        paths = [paths] if not isinstance(self.paths, tuple) else self.paths
+        paths = [self.paths] if not isinstance(self.paths, tuple) else self.paths
         for path in paths:
             param.add(SrcDstParam.instance(src=path.absolute_encode))
         return param
@@ -1173,10 +1174,12 @@ class Copy(ResolverCommand):
         return 'Copying'
 
     def _try_with_resolver(self, cursor):
-        return Copy(self._function, self._receiver, self.block, *self.paths, destination=self.destination, resolver=self.resolver, cursor=cursor).execute()
+        return Copy(self._function, self._receiver, self.block, *self.paths,
+                    destination=self.destination, resolver=self.resolver, cursor=cursor).execute()
 
     async def _a_try_with_resolver(self, cursor):
-        return await Copy(self._function, self._receiver, self.block, *self.paths, destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
+        return await Copy(self._function, self._receiver, self.block, *self.paths,
+                          destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
 
     def execute(self):
         try:
@@ -1213,10 +1216,12 @@ class Move(ResolverCommand):
         return 'Moving'
 
     def _try_with_resolver(self, cursor):
-        return Move(self._function, self._receiver, self.block, *self.paths, destination=self.destination, resolver=self.resolver, cursor=cursor).execute()
+        return Move(self._function, self._receiver, self.block, *self.paths,
+                    destination=self.destination, resolver=self.resolver, cursor=cursor).execute()
 
     async def _a_try_with_resolver(self, cursor):
-        return await Move(self._function, self._receiver, self.block, *self.paths, destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
+        return await Move(self._function, self._receiver, self.block, *self.paths,
+                          destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
 
     def execute(self):
         try:

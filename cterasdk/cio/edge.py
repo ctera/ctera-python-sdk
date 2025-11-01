@@ -459,5 +459,5 @@ class UploadFile(EdgeCommand):
         metadata = self._get_properties()
         with open(self.path, 'rb') as handle:
             with self.trace_execution():
-                return await Upload(self._function, self._receiver, self._metadata_function, metadata['name'], self.destination, handle).a_execute()
-
+                return await Upload(self._function, self._receiver, self._metadata_function,
+                                    metadata['name'], self.destination, handle).a_execute()

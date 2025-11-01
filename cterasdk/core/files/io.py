@@ -64,6 +64,7 @@ def share(core, path, members, as_project, allow_reshare, allow_sync):
         with fs.FilterShareMembers(_search_collaboration_member, core, members, resource.cloudFolderInfo.uid) as members:
             return fs.Share(update_share, core, path, members, as_project, allow_reshare, allow_sync).execute()
 
+
 def add_share_recipients(core, path, members):
     with fs.GetMetadata(listdir, core, path) as (_, resource):
         with fs.GetShareMetadata(list_shares, core, path) as shares:
