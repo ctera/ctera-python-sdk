@@ -234,7 +234,7 @@ class EnsureDirectory(PortalCommand):
     def _handle_response(self, r):
         exists, resource = r
         if (not exists or not resource.isFolder) and not self.suppress_error:
-            raise NotADirectoryError(self.path.relative)
+            raise exceptions.io.core.NotADirectoryException(self.path.relative)
         return resource.isFolder if exists else False, resource
 
 
@@ -498,7 +498,7 @@ class Open(PortalCommand):
 
     def _handle_exception(self, e):
         if isinstance(e, exceptions.transport.NotFound):
-            raise exceptions.io.core.FileNotFoundError(self.path.relative) from e
+            raise exceptions.io.core.FileNotFoundException(self.path.relative) from e
 
 
 class Download(PortalCommand):
@@ -619,9 +619,6 @@ class ListDirectory(PortalCommand):
 
 class ResourceIterator(ListDirectory):
 
-    def __init__(self, function, receiver, path, depth, include_deleted, search_criteria, limit):
-        super().__init__(function, receiver, path, depth, include_deleted, search_criteria, limit)
-
     def execute(self):
         try:
             return super().execute()
@@ -634,12 +631,6 @@ class ResourceIterator(ListDirectory):
     def _execute(self):
         with self.trace_execution():
             return self._fetch_resources()
-
-    async def _a_execute(self):
-        return super()._a_execute()
-
-    def _handle_exception(self, e):
-        return super()._handle_exception(e)
 
 
 class GetMetadata(ListDirectory):
@@ -762,7 +753,7 @@ class CreateDirectory(PortalCommand):
             for path in self._parents_generator():
                 try:
                     CreateDirectory(self._function, self._receiver, path).execute()
-                except exceptions.io.core.FileExistsError:
+                except exceptions.io.core.FileConflictError:
                     pass
         return self._function(self._receiver, self.get_parameter())
 
@@ -771,7 +762,7 @@ class CreateDirectory(PortalCommand):
             for path in self._parents_generator():
                 try:
                     await CreateDirectory(self._function, self._receiver, path).a_execute()
-                except exceptions.io.core.FileExistsError:
+                except exceptions.io.core.FileConflictError:
                     pass
         return await self._function(self._receiver, self.get_parameter())
 
@@ -780,7 +771,7 @@ class CreateDirectory(PortalCommand):
         if r is None or r == 'Ok':
             return path
         if r == ResourceError.FileWithTheSameNameExist:
-            raise exceptions.io.core.FileExistsError(path)
+            raise exceptions.io.core.FileConflictError(path)
         if r == ResourceError.DestinationNotExists:
             raise exceptions.io.core.FolderNotFoundError(self.path.parent.relative)
         if r == ResourceError.ReservedName:
@@ -861,7 +852,8 @@ class FilterShareMembers(PortalCommand):
         self.members = members
         self.cloud_folder_uid = cloud_folder_uid
 
-    def _valid_recipient(self, recipient):
+    @staticmethod
+    def _valid_recipient(recipient):
         is_valid = True
         if not recipient.account:
             logger.warning('No account information found. Skipping. %s', {'account': recipient.account})
@@ -886,7 +878,7 @@ class FilterShareMembers(PortalCommand):
     @contextmanager
     def _enumerate_members(self, collaborators):
         internals = []
-        for member in filter(self._valid_recipient, self.members):
+        for member in filter(FilterShareMembers._valid_recipient, self.members):
             if member.type == CollaboratorType.EXT:
                 collaborators.append(member)
             else:
@@ -897,16 +889,16 @@ class FilterShareMembers(PortalCommand):
     def _execute(self):
         collaborators = []
         with self._enumerate_members(collaborators) as members:
-            for i, member in enumerate(members):
-                members[i].collaborator = SearchMember(self._function, self._receiver, member.account, self.cloud_folder_uid).execute()
+            for member in enumerate(members):
+                members.collaborator = SearchMember(self._function, self._receiver, member.account, self.cloud_folder_uid).execute()
         return collaborators
 
     async def _a_execute(self):
         collaborators = []
         with self._enumerate_members(collaborators) as members:
-            for i, member in enumerate(members):
-                members[i].collaborator = await SearchMember(self._function,
-                                                             self._receiver, member.account, self.cloud_folder_uid).a_execute()
+            for member in enumerate(members):
+                members.collaborator = await SearchMember(self._function,
+                                                          self._receiver, member.account, self.cloud_folder_uid).a_execute()
         return collaborators
 
 
@@ -969,17 +961,17 @@ class AddMembers(Share):
 
     def _execute(self):
         if self._new_members:
-            return super()._execute()
+            super()._execute()
 
     async def _a_execute(self):
         if self._new_members:
-            return await super()._a_execute()
+            await super()._a_execute()
 
 
 class RemoveMembers(Share):
 
     def __init__(self, function, receiver, path, metadata, members):
-        members, revoke = self._filter_collaborators(metadata.shares, members)
+        members, revoke = RemoveMembers._filter_collaborators(metadata.shares, members)
         super().__init__(function, receiver, path, collaborators_from_server_object(members), metadata.teamProject,
                          metadata.allowReshare, metadata.shouldSync)
         self._revoke = revoke
@@ -995,7 +987,8 @@ class RemoveMembers(Share):
         if self._revoke:
             return await super()._a_execute()
 
-    def _filter_collaborators(self, collaborators, accounts):
+    @staticmethod
+    def _filter_collaborators(collaborators, accounts):
         current_accounts = obtain_current_accounts(collaborators)
         accounts_to_keep, accounts_to_remove = [], []
         if current_accounts:
@@ -1099,9 +1092,6 @@ class MultiResourceCommand(BackgroundPortalCommand):
 
 class Delete(MultiResourceCommand):
 
-    def __init__(self, function, receiver, block, *paths):
-        super().__init__(function, receiver, block, *paths)
-
     def _action_message(self):
         return 'Deleting'
 
@@ -1112,9 +1102,6 @@ class Delete(MultiResourceCommand):
 
 
 class Recover(MultiResourceCommand):
-
-    def __init__(self, function, receiver, block, *paths):
-        super().__init__(function, receiver, block, *paths)
 
     def _action_message(self):
         return 'Recovering'
@@ -1167,9 +1154,6 @@ class ResolverCommand(BackgroundPortalCommand):
 
 class Copy(ResolverCommand):
 
-    def __init__(self, function, receiver, block, *paths, destination=None, resolver=None, cursor=None):
-        super().__init__(function, receiver, block, *paths, destination=destination, resolver=resolver, cursor=cursor)
-
     def _action_message(self):
         return 'Copying'
 
@@ -1201,16 +1185,15 @@ class Copy(ResolverCommand):
         if not self.block:
             return r
 
-        cursor = r.cursor
-        if r.error_type == 'Conflict':
-            dest = CorePath.instance('', cursor.destResource).relative
-            raise exceptions.io.core.CopyError(self.paths, cursor) from exceptions.io.core.FileExistsError(dest)
+        if r.failed or r.completed_with_warnings:
+            cursor = r.cursor
+            if r.error_type == 'Conflict':
+                dest = CorePath.instance('', cursor.destResource).relative
+                raise exceptions.io.core.CopyError(self.paths, cursor) from exceptions.io.core.FileConflictError(dest)
+            raise exceptions.io.core.CopyError(self.paths, cursor)
 
 
 class Move(ResolverCommand):
-
-    def __init__(self, function, receiver, block, *paths, destination=None, resolver=None, cursor=None):
-        super().__init__(function, receiver, block, *paths, destination=destination, resolver=resolver, cursor=cursor)
 
     def _action_message(self):
         return 'Moving'
@@ -1243,7 +1226,9 @@ class Move(ResolverCommand):
         if not self.block:
             return r
 
-        cursor = r.cursor
-        if r.error_type == 'Conflict':
-            dest = CorePath.instance('', cursor.destResource).relative
-            raise exceptions.io.core.MoveError(self.paths, cursor) from exceptions.io.core.FileExistsError(dest)
+        if r.failed or r.completed_with_warnings:
+            cursor = r.cursor
+            if r.error_type == 'Conflict':
+                dest = CorePath.instance('', cursor.destResource).relative
+                raise exceptions.io.core.MoveError(self.paths, cursor) from exceptions.io.core.FileConflictError(dest)
+            raise exceptions.io.core.MoveError(self.paths, cursor)

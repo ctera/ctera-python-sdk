@@ -1,11 +1,8 @@
 import errno
-from .base import BaseIOError
+from .base import BaseIOError, EREMOTEIO
 
 
-EREMOTEIO = 121
-
-
-class FileExistsError(BaseIOError):
+class FileConflictError(BaseIOError):
 
     def __init__(self, filename):
         super().__init__(errno.EEXIST, 'File exists', filename)
@@ -17,7 +14,7 @@ class ObjectNotFoundError(BaseIOError):
         super().__init__(errno.ENOENT, 'Object not found', filename)
 
 
-class FileNotFoundError(BaseIOError):
+class FileNotFoundException(BaseIOError):
 
     def __init__(self, filename):
         super().__init__(errno.ENOENT, 'File not found', filename)
@@ -29,7 +26,7 @@ class FolderNotFoundError(BaseIOError):
         super().__init__(errno.ENOENT, 'Folder not found', filename)
 
 
-class NotADirectoryError(BaseIOError):
+class NotADirectoryException(BaseIOError):
 
     def __init__(self, filename):
         super().__init__(errno.ENOTDIR, 'Not a directory', filename)

@@ -51,13 +51,13 @@ class RemoteCommand(ABC):
     async def _a_execute(self):
         raise NotImplementedError("Subclass must implement the '_a_execute' method.")
 
-    def _handle_response(self, r):
+    def _handle_response(self, r):  # pylint: disable=no-self-use
         """
         Override this method to handle the response.
         """
         return r
 
-    def _handle_exception(self, e):
+    def _handle_exception(self, e):  # pylint: disable=no-self-use
         """
         Override this method to handle exceptions.
         """
@@ -74,12 +74,8 @@ class RemoteCommand(ABC):
 
 
 class PortalCommand(RemoteCommand):
-
-    def __init__(self, function, receiver):
-        super().__init__(function, receiver)
+    """Abstract Portal Command"""
 
 
 class EdgeCommand(RemoteCommand):
-
-    def __init__(self, function, receiver):
-        super().__init__(function, receiver)
+    """Abstract Edge Command"""

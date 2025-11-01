@@ -242,7 +242,7 @@ class GetMetadata(ListDirectory):
     def _handle_exception(self, e):
         if not self.suppress_error:
             if isinstance(e, exceptions.transport.NotFound):
-                raise exceptions.io.edge.FileNotFoundError(self.path.relative) from e
+                raise exceptions.io.edge.FileNotFoundException(self.path.relative) from e
         return False, None
 
 
@@ -262,7 +262,7 @@ class EnsureDirectory(EdgeCommand):
     def _handle_response(self, r):
         exists, resource = r if r is not None else (False, None)
         if (not exists or not resource.is_dir) and not self.suppress_error:
-            raise exceptions.io.edge.NotADirectoryError(self.path.relative)
+            raise exceptions.io.edge.NotADirectoryException(self.path.relative)
         return resource.is_dir if exists else False, resource
 
 
@@ -297,7 +297,7 @@ class CreateDirectory(EdgeCommand):
                 for path in self._parents_generator():
                     try:
                         CreateDirectory(self._function, self._receiver, path).execute()
-                    except (exceptions.io.edge.FileExistsError, exceptions.io.edge.ROFSError):
+                    except (exceptions.io.edge.FileConflictError, exceptions.io.edge.ROFSError):
                         pass
             return self._function(self._receiver, self.path.absolute)
 
@@ -307,17 +307,18 @@ class CreateDirectory(EdgeCommand):
                 for path in self._parents_generator():
                     try:
                         await CreateDirectory(self._function, self._receiver, path).a_execute()
-                    except (exceptions.io.edge.FileExistsError, exceptions.io.edge.ROFSError):
+                    except (exceptions.io.edge.FileConflictError, exceptions.io.edge.ROFSError):
                         pass
             return await self._function(self._receiver, self.path.absolute)
 
     def _handle_response(self, r):
         if r == 'OK':
             return self.path.relative
+        raise exceptions.io.edge.CreateDirectoryError(self.path)
 
     def _handle_exception(self, e):
         if e.error.response.error.msg == ResourceError.FileExists:
-            raise exceptions.io.edge.FileExistsError(self.path.relative)
+            raise exceptions.io.edge.FileConflictError(self.path.relative)
         if e.error.response.error.msg == ResourceError.Forbidden:
             raise exceptions.io.edge.ROFSError(self.path.relative)
 
@@ -338,7 +339,7 @@ class Copy(EdgeCommand):
             self.path, self.destination = self.path, self.destination.join(self.path.name)
         return (self.path.absolute, self.destination.absolute)
 
-    def _action_message(self):
+    def _action_message():
         return 'Copying'
 
     def _before_command(self):
