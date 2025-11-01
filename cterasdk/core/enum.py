@@ -651,11 +651,11 @@ class ConflictHandler:
     Conflict Handler
 
     :ivar str Skip: Skip.
-    :ivar str Override: Override target.
+    :ivar str Overwrite: Overwrite target.
     :ivar str Rename: Append date to file name.
     """
     Skip = 'Skip'
-    Override = 'Override'
+    Overwrite = 'Override'
     Rename = 'Rename'
 
 

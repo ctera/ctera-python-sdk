@@ -2,6 +2,7 @@ import re
 import logging
 import asyncio
 from abc import abstractmethod
+from contextlib import contextmanager
 from ..objects.uri import quote, unquote
 from ..common import Object, DateTimeUtils
 from ..core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, \
@@ -464,29 +465,6 @@ class SearchMember(PortalCommand):
         return None
 
 
-def valid_recipient(recipient):
-    is_valid = True
-    if not recipient.account:
-        logger.warning('No account information found. Skipping. %s', {'account': recipient.account})
-        is_valid = False
-    if not isinstance(recipient.account, (str, UserAccount, GroupAccount)):
-        logger.warning('Invalid recipient type. Skipping. %s', {'type': type(recipient.account)})
-        is_valid = False
-    if recipient.access not in [v for k, v in FileAccessMode.__dict__.items() if not k.startswith('_')]:
-        logger.warning('Invalid file access mode. Skipping. %s', {'account': str(recipient.account), 'access': recipient.access})
-        is_valid = False
-    if recipient.type == CollaboratorType.EXT and not isinstance(recipient.account, str):
-        logger.warning('Invalid external recipient type. Skipping. %s', {'expected': 'str', 'actual': type(recipient.account)})
-        is_valid = False
-    if recipient.type in [CollaboratorType.LU, CollaboratorType.LG] and not recipient.account.is_local:
-        logger.warning('Expected local account. Received a domain account. Skipping. %s', {'account': str(recipient.account)})
-        is_valid = False
-    if recipient.type in [CollaboratorType.DU, CollaboratorType.DG] and recipient.account.is_local:
-        logger.warning('Expected domain account. Received a local account. Skipping. %s', {'account': str(recipient.account)})
-        is_valid = False
-    return is_valid
-
-
 def obtain_current_accounts(collaborators):
     current_accounts = []
     for collaborator in collaborators:
@@ -784,7 +762,7 @@ class CreateDirectory(PortalCommand):
             for path in self._parents_generator():
                 try:
                     CreateDirectory(self._function, self._receiver, path).execute()
-                except FileExistsError:
+                except exceptions.io.core.FileExistsError:
                     pass
         return self._function(self._receiver, self.get_parameter())
 
@@ -793,7 +771,7 @@ class CreateDirectory(PortalCommand):
             for path in self._parents_generator():
                 try:
                     await CreateDirectory(self._function, self._receiver, path).a_execute()
-                except FileExistsError:
+                except exceptions.io.core.FileExistsError:
                     pass
         return await self._function(self._receiver, self.get_parameter())
 
@@ -883,20 +861,53 @@ class FilterShareMembers(PortalCommand):
         self.members = members
         self.cloud_folder_uid = cloud_folder_uid
 
-    def _execute(self):
-        members = []
-        for member in filter(valid_recipient, self.members):
-            if not member.type == CollaboratorType.EXT:
-                collaborator = SearchMember(self._function, self._receiver, member.account, self.cloud_folder_uid).execute()
-                if collaborator:
-                    member.collaborator = collaborator
-                    members.append(member)
+    def _valid_recipient(self, recipient):
+        is_valid = True
+        if not recipient.account:
+            logger.warning('No account information found. Skipping. %s', {'account': recipient.account})
+            is_valid = False
+        if not isinstance(recipient.account, (str, UserAccount, GroupAccount)):
+            logger.warning('Invalid recipient type. Skipping. %s', {'type': type(recipient.account)})
+            is_valid = False
+        if recipient.access not in [v for k, v in FileAccessMode.__dict__.items() if not k.startswith('_')]:
+            logger.warning('Invalid file access mode. Skipping. %s', {'account': str(recipient.account), 'access': recipient.access})
+            is_valid = False
+        if recipient.type == CollaboratorType.EXT and not isinstance(recipient.account, str):
+            logger.warning('Invalid external recipient type. Skipping. %s', {'expected': 'str', 'actual': type(recipient.account)})
+            is_valid = False
+        if recipient.type in [CollaboratorType.LU, CollaboratorType.LG] and not recipient.account.is_local:
+            logger.warning('Expected local account. Received a domain account. Skipping. %s', {'account': str(recipient.account)})
+            is_valid = False
+        if recipient.type in [CollaboratorType.DU, CollaboratorType.DG] and recipient.account.is_local:
+            logger.warning('Expected domain account. Received a local account. Skipping. %s', {'account': str(recipient.account)})
+            is_valid = False
+        return is_valid
+
+    @contextmanager
+    def _enumerate_members(self, collaborators):
+        internals = []
+        for member in filter(self._valid_recipient, self.members):
+            if member.type == CollaboratorType.EXT:
+                collaborators.append(member)
             else:
-                members.append(member)
-        return members
+                internals.append(member)
+        yield internals
+        collaborators.extend([member for member in internals if member.collaborator is not None])
+
+    def _execute(self):
+        collaborators = []
+        with self._enumerate_members(collaborators) as members:
+            for i, member in enumerate(members):
+                members[i].collaborator = SearchMember(self._function, self._receiver, member.account, self.cloud_folder_uid).execute()
+        return collaborators
 
     async def _a_execute(self):
-        pass
+        collaborators = []
+        with self._enumerate_members(collaborators) as members:
+            for i, member in enumerate(members):
+                members[i].collaborator = await SearchMember(self._function,
+                                                             self._receiver, member.account, self.cloud_folder_uid).a_execute()
+        return collaborators
 
 
 class Share(PortalCommand):
@@ -919,14 +930,12 @@ class Share(PortalCommand):
         return param
 
     def _execute(self):
-        param = self.get_parameter()
         with self.trace_execution():
-            self._function(self._receiver, param)
+            return self._function(self._receiver, self.get_parameter())
 
     async def _a_execute(self):
-        param = self.get_parameter()
         with self.trace_execution():
-            await self._function(self._receiver, param)
+            return await self._function(self._receiver, self.get_parameter())
 
     def _handle_response(self, r):
         return self.members
@@ -1095,6 +1104,11 @@ class Delete(MultiResourceCommand):
     def _action_message(self):
         return 'Deleting'
 
+    def _handle_response(self, r):
+        if r.failed or r.completed_with_warnings:
+            cursor = r.cursor
+            raise exceptions.io.core.DeleteError(self.paths, cursor)
+
 
 class Recover(MultiResourceCommand):
 
@@ -1147,30 +1161,7 @@ class ResolverCommand(BackgroundPortalCommand):
 
     @abstractmethod
     def _action_message(self):
-        raise NotImplementedError("Subclass must implement the '_action_message' method")         
-
-    def execute(self):
-        try:
-            return super().execute()
-        except exceptions.io.core.FileExistsError as e:
-            if self.resolver:
-                return self._try_with_resolver(e.cursor)
-            return self._handle_exception(e)
-
-    async def a_execute(self):
-        try:
-            return await super().a_execute()
-        except exceptions.io.core.FileExistsError as e:
-            if self.resolver:
-                return await self._a_try_with_resolver(e.cursor)
-            return self._handle_exception(e)
-
-    def _handle_response(self, r):
-        if not self.block:
-            return r
-
-        if r.error_type == 'Conflict':
-            raise exceptions.io.core.FileExistsError(r.cursor)
+        raise NotImplementedError("Subclass must implement the '_action_message' method")
 
 
 class Copy(ResolverCommand):
@@ -1187,6 +1178,31 @@ class Copy(ResolverCommand):
     async def _a_try_with_resolver(self, cursor):
         return await Copy(self._function, self._receiver, self.block, *self.paths, destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
 
+    def execute(self):
+        try:
+            return super().execute()
+        except exceptions.io.core.CopyError as e:
+            if self.resolver:
+                return self._try_with_resolver(e.cursor)
+            return self._handle_exception(e)
+
+    async def a_execute(self):
+        try:
+            return await super().a_execute()
+        except exceptions.io.core.CopyError as e:
+            if self.resolver:
+                return await self._a_try_with_resolver(e.cursor)
+            return self._handle_exception(e)
+
+    def _handle_response(self, r):
+        if not self.block:
+            return r
+
+        cursor = r.cursor
+        if r.error_type == 'Conflict':
+            dest = CorePath.instance('', cursor.destResource).relative
+            raise exceptions.io.core.CopyError(self.paths, cursor) from exceptions.io.core.FileExistsError(dest)
+
 
 class Move(ResolverCommand):
 
@@ -1201,3 +1217,28 @@ class Move(ResolverCommand):
 
     async def _a_try_with_resolver(self, cursor):
         return await Move(self._function, self._receiver, self.block, *self.paths, destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
+
+    def execute(self):
+        try:
+            return super().execute()
+        except exceptions.io.core.MoveError as e:
+            if self.resolver:
+                return self._try_with_resolver(e.cursor)
+            return self._handle_exception(e)
+
+    async def a_execute(self):
+        try:
+            return await super().a_execute()
+        except exceptions.io.core.MoveError as e:
+            if self.resolver:
+                return await self._a_try_with_resolver(e.cursor)
+            return self._handle_exception(e)
+
+    def _handle_response(self, r):
+        if not self.block:
+            return r
+
+        cursor = r.cursor
+        if r.error_type == 'Conflict':
+            dest = CorePath.instance('', cursor.destResource).relative
+            raise exceptions.io.core.MoveError(self.paths, cursor) from exceptions.io.core.FileExistsError(dest)

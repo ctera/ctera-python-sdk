@@ -38,6 +38,14 @@ class BaseTask(Object):
         self.end_time = datetime.fromisoformat(task.endTime) if task.endTime is not None else None
         self.result = task.result
 
+    @property
+    def failed(self):
+        return self.status == TaskRunningStatus.Failed
+
+    @property
+    def completed_with_warnings(self):
+        return self.status == TaskRunningStatus.Warnings
+
 
 class EdgeTask(BaseTask):
     """

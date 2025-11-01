@@ -873,7 +873,7 @@ class ConflictResolver:
         return ConflictResolver(ConflictHandler.Skip, apply_all)
 
     @staticmethod
-    def override(apply_all=True):
+    def overwrite(apply_all=True):
         return ConflictResolver(ConflictHandler.Override, apply_all)
 
     @staticmethod

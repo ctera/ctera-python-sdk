@@ -111,3 +111,36 @@ class CreateLinkError(BaseIOError):
 
     def __init__(self, filename):
         super().__init__(EREMOTEIO, 'Failed to create public link', filename)
+
+
+class BatchError(BaseIOError):
+    """Base job error"""
+
+    def __init__(self, strerror, paths, cursor):
+        super().__init__(EREMOTEIO, strerror)
+        self.paths = paths
+        self.cursor = cursor
+
+
+class DeleteError(BatchError):
+
+    def __init__(self, paths, cursor):
+        super().__init__('Delete error', paths, cursor)
+
+
+class RecoverError(BatchError):
+
+    def __init__(self, paths, cursor):
+        super().__init__('Recover error', paths, cursor)
+
+
+class CopyError(BatchError):
+
+    def __init__(self, paths, cursor):
+        super().__init__('Copy error', paths, cursor)
+
+
+class MoveError(BatchError):
+
+    def __init__(self, paths, cursor):
+        super().__init__('Move error', paths, cursor)

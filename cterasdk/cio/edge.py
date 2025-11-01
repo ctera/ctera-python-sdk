@@ -211,7 +211,8 @@ class RecursiveIterator:
         self._before_generate()
         for path in self._generator():
             for o in ListDirectory(self._function, self._receiver, path).execute():
-                yield self._process_object(o)
+                if path.relative != o.path:
+                    yield self._process_object(o)
 
     async def a_generate(self):
         self._before_generate()
@@ -318,7 +319,7 @@ class CreateDirectory(EdgeCommand):
         if e.error.response.error.msg == ResourceError.FileExists:
             raise exceptions.io.edge.FileExistsError(self.path.relative)
         if e.error.response.error.msg == ResourceError.Forbidden:
-            raise exceptions.io.edge.ROFSError(path=self.path.relative)
+            raise exceptions.io.edge.ROFSError(self.path.relative)
 
 
 class Copy(EdgeCommand):
