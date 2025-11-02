@@ -103,7 +103,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self.assertEqual(len(actual_param.urls), 1)
         expected_param = TestSynchronousFileBrowser._create_source_dest_parameter((f'{self.directory}/{self.filename}', None))
         self.assertEqual(actual_param.urls[0], expected_param[0])
-        self.assertEqual(ret, [{self.directory}/{self.filename}])
+        self.assertEqual(ret, [f'{self.directory}/{self.filename}'])
 
     def test_delete_no_wait(self):
         self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
@@ -123,7 +123,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self.assertEqual(len(actual_param.urls), 1)
         expected_param = TestSynchronousFileBrowser._create_source_dest_parameter((f'{self.directory}/{self.filename}', None))
         self.assertEqual(actual_param.urls[0], expected_param[0])
-        self.assertEqual(ret, [{self.directory}/{self.filename}])
+        self.assertEqual(ret, [f'{self.directory}/{self.filename}'])
 
     def test_undelete_no_wait(self):
         self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
