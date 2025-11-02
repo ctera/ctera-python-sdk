@@ -81,13 +81,13 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self._global_admin.api.execute.assert_called_once_with('', 'moveResources', mock.ANY)
         self.assertEqual(type(ret), AwaitablePortalTask)
 
-    def _create_source_dest_parameter(tuples):
+    def _create_source_dest_parameter(*tuples):
         scope = TestSynchronousFileBrowser.scope
         return [
             Object(**{
                 '_classname': 'SrcDstParam',
                 'src': f'{scope}/{src}',
-                'dst': f'{scope}/{dest}' if dest else None
+                'dest': f'{scope}/{dest}' if dest else None
             })
         for src, dest in tuples]
 
