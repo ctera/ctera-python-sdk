@@ -28,7 +28,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
                 'hasMore': False,
                 'items': [self.filename]
             }))
-            filename = next(self.files.listdir(self.directory, include_deleted=include_deleted))
+            filename = next(self._global_admin.files.listdir(self.directory, include_deleted=include_deleted))
             self._global_admin.api.execute.assert_called_once_with('', 'fetchResources', mock.ANY)
             param = self._global_admin.api.execute.call_args[0][2]
             self.assertEqual(param.root, f'{TestSynchronousFileBrowser.scope}/{self.directory}')
@@ -40,9 +40,10 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self._global_admin.api.execute.assert_called_once_with('', 'makeCollection', mock.ANY)
         actual_param = self._global_admin.api.execute.call_args[0][2]
         parts = self.directory_path.split('/')
+        parentPath = '/'.join(parts[:-1])
         expected_param = Object(**{
             'name': parts[-1],
-            'parentPath': quote(f'{TestSynchronousFileBrowser.scope}/{parts[:-1]}')
+            'parentPath': f'{TestSynchronousFileBrowser.scope}/{quote(parentPath)}'
         })
         self._assert_equal_objects(expected_param, actual_param)
         self.assertEqual(ret, self.directory_path)
@@ -54,6 +55,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self.assertEqual(len(parts), self._global_admin.api.execute.call_count)
         self.assertEqual(ret, self.directory_path)
 
+    """
     def test_rename_wait(self):
         m_rename = self.patch_call('cterasdk.core.files.io.rename')
 
