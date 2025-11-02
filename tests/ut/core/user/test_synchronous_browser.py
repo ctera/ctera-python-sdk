@@ -24,7 +24,8 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
     def test_listdir(self):
         for include_deleted in [True, False]:
             self._init_global_admin(execute_response=self._create_fetch_resources_response_object())
-            filename = next(self.files.listdir(self.directory))
+            iterator = self.files.listdir(self.directory)
+            filename = next(iterator)
             self._global_admin.api.execute.assert_called_once_with('', 'fetchResources', mock.ANY)
             param = self._global_admin.api.execute.call_args[0][2]
             self.assertEqual(param.path, f'{TestSynchronousFileBrowser.scope}/{self.directory}')
