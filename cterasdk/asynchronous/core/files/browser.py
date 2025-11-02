@@ -57,14 +57,15 @@ class FileBrowser(BaseCommand):
         """
         return await DownloadMany(io.handle_many, self._core, self.normalize(target), objects, destination).a_execute()
 
-    def listdir(self, path=None, depth=None, include_deleted=False):
+    async def listdir(self, path=None, depth=None, include_deleted=False):
         """
         List Directory
 
         :param str,optional path: Path, defaults to the Cloud Drive root
         :param bool,optional include_deleted: Include deleted files, defaults to False
         """
-        return ResourceIterator(query.iterator, self._core, self.normalize(path), depth, include_deleted, None, None).execute()
+        async for o in ResourceIterator(query.iterator, self._core, self.normalize(path), depth, include_deleted, None, None).a_execute():
+            yield o
 
     async def exists(self, path):
         """

@@ -623,9 +623,16 @@ class ResourceIterator(ListDirectory):
 
     def execute(self):
         try:
-            yield from super().execute():
+            yield from super().execute()
         except FetchResourcesError as e:
-            return self._handle_exception(e)
+            self._fetch_resources_error(e)
+
+    async def a_execute(self):
+        try:
+            async for o in self._execute():
+                yield o
+        except FetchResourcesError as e:
+            self._fetch_resources_error(e)
 
     def _fetch_resources(self):
         return self._function(self._receiver, '', self.get_parameter(), 'fetchResources', callback_response=FetchResourcesResponse)
@@ -634,9 +641,10 @@ class ResourceIterator(ListDirectory):
         with self.trace_execution():
             return self._fetch_resources()
 
-    def _handle_exception(self, e):
+    def _fetch_resources_error(self, e):
         if e.error == ResourceError.DestinationNotExists:
             raise exceptions.io.core.FolderNotFoundError(self.path.relative) from e
+        raise exceptions.io.core.ListDirectoryError(self.path.relative)
 
 
 class GetMetadata(ListDirectory):
