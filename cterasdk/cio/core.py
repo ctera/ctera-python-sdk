@@ -623,7 +623,8 @@ class ResourceIterator(ListDirectory):
 
     def execute(self):
         try:
-            return super().execute()
+            for o in  super().execute():
+                yield o
         except FetchResourcesError as e:
             return self._handle_exception(e)
 
@@ -633,6 +634,10 @@ class ResourceIterator(ListDirectory):
     def _execute(self):
         with self.trace_execution():
             return self._fetch_resources()
+
+    def _handle_exception(self, e):
+        if e.error == ResourceError.DestinationNotExists:
+            raise exceptions.io.core.FolderNotFoundError(self.path.relative) from e
 
 
 class GetMetadata(ListDirectory):
@@ -1018,7 +1023,7 @@ class UnShare(Share):
         logger.info('Revoking Share: %s', self.path.relative)
 
 
-class BackgroundPortalCommand(PortalCommand):
+class TaskCommand(PortalCommand):
 
     def __init__(self, function, receiver, block):
         super().__init__(function, receiver)
@@ -1054,26 +1059,26 @@ class BackgroundPortalCommand(PortalCommand):
             function = self._background_function()
             return await function(self.get_parameter())
 
-    def _handle_response(self, task):
+    def _handle_response(self, r):
         if not self.block:
-            return task
+            return r
 
-        if task.completed:
-            return self._task_complete(task)
+        if r.completed:
+            return self._task_complete(r)
 
-        if task.failed or task.completed_with_warnings:
-            return self._task_complete(task)
+        if r.failed or r.completed_with_warnings:
+            return self._task_complete(r)
 
-        # error
+        return r
 
-    def _task_complete(self, task):
+    def _task_complete(self, task):  # pylint: disable=no-self-use
         return task
 
-    def _task_error(self, task):
+    def _task_error(self, task):  # pylint: disable=no-self-use
         return task
 
 
-class Rename(BackgroundPortalCommand):
+class Rename(TaskCommand):
 
     def __init__(self, function, receiver, path, new_name, block):
         super().__init__(function, receiver, block)
@@ -1095,7 +1100,7 @@ class Rename(BackgroundPortalCommand):
         return self.new_path.relative
 
 
-class MultiResourceCommand(BackgroundPortalCommand):
+class MultiResourceCommand(TaskCommand):
 
     def __init__(self, function, receiver, block, *paths):
         super().__init__(function, receiver, block)
@@ -1136,7 +1141,7 @@ class Recover(MultiResourceCommand):
         raise exceptions.io.core.RecoverError(self.paths, cursor)
 
 
-class ResolverCommand(BackgroundPortalCommand):
+class ResolverCommand(TaskCommand):
 
     def __init__(self, function, receiver, block, *paths, destination=None, resolver=None, cursor=None):
         super().__init__(function, receiver, block)

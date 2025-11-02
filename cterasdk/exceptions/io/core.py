@@ -86,6 +86,12 @@ class ReservedNameError(BaseIOError):
         super().__init__(EREMOTEIO, 'Specified name is reserved by the system', filename)
 
 
+class ListDirectoryError(BaseIOError):
+
+    def __init__(self, filename):
+        super().__init__(EREMOTEIO, 'Failed to list directory', filename)
+
+
 class GetSnapshotsError(BaseIOError):
 
     def __init__(self, filename):

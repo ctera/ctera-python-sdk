@@ -49,7 +49,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
             'name': parts[-1],
             'parentPath': f'{TestSynchronousFileBrowser.scope}/{quote(parentPath)}'
         })
-        self._assert_equal_objects(expected_param, actual_param)
+        self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret, self.directory_path)
 
     def test_makedirs(self):
@@ -82,6 +82,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self._global_admin.api.execute.assert_called_once_with('', 'moveResources', mock.ANY)
         self.assertEqual(type(ret), AwaitablePortalTask)
 
+    @staticmethod
     def _create_source_dest_parameter(*tuples):
         scope = TestSynchronousFileBrowser.scope
         return [
