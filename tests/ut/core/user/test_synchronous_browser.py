@@ -1,8 +1,7 @@
-import munch
 from unittest import mock
+from urllib.parse import quote
 
 from cterasdk.common.object import Object
-from cterasdk.core.files.browser import CloudDrive
 from tests.ut.core.admin import base_admin
 
 
@@ -11,38 +10,49 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
 
     def setUp(self):
         super().setUp()
-        self.files = CloudDrive(self._global_admin)
         self.directory = 'docs'
+        self.directory_path = 'a/b c/d'
         self.filename = 'Document.txt'
 
     def test_versions(self):
         response = 'snapshots-response-object'
         self._init_global_admin(execute_response=response)
-        ret = self.files.versions(self.directory)
+        ret = self._global_admin.files.versions(self.directory)
         self._global_admin.api.execute.assert_called_once_with('', 'listSnapshots', f'{TestSynchronousFileBrowser.scope}/{self.directory}')
         self.assertEqual(ret, response)
 
     def test_listdir(self):
         for include_deleted in [True, False]:
-            self._init_global_admin(execute_response=self._create_fetch_resources_response_object())
+            self._init_global_admin(execute_response=Object(**{
+                'errorType': None,
+                'hasMore': False,
+                'items': [self.filename]
+            }))
             filename = next(self.files.listdir(self.directory, include_deleted=include_deleted))
             self._global_admin.api.execute.assert_called_once_with('', 'fetchResources', mock.ANY)
             param = self._global_admin.api.execute.call_args[0][2]
             self.assertEqual(param.root, f'{TestSynchronousFileBrowser.scope}/{self.directory}')
             self.assertEqual(filename, self.filename)
 
-    def _create_fetch_resources_response_object(self):
-        return Object(**{
-            'errorType': None,
-            'hasMore': False,
-            'items': [self.filename]
-        })
-    """
     def test_mkdir(self):
-        m_mkdir = self.patch_call('cterasdk.core.files.io.mkdir')
+        self._init_global_admin()
+        ret = self._global_admin.files.mkdir(f'{self.directory_path}')
+        self._global_admin.api.execute.assert_called_once_with('', 'makeCollection', mock.ANY)
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        parts = self.directory_path.split('/')
+        expected_param = Object(**{
+            'name': parts[-1],
+            'parentPath': quote(f'{TestSynchronousFileBrowser.scope}/{parts[:-1]}')
+        })
+        self._assert_equal_objects(expected_param, actual_param)
+        self.assertEqual(ret, self.directory_path)
 
     def test_makedirs(self):
-        m_makedirs = self.patch_call('cterasdk.core.files.io.makedirs')
+        self._init_global_admin()
+        ret = self._global_admin.files.makedirs(f'{self.directory_path}')
+        parts = self.directory_path.split('/')
+        self.assertEqual(len(parts), self._global_admin.api.execute.call_count)
+        self.assertEqual(ret, self.directory_path)
 
     def test_rename_wait(self):
         m_rename = self.patch_call('cterasdk.core.files.io.rename')
