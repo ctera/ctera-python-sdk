@@ -66,7 +66,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
             mock.call('', 'moveResources', mock.ANY),
             mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
         ])
-        actual_param = self._global_admin.api.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
         self.assertEqual(len(actual_param.urls), 1)
         expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(
             f'{self.directory}/{self.filename}',
@@ -98,7 +98,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
             mock.call('', 'deleteResources', mock.ANY),
             mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
         ])
-        actual_param = self._global_admin.api.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
         self.assertEqual(len(actual_param.urls), 1)
         expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(f'{self.directory}/{self.filename}', None)
         self.assertEqual(actual_param.urls[0], expected_param[0])
@@ -117,7 +117,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
             mock.call('', 'restoreResources', mock.ANY),
             mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
         ])
-        actual_param = self._global_admin.api.execute.call_args[0][2]
+        actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
         self.assertEqual(len(actual_param.urls), 1)
         expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(f'{self.directory}/{self.filename}', None)
         self.assertEqual(actual_param.urls[0], expected_param[0])
