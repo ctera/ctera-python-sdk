@@ -90,7 +90,8 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
                 'src': f'{scope}/{src}',
                 'dest': f'{scope}/{dest}' if dest else None
             })
-        for src, dest in tuples]
+            for src, dest in tuples
+        ]
 
     def test_delete_wait(self):
         self._init_global_admin()
