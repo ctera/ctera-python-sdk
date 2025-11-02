@@ -62,7 +62,10 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self._init_global_admin()
         self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
         ret = self._global_admin.files.rename(f'{self.directory}/{self.filename}', self.new_filename)
-        self._global_admin.api.execute.assert_called_once_with('', 'moveResources', mock.ANY)
+        self._global_admin.api.execute.assert_has_calls([
+            mock.call('', 'moveResources', mock.ANY),
+            mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
+        ])
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self.assertEqual(len(actual_param.urls), 1)
         expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(
@@ -91,7 +94,10 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self._init_global_admin()
         self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
         ret = self._global_admin.files.delete(f'{self.directory}/{self.filename}')
-        self._global_admin.api.execute.assert_called_once_with('', 'deleteResources', mock.ANY)
+        self._global_admin.api.execute.assert_has_calls([
+            mock.call('', 'deleteResources', mock.ANY),
+            mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
+        ])
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self.assertEqual(len(actual_param.urls), 1)
         expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(f'{self.directory}/{self.filename}', None)
@@ -107,7 +113,10 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self._init_global_admin()
         self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
         ret = self._global_admin.files.undelete(f'{self.directory}/{self.filename}')
-        self._global_admin.api.execute.assert_called_once_with('', 'restoreResources', mock.ANY)
+        self._global_admin.api.execute.assert_has_calls([
+            mock.call('', 'restoreResources', mock.ANY),
+            mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
+        ])
         actual_param = self._global_admin.api.execute.call_args[0][2]
         self.assertEqual(len(actual_param.urls), 1)
         expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(f'{self.directory}/{self.filename}', None)
