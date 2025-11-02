@@ -314,7 +314,7 @@ class CreateDirectory(EdgeCommand):
     def _handle_response(self, r):
         if r == 'OK':
             return self.path.relative
-        raise exceptions.io.edge.CreateDirectoryError(self.path)
+        raise exceptions.io.edge.CreateDirectoryError(self.path.relative)
 
     def _handle_exception(self, e):
         if e.error.response.error.msg == ResourceError.FileExists:

@@ -1098,15 +1098,29 @@ class Delete(MultiResourceCommand):
         return 'Deleting'
 
     def _handle_response(self, r):
+        if not self.block:
+            return r
+
         if r.failed or r.completed_with_warnings:
             cursor = r.cursor
             raise exceptions.io.core.DeleteError(self.paths, cursor)
 
+        return self.paths
 
 class Recover(MultiResourceCommand):
 
     def _action_message(self):
         return 'Recovering'
+
+    def _handle_response(self, r):
+        if not self.block:
+            return r
+
+        if r.failed or r.completed_with_warnings:
+            cursor = r.cursor
+            raise exceptions.io.core.RecoverError(self.paths, cursor)
+
+        return self.paths
 
 
 class ResolverCommand(BackgroundPortalCommand):

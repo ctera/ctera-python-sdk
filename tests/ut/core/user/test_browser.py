@@ -11,7 +11,6 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
     def setUp(self):
         super().setUp()
         self.files = CloudDrive(self._global_admin)
-        self._await_or_future_mock = self.patch_call('cterasdk.core.files.browser.await_or_future')
 
     def test_versions(self):
         path = 'cloud/Users'
@@ -61,7 +60,6 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
         rename_mock.assert_called_once_with(self._global_admin, mock.ANY, new_name)
         actual_ctera_path = rename_mock.call_args[0][1]
         self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path))
-        self._await_or_future_mock.assert_called_once_with(self._global_admin, mock.ANY, True)
 
     def test_delete(self):
         path = 'cloud/Users'
@@ -70,7 +68,6 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
         rm_mock.assert_called_once_with(self._global_admin, mock.ANY)
         actual_ctera_path = rm_mock.call_args[0][1]
         self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path))
-        self._await_or_future_mock.assert_called_once_with(self._global_admin, mock.ANY, True)
 
     def test_undelete(self):
         path = 'cloud/Users'
@@ -79,7 +76,6 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
         recover_mock.assert_called_once_with(self._global_admin, mock.ANY)
         actual_ctera_path = recover_mock.call_args[0][1]
         self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path))
-        self._await_or_future_mock.assert_called_once_with(self._global_admin, mock.ANY, True)
 
     def test_move(self):
         src = 'cloud/Users'
@@ -92,7 +88,6 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
             [actual_ctera_path.absolute for actual_ctera_path in actual_ctera_paths],
             [TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path) for path in [src]]
         )
-        self._await_or_future_mock.assert_called_once_with(self._global_admin, mock.ANY, True)
 
     def test_copy(self):
         src = 'cloud/Users'
@@ -105,7 +100,6 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
             [actual_ctera_path.absolute for actual_ctera_path in actual_ctera_paths],
             [TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path) for path in [src]]
         )
-        self._await_or_future_mock.assert_called_once_with(self._global_admin, mock.ANY, True)
 
     def test_create_public_link_default_values(self):
         for access in [None, 'RW', 'RO']:
