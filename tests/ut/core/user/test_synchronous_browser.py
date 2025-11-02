@@ -16,7 +16,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
 
     def test_versions(self):
         response = 'snapshots-response-object'
-        self.patch_call('cterasdk.core.files.io.versions', return_value=response)
+        self._init_global_admin(execute_response=response)
         ret = self.files.versions(self.directory)
         self._global_admin.api.execute.assert_called_once_with('', 'listSnapshots', f'{TestSynchronousFileBrowser.scope}/{self.directory}')
         self.assertEqual(ret, response)
@@ -33,6 +33,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
 
     def _create_fetch_resources_response_object(self):
         return munch.Munch({
+            'errorType': None,
             'hasMore': False,
             'items': [self.filename]
         })
