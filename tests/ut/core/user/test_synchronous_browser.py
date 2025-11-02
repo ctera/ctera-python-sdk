@@ -78,6 +78,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
     def test_rename_no_wait(self):
         self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
         ret = self._global_admin.files.rename(f'{self.directory}/{self.filename}', self.new_filename, wait=False)
+        self._global_admin.api.execute.assert_called_once_with('', 'moveResources', mock.ANY)
         self.assertEqual(type(ret), AwaitablePortalTask)
 
     def _create_source_dest_parameter(tuples):
@@ -107,6 +108,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
     def test_delete_no_wait(self):
         self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
         ret = self._global_admin.files.delete(f'{self.directory}/{self.filename}', wait=False)
+        self._global_admin.api.execute.assert_called_once_with('', 'deleteResources', mock.ANY)
         self.assertEqual(type(ret), AwaitablePortalTask)
 
     def test_undelete_wait(self):
@@ -126,6 +128,49 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
     def test_undelete_no_wait(self):
         self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
         ret = self._global_admin.files.undelete(f'{self.directory}/{self.filename}', wait=False)
+        self._global_admin.api.execute.assert_called_once_with('', 'restoreResources', mock.ANY)
+        self.assertEqual(type(ret), AwaitablePortalTask)
+
+    def test_copy_wait(self):
+        self._init_global_admin()
+        self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
+        self._global_admin.files.copy((f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}'))
+        self._global_admin.api.execute.assert_has_calls([
+            mock.call('', 'copyResources', mock.ANY),
+            mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
+        ])
+        actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
+        self.assertEqual(len(actual_param.urls), 1)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(
+            (f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}')
+        )
+        self.assertEqual(actual_param.urls[0], expected_param[0])
+
+    def test_copy_no_wait(self):
+        self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
+        ret = self._global_admin.files.copy((f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}'), wait=False)
+        self._global_admin.api.execute.assert_called_once_with('', 'copyResources', mock.ANY)
+        self.assertEqual(type(ret), AwaitablePortalTask)
+
+    def test_move_wait(self):
+        self._init_global_admin()
+        self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
+        self._global_admin.files.move((f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}'))
+        self._global_admin.api.execute.assert_has_calls([
+            mock.call('', 'moveResources', mock.ANY),
+            mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
+        ])
+        actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
+        self.assertEqual(len(actual_param.urls), 1)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(
+            (f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}')
+        )
+        self.assertEqual(actual_param.urls[0], expected_param[0])
+
+    def test_move_no_wait(self):
+        self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
+        ret = self._global_admin.files.move((f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}'), wait=False)
+        self._global_admin.api.execute.assert_called_once_with('', 'moveResources', mock.ANY)
         self.assertEqual(type(ret), AwaitablePortalTask)
 
     @staticmethod
