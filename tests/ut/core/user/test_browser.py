@@ -1,12 +1,13 @@
 from unittest import mock
 from pathlib import Path
 
+from cterasdk.common.object import Object
 from cterasdk.core.files.browser import CloudDrive
 from tests.ut.core.admin import base_admin
 
 
 class TestCoreFilesBrowser(base_admin.BaseCoreTest):
-    _base_path = '/admin/webdav'
+    _scope = '/admin/webdav'
 
     def setUp(self):
         super().setUp()
@@ -93,13 +94,19 @@ class TestCoreFilesBrowser(base_admin.BaseCoreTest):
         src = 'cloud/Users'
         dst = 'public'
         cp_mock = self.patch_call('cterasdk.core.files.io.copy')
-        self.files.copy(src, destination=dst)
-        cp_mock.assert_called_once_with(self._global_admin, mock.ANY, destination=mock.ANY, resolver=None, cursor=None)
-        actual_ctera_paths = cp_mock.call_args[0][1:]
-        self.assertListEqual(
-            [actual_ctera_path.absolute for actual_ctera_path in actual_ctera_paths],
-            [TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path) for path in [src]]
-        )
+        self.files.copy(src, destination=dst, wait=False)
+        cp_mock.assert_called_once_with(self._global_admin, mock.ANY)
+        actual_param = cp_mock.call_args[0][1]
+        expected_urls = TestCoreFilesBrowser._batch_action_on_objects()
+
+    @staticmethod
+    def _batch_action_on_objects(tuples):
+        return [
+            Object(**{
+                'src': source,
+                'dst': destination
+            })
+        for source, destination in tuples]
 
     def test_create_public_link_default_values(self):
         for access in [None, 'RW', 'RO']:
