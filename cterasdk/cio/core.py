@@ -623,8 +623,7 @@ class ResourceIterator(ListDirectory):
 
     def execute(self):
         try:
-            for o in  super().execute():
-                yield o
+            yield from super().execute():
         except FetchResourcesError as e:
             return self._handle_exception(e)
 
