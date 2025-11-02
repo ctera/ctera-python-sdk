@@ -1131,9 +1131,6 @@ class Recover(MultiResourceCommand):
     def _progress_str(self):
         return 'Recovering'
 
-    def _task_complete(self, task):
-        return self.paths
-
     def _task_error(self, task):
         cursor = task.cursor
         raise exceptions.io.core.RecoverError(self.paths, cursor)
