@@ -59,7 +59,8 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self.assertEqual(ret, self.directory_path)
 
     def test_rename_wait(self):
-        self._init_global_admin(execute_response=TestSynchronousFileBrowser._background_task_side_effect)
+        self._init_global_admin()
+        self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
         ret = self._global_admin.files.rename(f'{self.directory}/{self.filename}', self.new_filename)
         self._global_admin.api.execute.assert_called_once_with('', 'moveResources', mock.ANY)
         actual_param = self._global_admin.api.execute.call_args[0][2]
@@ -87,7 +88,8 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         for src, dest in tuples]
 
     def test_delete_wait(self):
-        self._init_global_admin(execute_response=TestSynchronousFileBrowser._background_task_side_effect)
+        self._init_global_admin()
+        self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
         ret = self._global_admin.files.delete(f'{self.directory}/{self.filename}')
         self._global_admin.api.execute.assert_called_once_with('', 'deleteResources', mock.ANY)
         actual_param = self._global_admin.api.execute.call_args[0][2]
@@ -102,7 +104,8 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self.assertEqual(type(ret), AwaitablePortalTask)
 
     def test_undelete_wait(self):
-        self._init_global_admin(execute_response=TestSynchronousFileBrowser._background_task_side_effect)
+        self._init_global_admin()
+        self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
         ret = self._global_admin.files.undelete(f'{self.directory}/{self.filename}')
         self._global_admin.api.execute.assert_called_once_with('', 'restoreResources', mock.ANY)
         actual_param = self._global_admin.api.execute.call_args[0][2]
