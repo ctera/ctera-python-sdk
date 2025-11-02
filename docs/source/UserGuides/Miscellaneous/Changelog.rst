@@ -1,10 +1,20 @@
 Changelog
 =========
 
-2.20.21
+2.20.22
 -------
 
-Related issues and pull requests on GitHub: `#319 <https://github.com/ctera/ctera-python-sdk/pull/319>`_
+Improvements
+^^^^^^^^^^^^
+
+* Refactored all file system modules to adopt the **Command** design pattern.
+* Added handling for HTTP errors during login, raising :py:class:`cterasdk.exceptions.auth.AuthenticationError`.
+* Enabled full support for both **synchronous** and **asynchronous** file system operations.
+* Replaced the `ShareRecipient` class with :py:class:`cterasdk.core.types.Collaborator`.
+* Enhanced exception handling for file system errors in both **Edge** and **Core** modules.
+
+2.20.21
+-------
 
 Bug Fixes
 ^^^^^^^^^
@@ -12,13 +22,10 @@ Bug Fixes
 * Fixed SNMPv3 configuration on Edge Filers - added missing XML class name for proper serialization
 * Fixed whitespace in SNMP docstring to resolve flake8 W293 warning
 
+Related issues and pull requests on GitHub: `#319 <https://github.com/ctera/ctera-python-sdk/pull/319>`_
+
 2.20.20
 -------
-
-Related issues and pull requests on GitHub: `#316 <https://github.com/ctera/ctera-python-sdk/pull/316>`_,
-`#317 <https://github.com/ctera/ctera-python-sdk/pull/317>`_
-`#318 <https://github.com/ctera/ctera-python-sdk/pull/318>`_
-
 
 Improvements
 ^^^^^^^^^^^^
@@ -85,6 +92,10 @@ Bug Fixes
    except cterasdk.exceptions.io.FileConflict as e:
        resolver = core_types.ConflictResolver.override()  # override destination
        user.files.copy(objects, resolver=resolver, cursor=e.cursor)  # resume copy from cursor
+
+Related issues and pull requests on GitHub: `#316 <https://github.com/ctera/ctera-python-sdk/pull/316>`_,
+`#317 <https://github.com/ctera/ctera-python-sdk/pull/317>`_
+`#318 <https://github.com/ctera/ctera-python-sdk/pull/318>`_
 
 2.20.19
 -------

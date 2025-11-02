@@ -1,7 +1,8 @@
 import logging
 
 from .base_command import BaseCommand
-from ...exceptions import CTERAException
+from ...exceptions.transport import InternalServerError
+from ...exceptions.auth import AuthenticationError
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -17,8 +18,10 @@ class Login(BaseCommand):
         try:
             await self._edge.api.form_data('/login', {'username': username, 'password': password})
             logger.info("User logged in. %s", {'host': host, 'user': username})
-        except CTERAException:
+        except InternalServerError as e:
             logger.error("Login failed. %s", {'host': host, 'user': username})
+            if e.error.response.error.msg == 'Wrong username or password':
+                raise AuthenticationError() from e
             raise
 
     async def logout(self):
@@ -27,9 +30,5 @@ class Login(BaseCommand):
         """
         host = self._edge.host()
         user = self._edge.session().account.name
-        try:
-            await self._edge.api.form_data('/logout', {'foo': 'bar'})
-            logger.info("User logged out. %s", {'host': host, 'user': user})
-        except CTERAException:
-            logger.error("Logout failed. %s", {'host': host, 'user': user})
-            raise
+        await self._edge.api.form_data('/logout', {'foo': 'bar'})
+        logger.info("User logged out. %s", {'host': host, 'user': user})

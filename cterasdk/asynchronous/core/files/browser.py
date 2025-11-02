@@ -1,6 +1,7 @@
-from ....cio.core import CorePath, a_await_or_future
-from ....lib.storage import asynfs, commonfs
-from ....exceptions.io import FileConflict
+from .. import query
+from ....cio.core import CorePath, Open, OpenMany, Upload, UploadFile, Download, \
+    DownloadMany, UnShare, CreateDirectory, GetMetadata, ListVersions, RecursiveIterator, \
+    Delete, Recover, Rename, GetShareMetadata, Link, Copy, Move, ResourceIterator, GetPermalink
 from ..base_command import BaseCommand
 from . import io
 
@@ -17,8 +18,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path to a file
         """
-        handle_function = io.handle(self.normalize(path))
-        return await handle_function(self._core)
+        return await Open(io.handle, self._core, self.normalize(path)).a_execute()
 
     async def handle_many(self, directory, *objects):
         """
@@ -27,8 +27,7 @@ class FileBrowser(BaseCommand):
         :param str directory: Path to a folder
         :param args objects: List of files and folders
         """
-        handle_many_function = io.handle_many(self.normalize(directory), *objects)
-        return await handle_many_function(self._core)
+        return await OpenMany(io.handle_many, self._core, self.normalize(directory), *objects).a_execute()
 
     async def download(self, path, destination=None):
         """
@@ -38,9 +37,7 @@ class FileBrowser(BaseCommand):
         :param str,optional destination:
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
-        directory, name = commonfs.determine_directory_and_filename(path, destination=destination)
-        handle = await self.handle(path)
-        return await asynfs.write(directory, name, handle)
+        return await Download(io.handle, self._core, self.normalize(path), destination).a_execute()
 
     async def download_many(self, target, objects, destination=None):
         """
@@ -58,9 +55,7 @@ class FileBrowser(BaseCommand):
             Optional. Path to the destination file or directory. If a directory is provided,
             the original filename will be preserved. Defaults to the default download directory.
         """
-        directory, name = commonfs.determine_directory_and_filename(target, objects, destination=destination, archive=True)
-        handle = await self.handle_many(target, *objects)
-        return await asynfs.write(directory, name, handle)
+        return await DownloadMany(io.handle_many, self._core, self.normalize(target), objects, destination).a_execute()
 
     async def listdir(self, path=None, depth=None, include_deleted=False):
         """
@@ -69,7 +64,8 @@ class FileBrowser(BaseCommand):
         :param str,optional path: Path, defaults to the Cloud Drive root
         :param bool,optional include_deleted: Include deleted files, defaults to False
         """
-        return await io.listdir(self._core, self.normalize(path), depth=depth, include_deleted=include_deleted)
+        async for o in ResourceIterator(query.iterator, self._core, self.normalize(path), depth, include_deleted, None, None).a_execute():
+            yield o
 
     async def exists(self, path):
         """
@@ -77,7 +73,8 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path
         """
-        return await io.exists(self._core, self.normalize(path))
+        async with GetMetadata(io.listdir, self._core, self.normalize(path), True) as (exists, *_):
+            return exists
 
     async def versions(self, path):
         """
@@ -85,7 +82,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path
         """
-        return await io.versions(self._core, self.normalize(path))
+        return await ListVersions(io.versions, self._core, self.normalize(path)).a_execute()
 
     async def walk(self, path=None, include_deleted=False):
         """
@@ -94,7 +91,8 @@ class FileBrowser(BaseCommand):
         :param str,optional path: Path to walk, defaults to the root directory
         :param bool,optional include_deleted: Include deleted files, defaults to False
         """
-        return io.walk(self._core, self._scope, path, include_deleted=include_deleted)
+        async for o in RecursiveIterator(query.iterator, self._core, self.normalize(path), include_deleted).a_generate():
+            yield o
 
     async def public_link(self, path, access='RO', expire_in=30):
         """
@@ -104,19 +102,7 @@ class FileBrowser(BaseCommand):
         :param str,optional access: Access policy of the link, defaults to 'RO'
         :param int,optional expire_in: Number of days until the link expires, defaults to 30
         """
-        return await io.public_link(self._core, self.normalize(path), access, expire_in)
-
-    async def _try_with_resolver(self, func, *paths, destination=None, resolver=None, cursor=None, wait=False):
-        async def wrapper(resume_from=None):
-            ref = await func(self._core, *paths, destination=destination, resolver=resolver, cursor=resume_from)
-            return await a_await_or_future(self._core, ref, wait)
-
-        try:
-            return await wrapper(cursor)
-        except FileConflict as e:
-            if resolver:
-                return await wrapper(e.cursor)
-            raise
+        return await Link(io.public_link, self._core, self.normalize(path), access, expire_in).a_execute()
 
     async def copy(self, *paths, destination=None, resolver=None, cursor=None, wait=False):
         """
@@ -131,9 +117,8 @@ class FileBrowser(BaseCommand):
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
-            return await self._try_with_resolver(io.copy, *[self.normalize(path) for path in paths],
-                                                 destination=self.normalize(destination),
-                                                 resolver=resolver, cursor=cursor, wait=wait)
+            return await Copy(io.copy, self._core, wait, *[self.normalize(path) for path in paths],
+                              destination=self.normalize(destination), resolver=resolver, cursor=cursor).a_execute()
         except ValueError:
             raise ValueError('Copy destination was not specified.')
 
@@ -143,11 +128,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path.
         """
-        p = self.normalize(path)
-        async for e in await io.listdir(self._core, p.parent, 1, False, p.name, 1):
-            if e.name == p.name:
-                return e.permalink
-        raise FileNotFoundError('File not found.', path)
+        return await GetPermalink(io.listdir, self._core, self.normalize(path)).a_execute()
 
     def normalize(self, entries):
         return CorePath.instance(self._scope, entries)
@@ -164,8 +145,7 @@ class CloudDrive(FileBrowser):
         :param object handle: Handle.
         :param str,optional size: File size, defaults to content length
         """
-        upload_function = io.upload(name, size, self.normalize(destination), handle)
-        return await upload_function(self._core)
+        return await Upload(io.upload, self._core, io.listdir, name, self.normalize(destination), size, handle).a_execute()
 
     async def upload_file(self, path, destination):
         """
@@ -174,10 +154,7 @@ class CloudDrive(FileBrowser):
         :param str path: Local path
         :param str destination: Remote path
         """
-        with open(path, 'rb') as handle:
-            metadata = commonfs.properties(path)
-            response = await self.upload(metadata['name'], destination, handle, metadata['size'])
-        return response
+        return await UploadFile(io.upload, self._core, io.listdir, path, self.normalize(destination)).a_execute()
 
     async def mkdir(self, path):
         """
@@ -185,7 +162,7 @@ class CloudDrive(FileBrowser):
 
         :param str path: Directory path
         """
-        return await io.mkdir(self._core, self.normalize(path))
+        return await CreateDirectory(io.mkdir, self._core, self.normalize(path)).a_execute()
 
     async def makedirs(self, path):
         """
@@ -193,7 +170,7 @@ class CloudDrive(FileBrowser):
 
         :param str path: Directory path
         """
-        return await io.makedirs(self._core, self.normalize(path))
+        return await CreateDirectory(io.mkdir, self._core, self.normalize(path), True).a_execute()
 
     async def rename(self, path, name, *, wait=False):
         """
@@ -205,8 +182,7 @@ class CloudDrive(FileBrowser):
         :returns: Task status object, or an awaitable task object
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        ref = await io.rename(self._core, self.normalize(path), name)
-        return await a_await_or_future(self._core, ref, wait)
+        return await Rename(io.move, self._core, self.normalize(path), name, wait).a_execute()
 
     async def delete(self, *paths, wait=False):
         """
@@ -217,8 +193,7 @@ class CloudDrive(FileBrowser):
         :returns: Task status object, or an awaitable task object
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        ref = await io.remove(self._core, *[self.normalize(path) for path in paths])
-        return await a_await_or_future(self._core, ref, wait)
+        return await Delete(io.delete, self._core, wait, *[self.normalize(path) for path in paths]).a_execute()
 
     async def undelete(self, *paths, wait=False):
         """
@@ -229,8 +204,7 @@ class CloudDrive(FileBrowser):
         :returns: Task status object, or an awaitable task object
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        ref = await io.recover(self._core, *[self.normalize(path) for path in paths])
-        return await a_await_or_future(self._core, ref, wait)
+        return await Recover(io.undelete, self._core, wait, *[self.normalize(path) for path in paths]).a_execute()
 
     async def move(self, *paths, destination=None, resolver=None, cursor=None, wait=False):
         """
@@ -245,8 +219,57 @@ class CloudDrive(FileBrowser):
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
-            return await self._try_with_resolver(io.move, *[self.normalize(path) for path in paths],
-                                                 destination=self.normalize(destination),
-                                                 resolver=resolver, cursor=cursor, wait=wait)
+            return await Move(io.move, self._core, wait, *[self.normalize(path) for path in paths],
+                              destination=self.normalize(destination), resolver=resolver, cursor=cursor).a_execute()
         except ValueError:
             raise ValueError('Move destination was not specified.')
+
+    async def get_share_info(self, path):
+        """
+        Get share settings and recipients
+
+        :param str path: Path
+        """
+        return await GetShareMetadata(io.list_shares, self._core, self.normalize(path)).a_execute()
+
+    async def share(self, path, recipients, as_project=True, allow_reshare=True, allow_sync=True):
+        """
+        Share a file or a folder
+
+        :param str path: The path of the file or folder to share
+        :param list[cterasdk.core.types.Collaborator] recipients: A list of share recipients
+        :param bool,optional as_project: Share as a team project, defaults to True when the item is a cloud folder else False
+        :param bool,optional allow_reshare: Allow recipients to re-share this item, defaults to True
+        :param bool,optional allow_sync: Allow recipients to sync this item, defaults to True when the item is a cloud folder else False
+        :return: A list of all recipients added to the collaboration share
+        :rtype: list[cterasdk.core.types.Collaborator]
+        """
+        return await io.share(self._core, self.normalize(path), recipients, as_project, allow_reshare, allow_sync)
+
+    async def add_share_recipients(self, path, recipients):
+        """
+        Add share recipients
+
+        :param str path: The path of the file or folder
+        :param list[cterasdk.core.types.Collaborator] recipients: A list of share recipients
+        :return: A list of all recipients added
+        :rtype: list[cterasdk.core.types.Collaborator]
+        """
+        return await io.add_share_recipients(self._core, self.normalize(path), recipients)
+
+    async def remove_share_recipients(self, path, accounts):
+        """
+        Remove share recipients
+
+        :param str path: The path of the file or folder
+        :param list[cterasdk.core.types.PortalAccount] accounts: A list of portal user or group accounts
+        :return: A list of all share recipients removed
+        :rtype: list[cterasdk.core.types.PortalAccount]
+        """
+        return await io.remove_share_recipients(self._core, self.normalize(path), accounts)
+
+    async def unshare(self, path):
+        """
+        Unshare a file or a folder
+        """
+        return await UnShare(io.update_share, self._core, self.normalize(path)).a_execute()

@@ -3,7 +3,7 @@ from collections import namedtuple
 from ..common import DateTimeUtils, StringCriteriaBuilder, PredefinedListCriteriaBuilder, CustomListCriteriaBuilder, Object
 from ..lib.storage import commonfs
 
-from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, \
+from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, ProtectionLevel, \
                   BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes, ConflictHandler
 
 
@@ -76,6 +76,10 @@ class PortalAccount(ABC):
                 return True
         return False
 
+    @property
+    def upn(self):
+        return f'{self.name}@{self.directory}' if self.directory else self.name
+
     def __str__(self):
         return (self.directory if self.directory else '') + '\\' + self.name
 
@@ -92,7 +96,7 @@ class GroupAccount(PortalAccount):
         return PortalAccountType.Group
 
 
-class ShareRecipient:
+class Collaborator:
     """
     Class Representing a Collboration Share Recipient
     """
@@ -104,6 +108,20 @@ class ShareRecipient:
         self.expiration_date = None
 
     @staticmethod
+    def from_server_object(server_object):
+        invitee = server_object.invitee
+        account = invitee.email
+        if invitee.type in [CollaboratorType.DG, CollaboratorType.LG]:
+            account = GroupAccount(invitee.name, invitee.domain)
+        elif invitee.type in [CollaboratorType.DU, CollaboratorType.LU]:
+            account = UserAccount(invitee.name, invitee.domain)
+
+        r = Collaborator(account, invitee.type, server_object.protectionLevel != ProtectionLevel.Public)
+        r.access = server_object.accessMode
+        r.expiration_date = server_object.expiration
+        return r
+
+    @staticmethod
     def external(email, two_factor=False):
         """
         Share with an external user
@@ -111,7 +129,7 @@ class ShareRecipient:
         :param str email: The email address of the recipient
         :param bool two_factor: Require two factor authentication over e-mail
         """
-        return ShareRecipient(email, CollaboratorType.EXT, two_factor)
+        return Collaborator(email, CollaboratorType.EXT, two_factor)
 
     @staticmethod
     def local_user(user_account):
@@ -120,7 +138,7 @@ class ShareRecipient:
 
         :param UserAccount user_account: A local user account
         """
-        return ShareRecipient(user_account, CollaboratorType.LU)
+        return Collaborator(user_account, CollaboratorType.LU)
 
     @staticmethod
     def domain_user(user_account):
@@ -129,7 +147,7 @@ class ShareRecipient:
 
         :param UserAccount user_account: A domain user account
         """
-        return ShareRecipient(user_account, CollaboratorType.DU)
+        return Collaborator(user_account, CollaboratorType.DU)
 
     @staticmethod
     def local_group(group_account):
@@ -138,7 +156,7 @@ class ShareRecipient:
 
         :param GroupAccount group_account: A local group account
         """
-        return ShareRecipient(group_account, CollaboratorType.LG)
+        return Collaborator(group_account, CollaboratorType.LG)
 
     @staticmethod
     def domain_group(group_account):
@@ -147,7 +165,7 @@ class ShareRecipient:
 
         :param GroupAccount group_account: A domain group account
         """
-        return ShareRecipient(group_account, CollaboratorType.DG)
+        return Collaborator(group_account, CollaboratorType.DG)
 
     def read_write(self):
         """
@@ -855,8 +873,8 @@ class ConflictResolver:
         return ConflictResolver(ConflictHandler.Skip, apply_all)
 
     @staticmethod
-    def override(apply_all=True):
-        return ConflictResolver(ConflictHandler.Override, apply_all)
+    def overwrite(apply_all=True):
+        return ConflictResolver(ConflictHandler.Overwrite, apply_all)
 
     @staticmethod
     def rename(apply_all=True):

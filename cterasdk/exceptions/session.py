@@ -16,7 +16,7 @@ class NotLoggedIn(CTERAException):
 
 
 class ContextError(CTERAException):
-    """API invocation context rrror"""
+    """API invocation context error"""
 
     def __init__(self, message):
         super().__init__(f'Context error: {message}.')

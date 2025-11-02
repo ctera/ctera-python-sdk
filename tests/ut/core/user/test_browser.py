@@ -1,142 +1,219 @@
 from unittest import mock
-from pathlib import Path
+from urllib.parse import quote
+from datetime import datetime, timedelta
 
-from cterasdk.core.files.browser import CloudDrive
+from cterasdk.common.object import Object
+from cterasdk.core.tasks import AwaitablePortalTask
 from tests.ut.core.admin import base_admin
 
 
-class TestCoreFilesBrowser(base_admin.BaseCoreTest):
-    _base_path = '/admin/webdav'
+class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
+    scope = '/admin/webdav'
+    _task_reference = 'servers/MainDB/bgTasks/918908'
 
     def setUp(self):
         super().setUp()
-        self.files = CloudDrive(self._global_admin)
-        self._await_or_future_mock = self.patch_call('cterasdk.core.files.browser.await_or_future')
+        self.directory = 'docs'
+        self.directory_path = 'a/b c/d'
+        self.filename = 'Document.txt'
+        self.new_filename = 'Summary.txt'
 
     def test_versions(self):
-        path = 'cloud/Users'
-        versions_mock = self.patch_call('cterasdk.core.files.io.versions')
-        self.files.versions(path)
-        versions_mock.assert_called_once_with(self._global_admin, mock.ANY)
-        actual_ctera_path = versions_mock.call_args[0][1]
-        self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path))
+        response = 'snapshots-response-object'
+        self._init_global_admin(execute_response=response)
+        ret = self._global_admin.files.versions(self.directory)
+        self._global_admin.api.execute.assert_called_once_with('', 'listSnapshots', f'{TestSynchronousFileBrowser.scope}/{self.directory}')
+        self.assertEqual(ret, response)
 
     def test_listdir(self):
-        path = 'cloud/Users'
-        listdir_mock = self.patch_call('cterasdk.core.files.io.listdir')
-        self.files.listdir(path)
-        listdir_mock.assert_called_once_with(self._global_admin, mock.ANY, depth=None, include_deleted=False)
-        actual_ctera_path = listdir_mock.call_args[0][1]
-        self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path))
-
-    def test_listdir_deleted_files(self):
-        path = 'cloud/Users'
-        listdir_mock = self.patch_call('cterasdk.core.files.io.listdir')
-        self.files.listdir(path, include_deleted=True)
-        listdir_mock.assert_called_once_with(self._global_admin, mock.ANY, depth=None, include_deleted=True)
-        actual_ctera_path = listdir_mock.call_args[0][1]
-        self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path))
+        for include_deleted in [True, False]:
+            self._init_global_admin(execute_response=Object(**{
+                'errorType': None,
+                'hasMore': False,
+                'items': [self.filename]
+            }))
+            filename = next(self._global_admin.files.listdir(self.directory, include_deleted=include_deleted))
+            self._global_admin.api.execute.assert_called_once_with('', 'fetchResources', mock.ANY)
+            param = self._global_admin.api.execute.call_args[0][2]
+            self.assertEqual(param.root, f'{TestSynchronousFileBrowser.scope}/{self.directory}')
+            self.assertEqual(filename, self.filename)
 
     def test_mkdir(self):
-        path = 'cloud/Users'
-        mkdir_mock = self.patch_call('cterasdk.core.files.io.mkdir')
-        self.files.mkdir(path)
-        mkdir_mock.assert_called_once_with(self._global_admin, mock.ANY)
-        actual_ctera_path = mkdir_mock.call_args[0][1]
-        self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path))
+        self._init_global_admin()
+        ret = self._global_admin.files.mkdir(f'{self.directory_path}')
+        self._global_admin.api.execute.assert_called_once_with('', 'makeCollection', mock.ANY)
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        parts = self.directory_path.split('/')
+        parentPath = '/'.join(parts[:-1])
+        expected_param = Object(**{
+            'name': parts[-1],
+            'parentPath': f'{TestSynchronousFileBrowser.scope}/{quote(parentPath)}'
+        })
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, self.directory_path)
 
     def test_makedirs(self):
-        path = 'cloud/Users'
-        makedirs_mock = self.patch_call('cterasdk.core.files.io.makedirs')
-        self.files.makedirs(path)
-        makedirs_mock.assert_called_once_with(self._global_admin, mock.ANY)
-        actual_ctera_path = makedirs_mock.call_args[0][1]
-        self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path))
+        self._init_global_admin()
+        ret = self._global_admin.files.makedirs(f'{self.directory_path}')
+        parts = self.directory_path.split('/')
+        self.assertEqual(len(parts), self._global_admin.api.execute.call_count)
+        self.assertEqual(ret, self.directory_path)
 
-    def test_rename(self):
-        path = 'cloud/Users'
-        new_name = 'Names'
-        rename_mock = self.patch_call('cterasdk.core.files.io.rename')
-        self.files.rename(path, new_name)
-        rename_mock.assert_called_once_with(self._global_admin, mock.ANY, new_name)
-        actual_ctera_path = rename_mock.call_args[0][1]
-        self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path))
-        self._await_or_future_mock.assert_called_once_with(self._global_admin, mock.ANY, True)
+    def test_rename_wait(self):
+        self._init_global_admin()
+        self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
+        ret = self._global_admin.files.rename(f'{self.directory}/{self.filename}', self.new_filename)
+        self._global_admin.api.execute.assert_has_calls([
+            mock.call('', 'moveResources', mock.ANY),
+            mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
+        ])
+        actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
+        self.assertEqual(len(actual_param.urls), 1)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter((
+            f'{self.directory}/{self.filename}',
+            f'{self.directory}/{self.new_filename}',
+        ))
+        self.assertEqual(actual_param.urls[0], expected_param[0])
+        self.assertEqual(ret, f'{self.directory}/{self.new_filename}')
 
-    def test_delete(self):
-        path = 'cloud/Users'
-        rm_mock = self.patch_call('cterasdk.core.files.io.remove')
-        self.files.delete(path)
-        rm_mock.assert_called_once_with(self._global_admin, mock.ANY)
-        actual_ctera_path = rm_mock.call_args[0][1]
-        self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path))
-        self._await_or_future_mock.assert_called_once_with(self._global_admin, mock.ANY, True)
-
-    def test_undelete(self):
-        path = 'cloud/Users'
-        recover_mock = self.patch_call('cterasdk.core.files.io.recover')
-        self.files.undelete(path)
-        recover_mock.assert_called_once_with(self._global_admin, mock.ANY)
-        actual_ctera_path = recover_mock.call_args[0][1]
-        self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path))
-        self._await_or_future_mock.assert_called_once_with(self._global_admin, mock.ANY, True)
-
-    def test_move(self):
-        src = 'cloud/Users'
-        dst = 'public'
-        mv_mock = self.patch_call('cterasdk.core.files.io.move')
-        self.files.move(src, destination=dst)
-        mv_mock.assert_called_once_with(self._global_admin, mock.ANY, destination=mock.ANY, resolver=None, cursor=None)
-        actual_ctera_paths = mv_mock.call_args[0][1:]
-        self.assertListEqual(
-            [actual_ctera_path.absolute for actual_ctera_path in actual_ctera_paths],
-            [TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path) for path in [src]]
-        )
-        self._await_or_future_mock.assert_called_once_with(self._global_admin, mock.ANY, True)
-
-    def test_copy(self):
-        src = 'cloud/Users'
-        dst = 'public'
-        cp_mock = self.patch_call('cterasdk.core.files.io.copy')
-        self.files.copy(src, destination=dst)
-        cp_mock.assert_called_once_with(self._global_admin, mock.ANY, destination=mock.ANY, resolver=None, cursor=None)
-        actual_ctera_paths = cp_mock.call_args[0][1:]
-        self.assertListEqual(
-            [actual_ctera_path.absolute for actual_ctera_path in actual_ctera_paths],
-            [TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path, path) for path in [src]]
-        )
-        self._await_or_future_mock.assert_called_once_with(self._global_admin, mock.ANY, True)
-
-    def test_create_public_link_default_values(self):
-        for access in [None, 'RW', 'RO']:
-            for expire_in in [None, 15, 30, 0]:
-                params = {}
-                if access is not None:
-                    params['access'] = access
-                if expire_in is not None:
-                    params['expire_in'] = expire_in
-                self._test_mklink(**params)
-
-    def _test_mklink(self, access=None, expire_in=None):
-        mklink_args = dict(
-            path='cloud/Users'
-        )
-        if access is not None:
-            mklink_args['access'] = access
-        if expire_in is not None:
-            mklink_args['expire_in'] = expire_in
-        ln_mock = self.patch_call('cterasdk.core.files.io.public_link')
-        self.files.public_link(**mklink_args)
-        ln_mock.assert_called_once_with(
-            self._global_admin,
-            mock.ANY,
-            access if access is not None else 'RO',
-            expire_in if expire_in is not None else 30
-        )
-        actual_ctera_path = ln_mock.call_args[0][1]
-        self.assertEqual(actual_ctera_path.absolute, TestCoreFilesBrowser._create_expected_path(TestCoreFilesBrowser._base_path,
-                                                                                                mklink_args['path']))
+    def test_rename_no_wait(self):
+        self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
+        ret = self._global_admin.files.rename(f'{self.directory}/{self.filename}', self.new_filename, wait=False)
+        self._global_admin.api.execute.assert_called_once_with('', 'moveResources', mock.ANY)
+        self.assertEqual(type(ret), AwaitablePortalTask)
 
     @staticmethod
-    def _create_expected_path(base, path):
-        return Path(base).joinpath(path).as_posix()
+    def _create_source_dest_parameter(*tuples):
+        scope = TestSynchronousFileBrowser.scope
+        return [
+            Object(**{
+                '_classname': 'SrcDstParam',
+                'src': f'{scope}/{src}',
+                'dest': f'{scope}/{dest}' if dest else None
+            })
+            for src, dest in tuples
+        ]
+
+    def test_delete_wait(self):
+        self._init_global_admin()
+        self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
+        ret = self._global_admin.files.delete(f'{self.directory}/{self.filename}')
+        self._global_admin.api.execute.assert_has_calls([
+            mock.call('', 'deleteResources', mock.ANY),
+            mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
+        ])
+        actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
+        self.assertEqual(len(actual_param.urls), 1)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter((f'{self.directory}/{self.filename}', None))
+        self.assertEqual(actual_param.urls[0], expected_param[0])
+        self.assertEqual(ret, [f'{self.directory}/{self.filename}'])
+
+    def test_delete_no_wait(self):
+        self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
+        ret = self._global_admin.files.delete(f'{self.directory}/{self.filename}', wait=False)
+        self._global_admin.api.execute.assert_called_once_with('', 'deleteResources', mock.ANY)
+        self.assertEqual(type(ret), AwaitablePortalTask)
+
+    def test_undelete_wait(self):
+        self._init_global_admin()
+        self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
+        ret = self._global_admin.files.undelete(f'{self.directory}/{self.filename}')
+        self._global_admin.api.execute.assert_has_calls([
+            mock.call('', 'restoreResources', mock.ANY),
+            mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
+        ])
+        actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
+        self.assertEqual(len(actual_param.urls), 1)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter((f'{self.directory}/{self.filename}', None))
+        self.assertEqual(actual_param.urls[0], expected_param[0])
+        self.assertEqual(ret, [f'{self.directory}/{self.filename}'])
+
+    def test_undelete_no_wait(self):
+        self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
+        ret = self._global_admin.files.undelete(f'{self.directory}/{self.filename}', wait=False)
+        self._global_admin.api.execute.assert_called_once_with('', 'restoreResources', mock.ANY)
+        self.assertEqual(type(ret), AwaitablePortalTask)
+
+    def test_copy_wait(self):
+        self._init_global_admin()
+        self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
+        self._global_admin.files.copy((f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}'))
+        self._global_admin.api.execute.assert_has_calls([
+            mock.call('', 'copyResources', mock.ANY),
+            mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
+        ])
+        actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
+        self.assertEqual(len(actual_param.urls), 1)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(
+            (f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}')
+        )
+        self.assertEqual(actual_param.urls[0], expected_param[0])
+
+    def test_copy_no_wait(self):
+        self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
+        ret = self._global_admin.files.copy((f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}'), wait=False)
+        self._global_admin.api.execute.assert_called_once_with('', 'copyResources', mock.ANY)
+        self.assertEqual(type(ret), AwaitablePortalTask)
+
+    def test_move_wait(self):
+        self._init_global_admin()
+        self._global_admin.api.execute = TestSynchronousFileBrowser._background_task_side_effect()
+        self._global_admin.files.move((f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}'))
+        self._global_admin.api.execute.assert_has_calls([
+            mock.call('', 'moveResources', mock.ANY),
+            mock.call('', 'getTaskStatus', TestSynchronousFileBrowser._task_reference)
+        ])
+        actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
+        self.assertEqual(len(actual_param.urls), 1)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(
+            (f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}')
+        )
+        self.assertEqual(actual_param.urls[0], expected_param[0])
+
+    def test_move_no_wait(self):
+        self._init_global_admin(execute_response=TestSynchronousFileBrowser._task_reference)
+        ret = self._global_admin.files.move((f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}'), wait=False)
+        self._global_admin.api.execute.assert_called_once_with('', 'moveResources', mock.ANY)
+        self.assertEqual(type(ret), AwaitablePortalTask)
+
+    def test_public_link(self):
+        execute_response = Object(**{'publicLink': 'success'})
+        for access, access_mode in [('PO', 'PreviewOnly'), ('RO', 'ReadOnly'), ('RW', 'ReadWrite')]:
+            for expire_in in [0, 15, 30]:
+                self._init_global_admin(execute_response=execute_response)
+                ret = self._global_admin.files.public_link(self.directory, access, expire_in)
+                self._global_admin.api.execute.assert_called_once_with('', 'createShare', mock.ANY)
+                actual_param = self._global_admin.api.execute.call_args[0][2]
+                self.assertEqual(actual_param.url, f'{TestSynchronousFileBrowser.scope}/{self.directory}')
+                self.assertEqual(actual_param.share.accessMode, access_mode)
+                expiration_date = datetime.now() + timedelta(days=expire_in)
+                self.assertEqual(actual_param.share.expiration, expiration_date.strftime('%Y-%m-%d'))
+                self.assertEqual(ret, execute_response.publicLink)
+
+    @staticmethod
+    def _background_task_side_effect():
+        return mock.MagicMock(side_effect=[
+            TestSynchronousFileBrowser._task_reference,
+            Object(**{
+                '_classname': 'FileManagerBgTask',
+                'id': 12345,
+                'name': 'Test Task',
+                'startTime': '2025-11-02T14:00:00',
+                'elapsedTime': 3600,
+                'status': 'completed',
+                'percentage': 100,
+                'endTime': '2025-11-02T15:00:00',
+                'result': 'success',
+                'progstring': 'Backup completed successfully',
+                'tenant': 'tenant_001',
+                'filesProcessed': 250,
+                'bytesProcessed': 1073741824,
+                'totalFiles': 250,
+                'totalBytes': 1073741824,
+                'errorType': None,
+                'fileInProgress': None,
+                'userUid': 123,
+                'portalUid': 456,
+                'cursor': 'Test Cursor'
+            })
+        ])

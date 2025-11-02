@@ -17,7 +17,7 @@ async def write(directory, name, handle):
     :rtype: str
     """
     ctx = ResultContext()
-    with write_new_version(directory, name) as tempfile:
+    with write_new_version(directory, name, ctx=ctx) as tempfile:
         await overwrite(tempfile, handle)
     return ctx.value
 

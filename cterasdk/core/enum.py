@@ -651,11 +651,11 @@ class ConflictHandler:
     Conflict Handler
 
     :ivar str Skip: Skip.
-    :ivar str Override: Override target.
+    :ivar str Overwrite: Overwrite target.
     :ivar str Rename: Append date to file name.
     """
     Skip = 'Skip'
-    Override = 'Override'
+    Overwrite = 'Override'
     Rename = 'Rename'
 
 
@@ -676,22 +676,6 @@ class UploadError:
     RejectedByPolicy = "Rejected by Cloud Drive policy rule"
     NoStorageBucket = "No available storage location"
     WindowsACL = "Illegal access to NTACL folder"
-
-
-class ResourceAction:
-    """
-    Resource Action
-
-    :ivar str Delete: Delete.
-    :ivar str Copy: Copy.
-    :ivar str Move: Move.
-    :ivar str Undelete: Undelete.
-    """
-    Delete = 'Delete'
-    Undelete = 'Undelete'
-    Copy = 'Copy'
-    Move = 'Move'
-    Write = 'Write'
 
 
 class ResourceScope:
@@ -727,3 +711,22 @@ class ResourceScope:
     CloudDrivesContainer = "CloudDrivesContainer"
     OfflineFolder = "OfflineFolder"
     InsideCloudFolder = "InsideCloudFolder"
+
+
+class ResourceError:
+    """
+    Resource Error
+
+    :ivar str Conflict: Conflict.
+    :ivar str PermissionDenied: Permission denied.
+    :ivar str DestinationNotExists: Path validation error.
+    :ivar str FileWithTheSameNameExist: File exists.
+    :ivar str InvalidName: Invalid name.
+    :ivar str ReservedName: Reserved name.
+    """
+    Conflict = "Conflict"
+    PermissionDenied = "PermissionDenied"
+    DestinationNotExists = "DestinationNotExists"
+    FileWithTheSameNameExist = "FileWithTheSameNameExist"
+    InvalidName = "InvalidName"
+    ReservedName = "ReservedName"

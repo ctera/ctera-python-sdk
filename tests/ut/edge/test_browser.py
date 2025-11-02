@@ -58,12 +58,12 @@ class TestEdgeFilesBrowser(base_edge.BaseEdgeTest):
         self._filer.io.delete.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath))
 
     def test_mkdir_success(self):
-        self._init_webdav()
+        self._init_webdav(mkcol_response='OK')
         self._files.mkdir(self._path)
         self._filer.io.mkdir.assert_called_once_with(TestEdgeFilesBrowser.make_local_files_dir(self._fullpath))
 
     def test_mkdir_recursive_success(self):
-        self._init_webdav()
+        self._init_webdav(mkcol_response='OK')
         self._files.makedirs(self._path)
         path = ''
         calls = []
