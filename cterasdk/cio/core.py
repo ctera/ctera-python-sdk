@@ -704,7 +704,7 @@ class RecursiveIterator:
 
     async def a_generate(self):
         for path in self._generator():
-            async for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).execute():
+            async for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).a_execute():
                 yield self._process_object(o)
 
     def _process_object(self, o):
