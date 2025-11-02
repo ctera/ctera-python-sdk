@@ -175,19 +175,18 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self.assertEqual(type(ret), AwaitablePortalTask)
 
     def test_public_link(self):
-        execute_response = 'success'
-        self._init_global_admin(execute_response=execute_response)
-        for access in ['PO', 'RO', 'RW']:
+        execute_response = Object(**{'publicLink': 'success'})
+        for access, access_mode in [('PO', 'PreviewOnly'), ('RO', 'ReadOnly'), ('RW', 'ReadWrite')]:
             for expire_in in [0, 15, 30]:
+                self._init_global_admin(execute_response=execute_response)
                 ret = self._global_admin.files.public_link(self.directory, access, expire_in)
                 self._global_admin.api.execute.assert_called_once_with('', 'createShare', mock.ANY)
                 actual_param = self._global_admin.api.execute.call_args[0][2]
-                print(actual_param)
                 self.assertEqual(actual_param.url, f'{TestSynchronousFileBrowser.scope}/{self.directory}')
-                self.assertEqual(actual_param.share.accessMode, access)
+                self.assertEqual(actual_param.share.accessMode, access_mode)
                 expiration_date = datetime.now() + timedelta(days=expire_in)
                 self.assertEqual(actual_param.share.expiration, expiration_date.strftime('%Y-%m-%d'))
-                self.assertEqual(ret, execute_response)
+                self.assertEqual(ret, execute_response.publicLink)
 
     @staticmethod
     def _background_task_side_effect():
@@ -216,17 +215,3 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
                 'cursor': 'Test Cursor'
             })
         ])
-
-    """
-    def test_move_wait(self):
-        m_move = self.patch_call('cterasdk.core.files.io.move')
-
-    def test_move_no_wait(self):
-        m_move = self.patch_call('cterasdk.core.files.io.move')
-
-    def test_copy_wait(self):
-        m_copy = self.patch_call('cterasdk.core.files.io.copy')
-
-    def test_copy_no_wait(self):
-        m_copy = self.patch_call('cterasdk.core.files.io.copy')
-    """
