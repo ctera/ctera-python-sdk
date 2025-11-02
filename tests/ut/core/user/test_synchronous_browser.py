@@ -68,10 +68,10 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         ])
         actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
         self.assertEqual(len(actual_param.urls), 1)
-        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter((
             f'{self.directory}/{self.filename}',
             f'{self.directory}/{self.new_filename}',
-        )
+        ))
         self.assertEqual(actual_param.urls[0], expected_param[0])
         self.assertEqual(ret, f'{self.directory}/{self.new_filename}')
 
@@ -100,7 +100,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         ])
         actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
         self.assertEqual(len(actual_param.urls), 1)
-        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(f'{self.directory}/{self.filename}', None)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter((f'{self.directory}/{self.filename}', None))
         self.assertEqual(actual_param.urls[0], expected_param[0])
         self.assertEqual(ret, [{self.directory}/{self.filename}])
 
@@ -119,7 +119,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         ])
         actual_param = self._global_admin.api.execute.call_args_list[0].args[2]
         self.assertEqual(len(actual_param.urls), 1)
-        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(f'{self.directory}/{self.filename}', None)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter((f'{self.directory}/{self.filename}', None))
         self.assertEqual(actual_param.urls[0], expected_param[0])
         self.assertEqual(ret, [{self.directory}/{self.filename}])
 
