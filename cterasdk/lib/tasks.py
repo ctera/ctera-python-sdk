@@ -46,6 +46,10 @@ class BaseTask(Object):
     def completed_with_warnings(self):
         return self.status == TaskRunningStatus.Warnings
 
+    @property
+    def completed(self):
+        return self.status == TaskRunningStatus.Completed
+
 
 class EdgeTask(BaseTask):
     """

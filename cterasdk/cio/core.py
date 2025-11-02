@@ -1026,8 +1026,8 @@ class BackgroundPortalCommand(PortalCommand):
         self.background = True
 
     @abstractmethod
-    def _action_message(self):
-        raise NotImplementedError("Subclass must implement the '_action_message' method")
+    def _progress_str(self):
+        raise NotImplementedError("Subclass must implement the '_progress_str' method")
 
     def _background_function(self):
         if asyncio.iscoroutinefunction(self._function):
@@ -1054,24 +1054,45 @@ class BackgroundPortalCommand(PortalCommand):
             function = self._background_function()
             return await function(self.get_parameter())
 
+    def _handle_response(self, task):
+        if not self.block:
+            return task
+
+        if task.completed:
+            return self._task_complete(task)
+
+        if task.failed or task.completed_with_warnings:
+            return self._task_complete(task)
+
+        # error
+
+    def _task_complete(self, task):
+        return task
+
+    def _task_error(self, task):
+        return task
+
 
 class Rename(BackgroundPortalCommand):
 
     def __init__(self, function, receiver, path, new_name, block):
         super().__init__(function, receiver, block)
         self.path = path
-        self.new_name = new_name
+        self.new_path = self.path.parent.join(new_name)
 
-    def _action_message(self):
+    def _progress_str(self):
         return 'Renaming'
 
     def get_parameter(self):
         param = ActionResourcesParam.instance()
-        param.add(SrcDstParam.instance(src=self.path.absolute_encode, dest=self.path.parent.join(self.new_name).absolute_encode))
+        param.add(SrcDstParam.instance(src=self.path.absolute_encode, dest=self.new_path.absolute_encode))
         return param
 
     def _before_command(self):
-        logger.info('%s: %s, to: %s', self._action_message(), self.path.relative, self.path.parent.join(self.new_name).relative)
+        logger.info('%s: %s, to: %s', self._progress_str(), self.path.relative, self.new_path.relative)
+
+    def _task_complete(self, task):
+        return self.new_path.relative
 
 
 class MultiResourceCommand(BackgroundPortalCommand):
@@ -1089,38 +1110,33 @@ class MultiResourceCommand(BackgroundPortalCommand):
 
     def _before_command(self):
         for path in self.paths:
-            logger.info('%s: %s', self._action_message(), path.relative)
+            logger.info('%s: %s', self._progress_str(), path.relative)
+
+    def _task_complete(self, task):
+        return [path.relative for path in self.paths]
 
 
 class Delete(MultiResourceCommand):
 
-    def _action_message(self):
+    def _progress_str(self):
         return 'Deleting'
 
-    def _handle_response(self, r):
-        if not self.block:
-            return r
+    def _task_error(self, task):
+        cursor = task.cursor
+        raise exceptions.io.core.DeleteError(self.paths, cursor)
 
-        if r.failed or r.completed_with_warnings:
-            cursor = r.cursor
-            raise exceptions.io.core.DeleteError(self.paths, cursor)
-
-        return self.paths
 
 class Recover(MultiResourceCommand):
 
-    def _action_message(self):
+    def _progress_str(self):
         return 'Recovering'
 
-    def _handle_response(self, r):
-        if not self.block:
-            return r
-
-        if r.failed or r.completed_with_warnings:
-            cursor = r.cursor
-            raise exceptions.io.core.RecoverError(self.paths, cursor)
-
+    def _task_complete(self, task):
         return self.paths
+
+    def _task_error(self, task):
+        cursor = task.cursor
+        raise exceptions.io.core.RecoverError(self.paths, cursor)
 
 
 class ResolverCommand(BackgroundPortalCommand):
@@ -1161,16 +1177,32 @@ class ResolverCommand(BackgroundPortalCommand):
             src, dest = path, self.destination
             if isinstance(path, tuple):
                 src, dest = path
-            logger.info('%s: %s to: %s', self._action_message(), src.relative, dest.relative)
+            logger.info('%s: %s to: %s', self._progress_str(), src.relative, dest.relative)
 
     @abstractmethod
-    def _action_message(self):
-        raise NotImplementedError("Subclass must implement the '_action_message' method")
+    def _progress_str(self):
+        raise NotImplementedError("Subclass must implement the '_progress_str' method")
+
+    def execute(self):
+        try:
+            return super().execute()
+        except (exceptions.io.core.CopyError, exceptions.io.core.MoveError) as e:
+            if self.resolver:
+                return self._try_with_resolver(e.cursor)
+            return self._handle_exception(e)
+
+    async def a_execute(self):
+        try:
+            return await super().a_execute()
+        except (exceptions.io.core.CopyError, exceptions.io.core.MoveError) as e:
+            if self.resolver:
+                return await self._a_try_with_resolver(e.cursor)
+            return self._handle_exception(e)
 
 
 class Copy(ResolverCommand):
 
-    def _action_message(self):
+    def _progress_str(self):
         return 'Copying'
 
     def _try_with_resolver(self, cursor):
@@ -1181,38 +1213,17 @@ class Copy(ResolverCommand):
         return await Copy(self._function, self._receiver, self.block, *self.paths,
                           destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
 
-    def execute(self):
-        try:
-            return super().execute()
-        except exceptions.io.core.CopyError as e:
-            if self.resolver:
-                return self._try_with_resolver(e.cursor)
-            return self._handle_exception(e)
-
-    async def a_execute(self):
-        try:
-            return await super().a_execute()
-        except exceptions.io.core.CopyError as e:
-            if self.resolver:
-                return await self._a_try_with_resolver(e.cursor)
-            return self._handle_exception(e)
-
-    def _handle_response(self, r):
-        if not self.block:
-            return r
-
-        if r.failed or r.completed_with_warnings:
-            cursor = r.cursor
-            if r.error_type == 'Conflict':
-                dest = CorePath.instance('', cursor.destResource).relative
-                raise exceptions.io.core.CopyError(self.paths, cursor) from exceptions.io.core.FileConflictError(dest)
-            raise exceptions.io.core.CopyError(self.paths, cursor)
-        return r
+    def _task_error(self, task):
+        cursor = task.cursor
+        if task.error_type == ResourceError.Conflict:
+            dest = CorePath.instance('', cursor.destResource).relative
+            raise exceptions.io.core.CopyError(self.paths, cursor) from exceptions.io.core.FileConflictError(dest)
+        raise exceptions.io.core.CopyError(self.paths, cursor)
 
 
 class Move(ResolverCommand):
 
-    def _action_message(self):
+    def _progress_str(self):
         return 'Moving'
 
     def _try_with_resolver(self, cursor):
@@ -1223,30 +1234,9 @@ class Move(ResolverCommand):
         return await Move(self._function, self._receiver, self.block, *self.paths,
                           destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
 
-    def execute(self):
-        try:
-            return super().execute()
-        except exceptions.io.core.MoveError as e:
-            if self.resolver:
-                return self._try_with_resolver(e.cursor)
-            return self._handle_exception(e)
-
-    async def a_execute(self):
-        try:
-            return await super().a_execute()
-        except exceptions.io.core.MoveError as e:
-            if self.resolver:
-                return await self._a_try_with_resolver(e.cursor)
-            return self._handle_exception(e)
-
-    def _handle_response(self, r):
-        if not self.block:
-            return r
-
-        if r.failed or r.completed_with_warnings:
-            cursor = r.cursor
-            if r.error_type == 'Conflict':
-                dest = CorePath.instance('', cursor.destResource).relative
-                raise exceptions.io.core.MoveError(self.paths, cursor) from exceptions.io.core.FileConflictError(dest)
-            raise exceptions.io.core.MoveError(self.paths, cursor)
-        return r
+    def _task_error(self, task):
+        cursor = task.cursor
+        if task.error_type == ResourceError.Conflict:
+            dest = CorePath.instance('', cursor.destResource).relative
+            raise exceptions.io.core.MoveError(self.paths, cursor) from exceptions.io.core.FileConflictError(dest)
+        raise exceptions.io.core.MoveError(self.paths, cursor)

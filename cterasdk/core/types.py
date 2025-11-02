@@ -874,7 +874,7 @@ class ConflictResolver:
 
     @staticmethod
     def overwrite(apply_all=True):
-        return ConflictResolver(ConflictHandler.Override, apply_all)
+        return ConflictResolver(ConflictHandler.Overwrite, apply_all)
 
     @staticmethod
     def rename(apply_all=True):

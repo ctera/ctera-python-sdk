@@ -2,6 +2,7 @@ from unittest import mock
 from urllib.parse import quote
 
 from cterasdk.common.object import Object
+from cterasdk.core.tasks import AwaitablePortalTask
 from tests.ut.core.admin import base_admin
 
 
@@ -13,6 +14,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self.directory = 'docs'
         self.directory_path = 'a/b c/d'
         self.filename = 'Document.txt'
+        self.new_filename = 'Summary.txt'
 
     def test_versions(self):
         response = 'snapshots-response-object'
@@ -55,25 +57,65 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self.assertEqual(len(parts), self._global_admin.api.execute.call_count)
         self.assertEqual(ret, self.directory_path)
 
-    """
     def test_rename_wait(self):
-        m_rename = self.patch_call('cterasdk.core.files.io.rename')
+        self._init_global_admin()
+        ret = self._global_admin.files.rename(f'{self.directory}/{self.filename}', self.new_filename)
+        self._global_admin.api.execute.assert_called_once_with('', 'moveResources', mock.ANY)
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        self.assertEqual(len(actual_param.urls), 1)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(
+            f'{self.directory}/{self.filename}',
+            f'{self.directory}/{self.new_filename}',
+        )
+        self.assertEqual(actual_param.urls[0], expected_param[0])
+        self.assertEqual(ret, f'{self.directory}/{self.new_filename}')
 
     def test_rename_no_wait(self):
-        m_rename = self.patch_call('cterasdk.core.files.io.rename')
+        self._init_global_admin()
+        ret = self._global_admin.files.rename(f'{self.directory}/{self.filename}', self.new_filename, wait=False)
+        self.assertEqual(type(ret), AwaitablePortalTask)
+
+    def _create_source_dest_parameter(tuples):
+        scope = TestSynchronousFileBrowser.scope
+        return [
+            Object(**{
+                '_classname': 'SrcDstParam',
+                'src': f'{scope}/{src}',
+                'dst': f'{scope}/{dest}' if dest else None
+            })
+        for src, dest in tuples]
 
     def test_delete_wait(self):
-        m_delete = self.patch_call('cterasdk.core.files.io.delete')
+        self._init_global_admin()
+        ret = self._global_admin.files.delete(f'{self.directory}/{self.filename}')
+        self._global_admin.api.execute.assert_called_once_with('', 'deleteResources', mock.ANY)
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        self.assertEqual(len(actual_param.urls), 1)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(f'{self.directory}/{self.filename}', None)
+        self.assertEqual(actual_param.urls[0], expected_param[0])
+        self.assertEqual(ret, [{self.directory}/{self.filename}])
 
     def test_delete_no_wait(self):
-        m_delete = self.patch_call('cterasdk.core.files.io.delete')
+        self._init_global_admin()
+        ret = self._global_admin.files.delete(f'{self.directory}/{self.filename}', wait=False)
+        self.assertEqual(type(ret), AwaitablePortalTask)
 
     def test_undelete_wait(self):
-        m_recover = self.patch_call('cterasdk.core.files.io.recover')
+        self._init_global_admin()
+        ret = self._global_admin.files.undelete(f'{self.directory}/{self.filename}')
+        self._global_admin.api.execute.assert_called_once_with('', 'restoreResources', mock.ANY)
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        self.assertEqual(len(actual_param.urls), 1)
+        expected_param = TestSynchronousFileBrowser._create_source_dest_parameter(f'{self.directory}/{self.filename}', None)
+        self.assertEqual(actual_param.urls[0], expected_param[0])
+        self.assertEqual(ret, [{self.directory}/{self.filename}])
 
     def test_undelete_no_wait(self):
-        m_recover = self.patch_call('cterasdk.core.files.io.recover')
+        self._init_global_admin()
+        ret = self._global_admin.files.undelete(f'{self.directory}/{self.filename}', wait=False)
+        self.assertEqual(type(ret), AwaitablePortalTask)
 
+    """
     def test_move_wait(self):
         m_move = self.patch_call('cterasdk.core.files.io.move')
 
