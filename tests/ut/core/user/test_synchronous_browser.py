@@ -1,6 +1,7 @@
 import munch
 from unittest import mock
 
+from cterasdk.common.object import Object
 from cterasdk.core.files.browser import CloudDrive
 from tests.ut.core.admin import base_admin
 
@@ -11,7 +12,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
     def setUp(self):
         super().setUp()
         self.files = CloudDrive(self._global_admin)
-        self.directory = 'My Files'
+        self.directory = 'docs'
         self.filename = 'Document.txt'
 
     def test_versions(self):
@@ -24,21 +25,18 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
     def test_listdir(self):
         for include_deleted in [True, False]:
             self._init_global_admin(execute_response=self._create_fetch_resources_response_object())
-            iterator = self.files.listdir(self.directory)
-            filename = next(iterator)
+            filename = next(self.files.listdir(self.directory, include_deleted=include_deleted))
             self._global_admin.api.execute.assert_called_once_with('', 'fetchResources', mock.ANY)
             param = self._global_admin.api.execute.call_args[0][2]
-            self.assertEqual(param.path, f'{TestSynchronousFileBrowser.scope}/{self.directory}')
-            self.assertEqual(param.include_deleted, include_deleted)
+            self.assertEqual(param.root, f'{TestSynchronousFileBrowser.scope}/{self.directory}')
             self.assertEqual(filename, self.filename)
 
     def _create_fetch_resources_response_object(self):
-        return munch.Munch({
+        return Object(**{
             'errorType': None,
             'hasMore': False,
             'items': [self.filename]
         })
-
     """
     def test_mkdir(self):
         m_mkdir = self.patch_call('cterasdk.core.files.io.mkdir')
