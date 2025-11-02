@@ -141,7 +141,8 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
                 'totalBytes': 1073741824,
                 'errorType': None,
                 'fileInProgress': None,
-                'userUid': 'user_abc',
+                'userUid': 123,
+                'portalUid': 456,
                 'cursor': 'Test Cursor'
             })
         ])
