@@ -1,5 +1,6 @@
 from unittest import mock
 from urllib.parse import quote
+from datetime import datetime, timedelta
 
 from cterasdk.common.object import Object
 from cterasdk.core.tasks import AwaitablePortalTask
@@ -172,6 +173,21 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         ret = self._global_admin.files.move((f'{self.directory}/{self.filename}', f'{self.directory}/{self.new_filename}'), wait=False)
         self._global_admin.api.execute.assert_called_once_with('', 'moveResources', mock.ANY)
         self.assertEqual(type(ret), AwaitablePortalTask)
+
+    def test_public_link(self):
+        execute_response = 'success'
+        self._init_global_admin(execute_response=execute_response)
+        for access in ['PO', 'RO', 'RW']:
+            for expire_in in [0, 15, 30]:
+                ret = self._global_admin.files.public_link(self.directory, access, expire_in)
+                self._global_admin.api.execute.assert_called_once_with('', 'createShare', mock.ANY)
+                actual_param = self._global_admin.api.execute.call_args[0][2]
+                print(actual_param)
+                self.assertEqual(actual_param.url, f'{TestSynchronousFileBrowser.scope}/{self.directory}')
+                self.assertEqual(actual_param.share.accessMode, access)
+                expiration_date = datetime.now() + timedelta(days=expire_in)
+                self.assertEqual(actual_param.share.expiration, expiration_date.strftime('%Y-%m-%d'))
+                self.assertEqual(ret, execute_response)
 
     @staticmethod
     def _background_task_side_effect():
