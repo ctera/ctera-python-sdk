@@ -64,6 +64,6 @@ jobs:
       uses: aliencube/microsoft-teams-actions@v0.8.0
       with:
         webhook_uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
-        title: New Release: CTERA SDK ${{ steps.tagName.outputs.tag }}
+        title: New Release - CTERA SDK ${{ steps.tagName.outputs.tag }}
         summary: Python SDK
         actions: '[{ "@type": "OpenUri", "name": "PyPi", "targets": [{ "os": "default", "uri": "https://pypi.org/project/cterasdk/"}] }, { "@type": "OpenUri", "name": "Docs", "targets": [{ "os": "default", "uri": "https://ctera-python-sdk.readthedocs.io/en/latest/"}] }]'
