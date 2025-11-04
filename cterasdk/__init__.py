@@ -1,7 +1,6 @@
 # pylint: disable=wrong-import-position
 import cterasdk.settings  # noqa: E402, F401
 import cterasdk.exceptions  # noqa: E402, F401
-from .version import __version__  # noqa: E402, F401
 
 from .common import Object, PolicyRule  # noqa: E402, F401
 from .convert import fromjsonstr, tojsonstr, fromxmlstr, toxmlstr  # noqa: E402, F401

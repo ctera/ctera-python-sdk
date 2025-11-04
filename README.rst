@@ -2,8 +2,6 @@
 CTERA SDK for Python
 ====================
 
-.. image:: https://travis-ci.com/ctera/ctera-python-sdk.svg?branch=master
-   :target: https://travis-ci.com/ctera/ctera-python-sdk
 .. image:: https://github.com/ctera/ctera-python-sdk/workflows/CI/badge.svg
    :target: https://github.com/ctera/ctera-python-sdk/actions?query=workflow%3ACI
 .. image:: https://readthedocs.org/projects/ctera-python-sdk/badge/?version=latest
@@ -51,7 +49,7 @@ Install from source:
 
    $ git clone https://github.com/ctera/ctera-python-sdk.git
    $ cd ctera-python-sdk
-   $ python setup.py install
+   $ python -m build
 
 Importing the Library
 ======================

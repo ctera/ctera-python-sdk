@@ -1,7 +1,4 @@
 recursive-exclude tests *
 recursive-exclude docs *
-recursive-exclude samples *
-recursive-exclude .travis *
-exclude doc8.ini Dockerfile.cterasdk-build .flake8 .gitignore Makefile .pylintrc skipper.yaml test-requirements.txt tox.ini .travis.yml ut-requirements.txt
-exclude
+exclude doc8.ini Dockerfile.cterasdk-build .flake8 .gitignore Makefile .pylintrc skipper.yaml test-requirements.txt tox.ini ut-requirements.txt
 global-exclude *.py[cod]
