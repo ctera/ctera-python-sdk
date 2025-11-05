@@ -5,7 +5,7 @@ import aiohttp
 from . import async_requests, errors
 from .settings import ClientSessionSettings, TraceSettings
 from ..common import utils
-from ..version import __version__
+from .. import __version__
 
 
 logger = logging.getLogger('cterasdk.http')
