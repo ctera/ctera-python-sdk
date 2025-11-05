@@ -2,12 +2,6 @@
 import cterasdk.settings  # noqa: E402, F401
 import cterasdk.exceptions  # noqa: E402, F401
 
-try:
-    from . import version
-    __version__ = version.__version__
-except ImportError:
-    __version__ = 'dev'
-
 from .common import Object, PolicyRule  # noqa: E402, F401
 from .convert import fromjsonstr, tojsonstr, fromxmlstr, toxmlstr  # noqa: E402, F401
 from .core import query  # noqa: E402, F401
