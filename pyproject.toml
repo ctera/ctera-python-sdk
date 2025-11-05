@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=80", "setuptools-scm[simple]>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">=3.10"
+name = "cterasdk"
+dynamic = ["version"]
+authors = [
+  {name = "Saimon Michelson", email = "saimon@ctera.com"}
+]
+maintainers = [
+  {name = "CTERA Networks Ltd", email = "info@ctera.com"}
+]
+license = "Apache-2.0"
+readme = "README.rst"
+
+classifiers = [
+    "Development_Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating_System :: OS Independent",
+    "Programming_Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+[project.urls]
+Homepage = "https://pypi.org/project/cterasdk/"
+"Bug Tracker" = "https://github.com/ctera/ctera-python-sdk/issues"
+Documentation = "https://ctera-python-sdk.readthedocs.io/en/latest/"
+"Source Code" = "https://github.com/ctera/ctera-python-sdk"
+
+[tool.setuptools_scm]
+version_file = "cterasdk/version.py"

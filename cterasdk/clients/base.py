@@ -5,7 +5,13 @@ import aiohttp
 from . import async_requests, errors
 from .settings import ClientSessionSettings, TraceSettings
 from ..common import utils
-from ..version import __version__
+
+
+try:
+    import cterasdk.version
+    __version__ = cterasdk.version.__version__
+except ImportError:
+    __version__ = 'dev'
 
 
 logger = logging.getLogger('cterasdk.http')

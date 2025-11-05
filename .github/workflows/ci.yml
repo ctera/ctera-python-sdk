@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11']
+        python-version: ['3.10', '3.11', '3.12']
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -48,10 +48,10 @@ jobs:
         python-version: 3.x
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install --upgrade build
     - name: Build package
       run: |
-        python setup.py sdist bdist_wheel
+        python -m build
     - name: Deploy to PyPi
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
@@ -64,6 +64,6 @@ jobs:
       uses: aliencube/microsoft-teams-actions@v0.8.0
       with:
         webhook_uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
-        title: CTERA Python SDK version ${{ steps.tagName.outputs.tag }} was released
-        summary: Python SDK Version
-        actions: '[{ "@type": "OpenUri", "name": "PyPi", "targets": [{ "os": "default", "uri": "https://pypi.org/project/cterasdk/"}] }]'
+        title: New Release - CTERA SDK ${{ steps.tagName.outputs.tag }}
+        summary: Python SDK
+        actions: '[{ "@type": "OpenUri", "name": "PyPi", "targets": [{ "os": "default", "uri": "https://pypi.org/project/cterasdk/"}] }, { "@type": "OpenUri", "name": "Docs", "targets": [{ "os": "default", "uri": "https://ctera-python-sdk.readthedocs.io/en/latest/"}] }]'
