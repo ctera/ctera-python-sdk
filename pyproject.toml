@@ -16,10 +16,10 @@ license = "Apache-2.0"
 readme = "README.rst"
 
 classifiers = [
-    "Development_Status :: 5 - Production/Stable",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "Operating_System :: OS Independent",
-    "Programming_Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 
