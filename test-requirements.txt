@@ -2,9 +2,9 @@ mock==2.0.0
 nose2==0.6.5
 flake8==3.7.9
 pylint==2.7.0
-pytest==3.0.6
+pytest>=8.4.0
 cov-core==1.15.0
-sphinx
+sphinx>=8.2.0
 sphinx_rtd_theme
 m2r
 doc8
