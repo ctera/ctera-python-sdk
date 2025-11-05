@@ -1,5 +1,5 @@
 pyyaml
-aiohttp
+aiohttp>=3.12.14
 aiofiles
 cryptography
 packaging
