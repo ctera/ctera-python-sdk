@@ -38,11 +38,8 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
 
         self._mtu = 1320
 
-        self._static_route_1 = Object()
-        self._static_route_1.GwIP = '192.168.0.150'
-        self._static_route_1.DestIpMask = '172.64.28.15_32'
-        self._static_routes = []
-        self._static_routes.append(self._static_route_1)
+        self._static_route_gateway = '192.168.0.150'
+        self._static_route_network = '172.64.28.15/32'
 
         self._proxy_address = '192.168.27.131'
         self._proxy_port = 3192
@@ -244,69 +241,52 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         return tcp_connect_param
 
     def test_add_static_routes(self):
-        add_response = f'/config/network/static_routes/{self._static_routes[0].DestIpMask}'
+        add_response = 'success'
         self._init_filer(add_response=add_response)
-        network.Network(self._filer).routes.add(
-            self._static_routes[0].GwIP,
-            self._static_routes[0].DestIpMask.replace("_", "/")
-        )
+        ret = network.Network(self._filer).routes.add(self._static_route_gateway, self._static_route_network)
         self._filer.api.add.assert_called_once_with('/config/network/static_routes', mock.ANY)
-
-        expected_param = self._static_routes[0]
+        expected_param = Object(**{
+            'GwIP': self._static_route_gateway,
+            'DestIpMask': self._static_route_network.replace('/', '_')
+        })
         actual_param = self._filer.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret.network, self._static_route_network)
+        self.assertEqual(ret.gateway, self._static_route_gateway)
 
     def test_add_static_routes_raise(self):
-        expected_exception = exceptions.CTERAException()
-        self._filer.api.add = mock.MagicMock(side_effect=expected_exception)
+        self._filer.api.add = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
-            network.Network(self._filer).routes.add(
-                self._static_routes[0].GwIP,
-                self._static_routes[0].DestIpMask.replace("_", "/")
-            )
+            network.Network(self._filer).routes.add(self._static_route_gateway, self._static_route_network)
         self.assertEqual('Static route creation failed', str(error.exception))
 
     def test_get_all_static_routes(self):
-        get_response = 'Success'
+        get_response = [Object(**{
+            'GwIP': self._static_route_gateway,
+            'DestIpMask': self._static_route_network
+        })]
         self._init_filer(get_response=get_response)
         ret = network.Network(self._filer).routes.get()
         self._filer.api.get.assert_called_once_with('/config/network/static_routes')
-        self.assertEqual(ret, get_response)
+        self.assertEqual(ret[0].gateway, get_response[0].GwIP)
+        self.assertEqual(ret[0].network, get_response[0].DestIpMask)
 
     def test_remove_static_route(self):
-        self._init_filer(delete_response=self._static_routes[0])
-
-        ret = network.Network(self._filer).routes.remove(self._static_routes[0].DestIpMask.replace("_", "/"))
-        self._filer.api.delete.assert_called_once_with(f'/config/network/static_routes/{self._static_routes[0].DestIpMask}')
-
-        self.assertEqual(self._static_routes[0], ret)
+        self._init_filer()
+        network.Network(self._filer).routes.delete(self._static_route_network)
+        self._filer.api.delete.assert_called_once_with(f'/config/network/static_routes/{self._static_route_network.replace("/", "_")}')
 
     def test_remove_static_route_raise(self):
-        expected_exception = exceptions.CTERAException()
-        self._filer.api.delete = mock.MagicMock(side_effect=expected_exception)
+        self._filer.api.delete = mock.MagicMock(side_effect=exceptions.CTERAException())
         with self.assertRaises(exceptions.CTERAException) as error:
-            network.Network(self._filer).routes.remove(self._static_routes[0].DestIpMask.replace("_", "/"))
+            network.Network(self._filer).routes.delete(self._static_route_network)
         self.assertEqual('Static route deletion failed', str(error.exception))
 
     def test_clean_all_static_routes_success(self):
-        expected_exception = 'Success'
-        self._init_filer(execute_response=expected_exception)
-        self._filer.api.execute = mock.MagicMock(side_effect=expected_exception)
-
+        execute_response = 'Success'
+        self._init_filer(execute_response=execute_response)
         network.Network(self._filer).routes.clear()
-
-        expected_param = 'cleanStaticRoutes'
-        actual_param = self._filer.api.execute.call_args[0][1]
-        self._assert_equal_objects(actual_param, expected_param)
-
-    def test_clean_all_static_routes_raise(self):
-        expected_exception = exceptions.CTERAException()
-        self._init_filer(execute_response=expected_exception)
-        self._filer.api.execute = mock.MagicMock(side_effect=expected_exception)
-
-        with self.assertRaises(exceptions.CTERAException) as error:
-            network.Network(self._filer).routes.clear()
-        self.assertEqual('Failed to clear static routes', str(error.exception))
+        self._filer.api.execute.assert_called_once_with('/config/network', 'cleanStaticRoutes')
 
     def test_get_proxy_config(self):
         get_response = 'Success'

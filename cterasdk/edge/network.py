@@ -1,10 +1,11 @@
 import logging
+import ipaddress
 
 from ..exceptions import CTERAException
 from ..exceptions.common import TaskException
 from .enum import Mode, IPProtocol, Traffic
-from .types import TCPConnectResult
-from ..common import Object, parse_to_ipaddress
+from .types import TCPConnectResult, StaticRoute
+from ..common import Object
 from .base_command import BaseCommand
 
 
@@ -257,55 +258,50 @@ class StaticRoutes(BaseCommand):
 
     def get(self):
         """
-        Get All Static Routes
+        Get routes.
         """
-        return self._edge.api.get('/config/network/static_routes')
+        return [StaticRoute(r.DestIpMask, r.GwIP) for r in self._edge.api.get('/config/network/static_routes')]
 
-    def add(self, source_ip, destination_ip_mask):
+    def add(self, gateway, network):
         """
-        Add a Static Route
+        Add a route.
 
-        :param str source_ip: The source IP (192.168.15.55)
-        :param str destination_ip_mask: The destination IP and CIDR block (10.5.0.1/32)
+        :param str gateway: Gateway IP address
+        :param str network: Network (CIDR)
         """
+        ipaddress.ip_address(gateway)
+        ipaddress.ip_network(network)
+        param = Object()
+        param.GwIP = gateway
+        param.DestIpMask = network.replace('/', '_')
         try:
-            param = Object()
-            param.GwIP = str(parse_to_ipaddress(source_ip))
-            param.DestIpMask = str(parse_to_ipaddress(destination_ip_mask)).replace("/", "_")
-            res = self._edge.api.add('/config/network/static_routes', param)
-            logger.info(
-                "Static route updated. %s", {'Source': param.GwIP, 'Destination': destination_ip_mask})
-            return res
+            logger.info('Adding route for network: %s, to: %s', network, param.GwIP)
+            self._edge.api.add('/config/network/static_routes', param)
+            logger.info('Route added for network: %s, to: %s', network, param.GwIP)
+            return StaticRoute(network, gateway)
         except CTERAException as error:
             logger.error("Static route creation failed.")
             raise CTERAException('Static route creation failed') from error
 
-    def remove(self, destination_ip_mask):
+    def delete(self, network):
         """
-        Remove a Static Route
+        Delete a route.
 
-        :param str destination_ip_mask: The destination IP and CIDR block (10.5.0.1/32)
+        :param str network: Subnet mask (CIDR)
         """
+        ipaddress.ip_network(network)
         try:
-            dest_ip_mask = str(parse_to_ipaddress(destination_ip_mask)).replace("/", "_")
-            response = self._edge.api.delete(f'/config/network/static_routes/{dest_ip_mask}')
-            logger.info(
-                "Static route deleted. %s", {'Destination': dest_ip_mask})
-            return response
+            logger.info('Deleting route for: %s', network)
+            self._edge.api.delete(f'/config/network/static_routes/{network.replace("/", "_")}')
+            logger.info('Route deleted. Subnet: %s', network)
         except CTERAException as error:
             logger.error("Static route deletion failed.")
             raise CTERAException('Static route deletion failed') from error
 
     def clear(self):
-        """
-        Clear All Static routes
-        """
-        try:
-            self._edge.api.execute('/config/network', 'cleanStaticRoutes')
-            logger.info('Static routes were deleted successfully')
-        except CTERAException as error:
-            logger.error("Failed to clear static routes")
-            raise CTERAException('Failed to clear static routes') from error
+        logger.info('Clearing route table.')
+        self._edge.api.execute('/config/network', 'cleanStaticRoutes')
+        logger.info('Route table cleared.')
 
 
 class Hosts(BaseCommand):

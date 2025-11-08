@@ -42,8 +42,8 @@ class Streamer:
                 yield fragment
                 self._offset = fragment.offset + fragment.length
         except DirectIOAPIError as error:
-            raise StreamError(error.filename, self._offset)
+            raise StreamError(error.filename, self._offset) from error
         except BlockError as error:
-            raise StreamError(error.block.file_id, self._offset)
+            raise StreamError(error.block.file_id, self._offset) from error
         finally:
             self.stop()
