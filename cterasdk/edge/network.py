@@ -299,13 +299,9 @@ class StaticRoutes(BaseCommand):
             raise CTERAException('Static route deletion failed') from error
 
     def clear(self):
-        """Clear all routes."""
-        try:
-            self._edge.api.execute('/config/network', 'cleanStaticRoutes')
-            logger.info('Static routes were deleted successfully')
-        except CTERAException as error:
-            logger.error("Failed to clear static routes")
-            raise CTERAException('Failed to clear static routes') from error
+        logger.info('Clearing route table.')
+        self._edge.api.execute('/config/network', 'cleanStaticRoutes')
+        logger.info('Route table cleared.')
 
 
 class Hosts(BaseCommand):
