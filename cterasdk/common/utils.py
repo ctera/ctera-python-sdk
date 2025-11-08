@@ -154,28 +154,6 @@ def parse_base_object_ref(base_object_ref):
     return BaseObjectRef(**arguments)
 
 
-def parse_to_ipaddress(address):
-    """
-    Parse an ip or network address into ipaddress object
-
-    :param str address: ip (10.0.0.5) or network address (192.168.44.0/28)
-    :return: ipaddress.IPV4Address/IPV6Address or ipaddress.IPV4Network/IPV6Network
-    """
-    try:
-        try:
-            ip_addrr = ipaddress.ip_address(address)
-            logger.debug('ip address validated. %s', {'ip': str(ip_addrr)})
-            return ip_addrr
-        except (ValueError, TypeError):
-            ip_network = ipaddress.ip_network(address)
-            logger.debug('ip network validated. %s', {'network': str(ip_network)})
-            return ip_network
-    except (ValueError, TypeError):
-        err = ValueError(f'{address} does not appear to be an IPv4 or IPv6 network or ip address')
-        logger.error('Incorrect entry, please use IPv4 or IPv6 CIDR Formats. %s', {'Error': err})
-        raise err
-
-
 class Version:
     """Software Version"""
 
@@ -222,10 +200,11 @@ def utf8_encode(message):
     return message.encode('utf-8')
 
 
-def tcp_connect(host, port):
+def tcp_connect(host, port, *, timeout=None):
     logger.debug('Testing connection. %s', {'host': host, 'port': port})
     message = f"Connection error to remote host {host} on port {port}."
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(timeout)
     rc = None
     try:
         rc = sock.connect_ex((host, port))

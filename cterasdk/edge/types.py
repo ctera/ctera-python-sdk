@@ -18,6 +18,12 @@ TCPConnectResult.is_open.__doc__ = 'Boolean, indicating whether a TCP connection
                                    'established to the target host over the specified port'
 
 
+StaticRoute = namedtuple('StaticRoute', ('network', 'gateway'))
+StaticRoute.__doc__ = 'Tuple holding the network and gateway of a static route'
+StaticRoute.network.__doc__ = 'Network (CIDR)'
+StaticRoute.gateway.__doc__ = 'Gateway IP address'
+
+
 class UserGroupEntry():
     """
     User or Group Entry

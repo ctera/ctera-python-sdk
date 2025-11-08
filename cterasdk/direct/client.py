@@ -2,7 +2,7 @@ import asyncio
 import cterasdk.settings
 
 from . import filters
-from .credentials import KeyPair, Bearer, create_bearer_token
+from .credentials import KeyPair, Bearer
 from .lib import get_chunks, decrypt_encryption_key, process_chunks
 from .types import ByteRange
 from .stream import Streamer
@@ -29,10 +29,9 @@ class DirectIO:
                               authenticator=lambda *_: True)
         self._client = AsyncClient(DefaultBuilder(), settings=cterasdk.settings.io.direct.storage.settings, authenticator=lambda *_: True)
         self._credentials = Bearer(bearer) if bearer else KeyPair(access_key_id, secret_access_key)
-        self._bearer = create_bearer_token(self._credentials)
 
     async def _chunks(self, file_id):
-        metadata = await get_chunks(self._api, self._bearer, file_id)
+        metadata = await get_chunks(self._api, self._credentials.bearer, file_id)
         if metadata.encrypted:
             metadata.encryption_key = decrypt_encryption_key(
                 metadata.file_id,

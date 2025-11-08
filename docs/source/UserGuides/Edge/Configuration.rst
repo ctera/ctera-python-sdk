@@ -928,7 +928,6 @@ Static Routes
 
 .. code-block:: python
 
-   # get static routes
    edge.network.routes.get()
 
 .. automethod:: cterasdk.edge.network.StaticRoutes.add
@@ -936,19 +935,16 @@ Static Routes
 
 .. code-block:: python
 
-   # add static route from 10.10.12.1 to 192.168.55.7/32
    edge.network.routes.add('10.10.12.1', '192.168.55.7/32')
 
-   # add static route from 10.100.102.4 to 172.18.100.0/24
    edge.network.routes.add('10.100.102.4', '172.18.100.0/24')
 
-.. automethod:: cterasdk.edge.network.StaticRoutes.remove
+.. automethod:: cterasdk.edge.network.StaticRoutes.delete
    :noindex:
 
 .. code-block:: python
 
-   # remove static route 192.168.55.7/32
-   edge.network.routes.remove('192.168.55.7/32')
+   edge.network.routes.delete('192.168.55.7/32')
 
 .. automethod:: cterasdk.edge.network.StaticRoutes.clear
    :noindex:
