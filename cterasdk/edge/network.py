@@ -267,7 +267,7 @@ class StaticRoutes(BaseCommand):
         Add a route.
 
         :param str gateway: Gateway IP address
-        :param str network: Network (CIDR) 
+        :param str network: Network (CIDR)
         """
         ipaddress.ip_address(gateway)
         ipaddress.ip_network(network)

@@ -1,7 +1,6 @@
 import re
 import socket
 import logging
-import ipaddress
 
 from datetime import datetime
 from packaging.version import parse as parse_version

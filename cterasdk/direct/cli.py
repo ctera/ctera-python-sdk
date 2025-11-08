@@ -1,9 +1,9 @@
 import sys
-import yarl
 import asyncio
 import logging
 import aiofiles
 import argparse
+import yarl
 
 
 from .. import settings
