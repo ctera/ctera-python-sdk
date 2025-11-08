@@ -1,6 +1,24 @@
 Changelog
 =========
 
+2.20.24
+-------
+
+Improvements
+^^^^^^^^^^^^
+* Improved management of Edge Filer static routes.
+* Added a CLI command for downloading files via CTERA Direct I/O.
+
+
+2.20.23
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Update build process to use pyproject.toml
+
+
 2.20.22
 -------
 
