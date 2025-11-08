@@ -1,8 +1,8 @@
 import sys
 import asyncio
 import logging
-import aiofiles
 import argparse
+import aiofiles
 import yarl
 
 
