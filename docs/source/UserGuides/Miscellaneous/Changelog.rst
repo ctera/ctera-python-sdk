@@ -9,6 +9,19 @@ Improvements
 * Improved management of Edge Filer static routes.
 * Added a CLI command for downloading files via CTERA Direct I/O.
 
+.. code:: bash
+$ cterasdk.io.direct.download --help
+
+With credentials set as environment variables
+.. code:: bash
+$ export cterasdk.io.direct.access_key_id="L5WT94ULMS3KFNE7IK5O"
+$ export cterasdk.io.direct.secret_access_key="CVZG1U07gRaY4sEdUmIH7tkHN7Vn63RKyvP6Rmrh"
+$ cterasdk.io.direct.download --endpoint https://192.168.94.137 --file-id 14390 --path ./art.png --no-verify-ssl --debug
+
+With credentials supplied as arguments
+.. code:: bash
+$ cterasdk.io.direct.download --endpoint https://192.168.94.137 --file-id 14390 --access ABC --secret XYZ --path ./art.png --no-verify-ssl --debug
+
 
 2.20.23
 -------
