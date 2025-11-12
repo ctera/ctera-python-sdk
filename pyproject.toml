@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 requires-python = ">=3.10"
 name = "cterasdk"
-dynamic = ["version"]
+dynamic = ["version", "dependencies"]
 authors = [
   {name = "Saimon Michelson", email = "saimon@ctera.com"}
 ]
@@ -31,6 +31,10 @@ Documentation = "https://ctera-python-sdk.readthedocs.io/en/latest/"
 
 [project.scripts]
 "cterasdk.io.direct.download" = "cterasdk.direct.cli:download_object"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
 
 [tool.setuptools_scm]
 version_file = "cterasdk/version.py"
