@@ -116,7 +116,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.volumes = volumes.Volumes(self)
 
     def _after_login(self):
-        self.ssl = ssl.initialize(self)
+        self.ssl = self.ssl.initialize(self)
 
     @property
     def migrate(self):
