@@ -1,6 +1,6 @@
 from ..base_command import BaseCommand
-from ...cio.edge import EdgePath, ListDirectory, RecursiveIterator, GetMetadata, Open, OpenMany, Upload, \
-     UploadFile, CreateDirectory, Copy, Move, Delete, Download, DownloadMany, Rename
+from ...cio.edge.commands import ListDirectory, RecursiveIterator, GetMetadata, Open, OpenMany, Upload, \
+     UploadFile, CreateDirectory, Copy, Move, Delete, Download, DownloadMany, Rename, EnsureDirectory
 from . import io
 
 
@@ -13,7 +13,8 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path
         """
-        return ListDirectory(io.listdir, self._edge, self.normalize(path)).execute()
+        with EnsureDirectory(io.listdir, self._edge, path):
+            return ListDirectory(io.listdir, self._edge, path).execute()
 
     def walk(self, path=None):
         """
@@ -21,7 +22,8 @@ class FileBrowser(BaseCommand):
 
         :param str,optional path: Path to walk, defaults to the root directory
         """
-        return RecursiveIterator(io.listdir, self._edge, self.normalize(path)).generate()
+        with EnsureDirectory(io.listdir, self._edge, path):
+            return RecursiveIterator(io.listdir, self._edge, path).generate()
 
     def exists(self, path):
         """
@@ -29,7 +31,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path
         """
-        with GetMetadata(io.listdir, self._edge, self.normalize(path), True) as (exists, *_):
+        with GetMetadata(io.listdir, self._edge, path, True) as (exists, *_):
             return exists
 
     def handle(self, path):
@@ -38,7 +40,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path to a file
         """
-        return Open(io.handle, self._edge, self.normalize(path)).execute()
+        return Open(io.handle, self._edge, path).execute()
 
     def handle_many(self, directory, *objects):
         """
@@ -57,7 +59,7 @@ class FileBrowser(BaseCommand):
         :param str,optional destination:
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
-        return Download(io.handle, self._edge, self.normalize(path), destination).execute()
+        return Download(io.handle, self._edge, path, destination).execute()
 
     def download_many(self, target, objects, destination=None):
         """
@@ -75,7 +77,7 @@ class FileBrowser(BaseCommand):
             Optional. Path to the destination file or directory. If a directory is provided,
             the original filename will be preserved. Defaults to the default download directory.
         """
-        return DownloadMany(io.handle_many, self._edge, self.normalize(target), objects, destination).execute()
+        return DownloadMany(io.handle_many, self._edge, target, objects, destination).execute()
 
     def upload(self, name, destination, handle):
         """
@@ -85,7 +87,7 @@ class FileBrowser(BaseCommand):
         :param str destination: Path to remote directory.
         :param object handle: Handle.
         """
-        return Upload(io.upload, self._edge, io.listdir, name, self.normalize(destination), handle).execute()
+        return Upload(io.upload, self._edge, io.listdir, name, destination, handle).execute()
 
     def upload_file(self, path, destination):
         """
@@ -94,7 +96,7 @@ class FileBrowser(BaseCommand):
         :param str path: Local path
         :param str destination: Remote path
         """
-        return UploadFile(io.upload, self._edge, io.listdir, path, self.normalize(destination)).execute()
+        return UploadFile(io.upload, self._edge, io.listdir, path, destination).execute()
 
     def mkdir(self, path):
         """
@@ -102,7 +104,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Directory path
         """
-        return CreateDirectory(io.mkdir, self._edge, self.normalize(path)).execute()
+        return CreateDirectory(io.mkdir, self._edge, path).execute()
 
     def makedirs(self, path):
         """
@@ -110,7 +112,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Directory path
         """
-        return CreateDirectory(io.mkdir, self._edge, self.normalize(path), True).execute()
+        return CreateDirectory(io.mkdir, self._edge, path, True).execute()
 
     def copy(self, path, destination=None, overwrite=False):
         """
@@ -120,7 +122,7 @@ class FileBrowser(BaseCommand):
         :param str destination: Destination folder path
         :param bool,optional overwrite: Overwrite on conflict, defaults to False
         """
-        return Copy(io.copy, self._edge, self.normalize(path), self.normalize(destination), overwrite).execute()
+        return Copy(io.copy, self._edge, path, destination, overwrite).execute()
 
     def move(self, path, destination=None, overwrite=False):
         """
@@ -130,7 +132,7 @@ class FileBrowser(BaseCommand):
         :param str destination: Destination folder path
         :param bool,optional overwrite: Overwrite on conflict, defaults to False
         """
-        return Move(io.move, self._edge, self.normalize(path), self.normalize(destination), overwrite).execute()
+        return Move(io.move, self._edge, path, destination, overwrite).execute()
 
     def rename(self, path, name):
         """
@@ -139,7 +141,7 @@ class FileBrowser(BaseCommand):
         :param str path: Path of the file or directory to rename
         :param str name: The name to rename to
         """
-        return Rename(io.move, self._edge, self.normalize(path), name).execute()
+        return Rename(io.move, self._edge, path, name).execute()
 
     def delete(self, path):
         """
@@ -147,8 +149,4 @@ class FileBrowser(BaseCommand):
 
         :param str path: File path
         """
-        return Delete(io.delete, self._edge, self.normalize(path)).execute()
-
-    @staticmethod
-    def normalize(path):
-        return EdgePath.instance('/', path)
+        return Delete(io.delete, self._edge, path).execute()

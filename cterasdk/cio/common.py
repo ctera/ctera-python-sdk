@@ -1,5 +1,7 @@
+import urllib.parse
+from abc import abstractmethod
 from pathlib import PurePosixPath
-from ..objects.uri import quote
+from ..common import Object
 from ..common.utils import utf8_decode
 from ..convert.serializers import toxmlstr
 
@@ -34,12 +36,16 @@ class BasePath:
         return self._reference.as_posix()
 
     @property
+    def relative_encode(self):
+        return urllib.parse.quote(self._reference.as_posix())
+
+    @property
     def name(self):
         return self._reference.name
 
     @property
     def parent(self):
-        return self.__class__(self._scope.as_posix(), self._reference.parent.as_posix())
+        return self.__class__(self._reference.parent.as_posix())
 
     @property
     def absolute(self):
@@ -47,11 +53,15 @@ class BasePath:
 
     @property
     def absolute_encode(self):
-        return f'/{self.scope.joinpath(quote(self.reference.as_posix())).as_posix()}'
+        return f'/{self.scope.joinpath(urllib.parse.quote(self.reference.as_posix())).as_posix()}'
 
     @property
     def absolute_parent(self):
         return self.parent.as_posix()
+
+    @property
+    def extension(self):
+        return self.reference.suffix
 
     def join(self, p):
         """
@@ -59,14 +69,50 @@ class BasePath:
 
         :param str p: Path.
         """
-        return self.__class__(self._scope.as_posix(), self.reference.joinpath(p).as_posix())
+        return self.__class__(self.reference.joinpath(p).as_posix())
 
     @property
     def parts(self):
         return self.reference.parts
 
     def __str__(self):
-        return self.absolute
+        return self.relative
+
+
+class BaseResource(Object):
+    """
+    Class for a Filesystem Resource.
+
+    :ivar str name: Resource name
+    :ivar cterasdk.cio.common.BasePath path: Path Object
+    :ivar bool is_dir: ``True`` if directory, ``False`` otherwise
+    :ivar int size: Size
+    :ivar datetime.datetime last_modified: Last Modified
+    :ivar str extension: Extension
+    """
+    def __init__(self, name, path, is_dir, size, last_modified):
+        self.name = name
+        self.path = path
+        self.is_dir = is_dir
+        self.size = size
+        self.last_modified = last_modified
+        self.extension = path.extension
+
+    @property
+    @abstractmethod
+    def uri(self):
+        raise NotImplementedError("Subclass must implement the 'uri' property")
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}("
+            f"'is_dir': {self.is_dir}, "
+            f"'size': {self.size}, "
+            f"'path': {self.path}}})"
+        )
+
+    def __str__(self):
+        return str(self.path)
 
 
 def encode_stream(fd, size):

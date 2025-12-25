@@ -1,7 +1,7 @@
 import logging
 
 from . import enum
-from ..cio.edge import EdgePath
+from ..cio.edge.types import EdgePath
 from ..common import Object
 from ..exceptions import CTERAException, InputError
 from .base_command import BaseCommand

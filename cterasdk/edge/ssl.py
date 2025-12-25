@@ -2,15 +2,15 @@ import logging
 
 from .base_command import BaseCommand
 from ..lib import X509Certificate, PrivateKey, create_certificate_chain
-from ..common import Object, BaseInitializer
+from ..common import Object, BaseModule
 
 
 logger = logging.getLogger('cterasdk.edge')
 
 
-class SSLInitializer(BaseInitializer):
+class SSLModule(BaseModule):
 
-    def _version_selector(self, software_version):
+    def initialize_version(self, software_version):
         return SSLv78 if software_version > '7.8' else SSLv1
 
 
@@ -56,10 +56,6 @@ class SSL(BaseCommand):
         response = self._edge.api.put(path, f"\n{server_certificate}")
         logger.info("Uploaded Web Server SSL certificate.")
         return response
-
-    @staticmethod
-    def initialize(edge):
-        return SSLInitializer(edge)
 
 
 class SSLv1(SSL):

@@ -2,122 +2,145 @@ import errno
 from .base import BaseIOError, EREMOTEIO
 
 
-class FileConflictError(BaseIOError):
+class PathError(BaseIOError):
+    """
+    Object I/O Error
+
+    :ivar str path: Object path
+    """
+    def __init__(self, errno, strerror, filename, filename2=None):
+        super().__init__(errno, strerror, filename, None, filename2)
+        self.path = filename
+
+
+class FileConflictError(PathError):
 
     def __init__(self, filename):
         super().__init__(errno.EEXIST, 'File exists', filename)
 
 
-class ObjectNotFoundError(BaseIOError):
+class ObjectNotFoundError(PathError):
 
     def __init__(self, filename):
         super().__init__(errno.ENOENT, 'Object not found', filename)
 
 
-class FileNotFoundException(BaseIOError):
+class FileNotFoundException(PathError):
 
     def __init__(self, filename):
         super().__init__(errno.ENOENT, 'File not found', filename)
 
 
-class FolderNotFoundError(BaseIOError):
+class FolderNotFoundError(PathError):
 
     def __init__(self, filename):
         super().__init__(errno.ENOENT, 'Folder not found', filename)
 
 
-class NotADirectoryException(BaseIOError):
+class NotADirectoryException(PathError):
 
     def __init__(self, filename):
         super().__init__(errno.ENOTDIR, 'Not a directory', filename)
 
 
-class WriteError(BaseIOError):
+class WriteError(PathError):
 
     def __init__(self, strerror, filename):
         super().__init__(EREMOTEIO, f'Write failed. Reason: {strerror}', filename)
 
 
-class ROFSError(BaseIOError):
+class ROFSError(PathError):
 
     def __init__(self, filename):
         super().__init__(errno.EROFS, 'Write access denied. Target path is read-only', filename)
 
 
-class PrivilegeError(BaseIOError):
+class PrivilegeError(PathError):
 
     def __init__(self, filename):
         super().__init__(errno.EACCES, 'Access denied. No permission to access resource', filename)
 
 
-class NTACLError(BaseIOError):
+class NTACLError(PathError):
 
     def __init__(self, filename):
         super().__init__(errno.EACCES, 'Access denied. Unable to access Windows ACL-enabled volume', filename)
 
 
-class QuotaError(BaseIOError):
+class QuotaError(PathError):
 
     def __init__(self, filename):
         super().__init__(errno.EDQUOT, 'Write failed. Out of quota', filename)
 
 
-class StorageBackendError(BaseIOError):
+class StorageBackendError(PathError):
 
     def __init__(self, filename):
         super().__init__(EREMOTEIO, 'Storage backend unavailable', filename)
 
 
-class FileRejectedError(BaseIOError):
+class FileRejectedError(PathError):
 
     def __init__(self, filename):
         super().__init__(EREMOTEIO, 'Rejected by policy', filename)
 
 
-class FilenameError(BaseIOError):
+class FilenameError(PathError):
 
     def __init__(self, filename):
         super().__init__(EREMOTEIO, 'File name contains characters that are not allowed "\\ / : ? & < > \" |".', filename)
 
 
-class ReservedNameError(BaseIOError):
+class ReservedNameError(PathError):
 
     def __init__(self, filename):
         super().__init__(EREMOTEIO, 'Specified name is reserved by the system', filename)
 
 
-class ListDirectoryError(BaseIOError):
+class ListDirectoryError(PathError):
 
     def __init__(self, filename):
         super().__init__(EREMOTEIO, 'Failed to list directory', filename)
 
 
-class GetSnapshotsError(BaseIOError):
+class GetVersionsError(PathError):
 
     def __init__(self, filename):
         super().__init__(EREMOTEIO, 'Failed to enumerate versions', filename)
 
 
-class CreateDirectoryError(BaseIOError):
+class CreateDirectoryError(PathError):
 
     def __init__(self, filename):
         super().__init__(EREMOTEIO, 'Failed to create folder', filename)
 
 
-class GetShareMetadataError(BaseIOError):
+class GetMetadataError(PathError):
+
+    def __init__(self, filename):
+        super().__init__(EREMOTEIO, 'Failed to retrieve object metadata', filename)
+
+
+class GetShareMetadataError(PathError):
 
     def __init__(self, filename):
         super().__init__(EREMOTEIO, 'Failed to retrieve collaboration-share metadata', filename)
 
 
-class CreateLinkError(BaseIOError):
+class CreateLinkError(PathError):
 
     def __init__(self, filename):
         super().__init__(EREMOTEIO, 'Failed to create public link', filename)
 
 
+class RenameError(PathError):
+
+    def __init__(self, filename, filename2):
+        super().__init__(EREMOTEIO, 'Failed to rename object', filename, filename2)
+
+
 class BatchError(BaseIOError):
-    """Base job error"""
+    """Task Error"""
 
     def __init__(self, strerror, paths, cursor):
         super().__init__(EREMOTEIO, strerror)

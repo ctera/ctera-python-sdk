@@ -6,4 +6,4 @@ from .utils import merge, union, parse_base_object_ref, convert_size, df_militar
 from .types import PolicyRule, PolicyRuleConverter, StringCriteriaBuilder, IntegerCriteriaBuilder, DateTimeCriteriaBuilder, \
                    PredefinedListCriteriaBuilder, CustomListCriteriaBuilder, ThrottlingRuleBuilder, ThrottlingRule, FilterBackupSet, \
                    FileFilterBuilder, ApplicationBackupSet, TimeRange  # noqa: E402, F401
-from .initializers import BaseInitializer  # noqa: E402, F401
+from .modules import BaseModule  # noqa: E402, F401

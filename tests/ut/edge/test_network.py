@@ -2,7 +2,7 @@ from unittest import mock
 import munch
 
 from cterasdk.edge import network
-from cterasdk.edge.types import TCPService, TCPConnectResult
+from cterasdk.edge.types import TCPService, TCPConnectResult, StaticRoute
 from cterasdk.edge.enum import Mode, IPProtocol, Traffic
 from cterasdk.common import Object
 from cterasdk.exceptions.common import TaskException
@@ -39,7 +39,9 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._mtu = 1320
 
         self._static_route_gateway = '192.168.0.150'
-        self._static_route_network = '172.64.28.15/32'
+        self._static_route_netmask = '255.255.255.255'
+        self._static_route_destination = '172.64.28.15'
+        self._static_route_network = f'{self._static_route_destination}/32'
 
         self._proxy_address = '192.168.27.131'
         self._proxy_port = 3192
@@ -52,28 +54,28 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_network_status(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = network.Network(self._filer).get_status()
+        ret = network.LegacyNetwork(self._filer).get_status()
         self._filer.api.get('/status/network/ports/0')
         self.assertEqual(ret, get_response)
 
     def test_ifconfig(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = network.Network(self._filer).ifconfig()
+        ret = network.LegacyNetwork(self._filer).ifconfig()
         self._filer.api.get('/config/network/ports/0')
         self.assertEqual(ret, get_response)
 
     def test_ipconfig(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = network.Network(self._filer).ipconfig()
+        ret = network.LegacyNetwork(self._filer).ipconfig()
         self._filer.api.get('/config/network/ports/0')
         self.assertEqual(ret, get_response)
 
     def test_set_static_ip_addr(self):
         get_response = self._dhcp_ip
         self._init_filer(get_response=get_response)
-        network.Network(self._filer).set_static_ipaddr(
+        network.LegacyNetwork(self._filer).set_static_ipaddr(
             self._static_ip.address,
             self._static_ip.netmask,
             self._static_ip.gateway,
@@ -90,7 +92,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_enable_dhcp(self):
         get_response = self._static_ip
         self._init_filer(get_response=get_response)
-        network.Network(self._filer).enable_dhcp()
+        network.LegacyNetwork(self._filer).enable_dhcp()
         self._filer.api.get.assert_called_once_with('/config/network/ports/0/ip')
         self._filer.api.put.assert_called_once_with('/config/network/ports/0/ip', mock.ANY)
 
@@ -104,7 +106,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._dhcp_ip.secondary_dns_server = None
         get_response = self._dhcp_ip
         self._init_filer(get_response=get_response)
-        network.Network(self._filer).set_static_nameserver(self._static_ip.DNSServer1)
+        network.LegacyNetwork(self._filer).set_static_nameserver(self._static_ip.DNSServer1)
         self._filer.api.get.assert_called_once_with('/config/network/ports/0/ip')
         self._filer.api.put.assert_called_once_with('/config/network/ports/0/ip', mock.ANY)
 
@@ -116,7 +118,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_set_static_primary_and_secondary_dns_servers(self):
         get_response = self._dhcp_ip
         self._init_filer(get_response=get_response)
-        network.Network(self._filer).set_static_nameserver(self._static_ip.DNSServer1, self._static_ip.DNSServer2)
+        network.LegacyNetwork(self._filer).set_static_nameserver(self._static_ip.DNSServer1, self._static_ip.DNSServer2)
         self._filer.api.get.assert_called_once_with('/config/network/ports/0/ip')
         self._filer.api.put.assert_called_once_with('/config/network/ports/0/ip', mock.ANY)
 
@@ -135,7 +137,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         task.result.rc = 'Open'
         self._filer.tasks.wait = mock.MagicMock(return_value=task)
 
-        ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
+        ret = network.LegacyNetwork(self._filer).diag.tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
         self._filer.api.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
         self._filer.tasks.wait.assert_called_once_with(self._task_id)
@@ -155,7 +157,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         task.result.rc = 'BadAddress'
         self._filer.tasks.wait = mock.MagicMock(return_value=task)
 
-        ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
+        ret = network.LegacyNetwork(self._filer).diag.tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
         self._filer.api.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
         self._filer.tasks.wait.assert_called_once_with(self._task_id)
@@ -175,7 +177,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         task.result.res = 'Success'
 
         self._filer.tasks.wait = mock.MagicMock(return_value=task)
-        ret = network.Network(self._filer).iperf(self._static_ip.address)
+        ret = network.LegacyNetwork(self._filer).diag.iperf(self._static_ip.address)
 
         expected_param = self._get_iperf_param()
         actual_param = self._filer.api.execute.call_args[0][2]
@@ -198,7 +200,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._init_filer(execute_response=execute_response)
         self._filer.tasks.wait = mock.MagicMock(side_effect=TaskException('Task failed', self._task_id))
 
-        ret = network.Network(self._filer).tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
+        ret = network.LegacyNetwork(self._filer).diag.tcp_connect(TCPService(self._tcp_connect_address, self._tcp_connect_port))
 
         self._filer.api.execute.assert_called_once_with('/status/network', 'tcpconnect', mock.ANY)
         self._filer.tasks.wait.assert_called_once_with(self._task_id)
@@ -212,7 +214,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_edge_set_mtu(self):
         get_response = TestEdgeNetwork._get_ethernet_object()
         self._init_filer(get_response=get_response)
-        network.Network(self._filer).mtu.modify(self._mtu)
+        network.LegacyNetwork(self._filer).mtu.modify(self._mtu)
         self._filer.api.put.assert_called_once_with('/config/network/ports/0/ethernet', mock.ANY)
         expected_param = TestEdgeNetwork._get_ethernet_object(jumbo=True, mtu=self._mtu)
         actual_param = self._filer.api.put.call_args[0][1]
@@ -221,7 +223,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_edge_reset_mtu(self):
         get_response = TestEdgeNetwork._get_ethernet_object(jumbo=True, mtu=1320)
         self._init_filer(get_response=get_response)
-        network.Network(self._filer).mtu.reset()
+        network.LegacyNetwork(self._filer).mtu.reset()
         self._filer.api.put.assert_called_once_with('/config/network/ports/0/ethernet', mock.ANY)
         expected_param = TestEdgeNetwork._get_ethernet_object()
         actual_param = self._filer.api.put.call_args[0][1]
@@ -240,10 +242,10 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         tcp_connect_param.port = self._tcp_connect_port
         return tcp_connect_param
 
-    def test_add_static_routes(self):
+    def test_add_legacy_static_route(self):
         add_response = 'success'
         self._init_filer(add_response=add_response)
-        ret = network.Network(self._filer).routes.add(self._static_route_gateway, self._static_route_network)
+        ret = network.LegacyNetwork(self._filer).routes.add(self._static_route_gateway, self._static_route_network)
         self._filer.api.add.assert_called_once_with('/config/network/static_routes', mock.ANY)
         expected_param = Object(**{
             'GwIP': self._static_route_gateway,
@@ -251,61 +253,67 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         })
         actual_param = self._filer.api.add.call_args[0][1]
         self._assert_equal_objects(actual_param, expected_param)
-        self.assertEqual(ret.network, self._static_route_network)
-        self.assertEqual(ret.gateway, self._static_route_gateway)
+        self.assertEqual(ret, add_response)
 
-    def test_add_static_routes_raise(self):
-        self._filer.api.add = mock.MagicMock(side_effect=exceptions.CTERAException())
-        with self.assertRaises(exceptions.CTERAException) as error:
-            network.Network(self._filer).routes.add(self._static_route_gateway, self._static_route_network)
-        self.assertEqual('Static route creation failed', str(error.exception))
+    def test_add_v711_static_route(self):
+        add_response = 'success'
+        self._init_filer(add_response=add_response, get_response=['LAN0', 'LAN1'])
+        ret = network.Network711(self._filer).routes.add('LAN1', self._static_route_gateway, self._static_route_network)
+        self._filer.api.add.assert_called_once_with('/config/network/ports/1/ipv4StaticRoutes', mock.ANY)
+        expected_param = Object(**{
+            'destination': self._static_route_destination,
+            'netmask': self._static_route_netmask,
+            'gateway': self._static_route_gateway
+        })
+        actual_param = self._filer.api.add.call_args[0][1]
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, add_response)
 
     def test_get_all_static_routes(self):
-        get_response = [Object(**{
+        get_response = Object()
+        get_response.ports = ['LAN']
+        get_response.static_routes = [Object(**{
+            '_uuid': 'abc',
             'GwIP': self._static_route_gateway,
             'DestIpMask': self._static_route_network
         })]
         self._init_filer(get_response=get_response)
-        ret = network.Network(self._filer).routes.get()
-        self._filer.api.get.assert_called_once_with('/config/network/static_routes')
+        ret = network.LegacyNetwork(self._filer).routes.get()
+        self._filer.api.get.assert_called_once_with('/config/network')
         self.assertEqual(ret[0].gateway, get_response[0].GwIP)
         self.assertEqual(ret[0].network, get_response[0].DestIpMask)
 
     def test_remove_static_route(self):
         self._init_filer()
-        network.Network(self._filer).routes.delete(self._static_route_network)
-        self._filer.api.delete.assert_called_once_with(f'/config/network/static_routes/{self._static_route_network.replace("/", "_")}')
-
-    def test_remove_static_route_raise(self):
-        self._filer.api.delete = mock.MagicMock(side_effect=exceptions.CTERAException())
-        with self.assertRaises(exceptions.CTERAException) as error:
-            network.Network(self._filer).routes.delete(self._static_route_network)
-        self.assertEqual('Static route deletion failed', str(error.exception))
+        route_uuid = '123'
+        route = StaticRoute(route_uuid, 0, 'LAN', self._static_route_destination, self._static_route_gateway)
+        network.LegacyNetwork(self._filer).routes.delete(route)
+        self._filer.api.delete.assert_called_once_with(f'/config/network/static_routes/{route_uuid}')
 
     def test_clean_all_static_routes_success(self):
         execute_response = 'Success'
         self._init_filer(execute_response=execute_response)
-        network.Network(self._filer).routes.clear()
+        network.LegacyNetwork(self._filer).routes.clear()
         self._filer.api.execute.assert_called_once_with('/config/network', 'cleanStaticRoutes')
 
     def test_get_proxy_config(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = network.Network(self._filer).proxy.get_configuration()
+        ret = network.LegacyNetwork(self._filer).proxy.get_configuration()
         self._filer.api.get.assert_called_once_with('/config/network/proxy')
         self.assertEqual(ret, get_response)
 
     def test_is_proxy_enabled(self):
         for expected_response, configuration in [(False, 'NoProxy'), (True, 'Manual')]:
             self._init_filer(get_response=configuration)
-            ret = network.Network(self._filer).proxy.is_enabled()
+            ret = network.LegacyNetwork(self._filer).proxy.is_enabled()
             self._filer.api.get.assert_called_once_with('/config/network/proxy/configurationMode')
             self.assertEqual(ret, expected_response)
 
     def test_disable_proxy(self):
         put_response = 'Success'
         self._init_filer(put_response=put_response)
-        ret = network.Network(self._filer).proxy.disable()
+        ret = network.LegacyNetwork(self._filer).proxy.disable()
         actual_param = self._filer.api.put.call_args[0][1]
         expected_param = TestEdgeNetwork._create_proxy_param(False)
         self._assert_equal_objects(actual_param, expected_param)
@@ -314,7 +322,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_modify_proxy(self):
         put_response = 'Success'
         self._init_filer(put_response=put_response)
-        ret = network.Network(self._filer).proxy.modify(self._proxy_address, self._proxy_port, self._proxy_user, self._proxy_pass)
+        ret = network.LegacyNetwork(self._filer).proxy.modify(self._proxy_address, self._proxy_port, self._proxy_user, self._proxy_pass)
         actual_param = self._filer.api.put.call_args[0][1]
         expected_param = TestEdgeNetwork._create_proxy_param(True, self._proxy_address, self._proxy_port,
                                                              self._proxy_user, self._proxy_pass)
@@ -338,14 +346,14 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_get_hosts_file(self):
         get_response = 'Success'
         self._init_filer(get_response=get_response)
-        ret = network.Network(self._filer).hosts.get()
+        ret = network.LegacyNetwork(self._filer).hosts.get()
         self._filer.api.get.assert_called_once_with('/config/network/hostsFileEntries')
         self.assertEqual(ret, get_response)
 
     def test_add_hosts_file_entry(self):
         add_response = 'Success'
         self._init_filer(add_response=add_response)
-        ret = network.Network(self._filer).hosts.add(self._hosts_ipaddr, self._hosts_hostname)
+        ret = network.LegacyNetwork(self._filer).hosts.add(self._hosts_ipaddr, self._hosts_hostname)
         self._filer.api.add.assert_called_once_with('/config/network/hostsFileEntries', mock.ANY)
         actual_param = self._filer.api.add.call_args[0][1]
         expected_param = munch.Munch(dict(ip=self._hosts_ipaddr, hostName=self._hosts_hostname))
@@ -355,6 +363,6 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
     def test_delete_hosts_file_entry(self):
         delete_response = 'Success'
         self._init_filer(delete_response=delete_response)
-        ret = network.Network(self._filer).hosts.delete(self._hosts_hostname)
+        ret = network.LegacyNetwork(self._filer).hosts.delete(self._hosts_hostname)
         self._filer.api.delete.assert_called_once_with(f'/config/network/hostsFileEntries/{self._hosts_hostname}')
         self.assertEqual(ret, delete_response)

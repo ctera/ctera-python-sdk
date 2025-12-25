@@ -150,7 +150,7 @@ class Services(BaseCommand):
             raise error
 
     def _check_cttp_traffic(self, address, port=995):
-        tcp_connect_result = self._edge.network.tcp_connect(TCPService(address, port))
+        tcp_connect_result = self._edge.network.diag.tcp_connect(TCPService(address, port))
         if not tcp_connect_result.is_open:
             logger.error("Unable to establish connection over port %s", str(tcp_connect_result.port))
             raise ConnectionError(f'Unable to establish CTTP connection {tcp_connect_result.host}:{tcp_connect_result.port}')

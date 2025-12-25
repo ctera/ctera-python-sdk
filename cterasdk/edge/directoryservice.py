@@ -58,7 +58,7 @@ class DirectoryService(BaseCommand):
         port = 389
         domain_controllers = self.get_static_domain_controller()
         domain_controllers = re.findall(r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b', domain_controllers) if domain_controllers else [domain]
-        connection_results = self._edge.network.diagnose([TCPService(host, port) for host in domain_controllers])
+        connection_results = self._edge.network.diag.diagnose([TCPService(host, port) for host in domain_controllers])
         for connection_result in connection_results:
             if not connection_result.is_open:
                 logger.error("Connection failed. No traffic allowed over port %(port)s", dict(port=connection_result.port))

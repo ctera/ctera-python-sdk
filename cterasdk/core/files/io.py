@@ -1,4 +1,4 @@
-from ...cio import core as fs
+from ...cio.core import commands as fs
 
 
 def listdir(core, param):

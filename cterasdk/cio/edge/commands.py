@@ -1,45 +1,14 @@
 import logging
-from datetime import datetime
-from pathlib import Path
 from ..common import Object
-from ..edge.enum import ResourceError
-from ..objects.uri import unquote
-from . import common
-from .. import exceptions
-from .actions import EdgeCommand
-from ..lib.storage import synfs, asynfs, commonfs
+from ...edge.enum import ResourceError
+from ..common import encode_request_parameter, encode_stream
+from ... import exceptions
+from ..actions import EdgeCommand
+from ...lib.storage import synfs, asynfs, commonfs
+from .types import EdgeResource, automatic_resolution
 
 
 logger = logging.getLogger('cterasdk.edge')
-
-
-class EdgePath(common.BasePath):
-    """Path for CTERA Edge Filer"""
-
-    def __init__(self, scope, reference):
-        """
-        Initialize a CTERA Edge Filer Path.
-
-        :param str scope: Scope.
-        :param str reference: Reference.
-        """
-        if isinstance(reference, Object):
-            super().__init__(scope, reference.path)
-        elif isinstance(reference, str):
-            super().__init__(scope, reference)
-        elif reference is None:
-            super().__init__(scope, '')
-        else:
-            message = 'Path validation failed: ensure the path exists and is correctly formatted.'
-            logger.error(message)
-            raise ValueError(message)
-
-    @staticmethod
-    def instance(scope, reference):
-        if isinstance(reference, tuple):
-            source, destination = reference
-            return (EdgePath(scope, source), EdgePath(scope, destination))
-        return EdgePath(scope, reference)
 
 
 class Open(EdgeCommand):
@@ -68,7 +37,7 @@ class Download(EdgeCommand):
 
     def __init__(self, function, receiver, path, destination):
         super().__init__(function, receiver)
-        self.path = path
+        self.path = automatic_resolution(path)
         self.destination = destination
 
     def get_parameter(self):
@@ -109,7 +78,7 @@ class OpenMany(EdgeCommand):
         param.snapshot.timestamp = None
         param.snapshot.path = None
         logger.info('Getting directory handle: %s', self.directory.reference)
-        return common.encode_request_parameter(param)
+        return encode_request_parameter(param)
 
     def _execute(self):
         with self.trace_execution():
@@ -124,7 +93,7 @@ class DownloadMany(EdgeCommand):
 
     def __init__(self, function, receiver, target, objects, destination):
         super().__init__(function, receiver)
-        self.target = target
+        self.target = automatic_resolution(target)
         self.objects = objects
         self.destination = destination
 
@@ -148,21 +117,16 @@ class DownloadMany(EdgeCommand):
                 return await asynfs.write(directory, name, handle)
 
 
-def decode_reference(href):
-    namespace = '/localFiles'
-    return unquote(href[href.index(namespace)+len(namespace) + 1:])
-
-
 class ListDirectory(EdgeCommand):
     """List"""
 
     def __init__(self, function, receiver, path, depth=None):
         super().__init__(function, receiver)
-        self.path = path
+        self.path = automatic_resolution(path)
         self.depth = depth if depth is not None else 1
 
     def _before_command(self):
-        logger.info('Listing directory: %s', self.path.relative)
+        logger.info('Listing directory: %s', self.path)
 
     def _execute(self):
         with self.trace_execution():
@@ -173,22 +137,7 @@ class ListDirectory(EdgeCommand):
             return await self._function(self._receiver, self.path.absolute, self.depth)
 
     def _handle_response(self, r):
-        entries = []
-        for e in r:
-            path = decode_reference(e.href)
-            if path and self.path != path:
-                is_dir = e.getcontenttype == 'httpd/unix-directory'
-                param = Object(
-                    path=path,
-                    name=Path(path).name,
-                    is_dir=is_dir,
-                    is_file=not is_dir,
-                    created_at=e.creationdate,
-                    last_modified=datetime.strptime(e.getlastmodified, "%a, %d %b %Y %H:%M:%S GMT").isoformat(),
-                    size=e.getcontentlength
-                )
-                entries.append(param)
-        return entries if self.depth > 0 else entries[0]
+        return [EdgeResource.from_server_object(e) for e in r] if self.depth > 0 else EdgeResource.from_server_object(r[0])
 
 
 class RecursiveIterator:
@@ -196,34 +145,29 @@ class RecursiveIterator:
     def __init__(self, function, receiver, path):
         self._function = function
         self._receiver = receiver
-        self.path = path
-        self.tree = [EdgePath.instance(path.scope, path.relative)]
+        self.path = automatic_resolution(path)
+        self.tree = [path]
 
     def _generator(self):
+        logger.info('Traversing: %s', self.path or '.')
         while len(self.tree) > 0:
             yield self.tree.pop(0)
 
-    def _before_generate(self):
-        EnsureDirectory(self._function, self._receiver, EdgePath.instance(self.path.scope, self.path.relative))
-        logger.info('Traversing: %s', self.path.relative)
-
     def generate(self):
-        self._before_generate()
         for path in self._generator():
             for o in ListDirectory(self._function, self._receiver, path).execute():
-                if path.relative != o.path:
+                if path != o.path.relative:
                     yield self._process_object(o)
 
     async def a_generate(self):
-        self._before_generate()
         for path in self._generator():
             for o in await ListDirectory(self._function, self._receiver, path).a_execute():
-                if path.relative != o.path:
+                if path != o.path.relative:
                     yield self._process_object(o)
 
     def _process_object(self, o):
         if o.is_dir:
-            self.tree.append(EdgePath.instance(self.path.scope, o))
+            self.tree.append(o.path.relative)
         return o
 
 
@@ -250,7 +194,7 @@ class EnsureDirectory(EdgeCommand):
 
     def __init__(self, function, receiver, path, suppress_error=False):
         super().__init__(function, receiver)
-        self.path = path
+        self.path = automatic_resolution(path)
         self.suppress_error = suppress_error
 
     def _execute(self):
@@ -271,7 +215,7 @@ class CreateDirectory(EdgeCommand):
 
     def __init__(self, function, receiver, path, parents=False):
         super().__init__(function, receiver)
-        self.path = path
+        self.path = automatic_resolution(path)
         self.parents = parents
 
     def get_parameter(self):
@@ -287,40 +231,47 @@ class CreateDirectory(EdgeCommand):
         if self.parents:
             parts = self.path.parts
             for i in range(1, len(parts)):
-                yield EdgePath.instance(self.path.scope, '/'.join(parts[:i]))
+                yield automatic_resolution('/'.join(parts[:i]))
         else:
             yield self.path
 
     def _execute(self):
+        if self.parents:
+            for path in self._parents_generator():
+                try:
+                    CreateDirectory(self._function, self._receiver, path).execute()
+                except exceptions.io.edge.CreateDirectoryError as e:
+                    self._suppress_error(e)
         with self.trace_execution():
-            if self.parents:
-                for path in self._parents_generator():
-                    try:
-                        CreateDirectory(self._function, self._receiver, path).execute()
-                    except (exceptions.io.edge.FileConflictError, exceptions.io.edge.ROFSError):
-                        pass
             return self._function(self._receiver, self.path.absolute)
 
     async def _a_execute(self):
+        if self.parents:
+            for path in self._parents_generator():
+                try:
+                    await CreateDirectory(self._function, self._receiver, path).a_execute()
+                except exceptions.io.edge.CreateDirectoryError as e:
+                    self._suppress_error(e)
         with self.trace_execution():
-            if self.parents:
-                for path in self._parents_generator():
-                    try:
-                        await CreateDirectory(self._function, self._receiver, path).a_execute()
-                    except (exceptions.io.edge.FileConflictError, exceptions.io.edge.ROFSError):
-                        pass
             return await self._function(self._receiver, self.path.absolute)
 
     def _handle_response(self, r):
-        if r == 'OK':
+        if r is None or not r or r == 'OK':
             return self.path.relative
         raise exceptions.io.edge.CreateDirectoryError(self.path.relative)
 
     def _handle_exception(self, e):
+        path = self.path.relative
+        error = exceptions.io.edge.CreateDirectoryError(path)
         if e.error.response.error.msg == ResourceError.FileExists:
-            raise exceptions.io.edge.FileConflictError(self.path.relative)
+            raise error from exceptions.io.edge.FileConflictError(path)
         if e.error.response.error.msg == ResourceError.Forbidden:
-            raise exceptions.io.edge.ROFSError(self.path.relative)
+            raise error from exceptions.io.edge.ROFSError(path)
+        raise error from e
+
+    def _suppress_error(self, e):
+        if not isinstance(e.__cause__, (exceptions.io.edge.FileConflictError, exceptions.io.edge.ROFSError)):
+            raise e
 
 
 class Copy(EdgeCommand):
@@ -328,8 +279,8 @@ class Copy(EdgeCommand):
 
     def __init__(self, function, receiver, path, destination=None, overwrite=False):
         super().__init__(function, receiver)
-        self.path = path
-        self.destination = destination
+        self.path = automatic_resolution(path)
+        self.destination = automatic_resolution(destination)
         self.overwrite = overwrite
 
     def get_parameter(self):
@@ -378,7 +329,7 @@ class Delete(EdgeCommand):
 
     def __init__(self, function, receiver, path):
         super().__init__(function, receiver)
-        self.path = path
+        self.path = automatic_resolution(path)
 
     def _before_command(self):
         logger.info('Deleting: %s', self.path.relative)
@@ -398,14 +349,14 @@ class Upload(EdgeCommand):
         super().__init__(function, receiver)
         self._metadata_function = metadata_function
         self.name = name
-        self.destination = destination
+        self.destination = automatic_resolution(destination)
         self.fd = fd
 
     def get_parameter(self):
-        fd, *_ = common.encode_stream(self.fd, 0)
+        fd, *_ = encode_stream(self.fd, 0)
         param = dict(
             name=self.name,
-            fullpath=f'{self.destination.absolute}/{self.name}',
+            fullpath=f'{self.destination.join(self.name).absolute}',
             filedata=fd
         )
         return param

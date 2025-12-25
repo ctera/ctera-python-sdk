@@ -1,23 +1,14 @@
-import logging
-
 from .. import query
-from ...cio.core import CorePath, Open, OpenMany, Upload, UploadFile, Download, \
-    DownloadMany, UnShare, CreateDirectory, GetMetadata, ListVersions, RecursiveIterator, \
+from ...cio.core.commands import Open, OpenMany, Upload, UploadFile, Download, EnsureDirectory, \
+    DownloadMany, UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, \
     Delete, Recover, Rename, GetShareMetadata, Link, Copy, Move, ResourceIterator, GetPermalink
-from ...exceptions.transport import HTTPError
 from ...lib.storage import commonfs
 from ..base_command import BaseCommand
 from . import io
 
 
-logger = logging.getLogger('cterasdk.core')
-
-
 class FileBrowser(BaseCommand):
 
-    def __init__(self, core):
-        super().__init__(core)
-        self._scope = f'/{self._core.context}/webdav'
 
     def handle(self, path):
         """
@@ -25,7 +16,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path to a file
         """
-        return Open(io.handle, self._core, self.normalize(path)).execute()
+        return Open(io.handle, self._core, path).execute()
 
     def handle_many(self, directory, *objects):
         """
@@ -34,7 +25,7 @@ class FileBrowser(BaseCommand):
         :param str directory: Path to a folder
         :param args objects: List of files and folders
         """
-        return OpenMany(io.handle_many, self._core, self.normalize(directory), *objects).execute()
+        return OpenMany(io.handle_many, self._core, directory, *objects).execute()
 
     def download(self, path, destination=None):
         """
@@ -44,7 +35,7 @@ class FileBrowser(BaseCommand):
         :param str,optional destination:
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
-        return Download(io.handle, self._core, self.normalize(path), destination).execute()
+        return Download(io.handle, self._core, path, destination).execute()
 
     def download_many(self, target, objects, destination=None):
         """
@@ -62,16 +53,26 @@ class FileBrowser(BaseCommand):
             Optional. Path to the destination file or directory. If a directory is provided,
             the original filename will be preserved. Defaults to the default download directory.
         """
-        return DownloadMany(io.handle_many, self._core, self.normalize(target), objects, destination).execute()
+        return DownloadMany(io.handle_many, self._core, target, objects, destination).execute()
 
-    def listdir(self, path=None, depth=None, include_deleted=False):
+    def listdir(self, path=None, include_deleted=False):
         """
         List Directory
 
         :param str,optional path: Path, defaults to the Cloud Drive root
         :param bool,optional include_deleted: Include deleted files, defaults to False
         """
-        return ResourceIterator(query.iterator, self._core, self.normalize(path), depth, include_deleted, None, None).execute()
+        with EnsureDirectory(io.listdir, self._core, path):
+            return ResourceIterator(query.iterator, self._core, path, None, include_deleted, None, None).execute()
+
+    def properties(self, path):
+        """
+        Get Properties
+        
+        :param str path: Path
+        """
+        _, metadata = GetProperties(io.listdir, self._core, path, False).execute()
+        return metadata
 
     def exists(self, path):
         """
@@ -79,7 +80,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path
         """
-        with GetMetadata(io.listdir, self._core, self.normalize(path), True) as (exists, *_):
+        with GetMetadata(io.listdir, self._core, path, True) as (exists, *_):
             return exists
 
     def versions(self, path):
@@ -88,7 +89,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path
         """
-        return ListVersions(io.versions, self._core, self.normalize(path)).execute()
+        return ListVersions(io.versions, self._core, path).execute()
 
     def walk(self, path=None, include_deleted=False):
         """
@@ -97,7 +98,8 @@ class FileBrowser(BaseCommand):
         :param str,optional path: Path to walk, defaults to the root directory
         :param bool,optional include_deleted: Include deleted files, defaults to False
         """
-        return RecursiveIterator(query.iterator, self._core, self.normalize(path), include_deleted).generate()
+        with EnsureDirectory(io.listdir, self._core, path):
+            return RecursiveIterator(query.iterator, self._core, path, include_deleted).generate()
 
     def public_link(self, path, access='RO', expire_in=30):
         """
@@ -107,7 +109,7 @@ class FileBrowser(BaseCommand):
         :param str,optional access: Access policy of the link, defaults to 'RO'
         :param int,optional expire_in: Number of days until the link expires, defaults to 30
         """
-        return Link(io.public_link, self._core, self.normalize(path), access, expire_in).execute()
+        return Link(io.public_link, self._core, path, access, expire_in).execute()
 
     def copy(self, *paths, destination=None, resolver=None, cursor=None, wait=True):
         """
@@ -122,9 +124,8 @@ class FileBrowser(BaseCommand):
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
-            return Copy(io.copy, self._core, wait, *[self.normalize(path) for path in paths],
-                        destination=self.normalize(destination), resolver=resolver, cursor=cursor).execute()
-        except ValueError:
+            return Copy(io.copy, self._core, wait, *paths, destination=destination, resolver=resolver, cursor=cursor).execute()
+        except ValueError as e:
             raise ValueError('Copy destination was not specified.')
 
     def permalink(self, path):
@@ -133,10 +134,7 @@ class FileBrowser(BaseCommand):
 
         :param str path: Path.
         """
-        return GetPermalink(io.listdir, self._core, self.normalize(path)).execute()
-
-    def normalize(self, entries):
-        return CorePath.instance(self._scope, entries)
+        return GetPermalink(io.listdir, self._core, path).execute()
 
 
 class CloudDrive(FileBrowser):
@@ -150,7 +148,7 @@ class CloudDrive(FileBrowser):
         :param object handle: File handle, String, or Bytes.
         :param str,optional size: File size, defaults to content length
         """
-        return Upload(io.upload, self._core, io.listdir, name, self.normalize(destination), size, handle).execute()
+        return Upload(io.upload, self._core, io.listdir, name, destination, size, handle).execute()
 
     def upload_file(self, path, destination):
         """
@@ -159,7 +157,7 @@ class CloudDrive(FileBrowser):
         :param str path: Local path
         :param str destination: Remote path
         """
-        return UploadFile(io.upload, self._core, io.listdir, path, self.normalize(destination)).execute()
+        return UploadFile(io.upload, self._core, io.listdir, path, destination).execute()
 
     def mkdir(self, path):
         """
@@ -167,7 +165,7 @@ class CloudDrive(FileBrowser):
 
         :param str path: Directory path
         """
-        return CreateDirectory(io.mkdir, self._core, self.normalize(path)).execute()
+        return CreateDirectory(io.mkdir, self._core, path).execute()
 
     def makedirs(self, path):
         """
@@ -175,7 +173,7 @@ class CloudDrive(FileBrowser):
 
         :param str path: Directory path
         """
-        return CreateDirectory(io.mkdir, self._core, self.normalize(path), True).execute()
+        return CreateDirectory(io.mkdir, self._core, path, True).execute()
 
     def rename(self, path, name, *, wait=True):
         """
@@ -187,7 +185,7 @@ class CloudDrive(FileBrowser):
         :returns: Task status object, or an awaitable task object
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return Rename(io.move, self._core, self.normalize(path), name, wait).execute()
+        return Rename(io.move, self._core, path, name, wait).execute()
 
     def delete(self, *paths, wait=True):
         """
@@ -198,7 +196,7 @@ class CloudDrive(FileBrowser):
         :returns: Task status object, or an awaitable task object
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return Delete(io.delete, self._core, wait, *[self.normalize(path) for path in paths]).execute()
+        return Delete(io.delete, self._core, wait, *paths).execute()
 
     def undelete(self, *paths, wait=True):
         """
@@ -209,7 +207,7 @@ class CloudDrive(FileBrowser):
         :returns: Task status object, or an awaitable task object
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
-        return Recover(io.undelete, self._core, wait, *[self.normalize(path) for path in paths]).execute()
+        return Recover(io.undelete, self._core, wait, *paths).execute()
 
     def move(self, *paths, destination=None, resolver=None, cursor=None, wait=True):
         """
@@ -224,8 +222,7 @@ class CloudDrive(FileBrowser):
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         try:
-            return Move(io.move, self._core, wait, *[self.normalize(path) for path in paths],
-                        destination=self.normalize(destination), resolver=resolver, cursor=cursor).execute()
+            return Move(io.move, self._core, wait, *paths, destination=destination, resolver=resolver, cursor=cursor).execute()
         except ValueError:
             raise ValueError('Move destination was not specified.')
 
@@ -235,7 +232,7 @@ class CloudDrive(FileBrowser):
 
         :param str path: Path
         """
-        return GetShareMetadata(io.list_shares, self._core, self.normalize(path)).execute()
+        return GetShareMetadata(io.list_shares, self._core, path).execute()
 
     def share(self, path, recipients, as_project=True, allow_reshare=True, allow_sync=True):
         """
@@ -249,7 +246,7 @@ class CloudDrive(FileBrowser):
         :return: A list of all recipients added to the collaboration share
         :rtype: list[cterasdk.core.types.Collaborator]
         """
-        return io.share(self._core, self.normalize(path), recipients, as_project, allow_reshare, allow_sync)
+        return io.share(self._core, path, recipients, as_project, allow_reshare, allow_sync)
 
     def add_share_recipients(self, path, recipients):
         """
@@ -260,7 +257,7 @@ class CloudDrive(FileBrowser):
         :return: A list of all recipients added
         :rtype: list[cterasdk.core.types.Collaborator]
         """
-        return io.add_share_recipients(self._core, self.normalize(path), recipients)
+        return io.add_share_recipients(self._core, path, recipients)
 
     def remove_share_recipients(self, path, accounts):
         """
@@ -271,13 +268,13 @@ class CloudDrive(FileBrowser):
         :return: A list of all share recipients removed
         :rtype: list[cterasdk.core.types.PortalAccount]
         """
-        return io.remove_share_recipients(self._core, self.normalize(path), accounts)
+        return io.remove_share_recipients(self._core, path, accounts)
 
     def unshare(self, path):
         """
         Unshare a file or a folder
         """
-        return UnShare(io.update_share, self._core, self.normalize(path)).execute()
+        return UnShare(io.update_share, self._core, path).execute()
 
 
 class Backups(FileBrowser):
@@ -290,9 +287,5 @@ class Backups(FileBrowser):
         :param str,optional destination:
          File destination, if it is a directory, the original filename will be kept, defaults to the default directory
         """
-        try:
-            destination = destination if destination is not None else f'{commonfs.downloads()}/{device}.xml'
-            return self.download(f'backups/{device}/Device Configuration/db.xml', destination)
-        except HTTPError as error:
-            logger.error('Error downloading device configuration: %s. Reason: %s', device, error.response.reason)
-            raise error
+        destination = destination if destination is not None else f'{commonfs.downloads()}/{device}.xml'
+        return Download(io.handle, self._core, f'backups/{device}/Device Configuration/db.xml', destination).execute()

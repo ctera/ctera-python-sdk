@@ -18,8 +18,11 @@ TCPConnectResult.is_open.__doc__ = 'Boolean, indicating whether a TCP connection
                                    'established to the target host over the specified port'
 
 
-StaticRoute = namedtuple('StaticRoute', ('network', 'gateway'))
-StaticRoute.__doc__ = 'Tuple holding the network and gateway of a static route'
+StaticRoute = namedtuple('StaticRoute', ('id', 'port', 'interface', 'network', 'gateway'))
+StaticRoute.__doc__ = 'Object holding a network interface static route'
+StaticRoute.id.__doc__ = 'Route ID'
+StaticRoute.port.__doc__ = 'Port number'
+StaticRoute.interface.__doc__ = 'Interface name'
 StaticRoute.network.__doc__ = 'Network (CIDR)'
 StaticRoute.gateway.__doc__ = 'Gateway IP address'
 
@@ -428,3 +431,17 @@ class AlertSettings(Object):  # pylint: disable=too-many-instance-attributes
             'disconnected_hours': server_object.CloudConnectFailHours,
         }
         return AlertSettings(**params)
+
+
+class NetworkInterface(Object):
+    """
+    Interface Status
+
+    :ivar int port: Port number
+    :ivar str name: Interface name
+    :ivar str mac: MAC address
+    """
+    def __init__(self, port, name, mac):
+        self.port = port
+        self.name = name
+        self.mac = mac
