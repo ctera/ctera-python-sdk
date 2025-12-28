@@ -10,7 +10,7 @@ class EdgePath(BasePath):
     Namespace = '/'
     
     def __init__(self, reference):
-        super().__init__(EdgePath.Namespace, reference)
+        super().__init__(EdgePath.Namespace, reference or '.')
 
 
 def decode_reference(href):
@@ -30,6 +30,8 @@ class EdgeResource(BaseResource):
     :ivar datetime.datetime last_modified: Last Modified
     :ivar str extension: Extension
     """
+    Scheme = 'ctera-edge'
+
     def __init__(self, path, is_dir, size, created_at, last_modified):
         super().__init__(path.name, path, is_dir, size, last_modified)
         self.created_at = created_at
@@ -44,10 +46,6 @@ class EdgeResource(BaseResource):
             datetime.strptime(server_object.getlastmodified, "%a, %d %b %Y %H:%M:%S GMT")
         )
 
-    @property
-    def uri(self):
-        return ''
-
 
 def resolve(path):
     """
@@ -61,7 +59,7 @@ def resolve(path):
     if isinstance(path, EdgeResource):
         return path.path
 
-    if isinstance(path, str):
+    if path is None or isinstance(path, str):
         return EdgePath(path)
 
     raise ValueError(f'Error: Could not resolve path: {path}. Type: {type(path)}')

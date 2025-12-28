@@ -313,7 +313,7 @@ class VolumeOwner(Object):
         self.name = name
 
     @property
-    def namespace(self):
+    def user_namespace(self):
         return f'/Users/{self.name}'
 
 
@@ -392,6 +392,8 @@ class PortalResource(BaseResource):
     :ivar str permalink: Permalink
     :ivar cterasdk.core.types.Volume,optional volume: Volume information.
     """
+    Scheme = 'ctera-core'
+
     def __init__(self, i, name, path, is_dir, deleted, size, permalink, last_modified, volume):
         super().__init__(
             name, path, is_dir, size,
@@ -400,8 +402,7 @@ class PortalResource(BaseResource):
         self.id = i
         self.deleted = deleted
         self.permalink = permalink
-        if volume is not None:
-            self.volume = PortalVolume.from_server_object(volume)
+        self.volume = PortalVolume.from_server_object(volume) if volume else None
 
     @staticmethod
     def from_server_object(server_object):
@@ -419,8 +420,5 @@ class PortalResource(BaseResource):
 
     @property
     def with_user_namespace(self):
-        pass
-
-    @property
-    def uri(self):
-        return ''
+        if self.volume:
+            return PortalPath(self.volume.owner.user_namespace, self.path.relative).absolute

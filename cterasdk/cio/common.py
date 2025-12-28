@@ -98,11 +98,6 @@ class BaseResource(Object):
         self.last_modified = last_modified
         self.extension = path.extension
 
-    @property
-    @abstractmethod
-    def uri(self):
-        raise NotImplementedError("Subclass must implement the 'uri' property")
-
     def __repr__(self):
         return (
             f"{self.__class__.__name__}("

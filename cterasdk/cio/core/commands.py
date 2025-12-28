@@ -510,18 +510,31 @@ class RecursiveIterator:
 
     def generate(self):
         for path in self._generator():
-            for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).execute():
-                yield self._process_object(o)
+            try:
+                print('Enumerating: ', path)
+                for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).execute():
+                    yield self._process_object(o)
+                input()
+            except exceptions.io.core.ListDirectoryError as e:
+                self._suppress_error(e)
 
     async def a_generate(self):
         for path in self._generator():
-            async for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).a_execute():
-                yield self._process_object(o)
+            try:
+                async for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).a_execute():
+                    yield self._process_object(o)
+            except exceptions.io.core.ListDirectoryError as e:
+                self._suppress_error(e)
 
     def _process_object(self, o):
         if o.is_dir:
             self.tree.append(o.path.relative)
         return o
+
+    def _suppress_error(self, e):
+        if not isinstance(e.__cause__, exceptions.io.core.FolderNotFoundError):
+            raise e
+        logger.warning(f"Could not list directory contents: {e.path}. No such directory.")
 
 
 class ListVersions(PortalCommand):

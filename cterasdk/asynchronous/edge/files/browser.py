@@ -25,6 +25,15 @@ class FileBrowser(BaseCommand):
         async for o in RecursiveIterator(io.listdir, self._edge, path).a_generate():
             yield o
 
+    async def properties(self, path):
+        """
+        Get Properties
+        
+        :param str path: Path
+        """
+        async with GetMetadata(io.listdir, self._edge, path, True) as (_, metadata):
+            return metadata
+
     async def exists(self, path):
         """
         Check if item exists

@@ -16,13 +16,13 @@ class Open(EdgeCommand):
 
     def __init__(self, function, receiver, path):
         super().__init__(function, receiver)
-        self.path = path
+        self.path = automatic_resolution(path)
 
     def get_parameter(self):
         return self.path.absolute
 
     def _before_command(self):
-        logger.info('Getting handle: %s', self.path.relative)
+        logger.info('Getting handle: %s', self.path)
 
     def _execute(self):
         with self.trace_execution():
@@ -31,6 +31,11 @@ class Open(EdgeCommand):
     async def _a_execute(self):
         with self.trace_execution():
             return await self._function(self._receiver, self.get_parameter())
+
+    def _handle_exception(self, e):
+        path = self.path.relative
+        if isinstance(e, exceptions.transport.NotFound):
+            raise exceptions.io.edge.FileNotFoundException(path) from e
 
 
 class Download(EdgeCommand):
@@ -139,6 +144,13 @@ class ListDirectory(EdgeCommand):
     def _handle_response(self, r):
         return [EdgeResource.from_server_object(e) for e in r] if self.depth > 0 else EdgeResource.from_server_object(r[0])
 
+    def _handle_exception(self, e):
+        path = self.path.relative
+        error = exceptions.io.edge.ListDirectoryError(path)
+        if isinstance(e, exceptions.transport.NotFound):
+            raise error from exceptions.io.edge.FolderNotFoundError(path)
+        raise error from e
+
 
 class RecursiveIterator:
 
@@ -146,29 +158,40 @@ class RecursiveIterator:
         self._function = function
         self._receiver = receiver
         self.path = automatic_resolution(path)
-        self.tree = [path]
+        self.tree = [self.path]
 
     def _generator(self):
-        logger.info('Traversing: %s', self.path or '.')
+        logger.info('Traversing: %s', self.path)
         while len(self.tree) > 0:
             yield self.tree.pop(0)
 
     def generate(self):
         for path in self._generator():
-            for o in ListDirectory(self._function, self._receiver, path).execute():
-                if path != o.path.relative:
-                    yield self._process_object(o)
+            try:
+                for o in ListDirectory(self._function, self._receiver, path).execute():
+                    if path.relative != o.path.relative:
+                        yield self._process_object(o)
+            except exceptions.io.edge.ListDirectoryError as e:
+                self._suppress_error(e)
 
     async def a_generate(self):
         for path in self._generator():
-            for o in await ListDirectory(self._function, self._receiver, path).a_execute():
-                if path != o.path.relative:
-                    yield self._process_object(o)
+            try:
+                for o in await ListDirectory(self._function, self._receiver, path).a_execute():
+                    if path.relative != o.path.relative:
+                        yield self._process_object(o)
+            except exceptions.io.edge.ListDirectoryError as e:
+                self._suppress_error(e)
 
     def _process_object(self, o):
         if o.is_dir:
-            self.tree.append(o.path.relative)
-        return o
+            self.tree.append(o.path)
+        return o      
+
+    def _suppress_error(self, e):
+        if not isinstance(e.__cause__, exceptions.io.edge.FolderNotFoundError):
+            raise e
+        logger.warning(f"Could not list directory contents: {e.path}. No such directory.")
 
 
 class GetMetadata(ListDirectory):
@@ -303,12 +326,18 @@ class Copy(EdgeCommand):
         with self.trace_execution():
             return await self._function(self._receiver, source, destination, overwrite=self.overwrite)
 
+    def _handle_exception(self, e):
+        raise exceptions.io.edge.CopyError(self.path.relative, self.destination.relative)
+
 
 class Move(Copy):
     """Move"""
 
     def _before_command(self):
         logger.info('%s: %s to: %s', 'Moving', self.path.relative, self.destination.relative)
+
+    def _handle_exception(self, e):
+        raise exceptions.io.edge.MoveError(self.path.relative, self.destination.relative)
 
 
 class Rename(Move):
@@ -322,7 +351,10 @@ class Rename(Move):
         return (self.path.absolute, self.path.parent.join(self.new_name).absolute)
 
     def _before_command(self):
-        logger.info('Renaming: %s to: %s', self.path.relative, self.path.parent.join(self.new_name).relative)
+        logger.info('Renaming: %s to: %s', self.path, self.path.parent.join(self.new_name))
+
+    def _handle_exception(self, e):
+        raise exceptions.io.edge.RenameError(self.path.relative, self.new_name)
 
 
 class Delete(EdgeCommand):
@@ -341,6 +373,9 @@ class Delete(EdgeCommand):
     async def _a_execute(self):
         with self.trace_execution():
             await self._function(self._receiver, self.path.absolute)
+
+    def _handle_exception(self, e):
+        raise exceptions.io.edge.DeleteError(self.path.relative)
 
 
 class Upload(EdgeCommand):
@@ -379,12 +414,20 @@ class Upload(EdgeCommand):
     def _execute(self):
         self._validate_destination()
         with self.trace_execution():
-            return self._function(self._receiver, self.get_parameter())
+            return self._function(self._receiver, self.get_parameter()).xml()
 
     async def _a_execute(self):
         await self._a_validate_destination()
         with self.trace_execution():
-            return await self._function(self._receiver, self.get_parameter())
+            response = await self._function(self._receiver, self.get_parameter())
+            return await response.xml()
+
+    def _handle_response(self, r):
+        if r.rc != 0:
+            raise exceptions.io.edge.WriteError(r.msg, self.destination.join(self.name).relative)
+
+    def _handle_exception(self, e):
+        raise exceptions.io.edge.WriteError(e.error.msg, self.destination.join(self.name).relative) from e
 
 
 class UploadFile(EdgeCommand):

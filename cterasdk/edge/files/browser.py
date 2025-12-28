@@ -25,6 +25,15 @@ class FileBrowser(BaseCommand):
         with EnsureDirectory(io.listdir, self._edge, path):
             return RecursiveIterator(io.listdir, self._edge, path).generate()
 
+    def properties(self, path):
+        """
+        Get Properties
+        
+        :param str path: Path
+        """
+        with GetMetadata(io.listdir, self._edge, path, True) as (_, metadata):
+            return metadata
+
     def exists(self, path):
         """
         Check if item exists

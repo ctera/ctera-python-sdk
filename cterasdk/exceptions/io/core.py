@@ -1,16 +1,5 @@
 import errno
-from .base import BaseIOError, EREMOTEIO
-
-
-class PathError(BaseIOError):
-    """
-    Object I/O Error
-
-    :ivar str path: Object path
-    """
-    def __init__(self, errno, strerror, filename, filename2=None):
-        super().__init__(errno, strerror, filename, None, filename2)
-        self.path = filename
+from .base import BaseIOError, PathError, EREMOTEIO
 
 
 class FileConflictError(PathError):
