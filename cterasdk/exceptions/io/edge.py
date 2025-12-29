@@ -26,6 +26,12 @@ class FolderNotFoundError(PathError):
         super().__init__(errno.ENOENT, 'Folder not found', filename)
 
 
+class GetMetadataError(PathError):
+
+    def __init__(self, filename):
+        super().__init__(EREMOTEIO, 'Failed to retrieve object metadata', filename)
+
+
 class NotADirectoryException(PathError):
 
     def __init__(self, filename):

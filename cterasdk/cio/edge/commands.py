@@ -209,9 +209,11 @@ class GetMetadata(ListDirectory):
         return True, super()._handle_response(r)
 
     def _handle_exception(self, e):
+        path = self.path.relative
         if not self.suppress_error:
             if isinstance(e, exceptions.transport.NotFound):
-                raise exceptions.io.edge.FileNotFoundException(self.path.relative) from e
+                cause = exceptions.io.edge.ObjectNotFoundError(path)
+                raise exceptions.io.edge.GetMetadataError(path) from cause
         return False, None
 
 

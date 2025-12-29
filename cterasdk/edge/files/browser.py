@@ -14,7 +14,9 @@ class FileBrowser(BaseCommand):
         :param str path: Path
         :returns: Directory contents.
         :rtype: list[cterasdk.cio.edge.types.EdgeResource]
-        :raises: cterasdk.exceptions.io.edge.ListDirectoryError
+        :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
+        :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
+        :raises cterasdk.exceptions.io.edge.ListDirectoryError: Raised on error do fetch directory contents.
         """
         with EnsureDirectory(io.listdir, self._edge, path):
             return ListDirectory(io.listdir, self._edge, path).execute()
@@ -26,6 +28,8 @@ class FileBrowser(BaseCommand):
         :param str,optional path: Path to walk, defaults to the root directory
         :returns: A generator of file-system objects
         :rtype: cterasdk.cio.edge.types.EdgeResource
+        :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
+        :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
         """
         with EnsureDirectory(io.listdir, self._edge, path):
             return RecursiveIterator(io.listdir, self._edge, path).generate()
@@ -37,9 +41,9 @@ class FileBrowser(BaseCommand):
         :param str path: Path
         :returns: Object properties
         :rtype: cterasdk.cio.edge.types.EdgeResource
-        :raises: exceptions.io.edge.FileNotFoundException
+        :raises cterasdk.exceptions.io.core.GetMetadataError: Raised on error to obtain object metadata.
         """
-        with GetMetadata(io.listdir, self._edge, path, True) as (_, metadata):
+        with GetMetadata(io.listdir, self._edge, path, False) as (_, metadata):
             return metadata
 
     def exists(self, path):
