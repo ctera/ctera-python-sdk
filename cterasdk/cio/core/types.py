@@ -78,16 +78,6 @@ class PortalPath(BasePath):
             return Namespaces[match.group()](path[match.end():])
         raise ValueError(f'Could not determine object path: {path}')
 
-    """
-    @property
-    def absolute(self):
-        reference = self.relative
-        previous_versions = 'PreviousVersions/'
-        if previous_versions in reference:
-            index = reference.index(previous_versions) + len(previous_versions)
-            return f'{self.scope.as_posix()}/{quote(reference[:index]) + reference[index:]}'
-        return super().absolute
-    """
 
 class ServicesPortalPath(PortalPath):
     """

@@ -50,6 +50,12 @@ class CreateDirectoryError(PathError):
         super().__init__(EREMOTEIO, 'Failed to create directory', filename)
 
 
+class OpenError(PathError):
+
+    def __init__(self, filename):
+        super().__init__(EREMOTEIO, 'Failed to open file', filename)
+
+
 class DeleteError(PathError):
 
     def __init__(self, filename):
@@ -86,8 +92,7 @@ class MoveError(PathError):
         self.destination = destination
 
 
-class WriteError(PathError):
+class UploadError(PathError):
 
     def __init__(self, strerror, filename):
-        super().__init__(EREMOTEIO, f'Write failed. Reason: {strerror}', filename)
-
+        super().__init__(EREMOTEIO, f'Upload failed. Reason: {strerror}', filename)

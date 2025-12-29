@@ -32,10 +32,16 @@ class NotADirectoryException(PathError):
         super().__init__(errno.ENOTDIR, 'Not a directory', filename)
 
 
-class WriteError(PathError):
+class OpenError(PathError):
+
+    def __init__(self, filename):
+        super().__init__(EREMOTEIO, 'Failed to open file', filename)
+
+
+class UploadError(PathError):
 
     def __init__(self, strerror, filename):
-        super().__init__(EREMOTEIO, f'Write failed. Reason: {strerror}', filename)
+        super().__init__(EREMOTEIO, f'Upload failed. Reason: {strerror}', filename)
 
 
 class ROFSError(PathError):

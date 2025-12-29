@@ -58,10 +58,10 @@ class Upload(PortalCommand):
 
     def __init__(self, function, receiver, metadata_function, name, destination, size, fd):
         super().__init__(function, receiver)
-        destination_prerequisite_conditions(destination, name)
         self.metadata_function = metadata_function
         self.name = name
         self.destination = automatic_resolution(destination, receiver.context)
+        destination_prerequisite_conditions(self.destination, name)
         self.size = size
         self.fd = fd
 
@@ -103,16 +103,17 @@ class Upload(PortalCommand):
     def _handle_response(self, r):
         path = self.destination.join(self.name).relative
         if r.rc:
+            error = exceptions.io.core.UploadError(r.msg, path)
             logger.error('Upload failed: %s', path)
             if r.msg in [UploadError.UserQuotaViolation, UploadError.PortalQuotaViolation, UploadError.FolderQuotaViolation]:
-                raise exceptions.io.core.QuotaError(path)
+                raise error from exceptions.io.core.QuotaError(path)
             if r.msg == UploadError.RejectedByPolicy:
-                raise exceptions.io.core.FileRejectedError(path)
+                raise error from exceptions.io.core.FileRejectedError(path)
             if r.msg == UploadError.WindowsACL:
-                raise exceptions.io.core.NTACLError(path)
+                raise error from exceptions.io.core.NTACLError(path)
             if r.msg.startswith(UploadError.NoStorageBucket):
-                raise exceptions.io.core.StorageBackendError(path)
-            raise exceptions.io.core.WriteError(r.msg, path)
+                raise error from exceptions.io.core.StorageBackendError(path)
+            raise error
         if not r.rc and r.msg == 'OK':
             logger.info('Upload success. Saved to: %s', path)
         return path
@@ -123,30 +124,23 @@ class Upload(PortalCommand):
             return await self._function(self._receiver, str(cloudfolder), self.get_parameter())
 
 
-class UploadFile(PortalCommand):
+class UploadFile(Upload):
 
     def __init__(self, function, receiver, metadata_function, path, destination):
-        super().__init__(function, receiver)
-        self._metadata_function = metadata_function
+        _, name = commonfs.split_file_directory(path)
+        metadata = commonfs.properties(path)
+        super().__init__(function, receiver, metadata_function, name, destination, metadata['size'], None)
         self.path = path
-        self.destination = destination
-
-    def _get_properties(self):
-        return commonfs.properties(self.path)
 
     def _execute(self):
-        metadata = self._get_properties()
         with open(self.path, 'rb') as handle:
-            with self.trace_execution():
-                return Upload(self._function, self._receiver, self._metadata_function, metadata['name'],
-                              self.destination, metadata['size'], handle).execute()
+            self.fd = handle
+            return super()._execute()
 
     async def _a_execute(self):
-        metadata = self._get_properties()
         with open(self.path, 'rb') as handle:
-            with self.trace_execution():
-                return await Upload(self._function, self._receiver, self._metadata_function, metadata['name'],
-                                    self.destination, metadata['size'], handle).a_execute()
+            self.fd = handle
+            return await super()._a_execute()
 
 
 def _is_sharing_on_user_behalf(path):
@@ -304,8 +298,11 @@ class Open(PortalCommand):
             return await self._function(self._receiver, self.get_parameter())
 
     def _handle_exception(self, e):
+        path = self.path.relative
+        error = exceptions.io.edge.OpenError(path)
         if isinstance(e, exceptions.transport.NotFound):
-            raise exceptions.io.core.FileNotFoundException(self.path.relative) from e
+            raise error from exceptions.io.core.FileNotFoundException()
+        raise error
 
 
 class Download(PortalCommand):
@@ -336,8 +333,9 @@ class Download(PortalCommand):
 
 class OpenMany(PortalCommand):
 
-    def __init__(self, function, receiver, directory, *objects):
+    def __init__(self, function, receiver, resource, directory, *objects):
         super().__init__(function, receiver)
+        self.cloudfolder = str(resource.cloudFolderInfo.uid)
         self.directory = automatic_resolution(directory, receiver.context)
         self.objects = objects
 
@@ -355,11 +353,11 @@ class OpenMany(PortalCommand):
 
     def _execute(self):
         with self.trace_execution():
-            return self._function(self._receiver, self.get_parameter(), self.directory)
+            return self._function(self._receiver, self.cloudfolder, self.get_parameter())
 
     async def _a_execute(self):
         with self.trace_execution():
-            return await self._function(self._receiver, self.get_parameter(), self.directory)
+            return await self._function(self._receiver, self.cloudfolder, self.get_parameter())
 
 
 class DownloadMany(PortalCommand):
@@ -866,6 +864,9 @@ class UnShare(Share):
 
     def _before_command(self):
         logger.info('Revoking Share: %s', self.path)
+
+    def _handle_response(self, r):
+        return None
 
 
 class TaskCommand(PortalCommand):

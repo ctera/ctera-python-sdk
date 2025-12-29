@@ -34,8 +34,10 @@ class Open(EdgeCommand):
 
     def _handle_exception(self, e):
         path = self.path.relative
+        error = exceptions.io.edge.OpenError(path)
         if isinstance(e, exceptions.transport.NotFound):
-            raise exceptions.io.edge.FileNotFoundException(path) from e
+            raise error from exceptions.io.edge.FileNotFoundException(path)
+        raise error
 
 
 class Download(EdgeCommand):
@@ -353,6 +355,9 @@ class Rename(Move):
     def _before_command(self):
         logger.info('Renaming: %s to: %s', self.path, self.path.parent.join(self.new_name))
 
+    def _handle_response(self, r):
+        return self.path.parent.join(self.new_name).relative
+
     def _handle_exception(self, e):
         raise exceptions.io.edge.RenameError(self.path.relative, self.new_name)
 
@@ -373,6 +378,9 @@ class Delete(EdgeCommand):
     async def _a_execute(self):
         with self.trace_execution():
             await self._function(self._receiver, self.path.absolute)
+
+    def _handle_response(self, r):
+        return self.path.relative
 
     def _handle_exception(self, e):
         raise exceptions.io.edge.DeleteError(self.path.relative)
@@ -424,32 +432,26 @@ class Upload(EdgeCommand):
 
     def _handle_response(self, r):
         if r.rc != 0:
-            raise exceptions.io.edge.WriteError(r.msg, self.destination.join(self.name).relative)
+            raise exceptions.io.edge.UploadError(r.msg, self.destination.join(self.name).relative)
+        return self.destination.join(self.name).relative
 
     def _handle_exception(self, e):
-        raise exceptions.io.edge.WriteError(e.error.msg, self.destination.join(self.name).relative) from e
+        raise exceptions.io.edge.UploadError(e.error.msg, self.destination.join(self.name).relative) from e
 
 
-class UploadFile(EdgeCommand):
+class UploadFile(Upload):
 
     def __init__(self, function, receiver, metadata_function, path, destination):
-        super().__init__(function, receiver)
-        self._metadata_function = metadata_function
+        _, name = commonfs.split_file_directory(path)
+        super().__init__(function, receiver, metadata_function, name, destination, None)
         self.path = path
-        self.destination = destination
-
-    def _get_properties(self):
-        return commonfs.properties(self.path)
 
     def _execute(self):
-        metadata = self._get_properties()
         with open(self.path, 'rb') as handle:
-            with self.trace_execution():
-                return Upload(self._function, self._receiver, self._metadata_function, metadata['name'], self.destination, handle).execute()
+            self.fd = handle
+            return super()._execute()
 
     async def _a_execute(self):
-        metadata = self._get_properties()
         with open(self.path, 'rb') as handle:
-            with self.trace_execution():
-                return await Upload(self._function, self._receiver, self._metadata_function,
-                                    metadata['name'], self.destination, handle).a_execute()
+            self.fd = handle
+            return await super()._a_execute()
