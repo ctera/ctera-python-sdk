@@ -57,9 +57,8 @@ class Network(BaseCommand):
         :returns: A list of network interfaces
         :rtype: list[cterasdk.edge.types.NetworkInterface]
         """
-        return [
-            NetworkInterface(i, interface.name, interface.ethernet.mac)
-        for i, interface in enumerate(self._edge.api.get(f'/status/network/ports'))]
+        return [NetworkInterface(i, interface.name, interface.ethernet.mac)
+                for i, interface in enumerate(self._edge.api.get('/status/network/ports'))]
 
     def status(self, interface):
         """
