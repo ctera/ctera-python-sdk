@@ -12,7 +12,7 @@ class PortalPath(BasePath):
     def from_server_object(server_object):
         """
         Parse Path from Server Object.
-        
+
         :param object server_object: Server Object
         """
         classname = getattr(server_object, '_classname', None)
@@ -32,7 +32,7 @@ class PortalPath(BasePath):
     def from_resource(resource):
         """
         Create Path Object from 'ResourceInfo' Class Object.
-        
+
         :param object resource: Resource Info Object
         """
         return PortalPath.from_str(urllib.parse.unquote(resource.href))
@@ -41,7 +41,7 @@ class PortalPath(BasePath):
     def from_snapshot(snapshot):
         """
         Create Path Object from 'SnapshotResp' Class Object.
-        
+
         :param object snapshot: Snapshot Response Object
         """
         return PortalPath.from_str(urllib.parse.unquote(snapshot.url + snapshot.path))
@@ -50,7 +50,7 @@ class PortalPath(BasePath):
     def from_cursor(cursor):
         """
         Create Path Object from 'ResourceActionCursor' Class Object.
-        
+
         :param object cursor: Resource Action Cursor Object
         """
         return PortalPath.from_str(urllib.parse.unquote(cursor.upperLevelUrl))
@@ -59,7 +59,7 @@ class PortalPath(BasePath):
     def from_str(path):
         """
         Create Path Object from String.
-        
+
         :param str path: Path
         """
         return PortalPath._parse_from_str(path or '')
@@ -68,7 +68,7 @@ class PortalPath(BasePath):
     def _parse_from_str(path):
         """
         Path Object from String.
-        
+
         :param str path: Path
         """
         groups = [f'(?P<{o.__name__}>{namespace})' for namespace, o in Namespaces.items()]
@@ -108,7 +108,7 @@ Namespaces = {
 def resolve(path, namespace=None):
     """
     Resolve Path
-    
+
     :param object path: Path
     :param cterasdk.cio.core.types.PortalPath,optional namespace: Path Object
     """
@@ -131,7 +131,7 @@ def resolve(path, namespace=None):
 def create_generator(paths, namespace=None):
     """
     Create Path Object Generator Object.
-    
+
     :param object paths: List or a tuple
     :param cterasdk.cio.core.types.PortalPath,optional namespace: Path Object
     """
@@ -147,7 +147,7 @@ def create_generator(paths, namespace=None):
 def automatic_resolution(p, context=None):
     """
     Automatic Resolution of Path Object
-    
+
     :param object p: Path
     :param str,optional context: Context (e.g. 'ServicesPortal' or 'admin')
     """
@@ -155,7 +155,7 @@ def automatic_resolution(p, context=None):
 
     if isinstance(p, (list, tuple)):
         return create_generator(p, namespace)
-    
+
     return resolve(p, namespace)
 
 

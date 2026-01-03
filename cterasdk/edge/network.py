@@ -3,7 +3,6 @@ from abc import abstractmethod
 from contextlib import contextmanager
 import ipaddress
 
-from ..exceptions import CTERAException
 from ..exceptions.common import TaskException
 from .enum import Mode, IPProtocol, Traffic
 from .types import TCPConnectResult, StaticRoute, NetworkInterface

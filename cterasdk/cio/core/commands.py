@@ -643,7 +643,7 @@ class CreateDirectory(PortalCommand):
         path = self.path.relative
         if r is None or r == 'Ok':
             return path
-        
+
         error, cause = exceptions.io.core.CreateDirectoryError(path), None
         if r == ResourceError.FileWithTheSameNameExist:
             cause = exceptions.io.core.FileConflictError(path)
@@ -776,7 +776,7 @@ class FilterShareMembers(PortalCommand):
         with self._enumerate_members(collaborators) as members:
             for member in members:
                 member.collaborator = await SearchMember(self._function,
-                                                          self._receiver, member.account, self.cloud_folder_uid).a_execute()
+                                                         self._receiver, member.account, self.cloud_folder_uid).a_execute()
         return collaborators
 
 
@@ -1059,7 +1059,7 @@ class ResolverCommand(TaskCommand):
     def _task_error(self, task):
         cursor = task.cursor
         error = self._error_object(self.paths, cursor)
-        
+
         """File conflict."""
         if task.error_type == ResourceError.Conflict:
             resource = automatic_resolution(cursor.destResource).relative
@@ -1125,7 +1125,7 @@ class Rename(Move):
         super().__init__(function, receiver, block,
                          *[(path, automatic_resolution(path, receiver.context).parent.join(new_name))],
                          resolver=resolver, cursor=cursor
-        )
+                         )
 
     def _try_with_resolver(self, cursor):
         source, destination = self.paths[0]

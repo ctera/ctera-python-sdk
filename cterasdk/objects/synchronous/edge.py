@@ -161,8 +161,8 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['afp', 'aio', 'array', 'audit', 'antivirus', 'backup', 'cache', 'cli', 'config', 'ctera_migrate', 'dedup',
-                                       'directoryservice', 'drive', 'files', 'firmware', 'ftp', 'groups', 'licenses', 'logs', 'mail',
-                                       'network', 'nfs', 'ntp', 'power', 'ransom_protect', 'rsync', 'services', 'shares', 'shell',
+        return super()._omit_fields + ['afp', 'aio', 'array', 'audit', 'antivirus', 'backup', 'cache', 'cli', 'config', 'ctera_migrate',
+                                       'dedup', 'directoryservice', 'drive', 'files', 'firmware', 'ftp', 'groups', 'licenses', 'logs',
+                                       'mail', 'network', 'nfs', 'ntp', 'power', 'ransom_protect', 'rsync', 'services', 'shares', 'shell',
                                        'smb', 'snmp', 'ssh', 'ssl', 'support', 'sync', 'syslog', 'tasks', 'telnet', 'timezone',
                                        'users', 'volumes']

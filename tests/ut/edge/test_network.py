@@ -6,7 +6,6 @@ from cterasdk.edge.types import TCPService, TCPConnectResult, StaticRoute
 from cterasdk.edge.enum import Mode, IPProtocol, Traffic
 from cterasdk.common import Object
 from cterasdk.exceptions.common import TaskException
-from cterasdk import exceptions
 from tests.ut.edge import base_edge
 
 

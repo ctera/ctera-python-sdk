@@ -230,7 +230,7 @@ class RecursiveIterator:
     def _process_object(self, o):
         if o.is_dir:
             self.tree.append(o.path)
-        return o      
+        return o
 
     def _suppress_error(self, e):
         if not isinstance(e.__cause__, exceptions.io.edge.FolderNotFoundError):
@@ -367,7 +367,7 @@ class Copy(EdgeCommand):
         source, destination = self.get_parameter()
         with self.trace_execution():
             return self._function(self._receiver, source, destination, overwrite=self.overwrite)
-        
+
     async def _a_execute(self):
         self.destination = await self._resolver.a_resolve()
         source, destination = self.get_parameter()

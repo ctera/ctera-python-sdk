@@ -40,7 +40,8 @@ class FileBrowser(BaseCommand):
         Download a file.
 
         :param str path: Path.
-        :param str, optional destination: File destination. If a directory is provided, the original filename is preserved. Defaults to the default download directory.
+        :param str, optional destination: File destination. If a directory is provided, the original filename is preserved.
+         Defaults to the default download directory.
         :returns: Path to the local file.
         :rtype: str
         :raises cterasdk.exceptions.io.core.OpenError: Raised on error to obtain a file handle.
@@ -155,7 +156,7 @@ class FileBrowser(BaseCommand):
         """
         try:
             return Copy(io.copy, self._core, wait, *paths, destination=destination, resolver=resolver, cursor=cursor).execute()
-        except ValueError as e:
+        except ValueError:
             raise ValueError('Copy destination was not specified.')
 
     def permalink(self, path):
@@ -343,7 +344,8 @@ class Backups(FileBrowser):
         Download a device configuration file.
 
         :param str device: Device name.
-        :param str, optional destination: File destination. If a directory is provided, original filename is preserved. Defaults to default downloads directory.
+        :param str, optional destination: File destination. If a directory is provided, original filename is preserved.
+         Defaults to default downloads directory.
         :returns: Path to local file.
         :rtype: str
         :raises cterasdk.exceptions.io.core.OpenError: Raised on error obtaining file handle.

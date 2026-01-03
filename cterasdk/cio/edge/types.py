@@ -8,7 +8,7 @@ class EdgePath(BasePath):
     Edge Filer Path Object
     """
     Namespace = '/'
-    
+
     def __init__(self, reference):
         super().__init__(EdgePath.Namespace, reference or '.')
 
@@ -50,7 +50,7 @@ class EdgeResource(BaseResource):
 def resolve(path):
     """
     Resolve Path
-    
+
     :param object path: Path
     """
     if isinstance(path, EdgePath):
@@ -68,7 +68,7 @@ def resolve(path):
 def create_generator(paths):
     """
     Create Path Object Generator Object.
-    
+
     :param object paths: List or a tuple
     """
     def wrapper():
@@ -83,10 +83,10 @@ def create_generator(paths):
 def automatic_resolution(p):
     """
     Automatic Resolution of Path Object
-    
+
     :param object p: Path
     """
     if isinstance(p, (list, tuple)):
         return create_generator(p)
-    
+
     return resolve(p)
