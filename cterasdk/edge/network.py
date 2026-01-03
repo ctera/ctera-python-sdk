@@ -176,7 +176,8 @@ class LegacyNetwork(Network):
         """
         return super().ipconfig(0)
 
-    def set_static_ipaddr(self, address, subnet, gateway, primary_dns_server, secondary_dns_server=None):  # pylint: disable=arguments-differ
+    def set_static_ipaddr(self, address, subnet, gateway,
+                          primary_dns_server, secondary_dns_server=None):  # pylint: disable=arguments-differ
         return super().set_static_ipaddr(0, address, subnet, gateway, primary_dns_server, secondary_dns_server)
 
     def set_static_nameserver(self, primary_dns_server, secondary_dns_server=None):  # pylint: disable=arguments-differ
@@ -338,7 +339,8 @@ class StaticRoutes711(BaseStaticRoutes):
         for port, interface in enumerate(self._edge.api.get('/config/network/ports')):
             for route in interface.ipv4StaticRoutes:
                 ip_network = str(ipaddress.IPv4Network(f'{route.destination}/{route.netmask}', False))
-                routes.append(StaticRoute(interface._uuid, port, interface.name, ip_network, route.gateway))  # pylint: disable=protected-access
+                routes.append(StaticRoute(interface._uuid, port,
+                                          interface.name, ip_network, route.gateway))  # pylint: disable=protected-access
         return routes
 
     def _add_route(self, interface, gateway, network):
@@ -359,7 +361,8 @@ class LegacyStaticRoutes(BaseStaticRoutes):
         """
         network = self._edge.api.get('/config/network')
         return [StaticRoute(
-            r._uuid, 0, network.ports[0].name, str(ipaddress.IPv4Network(r.DestIpMask.replace('_', '/'), False)), r.GwIP  # pylint: disable=protected-access
+            r._uuid, 0, network.ports[0].name,
+            str(ipaddress.IPv4Network(r.DestIpMask.replace('_', '/'), False)), r.GwIP  # pylint: disable=protected-access
         ) for r in network.static_routes]
 
     def add(self, gateway, network):
