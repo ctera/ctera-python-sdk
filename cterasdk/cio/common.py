@@ -44,7 +44,7 @@ class BasePath:
 
     @property
     def parent(self):
-        return self.__class__(self._reference.parent.as_posix())
+        return self.__class__(self._reference.parent.as_posix())  # pylint: disable=no-value-for-parameter
 
     @property
     def absolute(self):
@@ -68,7 +68,7 @@ class BasePath:
 
         :param str p: Path.
         """
-        return self.__class__(self.reference.joinpath(p).as_posix())
+        return self.__class__(self.reference.joinpath(p).as_posix())  # pylint: disable=no-value-for-parameter
 
     @property
     def parts(self):
@@ -93,12 +93,7 @@ class BaseResource(Object):
     :ivar str extension: Extension
     """
     def __init__(self, name, path, is_dir, size, last_modified):
-        self.name = name
-        self.path = path
-        self.is_dir = is_dir
-        self.size = size
-        self.last_modified = last_modified
-        self.extension = path.extension
+        super().__init__(name=name, path=path, is_dir=is_dir, size=size, last_modified=last_modified, extension=path.extension)
 
     def __repr__(self):
         return (

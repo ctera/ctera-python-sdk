@@ -1,7 +1,7 @@
 import logging
 
 from . import enum
-from ..cio.edge.types import EdgePath
+from ..cio.edge.types import automatic_resolution
 from ..common import Object
 from ..exceptions import CTERAException, InputError
 from .base_command import BaseCommand
@@ -60,7 +60,7 @@ class Shares(BaseCommand):
         param = Object()
         param.name = name
 
-        parts = EdgePath('/', directory).parts
+        parts = automatic_resolution(directory).parts
         volume = parts[0]
         self._validate_root_directory(volume)
         param.volume = volume
@@ -239,7 +239,7 @@ class Shares(BaseCommand):
         """
         share = self.get(name=name)
         if directory is not None:
-            parts = EdgePath('/', directory).parts
+            parts = automatic_resolution(directory).parts
             volume = parts[0]
             self._validate_root_directory(volume)
             share.volume = volume

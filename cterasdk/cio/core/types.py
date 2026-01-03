@@ -299,8 +299,7 @@ class VolumeOwner(Object):
     :ivar str namespace: User namespace.
     """
     def __init__(self, i, name):
-        self.id = i
-        self.name = name
+        super().__init__(id=i, name=name)
 
     @property
     def user_namespace(self):
@@ -318,11 +317,7 @@ class PortalVolume(Object):
     :ivar cterasdk.core.types.VolumeOwner owner: Volume owner information.
     """
     def __init__(self, i, name, group, protected, owner):
-        self.id = i
-        self.name = name
-        self.group = group
-        self.protected = protected
-        self.owner = owner
+        super().__init__(id=i, name=name, group=group, protected=protected, owner=owner)
 
     @staticmethod
     def from_server_object(server_object):
@@ -345,10 +340,12 @@ class PreviousVersion(Object):
     :ivar datetime.datetime end_time: Snapshot end time
     """
     def __init__(self, server_object):
-        self.path = PortalPath.from_snapshot(server_object)
-        self.current = server_object.current
-        self.start_time = datetime.fromisoformat(server_object.startTimestamp)
-        self.end_time = datetime.fromisoformat(server_object.calculatedTimestamp)
+        super().__init__(
+            path=PortalPath.from_snapshot(server_object),
+            current=server_object.current,
+            start_time=datetime.fromisoformat(server_object.startTimestamp),
+            end_time=datetime.fromisoformat(server_object.calculatedTimestamp)
+        )
 
     @staticmethod
     def from_server_object(server_object):
@@ -408,5 +405,4 @@ class PortalResource(BaseResource):
 
     @property
     def with_user_namespace(self):
-        if self.volume:
-            return PortalPath(self.volume.owner.user_namespace, self.path.relative).absolute
+        return PortalPath(self.volume.owner.user_namespace if self.volume else '/', self.path.relative).absolute

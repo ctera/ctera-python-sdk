@@ -184,7 +184,7 @@ class ListDirectory(EdgeCommand):
             return await self._function(self._receiver, self.path.absolute, self.depth)
 
     def _handle_response(self, r):
-        if not self.depth > 0:
+        if self.depth <= 0:
             return EdgeResource.from_server_object(r[0])
         return [EdgeResource.from_server_object(e) for e in r if self.path.relative != EdgeResource.decode_reference(e.href)]
 
@@ -216,7 +216,7 @@ class RecursiveIterator:
                     if path.relative != o.path.relative:
                         yield self._process_object(o)
             except exceptions.io.edge.ListDirectoryError as e:
-                self._suppress_error(e)
+                RecursiveIterator._suppress_error(e)
 
     async def a_generate(self):
         for path in self._generator():
@@ -225,17 +225,18 @@ class RecursiveIterator:
                     if path.relative != o.path.relative:
                         yield self._process_object(o)
             except exceptions.io.edge.ListDirectoryError as e:
-                self._suppress_error(e)
+                RecursiveIterator._suppress_error(e)
 
     def _process_object(self, o):
         if o.is_dir:
             self.tree.append(o.path)
         return o
 
-    def _suppress_error(self, e):
+    @staticmethod
+    def _suppress_error(e):
         if not isinstance(e.__cause__, exceptions.io.edge.FolderNotFoundError):
             raise e
-        logger.warning(f"Could not list directory contents: {e.path}. No such directory.")
+        logger.warning("Could not list directory contents: %s. No such directory.", e.path)
 
 
 class GetMetadata(ListDirectory):
@@ -346,7 +347,7 @@ class CreateDirectory(EdgeCommand):
 class Copy(EdgeCommand):
     """Copy"""
 
-    def __init__(self, function, receiver, listdir, path, destination, overwrite=False):
+    def __init__(self, function, receiver, listdir, path, destination, overwrite):
         super().__init__(function, receiver)
         self.path = automatic_resolution(path)
         self.destination = automatic_resolution(destination)

@@ -46,7 +46,7 @@ class Network(BaseCommand):
         """
         return self.interface(name).port
 
-    def _deduce_port(self, interface):
+    def deduce_port(self, interface):
         return interface if interface in [0, 1] else self.port(interface)
 
     @property
@@ -66,7 +66,7 @@ class Network(BaseCommand):
 
         :param object interface: Interface name or port number
         """
-        return self._edge.api.get(f'/status/network/ports/{self._deduce_port(interface)}')
+        return self._edge.api.get(f'/status/network/ports/{self.deduce_port(interface)}')
 
     def ipconfig(self, interface):
         """
@@ -74,7 +74,7 @@ class Network(BaseCommand):
 
         :param object interface: Interface name or port number
         """
-        return self._edge.api.get(f'/config/network/ports/{self._deduce_port(interface)}')
+        return self._edge.api.get(f'/config/network/ports/{self.deduce_port(interface)}')
 
     def set_static_ipaddr(self, interface, address, subnet, gateway, primary_dns_server, secondary_dns_server=None):
         """
@@ -87,7 +87,7 @@ class Network(BaseCommand):
         :param str primary_dns_server: The primary DNS server
         :param str,optinal secondary_dns_server: The secondary DNS server, defaults to None
         """
-        port = self._deduce_port(interface)
+        port = self.deduce_port(interface)
         ip = self._edge.api.get(f'/config/network/ports/{port}/ip')
         ip.DHCPMode = Mode.Disabled
         ip.address = address
@@ -114,7 +114,7 @@ class Network(BaseCommand):
         :param str primary_dns_server: Primary DNS server
         :param str,optional secondary_dns_server: Secondary DNS server, defaults to None
         """
-        port = self._deduce_port(interface)
+        port = self.deduce_port(interface)
         ip = self._edge.api.get(f'/config/network/ports/{port}/ip')
         ip.autoObtainDNS = False
         ip.DNSServer1 = primary_dns_server
@@ -132,7 +132,7 @@ class Network(BaseCommand):
 
         :param object interface: Interface name or port number
         """
-        port = self._deduce_port(interface)
+        port = self.deduce_port(interface)
         ip = self._edge.api.get(f'/config/network/ports/{port}/ip')
         ip.DHCPMode = Mode.Enabled
         ip.autoObtainDNS = True
@@ -170,19 +170,19 @@ class LegacyNetwork(Network):
         """
         return super().ipconfig(0)
 
-    def ipconfig(self):
+    def ipconfig(self):  # pylint: disable=arguments-differ
         """
         Retrieve the IP address settings
         """
         return super().ipconfig(0)
 
-    def set_static_ipaddr(self, address, subnet, gateway, primary_dns_server, secondary_dns_server=None):
+    def set_static_ipaddr(self, address, subnet, gateway, primary_dns_server, secondary_dns_server=None):  # pylint: disable=arguments-differ
         return super().set_static_ipaddr(0, address, subnet, gateway, primary_dns_server, secondary_dns_server)
 
-    def set_static_nameserver(self, primary_dns_server, secondary_dns_server=None):
+    def set_static_nameserver(self, primary_dns_server, secondary_dns_server=None):  # pylint: disable=arguments-differ
         return super().set_static_nameserver(0, primary_dns_server, secondary_dns_server)
 
-    def enable_dhcp(self):
+    def enable_dhcp(self):  # pylint: disable=arguments-differ
         return super().enable_dhcp(0)
 
 
@@ -247,10 +247,10 @@ class Proxy(BaseCommand):
 
 class BaseMTU(BaseCommand):
 
-    def reset(self, interface):
+    def reset(self, interface):  # pylint: disable=arguments-differ
         return self._update_max_transmission_unit(interface, False, 1500)
 
-    def modify(self, interface, size):
+    def modify(self, interface, size):  # pylint: disable=arguments-differ
         return self._update_max_transmission_unit(interface, True, size)
 
     def _update_max_transmission_unit(self, interface, jumbo, size):
@@ -287,19 +287,20 @@ class LegacyMTU(BaseMTU):
 class BaseStaticRoutes(BaseCommand):
     """Edge Filer Static Routes Configuration"""
 
+    @staticmethod
     @contextmanager
-    def _validate_route(self, gateway, network):
+    def _validate_route(gateway, network):
         yield str(ipaddress.ip_address(gateway)), ipaddress.ip_network(network)
 
-    def add(self, interface, gateway, network):
+    def add(self, interface, route_gateway, route_network):  # pylint: disable=arguments-differ
         """
         Add a route.
 
         :param object interface: Interface name or port number
-        :param str gateway: Gateway IP address
-        :param str network: Network (CIDR)
+        :param str route_gateway: Gateway IP address
+        :param str route_network: Network (CIDR)
         """
-        with self._validate_route(gateway, network) as (gateway, network):
+        with BaseStaticRoutes._validate_route(route_gateway, route_network) as (gateway, network):
             ip_network = str(network)
             logger.info('Adding route for network: %s, to: %s', ip_network, gateway)
             response = self._add_route(interface, gateway, network)
@@ -337,7 +338,7 @@ class StaticRoutes711(BaseStaticRoutes):
         for port, interface in enumerate(self._edge.api.get('/config/network/ports')):
             for route in interface.ipv4StaticRoutes:
                 ip_network = str(ipaddress.IPv4Network(f'{route.destination}/{route.netmask}', False))
-                routes.append(StaticRoute(interface._uuid, port, interface.name, ip_network, route.gateway))
+                routes.append(StaticRoute(interface._uuid, port, interface.name, ip_network, route.gateway))  # pylint: disable=protected-access
         return routes
 
     def _add_route(self, interface, gateway, network):
@@ -358,7 +359,7 @@ class LegacyStaticRoutes(BaseStaticRoutes):
         """
         network = self._edge.api.get('/config/network')
         return [StaticRoute(
-            r._uuid, 0, network.ports[0].name, str(ipaddress.IPv4Network(r.DestIpMask.replace('_', '/'), False)), r.GwIP
+            r._uuid, 0, network.ports[0].name, str(ipaddress.IPv4Network(r.DestIpMask.replace('_', '/'), False)), r.GwIP  # pylint: disable=protected-access
         ) for r in network.static_routes]
 
     def add(self, gateway, network):

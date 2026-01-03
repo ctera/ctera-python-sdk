@@ -442,6 +442,4 @@ class NetworkInterface(Object):
     :ivar str mac: MAC address
     """
     def __init__(self, port, name, mac):
-        self.port = port
-        self.name = name
-        self.mac = mac
+        super().__init__(port=port, name=name, mac=mac)

@@ -81,6 +81,7 @@ class PathResolver:
             return parent.join(name)
         if self._default is not None:
             return parent.join(self._default)
+        return self._destination
 
 
 def destination_prerequisite_conditions(destination):
@@ -330,7 +331,7 @@ class Open(PortalCommand):
         path = self.path.relative
         error = exceptions.io.edge.OpenError(path)
         if isinstance(e, exceptions.transport.NotFound):
-            raise error from exceptions.io.core.FileNotFoundException()
+            raise error from exceptions.io.core.FileNotFoundException(path)
         raise error
 
 
@@ -542,7 +543,7 @@ class RecursiveIterator:
                 for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).execute():
                     yield self._process_object(o)
             except exceptions.io.core.ListDirectoryError as e:
-                self._suppress_error(e)
+                RecursiveIterator._suppress_error(e)
 
     async def a_generate(self):
         for path in self._generator():
@@ -550,17 +551,18 @@ class RecursiveIterator:
                 async for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).a_execute():
                     yield self._process_object(o)
             except exceptions.io.core.ListDirectoryError as e:
-                self._suppress_error(e)
+                RecursiveIterator._suppress_error(e)
 
     def _process_object(self, o):
         if o.is_dir:
             self.tree.append(o.path.relative)
         return o
 
-    def _suppress_error(self, e):
+    @staticmethod
+    def _suppress_error(e):
         if not isinstance(e.__cause__, exceptions.io.core.FolderNotFoundError):
             raise e
-        logger.warning(f"Could not list directory contents: {e.path}. No such directory.")
+        logger.warning("Could not list directory contents: %s. No such directory.", e.path)
 
 
 class ListVersions(PortalCommand):
@@ -1060,18 +1062,15 @@ class ResolverCommand(TaskCommand):
         cursor = task.cursor
         error = self._error_object(self.paths, cursor)
 
-        """File conflict."""
-        if task.error_type == ResourceError.Conflict:
+        if task.error_type == ResourceError.Conflict:  # file conflict
             resource = automatic_resolution(cursor.destResource).relative
             raise error from exceptions.io.core.FileConflictError(resource)
 
-        """Object does not exist."""
-        if not task.unknown_object():
+        if not task.unknown_object():  # file not found
             resource = automatic_resolution(cursor).relative
             raise error from exceptions.io.core.ObjectNotFoundError(resource)
 
-        """Remote directory not found."""
-        if task.progress_str == ResourceError.DestinationNotExists:
+        if task.progress_str == ResourceError.DestinationNotExists:  # destination directory not found
             directory = self.destination if self.destination is not None else dict(self.paths).get(
                 automatic_resolution(cursor.srcResource).relative, None
             )
