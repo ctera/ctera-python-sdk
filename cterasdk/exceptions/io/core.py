@@ -130,8 +130,10 @@ class CreateLinkError(PathError):
 
 class RenameError(PathError):
 
-    def __init__(self, filename, filename2):
-        super().__init__(EREMOTEIO, 'Failed to rename object', filename, filename2)
+    def __init__(self, paths, cursor):
+        source, destination = paths[0]
+        super().__init__(EREMOTEIO, 'Failed to rename object', str(source), str(destination.name))
+        self.cursor = cursor
 
 
 class BatchError(BaseIOError):

@@ -1,20 +1,23 @@
 from ..base_command import BaseCommand
 from ....cio.edge.commands import ListDirectory, RecursiveIterator, GetMetadata, Open, OpenMany, Upload, \
-     UploadFile, CreateDirectory, Copy, Move, Delete, Download, DownloadMany, Rename, EnsureDirectory
+     CreateDirectory, Copy, Move, Delete, Download, DownloadMany, Rename, EnsureDirectory
+from ....lib.storage import commonfs
 from . import io
 
 
 class FileBrowser(BaseCommand):
-    """ Edge Filer File Browser APIs """
+    """Edge Filer File Browser API."""
 
     async def listdir(self, path):
         """
-        List Directory
+        List directory contents.
 
-        :param str path: Path
+        :param str path: Path.
         :returns: Directory contents.
-        :rtype: list[cterasdk.cio.edge.types.EdgeResource]
-        :raises: cterasdk.exceptions.io.edge.ListDirectoryError
+        :rtype: AsyncIterator[cterasdk.cio.edge.types.EdgeResource]
+        :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
+        :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
+        :raises cterasdk.exceptions.io.edge.ListDirectoryError: Raised on error to fetch directory contents.
         """
         async with EnsureDirectory(io.listdir, self._edge, path):
             for o in await ListDirectory(io.listdir, self._edge, path).a_execute():
@@ -22,11 +25,13 @@ class FileBrowser(BaseCommand):
 
     async def walk(self, path=None):
         """
-        Walk Directory Contents
+        Walk directory contents.
 
-        :param str,optional path: Path to walk, defaults to the root directory
-        :returns: A generator of file-system objects
-        :rtype: cterasdk.cio.edge.types.EdgeResource
+        :param str, optional path: Path to walk. Defaults to the root directory.
+        :returns: A generator of file-system objects.
+        :rtype: AsyncIterator[cterasdk.cio.edge.types.EdgeResource]
+        :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
+        :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
         """
         async with EnsureDirectory(io.listdir, self._edge, path):
             async for o in RecursiveIterator(io.listdir, self._edge, path).a_generate():
@@ -34,22 +39,22 @@ class FileBrowser(BaseCommand):
 
     async def properties(self, path):
         """
-        Get Properties
-        
-        :param str path: Path
-        :returns: Object properties
+        Get object properties.
+
+        :param str path: Path.
+        :returns: Object properties.
         :rtype: cterasdk.cio.edge.types.EdgeResource
-        :raises: exceptions.io.edge.FileNotFoundException
+        :raises cterasdk.exceptions.io.core.GetMetadataError: Raised on error to obtain object metadata.
         """
         async with GetMetadata(io.listdir, self._edge, path, False) as (_, metadata):
             return metadata
 
     async def exists(self, path):
         """
-        Check if item exists
+        Check whether an item exists.
 
-        :param str path: Path
-        :returns: ``True`` if exists, ``False`` otherwise
+        :param str path: Path.
+        :returns: ``True`` if the item exists, ``False`` otherwise.
         :rtype: bool
         """
         async with GetMetadata(io.listdir, self._edge, path, True) as (exists, *_):
@@ -57,34 +62,37 @@ class FileBrowser(BaseCommand):
 
     async def handle(self, path):
         """
-        Get File Handle.
+        Get file handle.
 
-        :param str path: Path to a file
-        :returns: File handle
-        :raises: cterasdk.exceptions.io.edge.OpenError
+        :param str path: Path to a file.
+        :returns: File handle.
+        :rtype: object
+        :raises cterasdk.exceptions.io.edge.OpenError: Raised on error to obtain a file handle.
         """
         return await Open(io.handle, self._edge, path).a_execute()
 
     async def handle_many(self, directory, *objects):
         """
-        Get a Zip Archive File Handle.
+        Get a ZIP archive file handle.
 
-        :param str directory: Path to a folder
-        :param args objects: List of files and folders
-        :returns: File handle
+        :param str directory: Path to a folder.
+        :param args objects: Files and folders to include.
+        :returns: File handle.
+        :rtype: object
         """
         return await OpenMany(io.handle_many, self._edge, directory, *objects).a_execute()
 
     async def download(self, path, destination=None):
         """
-        Download a file
+        Download a file.
 
-        :param str path: The file path on the Edge Filer
-        :param str,optional destination:
-         File destination, if it is a directory, the original filename will be kept, defaults to the default directory
-        :returns: Path to local file
+        :param str path: The file path on the Edge Filer.
+        :param str, optional destination:
+            File destination. If a directory is provided, the original filename is preserved.
+            Defaults to the default download directory.
+        :returns: Path to the local file.
         :rtype: str
-        :raises: cterasdk.exceptions.io.edge.OpenError
+        :raises cterasdk.exceptions.io.edge.OpenError: Raised on error to obtain a file handle.
         """
         return await Download(io.handle, self._edge, path, destination).a_execute()
 
@@ -102,67 +110,69 @@ class FileBrowser(BaseCommand):
             List of file and/or directory names to include in the download.
         :param str destination:
             Optional. Path to the destination file or directory. If a directory is provided,
-            the original filename will be preserved. Defaults to the default download directory.
-        :returns: Path to local file
+            the original filename is preserved. Defaults to the default download directory.
+        :returns: Path to the local file.
         :rtype: str
         """
         return await DownloadMany(io.handle_many, self._edge, target, objects, destination).a_execute()
 
-    async def upload(self, name, destination, handle):
+    async def upload(self, destination, handle, name=None):
         """
-        Upload from file handle.
+        Upload from a file handle.
 
-        :param str name: File name.
-        :param str destination: Path to remote directory.
-        :param object handle: Handle.
-        :returns: Remote file path
+        :param str destination: Remote path.
+        :param object handle: File-like handle.
+        :param str, optional name: Filename to use if it cannot be derived from ``destination``
+        :returns: Remote file path.
         :rtype: str
         :raises cterasdk.exceptions.io.edge.UploadError: Raised on upload failure.
         """
-        return await Upload(io.upload, self._edge, io.listdir, name, destination, handle).a_execute()
+        return await Upload(io.upload, self._edge, io.listdir, destination, handle, name).a_execute()
 
     async def upload_file(self, path, destination):
         """
         Upload a file.
 
-        :param str path: Local path
-        :param str destination: Remote path
-        :returns: Remote file path
+        :param str path: Local path.
+        :param str destination: Remote path.
+        :returns: Remote file path.
         :rtype: str
         :raises cterasdk.exceptions.io.edge.UploadError: Raised on upload failure.
         """
-        return await UploadFile(io.upload, self._edge, io.listdir, path, destination).a_execute()
+        _, name = commonfs.split_file_directory(path)
+        with open(path, 'rb') as handle:
+            return await self.upload(destination, handle, name)
 
     async def mkdir(self, path):
         """
-        Create a new directory
+        Create a new directory.
 
-        :param str path: Directory path
-        :returns: Remote directory path
+        :param str path: Directory path.
+        :returns: Remote directory path.
         :rtype: str
-        :raises: cterasdk.exceptions.io.edge.CreateDirectoryError
+        :raises cterasdk.exceptions.io.edge.CreateDirectoryError: Raised on error to create a directory.
         """
         return await CreateDirectory(io.mkdir, self._edge, path).a_execute()
 
     async def makedirs(self, path):
         """
-        Create a directory recursively
+        Create a directory recursively.
 
-        :param str path: Directory path
-        :returns: Remote directory path
+        :param str path: Directory path.
+        :returns: Remote directory path.
         :rtype: str
-        :raises: cterasdk.exceptions.io.edge.CreateDirectoryError
+        :raises cterasdk.exceptions.io.edge.CreateDirectoryError: Raised on error to create a directory.
         """
         return await CreateDirectory(io.mkdir, self._edge, path, True).a_execute()
 
     async def copy(self, path, destination=None, overwrite=False):
         """
-        Copy a file or a folder
+        Copy a file or directory.
 
-        :param str path: Source file or folder path
-        :param str destination: Destination folder path
-        :param bool,optional overwrite: Overwrite on conflict, defaults to False
-        :raises: cterasdk.exceptions.io.edge.CopyError
+        :param str path: Source file or directory path.
+        :param str destination: Destination directory path.
+        :param bool, optional overwrite: Overwrite on conflict. Defaults to ``False``.
+        :raises cterasdk.exceptions.io.edge.CopyError: Raised on error to copy a file or directory.
         """
         if destination is None:
             raise ValueError('Copy destination was not specified.')
@@ -170,34 +180,35 @@ class FileBrowser(BaseCommand):
 
     async def move(self, path, destination=None, overwrite=False):
         """
-        Move a file or a folder
+        Move a file or directory.
 
-        :param str path: Source file or folder path
-        :param str destination: Destination folder path
-        :param bool,optional overwrite: Overwrite on conflict, defaults to False
-        :raises: cterasdk.exceptions.io.edge.MoveError
+        :param str path: Source file or directory path.
+        :param str destination: Destination directory path.
+        :param bool, optional overwrite: Overwrite on conflict. Defaults to ``False``.
+        :raises cterasdk.exceptions.io.edge.MoveError: Raised on error to move a file or directory.
         """
         if destination is None:
             raise ValueError('Move destination was not specified.')
         return await Move(io.move, self._edge, path, destination, overwrite).a_execute()
 
-    async def rename(self, path, name):
+    async def rename(self, path, name, overwrite=False):
         """
-        Rename a file
+        Rename a file or directory.
 
-        :param str path: Path of the file or directory to rename
-        :param str name: The name to rename to
-        :returns: Remote object path
+        :param str path: Path of the file or directory to rename.
+        :param str name: New name for the file or directory.
+        :param bool, optional overwrite: Overwrite on conflict. Defaults to ``False``.
+        :returns: Remote object path.
         :rtype: str
-        :raises: cterasdk.exceptions.io.edge.RenameError
+        :raises cterasdk.exceptions.io.edge.RenameError: Raised on error to rename a file or directory.
         """
-        return await Rename(io.move, self._edge, path, name).a_execute()
+        return await Rename(io.move, self._edge, path, name, overwrite).a_execute()
 
     async def delete(self, path):
         """
-        Delete a file
+        Delete a file or directory.
 
-        :param str path: File path
-        :raises: cterasdk.exceptions.io.edge.DeleteError
+        :param str path: File or directory path.
+        :raises cterasdk.exceptions.io.edge.DeleteError: Raised on error to delete a file or directory.
         """
         return await Delete(io.delete, self._edge, path).a_execute()

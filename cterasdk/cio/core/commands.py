@@ -20,9 +20,72 @@ from ..actions import PortalCommand
 logger = logging.getLogger('cterasdk.core')
 
 
-def destination_prerequisite_conditions(destination, name):
-    if any(c in name for c in ['\\', '/', ':', '?', '&', '<', '>', '"', '|']):
-        raise exceptions.io.core.FilenameError(destination.join(name).relative)
+def split_file_directory(listdir, receiver, destination):
+    """
+    Split a path into its parent directory and final component.
+
+    :returns:
+        tuple[str, str]: A ``(parent_directory, name)`` tuple when:
+
+        * The path refers to an existing file
+        * The path refers to an existing directory
+        * The parent directory of the path exists
+
+    :raises GetMetadataError: If neither the path nor its parent directory exist.
+    """
+    is_dir, resource = EnsureDirectory(listdir, receiver, destination, True).execute()
+    if not is_dir:
+        is_dir, resource = EnsureDirectory(listdir, receiver, destination.parent).execute()
+        return resource, destination.parent, destination.name
+    return resource, destination, None
+
+
+async def a_split_file_directory(listdir, receiver, destination):
+    """
+    Split a path into its parent directory and final component.
+
+    :returns:
+        tuple[str, str]: A ``(parent_directory, name)`` tuple when:
+
+        * The path refers to an existing file
+        * The path refers to an existing directory
+        * The parent directory of the path exists
+
+    :raises GetMetadataError: If neither the path nor its parent directory exist.
+    """
+    is_dir, resource = await EnsureDirectory(listdir, receiver, destination, True).a_execute()
+    if not is_dir:
+        is_dir, resource = await EnsureDirectory(listdir, receiver, destination.parent).a_execute()
+        return resource, destination.parent, destination.name
+    return resource, destination, None
+
+
+class PathResolver:
+
+    def __init__(self, listdir, receiver, destination, default):
+        self._listdir = listdir
+        self._receiver = receiver
+        self._destination = destination
+        self._default = default
+
+    async def a_resolve(self):
+        resource, parent, name = await a_split_file_directory(self._listdir, self._receiver, self._destination)
+        return resource, self._resolve(parent, name)
+
+    def resolve(self):
+        resource, parent, name = split_file_directory(self._listdir, self._receiver, self._destination)
+        return resource, self._resolve(parent, name)
+
+    def _resolve(self, parent, name):
+        if name is not None:
+            return parent.join(name)
+        if self._default is not None:
+            return parent.join(self._default)
+
+
+def destination_prerequisite_conditions(destination):
+    if any(c in destination.name for c in ['\\', '/', ':', '?', '&', '<', '>', '"', '|']):
+        raise exceptions.io.core.FilenameError(destination.relative)
 
 
 class EnsureDirectory(PortalCommand):
@@ -56,52 +119,42 @@ def ensure_writeable(resource, directory):
 
 class Upload(PortalCommand):
 
-    def __init__(self, function, receiver, metadata_function, name, destination, size, fd):
+    def __init__(self, function, receiver, listdir, destination, fd, name, size):
         super().__init__(function, receiver)
-        self.metadata_function = metadata_function
-        self.name = name
         self.destination = automatic_resolution(destination, receiver.context)
-        destination_prerequisite_conditions(self.destination, name)
+        self._resolver = PathResolver(listdir, receiver, self.destination, name)
         self.size = size
         self.fd = fd
+        self._resource = None
 
     def get_parameter(self):
         fd, size = encode_stream(self.fd, self.size)
         param = dict(
-            name=self.name,
-            Filename=self.name,
-            fullpath=self._receiver.io.builder(self.destination.join(self.name).relative_encode),
+            name=self.destination.name,
+            Filename=self.destination.name,
+            fullpath=self._receiver.io.builder(self.destination.relative_encode),
             fileSize=size,
             file=fd
         )
         return param
 
-    def _validate_destination(self):
-        is_dir, resource = EnsureDirectory(self.metadata_function, self._receiver, self.destination, True).execute()
-        if not is_dir:
-            is_dir, resource = EnsureDirectory(self.metadata_function, self._receiver, self.destination.parent).execute()
-            self.name, self.destination = self.destination.name, self.destination.parent
-        ensure_writeable(resource, self.destination)
-        return resource.cloudFolderInfo.uid
-
-    async def _a_validate_destination(self):
-        is_dir, resource = await EnsureDirectory(self.metadata_function, self._receiver, self.destination, True).a_execute()
-        if not is_dir:
-            is_dir, resource = await EnsureDirectory(self.metadata_function, self._receiver, self.destination.parent).a_execute()
-            self.name, self.destination = self.destination.name, self.destination.parent
-        ensure_writeable(resource, self.destination)
-        return resource.cloudFolderInfo.uid
-
     def _before_command(self):
-        logger.info('Uploading: %s', self.destination.join(self.name))
+        destination_prerequisite_conditions(self.destination)
+        ensure_writeable(self._resource, self.destination.parent)
+        logger.info('Uploading: %s', self.destination)
 
     def _execute(self):
-        cloudfolder = self._validate_destination()
+        self._resource, self.destination = self._resolver.resolve()
         with self.trace_execution():
-            return self._function(self._receiver, str(cloudfolder), self.get_parameter())
+            return self._function(self._receiver, str(self._resource.cloudFolderInfo.uid), self.get_parameter())
+
+    async def _a_execute(self):
+        self._resource, self.destination = await self._resolver.a_resolve()
+        with self.trace_execution():
+            return await self._function(self._receiver, str(self._resource.cloudFolderInfo.uid), self.get_parameter())
 
     def _handle_response(self, r):
-        path = self.destination.join(self.name).relative
+        path = self.destination.relative
         if r.rc:
             error = exceptions.io.core.UploadError(r.msg, path)
             logger.error('Upload failed: %s', path)
@@ -117,30 +170,6 @@ class Upload(PortalCommand):
         if not r.rc and r.msg == 'OK':
             logger.info('Upload success. Saved to: %s', path)
         return path
-
-    async def _a_execute(self):
-        cloudfolder = await self._a_validate_destination()
-        with self.trace_execution():
-            return await self._function(self._receiver, str(cloudfolder), self.get_parameter())
-
-
-class UploadFile(Upload):
-
-    def __init__(self, function, receiver, metadata_function, path, destination):
-        _, name = commonfs.split_file_directory(path)
-        metadata = commonfs.properties(path)
-        super().__init__(function, receiver, metadata_function, name, destination, metadata['size'], None)
-        self.path = path
-
-    def _execute(self):
-        with open(self.path, 'rb') as handle:
-            self.fd = handle
-            return super()._execute()
-
-    async def _a_execute(self):
-        with open(self.path, 'rb') as handle:
-            self.fd = handle
-            return await super()._a_execute()
 
 
 def _is_sharing_on_user_behalf(path):
@@ -509,10 +538,9 @@ class RecursiveIterator:
     def generate(self):
         for path in self._generator():
             try:
-                print('Enumerating: ', path)
+                print('Enumerating: ', path or '.')
                 for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).execute():
                     yield self._process_object(o)
-                input()
             except exceptions.io.core.ListDirectoryError as e:
                 self._suppress_error(e)
 
@@ -924,32 +952,6 @@ class TaskCommand(PortalCommand):
         return task
 
 
-class Rename(TaskCommand):
-
-    def __init__(self, function, receiver, path, new_name, block):
-        super().__init__(function, receiver, block)
-        self.path = automatic_resolution(path, receiver.context)
-        self.new_path = self.path.parent.join(new_name)
-
-    def _progress_str(self):
-        return 'Renaming'
-
-    def get_parameter(self):
-        param = ActionResourcesParam.instance()
-        param.add(SrcDstParam.instance(src=self.path.absolute_encode, dest=self.new_path.absolute_encode))
-        return param
-
-    def _before_command(self):
-        logger.info('%s: %s to: %s', self._progress_str(), self.path, self.new_path)
-
-    def _task_error(self, task):
-        previous, new = self.path.relative, self.new_path.relative
-        error = exceptions.io.core.RenameError(previous, new)
-        if not task.unknown_object():
-            raise error from exceptions.io.core.ObjectNotFoundError(previous)
-        raise error
-
-
 class MultiResourceCommand(TaskCommand):
 
     def __init__(self, function, receiver, block, *paths):
@@ -1036,7 +1038,7 @@ class ResolverCommand(TaskCommand):
     def execute(self):
         try:
             return super().execute()
-        except (exceptions.io.core.CopyError, exceptions.io.core.MoveError) as e:
+        except (exceptions.io.core.CopyError, exceptions.io.core.MoveError, exceptions.io.core.RenameError) as e:
             if self.resolver:
                 return self._try_with_resolver(e.cursor)
             return self._handle_exception(e)
@@ -1044,7 +1046,7 @@ class ResolverCommand(TaskCommand):
     async def a_execute(self):
         try:
             return await super().a_execute()
-        except (exceptions.io.core.CopyError, exceptions.io.core.MoveError) as e:
+        except (exceptions.io.core.CopyError, exceptions.io.core.MoveError, exceptions.io.core.RenameError) as e:
             if self.resolver:
                 return await self._a_try_with_resolver(e.cursor)
             return self._handle_exception(e)
@@ -1112,3 +1114,29 @@ class Move(ResolverCommand):
     @property
     def _error_object(self):
         return exceptions.io.core.MoveError
+
+
+class Rename(Move):
+
+    def _progress_str(self):
+        return 'Renaming'
+
+    def __init__(self, function, receiver, block, path, new_name, resolver, cursor=None):
+        super().__init__(function, receiver, block,
+                         *[(path, automatic_resolution(path, receiver.context).parent.join(new_name))],
+                         resolver=resolver, cursor=cursor
+        )
+
+    def _try_with_resolver(self, cursor):
+        source, destination = self.paths[0]
+        return Rename(self._function, self._receiver, self.block, source, destination.name,
+                      resolver=self.resolver, cursor=cursor).execute()
+
+    async def _a_try_with_resolver(self, cursor):
+        source, destination = self.paths[0]
+        return await Rename(self._function, self._receiver, self.block, source, destination.name,
+                            resolver=self.resolver, cursor=cursor).a_execute()
+
+    @property
+    def _error_object(self):
+        return exceptions.io.core.RenameError

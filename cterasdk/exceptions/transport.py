@@ -48,6 +48,12 @@ class NotAllowed(HTTPError):
         super().__init__(HTTPStatus.METHOD_NOT_ALLOWED, error)
 
 
+class Conflict(HTTPError):
+
+    def __init__(self, error):
+        super().__init__(HTTPStatus.CONFLICT, error)
+
+
 class PreConditionFailed(HTTPError):
 
     def __init__(self, error):

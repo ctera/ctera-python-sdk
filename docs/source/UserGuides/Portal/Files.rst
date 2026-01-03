@@ -1,272 +1,366 @@
-============
+===============
 File Browser
-============
+===============
 
-This article outlines the file-browser APIs available in the CTERA Portal, enabling programmatic access to files and directories.
+This article describes the file-browser APIs available in the CTERA Portal, which provide programmatic access to files and directories.
 
-The API supports both **synchronous** and **asynchronous** implementations, allowing developers to choose the most suitable model
-for their integration use case—whether real-time interactions or background processing.
+The APIs support both **synchronous** and **asynchronous** execution models, enabling developers to choose the approach best suited to their integration needs, from real-time operations to background processing.
 
+Preface: Authentication
+=======================
+
+All file-browser operations require an authenticated session with the CTERA Portal.
+Authentication is performed by creating a portal context and calling ``login`` with valid credentials.
+
+Once authenticated, the ``files`` attribute provides access to the file-browser APIs.
+
+Synchronous Authentication
+--------------------------
+
+Set ``cterasdk.settings.core.syn.settings.connector.ssl = False`` to disable SSL verification.
+
+Authenticate as a tenant user using ``ServicesPortal``:
+
+.. code-block:: python
+
+   with ServicesPortal('tenant.ctera.com') as user:
+       user.login(username, password)
+       files = user.files
+
+Authenticate as a global administrator using ``GlobalAdmin``:
+
+.. code-block:: python
+
+   with GlobalAdmin('global.ctera.com') as admin:
+       admin.login(username, password)
+       files = admin.files
+
+Asynchronous Authentication
+---------------------------
+
+Set ``cterasdk.settings.core.asyn.settings.connector.ssl = False`` to disable SSL verification.
+
+Authenticate as a tenant user using ``AsyncServicesPortal``:
+
+.. code-block:: python
+
+   async with AsyncServicesPortal('tenant.ctera.com') as user:
+       await user.login(username, password)
+       files = user.files
+
+Authenticate as a global administrator using ``AsyncGlobalAdmin``:
+
+.. code-block:: python
+
+   async with AsyncGlobalAdmin('global.ctera.com') as admin:
+       await admin.login(username, password)
+       files = admin.files
+
+User Roles and Permissions
+==========================
+
+The file access APIs are available to the following user roles:
+
+- **Global Administrators** with the ``Access End User Folders`` permission enabled.
+- **Team Portal Administrators** with the ``Access End User Folders`` permission enabled.
+- **End Users**, accessing their personal cloud drive folders.
+
+For more information about configuring administrator permissions, see
+`Customizing Administrator Roles <https://kb.ctera.com/docs/customizing-administrator-roles-2>`_.
+
+Key Objects
+===========
+
+This section describes the core objects returned by the file-browser APIs.
+
+.. autoclass:: cterasdk.cio.core.types.PortalResource
+   :members:
+   :undoc-members:
+
+.. autoclass:: cterasdk.cio.core.types.PortalVolume
+   :members:
+   :undoc-members:
+
+.. autoclass:: cterasdk.cio.core.types.VolumeOwner
+   :members:
+   :undoc-members:
+
+.. autoclass:: cterasdk.cio.core.types.PreviousVersion
+   :members:
+   :undoc-members:
 
 Synchronous API
 ===============
 
-
-User Roles
-----------
-
-The file access APIs are available to the following user roles:
-
-- **Global Administrators** with the `Access End User Folders` permission enabled.
-- **Team Portal Administrators** with the `Access End User Folders` permission enabled.
-- **End Users**, accessing their personal cloud drive folders.
-
-For more information, See: `Customizing Administrator Roles <https://kb.ctera.com/docs/customizing-administrator-roles-2>`_
-
-List
-----
+Listing Files and Directories
+-----------------------------
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.listdir
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   """List directories as a Global Administrator"""
-   with GlobalAdmin('tenant.ctera.com') as admin:
-      admin.login('admin-user', 'admin-pass')
-
-      """List all sub-directories"""
-      for f in admin.files.listdir('Users/John Smith/My Files'):
-          if f.isFolder:
-              print({
-                  f.name,
-                  f.href,
-                  f.permalink  # a URL that links directly to a specific file
-              })
-
-.. code:: python
-
-   """List directories as a Team Portal Administrator or End User"""
-   with ServicesPortal('tenant.ctera.com') as user:
-      user.login('username', 'user-password')
-      for f in user.files.listdir('My Files/Documents'):
-          if not f.isFolder:
-              print({
-                  f.name,
-                  f.href,
-                  f.size,
-                  f.lastmodified,
-                  f.permalink  # a URL that links directly to a specific file
-              })
-
-      """List all deleted files"""
-      deleted_files = [f.href for f in user.files.listdir('My Files/Documents', include_deleted=True) if f.isDeleted]
-      print(deleted_files)
+   resources = files.listdir('My Files')
+   for r in resources:
+       print(r.name, r.is_dir)
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.walk
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   with GlobalAdmin('tenant.ctera.com') as admin:
-      admin.login('admin-user', 'admin-pass')
-      for element in admin.files.walk('Users/John Smith/My Files'):
-         print(element.name)  # traverse John Smith's 'My Files' directory and print the name of all files and folders
+   for resource in files.walk('My Files'):
+       if not resource.is_dir and resource.extension == 'pdf':
+           files.download(resource.path)
 
-   with ServicesPortal('tenant.ctera.com') as user:
-      user.login('username', 'user-password')
-      for element in user.files.walk('My Files/Documents'):
-         print(element.name)  # as a user, traverse all and print the name of all files and folders in 'My Files/Documents'
-
-Versions
---------
+Listing Files from Previous Versions
+-----------------------------------
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.versions
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   versions = admin.files.versions('Users/John Smith/My Files/Documents')
-   for version in versions:
-       if not version.current:
-           for item in admin.files.listdir(version):  # list items from previous versions
-               print(version.calculatedTimestamp, item.name)
+   # List all versions of a file
+   versions = files.versions('My Files/Keystone Project.docx')
+   for v in versions:
+       print(v.start_time, v.end_time, v.current)
 
+   # List files in a previous version
+   prev_version = next(v for v in versions if not v.current)
+   for f in files.listdir(prev_version.path):
+       print(f'File in previous version: {f.path}, Size: {f.size}, Last modified: {f.last_modified}')
 
-   versions = user.files.versions('My Files/Documents')
-   for version in versions:
-       if not version.current:
-           for item in user.files.listdir(version):  # list items from previous versions
-               print(version.calculatedTimestamp, item.name)
+   # Download files from a previous version
+   for f in files.listdir(prev_version.path):
+       local_path = files.download(f.path)
+       print(local_path)
 
-Download
---------
+Inspecting Files
+----------------
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.download
+.. automethod:: cterasdk.core.files.browser.FileBrowser.properties
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   admin.files.download('Users/John Smith/My Files/Documents/Sample.docx')
+   metadata = files.properties('My Files/Keystone Project.docx')
+   print(metadata.size, metadata.last_modified)
 
-   user.files.download('My Files/Documents/Sample.docx')
-
-.. automethod:: cterasdk.core.files.browser.FileBrowser.download_many
+.. automethod:: cterasdk.core.files.browser.FileBrowser.exists
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   admin.files.download_many('Users/John Smith/My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
+   exists = files.exists('My Files/Keystone Project.docx')
 
-   user.files.download_many('My Files/Documents', ['Sample.docx', 'Wizard Of Oz.docx'])
-
-Copy
-----
-
-.. automethod:: cterasdk.core.files.browser.FileBrowser.copy
-   :noindex:
-
-   To resolve file conflicts, use :py:class:`cterasdk.core.types.ConflictResolver`
-
-.. code:: python
-
-   admin.files.copy(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'], destination='Users/John Smith/The/quick/brown/fox')
-
-   user.files.copy(*['My Files/Documents/Sample.docx', 'My Files/Documents/Burndown.xlsx'], destination='The/quick/brown/fox')
-
-
-Create Public Link
-------------------
-
-.. automethod:: cterasdk.core.files.browser.FileBrowser.public_link
-   :noindex:
-
-.. code:: python
-
-   """
-   Access:
-   - RW: Read Write
-   - RO: Read Only
-   - NA: No Access
-   """
-
-   """Create a Read Only public link to a file that expires in 30 days"""
-   user.files.public_link('My Files/Documents/Sample.docx')
-
-   """Create a Read Write public link to a folder that expires in 45 days"""
-   user.files.public_link('My Files/Documents/Sample.docx', 'RW', 45)
-
-
-Get Permalink
--------------
+Retrieve a Permalink
+--------------------
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.permalink
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   user.files.permalink('My Files/Documents/Sample.docx')  # file
+   permalink = files.permalink('My Files/Keystone Project.docx')
+   print(f'Permalink: {permalink}')
 
-   user.files.permalink('My Files/Documents')  # folder
+Create a Public Link
+--------------------
 
+.. automethod:: cterasdk.core.files.browser.FileBrowser.public_link
+   :noindex:
+
+.. code-block:: python
+
+   public_url = files.public_link('My Files/Keystone Project.docx', access='RO', expire_in=7)
+   print(f'Public link: {public_url}')
+
+   preview_link = files.public_link('My Files/Keystone Market Overview.pdf', access='PO', expire_in=7)
+   print(f'Preview-only link: {preview_link}')
+
+   public_url_rw = files.public_link('My Files', access='RW', expire_in=30)
+   print(f'Public read-write link: {public_url_rw}')
+
+File Handles
+------------
+
+.. automethod:: cterasdk.core.files.browser.FileBrowser.handle
+   :noindex:
+
+.. code-block:: python
+
+   handle = files.handle('My Files/Keystone Project.docx')
+
+.. automethod:: cterasdk.core.files.browser.FileBrowser.handle_many
+
+.. code-block:: python
+
+   handle = files.handle_many('My Files', 'Keystone Project.docx', 'Images', 'Notes.txt')
+
+Downloading Files
+-----------------
+
+.. automethod:: cterasdk.core.files.browser.FileBrowser.download
+   :noindex:
+
+.. code-block:: python
+
+   local_path = files.download('My Files/Keystone Project.docx')
+
+.. automethod:: cterasdk.core.files.browser.FileBrowser.download_many
+   :noindex:
+
+.. code-block:: python
+
+   zip_path = files.download_many('My Files', ['Keystone Project.docx', 'Images'], destination='/tmp/MyFiles.zip')
 
 Create Directories
 ------------------
 
-.. automethod:: cterasdk.core.files.browser.CloudDrive.mkdir
+.. automethod:: cterasdk.core.files.cloud.CloudDrive.mkdir
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   admin.files.mkdir('Users/John Smith/My Files/Documents')
+   new_dir = files.mkdir('My Files/NewProject')
+   print(f'Created directory: {new_dir}')
 
-   user.files.mkdir('My Files/Documents')
-
-.. automethod:: cterasdk.core.files.browser.CloudDrive.makedirs
+.. automethod:: cterasdk.core.files.cloud.CloudDrive.makedirs
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   admin.files.makedirs('Users/John Smith/My Files/The/quick/brown/fox')
+   nested_dir = files.makedirs('My Files/Projects/2026/Q1')
+   print(f'Created nested directories: {nested_dir}')
 
-   user.files.makedirs('The/quick/brown/fox')
+Uploading Files
+---------------
 
-Rename
-------
-
-.. automethod:: cterasdk.core.files.browser.CloudDrive.rename
+.. automethod:: cterasdk.core.files.cloud.CloudDrive.upload_file
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   admin.files.rename('Users/John Smith/My Files/Documents/Sample.docx', 'Wizard Of Oz.docx')
+   # Upload from a local path to a directory
+   remote_path = files.upload_file('/tmp/Keystone Project.docx', 'My Files')
+   print(f'File uploaded to: {remote_path}')
 
-   user.files.makedirs('My Files/Documents/Sample.docx', 'Wizard Of Oz.docx')
+   # Upload from a local path and rename the file at the destination
+   remote_path = files.upload_file('/tmp/Keystone Project.docx', 'My Files/Keystone 2026.docx')
+   print(f'File uploaded to: {remote_path}')
 
-Delete
-------
-
-.. automethod:: cterasdk.core.files.browser.CloudDrive.delete
+.. automethod:: cterasdk.core.files.cloud.CloudDrive.upload
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   admin.files.delete(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'])
+   name = 'Keystone Project.docx'
+   destination = 'My Files'
+   
+   # Upload from file handle
+   with open('/tmp/Keystone Project.docx', 'rb') as f:
+       remote_path = files.upload(name, destination, f)
+   print(f'File uploaded from handle to: {remote_path}')
 
-   user.files.delete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
+   # Upload from string or bytes
+   remote_path = files.upload(name, destination, handle=b'Sample content for ProjectPlan.')
+   print(f'File uploaded from bytes to: {remote_path}')
 
-Undelete
---------
+Renaming Files and Folders
+--------------------------
 
-.. automethod:: cterasdk.core.files.browser.CloudDrive.undelete
+.. automethod:: cterasdk.core.files.cloud.CloudDrive.rename
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   admin.files.undelete(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'])
+   remote_path = files.rename('My Files/Keystone Project.docx', 'Keystone Project 2026.docx')
+   print(f'Renamed file: {remote_path}')
 
-   user.files.undelete(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'])
+Copying and Moving Files and Folders
+------------------------------------
 
-Move
-----
-
-.. automethod:: cterasdk.core.files.browser.CloudDrive.move
+.. automethod:: cterasdk.core.files.browser.FileBrowser.copy
    :noindex:
 
-   To resolve file conflicts, use :py:class:`cterasdk.core.types.ConflictResolver`
+.. code-block:: python
 
-.. code:: python
+   # Copy files into a destination directory
+   result = files.copy('My Files/Keystone Project.docx', 'My Files/Keystone Notes.txt', destination='Archive')
+   print(f'Files copied: {result}')
 
-   admin.files.move(*['Users/John Smith/My Files/Documents/Sample.docx', 'Users/John Smith/My Files/Documents/Wizard Of Oz.docx'], destination='Users/John Smith/The/quick/brown/fox')
+   # Copy multiple files at once while renaming them. Requires explicitly defining the target path
+   result = files.copy(
+       ('My Files/Keystone Project.docx', 'Archive/Keystone Project 2026.docx'),
+       ('My Files/Keystone Notes.txt', 'Archive/Keystone Notes 2026.txt')
+   )
+   print(f'Files copied with explicit paths: {result}')
 
-   user.files.move(*['My Files/Documents/Sample.docx', 'My Files/Documents/Wizard Of Oz.docx'], destination='The/quick/brown/fox')
+.. automethod:: cterasdk.core.files.browser.FileBrowser.move
+   :noindex:
 
-Upload
-------
+.. code-block:: python
 
-.. automethod:: cterasdk.core.files.browser.CloudDrive.upload
+   # Move files into a destination directory
+   result = files.move('My Files/Keystone Project.docx', 'My Files/Keystone Notes.txt', destination='Archive')
+   print(f'Files moved: {result}')
 
-.. code:: python
+   # Move multiple files at once while renaming them. Requires explicitly defining the target path
+   result = files.move(
+       ('My Files/Keystone Project.docx', 'Archive/Keystone 2026.docx'),
+       ('My Files/Keystone Notes.txt', 'Archive/Keystone Notes 2026.txt')
+   )
+   print(f'Files moved with explicit paths: {result}')
 
-   admin.files.upload(r'C:\Users\admin\Downloads\Tree.jpg', 'Users/John Smith/My Files/Images')
+Delete or Recovering Files and Folders
+--------------------------------------
 
-   user.files.upload(r'C:\Users\admin\Downloads\Tree.jpg', 'My Files/Images')
+.. automethod:: cterasdk.core.files.cloud.CloudDrive.delete
+   :noindex:
 
+.. code-block:: python
+
+   result = files.delete('My Files/Project Keystone.docx')
+   print(f'Deleted file: {result}')
+
+   result = files.delete('My Files/Project Keystone.docx', 'My Files/Keystone Notes.txt', 'Archive/Keystone')
+   print(f'Deleted multiple files/folders: {result}')
+
+.. automethod:: cterasdk.core.files.cloud.CloudDrive.undelete
+   :noindex:
+
+.. code-block:: python
+
+   result = files.undelete('My Files/Project Keystone.docx')
+   print(f'Recovered file: {result}')
+
+   result = files.undelete('My Files/Project Keystone.docx', 'My Files/Keystone Notes.txt', 'Archive/Keystone')
+   print(f'Recovered multiple files/folders: {result}')
 
 Collaboration Shares
 --------------------
 
+This section describes the main objects used for managing collaboration shares.
+
+.. autoclass:: cterasdk.core.types.UserAccount
+   :members:
+   :undoc-members:
+
+
+.. autoclass:: cterasdk.core.types.GroupAccount
+   :members:
+   :undoc-members:
+
+
+.. autoclass:: cterasdk.core.types.Collaborator
+   :members:
+   :undoc-members:
+
 .. automethod:: cterasdk.core.files.browser.CloudDrive.share
    :noindex:
 
-.. code:: python
-
-
-   """
-   Share with a local user and a local group.
-   - Grant the local user with read only access for 30 days
-   - Grant the local group with read write access with no expiration
-   """
+.. code-block:: python
 
    alice = core_types.UserAccount('alice')
    engineers = core_types.GroupAccount('Engineers')
@@ -276,35 +370,16 @@ Collaboration Shares
 
    user.files.share('Codebase', [alice_rcpt, engineers_rcpt])
 
-..
+.. code-block:: python
 
-.. code:: python
-
-
-   """
-   Share with an external recipient
-   - Grant the external user with preview only access for 10 days
-   """
    jsmith = core_types.Collaborator.external('jsmith@hotmail.com').expire_in(10).preview_only()
    user.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
-   """
-   Share with an external recipient, and require 2 factor authentication
-   - Grant the external user with read only access for 5 days, and require 2 factor authentication over e-mail
-   """
    jsmith = core_types.Collaborator.external('jsmith@hotmail.com', True).expire_in(5).read_only()
    user.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
-..
+.. code-block:: python
 
-.. code:: python
-
-
-   """
-   Share with a domain groups
-   - Grant the Albany domain group with read write access with no expiration
-   - Grant the Cleveland domain group with read only access with no expiration
-   """
    albany_group = core_types.GroupAccount('Albany', 'ctera.com')
    cleveland_group = core_types.GroupAccount('Cleveland', 'ctera.com')
 
@@ -316,27 +391,17 @@ Collaboration Shares
 .. automethod:: cterasdk.core.files.browser.CloudDrive.add_share_recipients
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-
-   """
-   Add collaboration shares members.
-
-   - Grant the 'Engineering' local group with read-write permission
-   """
    engineering = core_types.GroupAccount('Engineering')
    engineering_rcpt = core_types.Collaborator.local_group(engineering).read_write()
    user.files.add_share_recipients('My Files/Projects/2020/ProjectX', [engineering_rcpt])
 
-.. note:: if the share recipients provided as an argument already exist, they will be skipped and not updated
-
 .. automethod:: cterasdk.core.files.browser.CloudDrive.remove_share_recipients
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-
-   """Remove 'Alice' and 'Engineering' from the List of Recipients"""
    alice = core_types.UserAccount('alice')
    engineering = core_types.GroupAccount('Engineering')
    user.files.remove_share_recipients('My Files/Projects/2020/ProjectX', [alice, engineering])
@@ -344,62 +409,61 @@ Collaboration Shares
 .. automethod:: cterasdk.core.files.browser.CloudDrive.unshare
    :noindex:
 
-.. code:: python
+.. code-block:: python
 
-   """
-   Unshare a file or a folder
-   """
    user.files.unshare('Codebase')
    user.files.unshare('My Files/Projects/2020/ProjectX')
    user.files.unshare('Cloud/Albany')
 
-
 Managing S3 Credentials
 -----------------------
 
-Starting CTERA 8.0, CTERA Portal features programmatic access via the S3 protocol, also known as *CTERA Fusion*
-For more information on how to enable CTERA Fusion and the supported extensions of the S3 protocol, please refer to the following `article <https://kb.ctera.com/v1/docs/en/setting-up-access-from-an-s3-browser>`_
+CTERA Portal supports programmatic access to cloud storage via the S3 protocol, also known as *CTERA Fusion*.
+This allows users and administrators to manage files and folders using standard S3 tools and SDKs, such as the Amazon SDK for Python (`boto3 <https://pypi.org/project/boto3/>`_).
 
-The following section includes examples on how to instantiate an S3 client using the Amazon SDK for Python `boto3 <https://pypi.org/project/boto3/>`_
+For details on enabling CTERA Fusion and supported S3 features, 
+see the `CTERA KB article <https://kb.ctera.com/docs/setting-up-access-to-portal-content-using-the-s3-api-ctera-fusion>`_.
 
-.. code:: python
+The following example demonstrates how to create S3 credentials and interact with the portal using `boto3`.
 
-   credentials = user.credentials.s3.create()  # if logged in as a user
-   # credentials = admin.credentials.s3.create(core_types.UserAccount('username', 'domain'))  # if logged in as a Global Admin
+.. code-block:: python
 
-   """Instantiate the boto3 client"""
-   client = boto3.client(
-         's3',
-         endpoint_url=https://domain.ctera.com:8443,  # your CTERA Portal tenant domain
-         aws_access_key_id=credentials.accessKey,
-         aws_secret_access_key=credentials.secretKey,
-         verify=False  # disable certificate verification (Optional)
-   )
+   import boto3
 
-   """List Buckets"""
-   response = client.list_buckets()
-   for bucket in response['Buckets']:
-      print(bucket['Name'])
+   bucket = 'my-bucket-name'
+   local_file = './ProjectOverview.docx'
+   remote_key = 'documents/ProjectOverview.docx'
+   download_file = './ProjectOverview_Copy.docx'
 
-   """Upload a file"""
-   client.upload_file(r'./document.docx', 'my-bucket-name', 'data-management-document.docx')
+   # CTERA Fusion: Create S3 credentials (user or admin)
+   creds = user.credentials.s3.create()  # or admin.credentials.s3.create(core_types.UserAccount('username', 'domain'))
 
-   """List files"""
-   response = client.list_objects_v2(Bucket='my-bucket-name')
-   for item in response['Contents']:
-      print(item['Key'], item['LastModified'])
+   # Instantiate boto3 client
+   client = boto3.client('s3', endpoint_url='https://tenant.ctera.com:8443', aws_access_key_id=creds.accessKey,
+                         aws_secret_access_key=creds.secretKey, verify=False)
 
-   """List files, using Pagination"""
-   paginator = client.get_paginator('list_objects_v2')
-   for page in paginator.paginate(Bucket='my-bucket-name'):
-      for item in page['Contents']:
-         print(item['Key'], item['LastModified'])
+   # List buckets
+   for b in client.list_buckets()['Buckets']:
+       print(b['Name'])
 
-   """Download a file"""
-   client.download_file(r'./data-management-document.docx', 'my-bucket-name', 'data-management-document-copy.docx')
+   # Upload a file
+   client.upload_file(local_file, bucket, remote_key)
 
-   # for more information, please refer to the Amazon SDK for Python (boto3) documentation.
+   # List files in a bucket
+   for item in client.list_objects_v2(Bucket=bucket).get('Contents', []):
+       print(item['Key'], item['LastModified'])
 
+   # List files with pagination
+   for page in client.get_paginator('list_objects_v2').paginate(Bucket=bucket):
+       for item in page.get('Contents', []):
+           print(item['Key'], item['LastModified'])
+
+   # Download a file
+   client.download_file(bucket, remote_key, download_file)
+
+.. note::
+
+   For more details on using the Amazon SDK for Python (`boto3`), refer to the official `boto3 documentation <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_.
 
 Asynchronous API
 ================
@@ -458,52 +522,14 @@ Asynchronous API
 .. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.undelete
    :noindex:
 
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.share
+   :noindex:
 
-.. code:: python
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.add_share_recipients
+   :noindex:
 
-   """Access a Global Administrator"""
-   async with AsyncGlobalAdmin('global.ctera.com') as admin:
-       await admin.login('username', 'password')
-       await admin.portals.browse('corp')  # access files in the 'corp' Team Portal tenant
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.remove_share_recipients
+   :noindex:
 
-       """Create directories recursively"""
-       await admin.files.makedirs('Users/John Smith/My Files/the/quick/brown/fox')
-
-       """Create a 'Documents' directory"""
-       await admin.files.mkdir('Users/John Smith/Documents')
-
-       """Walk 'John Smith's My Files directory"""
-       async for i in admin.files.walk('Users/John Smith/My Files'):
-           print(i.name, i.size, i.lastmodified, i.permalink)
-
-       """List all files in a directory"""
-       documents = [i.name async for i in admin.files.listdir('Users/John Smith/Documents') if i.isfile]
-
-       """Rename a directory"""
-       await admin.files.rename('Users/John Smith/Documents', 'Documents360')
-
-       """Download"""
-       await admin.files.download('Users/John Smith/My Files/Sunrise.png')
-       await admin.files.download('Users/John Smith/My Files/Sunrise.png', 'c:/users/jsmith/downloads/Patagonia.png')
-
-       await admin.files.download_many('Users/John Smith/Pictures', ['Sunrise.png', 'Gelato.pptx'])
-       await admin.files.download_many('Users/John Smith/Pictures', ['Sunrise.png', 'Gelato.pptx'], 'c:/users/jsmith/downloads/Images.zip')
-
-       """Upload"""
-       await admin.files.upload_file('c:/users/jsmith/downloads/Sunset.png', '/Users/John Smith/Pictures')
-
-       """Public Link"""
-       url = await admin.files.public_link('Users/John Smith/Pictures/Sunrise.png')
-       print(url)
-
-.. code:: python
-
-   """Access a Team Portal Administrator or End User"""
-   async with AsyncservicesPortal('tenant.ctera.com') as user:
-       await user.login('username', 'password')
-
-       """Create directories as an End User"""
-       await user.files.makedirs('My Files/the/quick/brown/fox')  # Create a directory in your own account
-
-       """Create directories as Team Portal Administrator"""
-       await user.files.makedirs('Users/John Smith/My Files/the/quick/brown/fox')  # Create a directory in a user's account
+.. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.unshare
+   :noindex:

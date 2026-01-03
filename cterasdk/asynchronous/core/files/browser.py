@@ -1,45 +1,49 @@
 from .. import query
-from ....cio.core.commands import Open, OpenMany, Upload, UploadFile, Download, EnsureDirectory, \
+from ....cio.core.commands import Open, OpenMany, Upload, Download, EnsureDirectory, \
     DownloadMany, UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, \
     Delete, Recover, Rename, GetShareMetadata, Link, Copy, Move, ResourceIterator, GetPermalink
 from ..base_command import BaseCommand
+from ....lib.storage import commonfs
 from . import io
 
 
 class FileBrowser(BaseCommand):
+    """Async File Browser API."""
 
     async def handle(self, path):
         """
-        Get File Handle.
+        Get a file handle.
 
-        :param str path: Path to a file
-        :returns: File handle
-        :raises: cterasdk.exceptions.io.core.OpenError
+        :param str path: Path to a file.
+        :returns: File handle.
+        :rtype: object
+        :raises cterasdk.exceptions.io.core.OpenError: Raised on error to obtain file handle.
         """
         return await Open(io.handle, self._core, path).a_execute()
 
     async def handle_many(self, directory, *objects):
         """
-        Get a Zip Archive File Handle.
+        Get a ZIP archive file handle.
 
-        :param str directory: Path to a folder
-        :param args objects: List of files and folders
-        :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
-        :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
+        :param str directory: Path to a folder.
+        :param args objects: List of files and folders to include.
+        :returns: File handle.
+        :rtype: object
+        :raises cterasdk.exceptions.io.core.GetMetadataError: If directory not found.
+        :raises cterasdk.exceptions.io.core.NotADirectoryException: If target path is not a directory.
         """
         async with EnsureDirectory(io.listdir, self._core, directory) as (_, resource):
             return await OpenMany(io.handle_many, self._core, resource, directory, *objects).a_execute()
 
     async def download(self, path, destination=None):
         """
-        Download a file
+        Download a file.
 
-        :param str path: Path
-        :param str,optional destination:
-         File destination, if it is a directory, the original filename will be kept, defaults to the default directory
-        :returns: Path to local file
+        :param str path: Path.
+        :param str, optional destination: File destination. If directory, original filename preserved. Defaults to default directory.
+        :returns: Path to local file.
         :rtype: str
-        :raises: cterasdk.exceptions.io.core.OpenError
+        :raises cterasdk.exceptions.io.core.OpenError: Raised on error to obtain file handle.
         """
         return await Download(io.handle, self._core, path, destination).a_execute()
 
@@ -48,33 +52,28 @@ class FileBrowser(BaseCommand):
         Download selected files and/or directories as a ZIP archive.
 
         .. warning::
-            The provided list of objects is not validated. Only existing files and directories
-            will be included in the resulting ZIP file.
+            Only existing files and directories will be included in the resulting ZIP file.
 
-        :param str target:
-            Path to the cloud folder containing the files and directories to download.
-        :param list[str] objects:
-            List of file and/or directory names to include in the download.
-        :param str destination:
-            Optional. Path to the destination file or directory. If a directory is provided,
-            the original filename will be preserved. Defaults to the default download directory.
-        :returns: Path to local file
+        :param str target: Path to cloud folder containing files and directories.
+        :param list[str] objects: List of file and/or directory names to include.
+        :param str destination: Optional path to destination file or directory. Defaults to default download directory.
+        :returns: Path to local file.
         :rtype: str
-        :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
-        :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
+        :raises cterasdk.exceptions.io.core.GetMetadataError: If directory not found.
+        :raises cterasdk.exceptions.io.core.NotADirectoryException: If target path is not a directory.
         """
         return await DownloadMany(io.handle_many, self._core, target, objects, destination).a_execute()
 
     async def listdir(self, path=None, depth=None, include_deleted=False):
         """
-        List Directory
+        List directory contents.
 
-        :param str,optional path: Path, defaults to the Cloud Drive root
-        :param bool,optional include_deleted: Include deleted files, defaults to False
+        :param str, optional path: Path, defaults to Cloud Drive root.
+        :param bool, optional include_deleted: Include deleted files. Defaults to False.
         :returns: Directory contents.
-        :rtype: list[cterasdk.cio.core.types.PortalResource]
-        :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
-        :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
+        :rtype: AsyncIterator[cterasdk.cio.core.types.PortalResource]
+        :raises cterasdk.exceptions.io.core.GetMetadataError: If directory not found.
+        :raises cterasdk.exceptions.io.core.NotADirectoryException: If target path is not a directory.
         :raises cterasdk.exceptions.io.core.ListDirectoryError: Raised on error fetching directory contents.
         """
         async with EnsureDirectory(io.listdir, self._core, path):
@@ -83,21 +82,21 @@ class FileBrowser(BaseCommand):
 
     async def properties(self, path):
         """
-        Get Properties
-        
-        :param str path: Path
-        :returns: Object properties
+        Get object properties.
+
+        :param str path: Path.
+        :returns: Object properties.
         :rtype: cterasdk.cio.core.types.PortalResource
-        :raises: cterasdk.exceptions.io.core.GetMetadataError
+        :raises cterasdk.exceptions.io.core.GetMetadataError: Raised on error retrieving object metadata.
         """
         return await GetProperties(io.listdir, self._core, path, False).a_execute()
 
     async def exists(self, path):
         """
-        Check if item exists
+        Check if item exists.
 
-        :param str path: Path
-        :returns: ``True`` if exists, ``False`` otherwise
+        :param str path: Path.
+        :returns: True if exists, False otherwise.
         :rtype: bool
         """
         async with GetMetadata(io.listdir, self._core, path, True) as (exists, *_):
@@ -105,25 +104,25 @@ class FileBrowser(BaseCommand):
 
     async def versions(self, path):
         """
-        List snapshots of a file or directory
+        List snapshots of a file or directory.
 
-        :param str path: Path
-        :returns: List of versions
+        :param str path: Path.
+        :returns: List of versions.
         :rtype: list[cterasdk.cio.core.types.PreviousVersion]
-        :raises: cterasdk.exceptions.io.core.GetVersionsError
+        :raises cterasdk.exceptions.io.core.GetVersionsError: Raised on error retrieving versions.
         """
         return await ListVersions(io.versions, self._core, path).a_execute()
 
     async def walk(self, path=None, include_deleted=False):
         """
-        Walk Directory Contents
+        Walk directory contents.
 
-        :param str,optional path: Path to walk, defaults to the root directory
-        :param bool,optional include_deleted: Include deleted files, defaults to False
-        :returns: A generator of file-system objects
-        :rtype: cterasdk.cio.edge.types.PortalResource
-        :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
-        :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
+        :param str, optional path: Path to walk, defaults to root directory.
+        :param bool, optional include_deleted: Include deleted files. Defaults to False.
+        :returns: Async generator of file-system objects.
+        :rtype: AsyncIterator[cterasdk.cio.edge.types.PortalResource]
+        :raises cterasdk.exceptions.io.core.GetMetadataError: If directory not found.
+        :raises cterasdk.exceptions.io.core.NotADirectoryException: If target path is not a directory.
         """
         async with EnsureDirectory(io.listdir, self._core, path):
             async for o in RecursiveIterator(query.iterator, self._core, path, include_deleted).a_generate():
@@ -131,29 +130,29 @@ class FileBrowser(BaseCommand):
 
     async def public_link(self, path, access='RO', expire_in=30):
         """
-        Create a public link to a file or a folder
+        Create a public link to a file or folder.
 
-        :param str path: The path of the file to create a link to
-        :param str,optional access: Access policy of the link, defaults to 'RO'
-        :param int,optional expire_in: Number of days until the link expires, defaults to 30
-        :returns: Public Link
+        :param str path: Path of file/folder.
+        :param str, optional access: Access policy. Defaults 'RO'.
+        :param int, optional expire_in: Days until link expires. Defaults 30.
+        :returns: Public link.
         :rtype: str
-        :raises cterasdk.exceptions.io.core.CreateLinkError: Raised on failure to generate public link
+        :raises cterasdk.exceptions.io.core.CreateLinkError: Raised on failure generating public link.
         """
         return await Link(io.public_link, self._core, path, access, expire_in).a_execute()
 
     async def copy(self, *paths, destination=None, resolver=None, cursor=None, wait=False):
         """
-        Copy one or more files or folders
+        Copy one or more files or folders.
 
-        :param list[str] paths: List of paths
-        :param str destination: Destination
-        :param cterasdk.core.types.ConflictResolver resolver: Conflict resolver, defaults to ``None``
-        :param cterasdk.common.object.Object cursor: Resume copy from cursor
-        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
-        :returns: Task status object, or an awaitable task object
+        :param list[str] paths: Paths to copy.
+        :param str destination: Destination path.
+        :param cterasdk.core.types.ConflictResolver, optional resolver: Conflict resolver. Defaults None.
+        :param cterasdk.common.object.Object, optional cursor: Resume copy from cursor.
+        :param bool, optional wait: Wait for task completion. Defaults False.
+        :returns: Task status object or awaitable task.
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
-        :raises cterasdk.exceptions.io.core.CopyError: Raised on failure to copy one or more resources 
+        :raises cterasdk.exceptions.io.core.CopyError: Raised on failure copying resources.
         """
         try:
             return await Copy(io.copy, self._core, wait, *paths, destination=destination, resolver=resolver, cursor=cursor).a_execute()
@@ -162,115 +161,119 @@ class FileBrowser(BaseCommand):
 
     async def permalink(self, path):
         """
-        Get Permalink for Path.
+        Get permalink for a path.
 
         :param str path: Path.
-        :returns: Permalink
+        :returns: Permalink.
         :rtype: str
-        :raises cterasdk.exceptions.io.core.GetMetadataError: Raised on error retrieving object metadata
+        :raises cterasdk.exceptions.io.core.GetMetadataError: Raised on error retrieving object metadata.
         """
         return await GetPermalink(io.listdir, self._core, path).a_execute()
 
 
 class CloudDrive(FileBrowser):
+    """Async CloudDrive API with upload and sharing functionality."""
 
-    async def upload(self, name, destination, handle, size=None):
+    async def upload(self, destination, handle, name=None, size=None):
         """
         Upload from file handle.
 
-        :param str name: File name.
-        :param str destination: Path to remote directory.
-        :param object handle: Handle.
-        :param str,optional size: File size, defaults to content length
-        :returns: Remote file path
+        :param str destination: Remote path.
+        :param object handle: File-like handle.
+        :param str, optional size: File size. Defaults to content length.
+        :param str, optional name: Filename to use if it cannot be derived from ``destination``
+        :returns: Remote file path.
         :rtype: str
         :raises cterasdk.exceptions.io.core.UploadError: Raised on upload failure.
         """
-        return await Upload(io.upload, self._core, io.listdir, name, destination, size, handle).a_execute()
+        return await Upload(io.upload, self._core, io.listdir, destination, handle, name, size).a_execute()
 
     async def upload_file(self, path, destination):
         """
         Upload a file.
 
-        :param str path: Local path
-        :param str destination: Remote path
-        :returns: Remote file path
+        :param str path: Local path.
+        :param str destination: Remote path.
+        :returns: Remote file path.
         :rtype: str
         :raises cterasdk.exceptions.io.core.UploadError: Raised on upload failure.
         """
-        return await UploadFile(io.upload, self._core, io.listdir, path, destination).a_execute()
+        _, name = commonfs.split_file_directory(path)
+        with open(path, 'rb') as handle:
+            return await self.upload(destination, handle, name, commonfs.properties(path)['size'])
 
     async def mkdir(self, path):
         """
-        Create a new directory
+        Create a directory.
 
-        :param str path: Directory path
-        :returns: Remote directory path
+        :param str path: Directory path.
+        :returns: Remote directory path.
         :rtype: str
-        :raises cterasdk.exceptions.io.core.CreateDirectoryError: Raised on error to create directory
+        :raises cterasdk.exceptions.io.core.CreateDirectoryError: Raised on error creating directory.
         """
         return await CreateDirectory(io.mkdir, self._core, path).a_execute()
 
     async def makedirs(self, path):
         """
-        Create a directory recursively
+        Recursively create a directory.
 
-        :param str path: Directory path
-        :returns: Remote directory path
+        :param str path: Directory path.
+        :returns: Remote directory path.
         :rtype: str
-        :raises cterasdk.exceptions.io.core.CreateDirectoryError: Raised on error to create directory
+        :raises cterasdk.exceptions.io.core.CreateDirectoryError: Raised on error creating directory.
         """
         return await CreateDirectory(io.mkdir, self._core, path, True).a_execute()
 
-    async def rename(self, path, name, *, wait=False):
+    async def rename(self, path, name, *, resolver=None, wait=False):
         """
-        Rename a file
+        Rename a file or folder.
 
-        :param str path: Path of the file or directory to rename
-        :param str name: The name to rename to
-        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
-        :returns: Task status object, or an awaitable task object
+        :param str path: Path to rename.
+        :param str name: New name.
+        :param cterasdk.core.types.ConflictResolver, optional resolver: Conflict resolver. Defaults None.
+        :param bool, optional wait: Wait for task completion. Defaults False.
+        :returns: Task status object or awaitable task.
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
-        :raises cterasdk.exceptions.io.core.RenameError: Raised on error renaming object
+        :raises cterasdk.exceptions.io.core.RenameError: Raised on error renaming object.
         """
-        return await Rename(io.move, self._core, path, name, wait).a_execute()
+        return await Rename(io.move, self._core, wait, path, name, resolver).a_execute()
 
     async def delete(self, *paths, wait=False):
         """
-        Delete one or more files or folders
+        Delete one or more files or folders.
 
-        :param str path: Path
-        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
-        :returns: Task status object, or an awaitable task object
+        :param list[str] paths: Paths to delete.
+        :param bool, optional wait: Wait for task completion. Defaults False.
+        :returns: Task status object or awaitable task.
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
-        :raises cterasdk.exceptions.io.core.DeleteError: Raised on deleting one or more resources
+        :raises cterasdk.exceptions.io.core.DeleteError: Raised on error deleting resources.
         """
         return await Delete(io.delete, self._core, wait, *paths).a_execute()
 
     async def undelete(self, *paths, wait=False):
         """
-        Recover one or more files or folders
+        Recover one or more files or folders.
 
-        :param str path: Path
-        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
-        :returns: Task status object, or an awaitable task object
+        :param list[str] paths: Paths to recover.
+        :param bool, optional wait: Wait for task completion. Defaults False.
+        :returns: Task status object or awaitable task.
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
-        :raises cterasdk.exceptions.io.core.RecoverError: Raised on recovering one or more resources
+        :raises cterasdk.exceptions.io.core.RecoverError: Raised on error recovering resources.
         """
         return await Recover(io.undelete, self._core, wait, *paths).a_execute()
 
     async def move(self, *paths, destination=None, resolver=None, cursor=None, wait=False):
         """
-        Move one or more files or folders
+        Move one or more files or folders.
 
-        :param list[str] paths: List of paths
-        :param str destination: Destination
-        :param cterasdk.core.types.ConflictResolver resolver: Conflict resolver, defaults to ``None``
-        :param cterasdk.common.object.Object cursor: Resume copy from cursor
-        :param bool,optional wait: ``True`` Wait for task to complete, or ``False`` to return an awaitable task object.
-        :returns: Task status object, or an awaitable task object
+        :param list[str] paths: Paths to move.
+        :param str destination: Destination path.
+        :param cterasdk.core.types.ConflictResolver, optional resolver: Conflict resolver. Defaults None.
+        :param cterasdk.common.object.Object, optional cursor: Resume move from cursor.
+        :param bool, optional wait: Wait for task completion. Defaults False.
+        :returns: Task status object or awaitable task.
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
-        :raises cterasdk.exceptions.io.core.MoveError: Raised on error moving one or more resources
+        :raises cterasdk.exceptions.io.core.MoveError: Raised on error moving resources.
         """
         try:
             return await Move(io.move, self._core, wait, *paths, destination=destination, resolver=resolver, cursor=cursor).a_execute()
@@ -279,51 +282,55 @@ class CloudDrive(FileBrowser):
 
     async def get_share_info(self, path):
         """
-        Get share settings and recipients
+        Get share settings and recipients.
 
-        :param str path: Path
-        :raises cterasdk.exceptions.io.core.GetShareMetadataError: Raised on error obtaining collaboration share metadata
+        :param str path: Path.
+        :returns: Share metadata.
+        :rtype: object
+        :raises cterasdk.exceptions.io.core.GetShareMetadataError: Raised on error obtaining share metadata.
         """
         return await GetShareMetadata(io.list_shares, self._core, path).a_execute()
 
     async def share(self, path, recipients, as_project=True, allow_reshare=True, allow_sync=True):
         """
-        Share a file or a folder
+        Share a file or folder.
 
-        :param str path: The path of the file or folder to share
-        :param list[cterasdk.core.types.Collaborator] recipients: A list of share recipients
-        :param bool,optional as_project: Share as a team project, defaults to True when the item is a cloud folder else False
-        :param bool,optional allow_reshare: Allow recipients to re-share this item, defaults to True
-        :param bool,optional allow_sync: Allow recipients to sync this item, defaults to True when the item is a cloud folder else False
-        :returns: Current list of share members
+        :param str path: Path to file/folder.
+        :param list[cterasdk.core.types.Collaborator] recipients: Recipients to share with.
+        :param bool, optional as_project: Share as team project. Defaults True if cloud folder.
+        :param bool, optional allow_reshare: Allow re-share. Defaults True.
+        :param bool, optional allow_sync: Allow sync. Defaults True if cloud folder.
+        :returns: Current list of share members.
         :rtype: list[cterasdk.core.types.Collaborator]
         """
         return await io.share(self._core, path, recipients, as_project, allow_reshare, allow_sync)
 
     async def add_share_recipients(self, path, recipients):
         """
-        Add share recipients
+        Add share recipients.
 
-        :param str path: The path of the file or folder
-        :param list[cterasdk.core.types.Collaborator] recipients: A list of share recipients
-        :returns: Current list of share members
+        :param str path: Path of file/folder.
+        :param list[cterasdk.core.types.Collaborator] recipients: Recipients to add.
+        :returns: Current list of share members.
         :rtype: list[cterasdk.core.types.Collaborator]
         """
         return await io.add_share_recipients(self._core, path, recipients)
 
     async def remove_share_recipients(self, path, accounts):
         """
-        Remove share recipients
+        Remove share recipients.
 
-        :param str path: The path of the file or folder
-        :param list[cterasdk.core.types.PortalAccount] accounts: A list of portal user or group accounts
-        :returns: Current list of share members
+        :param str path: Path of file/folder.
+        :param list[cterasdk.core.types.PortalAccount] accounts: Accounts to remove.
+        :returns: Current list of share members.
         :rtype: list[cterasdk.core.types.Collaborator]
         """
         return await io.remove_share_recipients(self._core, path, accounts)
 
     async def unshare(self, path):
         """
-        Unshare a file or a folder
+        Unshare a file or folder.
+
+        :param str path: Path of file/folder.
         """
         return await UnShare(io.update_share, self._core, path).a_execute()

@@ -194,15 +194,19 @@ def write_new_version(directory, name, *, ctx=None):
 
 def split_file_directory(location):
     """
-    Split file and directory.
+    Split a path into its parent directory and final component.
 
-    :param str path: Path
+    :param str path: The path to a file or directory.
 
-    Returns:
-    1. (parent directory, file name), if a file exists
-    2. (parent directory, file name), if a directory exists
-    3. (parent directory, file name), if the parent directory exists
-    4. Raises ``FileNotFoundError`` if neither the object nor the parent directory exist
+    :returns:
+        tuple[str, str]: A ``(parent_directory, name)`` tuple when:
+
+        * The path refers to an existing file
+        * The path refers to an existing directory
+        * The parent directory of the path exists
+
+    :raises FileNotFoundError:
+        If neither the path nor its parent directory exist.
     """
     p = expanduser(location)
     if p.exists():

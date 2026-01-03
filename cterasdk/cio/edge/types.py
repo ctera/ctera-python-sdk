@@ -13,11 +13,6 @@ class EdgePath(BasePath):
         super().__init__(EdgePath.Namespace, reference or '.')
 
 
-def decode_reference(href):
-    namespace = '/localFiles'
-    return urllib.parse.unquote(href[href.index(namespace)+len(namespace) + 1:])
-
-
 class EdgeResource(BaseResource):
     """
     Class for a Edge Filer Filesystem Resource.
@@ -37,9 +32,14 @@ class EdgeResource(BaseResource):
         self.created_at = created_at
 
     @staticmethod
+    def decode_reference(href):
+        namespace = '/localFiles'
+        return urllib.parse.unquote(href[href.index(namespace)+len(namespace) + 1:])
+
+    @staticmethod
     def from_server_object(server_object):
         return EdgeResource(
-            EdgePath(decode_reference(server_object.href)),
+            EdgePath(EdgeResource.decode_reference(server_object.href)),
             server_object.getcontenttype == 'httpd/unix-directory',
             server_object.getcontentlength,
             datetime.fromisoformat(server_object.creationdate),
@@ -74,7 +74,7 @@ def create_generator(paths):
     def wrapper():
         for path in paths:
             if isinstance(path, tuple):
-                yield resolve(path[0]), resolve(path[0])
+                yield resolve(path[0]), resolve(path[1])
             else:
                 yield resolve(path)
     return wrapper()

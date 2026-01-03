@@ -1,5 +1,4 @@
 import urllib.parse
-from abc import abstractmethod
 from pathlib import PurePosixPath
 from ..common import Object
 from ..common.utils import utf8_decode
@@ -74,6 +73,9 @@ class BasePath:
     @property
     def parts(self):
         return self.reference.parts
+
+    def __eq__(self, p):
+        return self.absolute == p.absolute
 
     def __str__(self):
         return self.relative

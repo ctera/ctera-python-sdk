@@ -138,7 +138,7 @@ def create_generator(paths, namespace=None):
     def wrapper():
         for path in paths:
             if isinstance(path, tuple):
-                yield resolve(path[0], namespace), resolve(path[0], namespace)
+                yield resolve(path[0], namespace), resolve(path[1], namespace)
             else:
                 yield resolve(path, namespace)
     return wrapper()
@@ -382,8 +382,6 @@ class PortalResource(BaseResource):
     :ivar str permalink: Permalink
     :ivar cterasdk.core.types.Volume,optional volume: Volume information.
     """
-    Scheme = 'ctera-core'
-
     def __init__(self, i, name, path, is_dir, deleted, size, permalink, last_modified, volume):
         super().__init__(
             name, path, is_dir, size,

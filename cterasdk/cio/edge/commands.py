@@ -11,6 +11,46 @@ from .types import EdgeResource, automatic_resolution
 logger = logging.getLogger('cterasdk.edge')
 
 
+def split_file_directory(listdir, receiver, destination):
+    """
+    Split a path into its parent directory and final component.
+
+    :returns:
+        tuple[str, str]: A ``(parent_directory, name)`` tuple when:
+
+        * The path refers to an existing file
+        * The path refers to an existing directory
+        * The parent directory of the path exists
+
+    :raises GetMetadataError: If neither the path nor its parent directory exist.
+    """
+    is_dir, *_ = EnsureDirectory(listdir, receiver, destination, True).execute()
+    if not is_dir:
+        is_dir, *_ = EnsureDirectory(listdir, receiver, destination.parent).execute()
+        return destination.parent, destination.name
+    return destination, None
+
+
+async def a_split_file_directory(listdir, receiver, destination):
+    """
+    Split a path into its parent directory and final component.
+
+    :returns:
+        tuple[str, str]: A ``(parent_directory, name)`` tuple when:
+
+        * The path refers to an existing file
+        * The path refers to an existing directory
+        * The parent directory of the path exists
+
+    :raises GetMetadataError: If neither the path nor its parent directory exist.
+    """
+    is_dir, *_ = await EnsureDirectory(listdir, receiver, destination, True).a_execute()
+    if not is_dir:
+        is_dir, *_ = await EnsureDirectory(listdir, receiver, destination.parent).a_execute()
+        return destination.parent, destination.name
+    return destination, None
+
+
 class Open(EdgeCommand):
     """Open file"""
 
@@ -144,7 +184,9 @@ class ListDirectory(EdgeCommand):
             return await self._function(self._receiver, self.path.absolute, self.depth)
 
     def _handle_response(self, r):
-        return [EdgeResource.from_server_object(e) for e in r] if self.depth > 0 else EdgeResource.from_server_object(r[0])
+        if not self.depth > 0:
+            return EdgeResource.from_server_object(r[0])
+        return [EdgeResource.from_server_object(e) for e in r if self.path.relative != EdgeResource.decode_reference(e.href)]
 
     def _handle_exception(self, e):
         path = self.path.relative
@@ -304,34 +346,48 @@ class CreateDirectory(EdgeCommand):
 class Copy(EdgeCommand):
     """Copy"""
 
-    def __init__(self, function, receiver, path, destination=None, overwrite=False):
+    def __init__(self, function, receiver, listdir, path, destination, overwrite=False):
         super().__init__(function, receiver)
         self.path = automatic_resolution(path)
         self.destination = automatic_resolution(destination)
+        self._resolver = PathResolver(listdir, receiver, self.destination, self.path.name)
         self.overwrite = overwrite
 
     def get_parameter(self):
-        if isinstance(self.path, tuple):
-            self.path, self.destination = self.path[0], self.path[1]
-        else:
-            self.path, self.destination = self.path, self.destination.join(self.path.name)
-        return (self.path.absolute, self.destination.absolute)
+        return self.path.absolute, self.destination.absolute
 
     def _before_command(self):
+        if self.path == self.destination:
+            logger.info('No-op copy. Source and destination refer to the same file: %s', self.path.relative)
+            raise self._error_object() from exceptions.io.edge.FileConflictError(self.path.relative)
         logger.info('%s: %s to: %s', 'Copying', self.path.relative, self.destination.relative)
 
     def _execute(self):
+        self.destination = self._resolver.resolve()
         source, destination = self.get_parameter()
         with self.trace_execution():
             return self._function(self._receiver, source, destination, overwrite=self.overwrite)
-
+        
     async def _a_execute(self):
+        self.destination = await self._resolver.a_resolve()
         source, destination = self.get_parameter()
         with self.trace_execution():
             return await self._function(self._receiver, source, destination, overwrite=self.overwrite)
 
+    def _error_object(self):
+        return exceptions.io.edge.CopyError(self.path.relative, self.destination.relative)
+
+    def _file_conflict(self):
+        return exceptions.io.edge.FileConflictError(self.destination.relative)
+
+    def _handle_response(self, r):
+        return self.destination.relative
+
     def _handle_exception(self, e):
-        raise exceptions.io.edge.CopyError(self.path.relative, self.destination.relative)
+        error = self._error_object()
+        if isinstance(e, (exceptions.transport.PreConditionFailed, exceptions.transport.Conflict)):
+            raise error from self._file_conflict()
+        raise error
 
 
 class Move(Copy):
@@ -340,28 +396,25 @@ class Move(Copy):
     def _before_command(self):
         logger.info('%s: %s to: %s', 'Moving', self.path.relative, self.destination.relative)
 
-    def _handle_exception(self, e):
-        raise exceptions.io.edge.MoveError(self.path.relative, self.destination.relative)
+    def _error_object(self):
+        return exceptions.io.edge.MoveError(self.path.relative, self.destination.relative)
 
 
 class Rename(Move):
     """Rename"""
 
-    def __init__(self, function, receiver, path, new_name, overwrite=False):
-        super().__init__(function, receiver, path, None, overwrite)
+    def __init__(self, function, receiver, listdir, path, new_name, overwrite):
+        super().__init__(function, receiver, listdir, path, automatic_resolution(path).parent.join(new_name), overwrite)
         self.new_name = new_name
 
-    def get_parameter(self):
-        return (self.path.absolute, self.path.parent.join(self.new_name).absolute)
-
     def _before_command(self):
-        logger.info('Renaming: %s to: %s', self.path, self.path.parent.join(self.new_name))
+        logger.info('%s: %s to: %s', 'Renaming', self.path.relative, self.destination.relative)
 
-    def _handle_response(self, r):
-        return self.path.parent.join(self.new_name).relative
+    def _error_object(self):
+        return exceptions.io.edge.RenameError(self.path.relative, self.new_name)
 
-    def _handle_exception(self, e):
-        raise exceptions.io.edge.RenameError(self.path.relative, self.new_name)
+    def _file_conflict(self):
+        return exceptions.io.edge.FileConflictError(self.destination.relative)
 
 
 class Delete(EdgeCommand):
@@ -385,75 +438,72 @@ class Delete(EdgeCommand):
         return self.path.relative
 
     def _handle_exception(self, e):
-        raise exceptions.io.edge.DeleteError(self.path.relative)
+        path = self.path.relative
+        error = exceptions.io.edge.DeleteError(path)
+        if isinstance(e, exceptions.transport.NotFound):
+            raise error from exceptions.io.edge.ObjectNotFoundError(path)
+        raise error
+
+
+class PathResolver:
+
+    def __init__(self, listdir, receiver, destination, default):
+        self._listdir = listdir
+        self._receiver = receiver
+        self._destination = destination
+        self._default = default
+
+    async def a_resolve(self):
+        parent, name = await a_split_file_directory(self._listdir, self._receiver, self._destination)
+        return self._resolve(parent, name)
+
+    def resolve(self):
+        parent, name = split_file_directory(self._listdir, self._receiver, self._destination)
+        return self._resolve(parent, name)
+
+    def _resolve(self, parent, name):
+        if name is not None:
+            return parent.join(name)
+        if self._default is not None:
+            return parent.join(self._default)
+        return self._destination
 
 
 class Upload(EdgeCommand):
 
-    def __init__(self, function, receiver, metadata_function, name, destination, fd):
+    def __init__(self, function, receiver, listdir, destination, fd, name):
         super().__init__(function, receiver)
-        self._metadata_function = metadata_function
-        self.name = name
         self.destination = automatic_resolution(destination)
+        self._resolver = PathResolver(listdir, receiver, self.destination, name)
         self.fd = fd
 
     def get_parameter(self):
         fd, *_ = encode_stream(self.fd, 0)
         param = dict(
-            name=self.name,
-            fullpath=f'{self.destination.join(self.name).absolute}',
+            name=self.destination.name,
+            fullpath=f'{self.destination.absolute}',
             filedata=fd
         )
         return param
 
-    def _validate_destination(self):
-        is_dir, *_ = EnsureDirectory(self._metadata_function, self._receiver, self.destination, True).execute()
-        if not is_dir:
-            is_dir, *_ = EnsureDirectory(self._metadata_function, self._receiver, self.destination.parent).execute()
-            self.name, self.destination = self.destination.name, self.destination.parent
-
-    async def _a_validate_destination(self):
-        is_dir, *_ = await EnsureDirectory(self._metadata_function, self._receiver, self.destination, True).a_execute()
-        if not is_dir:
-            is_dir, *_ = await EnsureDirectory(self._metadata_function, self._receiver, self.destination.parent).a_execute()
-            self.name, self.destination = self.destination.name, self.destination.parent
-
     def _before_command(self):
-        logger.info('Uploading: %s', self.destination.join(self.name).relative)
+        logger.info('Uploading: %s', self.destination.relative)
 
     def _execute(self):
-        self._validate_destination()
+        self.destination = self._resolver.resolve()
         with self.trace_execution():
             return self._function(self._receiver, self.get_parameter()).xml()
 
     async def _a_execute(self):
-        await self._a_validate_destination()
+        self.destination = await self._resolver.a_resolve()
         with self.trace_execution():
             response = await self._function(self._receiver, self.get_parameter())
             return await response.xml()
 
     def _handle_response(self, r):
         if r.rc != 0:
-            raise exceptions.io.edge.UploadError(r.msg, self.destination.join(self.name).relative)
-        return self.destination.join(self.name).relative
+            raise exceptions.io.edge.UploadError(r.msg, self.destination.relative)
+        return self.destination.relative
 
     def _handle_exception(self, e):
-        raise exceptions.io.edge.UploadError(e.error.msg, self.destination.join(self.name).relative) from e
-
-
-class UploadFile(Upload):
-
-    def __init__(self, function, receiver, metadata_function, path, destination):
-        _, name = commonfs.split_file_directory(path)
-        super().__init__(function, receiver, metadata_function, name, destination, None)
-        self.path = path
-
-    def _execute(self):
-        with open(self.path, 'rb') as handle:
-            self.fd = handle
-            return super()._execute()
-
-    async def _a_execute(self):
-        with open(self.path, 'rb') as handle:
-            self.fd = handle
-            return await super()._a_execute()
+        raise exceptions.io.edge.UploadError(e.error.msg, self.destination.relative) from e
