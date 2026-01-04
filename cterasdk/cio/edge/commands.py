@@ -311,7 +311,7 @@ class CreateDirectory(EdgeCommand):
                 try:
                     CreateDirectory(self._function, self._receiver, path).execute()
                 except exceptions.io.edge.CreateDirectoryError as e:
-                    self._suppress_error(e)
+                    CreateDirectory._suppress_error(e)
         with self.trace_execution():
             return self._function(self._receiver, self.path.absolute)
 
@@ -321,7 +321,7 @@ class CreateDirectory(EdgeCommand):
                 try:
                     await CreateDirectory(self._function, self._receiver, path).a_execute()
                 except exceptions.io.edge.CreateDirectoryError as e:
-                    self._suppress_error(e)
+                    CreateDirectory._suppress_error(e)
         with self.trace_execution():
             return await self._function(self._receiver, self.path.absolute)
 
@@ -339,7 +339,8 @@ class CreateDirectory(EdgeCommand):
             raise error from exceptions.io.edge.ROFSError(path)
         raise error from e
 
-    def _suppress_error(self, e):
+    @staticmethod
+    def _suppress_error(e):
         if not isinstance(e.__cause__, (exceptions.io.edge.FileConflictError, exceptions.io.edge.ROFSError)):
             raise e
 
