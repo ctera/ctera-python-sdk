@@ -38,13 +38,35 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
             self._init_global_admin(execute_response=Object(**{
                 'errorType': None,
                 'hasMore': False,
-                'items': [self.filename]
+                'items': [TestSynchronousFileBrowser._generate_resource(self.filename)]
             }))
-            filename = next(self._global_admin.files.listdir(self.directory, include_deleted=include_deleted))
+            item = next(self._global_admin.files.listdir(self.directory, include_deleted=include_deleted))
             self._global_admin.api.execute.assert_called_once_with('', 'fetchResources', mock.ANY)
             param = self._global_admin.api.execute.call_args[0][2]
             self.assertEqual(param.root, f'{TestSynchronousFileBrowser.scope}/{self.directory}')
-            self.assertEqual(filename, self.filename)
+            self.assertEqual(item.name, self.filename)
+
+    @staticmethod
+    def _generate_resource(name):
+        resource_info = Object()
+        resource_info._classname = 'ResourceInfo'  # pylint: disable=protected-access
+        resource_info.href = TestSynchronousFileBrowser.scope + '/' + name
+        resource_info.name = name
+        resource_info.fileId = 1
+        resource_info.isFolder = False
+        resource_info.isDeleted = False
+        resource_info.size = 1,
+        resource_info.permalink = 'xyz'
+        resource_info.lastmodified = datetime.now().isoformat()
+        resource_info.cloudFolderInfo = Object(
+            uid=1,
+            name='Volume name',
+            groupUid=1,
+            passphraseProtected=False,
+            ownerUid=1,
+            ownerFriendlyName='First Last'
+        )
+        return resource_info
 
     def test_mkdir(self):
         self._init_global_admin()
