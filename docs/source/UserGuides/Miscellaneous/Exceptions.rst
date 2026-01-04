@@ -37,45 +37,222 @@ Session
 I/O
 ---
 
-.. autoclass:: cterasdk.exceptions.io.RemoteStorageError
+Edge Filer
+^^^^^^^^^^
+
+.. autoclass:: cterasdk.exceptions.io.edge.FileConflictError
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.exceptions.io.ResourceNotFoundError
+.. autoclass:: cterasdk.exceptions.io.edge.ObjectNotFoundError
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.exceptions.io.NotADirectory
+.. autoclass:: cterasdk.exceptions.io.edge.FileNotFoundException
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.exceptions.io.ResourceExistsError
+.. autoclass:: cterasdk.exceptions.io.edge.FolderNotFoundError
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.exceptions.io.PathValidationError
+.. autoclass:: cterasdk.exceptions.io.edge.GetMetadataError
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.exceptions.io.NameSyntaxError
+.. autoclass:: cterasdk.exceptions.io.edge.NotADirectoryException
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.exceptions.io.ReservedNameError
+.. autoclass:: cterasdk.exceptions.io.edge.ROFSError
    :noindex:
    :members:
    :show-inheritance:
 
-.. autoclass:: cterasdk.exceptions.io.RestrictedPathError
+.. autoclass:: cterasdk.exceptions.io.edge.ListDirectoryError
    :noindex:
    :members:
    :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.edge.CreateDirectoryError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.edge.OpenError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.edge.DeleteError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.edge.RenameError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.edge.CopyError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.edge.MoveError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.edge.UploadError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+Portal
+^^^^^^
+
+.. autoclass:: cterasdk.exceptions.io.core.FileConflictError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.ObjectNotFoundError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.FileNotFoundException
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.FolderNotFoundError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.NotADirectoryException
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.OpenError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.UploadError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.ROFSError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.PrivilegeError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.NTACLError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.QuotaError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.StorageBackendError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.FileRejectedError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.FilenameError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.ReservedNameError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.ListDirectoryError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.GetVersionsError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.CreateDirectoryError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.GetMetadataError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.GetShareMetadataError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.CreateLinkError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.RenameError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.BatchError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.DeleteError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.RecoverError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.CopyError
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.io.core.MoveError
+   :noindex:
+   :members:
+   :show-inheritance:
+
 
 Notification Service
 --------------------
@@ -115,6 +292,11 @@ HTTP Transport
    :show-inheritance:
 
 .. autoclass:: cterasdk.exceptions.transport.NotAllowed
+   :noindex:
+   :members:
+   :show-inheritance:
+
+.. autoclass:: cterasdk.exceptions.transport.Conflict
    :noindex:
    :members:
    :show-inheritance:

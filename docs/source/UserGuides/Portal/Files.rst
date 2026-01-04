@@ -347,16 +347,19 @@ This section describes the main objects used for managing collaboration shares.
 .. autoclass:: cterasdk.core.types.UserAccount
    :members:
    :undoc-members:
+   :noindex:
 
 
 .. autoclass:: cterasdk.core.types.GroupAccount
    :members:
    :undoc-members:
+   :noindex:
 
 
 .. autoclass:: cterasdk.core.types.Collaborator
    :members:
    :undoc-members:
+   :noindex:
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.share
    :noindex:

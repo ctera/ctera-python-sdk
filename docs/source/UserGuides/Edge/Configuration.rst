@@ -843,7 +843,56 @@ Windows File Sharing (CIFS/SMB)
 Network
 =======
 
+Version 7.11+
+-------------
+
+.. automethod:: cterasdk.edge.network.Network.interface
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.Network.port
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.Network.deduce_port
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.Network.status
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.Network.ipconfig
+   :noindex:
+
 .. automethod:: cterasdk.edge.network.Network.set_static_ipaddr
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.Network.set_static_nameserver
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.Network.enable_dhcp
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.MTU711.reset
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.MTU711.modify
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.StaticRoutes711.get
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.StaticRoutes711.add
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.StaticRoutes711.delete
+   :noindex:
+
+.. automethod:: cterasdk.edge.network.StaticRoutes711.clear
+   :noindex:
+
+
+Pre-Version 7.11
+----------------
+
+.. automethod:: cterasdk.edge.network.LegacyNetwork.set_static_ipaddr
    :noindex:
 
 .. code-block:: python
@@ -852,7 +901,7 @@ Network
 
    edge.show('/status/network/ports/0/ip') # will print the IP configuration
 
-.. automethod:: cterasdk.edge.network.Network.set_static_nameserver
+.. automethod:: cterasdk.edge.network.LegacyNetwork.set_static_nameserver
    :noindex:
 
 .. code-block:: python
@@ -861,12 +910,59 @@ Network
 
    edge.network.set_static_nameserver('10.100.102.1', '10.100.102.254') # to set both primary and secondary
 
-.. automethod:: cterasdk.edge.network.Network.enable_dhcp
+.. automethod:: cterasdk.edge.network.LegacyNetwork.enable_dhcp
    :noindex:
 
 .. code-block:: python
 
    edge.network.enable_dhcp()
+
+.. automethod:: cterasdk.edge.network.LegacyMTU.modify
+   :noindex:
+
+.. code-block:: python
+
+   edge.network.mtu.modify(1320)  # set the maximum transmission unit (MTU) to 1320
+
+   edge.network.mtu.modify(9000)  # configure 'jumbo' frames (MTU: 9000)
+
+.. automethod:: cterasdk.edge.network.LegacyMTU.reset
+   :noindex:
+
+.. code-block:: python
+
+   edge.network.mtu.reset()  # disable custom mtu configuration and restore default setting (1500)
+
+.. automethod:: cterasdk.edge.network.LegacyStaticRoutes.get
+   :noindex:
+
+.. code-block:: python
+
+   edge.network.routes.get()
+
+.. automethod:: cterasdk.edge.network.LegacyStaticRoutes.add
+   :noindex:
+
+.. code-block:: python
+
+   edge.network.routes.add('10.10.12.1', '192.168.55.7/32')
+
+   edge.network.routes.add('10.100.102.4', '172.18.100.0/24')
+
+.. automethod:: cterasdk.edge.network.LegacyStaticRoutes.delete
+   :noindex:
+
+.. code-block:: python
+
+   edge.network.routes.delete('192.168.55.7/32')
+
+.. automethod:: cterasdk.edge.network.LegacyStaticRoutes.clear
+   :noindex:
+
+.. code-block:: python
+
+   # remove all static routes -  (clean)
+   edge.network.routes.clear()
 
 Proxy Settings
 --------------
@@ -901,60 +997,6 @@ Proxy Settings
 
    edge.network.proxy.disable()
 
-MTU
----
-
-.. automethod:: cterasdk.edge.network.MTU.modify
-   :noindex:
-
-.. code-block:: python
-
-   edge.network.mtu.modify(1320)  # set the maximum transmission unit (MTU) to 1320
-
-   edge.network.mtu.modify(9000)  # configure 'jumbo' frames (MTU: 9000)
-
-.. automethod:: cterasdk.edge.network.MTU.reset
-   :noindex:
-
-.. code-block:: python
-
-   edge.network.mtu.reset()  # disable custom mtu configuration and restore default setting (1500)
-
-Static Routes
--------------
-
-.. automethod:: cterasdk.edge.network.StaticRoutes.get
-   :noindex:
-
-.. code-block:: python
-
-   edge.network.routes.get()
-
-.. automethod:: cterasdk.edge.network.StaticRoutes.add
-   :noindex:
-
-.. code-block:: python
-
-   edge.network.routes.add('10.10.12.1', '192.168.55.7/32')
-
-   edge.network.routes.add('10.100.102.4', '172.18.100.0/24')
-
-.. automethod:: cterasdk.edge.network.StaticRoutes.delete
-   :noindex:
-
-.. code-block:: python
-
-   edge.network.routes.delete('192.168.55.7/32')
-
-.. automethod:: cterasdk.edge.network.StaticRoutes.clear
-   :noindex:
-
-.. code-block:: python
-
-   # remove all static routes -  (clean)
-   edge.network.routes.clear()
-
-
 Hosts
 -----
 
@@ -983,13 +1025,13 @@ Hosts
 Diagnostics
 -----------
 
-.. automethod:: cterasdk.edge.network.Network.tcp_connect
+.. automethod:: cterasdk.edge.network.Diagnostics.tcp_connect
    :noindex:
 
 .. code-block:: python
 
    cttp_service = edge_types.TCPService('tenant.ctera.com', 995)
-   result = edge.network.tcp_connect(cttp_service)
+   result = edge.network.diag.tcp_connect(cttp_service)
    if result.is_open:
        print('Success')
        # do something...
@@ -997,9 +1039,9 @@ Diagnostics
        print('Failure')
 
    ldap_service = edge_types.TCPService('dc.ctera.com', 389)
-   edge.network.tcp_connect(ldap_service)
+   edge.network.diag.tcp_connect(ldap_service)
 
-.. automethod:: cterasdk.edge.network.Network.diagnose
+.. automethod:: cterasdk.edge.network.Diagnostics.diagnose
    :noindex:
 
 .. code-block:: python
@@ -1008,23 +1050,23 @@ Diagnostics
    services.append(edge_types.TCPService('192.168.90.1', 389))  # LDAP
    services.append(edge_types.TCPService('ctera.portal.com', 995))  # CTTP
    services.append(edge_types.TCPService('ctera.portal.com', 443))  # HTTPS
-   result = edge.network.diagnose(services)
+   result = edge.network.diag.diagnose(services)
    for result in results:
        print(result.host, result.port, result.is_open)
 
 
-.. automethod:: cterasdk.edge.network.Network.iperf
+.. automethod:: cterasdk.edge.network.Diagnostics.iperf
    :noindex:
 
 .. code-block:: python
 
-   edge.network.iperf('192.168.1.145')  # iperf server: 192.168.1.145, threads: 1, measure upload over TCP port 5201
+   edge.network.diag.iperf('192.168.1.145')  # iperf server: 192.168.1.145, threads: 1, measure upload over TCP port 5201
 
-   edge.network.iperf('192.168.1.145', port=85201, threads=5)  # Customized port and number of threads
+   edge.network.diag.iperf('192.168.1.145', port=85201, threads=5)  # Customized port and number of threads
 
-   edge.network.iperf('192.168.1.145', direction=edge_enum.Traffic.Download)  # Measure download speed
+   edge.network.diag.iperf('192.168.1.145', direction=edge_enum.Traffic.Download)  # Measure download speed
 
-   edge.network.iperf('192.168.1.145', protocol=edge_enum.IPProtocol.UDP)  # Use UDP
+   edge.network.diag.iperf('192.168.1.145', protocol=edge_enum.IPProtocol.UDP)  # Use UDP
 
 
 Antivirus

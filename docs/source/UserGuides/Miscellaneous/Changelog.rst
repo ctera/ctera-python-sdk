@@ -1,6 +1,34 @@
 Changelog
 =========
 
+2.20.26
+-------
+
+Improvements
+^^^^^^^^^^^^
+* Added support for Edge Filer v7.11 dual-interface network configuration, including MTU and static routes
+* Refactored file browser extensions for Edge Filer and Portal
+* Improved exception handling for file access errors
+* Updated documentation for file browser extensions
+* Listing previous versions, files, and directories now returns Python objects
+* Added automatic path inference from multiple input types
+* Introduced a version-based module initialization template
+
+Bug Fixes
+^^^^^^^^^
+* Added ``backups`` to the list of omitted fields to allow printing the Portal object
+* Fixed handling of HTTP ``Conflict`` errors
+
+Related issues and pull requests on GitHub: `#329 <https://github.com/ctera/ctera-python-sdk/pull/329>`_
+
+2.20.25
+-------
+
+Security
+^^^^^^^^
+* Upgraded library dependencies to address security vulnerabilities
+
+
 2.20.24
 -------
 
@@ -290,7 +318,7 @@ Improvements
 ^^^^^^^^^^^^
 
 * Support for overriding timeout settings on a per-request basis.
-* Increased the ``sock_read`` timeout to 2 minutes when invoking :py:func:`cterasdk.edge.network.Network.tcp_connect`.
+* Increased the ``sock_read`` timeout to 2 minutes when invoking :py:func:`cterasdk.edge.network.Diagnostics.tcp_connect`.
 
 Related issues and pull requests on GitHub: `#302 <https://github.com/ctera/ctera-python-sdk/pull/302>`_
 
