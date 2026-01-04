@@ -256,7 +256,10 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
 
     def test_add_v711_static_route(self):
         add_response = 'success'
-        self._init_filer(add_response=add_response, get_response=['LAN0', 'LAN1'])
+        self._init_filer(add_response=add_response, get_response=[
+            Object(name='LAN0', ethernet=Object(mac='xyz')),
+            Object(name='LAN1', ethernet=Object(mac='abc'))
+        ])
         ret = network.Network711(self._filer).routes.add('LAN1', self._static_route_gateway, self._static_route_network)
         self._filer.api.add.assert_called_once_with('/config/network/ports/1/ipv4StaticRoutes', mock.ANY)
         expected_param = Object(**{
@@ -279,8 +282,8 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._init_filer(get_response=get_response)
         ret = network.LegacyNetwork(self._filer).routes.get()
         self._filer.api.get.assert_called_once_with('/config/network')
-        self.assertEqual(ret[0].gateway, get_response.static_routes.GwIP)
-        self.assertEqual(ret[0].network, get_response.static_routes.DestIpMask)
+        self.assertEqual(ret[0].gateway, get_response.static_routes[0].GwIP)
+        self.assertEqual(ret[0].network, get_response.static_routes[0].DestIpMask)
 
     def test_remove_static_route(self):
         self._init_filer()

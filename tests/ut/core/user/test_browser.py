@@ -55,7 +55,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         resource_info.fileId = 1
         resource_info.isFolder = False
         resource_info.isDeleted = False
-        resource_info.size = 1,
+        resource_info.size = 1
         resource_info.permalink = 'xyz'
         resource_info.lastmodified = datetime.now().isoformat()
         resource_info.cloudFolderInfo = Object(

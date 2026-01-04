@@ -1,5 +1,5 @@
-import munch
 from datetime import datetime
+import munch
 from tests.ut.core.user import base_user
 
 
