@@ -3,7 +3,9 @@ from ...clients import clients
 from ..services import Management
 from ..endpoints import EndpointBuilder
 from .. import authenticators
+from ...common import modules
 from ...lib.session.edge import Session
+
 
 from ...edge import (
     afp, aio, antivirus, array, audit, backup, cache, cli, config, connection, ctera_migrate,
@@ -93,7 +95,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.licenses = licenses.Licenses(self)
         self.logs = logs.Logs(self)
         self.mail = mail.Mail(self)
-        self.network = network.Network(self)
+        self.network = modules.initialize(network.NetworkModule, self)
         self.nfs = nfs.NFS(self)
         self.ntp = ntp.NTP(self)
         self.power = power.Power(self)
@@ -105,7 +107,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.smb = smb.SMB(self)
         self.snmp = snmp.SNMP(self)
         self.ssh = ssh.SSH(self)
-        self.ssl = ssl.SSL(self)
+        self.ssl = modules.initialize(ssl.SSLModule, self)
         self.support = support.Support(self)
         self.sync = sync.Sync(self)
         self.syslog = syslog.Syslog(self)
@@ -116,7 +118,8 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.volumes = volumes.Volumes(self)
 
     def _after_login(self):
-        self.ssl = ssl.initialize(self)
+        self.ssl = modules.initialize(ssl.SSLModule, self)
+        self.network = modules.initialize(network.NetworkModule, self)
 
     @property
     def migrate(self):
@@ -158,8 +161,8 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['afp', 'aio', 'array', 'audit', 'backup', 'cache', 'cli', 'config', 'ctera_migrate', 'dedup',
-                                       'directoryservice', 'drive', 'files', 'firmware', 'ftp', 'groups', 'licenses', 'logs', 'mail',
-                                       'network', 'nfs', 'ntp', 'power', 'ransom_protect', 'rsync', 'services', 'shares', 'shell',
+        return super()._omit_fields + ['afp', 'aio', 'array', 'audit', 'antivirus', 'backup', 'cache', 'cli', 'config', 'ctera_migrate',
+                                       'dedup', 'directoryservice', 'drive', 'files', 'firmware', 'ftp', 'groups', 'licenses', 'logs',
+                                       'mail', 'network', 'nfs', 'ntp', 'power', 'ransom_protect', 'rsync', 'services', 'shares', 'shell',
                                        'smb', 'snmp', 'ssh', 'ssl', 'support', 'sync', 'syslog', 'tasks', 'telnet', 'timezone',
                                        'users', 'volumes']

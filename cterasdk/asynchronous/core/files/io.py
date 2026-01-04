@@ -1,4 +1,4 @@
-from ....cio import core as fs
+from ....cio.core import commands as fs
 
 
 async def listdir(core, param):
@@ -33,9 +33,8 @@ async def handle(core, param):
     return await core.io.download(param)
 
 
-async def handle_many(core, param, directory):
-    async with fs.EnsureDirectory(listdir, core, directory) as (_, resource):
-        return await core.io.download_zip(str(resource.cloudFolderInfo.uid), param)
+async def handle_many(core, cloudfolder, param):
+    return await core.io.download_zip(cloudfolder, param)
 
 
 async def upload(core, cloudfolder, param):

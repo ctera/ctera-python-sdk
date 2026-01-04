@@ -1,56 +1,94 @@
 import logging
+from abc import abstractmethod
+from contextlib import contextmanager
 import ipaddress
 
-from ..exceptions import CTERAException
 from ..exceptions.common import TaskException
 from .enum import Mode, IPProtocol, Traffic
-from .types import TCPConnectResult, StaticRoute
-from ..common import Object
+from .types import TCPConnectResult, StaticRoute, NetworkInterface
+from ..common import Object, BaseModule
 from .base_command import BaseCommand
 
 
 logger = logging.getLogger('cterasdk.edge')
 
 
+class NetworkModule(BaseModule):
+
+    def initialize_version(self, software_version):
+        return Network711 if software_version > '7.9' else LegacyNetwork
+
+
 class Network(BaseCommand):
-    """ Edge Filer Network configuration APIs """
 
-    def __init__(self, portal):
-        super().__init__(portal)
-        self.proxy = Proxy(self._edge)
-        self.mtu = MTU(self._edge)
-        self.routes = StaticRoutes(self._edge)
+    def __init__(self, edge):
+        super().__init__(edge)
         self.hosts = Hosts(self._edge)
+        self.proxy = Proxy(self._edge)
+        self.diag = Diagnostics(self._edge)
 
-    def get_status(self):
+    def interface(self, name):
         """
-        Retrieve the network interface status
-        """
-        return self._edge.api.get('/status/network/ports/0')
+        Get Network Interface
 
-    def ifconfig(self):
+        :param str name: Interface name
         """
-        Retrieve the ip configuration
-        """
-        return self.ipconfig()
+        for interface in self.interfaces:
+            if interface.name == name:
+                return interface
+        raise ValueError(f'Could not find interface: {name}.')
 
-    def ipconfig(self):
+    def port(self, name):
         """
-        Retrieve the ip configuration
-        """
-        return self._edge.api.get('/config/network/ports/0')
+        Get Port
 
-    def set_static_ipaddr(self, address, subnet, gateway, primary_dns_server, secondary_dns_server=None):
+        :param str name: Interface name
+        """
+        return self.interface(name).port
+
+    def deduce_port(self, interface):
+        return interface if interface in [0, 1] else self.port(interface)
+
+    @property
+    def interfaces(self):
+        """
+        Get Network Interfaces.
+
+        :returns: A list of network interfaces
+        :rtype: list[cterasdk.edge.types.NetworkInterface]
+        """
+        return [NetworkInterface(i, interface.name, interface.ethernet.mac)
+                for i, interface in enumerate(self._edge.api.get('/status/network/ports'))]
+
+    def status(self, interface):
+        """
+        Get Interface Status.
+
+        :param object interface: Interface name or port number
+        """
+        return self._edge.api.get(f'/status/network/ports/{self.deduce_port(interface)}')
+
+    def ipconfig(self, interface):
+        """
+        Get Interface Configuration
+
+        :param object interface: Interface name or port number
+        """
+        return self._edge.api.get(f'/config/network/ports/{self.deduce_port(interface)}')
+
+    def set_static_ipaddr(self, interface, address, subnet, gateway, primary_dns_server, secondary_dns_server=None):
         """
         Set a Static IP Address
 
+        :param object interface: Interface name or port number
         :param str address: The static address
         :param str subnet: The subnet for the static address
         :param str gateway: The default gateway
         :param str primary_dns_server: The primary DNS server
         :param str,optinal secondary_dns_server: The secondary DNS server, defaults to None
         """
-        ip = self._edge.api.get('/config/network/ports/0/ip')
+        port = self.deduce_port(interface)
+        ip = self._edge.api.get(f'/config/network/ports/{port}/ip')
         ip.DHCPMode = Mode.Disabled
         ip.address = address
         ip.netmask = subnet
@@ -61,48 +99,312 @@ class Network(BaseCommand):
         if secondary_dns_server is not None:
             ip.DNSServer2 = secondary_dns_server
 
-        logger.info('Configuring a static ip address.')
-
-        self._edge.api.put('/config/network/ports/0/ip', ip)
-
+        logger.info('Updating network configuration: IP Configuration')
+        self._edge.api.put(f'/config/network/ports/{port}/ip', ip)
         logger.info(
-            'Network settings updated. %s',
+            'Network configuration updated. %s',
             {'address': address, 'subnet': subnet, 'gateway': gateway, 'DNS1': primary_dns_server, 'DNS2': secondary_dns_server}
         )
 
-    def set_static_nameserver(self, primary_dns_server, secondary_dns_server=None):
+    def set_static_nameserver(self, interface, primary_dns_server, secondary_dns_server=None):
         """
-        Set the DNS Server addresses statically
+        Set Static DNS Servers
 
-        :param str primary_dns_server: The primary DNS server
-        :param str,optinal secondary_dns_server: The secondary DNS server, defaults to None
+        :param object interface: Interface name or port number
+        :param str primary_dns_server: Primary DNS server
+        :param str,optional secondary_dns_server: Secondary DNS server, defaults to None
         """
-        ip = self._edge.api.get('/config/network/ports/0/ip')
+        port = self.deduce_port(interface)
+        ip = self._edge.api.get(f'/config/network/ports/{port}/ip')
         ip.autoObtainDNS = False
         ip.DNSServer1 = primary_dns_server
 
         if secondary_dns_server is not None:
             ip.DNSServer2 = secondary_dns_server
 
-        logger.info('Configuring nameserver settings.')
+        logger.info('Updating network configuration: DNS.')
+        self._edge.api.put(f'/config/network/ports/{port}/ip', ip)
+        logger.info('Network configuration updated. %s', {'DNS1': primary_dns_server, 'DNS2': secondary_dns_server})
 
-        self._edge.api.put('/config/network/ports/0/ip', ip)
-
-        logger.info('Nameserver settings updated. %s', {'DNS1': primary_dns_server, 'DNS2': secondary_dns_server})
-
-    def enable_dhcp(self):
+    def enable_dhcp(self, interface):
         """
         Enable DHCP
+
+        :param object interface: Interface name or port number
         """
-        ip = self._edge.api.get('/config/network/ports/0/ip')
+        port = self.deduce_port(interface)
+        ip = self._edge.api.get(f'/config/network/ports/{port}/ip')
         ip.DHCPMode = Mode.Enabled
         ip.autoObtainDNS = True
+        logger.info('Updating network configuration: Enabling DHCP.')
+        self._edge.api.put(f'/config/network/ports/{port}/ip', ip)
+        logger.info('Network configuration updated. Enabled DHCP.')
 
-        logger.info('Enabling DHCP.')
 
-        self._edge.api.put('/config/network/ports/0/ip', ip)
+class Network711(Network):
+    """ Edge Filer v7.11 Network API """
 
-        logger.info('Network settings updated. Enabled DHCP.')
+    def __init__(self, edge):
+        super().__init__(edge)
+        self.mtu = MTU711(self._edge)
+        self.routes = StaticRoutes711(self._edge)
+
+
+class LegacyNetwork(Network):
+    """ Edge Filer Legacy Network API """
+
+    def __init__(self, edge):
+        super().__init__(edge)
+        self.mtu = LegacyMTU(self._edge)
+        self.routes = LegacyStaticRoutes(self._edge)
+
+    def get_status(self):
+        """
+        Retrieve the network interface status
+        """
+        return super().status(0)
+
+    def ifconfig(self):
+        """
+        Retrieve the IP address settings
+        """
+        return super().ipconfig(0)
+
+    def ipconfig(self):  # pylint: disable=arguments-differ
+        """
+        Retrieve the IP address settings
+        """
+        return super().ipconfig(0)
+
+    def set_static_ipaddr(self, address, subnet, gateway,  # pylint: disable=arguments-differ
+                          primary_dns_server, secondary_dns_server=None):
+        return super().set_static_ipaddr(0, address, subnet, gateway, primary_dns_server, secondary_dns_server)
+
+    def set_static_nameserver(self, primary_dns_server, secondary_dns_server=None):  # pylint: disable=arguments-differ
+        return super().set_static_nameserver(0, primary_dns_server, secondary_dns_server)
+
+    def enable_dhcp(self):  # pylint: disable=arguments-differ
+        return super().enable_dhcp(0)
+
+
+class Proxy(BaseCommand):
+    """Edge Filer Proxy Configuration APIs"""
+
+    def get_configuration(self):
+        """
+        Get Proxy Configuration
+        """
+        return self._edge.api.get('/config/network/proxy')
+
+    def is_enabled(self):
+        """
+        Check if Proxy Configuration is Enabled
+
+        :returns: ``True`` if a proxy server was configured and ``False`` otherwise.
+        :rtype: bool
+        """
+        return self._edge.api.get('/config/network/proxy/configurationMode') != 'NoProxy'
+
+    def modify(self, address, port=None, username=None, password=None):
+        """
+        Modify Proxy Configuration
+
+        :param str address: Proxy address
+        :param int,optional port: Proxy port, defaults to ``8080``
+        :param str,optional username: Username
+        :param str,optional password: Password
+        :returns: Proxy settings
+        :rtype: cterasdk.common.object.Object
+        """
+        return self._configure(True, address, port, username, password)
+
+    def _configure(self, enabled, address=None, port=None, username=None, password=None):
+        param = Object()
+        param._classname = 'ProxySettings'  # pylint: disable=protected-access
+        param.configurationMode = 'Manual' if enabled else 'NoProxy'
+        if enabled:
+            param.port = port if port else 8080
+            if address:
+                param.address = address
+            if username:
+                param.username = username
+            if password:
+                param.password = password
+        logger.info('Updating Proxy Server Configuration.')
+        response = self._edge.api.put('/config/network/proxy', param)
+        logger.info('Updated Proxy Server Configuration.')
+        return response
+
+    def disable(self):
+        """
+        Disable Proxy
+
+        :returns: Proxy settings
+        :rtype: cterasdk.common.object.Object
+        """
+        logger.info('Disabling Proxy.')
+        return self._configure(False)
+
+
+class BaseMTU(BaseCommand):
+
+    def reset(self, interface):  # pylint: disable=arguments-differ
+        return self._update_max_transmission_unit(interface, False, 1500)
+
+    def modify(self, interface, size):  # pylint: disable=arguments-differ
+        return self._update_max_transmission_unit(interface, True, size)
+
+    def _update_max_transmission_unit(self, interface, jumbo, size):
+        port = self._edge.network.deduce_port(interface)
+        settings = self._edge.api.get(f'/config/network/ports/{port}/ethernet')
+        settings.jumbo = jumbo
+        settings.mtu = size
+        logger.info('Configuring %s MTU for interface: %s', size, port)
+        return self._edge.api.put(f'/config/network/ports/{port}/ethernet', settings)
+
+
+class MTU711(BaseMTU):
+    """Multi Network Interface MTU Configuration"""
+
+
+class LegacyMTU(BaseMTU):
+    """Single Network Interface MTU Configuration"""
+
+    def reset(self):  # pylint: disable=arguments-differ
+        """
+        Reset to defaults.
+        """
+        super().reset(0)
+
+    def modify(self, size):  # pylint: disable=arguments-differ
+        """
+        Set Custom Network Maximum Transmission Unit (MTU)
+
+        :param int size: Maximum Transmission Unit
+        """
+        super().modify(0, size)
+
+
+class BaseStaticRoutes(BaseCommand):
+    """Edge Filer Static Routes Configuration"""
+
+    @staticmethod
+    @contextmanager
+    def _validate_route(gateway, network):
+        yield str(ipaddress.ip_address(gateway)), ipaddress.ip_network(network)
+
+    def add(self, interface, route_gateway, route_network):  # pylint: disable=arguments-differ
+        """
+        Add a route.
+
+        :param object interface: Interface name or port number
+        :param str route_gateway: Gateway IP address
+        :param str route_network: Network (CIDR)
+        """
+        with BaseStaticRoutes._validate_route(route_gateway, route_network) as (gateway, network):
+            ip_network = str(network)
+            logger.info('Adding route for network: %s, to: %s', ip_network, gateway)
+            response = self._add_route(interface, gateway, network)
+            logger.info('Route added for network: %s, to: %s', ip_network, gateway)
+            return response
+
+    @abstractmethod
+    def _add_route(self, interface, gateway, network):
+        raise NotImplementedError('Subclass must implement the "_add_route" method.')
+
+    def delete(self, route):
+        """
+        Delete a route.
+
+        :param cterasdk.edge.types.StaticRoute route: Static Route
+        """
+        logger.info('Deleting route. Network: %s, Gateway: %s', route.network, route.gateway)
+        self._edge.api.delete(f'/config/network/static_routes/{route.id}')
+        logger.info('Route deleted. Network: %s, Gateway: %s', route.network, route.gateway)
+
+    def clear(self):
+        logger.info('Clearing route table.')
+        self._edge.api.execute('/config/network', 'cleanStaticRoutes')
+        logger.info('Route table cleared.')
+
+
+class StaticRoutes711(BaseStaticRoutes):
+    """Edge Filer 7.11 Static Routes Configuration"""
+
+    def get(self):
+        """
+        Get Routes.
+        """
+        routes = []
+        for port, interface in enumerate(self._edge.api.get('/config/network/ports')):
+            for route in interface.ipv4StaticRoutes:
+                ip_network = str(ipaddress.IPv4Network(f'{route.destination}/{route.netmask}', False))
+                routes.append(StaticRoute(interface._uuid, port,  # pylint: disable=protected-access
+                                          interface.name, ip_network, route.gateway))
+        return routes
+
+    def _add_route(self, interface, gateway, network):
+        port = self._edge.network.deduce_port(interface)
+        param = Object()
+        param.destination = str(network.network_address)
+        param.netmask = str(network.netmask)
+        param.gateway = gateway
+        return self._edge.api.add(f'/config/network/ports/{port}/ipv4StaticRoutes', param)
+
+
+class LegacyStaticRoutes(BaseStaticRoutes):
+    """Legacy Static Routes Configuration"""
+
+    def get(self):
+        """
+        Get Routes.
+        """
+        network = self._edge.api.get('/config/network')
+        return [StaticRoute(
+            r._uuid, 0, network.ports[0].name,  # pylint: disable=protected-access
+            str(ipaddress.IPv4Network(r.DestIpMask.replace('_', '/'), False)), r.GwIP
+        ) for r in network.static_routes]
+
+    def add(self, gateway, network):  # pylint: disable=arguments-differ
+        """
+        Add a route.
+
+        :param str gateway: Gateway IP address
+        :param str network: Network (CIDR)
+        """
+        return super().add(0, gateway, network)
+
+    def _add_route(self, interface, gateway, network):  # pylint: disable=unused-argument
+        param = Object()
+        param.GwIP = gateway
+        param.DestIpMask = str(network).replace('/', '_')
+        return self._edge.api.add('/config/network/static_routes', param)
+
+
+class Hosts(BaseCommand):
+    """Edge Filer Static Route Configuration APIs"""
+
+    def get(self):
+        """
+        Get the Edge Filer's hosts file entries.
+        """
+        return self._edge.api.get('/config/network/hostsFileEntries')
+
+    def add(self, ipaddr, hostname):
+        """
+        Add entry to the Edge Filer's hosts file.
+
+        :param str ipaddr: IP Address
+        :param str hostname: Hostname
+        """
+        param = Object(ip=ipaddr, hostName=hostname)
+        return self._edge.api.add('/config/network/hostsFileEntries', param)
+
+    def delete(self, hostname):
+        return self._edge.api.delete(f'/config/network/hostsFileEntries/{hostname}')
+
+
+class Diagnostics(BaseCommand):
 
     def diagnose(self, services):
         """
@@ -167,161 +469,3 @@ class Network(BaseCommand):
             return task.result.res
         except TaskException as error:
             return error.task.result.res
-
-
-class Proxy(BaseCommand):
-    """Edge Filer Proxy Configuration APIs"""
-
-    def get_configuration(self):
-        """
-        Get Proxy Configuration
-        """
-        return self._edge.api.get('/config/network/proxy')
-
-    def is_enabled(self):
-        """
-        Check if Proxy Configuration is Enabled
-
-        :returns: ``True`` if a proxy server was configured and ``False`` otherwise.
-        :rtype: bool
-        """
-        return self._edge.api.get('/config/network/proxy/configurationMode') != 'NoProxy'
-
-    def modify(self, address, port=None, username=None, password=None):
-        """
-        Modify Proxy Configuration
-
-        :param str address: Proxy address
-        :param int,optional port: Proxy port, defaults to ``8080``
-        :param str,optional username: Username
-        :param str,optional password: Password
-        :returns: Proxy settings
-        :rtype: cterasdk.common.object.Object
-        """
-        return self._configure(True, address, port, username, password)
-
-    def _configure(self, enabled, address=None, port=None, username=None, password=None):
-        param = Object()
-        param._classname = 'ProxySettings'  # pylint: disable=protected-access
-        param.configurationMode = 'Manual' if enabled else 'NoProxy'
-        if enabled:
-            param.port = port if port else 8080
-            if address:
-                param.address = address
-            if username:
-                param.username = username
-            if password:
-                param.password = password
-        logger.info('Updating Proxy Server Configuration.')
-        response = self._edge.api.put('/config/network/proxy', param)
-        logger.info('Updated Proxy Server Configuration.')
-        return response
-
-    def disable(self):
-        """
-        Disable Proxy
-
-        :returns: Proxy settings
-        :rtype: cterasdk.common.object.Object
-        """
-        logger.info('Disabling Proxy.')
-        return self._configure(False)
-
-
-class MTU(BaseCommand):
-    """Edge Filer MTU Configuration APIs"""
-
-    def reset(self):
-        """
-        Set the default maximum transmission unit (MTU) settings
-        """
-        return self._configure(False, 1500)
-
-    def modify(self, mtu):
-        """
-        Set a custom network maximum transmission unit (MTU)
-
-        :param int mtu: Maximum transmission unit
-        """
-        return self._configure(True, mtu)
-
-    def _configure(self, jumbo, mtu):
-        settings = self._edge.api.get('/config/network/ports/0/ethernet')
-        settings.jumbo = jumbo
-        settings.mtu = mtu
-        logger.info('Configuring MTU. %s', {'MTU': mtu})
-        return self._edge.api.put('/config/network/ports/0/ethernet', settings)
-
-
-class StaticRoutes(BaseCommand):
-    """Edge Filer Static Route Configuration APIs"""
-
-    def get(self):
-        """
-        Get routes.
-        """
-        return [StaticRoute(r.DestIpMask, r.GwIP) for r in self._edge.api.get('/config/network/static_routes')]
-
-    def add(self, gateway, network):
-        """
-        Add a route.
-
-        :param str gateway: Gateway IP address
-        :param str network: Network (CIDR)
-        """
-        ipaddress.ip_address(gateway)
-        ipaddress.ip_network(network)
-        param = Object()
-        param.GwIP = gateway
-        param.DestIpMask = network.replace('/', '_')
-        try:
-            logger.info('Adding route for network: %s, to: %s', network, param.GwIP)
-            self._edge.api.add('/config/network/static_routes', param)
-            logger.info('Route added for network: %s, to: %s', network, param.GwIP)
-            return StaticRoute(network, gateway)
-        except CTERAException as error:
-            logger.error("Static route creation failed.")
-            raise CTERAException('Static route creation failed') from error
-
-    def delete(self, network):
-        """
-        Delete a route.
-
-        :param str network: Subnet mask (CIDR)
-        """
-        ipaddress.ip_network(network)
-        try:
-            logger.info('Deleting route for: %s', network)
-            self._edge.api.delete(f'/config/network/static_routes/{network.replace("/", "_")}')
-            logger.info('Route deleted. Subnet: %s', network)
-        except CTERAException as error:
-            logger.error("Static route deletion failed.")
-            raise CTERAException('Static route deletion failed') from error
-
-    def clear(self):
-        logger.info('Clearing route table.')
-        self._edge.api.execute('/config/network', 'cleanStaticRoutes')
-        logger.info('Route table cleared.')
-
-
-class Hosts(BaseCommand):
-    """Edge Filer Static Route Configuration APIs"""
-
-    def get(self):
-        """
-        Get the Edge Filer's hosts file entries.
-        """
-        return self._edge.api.get('/config/network/hostsFileEntries')
-
-    def add(self, ipaddr, hostname):
-        """
-        Add entry to the Edge Filer's hosts file.
-
-        :param str ipaddr: IP Address
-        :param str hostname: Hostname
-        """
-        param = Object(ip=ipaddr, hostName=hostname)
-        return self._edge.api.add('/config/network/hostsFileEntries', param)
-
-    def delete(self, hostname):
-        return self._edge.api.delete(f'/config/network/hostsFileEntries/{hostname}')

@@ -1,4 +1,5 @@
 from unittest import mock
+from datetime import datetime
 
 from cterasdk.common import Object
 from tests.ut.core.user import base_user
@@ -14,12 +15,13 @@ class BaseCoreServicesFilesList(base_user.BaseCoreServicesTest):
         self._path = 'Documents'
 
     def test_list_directory_str_arg(self):
+        self.patch_call("cterasdk.cio.core.commands.EnsureDirectory.execute")
         self._init_services()
         self._services.api.execute = mock.MagicMock(side_effect=BaseCoreServicesFilesList._fetch_resources_side_effect)
         iterator = self._services.files.listdir(self._path)
         files = BaseCoreServicesFilesList.files[0] + BaseCoreServicesFilesList.files[1]
         for item in iterator:
-            self.assertEqual(item.href, f'{self._base}/{files.pop(0)}')
+            self.assertEqual(item.path.absolute, f'{BaseCoreServicesFilesList.basepath}/{files.pop(0)}')
         self._services.api.execute.assert_has_calls(
             [
                 mock.call('', 'fetchResources', mock.ANY),
@@ -54,14 +56,28 @@ class BaseCoreServicesFilesList(base_user.BaseCoreServicesTest):
     @staticmethod
     def _fetch_resources_response(response, files):
         for file in files:
-            resource_info = BaseCoreServicesFilesList._create_resource_info(file)
             response.errorType = None
-            response.items.append(resource_info)
+            response.items.append(BaseCoreServicesFilesList._create_resource_info(file))
         return response
 
     @staticmethod
-    def _create_resource_info(path):
+    def _create_resource_info(name):
         resource_info = Object()
         resource_info._classname = 'ResourceInfo'  # pylint: disable=protected-access
-        resource_info.href = BaseCoreServicesFilesList.basepath + '/' + path
+        resource_info.href = BaseCoreServicesFilesList.basepath + '/' + name
+        resource_info.name = name
+        resource_info.fileId = 1
+        resource_info.isFolder = False
+        resource_info.isDeleted = False
+        resource_info.size = 1
+        resource_info.permalink = 'xyz'
+        resource_info.lastmodified = datetime.now().isoformat()
+        resource_info.cloudFolderInfo = Object(
+            uid=1,
+            name='Volume name',
+            groupUid=1,
+            passphraseProtected=False,
+            ownerUid=1,
+            ownerFriendlyName='First Last'
+        )
         return resource_info

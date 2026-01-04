@@ -2,19 +2,16 @@ import logging
 
 from .base_command import BaseCommand
 from ..lib import X509Certificate, PrivateKey, create_certificate_chain
-from ..common import Object
+from ..common import Object, BaseModule
 
 
 logger = logging.getLogger('cterasdk.edge')
 
 
-def initialize(edge):
-    """
-    Conditional intialization of the Edge Filer SSL Module.
-    """
-    if edge.session().software_version > '7.8':
-        return SSLv78(edge)
-    return SSLv1(edge)
+class SSLModule(BaseModule):
+
+    def initialize_version(self, software_version):
+        return SSLv78 if software_version > '7.8' else SSLv1
 
 
 class SSL(BaseCommand):

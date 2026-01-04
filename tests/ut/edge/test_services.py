@@ -42,10 +42,10 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         self._init_filer()
         self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
         self._filer.tasks.wait = mock.MagicMock()
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
+        self._filer.network.diag.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
         services.Services(self._filer).activate(self._server, self._user, self._code)
 
-        self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
+        self._filer.network.diag.tcp_connect.assert_called_once_with(self._cttp_service)
         self._filer.api.execute.assert_called_once_with('/status/services', 'attachAndSave', mock.ANY)
         self._filer.tasks.wait.assert_called_once_with(TestEdgeServices._background_task_id)
         expected_param = self._get_attach_and_save_param(False, use_activation_code=True)
@@ -66,11 +66,11 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         self._init_filer()
         self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
         self._filer.tasks.wait = mock.MagicMock()
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
+        self._filer.network.diag.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
 
         services.Services(self._filer).connect(self._server, self._user, self._password)
 
-        self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
+        self._filer.network.diag.tcp_connect.assert_called_once_with(self._cttp_service)
         self._filer.api.execute.assert_has_calls(
             [
                 mock.call('/status/services', 'isWebSsoEnabled', mock.ANY),
@@ -97,20 +97,20 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
             1)
 
     def test_connect_tcp_connect_error(self):
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, False))
+        self._filer.network.diag.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, False))
         with self.assertRaises(ConnectionError) as error:
             services.Services(self._filer).connect(self._server, self._user, self._password)
-        self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
+        self._filer.network.diag.tcp_connect.assert_called_once_with(self._cttp_service)
         self.assertEqual(f'Unable to establish CTTP connection {self._server}:{self._cttp_port}', str(error.exception))
 
     def test_connect_require_sso_failure(self):
         self._init_filer(execute_response=TestEdgeServices._check_web_sso_require_sso())
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
+        self._filer.network.diag.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
 
         with self.assertRaises(exceptions.CTERAException) as error:
             services.Services(self._filer).connect(self._server, self._user, self._password)
 
-        self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
+        self._filer.network.diag.tcp_connect.assert_called_once_with(self._cttp_service)
         self._filer.api.execute.assert_called_once_with('/status/services', 'isWebSsoEnabled', mock.ANY)
         expected_param = self._get_is_web_sso_param(False)
         actual_param = self._filer.api.execute.call_args[0][2]
@@ -122,12 +122,12 @@ class TestEdgeServices(base_edge.BaseEdgeTest):  # pylint: disable=too-many-inst
         self._filer.api.execute = mock.MagicMock(side_effect=TestEdgeServices._mock_execute_connect_ok)
         task_error_side_effect = TestEdgeServices._get_task_error()
         self._filer.tasks.wait = mock.MagicMock(side_effect=task_error_side_effect)
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
+        self._filer.network.diag.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._server, self._cttp_port, True))
 
         with self.assertRaises(exceptions.CTERAException) as error:
             services.Services(self._filer).connect(self._server, self._user, self._password)
 
-        self._filer.network.tcp_connect.assert_called_once_with(self._cttp_service)
+        self._filer.network.diag.tcp_connect.assert_called_once_with(self._cttp_service)
         self._filer.api.execute.assert_has_calls(
             [
                 mock.call('/status/services', 'isWebSsoEnabled', mock.ANY),

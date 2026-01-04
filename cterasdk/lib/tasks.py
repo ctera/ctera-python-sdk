@@ -74,6 +74,12 @@ class PortalTask(BaseTask):
         self.progress_str = task.progstring
         self.tenant = task.portalUid
 
+    def unknown_object(self):
+        match = re.search(r'(?<=^Resource,\ )(.+(?=\ ,\ ))', self.progress_str)
+        if match and self.progress_str[match.end() + 3:] == "doesn't exist.":
+            return False
+        return True
+
 
 class FilesystemTask(PortalTask):
     """

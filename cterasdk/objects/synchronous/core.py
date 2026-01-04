@@ -108,9 +108,9 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
 
     @property
     def _omit_fields(self):
-        return super()._omit_fields + ['activation', 'admins', 'cloudfs', 'credentials', 'devices', 'directoryservice', 'domains', 'files',
-                                       'firmwares', 'groups', 'logs', 'plans', 'reports', 'roles', 'settings', 'tasks', 'templates',
-                                       'users']
+        return super()._omit_fields + ['activation', 'admins', 'backups', 'cloudfs', 'credentials', 'devices', 'directoryservice',
+                                       'domains', 'files', 'firmwares', 'groups', 'logs', 'plans', 'reports', 'roles', 'settings',
+                                       'storage_classes', 'tasks', 'templates', 'users']
 
 
 class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes
