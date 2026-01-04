@@ -1140,3 +1140,6 @@ class Rename(Move):
     @property
     def _error_object(self):
         return exceptions.io.core.RenameError
+
+    def _handle_response(self, r):
+        return self.paths[0][1]
