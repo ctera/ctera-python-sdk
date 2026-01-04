@@ -21,7 +21,7 @@ class BaseCoreServicesFilesList(base_user.BaseCoreServicesTest):
         iterator = self._services.files.listdir(self._path)
         files = BaseCoreServicesFilesList.files[0] + BaseCoreServicesFilesList.files[1]
         for item in iterator:
-            self.assertEqual(item.href, f'{self._base}/{files.pop(0)}')
+            self.assertEqual(item.path.absolute, f'{BaseCoreServicesFilesList.basepath}/{files.pop(0)}')
         self._services.api.execute.assert_has_calls(
             [
                 mock.call('', 'fetchResources', mock.ANY),
@@ -61,10 +61,11 @@ class BaseCoreServicesFilesList(base_user.BaseCoreServicesTest):
         return response
 
     @staticmethod
-    def _create_resource_info(path):
+    def _create_resource_info(name):
         resource_info = Object()
         resource_info._classname = 'ResourceInfo'  # pylint: disable=protected-access
-        resource_info.href = BaseCoreServicesFilesList.basepath + '/' + path
+        resource_info.href = BaseCoreServicesFilesList.basepath + '/' + name
+        resource_info.name = name
         resource_info.fileId = 1
         resource_info.isFolder = False
         resource_info.isDeleted = False
