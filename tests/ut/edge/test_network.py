@@ -279,8 +279,8 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
         self._init_filer(get_response=get_response)
         ret = network.LegacyNetwork(self._filer).routes.get()
         self._filer.api.get.assert_called_once_with('/config/network')
-        self.assertEqual(ret[0].gateway, get_response[0].GwIP)
-        self.assertEqual(ret[0].network, get_response[0].DestIpMask)
+        self.assertEqual(ret[0].gateway, get_response.static_routes.GwIP)
+        self.assertEqual(ret[0].network, get_response.static_routes.DestIpMask)
 
     def test_remove_static_route(self):
         self._init_filer()
