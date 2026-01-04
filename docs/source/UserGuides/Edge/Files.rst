@@ -127,7 +127,7 @@ Downloading Files
    zip_path = edge.files.download_many('network-share/docs', ['Keystone Project.docx', 'Keystone Model.docx'])
 
 Creating Directories
--------------------
+--------------------
 
 .. automethod:: cterasdk.edge.files.browser.FileBrowser.mkdir
    :noindex:

@@ -4,7 +4,8 @@ File Browser
 
 This article describes the file-browser APIs available in the CTERA Portal, which provide programmatic access to files and directories.
 
-The APIs support both **synchronous** and **asynchronous** execution models, enabling developers to choose the approach best suited to their integration needs, from real-time operations to background processing.
+The APIs support both **synchronous** and **asynchronous** execution models, enabling developers to choose the approach
+best suited to their integration needs, from real-time operations to background processing.
 
 Preface: Authentication
 =======================
@@ -114,7 +115,7 @@ Listing Files and Directories
            files.download(resource.path)
 
 Listing Files from Previous Versions
------------------------------------
+------------------------------------
 
 .. automethod:: cterasdk.core.files.browser.FileBrowser.versions
    :noindex:
@@ -257,7 +258,7 @@ Uploading Files
 
    name = 'Keystone Project.docx'
    destination = 'My Files'
-   
+
    # Upload from file handle
    with open('/tmp/Keystone Project.docx', 'rb') as f:
        remote_path = files.upload(name, destination, f)
@@ -421,7 +422,7 @@ Managing S3 Credentials
 CTERA Portal supports programmatic access to cloud storage via the S3 protocol, also known as *CTERA Fusion*.
 This allows users and administrators to manage files and folders using standard S3 tools and SDKs, such as the Amazon SDK for Python (`boto3 <https://pypi.org/project/boto3/>`_).
 
-For details on enabling CTERA Fusion and supported S3 features, 
+For details on enabling CTERA Fusion and supported S3 features,
 see the `CTERA KB article <https://kb.ctera.com/docs/setting-up-access-to-portal-content-using-the-s3-api-ctera-fusion>`_.
 
 The following example demonstrates how to create S3 credentials and interact with the portal using `boto3`.
