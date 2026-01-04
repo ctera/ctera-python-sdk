@@ -1142,4 +1142,5 @@ class Rename(Move):
         return exceptions.io.core.RenameError
 
     def _handle_response(self, r):
-        return self.paths[0][1]
+        response = super()._handle_response(r)
+        return self.paths[0][1].relative if self.block else response
