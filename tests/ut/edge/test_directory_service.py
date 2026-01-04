@@ -40,11 +40,11 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self._init_filer()
         get_response_side_effect = TestEdgeDirectoryService._get_response_side_effect(self._get_workgroup_param(), None)
         self._filer.api.get = mock.MagicMock(side_effect=get_response_side_effect)
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
+        self._filer.network.diag.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
 
         directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, check_connection=True)
 
-        self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
+        self._filer.network.diag.tcp_connect.assert_called_once_with(self._ldap_service)
         self._filer.api.get.assert_has_calls([
             mock.call('/config/fileservices/cifs/passwordServer'),
             mock.call('/config/fileservices/cifs')
@@ -65,11 +65,11 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         ou_path = "ou=North America,DC=ctera,DC=local"
         get_response_side_effect = TestEdgeDirectoryService._get_response_side_effect(self._get_workgroup_param(), None)
         self._filer.api.get = mock.MagicMock(side_effect=get_response_side_effect)
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
+        self._filer.network.diag.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
 
         directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, ou_path, check_connection=True)
 
-        self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
+        self._filer.network.diag.tcp_connect.assert_called_once_with(self._ldap_service)
         self._filer.api.get.assert_has_calls([
             mock.call('/config/fileservices/cifs/passwordServer'),
             mock.call('/config/fileservices/cifs')
@@ -98,13 +98,13 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
         self._init_filer()
         get_response_side_effect = TestEdgeDirectoryService._get_response_side_effect(self._get_workgroup_param(), None)
         self._filer.api.get = mock.MagicMock(side_effect=get_response_side_effect)
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
+        self._filer.network.diag.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, True))
         self._filer.api.execute = mock.MagicMock(side_effect=TaskException('Task failed', self._task_id))
 
         with self.assertRaises(exceptions.CTERAException):
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, check_connection=True)
 
-        self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
+        self._filer.network.diag.tcp_connect.assert_called_once_with(self._ldap_service)
 
         self._filer.api.get.assert_has_calls([
             mock.call('/config/fileservices/cifs/passwordServer'),
@@ -123,13 +123,13 @@ class TestEdgeDirectoryService(base_edge.BaseEdgeTest):  # pylint: disable=too-m
 
     def test_connect_connection_error(self):
         self._init_filer(get_response=None)
-        self._filer.network.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, False))
+        self._filer.network.diag.tcp_connect = mock.MagicMock(return_value=TCPConnectResult(self._domain, self._ldap_port, False))
 
         with self.assertRaises(ConnectionError) as error:
             directoryservice.DirectoryService(self._filer).connect(self._domain, self._username, self._password, check_connection=True)
 
         self._filer.api.get.assert_called_once_with('/config/fileservices/cifs/passwordServer')
-        self._filer.network.tcp_connect.assert_called_once_with(self._ldap_service)
+        self._filer.network.diag.tcp_connect.assert_called_once_with(self._ldap_service)
         self.assertEqual(f'Unable to establish LDAP connection {self._domain}:{self._ldap_port}', str(error.exception))
 
     def test_get_advanced_mapping(self):
