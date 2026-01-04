@@ -365,7 +365,7 @@ class OpenMany(PortalCommand):
 
     def __init__(self, function, receiver, resource, directory, *objects):
         super().__init__(function, receiver)
-        self.cloudfolder = str(resource.cloudFolderInfo.uid)
+        self.uid = str(resource.cloudFolderInfo.uid)
         self.directory = automatic_resolution(directory, receiver.context)
         self.objects = objects
 
@@ -383,38 +383,39 @@ class OpenMany(PortalCommand):
 
     def _execute(self):
         with self.trace_execution():
-            return self._function(self._receiver, self.cloudfolder, self.get_parameter())
+            return self._function(self._receiver, self.uid, self.get_parameter())
 
     async def _a_execute(self):
         with self.trace_execution():
-            return await self._function(self._receiver, self.cloudfolder, self.get_parameter())
+            return await self._function(self._receiver, self.uid, self.get_parameter())
 
 
 class DownloadMany(PortalCommand):
 
-    def __init__(self, function, receiver, target, objects, destination):
+    def __init__(self, function, receiver, resource, directory, objects, destination):
         super().__init__(function, receiver)
-        self.target = automatic_resolution(target, receiver.context)
+        self.resource = resource
+        self.directory = automatic_resolution(directory, receiver.context)
         self.objects = objects
         self.destination = destination
 
     def get_parameter(self):
-        return commonfs.determine_directory_and_filename(self.target.reference, self.objects, destination=self.destination, archive=True)
+        return commonfs.determine_directory_and_filename(self.directory.reference, self.objects, destination=self.destination, archive=True)
 
     def _before_command(self):
         for o in self.objects:
-            logger.info('Downloading: %s', self.target.join(o).relative)
+            logger.info('Downloading: %s', self.directory.join(o).relative)
 
     def _execute(self):
         directory, name = self.get_parameter()
         with self.trace_execution():
-            with OpenMany(self._function, self._receiver, self.target, *self.objects) as handle:
+            with OpenMany(self._function, self._receiver, self.resource, self.directory, *self.objects) as handle:
                 return synfs.write(directory, name, handle)
 
     async def _a_execute(self):
         directory, name = self.get_parameter()
         with self.trace_execution():
-            async with OpenMany(self._function, self._receiver, self.target, *self.objects) as handle:
+            async with OpenMany(self._function, self._receiver, self.resource, self.directory, *self.objects) as handle:
                 return await asynfs.write(directory, name, handle)
 
 

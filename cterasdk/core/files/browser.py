@@ -48,22 +48,23 @@ class FileBrowser(BaseCommand):
         """
         return Download(io.handle, self._core, path, destination).execute()
 
-    def download_many(self, target, objects, destination=None):
+    def download_many(self, directory, objects, destination=None):
         """
         Download selected files and/or directories as a ZIP archive.
 
         .. warning::
             Only existing files and directories will be included in the resulting ZIP file.
 
-        :param str target: Path to the cloud folder containing files and directories.
-        :param list[str] objects: List of file and/or directory names to include.
+        :param str directory: Path to a folder.
+        :param list[str] objects: List of files and / or directory names to download.
         :param str destination: Optional path to destination file or directory. Defaults to the default download directory.
         :returns: Path to the local file.
         :rtype: str
         :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
         :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
         """
-        return DownloadMany(io.handle_many, self._core, target, objects, destination).execute()
+        with EnsureDirectory(io.listdir, self._core, directory) as (_, resource):
+            return DownloadMany(io.handle_many, self._core, resource, directory, objects, destination).execute()
 
     def listdir(self, path=None, include_deleted=False):
         """
