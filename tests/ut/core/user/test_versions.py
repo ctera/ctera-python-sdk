@@ -10,7 +10,7 @@ class BaseCoreServicesFilesVersions(base_user.BaseCoreServicesTest):
         self._init_services(execute_response=[self._create_snapshot_response(directory, True)])
         ret = self._services.files.versions(directory)
         self._services.api.execute.assert_called_once_with('', 'listSnapshots', f'{self._base}/{directory}')
-        self.assertEqual(str(ret.path), directory)
+        self.assertEqual(str(ret[0].path), directory)
 
     def _create_snapshot_response(self, path, current):
         return munch.Munch({
