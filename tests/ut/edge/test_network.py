@@ -270,7 +270,7 @@ class TestEdgeNetwork(base_edge.BaseEdgeTest):  # pylint: disable=too-many-publi
 
     def test_get_all_static_routes(self):
         get_response = Object()
-        get_response.ports = ['LAN']
+        get_response.ports = [Object(name='LAN')]
         get_response.static_routes = [Object(**{
             '_uuid': 'abc',
             'GwIP': self._static_route_gateway,

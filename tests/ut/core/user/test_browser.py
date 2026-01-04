@@ -1,6 +1,7 @@
 from unittest import mock
 from urllib.parse import quote
 from datetime import datetime, timedelta
+import munch
 
 from cterasdk.common.object import Object
 from cterasdk.core.tasks import AwaitablePortalTask
@@ -19,11 +20,17 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self.new_filename = 'Summary.txt'
 
     def test_versions(self):
-        response = 'snapshots-response-object'
-        self._init_global_admin(execute_response=response)
+        directory = 'Users/John Smith/My Files'
+        self._init_global_admin(execute_response=[munch.Munch({
+            'url': TestSynchronousFileBrowser.scope,
+            'path': directory,
+            'current': True,
+            'startTimestamp': datetime.now().isoformat(),
+            'calculatedTimestamp': datetime.now().isoformat()
+        })])
         ret = self._global_admin.files.versions(self.directory)
         self._global_admin.api.execute.assert_called_once_with('', 'listSnapshots', f'{TestSynchronousFileBrowser.scope}/{self.directory}')
-        self.assertEqual(ret, response)
+        self.assertEqual(str(ret[0].path), directory)
 
     def test_listdir(self):
         for include_deleted in [True, False]:
