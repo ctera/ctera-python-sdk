@@ -77,18 +77,22 @@ This section describes the core objects returned by the file-browser APIs.
 .. autoclass:: cterasdk.cio.core.types.PortalResource
    :members:
    :undoc-members:
+   :noindex:
 
 .. autoclass:: cterasdk.cio.core.types.PortalVolume
    :members:
    :undoc-members:
+   :noindex:
 
 .. autoclass:: cterasdk.cio.core.types.VolumeOwner
    :members:
    :undoc-members:
+   :noindex:
 
 .. autoclass:: cterasdk.cio.core.types.PreviousVersion
    :members:
    :undoc-members:
+   :noindex:
 
 Synchronous API
 ===============
@@ -219,7 +223,7 @@ Downloading Files
 Create Directories
 ------------------
 
-.. automethod:: cterasdk.core.files.cloud.CloudDrive.mkdir
+.. automethod:: cterasdk.core.files.browser.CloudDrive.mkdir
    :noindex:
 
 .. code-block:: python
@@ -227,7 +231,7 @@ Create Directories
    new_dir = files.mkdir('My Files/NewProject')
    print(f'Created directory: {new_dir}')
 
-.. automethod:: cterasdk.core.files.cloud.CloudDrive.makedirs
+.. automethod:: cterasdk.core.files.browser.CloudDrive.makedirs
    :noindex:
 
 .. code-block:: python
@@ -238,7 +242,7 @@ Create Directories
 Uploading Files
 ---------------
 
-.. automethod:: cterasdk.core.files.cloud.CloudDrive.upload_file
+.. automethod:: cterasdk.core.files.browser.CloudDrive.upload_file
    :noindex:
 
 .. code-block:: python
@@ -251,7 +255,7 @@ Uploading Files
    remote_path = files.upload_file('/tmp/Keystone Project.docx', 'My Files/Keystone 2026.docx')
    print(f'File uploaded to: {remote_path}')
 
-.. automethod:: cterasdk.core.files.cloud.CloudDrive.upload
+.. automethod:: cterasdk.core.files.browser.CloudDrive.upload
    :noindex:
 
 .. code-block:: python
@@ -271,7 +275,7 @@ Uploading Files
 Renaming Files and Folders
 --------------------------
 
-.. automethod:: cterasdk.core.files.cloud.CloudDrive.rename
+.. automethod:: cterasdk.core.files.browser.CloudDrive.rename
    :noindex:
 
 .. code-block:: python
@@ -298,7 +302,7 @@ Copying and Moving Files and Folders
    )
    print(f'Files copied with explicit paths: {result}')
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.move
+.. automethod:: cterasdk.core.files.browser.CloudDrive.move
    :noindex:
 
 .. code-block:: python
@@ -317,7 +321,7 @@ Copying and Moving Files and Folders
 Delete or Recovering Files and Folders
 --------------------------------------
 
-.. automethod:: cterasdk.core.files.cloud.CloudDrive.delete
+.. automethod:: cterasdk.core.files.browser.CloudDrive.delete
    :noindex:
 
 .. code-block:: python
@@ -328,7 +332,7 @@ Delete or Recovering Files and Folders
    result = files.delete('My Files/Project Keystone.docx', 'My Files/Keystone Notes.txt', 'Archive/Keystone')
    print(f'Deleted multiple files/folders: {result}')
 
-.. automethod:: cterasdk.core.files.cloud.CloudDrive.undelete
+.. automethod:: cterasdk.core.files.browser.CloudDrive.undelete
    :noindex:
 
 .. code-block:: python

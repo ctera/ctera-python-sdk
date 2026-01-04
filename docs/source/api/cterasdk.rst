@@ -14,6 +14,7 @@ Subpackages
     cterasdk.asynchronous
     cterasdk.clients
     cterasdk.common
+    cterasdk.cio
     cterasdk.convert
     cterasdk.core
     cterasdk.direct
