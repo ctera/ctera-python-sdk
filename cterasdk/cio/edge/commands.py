@@ -22,7 +22,7 @@ def split_file_directory(listdir, receiver, destination):
         * The path refers to an existing directory
         * The parent directory of the path exists
 
-    :raises GetMetadataError: If neither the path nor its parent directory exist.
+    :raises cterasdk.exceptions.io.edge.GetMetadataError: If neither the path nor its parent directory exist.
     """
     is_dir, *_ = EnsureDirectory(listdir, receiver, destination, True).execute()
     if not is_dir:
@@ -42,7 +42,7 @@ async def a_split_file_directory(listdir, receiver, destination):
         * The path refers to an existing directory
         * The parent directory of the path exists
 
-    :raises GetMetadataError: If neither the path nor its parent directory exist.
+    :raises cterasdk.exceptions.io.edge.GetMetadataError: If neither the path nor its parent directory exist.
     """
     is_dir, *_ = await EnsureDirectory(listdir, receiver, destination, True).a_execute()
     if not is_dir:
