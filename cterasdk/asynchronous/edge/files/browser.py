@@ -176,7 +176,7 @@ class FileBrowser(BaseCommand):
         """
         if destination is None:
             raise ValueError('Copy destination was not specified.')
-        return await Copy(io.copy, self._edge, path, destination, overwrite).a_execute()
+        return await Copy(io.copy, self._edge, io.listdir, path, destination, overwrite).a_execute()
 
     async def move(self, path, destination=None, overwrite=False):
         """
@@ -189,7 +189,7 @@ class FileBrowser(BaseCommand):
         """
         if destination is None:
             raise ValueError('Move destination was not specified.')
-        return await Move(io.move, self._edge, path, destination, overwrite).a_execute()
+        return await Move(io.move, self._edge, io.listdir, path, destination, overwrite).a_execute()
 
     async def rename(self, path, name, overwrite=False):
         """
@@ -202,7 +202,7 @@ class FileBrowser(BaseCommand):
         :rtype: str
         :raises cterasdk.exceptions.io.edge.RenameError: Raised on error to rename a file or directory.
         """
-        return await Rename(io.move, self._edge, path, name, overwrite).a_execute()
+        return await Rename(io.move, self._edge, io.listdir, path, name, overwrite).a_execute()
 
     async def delete(self, path):
         """

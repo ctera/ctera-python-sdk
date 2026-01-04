@@ -623,7 +623,7 @@ class CreateDirectory(PortalCommand):
                 try:
                     CreateDirectory(self._function, self._receiver, path).execute()
                 except exceptions.io.core.CreateDirectoryError as e:
-                    self._suppress_file_conflict_error(e)
+                    CreateDirectory._suppress_file_conflict_error(e)
         with self.trace_execution():
             return self._function(self._receiver, self.get_parameter())
 
@@ -633,11 +633,12 @@ class CreateDirectory(PortalCommand):
                 try:
                     await CreateDirectory(self._function, self._receiver, path).a_execute()
                 except exceptions.io.core.CreateDirectoryError as e:
-                    self._suppress_file_conflict_error(e)
+                    CreateDirectory._suppress_file_conflict_error(e)
         with self.trace_execution():
             return await self._function(self._receiver, self.get_parameter())
 
-    def _suppress_file_conflict_error(self, e):
+    @staticmethod
+    def _suppress_file_conflict_error(e):
         if not isinstance(e.__cause__, exceptions.io.core.FileConflictError):
             raise e
 
