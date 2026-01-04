@@ -33,6 +33,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self.assertEqual(str(ret[0].path), directory)
 
     def test_listdir(self):
+        self.patch_call("cterasdk.cio.core.commands.EnsureDirectory.execute")
         for include_deleted in [True, False]:
             self._init_global_admin(execute_response=Object(**{
                 'errorType': None,
