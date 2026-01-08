@@ -188,6 +188,13 @@ class Collaborator:
         self.access = FileAccessMode.PO
         return self
 
+    def upload_only(self):
+        """
+        Grant upload only access
+        """
+        self.access = FileAccessMode.UO
+        return self
+
     def no_access(self):
         """
         Deny access

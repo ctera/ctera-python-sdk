@@ -314,7 +314,7 @@ class PortalVolume(Object):
     :ivar str name: Cloud Drive Folder Name
     :ivar int group: Folder Group ID
     :ivar bool protected: Passphrase-Protected
-    :ivar cterasdk.core.types.VolumeOwner owner: Volume owner information.
+    :ivar cterasdk.cio.core.types.VolumeOwner owner: Volume owner information.
     """
     def __init__(self, i, name, group, protected, owner):
         super().__init__(id=i, name=name, group=group, protected=protected, owner=owner)
