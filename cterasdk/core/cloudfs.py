@@ -625,6 +625,64 @@ class Zones(BaseCommand):
             logger.error('Failed adding folders to zone.')
             raise CTERAException(f'Failed adding folders to zone: {name}') from error
 
+    def add_users(self, name, user_accounts):
+        """
+        Add users to a zone
+
+        :param str name: The name of the zone
+        :param list[cterasdk.core.types.UserAccount] user_accounts: List of user accounts to add
+        """
+        zone = self._core.cloudfs.zones.get(name)
+        info = self._zone_info(zone.zoneId)
+        description = info.description if hasattr(info, 'description') else None
+        param = self._zone_param(info.name, info.policyType, description, info.zoneId)
+
+        param.delta.usersDelta = Object()
+        param.delta.usersDelta._classname = 'ZoneUserDelta'  # pylint: disable=protected-access
+        param.delta.usersDelta.added = []
+        param.delta.usersDelta.removed = []
+
+        for user_account in user_accounts:
+            user = self._core.users.get(user_account, include=['uid'])
+            param.delta.usersDelta.added.append(user.uid)
+
+        logger.info('Adding users to zone. %s', {'zone': info.name})
+
+        try:
+            self._save(param)
+        except CTERAException as error:
+            logger.error('Failed adding users to zone.')
+            raise CTERAException(f'Failed adding users to zone: {name}') from error
+
+    def remove_users(self, name, user_accounts):
+        """
+        Remove users from a zone
+
+        :param str name: The name of the zone
+        :param list[cterasdk.core.types.UserAccount] user_accounts: List of user accounts to remove
+        """
+        zone = self._core.cloudfs.zones.get(name)
+        info = self._zone_info(zone.zoneId)
+        description = info.description if hasattr(info, 'description') else None
+        param = self._zone_param(info.name, info.policyType, description, info.zoneId)
+
+        param.delta.usersDelta = Object()
+        param.delta.usersDelta._classname = 'ZoneUserDelta'  # pylint: disable=protected-access
+        param.delta.usersDelta.added = []
+        param.delta.usersDelta.removed = []
+
+        for user_account in user_accounts:
+            user = self._core.users.get(user_account, include=['uid'])
+            param.delta.usersDelta.removed.append(user.uid)
+
+        logger.info('Removing users from zone. %s', {'zone': info.name})
+
+        try:
+            self._save(param)
+        except CTERAException as error:
+            logger.error('Failed removing users from zone.')
+            raise CTERAException(f'Failed removing users from zone: {name}') from error
+
     def _zone_info(self, zid):
         logger.debug('Obtaining zone info. %s', {'id': zid})
         response = self._core.api.execute('', 'getZoneBasicInfo', zid)
