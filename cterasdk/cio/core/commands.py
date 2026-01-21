@@ -20,6 +20,30 @@ from ..actions import PortalCommand
 logger = logging.getLogger('cterasdk.core')
 
 
+def _is_permission_denied_message(message):
+    msg = (message or '').lower()
+    return (
+        'permission' in msg
+        or 'denied' in msg
+        or 'read only' in msg
+        or 'action is not allowed' in msg
+    )
+
+
+def _raise_strict_permission_denied(result, path):
+    if result is None:
+        raise exceptions.io.core.PrivilegeError(path)
+    if isinstance(result, str) and not result.strip():
+        raise exceptions.io.core.PrivilegeError(path)
+
+    msg = getattr(result, 'msg', None)
+    rc = getattr(result, 'rc', None)
+    if msg and _is_permission_denied_message(msg):
+        raise exceptions.io.core.PrivilegeError(path)
+    if msg in (None, '') and rc in (0, '0', None):
+        raise exceptions.io.core.PrivilegeError(path)
+
+
 def split_file_directory(listdir, receiver, destination):
     """
     Split a path into its parent directory and final component.
@@ -120,12 +144,13 @@ def ensure_writeable(resource, directory):
 
 class Upload(PortalCommand):
 
-    def __init__(self, function, receiver, listdir, destination, fd, name, size):
+    def __init__(self, function, receiver, listdir, destination, fd, name, size, strict_permission=False):
         super().__init__(function, receiver)
         self.destination = automatic_resolution(destination, receiver.context)
         self._resolver = PathResolver(listdir, receiver, self.destination, name)
         self.size = size
         self.fd = fd
+        self._strict_permission = strict_permission
         self._resource = None
 
     def get_parameter(self):
@@ -156,6 +181,8 @@ class Upload(PortalCommand):
 
     def _handle_response(self, r):
         path = self.destination.relative
+        if self._strict_permission:
+            _raise_strict_permission_denied(r, path)
         if r.rc:
             error = exceptions.io.core.UploadError(r.msg, path)
             logger.error('Upload failed: %s', path)
@@ -596,10 +623,11 @@ class ListVersions(PortalCommand):
 class CreateDirectory(PortalCommand):
     """Create Directory"""
 
-    def __init__(self, function, receiver, path, parents=False):
+    def __init__(self, function, receiver, path, parents=False, strict_permission=False):
         super().__init__(function, receiver)
         self.path = automatic_resolution(path, receiver.context)
         self.parents = parents
+        self._strict_permission = strict_permission
 
     def get_parameter(self):
         param = Object()
@@ -622,7 +650,12 @@ class CreateDirectory(PortalCommand):
         if self.parents:
             for path in self._parents_generator():
                 try:
-                    CreateDirectory(self._function, self._receiver, path).execute()
+                    CreateDirectory(
+                        self._function,
+                        self._receiver,
+                        path,
+                        strict_permission=self._strict_permission
+                    ).execute()
                 except exceptions.io.core.CreateDirectoryError as e:
                     CreateDirectory._suppress_file_conflict_error(e)
         with self.trace_execution():
@@ -632,7 +665,12 @@ class CreateDirectory(PortalCommand):
         if self.parents:
             for path in self._parents_generator():
                 try:
-                    await CreateDirectory(self._function, self._receiver, path).a_execute()
+                    await CreateDirectory(
+                        self._function,
+                        self._receiver,
+                        path,
+                        strict_permission=self._strict_permission
+                    ).a_execute()
                 except exceptions.io.core.CreateDirectoryError as e:
                     CreateDirectory._suppress_file_conflict_error(e)
         with self.trace_execution():
@@ -645,6 +683,8 @@ class CreateDirectory(PortalCommand):
 
     def _handle_response(self, r):
         path = self.path.relative
+        if self._strict_permission:
+            _raise_strict_permission_denied(r, path)
         if r is None or r == 'Ok':
             return path
 
@@ -903,10 +943,11 @@ class UnShare(Share):
 
 class TaskCommand(PortalCommand):
 
-    def __init__(self, function, receiver, block):
+    def __init__(self, function, receiver, block, strict_permission=False):
         super().__init__(function, receiver)
         self.block = block
         self.background = True
+        self._strict_permission = strict_permission
 
     @abstractmethod
     def _progress_str(self):
@@ -938,6 +979,11 @@ class TaskCommand(PortalCommand):
             return await function(self.get_parameter())
 
     def _handle_response(self, r):
+        if self._strict_permission:
+            msg = getattr(r, 'msg', None)
+            error_type = getattr(r, 'error_type', None)
+            if _is_permission_denied_message(str(msg)) or _is_permission_denied_message(str(error_type)):
+                raise exceptions.io.core.PrivilegeError('')
         if not self.block:
             return r
 
@@ -958,8 +1004,8 @@ class TaskCommand(PortalCommand):
 
 class MultiResourceCommand(TaskCommand):
 
-    def __init__(self, function, receiver, block, *paths):
-        super().__init__(function, receiver, block)
+    def __init__(self, function, receiver, block, *paths, strict_permission=False):
+        super().__init__(function, receiver, block, strict_permission=strict_permission)
         self.paths = list(automatic_resolution(paths, receiver.context))
 
     def get_parameter(self):
@@ -998,8 +1044,9 @@ class Recover(MultiResourceCommand):
 
 class ResolverCommand(TaskCommand):
 
-    def __init__(self, function, receiver, block, *paths, destination=None, resolver=None, cursor=None):
-        super().__init__(function, receiver, block)
+    def __init__(self, function, receiver, block, *paths, destination=None, resolver=None, cursor=None,
+                 strict_permission=False):
+        super().__init__(function, receiver, block, strict_permission=strict_permission)
         self.paths = list(automatic_resolution(paths, receiver.context))
         self.destination = automatic_resolution(destination, receiver.context)
         self.resolver = resolver
@@ -1088,11 +1135,13 @@ class Copy(ResolverCommand):
 
     def _try_with_resolver(self, cursor):
         return Copy(self._function, self._receiver, self.block, *self.paths,
-                    destination=self.destination, resolver=self.resolver, cursor=cursor).execute()
+                    destination=self.destination, resolver=self.resolver, cursor=cursor,
+                    strict_permission=self._strict_permission).execute()
 
     async def _a_try_with_resolver(self, cursor):
         return await Copy(self._function, self._receiver, self.block, *self.paths,
-                          destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
+                          destination=self.destination, resolver=self.resolver, cursor=cursor,
+                          strict_permission=self._strict_permission).a_execute()
 
     @property
     def _error_object(self):
@@ -1106,11 +1155,13 @@ class Move(ResolverCommand):
 
     def _try_with_resolver(self, cursor):
         return Move(self._function, self._receiver, self.block, *self.paths,
-                    destination=self.destination, resolver=self.resolver, cursor=cursor).execute()
+                    destination=self.destination, resolver=self.resolver, cursor=cursor,
+                    strict_permission=self._strict_permission).execute()
 
     async def _a_try_with_resolver(self, cursor):
         return await Move(self._function, self._receiver, self.block, *self.paths,
-                          destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
+                          destination=self.destination, resolver=self.resolver, cursor=cursor,
+                          strict_permission=self._strict_permission).a_execute()
 
     @property
     def _error_object(self):
@@ -1122,21 +1173,26 @@ class Rename(Move):
     def _progress_str(self):
         return 'Renaming'
 
-    def __init__(self, function, receiver, block, path, new_name, resolver, cursor=None):
-        super().__init__(function, receiver, block,
-                         *[(path, automatic_resolution(path, receiver.context).parent.join(new_name))],
-                         resolver=resolver, cursor=cursor
-                         )
+    def __init__(self, function, receiver, block, path, new_name, resolver, cursor=None, strict_permission=False):
+        super().__init__(
+            function,
+            receiver,
+            block,
+            *[(path, automatic_resolution(path, receiver.context).parent.join(new_name))],
+            resolver=resolver,
+            cursor=cursor,
+            strict_permission=strict_permission
+        )
 
     def _try_with_resolver(self, cursor):
         source, destination = self.paths[0]
         return Rename(self._function, self._receiver, self.block, source, destination.name,
-                      resolver=self.resolver, cursor=cursor).execute()
+                      resolver=self.resolver, cursor=cursor, strict_permission=self._strict_permission).execute()
 
     async def _a_try_with_resolver(self, cursor):
         source, destination = self.paths[0]
         return await Rename(self._function, self._receiver, self.block, source, destination.name,
-                            resolver=self.resolver, cursor=cursor).a_execute()
+                            resolver=self.resolver, cursor=cursor, strict_permission=self._strict_permission).a_execute()
 
     @property
     def _error_object(self):
