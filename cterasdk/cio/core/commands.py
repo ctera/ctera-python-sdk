@@ -36,6 +36,11 @@ def _raise_strict_permission_denied(result, path):
     if isinstance(result, str) and not result.strip():
         raise exceptions.io.core.PrivilegeError(path)
 
+    if isinstance(result, str):
+        if _is_permission_denied_message(result):
+            raise exceptions.io.core.PrivilegeError(path)
+        return
+
     msg = getattr(result, 'msg', None)
     rc = getattr(result, 'rc', None)
     if msg and _is_permission_denied_message(msg):
@@ -641,7 +646,17 @@ class CreateDirectory(PortalCommand):
     def _parents_generator(self):
         if self.parents:
             parts = self.path.parts
-            for i in range(1, len(parts)):
+            start_index = 1
+            known_roots = ('My Files', 'Shared With Me', 'Shared', 'Team Portal')
+            if parts:
+                if parts[0] in known_roots:
+                    start_index = 2
+                elif parts[0] in ('Users', 'Groups') and len(parts) > 1:
+                    if len(parts) > 2 and parts[2] in known_roots:
+                        start_index = 4
+                    else:
+                        start_index = 3
+            for i in range(start_index, len(parts)):
                 yield automatic_resolution('/'.join(parts[:i]), self._receiver.context)
         else:
             yield self.path
@@ -683,10 +698,10 @@ class CreateDirectory(PortalCommand):
 
     def _handle_response(self, r):
         path = self.path.relative
-        if self._strict_permission:
-            _raise_strict_permission_denied(r, path)
         if r is None or r == 'Ok':
             return path
+        if self._strict_permission:
+            _raise_strict_permission_denied(r, path)
 
         error, cause = exceptions.io.core.CreateDirectoryError(path), None
         if r == ResourceError.FileWithTheSameNameExist:
@@ -989,6 +1004,9 @@ class TaskCommand(PortalCommand):
 
         if r.completed:
             return self._task_complete(r)
+
+        if r.completed_with_warnings:
+            return r
 
         if r.failed or r.completed_with_warnings:
             return self._task_error(r)
