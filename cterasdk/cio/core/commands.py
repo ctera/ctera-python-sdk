@@ -30,23 +30,52 @@ def _is_permission_denied_message(message):
     )
 
 
-def _raise_strict_permission_denied(result, path):
+def _normalize_rc(rc):
+    if isinstance(rc, str):
+        return rc.strip()
+    return rc
+
+
+def _normalize_msg(msg):
+    if isinstance(msg, str):
+        return msg.strip().lower()
+    return msg
+
+
+def _extract_rc_msg(result):
     if result is None:
-        raise exceptions.io.core.PrivilegeError(path)
-    if isinstance(result, str) and not result.strip():
-        raise exceptions.io.core.PrivilegeError(path)
-
+        return None, None
     if isinstance(result, str):
-        if _is_permission_denied_message(result):
-            raise exceptions.io.core.PrivilegeError(path)
-        return
+        return None, result
+    return getattr(result, 'rc', None), getattr(result, 'msg', None)
 
-    msg = getattr(result, 'msg', None)
-    rc = getattr(result, 'rc', None)
-    if msg and _is_permission_denied_message(msg):
-        raise exceptions.io.core.PrivilegeError(path)
-    if msg in (None, '') and rc in (0, '0', None):
-        raise exceptions.io.core.PrivilegeError(path)
+
+_STRICT_PERMISSION_ERROR_MAP = {
+    (None, None): exceptions.io.core.PrivilegeError,
+    (None, ''): exceptions.io.core.PrivilegeError,
+    (0, None): exceptions.io.core.PrivilegeError,
+    ('0', None): exceptions.io.core.PrivilegeError,
+    (None, 'permission denied'): exceptions.io.core.PrivilegeError,
+    (None, 'access denied'): exceptions.io.core.PrivilegeError,
+    (None, 'read only'): exceptions.io.core.PrivilegeError,
+    (None, 'action is not allowed'): exceptions.io.core.PrivilegeError,
+    ('permissiondenied', None): exceptions.io.core.PrivilegeError,
+    (None, 'permissiondenied'): exceptions.io.core.PrivilegeError,
+    ('permissiondenied', 'permissiondenied'): exceptions.io.core.PrivilegeError,
+}
+
+
+def _raise_strict_permission_denied(result, path):
+    rc, msg = _extract_rc_msg(result)
+    rc = _normalize_rc(rc)
+    msg = _normalize_msg(msg)
+    logger.debug(
+        'strict_permission response for %s: rc=%r msg=%r',
+        path, rc, msg
+    )
+    error_cls = _STRICT_PERMISSION_ERROR_MAP.get((rc, msg))
+    if error_cls is not None:
+        raise error_cls(path)
 
 
 def split_file_directory(listdir, receiver, destination):
