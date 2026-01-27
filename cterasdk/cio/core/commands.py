@@ -80,6 +80,7 @@ def _raise_strict_permission_denied(result, path):
     if (rc, msg) in _STRICT_PERMISSION_ERROR_SET:
         raise exceptions.io.core.PrivilegeError(path)
 
+
 def _extract_task_error_tuple(result):
     rc = _normalize_rc(getattr(result, 'rc', None))
     msg = _normalize_msg(getattr(result, 'msg', None))
