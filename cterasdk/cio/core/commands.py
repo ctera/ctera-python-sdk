@@ -40,32 +40,32 @@ def _extract_rc_msg(result):
     return getattr(result, 'rc', None), getattr(result, 'msg', None)
 
 
-_STRICT_PERMISSION_ERROR_MAP = {
-    (None, None): exceptions.io.core.PrivilegeError,
-    (None, ''): exceptions.io.core.PrivilegeError,
-    (0, None): exceptions.io.core.PrivilegeError,
-    ('0', None): exceptions.io.core.PrivilegeError,
-    (None, 'permission denied'): exceptions.io.core.PrivilegeError,
-    (None, 'access denied'): exceptions.io.core.PrivilegeError,
-    (None, 'read only'): exceptions.io.core.PrivilegeError,
-    (None, 'action is not allowed'): exceptions.io.core.PrivilegeError,
-    ('permissiondenied', None): exceptions.io.core.PrivilegeError,
-    (None, 'permissiondenied'): exceptions.io.core.PrivilegeError,
-    ('permissiondenied', 'permissiondenied'): exceptions.io.core.PrivilegeError,
+_STRICT_PERMISSION_ERROR_SET = {
+    (None, None),
+    (None, ''),
+    (0, None),
+    ('0', None),
+    (None, 'permission denied'),
+    (None, 'access denied'),
+    (None, 'read only'),
+    (None, 'action is not allowed'),
+    ('permissiondenied', None),
+    (None, 'permissiondenied'),
+    ('permissiondenied', 'permissiondenied'),
 }
 
-_STRICT_PERMISSION_TASK_ERROR_MAP = {
-    (None, None, 'permissiondenied'): exceptions.io.core.PrivilegeError,
-    (None, None, 'permission denied'): exceptions.io.core.PrivilegeError,
-    (None, None, 'access denied'): exceptions.io.core.PrivilegeError,
-    (None, None, 'read only'): exceptions.io.core.PrivilegeError,
-    (None, None, 'action is not allowed'): exceptions.io.core.PrivilegeError,
-    (None, 'permission denied', None): exceptions.io.core.PrivilegeError,
-    (None, 'access denied', None): exceptions.io.core.PrivilegeError,
-    (None, 'read only', None): exceptions.io.core.PrivilegeError,
-    (None, 'action is not allowed', None): exceptions.io.core.PrivilegeError,
-    (0, None, 'permissiondenied'): exceptions.io.core.PrivilegeError,
-    ('0', None, 'permissiondenied'): exceptions.io.core.PrivilegeError,
+_STRICT_PERMISSION_TASK_ERROR_SET = {
+    (None, None, 'permissiondenied'),
+    (None, None, 'permission denied'),
+    (None, None, 'access denied'),
+    (None, None, 'read only'),
+    (None, None, 'action is not allowed'),
+    (None, 'permission denied', None),
+    (None, 'access denied', None),
+    (None, 'read only', None),
+    (None, 'action is not allowed', None),
+    (0, None, 'permissiondenied'),
+    ('0', None, 'permissiondenied'),
 }
 
 
@@ -77,9 +77,8 @@ def _raise_strict_permission_denied(result, path):
         'strict_permission response for %s: rc=%r msg=%r raw=%s',
         path, rc, msg, type(result).__name__
     )
-    error_cls = _STRICT_PERMISSION_ERROR_MAP.get((rc, msg))
-    if error_cls is not None:
-        raise error_cls(path)
+    if (rc, msg) in _STRICT_PERMISSION_ERROR_SET:
+        raise exceptions.io.core.PrivilegeError(path)
 
 def _extract_task_error_tuple(result):
     rc = _normalize_rc(getattr(result, 'rc', None))
@@ -1035,9 +1034,8 @@ class TaskCommand(PortalCommand):
     def _handle_response(self, r):
         if self._strict_permission:
             rc, msg, error_type = _extract_task_error_tuple(r)
-            error_cls = _STRICT_PERMISSION_TASK_ERROR_MAP.get((rc, msg, error_type))
-            if error_cls is not None:
-                raise error_cls('')
+            if (rc, msg, error_type) in _STRICT_PERMISSION_TASK_ERROR_SET:
+                raise exceptions.io.core.PrivilegeError('')
         if not self.block:
             return r
 
