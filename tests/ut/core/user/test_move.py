@@ -1,5 +1,8 @@
 from unittest import mock
 
+from cterasdk.common import Object
+from cterasdk import exceptions
+
 from tests.ut.core.user import base_user
 
 
@@ -20,6 +23,14 @@ class BaseCoreServicesFilesMove(base_user.BaseCoreServicesTest):
         actual_param = self._services.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret.ref, execute_response)
+
+    def test_move_strict_permission_denied(self):
+        task = Object(msg='permission denied')
+        self._services.tasks.wait = mock.MagicMock(return_value=task)
+        self._init_services(execute_response=self._task_reference)
+        with self.assertRaises(exceptions.io.core.PrivilegeError):
+            self._services.files.move(self._source, destination=self._dest, strict_permission=True)
+        self._services.tasks.wait.assert_called_once_with(self._task_reference)
 
     def _create_move_resource_param(self):
         destinations = [base_user.BaseCoreServicesTest.encode_path(self._dest + '/' + self._filename)]
