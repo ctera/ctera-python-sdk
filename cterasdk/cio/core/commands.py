@@ -20,16 +20,6 @@ from ..actions import PortalCommand
 logger = logging.getLogger('cterasdk.core')
 
 
-def _is_permission_denied_message(message):
-    msg = (message or '').lower()
-    return (
-        'permission' in msg
-        or 'denied' in msg
-        or 'read only' in msg
-        or 'action is not allowed' in msg
-    )
-
-
 def _normalize_rc(rc):
     if isinstance(rc, str):
         return rc.strip()
