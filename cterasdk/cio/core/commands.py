@@ -64,18 +64,38 @@ _STRICT_PERMISSION_ERROR_MAP = {
     ('permissiondenied', 'permissiondenied'): exceptions.io.core.PrivilegeError,
 }
 
+_STRICT_PERMISSION_TASK_ERROR_MAP = {
+    (None, None, 'permissiondenied'): exceptions.io.core.PrivilegeError,
+    (None, None, 'permission denied'): exceptions.io.core.PrivilegeError,
+    (None, None, 'access denied'): exceptions.io.core.PrivilegeError,
+    (None, None, 'read only'): exceptions.io.core.PrivilegeError,
+    (None, None, 'action is not allowed'): exceptions.io.core.PrivilegeError,
+    (None, 'permission denied', None): exceptions.io.core.PrivilegeError,
+    (None, 'access denied', None): exceptions.io.core.PrivilegeError,
+    (None, 'read only', None): exceptions.io.core.PrivilegeError,
+    (None, 'action is not allowed', None): exceptions.io.core.PrivilegeError,
+    (0, None, 'permissiondenied'): exceptions.io.core.PrivilegeError,
+    ('0', None, 'permissiondenied'): exceptions.io.core.PrivilegeError,
+}
+
 
 def _raise_strict_permission_denied(result, path):
     rc, msg = _extract_rc_msg(result)
     rc = _normalize_rc(rc)
     msg = _normalize_msg(msg)
-    logger.debug(
-        'strict_permission response for %s: rc=%r msg=%r',
-        path, rc, msg
+    logger.info(
+        'strict_permission response for %s: rc=%r msg=%r raw=%s',
+        path, rc, msg, type(result).__name__
     )
     error_cls = _STRICT_PERMISSION_ERROR_MAP.get((rc, msg))
     if error_cls is not None:
         raise error_cls(path)
+
+def _extract_task_error_tuple(result):
+    rc = _normalize_rc(getattr(result, 'rc', None))
+    msg = _normalize_msg(getattr(result, 'msg', None))
+    error_type = _normalize_msg(getattr(result, 'error_type', None))
+    return rc, msg, error_type
 
 
 def split_file_directory(listdir, receiver, destination):
@@ -1024,10 +1044,10 @@ class TaskCommand(PortalCommand):
 
     def _handle_response(self, r):
         if self._strict_permission:
-            msg = getattr(r, 'msg', None)
-            error_type = getattr(r, 'error_type', None)
-            if _is_permission_denied_message(str(msg)) or _is_permission_denied_message(str(error_type)):
-                raise exceptions.io.core.PrivilegeError('')
+            rc, msg, error_type = _extract_task_error_tuple(r)
+            error_cls = _STRICT_PERMISSION_TASK_ERROR_MAP.get((rc, msg, error_type))
+            if error_cls is not None:
+                raise error_cls('')
         if not self.block:
             return r
 
