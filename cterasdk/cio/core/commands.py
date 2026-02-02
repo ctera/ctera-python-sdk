@@ -797,7 +797,7 @@ class Link(PortalCommand):
         logger.info('Creating Public Link: %s', self.path)
 
     def get_parameter(self):
-        access = {'RO': 'ReadOnly', 'RW': 'ReadWrite', 'PO': 'PreviewOnly'}.get(self.access)
+        access = {k: v for k, v in FileAccessMode.__dict__.items() if not k.startswith('_') and k != 'NA'}.get(self.access, None)
         expire_on = DateTimeUtils.get_expiration_date(self.expire_in).strftime('%Y-%m-%d')
         param = CreateShareParam.instance(path=self.path.absolute_encode, access=access, expire_on=expire_on)
         return param

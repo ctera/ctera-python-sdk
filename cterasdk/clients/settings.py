@@ -1,80 +1,45 @@
-import copy
-from collections.abc import MutableMapping
 from aiohttp import TCPConnector, CookieJar, ClientTimeout
-import cterasdk.settings
+from pydantic import ValidationError
+from cterasdk import settings
+from ..conf import ClientSettings, Postman
 from .tracers import requests, session, postman
 
 
-class ClientSessionSettings(MutableMapping):
+def get_configuration(transport_settings):
+    """
+    Get session configuration.
 
-    def __init__(self, *args, **kwargs):
-        self._mapping = {
-            'connector': {
-                '_classname': TCPConnector,
-                'ssl': True
-            },
-            'timeout': {
-                '_classname': ClientTimeout,
-                'sock_connect': 10,
-                'sock_read': 60
-            },
-            'cookie_jar': {
-                '_classname': CookieJar,
-                'unsafe': False
-            }
-        }
-        self._mapping.update(dict(*args, **kwargs))
+    :param pydantic.BaseModel transport: Transport settings
+    :raises pydantic.ValidationError:
+    :returns: Settings, represented as a key-value dictionary
+    :rtype: dict
+    """
+    try:
+        parameters = transport_settings.model_dump()
+        ClientSettings.model_validate(parameters)
 
-    def update(self, **kwargs):  # pylint: disable=arguments-differ
-        for k, v in self._mapping.items():
-            attributes = kwargs.get(k, None)
-            self._mapping[k] = attributes
-            self._mapping[k]['_classname'] = v.get('_classname', None)
+        audit = settings.audit.model_dump()
+        Postman.model_validate(audit)
 
-    def __getitem__(self, key):
-        mapping = copy.deepcopy(self._mapping)
-        attributes = mapping.get(key, None)
-        new_instance = attributes.pop('_classname', None)
-        if new_instance:
-            return new_instance(**attributes)
-        return attributes
-
-    def __setitem__(self, key, value):
-        self._mapping[key] = value
-
-    def __delitem__(self, key):
-        del self._mapping[key]
-
-    def __iter__(self):
-        return iter(self._mapping)
-
-    def __len__(self):
-        return len(self._mapping)
-
-    def __str__(self):
-        return str(self._mapping)
+        parameters['audit'] = audit
+        return parameters
+    except (AttributeError, ValidationError) as error:
+        raise ValueError('Configuration error.') from error
 
 
-class TraceSettings(MutableMapping):
+def from_configuration(configuration):
+    """
+    Convert dictionary configuration to session settings.
 
-    def __init__(self):
-        self._mapping = {
-            'trace_configs': [requests.tracer(), session.tracer()]
-        }
-        if cterasdk.settings.audit.enabled:
-            self._mapping['trace_configs'].append(postman.tracer())
-
-    def __getitem__(self, key):
-        return self._mapping.get(key, None)
-
-    def __setitem__(self, key, value):  # pylint: disable=useless-parent-delegation
-        return super().__setitem__(key, value)
-
-    def __delitem__(self, key):  # pylint: disable=useless-parent-delegation
-        return super().__delitem__(key)
-
-    def __len__(self):  # pylint: disable=useless-parent-delegation
-        return super().__len__()
-
-    def __iter__(self):
-        return iter(self._mapping)
+    :param dict configuration: Session configuration.
+    :returns: A dictionary used for initialization of an ``aiohttp.ClientSession`` object
+    :rtype: dict
+    """
+    parameters = {}
+    parameters['cookie_jar'] = CookieJar(**configuration['cookie_jar'])
+    parameters['connector'] = TCPConnector(**configuration['connector'])
+    parameters['timeout'] = ClientTimeout(**configuration['timeout'])
+    parameters['trace_configs'] = [requests.tracer(), session.tracer()]
+    if configuration['audit']['enabled']:
+        parameters['trace_configs'].append(postman.tracer())
+    return parameters

@@ -5,7 +5,7 @@ import aiohttp
 
 from yarl import URL
 from ..exceptions.transport import TLSError
-
+from .settings import from_configuration
 
 logger = logging.getLogger('cterasdk.http')
 
@@ -13,20 +13,22 @@ logger = logging.getLogger('cterasdk.http')
 class Session:
     """Asynchronous HTTP Session"""
 
-    def __init__(self, settings, trace):
-        self._settings = settings
-        self._trace = trace
+    def __init__(self, configuration):
+        self._configuration = configuration
+        self._cookie_jar = CachedCookieJar()
         self._session = None
 
     @property
     def session(self):
         if self.closed:
-            self._session = aiohttp.ClientSession(**self._settings, **self._trace)
+            self._session = aiohttp.ClientSession(**from_configuration(self._configuration), trust_env=True)
+            self._cookie_jar.register(self._session)
+        self._cookie_jar.update_cookie_jar()
         return self._session
 
     @property
-    def cookies(self):
-        return CookieJar(self.session.cookie_jar)
+    def cookie_jar(self):
+        return self._cookie_jar
 
     async def request(self, r, *, await_promise=False, on_response=None):
         if await_promise:
@@ -80,22 +82,62 @@ def decorate_stream_error(stream_reader):
     return wrapper
 
 
-class CookieJar:
-
-    def __init__(self, cookie_jar):
-        self._cookie_jar = cookie_jar
-
-    def update_cookies(self, cookies, response_url=None):
-        self._cookie_jar.update_cookies(cookies, URL(response_url))
-
-    def get(self, key):
-        for cookie in self._cookie_jar:
-            if cookie.key == key:
-                return cookie.value
+def ensure_session(func):
+    def wrapper(self, *args, **kwargs):
+        if self._session is not None and not self._session.closed:  # pylint: disable=protected-access
+            return func(self, *args, **kwargs)
         return None
+    return wrapper
 
+
+def update_session(func):
+    def wrapper(self, *args, **kwargs):
+        func(self, *args, **kwargs)
+        self.update_cookie_jar()
+    return wrapper
+
+
+class CachedCookieJar:
+
+    def __init__(self):
+        self._cache = {}
+        self._session = None
+
+    def register(self, session):
+        self._session = session
+
+    @ensure_session
+    def update_cookie_jar(self):
+        for response_url, cookies in self._cache.items():
+            self._session.cookie_jar.update_cookies(cookies, URL(response_url))
+        self._cache.clear()
+
+    @update_session
+    def update_cookies(self, cookies, response_url=None):
+        logger.debug('Cookie update. Scope: %s', response_url)
+        self._cache[response_url] = cookies
+
+    @ensure_session
+    def filter_cookies(self, response_url):
+        return self._session.cookie_jar.filter_cookies(response_url)
+
+    @ensure_session
+    def get(self, response_url, key):
+        """
+        Get Cookie Value
+
+        :param str response_url: URL
+        :param str key: Cookie Key
+        :returns: Cookie Value
+        :rtype: str
+        """
+        cookies = self._session.cookie_jar.filter_cookies(response_url)
+        cookie = cookies.get(key, None)
+        return cookie.value if cookie else None
+
+    @ensure_session
     def clear(self):
-        self._cookie_jar.clear()
+        return self._session.cookie_jar.clear()
 
 
 class BaseRequest:

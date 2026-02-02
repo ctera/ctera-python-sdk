@@ -176,6 +176,7 @@ class FileAccessMode:
     RW = "ReadWrite"
     RO = "ReadOnly"
     PO = "PreviewOnly"
+    UO = "UploadOnly"
     NA = "None"
 
 

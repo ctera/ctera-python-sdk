@@ -376,13 +376,17 @@ This section describes the main objects used for managing collaboration shares.
    alice_rcpt = core_types.Collaborator.local_user(alice).expire_in(30).read_only()
    engineers_rcpt = core_types.Collaborator.local_group(engineers).read_write()
 
+   # Share with a local user with read-only access, expiring in 30 days
+   # Share with a local group with read-write access and the default expiration date
    user.files.share('Codebase', [alice_rcpt, engineers_rcpt])
 
 .. code-block:: python
 
+   # Share with an external user with view-only access, expiring in 10 days
    jsmith = core_types.Collaborator.external('jsmith@hotmail.com').expire_in(10).preview_only()
    user.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
+   # Share with an external user with read-only access, expiring in 5 days
    jsmith = core_types.Collaborator.external('jsmith@hotmail.com', True).expire_in(5).read_only()
    user.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
@@ -394,13 +398,21 @@ This section describes the main objects used for managing collaboration shares.
    albany_rcpt = core_types.Collaborator.domain_group(albany_group).read_write()
    cleveland_rcpt = core_types.Collaborator.domain_group(cleveland_group).read_only()
 
+   # Share with two domain groups, with the default expiration date
    user.files.share('Cloud/Albany', [albany_rcpt, cleveland_rcpt])
+
+.. code-block:: python
+
+   # Share with an external user with upload-only access, expiring in 15 days
+   jsmith = core_types.Collaborator.external('jsmith@hotmail.com').expire_in(15).upload_only()
+   user.files.share('My Files/Projects/2020/ProjectX', [jsmith])
 
 .. automethod:: cterasdk.core.files.browser.CloudDrive.add_share_recipients
    :noindex:
 
 .. code-block:: python
 
+   # Add a read-write local group share recepient
    engineering = core_types.GroupAccount('Engineering')
    engineering_rcpt = core_types.Collaborator.local_group(engineering).read_write()
    user.files.add_share_recipients('My Files/Projects/2020/ProjectX', [engineering_rcpt])
@@ -410,6 +422,7 @@ This section describes the main objects used for managing collaboration shares.
 
 .. code-block:: python
 
+   # Remove a local user and group from a share
    alice = core_types.UserAccount('alice')
    engineering = core_types.GroupAccount('Engineering')
    user.files.remove_share_recipients('My Files/Projects/2020/ProjectX', [alice, engineering])
@@ -419,9 +432,7 @@ This section describes the main objects used for managing collaboration shares.
 
 .. code-block:: python
 
-   user.files.unshare('Codebase')
    user.files.unshare('My Files/Projects/2020/ProjectX')
-   user.files.unshare('Cloud/Albany')
 
 Managing S3 Credentials
 -----------------------
