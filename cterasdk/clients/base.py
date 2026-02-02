@@ -3,7 +3,7 @@ import platform
 import threading
 import aiohttp
 from . import async_requests, errors
-from .settings import ClientSessionSettings, TraceSettings
+from .settings import get_configuration
 from ..common import utils
 
 
@@ -17,22 +17,7 @@ except ImportError:
 logger = logging.getLogger('cterasdk.http')
 
 
-class CookieJar:
-
-    def __init__(self, cookies):
-        self._cookies = cookies
-
-    def get(self, key):
-        return self._cookies.get(key)
-
-    def update(self, cookies, response_url):
-        self._cookies.update_cookies(cookies, response_url)
-
-    def clear(self):
-        self._cookies.clear()
-
-
-class PersistentHeaders:
+class Headers:
     """Headers to include in every request"""
 
     def __init__(self):
@@ -47,6 +32,9 @@ class PersistentHeaders:
     @property
     def all(self):
         return self._headers
+
+    def get(self, key):
+        return self._headers.get(key, None)
 
     def persist_response_header(self, response, header):
         """
@@ -68,24 +56,20 @@ class PersistentHeaders:
 class BaseClient:
     """Base Client"""
 
-    def __init__(self, builder=None, session=None, settings=None, authenticator=None):
+    def __init__(self, builder=None, session=None, settings=None, authenticator=None, headers=None):
         """
         Initialize a Client
 
         :param builder: Endpoint builder.
         :param ,optional session: Session.
-        :param ,optional settings: Client Session Settings.
+        :param pydantic.BaseModel,optional settings: Client Settings
         :param ,optional authenticator: Authenticator function.
+        :param cterasdk.clients.base.Headers,optional headers: Headers Object
         """
-        self._headers = PersistentHeaders()
         self._authenticator = authenticator
         self._builder = builder
-
-        default_settings = ClientSessionSettings()
-        if settings:
-            default_settings.update(**settings)
-
-        self._session = session if session else async_requests.Session(default_settings, TraceSettings())
+        self._session = session if session else async_requests.Session(get_configuration(settings))
+        self._headers = headers if headers else Headers()
 
     def clone(self, definition, builder=None, authenticator=None):
         """
@@ -100,11 +84,12 @@ class BaseClient:
             self._session,
             None,
             authenticator if authenticator is not None else self._authenticator,
+            self._headers
         )
 
     @property
-    def cookies(self):
-        return CookieJar(self._session.cookies)
+    def cookie_jar(self):
+        return self._session.cookie_jar
 
     @property
     def headers(self):

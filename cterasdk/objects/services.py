@@ -38,8 +38,13 @@ class CTERA(Service):
 
     def __init__(self, host, port, https, base):
         super().__init__(host, port, https, base)
+        self._default = None
         self._ctera_session = None
         self._ctera_clients = None
+
+    @property
+    def default(self):
+        return self._default
 
     @property
     def clients(self):
@@ -65,6 +70,9 @@ class CTERA(Service):
     def _authenticator(self, url):
         raise NotImplementedError("Subclass must implement the '_authenticator' function")
 
+    def bearer(self, token):
+        self._default.headers.persist_headers({'Authorization': f'Bearer {token}'})
+
     def whoami(self):
         """
         Return the name of the logged in user.
@@ -83,10 +91,6 @@ class AsyncManagement(CTERA):  # pylint: disable=abstract-method
         super().__init__(host, port, https, base)
         self._default = clients.AsyncClient(endpoints.EndpointBuilder.new(self.base), settings=settings, authenticator=self._authenticator)
 
-    @property
-    def default(self):
-        return self._default
-
     async def login(self, username, password):
         self._before_login()
         await self._login_object.login(username, password)
@@ -97,10 +101,10 @@ class AsyncManagement(CTERA):  # pylint: disable=abstract-method
         if self._ctera_session.connected:
             await self._login_object.logout()
             self._ctera_session.stop_session()
-        await self.default.close()
+        await self._default.close()
 
     async def __aexit__(self, exc_type, exc, tb):
-        await self.default.close()
+        await self._default.close()
 
 
 class Management(CTERA):
@@ -140,20 +144,16 @@ class Management(CTERA):
     def _session_id_key(self):
         return NotImplementedError("Subclass must implement the '_session_id_key' property")
 
-    @property
-    def default(self):
-        return self._default
-
     def get_session_id(self):
         """
         Get Session Identifier
 
         :return str: Session ID
         """
-        return self._default.cookies.get(self._session_id_key)
+        return self._default.cookie_jar.get(self._default.baseurl, self._session_id_key)
 
     def set_session_id(self, session_id):
-        self._default.cookies.update({self._session_id_key: session_id}, self._default.baseurl)
+        self._default.cookie_jar.update_cookies({self._session_id_key: session_id}, self._default.baseurl)
         self._ctera_session.start_session(self)
 
     def __exit__(self, exc_type, exc_value, exc_tb):
