@@ -1,6 +1,21 @@
 Changelog
 =========
 
+2.20.28
+-------
+
+Improvements
+^^^^^^^^^^^^
+* Added ``strict_permission`` support to core file operations (mkdir/makedirs/upload/copy/move/rename/delete)
+* Refined strict permission handling to avoid false permission errors on successful operations
+* Improved strict permission detection for background tasks using rc/msg/error_type tuples
+* Adjusted recursive directory creation to skip portal root segments
+* Treat completed-with-warnings background tasks as successful results
+
+Bug Fixes
+^^^^^^^^^
+* Fixed directory creation behavior when the portal returns ``None`` or ``Ok`` responses
+
 2.20.26
 -------
 
