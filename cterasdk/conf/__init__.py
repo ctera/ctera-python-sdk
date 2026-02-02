@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 from pydantic import BaseModel, Field
 
 
@@ -42,7 +42,7 @@ class AsynchronousClient(BaseSettings):
     ))
 
 
-SSLCloudServices = Literal["prompt"] | bool
+SSLCloudServices = Union[Literal["prompt"], bool]
 
 
 class CloudServices(BaseSettings):

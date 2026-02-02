@@ -84,7 +84,7 @@ def decorate_stream_error(stream_reader):
 
 def ensure_session(func):
     def wrapper(self, *args, **kwargs):
-        if self._session is not None and not self._session.closed:  #pylint: disable=protected-access
+        if self._session is not None and not self._session.closed:  # pylint: disable=protected-access
             return func(self, *args, **kwargs)
         return None
     return wrapper
