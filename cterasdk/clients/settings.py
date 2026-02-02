@@ -8,7 +8,7 @@ from .tracers import requests, session, postman
 def get_configuration(transport_settings):
     """
     Get session configuration.
-    
+
     :param pydantic.BaseModel transport: Transport settings
     :raises pydantic.ValidationError:
     :returns: Settings, represented as a key-value dictionary
@@ -23,16 +23,14 @@ def get_configuration(transport_settings):
 
         parameters['audit'] = audit
         return parameters
-    except AttributeError as error:
-        raise
-    except ValidationError as error:
+    except (AttributeError, ValidationError) as error:
         raise ValueError('Configuration error.') from error
 
 
 def from_configuration(configuration):
     """
     Convert dictionary configuration to session settings.
-    
+
     :param dict configuration: Session configuration.
     :returns: A dictionary used for initialization of an ``aiohttp.ClientSession`` object
     :rtype: dict
