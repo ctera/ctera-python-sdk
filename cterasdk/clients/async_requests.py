@@ -21,7 +21,7 @@ class Session:
     @property
     def session(self):
         if self.closed:
-            self._session = aiohttp.ClientSession(**from_configuration(self._configuration))
+            self._session = aiohttp.ClientSession(**from_configuration(self._configuration), trust_env=True)
             self._cookie_jar.register(self._session)
         self._cookie_jar.update_cookie_jar()
         return self._session
