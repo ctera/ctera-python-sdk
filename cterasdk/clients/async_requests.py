@@ -82,6 +82,21 @@ def decorate_stream_error(stream_reader):
     return wrapper
 
 
+def ensure_session(func):
+    def wrapper(self, *args, **kwargs):
+        if self._session is not None and not self._session.closed:  #pylint: disable=protected-access
+            return func(self, *args, **kwargs)
+        return None
+    return wrapper
+
+
+def update_session(func):
+    def wrapper(self, *args, **kwargs):
+        func(self, *args, **kwargs)
+        self.update_cookie_jar()
+    return wrapper
+
+
 class CachedCookieJar:
 
     def __init__(self):
@@ -91,24 +106,11 @@ class CachedCookieJar:
     def register(self, session):
         self._session = session
 
-    def ensure_session(func):
-        def wrapper(self, *args, **kwargs):
-            if self._session is not None and not self._session.closed:
-                return func(self, *args, **kwargs)
-            return None
-        return wrapper
-
     @ensure_session
     def update_cookie_jar(self):
         for response_url, cookies in self._cache.items():
             self._session.cookie_jar.update_cookies(cookies, URL(response_url))
         self._cache.clear()
-
-    def update_session(func):
-        def wrapper(self, *args, **kwargs):
-            func(self, *args, **kwargs)
-            self.update_cookie_jar()
-        return wrapper
 
     @update_session
     def update_cookies(self, cookies, response_url=None):
