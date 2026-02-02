@@ -11,10 +11,14 @@ Improvements
 * Improved strict permission detection for background tasks using rc/msg/error_type tuples
 * Adjusted recursive directory creation to skip portal root segments
 * Treat completed-with-warnings background tasks as successful results
+* Support "upload only" permission when sharing public links
+* Migrate SDK configuration from YAML file to Python module
+* Support bearer token authentication
 
 Bug Fixes
 ^^^^^^^^^
 * Fixed directory creation behavior when the portal returns ``None`` or ``Ok`` responses
+* Resolve regression in cookie-based authentication caused by aiohttp library upgrade
 
 2.20.26
 -------
