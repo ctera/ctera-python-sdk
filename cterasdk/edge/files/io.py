@@ -2,6 +2,10 @@ def listdir(edge, path, depth):
     return edge.io.propfind(path, depth)
 
 
+def synchronization_status(edge, param):
+    return edge.api.execute('/config/cloudsync', 'getFileSyncedList', param)
+
+
 def mkdir(edge, param):
     return edge.io.mkdir(param)
 

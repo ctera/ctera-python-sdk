@@ -1,6 +1,6 @@
 from ..base_command import BaseCommand
 from ....cio.edge.commands import ListDirectory, RecursiveIterator, GetMetadata, Open, OpenMany, Upload, \
-     CreateDirectory, Copy, Move, Delete, Download, DownloadMany, Rename, EnsureDirectory
+     CreateDirectory, Copy, Move, Delete, Download, DownloadMany, Rename, EnsureDirectory, GetResourcesState
 from ....lib.storage import commonfs
 from . import io
 
@@ -22,6 +22,19 @@ class FileBrowser(BaseCommand):
         async with EnsureDirectory(io.listdir, self._edge, path):
             for o in await ListDirectory(io.listdir, self._edge, path).a_execute():
                 yield o
+
+    async def synchronization_status(self, path):
+        """
+        List directory objects with synchronization status.
+
+        :param str path: Path
+        :returns: Directory contents, and object synchronization status.
+        :rtype: list[cterasdk.cio.edge.types.ResourceState]
+        :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
+        :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
+        """
+        async with EnsureDirectory(io.listdir, self._edge, path):
+            return await GetResourcesState(io.synchronization_status, self._edge, path).a_execute()
 
     async def walk(self, path=None):
         """

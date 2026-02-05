@@ -12,7 +12,7 @@ class BaseSettings(BaseModel):
 
 
 class ClientCookieJar(BaseSettings):
-    unsafe: bool = False
+    unsafe: bool = True
 
 
 class ClientConnector(BaseSettings):

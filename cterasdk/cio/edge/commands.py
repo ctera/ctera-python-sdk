@@ -5,7 +5,7 @@ from ..common import encode_request_parameter, encode_stream
 from ... import exceptions
 from ..actions import EdgeCommand
 from ...lib.storage import synfs, asynfs, commonfs
-from .types import EdgeResource, automatic_resolution
+from .types import EdgeResource, ResourceState, automatic_resolution
 
 
 logger = logging.getLogger('cterasdk.edge')
@@ -194,6 +194,30 @@ class ListDirectory(EdgeCommand):
         if isinstance(e, exceptions.transport.NotFound):
             raise error from exceptions.io.edge.FolderNotFoundError(path)
         raise error from e
+
+
+class GetResourcesState(EdgeCommand):
+
+    def __init__(self, function, receiver, path):
+        super().__init__(function, receiver)
+        self.path = automatic_resolution(path)
+
+    def get_parameter(self):
+        return Object(path=self.path.absolute)
+
+    def _before_command(self):
+        logger.info('Listing directory: %s', self.path)
+
+    def _execute(self):
+        with self.trace_execution():
+            return self._function(self._receiver, self.get_parameter())
+
+    async def _a_execute(self):
+        with self.trace_execution():
+            return await self._function(self._receiver, self.get_parameter())
+
+    def _handle_response(self, r):
+        return [ResourceState.from_server_object(o, self.path) for o in r]
 
 
 class RecursiveIterator:
