@@ -36,6 +36,12 @@ class BaseCoreServicesFilesMkdir(base_user.BaseCoreServicesTest):
         with self.assertRaises(exceptions.io.core.PrivilegeError):
             self._services.files.mkdir(self._directory, strict_permission=True)
 
+    def test_mkdir_strict_permission_denied_message(self):
+        execute_response = Object(msg='access denied')
+        self._init_services(execute_response=execute_response)
+        with self.assertRaises(exceptions.io.core.PrivilegeError):
+            self._services.files.mkdir(self._directory, strict_permission=True)
+
     def test_makedirs_strict_permission_root_path(self):
         rooted_directories = 'Team Portal/Engineering/Documents'
         self._init_services(execute_response=None)

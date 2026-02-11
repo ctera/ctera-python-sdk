@@ -40,52 +40,54 @@ def _extract_rc_msg(result):
     return getattr(result, 'rc', None), getattr(result, 'msg', None)
 
 
-_STRICT_PERMISSION_ERROR_SET = {
-    (None, None),
-    (None, ''),
-    (0, None),
-    ('0', None),
-    (None, 'permission denied'),
-    (None, 'access denied'),
-    (None, 'read only'),
-    (None, 'action is not allowed'),
-    ('permissiondenied', None),
-    (None, 'permissiondenied'),
-    ('permissiondenied', 'permissiondenied'),
+_STRICT_PERMISSION_DENIED_MESSAGES = {
+    'permission denied',
+    'access denied',
+    'read only',
+    'action is not allowed',
 }
 
-_STRICT_PERMISSION_TASK_ERROR_SET = {
-    (None, None, 'permissiondenied'),
-    (None, None, 'permission denied'),
-    (None, None, 'access denied'),
-    (None, None, 'read only'),
-    (None, None, 'action is not allowed'),
-    (None, 'permission denied', None),
-    (None, 'access denied', None),
-    (None, 'read only', None),
-    (None, 'action is not allowed', None),
-    (0, None, 'permissiondenied'),
-    ('0', None, 'permissiondenied'),
-}
+# Some APIs return condensed "permissiondenied" in rc/msg/error_type.
+_STRICT_PERMISSION_DENIED_TOKENS = {'permissiondenied'}
+_STRICT_PERMISSION_AMBIGUOUS_RC = {None, 0, '0'}
+_STRICT_PERMISSION_EMPTY_MESSAGES = {None, ''}
 
 
 def _raise_strict_permission_denied(result, path):
-    rc, msg = _extract_rc_msg(result)
-    rc = _normalize_rc(rc)
-    msg = _normalize_msg(msg)
+    rc, msg = _extract_normalized_rc_msg(result)
     logger.info(
         'strict_permission response for %s: rc=%r msg=%r raw=%s',
         path, rc, msg, type(result).__name__
     )
-    if (rc, msg) in _STRICT_PERMISSION_ERROR_SET:
+    if _is_strict_permission_denied_response(rc, msg):
         raise exceptions.io.core.PrivilegeError(path)
 
 
-def _extract_task_error_tuple(result):
+def _extract_normalized_rc_msg(result):
+    rc, msg = _extract_rc_msg(result)
+    return _normalize_rc(rc), _normalize_msg(msg)
+
+
+def _extract_task_error_fields(result):
     rc = _normalize_rc(getattr(result, 'rc', None))
     msg = _normalize_msg(getattr(result, 'msg', None))
     error_type = _normalize_msg(getattr(result, 'error_type', None))
     return rc, msg, error_type
+
+
+def _is_strict_permission_denied_response(rc, msg):
+    if msg in _STRICT_PERMISSION_DENIED_MESSAGES:
+        return True
+    if rc in _STRICT_PERMISSION_DENIED_TOKENS or msg in _STRICT_PERMISSION_DENIED_TOKENS:
+        return True
+    return rc in _STRICT_PERMISSION_AMBIGUOUS_RC and msg in _STRICT_PERMISSION_EMPTY_MESSAGES
+
+
+def _is_strict_permission_denied_task(rc, msg, error_type):
+    _ = rc
+    if error_type in _STRICT_PERMISSION_DENIED_MESSAGES or error_type in _STRICT_PERMISSION_DENIED_TOKENS:
+        return True
+    return msg in _STRICT_PERMISSION_DENIED_MESSAGES
 
 
 def split_file_directory(listdir, receiver, destination):
@@ -1022,8 +1024,8 @@ class TaskCommand(PortalCommand):
 
     def _handle_response(self, r):
         if self._strict_permission:
-            rc, msg, error_type = _extract_task_error_tuple(r)
-            if (rc, msg, error_type) in _STRICT_PERMISSION_TASK_ERROR_SET:
+            rc, msg, error_type = _extract_task_error_fields(r)
+            if _is_strict_permission_denied_task(rc, msg, error_type):
                 raise exceptions.io.core.PrivilegeError('')
         if not self.block:
             return r
