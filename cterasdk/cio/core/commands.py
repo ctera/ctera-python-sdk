@@ -685,17 +685,7 @@ class CreateDirectory(PortalCommand):
     def _parents_generator(self):
         if self.parents:
             parts = self.path.parts
-            start_index = 1
-            known_roots = ('My Files', 'Shared With Me', 'Shared', 'Team Portal')
-            if parts:
-                if parts[0] in known_roots:
-                    start_index = 2
-                elif parts[0] in ('Users', 'Groups') and len(parts) > 1:
-                    if len(parts) > 2 and parts[2] in known_roots:
-                        start_index = 4
-                    else:
-                        start_index = 3
-            for i in range(start_index, len(parts)):
+            for i in range(1, len(parts)):
                 yield automatic_resolution('/'.join(parts[:i]), self._receiver.context)
         else:
             yield self.path
@@ -707,8 +697,7 @@ class CreateDirectory(PortalCommand):
                     CreateDirectory(
                         self._function,
                         self._receiver,
-                        path,
-                        strict_permission=self._strict_permission
+                        path
                     ).execute()
                 except exceptions.io.core.CreateDirectoryError as e:
                     CreateDirectory._suppress_file_conflict_error(e)
@@ -722,8 +711,7 @@ class CreateDirectory(PortalCommand):
                     await CreateDirectory(
                         self._function,
                         self._receiver,
-                        path,
-                        strict_permission=self._strict_permission
+                        path
                     ).a_execute()
                 except exceptions.io.core.CreateDirectoryError as e:
                     CreateDirectory._suppress_file_conflict_error(e)
@@ -1042,9 +1030,6 @@ class TaskCommand(PortalCommand):
 
         if r.completed:
             return self._task_complete(r)
-
-        if r.completed_with_warnings:
-            return r
 
         if r.failed or r.completed_with_warnings:
             return self._task_error(r)

@@ -35,3 +35,10 @@ class BaseCoreServicesFilesMkdir(base_user.BaseCoreServicesTest):
         self._init_services(execute_response=execute_response)
         with self.assertRaises(exceptions.io.core.PrivilegeError):
             self._services.files.mkdir(self._directory, strict_permission=True)
+
+    def test_makedirs_strict_permission_root_path(self):
+        rooted_directories = 'Team Portal/Engineering/Documents'
+        self._init_services(execute_response=None)
+        ret = self._services.files.makedirs(rooted_directories, strict_permission=True)
+        self.assertEqual(self._services.api.execute.call_count, len(rooted_directories.split('/')))
+        self.assertEqual(ret, rooted_directories)

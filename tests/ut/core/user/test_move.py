@@ -32,6 +32,21 @@ class BaseCoreServicesFilesMove(base_user.BaseCoreServicesTest):
             self._services.files.move(self._source, destination=self._dest, strict_permission=True)
         self._services.tasks.wait.assert_called_once_with(self._task_reference)
 
+    def test_move_completed_with_warnings_raises_move_error(self):
+        task = mock.MagicMock()
+        task.completed = False
+        task.completed_with_warnings = True
+        task.failed = False
+        task.cursor = None
+        task.error_type = None
+        task.unknown_object.return_value = True
+        task.progress_str = None
+        self._services.tasks.wait = mock.MagicMock(return_value=task)
+        self._init_services(execute_response=self._task_reference)
+        with self.assertRaises(exceptions.io.core.MoveError):
+            self._services.files.move(self._source, destination=self._dest, strict_permission=True)
+        self._services.tasks.wait.assert_called_once_with(self._task_reference)
+
     def _create_move_resource_param(self):
         destinations = [base_user.BaseCoreServicesTest.encode_path(self._dest + '/' + self._filename)]
         return self._create_action_resource_param([base_user.BaseCoreServicesTest.encode_path(self._source)], destinations)
