@@ -24,22 +24,6 @@ class BaseCoreServicesFilesMove(base_user.BaseCoreServicesTest):
         self._assert_equal_objects(actual_param, expected_param)
         self.assertEqual(ret.ref, execute_response)
 
-    def test_move_strict_permission_denied(self):
-        task = Object(msg='permission denied')
-        self._services.tasks.wait = mock.MagicMock(return_value=task)
-        self._init_services(execute_response=self._task_reference)
-        with self.assertRaises(exceptions.io.core.PrivilegeError):
-            self._services.files.move(self._source, destination=self._dest, strict_permission=True)
-        self._services.tasks.wait.assert_called_once_with(self._task_reference)
-
-    def test_move_strict_permission_denied_error_type(self):
-        task = Object(error_type='permissiondenied')
-        self._services.tasks.wait = mock.MagicMock(return_value=task)
-        self._init_services(execute_response=self._task_reference)
-        with self.assertRaises(exceptions.io.core.PrivilegeError):
-            self._services.files.move(self._source, destination=self._dest, strict_permission=True)
-        self._services.tasks.wait.assert_called_once_with(self._task_reference)
-
     def test_move_completed_with_warnings_raises_move_error(self):
         task = mock.MagicMock()
         task.completed = False
@@ -52,7 +36,7 @@ class BaseCoreServicesFilesMove(base_user.BaseCoreServicesTest):
         self._services.tasks.wait = mock.MagicMock(return_value=task)
         self._init_services(execute_response=self._task_reference)
         with self.assertRaises(exceptions.io.core.MoveError):
-            self._services.files.move(self._source, destination=self._dest, strict_permission=True)
+            self._services.files.move(self._source, destination=self._dest)
         self._services.tasks.wait.assert_called_once_with(self._task_reference)
 
     def _create_move_resource_param(self):
