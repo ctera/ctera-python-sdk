@@ -1542,12 +1542,12 @@ To manage zones, you must be a Read Write Administrator
    """
    Add the following cloud folders to zone: 'ZN-001'
 
-   1) 'Accounting' folder owned by 'Bruce'
-   2) 'HR' folder owned by 'Diana'
+   1) 'Accounting' folder owned by 'Alice'
+   2) 'HR' folder owned by 'Bob'
    """
 
-   accounting = core_types.CloudFSFolderFindingHelper('Accounting', 'Bruce')
-   hr = core_types.CloudFSFolderFindingHelper('HR', 'Diana')
+   accounting = core_types.CloudFSFolderFindingHelper('Accounting', core_types.UserAccount('Alice'))
+   hr = core_types.CloudFSFolderFindingHelper('HR', core_types.UserAccount('Bob'))
 
    admin.cloudfs.zones.add_folders('ZN-001', [accounting, hr])
 

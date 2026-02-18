@@ -142,7 +142,7 @@ class FileBrowser(BaseCommand):
         """
         return await Link(io.public_link, self._core, path, access, expire_in).a_execute()
 
-    async def copy(self, *paths, destination=None, resolver=None, cursor=None, wait=False, strict_permission=False):
+    async def copy(self, *paths, destination=None, resolver=None, cursor=None, wait=False):
         """
         Copy one or more files or folders.
 
@@ -156,16 +156,7 @@ class FileBrowser(BaseCommand):
         :raises cterasdk.exceptions.io.core.CopyError: Raised on failure copying resources.
         """
         try:
-            return await Copy(
-                io.copy,
-                self._core,
-                wait,
-                *paths,
-                destination=destination,
-                resolver=resolver,
-                cursor=cursor,
-                strict_permission=strict_permission
-            ).a_execute()
+            return await Copy(io.copy, self._core, wait, *paths, destination=destination, resolver=resolver, cursor=cursor).a_execute()
         except ValueError:
             raise ValueError('Copy destination was not specified.')
 
@@ -184,7 +175,7 @@ class FileBrowser(BaseCommand):
 class CloudDrive(FileBrowser):
     """Async CloudDrive API with upload and sharing functionality."""
 
-    async def upload(self, destination, handle, name=None, size=None, strict_permission=False):
+    async def upload(self, destination, handle, name=None, size=None):
         """
         Upload from file handle.
 
@@ -203,11 +194,10 @@ class CloudDrive(FileBrowser):
             destination,
             handle,
             name,
-            size,
-            strict_permission=strict_permission
+            size
         ).a_execute()
 
-    async def upload_file(self, path, destination, strict_permission=False):
+    async def upload_file(self, path, destination):
         """
         Upload a file.
 
@@ -223,11 +213,10 @@ class CloudDrive(FileBrowser):
                 destination,
                 handle,
                 name,
-                commonfs.properties(path)['size'],
-                strict_permission=strict_permission
+                commonfs.properties(path)['size']
             )
 
-    async def mkdir(self, path, strict_permission=False):
+    async def mkdir(self, path):
         """
         Create a directory.
 
@@ -236,9 +225,9 @@ class CloudDrive(FileBrowser):
         :rtype: str
         :raises cterasdk.exceptions.io.core.CreateDirectoryError: Raised on error creating directory.
         """
-        return await CreateDirectory(io.mkdir, self._core, path, strict_permission=strict_permission).a_execute()
+        return await CreateDirectory(io.mkdir, self._core, path, ).a_execute()
 
-    async def makedirs(self, path, strict_permission=False):
+    async def makedirs(self, path):
         """
         Recursively create a directory.
 
@@ -247,9 +236,9 @@ class CloudDrive(FileBrowser):
         :rtype: str
         :raises cterasdk.exceptions.io.core.CreateDirectoryError: Raised on error creating directory.
         """
-        return await CreateDirectory(io.mkdir, self._core, path, True, strict_permission=strict_permission).a_execute()
+        return await CreateDirectory(io.mkdir, self._core, path, True, ).a_execute()
 
-    async def rename(self, path, name, *, resolver=None, wait=False, strict_permission=False):
+    async def rename(self, path, name, *, resolver=None, wait=False):
         """
         Rename a file or folder.
 
@@ -267,11 +256,10 @@ class CloudDrive(FileBrowser):
             wait,
             path,
             name,
-            resolver,
-            strict_permission=strict_permission
+            resolver
         ).a_execute()
 
-    async def delete(self, *paths, wait=False, strict_permission=False):
+    async def delete(self, *paths, wait=False):
         """
         Delete one or more files or folders.
 
@@ -281,7 +269,7 @@ class CloudDrive(FileBrowser):
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         :raises cterasdk.exceptions.io.core.DeleteError: Raised on error deleting resources.
         """
-        return await Delete(io.delete, self._core, wait, *paths, strict_permission=strict_permission).a_execute()
+        return await Delete(io.delete, self._core, wait, *paths, ).a_execute()
 
     async def undelete(self, *paths, wait=False):
         """
@@ -295,7 +283,7 @@ class CloudDrive(FileBrowser):
         """
         return await Recover(io.undelete, self._core, wait, *paths).a_execute()
 
-    async def move(self, *paths, destination=None, resolver=None, cursor=None, wait=False, strict_permission=False):
+    async def move(self, *paths, destination=None, resolver=None, cursor=None, wait=False):
         """
         Move one or more files or folders.
 
@@ -309,16 +297,7 @@ class CloudDrive(FileBrowser):
         :raises cterasdk.exceptions.io.core.MoveError: Raised on error moving resources.
         """
         try:
-            return await Move(
-                io.move,
-                self._core,
-                wait,
-                *paths,
-                destination=destination,
-                resolver=resolver,
-                cursor=cursor,
-                strict_permission=strict_permission
-            ).a_execute()
+            return await Move(io.move, self._core, wait, *paths, destination=destination, resolver=resolver, cursor=cursor).a_execute()
         except ValueError:
             raise ValueError('Move destination was not specified.')
 

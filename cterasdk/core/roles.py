@@ -36,9 +36,9 @@ class Roles(BaseCommand):
         :returns: Role settings
         :rtype: cterasdk.core.types.RoleSettings
         """
-        role = Roles.find(role)
-        if role:
-            return RoleSettings.from_server_object(self._core.api.get(f'/rolesSettings/{role}'))
+        name = Roles.find(role)
+        if name:
+            return RoleSettings.from_server_object(self._core.api.get(f'/rolesSettings/{name}'))
         logger.warning('Could not find role. %s', {'role': role})
         return None
 

@@ -7,7 +7,7 @@ from abc import abstractmethod
 from contextlib import contextmanager
 from ...common import Object, DateTimeUtils
 from ...core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, \
-    UploadError, ResourceScope, ResourceError
+    UploadError, ResourceScope, ResourceError, Context, Administrators
 from ...core.types import PortalAccount, UserAccount, GroupAccount, Collaborator
 from ... import exceptions
 from ...lib.storage import synfs, asynfs, commonfs
@@ -20,72 +20,49 @@ from ..actions import PortalCommand
 logger = logging.getLogger('cterasdk.core')
 
 
-def _normalize_rc(rc):
-    if isinstance(rc, str):
-        return rc.strip()
-    return rc
+def administrator_namespace(path):
+    return path[0] in ['.', 'backupFolders', 'backups', 'Users'] if len(path.parts) > 0 else True
 
 
-def _normalize_msg(msg):
-    if isinstance(msg, str):
-        return msg.strip().lower()
-    return msg
+def is_password_protected(path):
+    """
+    Determine whether a path is password protected
+    :returns: ``True`` if password protected, ``False`` otherwise.
+    :rtype: bool
+    """
+    if len(path.parts) > 1 and path[0] in ['backups', 'backupFolders']:
+        return True
+    if len(path.parts) > 2 and path[0] == 'Users':
+        return True
+    return False
 
 
-def _extract_rc_msg(result):
-    if result is None:
-        return None, None
-    if isinstance(result, str):
-        return None, result
-    return getattr(result, 'rc', None), getattr(result, 'msg', None)
+def ensure_user_access(user_session, path):
+    """
+    Determine whether the current user has permission to access the specified path.
+
+    :param cterasdk.lib.session.Session user_session:
+        The active user session used to evaluate permissions.
+    :param str or cterasdk.cio.core.types.PortalPath path:
+        The target path to validate.
+    """
+    relative = path.relative
+    if user_session.account.role.name in Administrators:
+        if user_session.context == Context.admin:
+            if not administrator_namespace(path):
+                return False, exceptions.io.core.ContextError(relative)
+            if not user_session.account.role.access_end_user_folders and is_password_protected(path):
+                return False, exceptions.io.core.PrivilegeError(relative)
+        elif user_session.context == Context.ServicesPortal:
+            if not user_session.account.role.access_end_user_folders and is_password_protected(path):
+                return False, exceptions.io.core.PrivilegeError(relative)
+    return True, None
 
 
-_STRICT_PERMISSION_ERROR_SET = {
-    (None, None),
-    (None, ''),
-    (0, None),
-    ('0', None),
-    (None, 'permission denied'),
-    (None, 'access denied'),
-    (None, 'read only'),
-    (None, 'action is not allowed'),
-    ('permissiondenied', None),
-    (None, 'permissiondenied'),
-    ('permissiondenied', 'permissiondenied'),
-}
-
-_STRICT_PERMISSION_TASK_ERROR_SET = {
-    (None, None, 'permissiondenied'),
-    (None, None, 'permission denied'),
-    (None, None, 'access denied'),
-    (None, None, 'read only'),
-    (None, None, 'action is not allowed'),
-    (None, 'permission denied', None),
-    (None, 'access denied', None),
-    (None, 'read only', None),
-    (None, 'action is not allowed', None),
-    (0, None, 'permissiondenied'),
-    ('0', None, 'permissiondenied'),
-}
-
-
-def _raise_strict_permission_denied(result, path):
-    rc, msg = _extract_rc_msg(result)
-    rc = _normalize_rc(rc)
-    msg = _normalize_msg(msg)
-    logger.info(
-        'strict_permission response for %s: rc=%r msg=%r raw=%s',
-        path, rc, msg, type(result).__name__
-    )
-    if (rc, msg) in _STRICT_PERMISSION_ERROR_SET:
-        raise exceptions.io.core.PrivilegeError(path)
-
-
-def _extract_task_error_tuple(result):
-    rc = _normalize_rc(getattr(result, 'rc', None))
-    msg = _normalize_msg(getattr(result, 'msg', None))
-    error_type = _normalize_msg(getattr(result, 'error_type', None))
-    return rc, msg, error_type
+def raise_or_suppress_access_error(receiver, path):
+    allowed_access, error = ensure_user_access(receiver.session(), path)
+    if not allowed_access:
+        raise error
 
 
 def split_file_directory(listdir, receiver, destination):
@@ -188,13 +165,12 @@ def ensure_writeable(resource, directory):
 
 class Upload(PortalCommand):
 
-    def __init__(self, function, receiver, listdir, destination, fd, name, size, strict_permission=False):
+    def __init__(self, function, receiver, listdir, destination, fd, name, size):
         super().__init__(function, receiver)
         self.destination = automatic_resolution(destination, receiver.context)
         self._resolver = PathResolver(listdir, receiver, self.destination, name)
         self.size = size
         self.fd = fd
-        self._strict_permission = strict_permission
         self._resource = None
 
     def get_parameter(self):
@@ -209,6 +185,7 @@ class Upload(PortalCommand):
         return param
 
     def _before_command(self):
+        raise_or_suppress_access_error(self._receiver, self.destination)
         destination_prerequisite_conditions(self.destination)
         ensure_writeable(self._resource, self.destination.parent)
         logger.info('Uploading: %s', self.destination)
@@ -225,8 +202,6 @@ class Upload(PortalCommand):
 
     def _handle_response(self, r):
         path = self.destination.relative
-        if self._strict_permission:
-            _raise_strict_permission_denied(r, path)
         if r.rc:
             error = exceptions.io.core.UploadError(r.msg, path)
             logger.error('Upload failed: %s', path)
@@ -388,6 +363,7 @@ class Open(PortalCommand):
         return self.path.reference
 
     def _before_command(self):
+        raise_or_suppress_access_error(self._receiver, self.path)
         logger.info('Getting handle: %s', self.path)
 
     def _execute(self):
@@ -441,6 +417,7 @@ class OpenMany(PortalCommand):
         self.objects = objects
 
     def _before_command(self):
+        raise_or_suppress_access_error(self._receiver, self.directory)
         logger.info('Getting handle: %s', [self.directory.join(o).relative for o in self.objects])
 
     def get_parameter(self):
@@ -513,6 +490,7 @@ class ListDirectory(PortalCommand):
         return builder.build()
 
     def _before_command(self):
+        raise_or_suppress_access_error(self._receiver, self.path)
         logger.info('Listing directory: %s', self.path)
 
     def _execute(self):
@@ -614,7 +592,7 @@ class RecursiveIterator:
                 print('Enumerating: ', path or '.')
                 for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).execute():
                     yield self._process_object(o)
-            except exceptions.io.core.ListDirectoryError as e:
+            except (exceptions.io.core.ListDirectoryError, exceptions.io.core.PrivilegeError) as e:
                 RecursiveIterator._suppress_error(e)
 
     async def a_generate(self):
@@ -622,7 +600,7 @@ class RecursiveIterator:
             try:
                 async for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).a_execute():
                     yield self._process_object(o)
-            except exceptions.io.core.ListDirectoryError as e:
+            except (exceptions.io.core.ListDirectoryError, exceptions.io.core.PrivilegeError) as e:
                 RecursiveIterator._suppress_error(e)
 
     def _process_object(self, o):
@@ -632,9 +610,12 @@ class RecursiveIterator:
 
     @staticmethod
     def _suppress_error(e):
-        if not isinstance(e.__cause__, exceptions.io.core.FolderNotFoundError):
+        if isinstance(e, exceptions.io.core.PrivilegeError):
+            logger.warning("Could not list directory contents: %s. Access denied.", e.path)
+        elif isinstance(e.__cause__, exceptions.io.core.FolderNotFoundError):
+            logger.warning("Could not list directory contents: %s. No such directory.", e.path)
+        else:
             raise e
-        logger.warning("Could not list directory contents: %s. No such directory.", e.path)
 
 
 class ListVersions(PortalCommand):
@@ -644,6 +625,7 @@ class ListVersions(PortalCommand):
         self.path = automatic_resolution(path, receiver.context)
 
     def _before_command(self):
+        raise_or_suppress_access_error(self._receiver, self.path)
         logger.info('Listing versions: %s', self.path)
 
     def get_parameter(self):
@@ -667,11 +649,10 @@ class ListVersions(PortalCommand):
 class CreateDirectory(PortalCommand):
     """Create Directory"""
 
-    def __init__(self, function, receiver, path, parents=False, strict_permission=False):
+    def __init__(self, function, receiver, path, parents=False):
         super().__init__(function, receiver)
         self.path = automatic_resolution(path, receiver.context)
         self.parents = parents
-        self._strict_permission = strict_permission
 
     def get_parameter(self):
         param = Object()
@@ -680,22 +661,13 @@ class CreateDirectory(PortalCommand):
         return param
 
     def _before_command(self):
+        raise_or_suppress_access_error(self._receiver, self.path)
         logger.info('Creating directory: %s', self.path)
 
     def _parents_generator(self):
         if self.parents:
             parts = self.path.parts
-            start_index = 1
-            known_roots = ('My Files', 'Shared With Me', 'Shared', 'Team Portal')
-            if parts:
-                if parts[0] in known_roots:
-                    start_index = 2
-                elif parts[0] in ('Users', 'Groups') and len(parts) > 1:
-                    if len(parts) > 2 and parts[2] in known_roots:
-                        start_index = 4
-                    else:
-                        start_index = 3
-            for i in range(start_index, len(parts)):
+            for i in range(1, len(parts)):
                 yield automatic_resolution('/'.join(parts[:i]), self._receiver.context)
         else:
             yield self.path
@@ -704,12 +676,7 @@ class CreateDirectory(PortalCommand):
         if self.parents:
             for path in self._parents_generator():
                 try:
-                    CreateDirectory(
-                        self._function,
-                        self._receiver,
-                        path,
-                        strict_permission=self._strict_permission
-                    ).execute()
+                    CreateDirectory(self._function, self._receiver, path).execute()
                 except exceptions.io.core.CreateDirectoryError as e:
                     CreateDirectory._suppress_file_conflict_error(e)
         with self.trace_execution():
@@ -719,12 +686,7 @@ class CreateDirectory(PortalCommand):
         if self.parents:
             for path in self._parents_generator():
                 try:
-                    await CreateDirectory(
-                        self._function,
-                        self._receiver,
-                        path,
-                        strict_permission=self._strict_permission
-                    ).a_execute()
+                    await CreateDirectory(self._function, self._receiver, path).a_execute()
                 except exceptions.io.core.CreateDirectoryError as e:
                     CreateDirectory._suppress_file_conflict_error(e)
         with self.trace_execution():
@@ -739,8 +701,6 @@ class CreateDirectory(PortalCommand):
         path = self.path.relative
         if r is None or r == 'Ok':
             return path
-        if self._strict_permission:
-            _raise_strict_permission_denied(r, path)
 
         error, cause = exceptions.io.core.CreateDirectoryError(path), None
         if r == ResourceError.FileWithTheSameNameExist:
@@ -997,11 +957,10 @@ class UnShare(Share):
 
 class TaskCommand(PortalCommand):
 
-    def __init__(self, function, receiver, block, strict_permission=False):
+    def __init__(self, function, receiver, block):
         super().__init__(function, receiver)
         self.block = block
         self.background = True
-        self._strict_permission = strict_permission
 
     @abstractmethod
     def _progress_str(self):
@@ -1033,18 +992,11 @@ class TaskCommand(PortalCommand):
             return await function(self.get_parameter())
 
     def _handle_response(self, r):
-        if self._strict_permission:
-            rc, msg, error_type = _extract_task_error_tuple(r)
-            if (rc, msg, error_type) in _STRICT_PERMISSION_TASK_ERROR_SET:
-                raise exceptions.io.core.PrivilegeError('')
         if not self.block:
             return r
 
         if r.completed:
             return self._task_complete(r)
-
-        if r.completed_with_warnings:
-            return r
 
         if r.failed or r.completed_with_warnings:
             return self._task_error(r)
@@ -1060,8 +1012,8 @@ class TaskCommand(PortalCommand):
 
 class MultiResourceCommand(TaskCommand):
 
-    def __init__(self, function, receiver, block, *paths, strict_permission=False):
-        super().__init__(function, receiver, block, strict_permission=strict_permission)
+    def __init__(self, function, receiver, block, *paths):
+        super().__init__(function, receiver, block)
         self.paths = list(automatic_resolution(paths, receiver.context))
 
     def get_parameter(self):
@@ -1072,6 +1024,7 @@ class MultiResourceCommand(TaskCommand):
 
     def _before_command(self):
         for path in self.paths:
+            raise_or_suppress_access_error(self._receiver, path)
             logger.info('%s: %s', self._progress_str(), path)
 
     def _task_complete(self, task):
@@ -1100,9 +1053,8 @@ class Recover(MultiResourceCommand):
 
 class ResolverCommand(TaskCommand):
 
-    def __init__(self, function, receiver, block, *paths, destination=None, resolver=None, cursor=None,
-                 strict_permission=False):
-        super().__init__(function, receiver, block, strict_permission=strict_permission)
+    def __init__(self, function, receiver, block, *paths, destination=None, resolver=None, cursor=None):
+        super().__init__(function, receiver, block)
         self.paths = list(automatic_resolution(paths, receiver.context))
         self.destination = automatic_resolution(destination, receiver.context)
         self.resolver = resolver
@@ -1136,6 +1088,8 @@ class ResolverCommand(TaskCommand):
             src, dest = path, self.destination
             if isinstance(path, tuple):
                 src, dest = path
+            raise_or_suppress_access_error(self._receiver, src)
+            raise_or_suppress_access_error(self._receiver, dest)
             logger.info('%s: %s to: %s', self._progress_str(), src.relative, dest.relative)
 
     @abstractmethod
@@ -1191,13 +1145,11 @@ class Copy(ResolverCommand):
 
     def _try_with_resolver(self, cursor):
         return Copy(self._function, self._receiver, self.block, *self.paths,
-                    destination=self.destination, resolver=self.resolver, cursor=cursor,
-                    strict_permission=self._strict_permission).execute()
+                    destination=self.destination, resolver=self.resolver, cursor=cursor).execute()
 
     async def _a_try_with_resolver(self, cursor):
         return await Copy(self._function, self._receiver, self.block, *self.paths,
-                          destination=self.destination, resolver=self.resolver, cursor=cursor,
-                          strict_permission=self._strict_permission).a_execute()
+                          destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
 
     @property
     def _error_object(self):
@@ -1211,13 +1163,11 @@ class Move(ResolverCommand):
 
     def _try_with_resolver(self, cursor):
         return Move(self._function, self._receiver, self.block, *self.paths,
-                    destination=self.destination, resolver=self.resolver, cursor=cursor,
-                    strict_permission=self._strict_permission).execute()
+                    destination=self.destination, resolver=self.resolver, cursor=cursor).execute()
 
     async def _a_try_with_resolver(self, cursor):
         return await Move(self._function, self._receiver, self.block, *self.paths,
-                          destination=self.destination, resolver=self.resolver, cursor=cursor,
-                          strict_permission=self._strict_permission).a_execute()
+                          destination=self.destination, resolver=self.resolver, cursor=cursor).a_execute()
 
     @property
     def _error_object(self):
@@ -1229,26 +1179,23 @@ class Rename(Move):
     def _progress_str(self):
         return 'Renaming'
 
-    def __init__(self, function, receiver, block, path, new_name, resolver, cursor=None, strict_permission=False):
-        super().__init__(
-            function,
-            receiver,
-            block,
-            *[(path, automatic_resolution(path, receiver.context).parent.join(new_name))],
-            resolver=resolver,
-            cursor=cursor,
-            strict_permission=strict_permission
-        )
+    def __init__(self, function, receiver, block, path, new_name, resolver, cursor=None):
+        super().__init__(function, receiver, block, *[(path, automatic_resolution(path, receiver.context).parent.join(new_name))],
+                         resolver=resolver, cursor=cursor)
+
+    def _before_command(self):
+        raise_or_suppress_access_error(self._receiver, self.paths[0])
+        return super()._before_command()
 
     def _try_with_resolver(self, cursor):
         source, destination = self.paths[0]
         return Rename(self._function, self._receiver, self.block, source, destination.name,
-                      resolver=self.resolver, cursor=cursor, strict_permission=self._strict_permission).execute()
+                      resolver=self.resolver, cursor=cursor).execute()
 
     async def _a_try_with_resolver(self, cursor):
         source, destination = self.paths[0]
         return await Rename(self._function, self._receiver, self.block, source, destination.name,
-                            resolver=self.resolver, cursor=cursor, strict_permission=self._strict_permission).a_execute()
+                            resolver=self.resolver, cursor=cursor).a_execute()
 
     @property
     def _error_object(self):

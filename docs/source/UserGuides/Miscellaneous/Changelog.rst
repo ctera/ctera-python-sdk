@@ -6,11 +6,22 @@ Changelog
 
 Improvements
 ^^^^^^^^^^^^
-* Added ``strict_permission`` support to core file operations (mkdir/makedirs/upload/copy/move/rename/delete)
-* Refined strict permission handling to avoid false permission errors on successful operations
-* Improved strict permission detection for background tasks using rc/msg/error_type tuples
-* Adjusted recursive directory creation to skip portal root segments
-* Treat completed-with-warnings background tasks as successful results
+
+* Capture the logged-on user's permission to access user folders
+* Add ability to:
+
+  - Compute paths based on slices
+  - Compute paths relative to another path
+  - Verify whether a path is relative to another path
+
+* Add a function to verify and raise an error on user access before executing a remote file system command
+* Support validating user permissions for the following commands:
+
+  ``handle``, ``handle_many``, ``download``, ``download_many``, ``mkdir``,
+  ``makedirs``, ``listdir``, ``walk``, ``properties``, ``exists``,
+  ``versions``, ``permalink``, ``copy``, ``move``, ``delete``,
+  ``upload``, ``upload_file``
+
 * Support "upload only" permission when sharing public links
 * Migrate SDK configuration from YAML file to Python module
 * Support bearer token authentication

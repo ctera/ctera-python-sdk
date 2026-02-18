@@ -142,7 +142,7 @@ class FileBrowser(BaseCommand):
         """
         return Link(io.public_link, self._core, path, access, expire_in).execute()
 
-    def copy(self, *paths, destination=None, resolver=None, cursor=None, wait=True, strict_permission=False):
+    def copy(self, *paths, destination=None, resolver=None, cursor=None, wait=True):
         """
         Copy one or more files or folders.
 
@@ -156,16 +156,7 @@ class FileBrowser(BaseCommand):
         :raises cterasdk.exceptions.io.core.CopyError: Raised on failure to copy resources.
         """
         try:
-            return Copy(
-                io.copy,
-                self._core,
-                wait,
-                *paths,
-                destination=destination,
-                resolver=resolver,
-                cursor=cursor,
-                strict_permission=strict_permission
-            ).execute()
+            return Copy(io.copy, self._core, wait, *paths, destination=destination, resolver=resolver, cursor=cursor).execute()
         except ValueError:
             raise ValueError('Copy destination was not specified.')
 
@@ -184,7 +175,7 @@ class FileBrowser(BaseCommand):
 class CloudDrive(FileBrowser):
     """CloudDrive extends FileBrowser with upload and share functionality."""
 
-    def upload(self, destination, handle, name=None, size=None, strict_permission=False):
+    def upload(self, destination, handle, name=None, size=None):
         """
         Upload from file handle.
 
@@ -196,18 +187,9 @@ class CloudDrive(FileBrowser):
         :rtype: str
         :raises cterasdk.exceptions.io.core.UploadError: Raised on upload failure.
         """
-        return Upload(
-            io.upload,
-            self._core,
-            io.listdir,
-            destination,
-            handle,
-            name,
-            size,
-            strict_permission=strict_permission
-        ).execute()
+        return Upload(io.upload, self._core, io.listdir, destination, handle, name, size).execute()
 
-    def upload_file(self, path, destination, strict_permission=False):
+    def upload_file(self, path, destination):
         """
         Upload a file.
 
@@ -219,15 +201,9 @@ class CloudDrive(FileBrowser):
         """
         _, name = commonfs.split_file_directory(path)
         with open(path, 'rb') as handle:
-            return self.upload(
-                destination,
-                handle,
-                name,
-                commonfs.properties(path)['size'],
-                strict_permission=strict_permission
-            )
+            return self.upload(destination, handle, name, commonfs.properties(path)['size'])
 
-    def mkdir(self, path, strict_permission=False):
+    def mkdir(self, path):
         """
         Create a directory.
 
@@ -236,9 +212,9 @@ class CloudDrive(FileBrowser):
         :rtype: str
         :raises cterasdk.exceptions.io.core.CreateDirectoryError: Raised on error creating directory.
         """
-        return CreateDirectory(io.mkdir, self._core, path, strict_permission=strict_permission).execute()
+        return CreateDirectory(io.mkdir, self._core, path).execute()
 
-    def makedirs(self, path, strict_permission=False):
+    def makedirs(self, path):
         """
         Recursively create a directory.
 
@@ -247,9 +223,9 @@ class CloudDrive(FileBrowser):
         :rtype: str
         :raises cterasdk.exceptions.io.core.CreateDirectoryError: Raised on error creating directory.
         """
-        return CreateDirectory(io.mkdir, self._core, path, True, strict_permission=strict_permission).execute()
+        return CreateDirectory(io.mkdir, self._core, path, True).execute()
 
-    def rename(self, path, name, *, resolver=None, wait=True, strict_permission=False):
+    def rename(self, path, name, *, resolver=None, wait=True):
         """
         Rename a file or folder.
 
@@ -261,17 +237,9 @@ class CloudDrive(FileBrowser):
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         :raises cterasdk.exceptions.io.core.RenameError: Raised on error renaming object.
         """
-        return Rename(
-            io.move,
-            self._core,
-            wait,
-            path,
-            name,
-            resolver,
-            strict_permission=strict_permission
-        ).execute()
+        return Rename(io.move, self._core, wait, path, name, resolver).execute()
 
-    def delete(self, *paths, wait=True, strict_permission=False):
+    def delete(self, *paths, wait=True):
         """
         Delete one or more files or folders.
 
@@ -281,7 +249,7 @@ class CloudDrive(FileBrowser):
         :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         :raises cterasdk.exceptions.io.core.DeleteError: Raised on error deleting resources.
         """
-        return Delete(io.delete, self._core, wait, *paths, strict_permission=strict_permission).execute()
+        return Delete(io.delete, self._core, wait, *paths).execute()
 
     def undelete(self, *paths, wait=True):
         """
@@ -295,7 +263,7 @@ class CloudDrive(FileBrowser):
         """
         return Recover(io.undelete, self._core, wait, *paths).execute()
 
-    def move(self, *paths, destination=None, resolver=None, cursor=None, wait=True, strict_permission=False):
+    def move(self, *paths, destination=None, resolver=None, cursor=None, wait=True):
         """
         Move one or more files or folders.
 
@@ -309,16 +277,7 @@ class CloudDrive(FileBrowser):
         :raises cterasdk.exceptions.io.core.MoveError: Raised on error moving resources.
         """
         try:
-            return Move(
-                io.move,
-                self._core,
-                wait,
-                *paths,
-                destination=destination,
-                resolver=resolver,
-                cursor=cursor,
-                strict_permission=strict_permission
-            ).execute()
+            return Move(io.move, self._core, wait, *paths, destination=destination, resolver=resolver, cursor=cursor).execute()
         except ValueError:
             raise ValueError('Move destination was not specified.')
 

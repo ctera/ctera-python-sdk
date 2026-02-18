@@ -1,9 +1,5 @@
 from unittest import mock
 import munch
-
-from cterasdk.common import Object
-from cterasdk import exceptions
-
 from tests.ut.core.user import base_user
 
 
@@ -24,14 +20,3 @@ class BaseCoreServicesFilesMkdir(base_user.BaseCoreServicesTest):
         })
         actual_param = self._services.api.execute.call_args[0][2]
         self._assert_equal_objects(actual_param, expected_param)
-
-    def test_mkdir_strict_permission_success(self):
-        self._init_services(execute_response=None)
-        ret = self._services.files.mkdir(self._directory, strict_permission=True)
-        self.assertEqual(ret, self._directory)
-
-    def test_mkdir_strict_permission_denied(self):
-        execute_response = Object(rc=0)
-        self._init_services(execute_response=execute_response)
-        with self.assertRaises(exceptions.io.core.PrivilegeError):
-            self._services.files.mkdir(self._directory, strict_permission=True)

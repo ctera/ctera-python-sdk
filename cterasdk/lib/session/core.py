@@ -1,15 +1,27 @@
 import logging
 from .base import BaseSession, BaseUser
 from .types import Product
+from ...common import Object
+from ...core.enum import Administrators
 
 
 class PortalUser(BaseUser):
     """Local User"""
 
-    def __init__(self, name, domain, tenant, role):
+    def __init__(self, name, domain, tenant, role, authorizations):
         super().__init__(name, domain)
         self.tenant = tenant
-        self.role = role
+        self.role = Role(role, authorizations)
+
+
+class Role(Object):
+    """User Role"""
+
+    def __init__(self, name, authorizations):
+        super().__init__()
+        self.name = name
+        if authorizations:
+            self.access_end_user_folders = authorizations.access_end_user_folders
 
 
 class Session(BaseSession):
@@ -22,25 +34,28 @@ class Session(BaseSession):
 
     def _start_session(self, session):
         logging.getLogger('cterasdk.core').debug('Starting Session.')
-        current_session = session.api.get('/currentSession')
+        user_session = session.api.get('/currentSession')
         current_tenant = session.api.get('/currentPortal') or Session.Administration
         software_version = session.api.get('/version')
-        self._update_session(current_session, current_tenant, software_version)
+        authorizations = session.roles.get(user_session.role) if user_session.role in Administrators else None
+        self._update_session(user_session, current_tenant, software_version, authorizations)
 
     async def _async_start_session(self, session):
         logging.getLogger('cterasdk.core').debug('Starting Session.')
-        current_session = session.v1.api.get('/currentSession')
+        user_session = await session.v1.api.get('/currentSession')
         current_tenant = session.v1.api.get('/currentPortal')
         software_version = session.v1.api.get('/version')
-        self._update_session(await current_session, await current_tenant or Session.Administration, await software_version)
+        authorizations = await session.roles.get(user_session.role) if user_session.role in Administrators else None
+        self._update_session(user_session, await current_tenant or Session.Administration, await software_version, authorizations)
 
-    def _update_session(self, current_session, current_tenant, software_version):
+    def _update_session(self, user_session, current_tenant, software_version, authorizations):
         self._update_account(
             PortalUser(
-                current_session.username,
-                current_session.domain,
+                user_session.username,
+                user_session.domain,
                 current_tenant,
-                current_session.role
+                user_session.role,
+                authorizations
             )
         )
         self._update_software_version(software_version)

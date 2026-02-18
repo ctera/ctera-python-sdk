@@ -18,6 +18,7 @@ class TestSynchronousFileBrowser(base_admin.BaseCoreTest):
         self.directory_path = 'a/b c/d'
         self.filename = 'Document.txt'
         self.new_filename = 'Summary.txt'
+        self.patch_call('cterasdk.cio.core.commands.raise_or_suppress_access_error')
 
     def test_versions(self):
         directory = 'Users/John Smith/My Files'
