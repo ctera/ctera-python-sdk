@@ -13,6 +13,7 @@ class BaseCoreServicesTest(base.BaseTest):
         self._services = ServicesPortal("")
         self._base = '/ServicesPortal/webdav'
         self._task_reference = 'servers/MainDB/bgTasks/918908'
+        self.patch_call('cterasdk.cio.core.commands.raise_or_suppress_access_error')
 
     @staticmethod
     def encode_path(path):
