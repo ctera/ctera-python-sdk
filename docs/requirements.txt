@@ -1,3 +1,4 @@
+pydantic
 pyyaml
 aiohttp>=3.12.14
 aiofiles
