@@ -1,8 +1,5 @@
 from unittest import mock
-
-from cterasdk.common import Object
 from cterasdk import exceptions
-
 from tests.ut.core.user import base_user
 
 

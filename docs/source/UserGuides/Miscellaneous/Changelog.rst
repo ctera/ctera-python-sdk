@@ -9,7 +9,7 @@ Improvements
 
 * Capture the logged-on user's permission to access user folders
 * Add ability to:
-  
+
   - Compute paths based on slices
   - Compute paths relative to another path
   - Verify whether a path is relative to another path
