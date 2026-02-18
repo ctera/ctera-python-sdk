@@ -100,11 +100,10 @@ class BasePath:
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            return self.__class__(self.parts[key])
-        elif isinstance(key, int):
+            return self.__class__(self.parts[key])  # pylint: disable=no-value-for-parameter
+        if isinstance(key, int):
             return self.parts[key]
-        else:
-            raise TypeError("Invalid argument type")
+        raise TypeError("Invalid argument type")
 
     def __eq__(self, p):
         return self.absolute == p.absolute

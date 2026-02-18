@@ -7,7 +7,7 @@ from abc import abstractmethod
 from contextlib import contextmanager
 from ...common import Object, DateTimeUtils
 from ...core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, \
-    UploadError, ResourceScope, ResourceError, Context, Role, Administrators
+    UploadError, ResourceScope, ResourceError, Context, Administrators
 from ...core.types import PortalAccount, UserAccount, GroupAccount, Collaborator
 from ... import exceptions
 from ...lib.storage import synfs, asynfs, commonfs

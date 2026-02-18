@@ -18,6 +18,7 @@ class Role(Object):
     """User Role"""
 
     def __init__(self, name, authorizations):
+        super().__init__()
         self.name = name
         if authorizations:
             self.access_end_user_folders = authorizations.access_end_user_folders

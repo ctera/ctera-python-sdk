@@ -187,8 +187,7 @@ class CloudDrive(FileBrowser):
         :rtype: str
         :raises cterasdk.exceptions.io.core.UploadError: Raised on upload failure.
         """
-        return Upload(io.upload, self._core, io.listdir, destination, handle, name, size
-        ).execute()
+        return Upload(io.upload, self._core, io.listdir, destination, handle, name, size).execute()
 
     def upload_file(self, path, destination):
         """

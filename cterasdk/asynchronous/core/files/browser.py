@@ -194,8 +194,7 @@ class CloudDrive(FileBrowser):
             destination,
             handle,
             name,
-            size,
-            
+            size
         ).a_execute()
 
     async def upload_file(self, path, destination):
@@ -214,8 +213,7 @@ class CloudDrive(FileBrowser):
                 destination,
                 handle,
                 name,
-                commonfs.properties(path)['size'],
-                
+                commonfs.properties(path)['size']
             )
 
     async def mkdir(self, path):
@@ -258,8 +256,7 @@ class CloudDrive(FileBrowser):
             wait,
             path,
             name,
-            resolver,
-            
+            resolver
         ).a_execute()
 
     async def delete(self, *paths, wait=False):
