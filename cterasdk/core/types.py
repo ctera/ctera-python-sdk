@@ -778,14 +778,14 @@ class RoleSettings(Object):  # pylint: disable=too-many-instance-attributes
     :ivar bool manage_cloud_drives: Manage Cloud Folders
     :ivar bool manage_plans: Manage Plans
     :ivar bool manage_logs: Manage Log Settings
-    :ivar bool allow_folders_files_permanent_delete: Allow Folders Files Permanent Delete
-    :ivar bool can_manage_legal_holds: Manage Legal Holds
-    :ivar bool can_manage_compliance_settings: Manage Compliance Settings
+    :ivar bool permanent_delete: Allow Permanent Delete
+    :ivar bool manage_legal_holds: Manage Legal Holds
+    :ivar bool manage_compliance_settings: Manage Compliance Settings
     """
     # pylint: disable=too-many-arguments, too-many-locals
     def __init__(self, name, sudo, enable_remote_wipe, enable_sso, enable_seeding_export, enable_seeding_import, access_end_user_folders,
                  update_settings, update_roles, update_account_emails, update_account_password, manage_cloud_drives, manage_plans,
-                 manage_users, manage_logs, allow_folders_files_permanent_delete, can_manage_legal_holds, can_manage_compliance_settings):
+                 manage_users, manage_logs, permanent_delete, manage_legal_holds, manage_compliance_settings):
         super().__init__()
         self.name = name
         self.sudo = sudo
@@ -802,9 +802,9 @@ class RoleSettings(Object):  # pylint: disable=too-many-instance-attributes
         self.manage_plans = manage_plans
         self.manage_users = manage_users
         self.manage_logs = manage_logs
-        self.allow_folders_files_permanent_delete = allow_folders_files_permanent_delete
-        self.can_manage_legal_holds = can_manage_legal_holds
-        self.can_manage_compliance_settings = can_manage_compliance_settings
+        self.permanent_delete = permanent_delete
+        self.manage_legal_holds = manage_legal_holds
+        self.manage_compliance_settings = manage_compliance_settings
 
     def to_server_object(self):
         param = Object()
@@ -824,9 +824,9 @@ class RoleSettings(Object):  # pylint: disable=too-many-instance-attributes
         param.canManagePlans = self.manage_plans
         param.canManageUsers = self.manage_users
         param.canManageLogSettings = self.manage_logs
-        param.allowFoldersFilesPermanentDelete = self.allow_folders_files_permanent_delete
-        param.canManageLegalHolds = self.can_manage_legal_holds
-        param.canManageComplianceSetting = self.can_manage_compliance_settings
+        param.allowFoldersFilesPermanentDelete = self.permanent_delete
+        param.canManageLegalHolds = self.manage_legal_holds
+        param.canManageComplianceSetting = self.manage_compliance_settings
         return param
 
     @staticmethod
@@ -847,9 +847,9 @@ class RoleSettings(Object):  # pylint: disable=too-many-instance-attributes
             'manage_plans': server_object.canManagePlans,
             'manage_users': server_object.canManageUsers,
             'manage_logs': server_object.canManageLogSettings,
-            'allow_folders_files_permanent_delete': server_object.allowFoldersFilesPermanentDelete,
-            'can_manage_legal_holds': server_object.canManageLegalHolds,
-            'can_manage_compliance_settings': server_object.canManageComplianceSetting
+            'permanent_delete': server_object.allowFoldersFilesPermanentDelete,
+            'manage_legal_holds': server_object.canManageLegalHolds,
+            'manage_compliance_settings': server_object.canManageComplianceSetting
         }
         return RoleSettings(**params)
 

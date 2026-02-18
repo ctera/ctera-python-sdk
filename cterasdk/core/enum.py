@@ -68,17 +68,21 @@ class Role:
     """
     Portal User Role
 
-    :ivar str Disabled: Disabled user role
-    :ivar str EndUser: EndUser user role
-    :ivar str ReadWriteAdmin: ReadWriteAdmin user role
-    :ivar str ReadOnlyAdmin: ReadOnlyAdmin user role
-    :ivar str Support: Support user role
+    :ivar str Disabled: Disabled
+    :ivar str EndUser: End User
+    :ivar str ReadWriteAdmin: Read Write Administrator
+    :ivar str ReadOnlyAdmin: Read Only Administrator
+    :ivar str Support: Support Administrator
     """
     Disabled = "Disabled"
     EndUser = "EndUser"
     ReadWriteAdmin = "ReadWriteAdmin"
     ReadOnlyAdmin = "ReadOnlyAdmin"
+    ComplianceOfficer = "ComplianceOffer"
     Support = "Support"
+
+
+Administrators = [Role.ReadWriteAdmin, Role.ReadOnlyAdmin, Role.ComplianceOfficer, Role.Support]
 
 
 class RoleResolver:

@@ -1,8 +1,24 @@
 import urllib.parse
+from functools import wraps
 from pathlib import PurePosixPath
 from ..common import Object
 from ..common.utils import utf8_decode
 from ..convert.serializers import toxmlstr
+
+
+def resolver(func):
+    @wraps(func)
+    def wrapper(self, p):
+        if isinstance(p, BasePath):
+            p = p.reference
+        elif isinstance(p, str):
+            pass
+        else:
+            raise ValueError(
+                f"Parameter 'p' must be str or BasePath, got {type(p).__name__}"
+            )
+        return func(self, p)
+    return wrapper
 
 
 class BasePath:
@@ -20,7 +36,7 @@ class BasePath:
         if isinstance(reference, str):
             reference = reference.lstrip('/')
         self._scope = PurePosixPath(scope)
-        self._reference = PurePosixPath(reference)
+        self._reference = PurePosixPath(*reference) if isinstance(reference, tuple) else PurePosixPath(reference)
 
     @property
     def scope(self):
@@ -58,6 +74,14 @@ class BasePath:
     def absolute_parent(self):
         return self.parent.as_posix()
 
+    @resolver
+    def is_relative_to(self, p):
+        return self.reference.is_relative_to(p)
+
+    @resolver
+    def relative_to(self, p):
+        return self.__class__(self.reference.relative_to(p).as_posix())  # pylint: disable=no-value-for-parameter
+
     @property
     def extension(self):
         return self.reference.suffix
@@ -73,6 +97,14 @@ class BasePath:
     @property
     def parts(self):
         return self.reference.parts
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.__class__(self.parts[key])
+        elif isinstance(key, int):
+            return self.parts[key]
+        else:
+            raise TypeError("Invalid argument type")
 
     def __eq__(self, p):
         return self.absolute == p.absolute

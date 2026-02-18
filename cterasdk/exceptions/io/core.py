@@ -56,6 +56,12 @@ class PrivilegeError(PathError):
         super().__init__(errno.EACCES, 'Access denied. No permission to access resource', filename)
 
 
+class ContextError(PathError):
+
+    def __init__(self, filename):
+        super().__init__(EREMOTEIO, "Global administrator access is restricted to: 'backupFolders', 'backups', and 'Users'.", filename)
+
+
 class NTACLError(PathError):
 
     def __init__(self, filename):
