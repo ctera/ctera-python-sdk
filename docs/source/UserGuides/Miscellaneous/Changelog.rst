@@ -1,6 +1,15 @@
 Changelog
 =========
 
+2.20.30
+-------
+
+Bug Fixes
+^^^^^^^^^
+* Update documentation to require :py:class:`cterasdk.core.types.UserAccount` in :py:class:`cterasdk.core.types.CloudFSFolderFindingHelper`
+* Support downloading files from Azure Blob Storage via CTERA Direct I/O.
+
+
 2.20.28
 -------
 
