@@ -8,10 +8,13 @@ from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCrite
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
-CloudFSFolderFindingHelper.__doc__ = 'Tuple holding the name and owner couple to search for folders'
+CloudFSFolderFindingHelper.__doc__ = 'Tuple holding the folder name and owner (UserAccount) to search for cloud drive folders'
 CloudFSFolderFindingHelper.name.__doc__ = 'The name of the CloudFS folder'
-CloudFSFolderFindingHelper.owner.__doc__ = 'The name of the owner of the CloudFS folder'
-
+CloudFSFolderFindingHelper.owner.__doc__ = (
+    'The owner of the CloudFS folder (:class:`cterasdk.core.types.UserAccount`).'
+    ' Use UserAccount (display_name) for local users,'
+    ' or UserAccount (name, domain) for domain users.'
+)
 
 PlatformVersion = namedtuple('PlatformVersion', ('name', 'version'))
 PlatformVersion.__doc__ = 'Tuple holding the platform name and version'
