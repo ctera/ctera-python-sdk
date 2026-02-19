@@ -1184,7 +1184,7 @@ class Rename(Move):
                          resolver=resolver, cursor=cursor)
 
     def _before_command(self):
-        raise_or_suppress_access_error(self._receiver, self.paths[0])
+        raise_or_suppress_access_error(self._receiver, self.paths[0][0])
         return super()._before_command()
 
     def _try_with_resolver(self, cursor):
