@@ -74,7 +74,7 @@ async def get_object(client, file_id, chunk):
 
 
 def is_azure_object_storage(chunk):
-    return True if urllib.parse.urlparse(chunk.url).netloc.endswith('core.windows.net') else False
+    return urllib.parse.urlparse(chunk.url).netloc.endswith('core.windows.net')
 
 
 async def decrypt_object(file_id, encrypted_object, encryption_key, chunk):
