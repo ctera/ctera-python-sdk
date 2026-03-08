@@ -32,11 +32,10 @@ class Portals(BaseCommand):
 
     def list_tenants(self, include=None, portal_type=None):
         """
-        List tenants.\n
-        To retrieve tenants, you must first browse the Global Administration Portal, using: `GlobalAdmin.portals.browse_global_admin()`
-
+        List tenants.
+         Restricted to the Global Administration Portal. Browse it using :py:func:`cterasdk.core.portals.browse_global_admin`.
         :param list[str],optional include: List of fields to retrieve, defaults to ['name']
-        :param cterasdk.core.enum.PortalType portal_type: The Portal type
+        :param cterasdk.core.enum.PortalType portal_type: Portal type
         """
         # browse administration
         include = union(include or [], Portals.default)
@@ -147,7 +146,7 @@ class Portals(BaseCommand):
 
         :param bool,optional wait: Wait for all changes to apply
         :returns: Task status object, or an awaitable task object
-        :rtype: cterasdk.common.object.Object or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
+        :rtype: :py:attr:`cterasdk.common.object.Object` or :class:`cterasdk.lib.tasks.AwaitablePortalTask`
         """
         param = Object()
         param.objectId = None

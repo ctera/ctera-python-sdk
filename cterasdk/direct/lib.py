@@ -6,7 +6,7 @@ from ..lib.retries import execute_with_retries
 from .types import Metadata, Block
 from .crypto import decrypt_key, decrypt_block
 from .decompressor import decompress
-from ..exceptions.transport import BadRequest, Unauthorized, Unprocessable, InternalServerError, HTTPError
+from ..exceptions.transport import BadRequest, Unauthorized, Forbidden, Unprocessable, InternalServerError, HTTPError
 from ..exceptions.direct import (
     AuthorizationError, BlockListConnectionError, BlockListTimeout, BlockValidationException, BlocksNotFoundError,
     DecompressBlockError, DecryptBlockError, DecryptKeyError, DirectIOError, DownloadConnectionError,
@@ -207,7 +207,7 @@ async def get_chunks(api, bearer, file_id):
         return Metadata(file_id, response)
     except BadRequest as error:
         raise ObjectNotFoundError(file_id) from error
-    except Unauthorized as error:
+    except (Unauthorized, Forbidden) as error:
         raise AuthorizationError(file_id) from error
     except Unprocessable as error:
         raise UnsupportedStorageError(file_id) from error

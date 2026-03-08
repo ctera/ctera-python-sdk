@@ -516,7 +516,7 @@ class Zones(BaseCommand):
         :param list[],optional filters: List of additional filters, defaults to None
 
         :return: Iterator for all Zones
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         builder = query.QueryParamBuilder().include_classname().startFrom(0).countLimit(25)
         filters = filters or []
@@ -532,7 +532,7 @@ class Zones(BaseCommand):
         :param str name: Search query
 
         :return: Iterator for all matching Zones
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         filters = [query.FilterBuilder(Zones.name_attr).like(name)]
         return self.all(filters)
@@ -543,7 +543,7 @@ class Zones(BaseCommand):
 
         :param str name: The name of the new zone
         :param cterasdk.core.enum.PolicyType,optional policy_type:
-         Policy type of the new zone, defaults to cterasdk.core.enum.PolicyType.SELECT
+         Policy type of the new zone, defaults to :py:attr:`cterasdk.core.enum.PolicyType.SELECT`
         :param str,optional description: The description of the new zone
         """
         param = self._zone_param(name, policy_type, description)

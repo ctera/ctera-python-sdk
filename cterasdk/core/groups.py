@@ -52,7 +52,7 @@ class Groups(BaseCommand):
 
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: Iterator for all local groups
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         include = union(include or [], Groups.default)
         param = query.QueryParamBuilder().include(include).build()
@@ -65,7 +65,7 @@ class Groups(BaseCommand):
         :param str domain: Domain name
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: Iterator for all the domain groups
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         include = union(include or [], Groups.default)
         param = query.QueryParamBuilder().include(include).build()
