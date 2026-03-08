@@ -40,8 +40,8 @@ class Logs(BaseCommand):
 
         :param str topic: Log Topic to fetch
         :param list[str],optional include: List of fields to include in the response, defailts to Logs.default_include
-        :param cterasdk.edge.enum.Severity,optional minSeverity: Minimal log severity to fetch, defaults to :py:attr:`cterasdk.edge.enum.Severity.INFO`
-
+        :param cterasdk.edge.enum.Severity,optional minSeverity: Minimal log severity to fetch,
+         defaults to :py:attr:`cterasdk.edge.enum.Severity.INFO`
         :return: Log entries
         :rtype: cterasdk.lib.iterator.QueryIterator
         """
