@@ -46,7 +46,7 @@ class Administrators(BaseCommand):
 
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: Iterator for local administrators
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         include = union(include or [], Administrators.default)
         param = query.QueryParamBuilder().include(include).build()

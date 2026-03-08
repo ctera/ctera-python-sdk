@@ -56,7 +56,7 @@ class Users(BaseCommand):
 
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: Iterator for all local users
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         include = union(include or [], Users.default)
         param = query.QueryParamBuilder().include(include).build()
@@ -69,7 +69,7 @@ class Users(BaseCommand):
         :param str domain: Domain name
         :param list[str] include: List of fields to retrieve, defaults to ['name']
         :return: Iterator for all the domain users
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         include = union(include or [], Users.default)
         param = query.QueryParamBuilder().include(include).build()

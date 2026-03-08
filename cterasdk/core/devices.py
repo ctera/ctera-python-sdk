@@ -31,7 +31,7 @@ class Devices(BaseCommand):
         :param list[str],optional include: List of fields to retrieve, defaults to ['name', 'portal', 'deviceType']
 
         :return: Managed Device
-        :rtype: cterasdk.objects.synchronous.Edge or cterasdk.objects.synchronous.Drive
+        :rtype: cterasdk.objects.synchronous.edge.Edge or cterasdk.objects.synchronous.drive.Drive
         """
         include = union(include or [], Devices.default)
         include = ['/' + attr for attr in include]
@@ -53,7 +53,7 @@ class Devices(BaseCommand):
         :param list[cterasdk.core.enum.DeviceType.Gateways] deviceTypes: Types of Filers, defaults to all Filer types
 
         :return: Iterator for all matching Filers
-        :rtype: cterasdk.lib.iterator.Iterator[cterasdk.object.Gateway.Gateway]
+        :rtype: cterasdk.lib.iterator.QueryIterator[cterasdk.objects.synchronous.edge.Edge]
         """
         if deviceTypes:
             deviceTypes = [deviceType for deviceType in deviceTypes if deviceType in DeviceType.Gateways]
@@ -71,7 +71,7 @@ class Devices(BaseCommand):
         :param bool,optional allPortals: Search in all portals, defaults to False
 
         :return: Iterator for all matching Agents
-        :rtype: cterasdk.lib.iterator.Iterator[cterasdk.object.Agent.Agent]
+        :rtype: cterasdk.lib.iterator.QueryIterator[cterasdk.objects.synchronous.drive.Drive]
         """
         filters = [query.FilterBuilder(Devices.type_attr).like('Agent')]
         return self.devices(include, allPortals, filters)
@@ -84,7 +84,7 @@ class Devices(BaseCommand):
         :param bool,optional allPortals: Search in all portals, defaults to False
 
         :return: Iterator for all matching Desktops
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         filters = [query.FilterBuilder(Devices.type_attr).eq(DeviceType.WorkstationAgent)]
         return self.devices(include, allPortals, filters)
@@ -97,7 +97,7 @@ class Devices(BaseCommand):
         :param bool,optional allPortals: Search in all portals, defaults to False
 
         :return: Iterator for all matching Servers
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         filters = [query.FilterBuilder(Devices.type_attr).eq(DeviceType.ServerAgent)]
         return self.devices(include, allPortals, filters)
@@ -110,7 +110,7 @@ class Devices(BaseCommand):
         :param list[str],optional include: List of fields to retrieve, defaults to ['name', 'portal', 'deviceType']
 
         :return: Iterator for all matching Devices
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         filters = [query.FilterBuilder('name').eq(name) for name in names]
         return self.devices(include, False, filters)
@@ -125,7 +125,7 @@ class Devices(BaseCommand):
         :param cterasdk.core.types.UserAccount user: User account of the device owner
 
         :return: Iterator for all matching Devices
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         include = union(include or [], Devices.default)
         builder = query.QueryParamBuilder().include(include).allPortals(allPortals)

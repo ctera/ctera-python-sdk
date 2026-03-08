@@ -39,7 +39,7 @@ class DirectoryService(BaseCommand):
         :param str username: The user name to use when connecting to the active directory services
         :param str password: The password to use when connecting to the active directory services
         :param str,optional ou: The OU path to use when connecting to the active directory services, defaults to `None`
-        :param cterasdk.core.enum.DirectoryServiceType,optional directory: The directory service type, deafults to `'ActiveDirectory'`
+        :param cterasdk.core.enum.DirectoryServiceType,optional directory: The directory service type, defaults to ``ActiveDirectory``
         :param cterasdk.core.types.DomainControllers,optional domain_controllers:
             Connect to a primary and a secondary domain controllers, defaults to `None`
         :param bool,optional ssl: Connect using SSL, defaults to `False`

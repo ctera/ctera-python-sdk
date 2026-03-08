@@ -101,9 +101,8 @@ class Buckets(BaseCommand):
 
     def list_buckets(self, include=None):
         """
-        List Buckets.\n
-        To retrieve buckets, you must first browse the Global Administration Portal, using: `GlobalAdmin.portals.browse_global_admin()`
-
+        List Buckets.
+         Restricted to the Global Administration Portal. Browse it using :py:func:`cterasdk.core.portals.browse_global_admin`.
         :param list[str],optional include: List of fields to retrieve, defaults to ``['name']``
         """
         include = union(include or [], Buckets.default)

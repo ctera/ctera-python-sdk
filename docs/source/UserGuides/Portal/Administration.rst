@@ -1244,6 +1244,8 @@ Retrieve a Report
 
 Once a report was generated, use the following commands to retrieve the report.
 
+.. note:: To retrieve the following reports, first navigate to the Global Administration view using :py:func:`cterasdk.core.portals.browse_global_admin()`
+
 .. automethod:: cterasdk.core.reports.Reports.storage
    :noindex:
 

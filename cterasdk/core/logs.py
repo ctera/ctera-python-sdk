@@ -33,15 +33,15 @@ class Logs(BaseCommand):
         Get device logs from the Portal
 
         :param str name: Name of a device
-        :param cterasdk.core.enum.LogTopic,optional topic: Log topic to get, defaults to cterasdk.core.enum.LogTopic.System
+        :param cterasdk.core.enum.LogTopic,optional topic: Log topic to get, defaults to :py:attr:`cterasdk.core.enum.LogTopic.System`
         :param cterasdk.core.enum.Severity,optional min_severity:
-         Minimun severity of logs to get, defaults to cterasdk.core.enum.Severity.INFO
+         Minimun severity of logs to get, defaults to :py:attr:`cterasdk.core.enum.Severity.INFO`
         :param str,optional before: Get logs before this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
         :param str,optional after: Get logs after this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
         :param list[cterasdk.core.query.FilterBuilder],optional filters: List of additional filters, defaults to None
 
         :return: Iterator for all matching logs
-        :rtype: cterasdk.lib.iterator.Iterator[cterasdk.object.Object]
+        :rtype: cterasdk.lib.iterator.QueryIterator[cterasdk.common.object.Object]
         """
         return self.get(topic, min_severity, enum.OriginType.Device, name, before, after, filters)
 
@@ -54,14 +54,14 @@ class Logs(BaseCommand):
         :param cterasdk.core.enum.Severity,optional min_severity:
          Minimun severity of logs to get, defaults to cterasdk.core.enum.Severity.INFO
         :param cterasdk.core.enum.OriginType,optional origin_type:
-         Origin type of the logs to get, defaults to cterasdk.core.enum.OriginType.Portal
+         Origin type of the logs to get, defaults to :py:attr:`cterasdk.core.enum.OriginType.Portal`
         :param str,optional origin: Log origin (e.g. device name, Portal server name), defaults to None
         :param str,optional before: Get logs before this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
         :param str,optional after: Get logs after this date (in format "%m/%d/%Y %H:%M:%S"), defaults to None
         :param list[cterasdk.core.query.FilterBuilder],optional filters: List of additional filters, defaults to None
 
         :return: Iterator for all matching logs
-        :rtype: cterasdk.lib.iterator.Iterator[cterasdk.object.Object]
+        :rtype: cterasdk.lib.iterator.QueryIterator[cterasdk.common.object.Object]
         """
         builder = query.QueryParamBuilder().put('topic', topic).put('minSeverity', min_severity)
 

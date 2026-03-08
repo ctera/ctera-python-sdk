@@ -20,10 +20,10 @@ class DirectIO:
         """
         Initialize a CTERA Direct IO Client.
 
-        :param str baseurl: Portal URL
-        :param str,optional access_key_id: Access key
-        :param str,optional secret_access_key: Secret key
-        :param str,optional bearer: Bearer token
+        :param str, optional baseurl: Portal URL.
+        :param str, optional access_key_id: Access key.
+        :param str, optional secret_access_key: Secret key.
+        :param str, optional bearer: Bearer token.
         """
         self._api = AsyncJSON(EndpointBuilder.new(baseurl, '/directio'), settings=cterasdk.settings.io.direct.api.settings,
                               authenticator=lambda *_: True)
@@ -45,6 +45,7 @@ class DirectIO:
         Get File Metadata.
 
         :param int file_id: File ID.
+        :return: Serialized file metadata.
         """
         meta = await self._chunks(file_id)
         return meta.serialize()
@@ -54,14 +55,12 @@ class DirectIO:
         Blocks API.
 
         :param int file_id: File ID.
-        :param cterasdk.direct.types.ByteRange,optional byte_range: Byte Range.
-        :param int,optional max_workers: Max concurrent tasks
+        :param cterasdk.direct.types.ByteRange, optional byte_range: Byte range.
+        :param int, optional max_workers: Max concurrent tasks.
         :returns: List of Blocks.
         :rtype: list[cterasdk.direct.types.Block]
         """
-        meta = await self._chunks(file_id)
-        byte_range = byte_range if byte_range is not None else ByteRange.default()
-        executor = self.executor(filters.span(meta, byte_range), meta.encryption_key, meta.file_id, max_workers)
+        executor = self.executor(await self._chunks(file_id), byte_range=byte_range, max_workers=max_workers)
         return await executor()
 
     async def streamer(self, file_id, byte_range=None, max_workers=None):
@@ -69,35 +68,34 @@ class DirectIO:
         Stream API.
 
         :param int file_id: File ID.
-        :param cterasdk.direct.types.ByteRange,optional byte_range: Byte Range.
-        :param int,optional max_workers: Max concurrent tasks
-        :returns: Streamer Object
+        :param cterasdk.direct.types.ByteRange, optional byte_range: Byte range.
+        :param int, optional max_workers: Max concurrent tasks.
+        :returns: Streamer object.
         :rtype: cterasdk.direct.stream.Streamer
         """
-        meta = await self._chunks(file_id)
-        byte_range = byte_range if byte_range is not None else ByteRange.default()
-        max_workers = max_workers if max_workers else cterasdk.settings.io.direct.streamer.max_workers
-        executor = self.executor(filters.span(meta, byte_range), meta.encryption_key, file_id, max_workers)
+        executor = self.executor(await self._chunks(file_id), byte_range=byte_range, max_workers=max_workers)
         return Streamer(executor, byte_range)
 
-    def executor(self, chunks, encryption_key, file_id=None, max_workers=None):
+    def executor(self, metadata, file_id=None, byte_range=None, max_workers=None):
         """
         Download Executor.
 
-        :param list[cterasdk.direct.types.Chunk] chunks: List of Chunks.
-        :param str encryption_key: Decryption Key.
-        :param int,optional file_id: File ID.
-        :param int,optional max_workers: Max concurrent tasks.
-
-        :returns: Callable Downloader
+        :param cterasdk.direct.types.Metadata metadata: Direct I/O file metadata.
+        :param int, optional file_id: File ID.
+        :param cterasdk.direct.types.ByteRange, optional byte_range: Byte range.
+        :param int, optional max_workers: Max concurrent tasks.
+        :returns: Callable downloader.
         :rtype: function
         """
+        byte_range = byte_range if byte_range is not None else ByteRange.default()
+        chunks = filters.span(metadata, byte_range)
+        file_id = file_id if file_id is not None else metadata.file_id
 
         async def execute():
             """
             Asynchronous Executable of Chunk Retrieval Tasks.
             """
-            return await process_chunks(self._client, file_id, chunks, encryption_key,
+            return await process_chunks(self._client, file_id, chunks, metadata.encryption_key,
                                         asyncio.Semaphore(max_workers) if max_workers else None)
 
         return execute

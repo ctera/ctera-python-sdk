@@ -49,7 +49,7 @@ class PortalPath(BasePath):
     @staticmethod
     def from_cursor(cursor):
         """
-        Create Path Object from 'ResourceActionCursor' Class Object.
+        Create Path Object from :class:`cterasdk.cio.core.types.ResourceActionCursor`.
 
         :param object cursor: Resource Action Cursor Object
         """
@@ -110,7 +110,7 @@ def resolve(path, namespace=None):
     Resolve Path
 
     :param object path: Path
-    :param cterasdk.cio.core.types.PortalPath,optional namespace: Path Object
+    :param namespace: :class:`cterasdk.cio.core.types.ServicesPortalPath` or :class:`cterasdk.cio.core.types.GlobalAdminPath` (optional)
     """
     if isinstance(path, PortalPath):
         return path
@@ -133,7 +133,7 @@ def create_generator(paths, namespace=None):
     Create Path Object Generator Object.
 
     :param object paths: List or a tuple
-    :param cterasdk.cio.core.types.PortalPath,optional namespace: Path Object
+    :param namespace: :class:`cterasdk.cio.core.types.ServicesPortalPath` or :class:`cterasdk.cio.core.types.GlobalAdminPath` (optional)
     """
     def wrapper():
         for path in paths:
@@ -335,7 +335,7 @@ class PreviousVersion(Object):
     Class Representing a Previous Version
 
     :ivar bool current: Current
-    :ivar cterasdk.cio.types.PortalPath path: Path Object
+    :ivar path: :class:`cterasdk.cio.types.ServicesPortalPath` or :class:`cterasdk.cio.types.GlobalAdminPath`
     :ivar datetime.datetime start_time: Snapshot start time
     :ivar datetime.datetime end_time: Snapshot end time
     """
@@ -370,7 +370,7 @@ class PortalResource(BaseResource):
 
     :ivar int,optional id: Resource ID, defaults to ``None`` if not exists
     :ivar str name: Resource name
-    :ivar cterasdk.cio.types.PortalPath path: Path Object
+    :ivar path: :class:`cterasdk.cio.types.ServicesPortalPath` or :class:`cterasdk.cio.types.GlobalAdminPath`
     :ivar bool is_dir: ``True`` if directory, ``False`` otherwise
     :ivar bool deleted: ``True`` if deleted, ``False`` otherwise
     :ivar int size: Size

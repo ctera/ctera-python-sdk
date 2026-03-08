@@ -19,9 +19,9 @@ class Syslog(BaseCommand):
         :param str server: Server address to send syslog logs
         :param int,optional port: Syslog server communication port, defaults to 514
         :param cterasdk.edge.enum.IPProtocol,optional proto:
-         Syslog server communication protocol, defaults to cterasdk.edge.enum.IPProtocol.UDP
+         Syslog server communication protocol, defaults to :py:attr:`cterasdk.edge.enum.IPProtocol.UDP`
         :param cterasdk.edge.enum.Severity,optional min_severity:
-         Minimal log severity to fetch, defaults to cterasdk.edge.enum.Severity.INFO
+         Minimal log severity to fetch, defaults to :py:attr:`cterasdk.edge.enum.Severity.INFO`
         """
         obj = Object()
         obj.mode = enum.Mode.Enabled

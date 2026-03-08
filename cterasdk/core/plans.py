@@ -43,7 +43,7 @@ class Plans(BaseCommand):
         :param list[cterasdk.core.query.FilterBuilder],optional filters: List of additional filters, defaults to None
 
         :return: Iterator for all matching Plans
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         filters = [query.FilterBuilder('name').eq(name) for name in names]
         return self.list_plans(include, filters)
@@ -56,7 +56,7 @@ class Plans(BaseCommand):
         :param list[],optional filters: List of additional filters, defaults to None
 
         :return: Iterator for all matching Plans
-        :rtype: cterasdk.lib.iterator.Iterator
+        :rtype: cterasdk.lib.iterator.QueryIterator
         """
         include = union(include or [], Plans.default)
         builder = query.QueryParamBuilder().include(include)

@@ -13,29 +13,25 @@ class Reports(BaseCommand):
     """
     def storage(self):
         """
-        Retrieve the portals statistics report.\n
-        To retrieve this report, you must first browse the Global Administration Portal, using: `GlobalAdmin.portals.browse_global_admin()`
+        Storage Statistics Report.
         """
         return self._get_report(enum.Reports.Storage)
 
     def portals(self):
         """
-        Retrieve the storage statistics report.\n
-        To retrieve this report, you must first browse the Global Administration Portal, using: `GlobalAdmin.portals.browse_global_admin()`
+        Portal Statistics Report.
         """
         return self._get_report(enum.Reports.Portals)
 
     def folders(self):
         """
-        Retrieve the cloud folders statistics report.\n
-        To retrieve this report, you must first browse the Virtual Portal that contains the report, using: `GlobalAdmin.portals.browse()`
+        Cloud Drive Folders Statistics Report.
         """
         return self._get_report(enum.Reports.Folders)
 
     def folder_groups(self):
         """
-        Retrieve the folder groups statistics report.\n
-        To retrieve this report, you must first browse the Virtual Portal that contains the report, using: `GlobalAdmin.portals.browse()`
+        Folder Groups Statistics Report.
         """
         return self._get_report(enum.Reports.FolderGroups)
 
@@ -43,7 +39,7 @@ class Reports(BaseCommand):
         """
         Generate a CTERA Portal Report
 
-        :param cterasdk.core.enum.reports report: Report
+        :param cterasdk.core.enum.Reports report: Report
         """
         options = {v: k for k, v in enum.Reports.__dict__.items() if not k.startswith('_')}
         if options.get(name, None) is None:

@@ -36,7 +36,7 @@ class PortalSettings(BaseCommand):
         """
         Update Portal Settings
 
-        :param cterasdk.common.object.Objcet settings: Settings, defaults to using the global settings.
+        :param cterasdk.common.object.Object settings: Settings, defaults to using the global settings.
         """
         if not self.session().in_tenant_context():
             self._core.api.put('/settings/defaultPortalSettings', settings)

@@ -67,7 +67,7 @@ class Services(BaseCommand):
         :param str server: Address of the Portal
         :param str user: User for the Portal connection
         :param str password: Password for the Portal connection
-        :param cterasdk.edge.enum.License,optional ctera_license: CTERA License, defaults to cterasdk.edge.enum.License.EV16
+        :param cterasdk.edge.enum.License,optional ctera_license: CTERA License, defaults to :py:attr:`cterasdk.edge.enum.License.EV16`
         """
         self._before_connect_to_services(ctera_license, server)
         self._check_connection(server)
@@ -86,7 +86,7 @@ class Services(BaseCommand):
         :param str server: Address of the Portal
         :param str user: User for  the Portal connection
         :param str code: Activation code for the Portal connection
-        :param cterasdk.edge.enum.License,optional ctera_license: CTERA License, defaults to cterasdk.edge.enum.License.EV16
+        :param cterasdk.edge.enum.License,optional ctera_license: CTERA License, defaults to :py:attr:`cterasdk.edge.enum.License.EV16`
         """
         self._before_connect_to_services(ctera_license, server)
 
