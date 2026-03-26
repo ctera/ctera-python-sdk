@@ -46,7 +46,7 @@ class TestSpecialCharacterPaths(base_user.BaseCoreServicesTest):
             path = f'My Files/{filename}'
             self._init_services()
             mock_download = mock.MagicMock()
-            self._services.io._webdav.download = mock_download
+            self._services.io._webdav.download = mock_download  # pylint: disable=protected-access
             self._services.files.handle(path)
             call_args = mock_download.call_args[0]
             actual_path = str(call_args[0])
@@ -59,7 +59,7 @@ class TestSpecialCharacterPaths(base_user.BaseCoreServicesTest):
             path = f'{directory}/document.txt'
             self._init_services()
             mock_download = mock.MagicMock()
-            self._services.io._webdav.download = mock_download
+            self._services.io._webdav.download = mock_download  # pylint: disable=protected-access
             self._services.files.handle(path)
             call_args = mock_download.call_args[0]
             actual_path = str(call_args[0])
