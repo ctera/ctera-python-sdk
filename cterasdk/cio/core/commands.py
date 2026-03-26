@@ -360,7 +360,7 @@ class Open(PortalCommand):
         self.path = automatic_resolution(path, receiver.context)
 
     def get_parameter(self):
-        return self.path.reference
+        return self.path.relative_encode
 
     def _before_command(self):
         raise_or_suppress_access_error(self._receiver, self.path)
@@ -422,7 +422,7 @@ class OpenMany(PortalCommand):
 
     def get_parameter(self):
         param = Object()
-        param.paths = ['/'.join([self.directory.absolute, filename]) for filename in self.objects]
+        param.paths = [self.directory.join(filename).absolute_encode for filename in self.objects]
         param.snapshot = None
         param.password = None
         param.portalName = None
@@ -629,7 +629,7 @@ class ListVersions(PortalCommand):
         logger.info('Listing versions: %s', self.path)
 
     def get_parameter(self):
-        return self.path.absolute
+        return self.path.absolute_encode
 
     def _execute(self):
         with self.trace_execution():
