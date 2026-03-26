@@ -776,7 +776,8 @@ class Link(PortalCommand):
     def _handle_exception(self, e):
         path = self.path.relative
         error = exceptions.io.core.CreateLinkError(path)
-        if e.error.response.error.msg == 'Resource does not exist':
+        err_detail = e.error.response.error
+        if hasattr(err_detail, 'msg') and err_detail.msg == 'Resource does not exist':
             raise error from exceptions.io.core.ObjectNotFoundError(path)
         raise error from e
 
