@@ -1,6 +1,15 @@
 Changelog
 =========
 
+2.20.31
+-------
+
+Bug Fixes
+^^^^^^^^^
+* Support opening, downloading, and listing previous versions of files and directories containing special characters
+* Improve error handling when attempting to generate a public link for a resource that does not exist
+
+
 2.20.30
 -------
 
