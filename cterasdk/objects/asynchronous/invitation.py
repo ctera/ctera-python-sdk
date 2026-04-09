@@ -31,13 +31,13 @@ class AsyncInvitation(AsyncPortal):
     def _authenticator(self, url):  # pylint: disable=unused-argument
         return True
 
-    async def login(self):
+    async def login(self):  # pylint: disable=arguments-differ
         await super().login('share', self.invite)
         self.details = await self.files.details()
 
     @property
     def uri(self):
-        return invitation.uri(self)
+        return f'{self.clients.v1.ctera.baseurl}/?share={self.invite}'
 
     @property
     def _login_object(self):

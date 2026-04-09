@@ -31,13 +31,13 @@ class Invitation(Portal):
     def _authenticator(self, url):  # pylint: disable=unused-argument
         return True
 
-    def login(self):
+    def login(self):  # pylint: disable=arguments-differ
         super().login('share', self.invite)
         self.details = self.files.details()
 
     @property
     def uri(self):
-        return invitation.uri(self)
+        return f'{self.clients.ctera.baseurl}/?share={self.invite}'
 
     @property
     def _login_object(self):

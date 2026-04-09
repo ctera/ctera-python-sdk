@@ -21,6 +21,7 @@ class BaseUser(Object):
     """Base User Account"""
 
     def __init__(self, type_of):
+        super().__init__()
         self.type = type_of
 
 

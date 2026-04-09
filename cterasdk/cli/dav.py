@@ -44,7 +44,7 @@ async def handle_ls(args):
                 print(formatter.format(*row))
 
 
-async def handle_download(args):
+async def handle_download(args):  # pylint: disable=too-many-branches
     target = Path(args.dest or os.getcwd())
 
     try:
@@ -59,11 +59,11 @@ async def handle_download(args):
         async with AsyncInvitation.from_uri(args.endpoint) as invitation:
             jobs = []
 
-            if not invitation.details.is_dir:
+            if not invitation.details.is_dir:  # pylint: disable=too-many-nested-blocks
                 if args.src:
                     print(f"error: object not found error: '{args.src}'", file=sys.stderr)
                     sys.exit(1)
-                resource = await anext(invitation.files.listdir())  # noqa: F821
+                resource = await invitation.files.listdir().__anext__()
                 jobs.append(download(invitation, resource, destination=target))
             else:
                 try:
@@ -90,9 +90,9 @@ async def handle_download(args):
     except PermissionError:
         print(f"error: permission denied: Cannot create files and folders at '{target}'.", file=sys.stderr)
     except NotADirectoryError:
-        print(f"error: path conflict: '{target}' is a file, but a folder was expected.", file=sys.strerr)
+        print(f"error: path conflict: '{target}' is a file, but a folder was expected.", file=sys.stderr)
     except OSError as e:
-        print(f"error: an unexpected error occurred during download. {e}", file=sys.strerr)
+        print(f"error: an unexpected error occurred during download. {e}", file=sys.stderr)
 
 
 async def handle_upload(args):

@@ -1,8 +1,8 @@
 from .uri import components, parse_qsl
 
 
-def validate(uri):
-    r = components(uri)
+def validate(resource):
+    r = components(resource)
 
     assert r.scheme == "https", f"Error: Expected 'https' scheme, got '{r.scheme}'."
     assert r.netloc, "Error: Could not identify network location."
@@ -19,7 +19,3 @@ def validate(uri):
         return r.hostname, r.port, invite
 
     raise ValueError("Error: Could not find invitation identifer.")
-
-
-def uri(invitation):
-    return f'{invitation.clients.ctera.baseurl}/?share={invitation.invite}'
