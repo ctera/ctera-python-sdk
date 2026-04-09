@@ -25,7 +25,7 @@ class Invitation(Portal):
     def context(self):
         return 'invitations'
 
-    def _authenticator(self, url):  #pylint: disable=unused-argument
+    def _authenticator(self, url):  # pylint: disable=unused-argument
         return True
 
     def login(self):

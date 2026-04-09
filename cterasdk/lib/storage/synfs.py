@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 from .commonfs import write_new_version, ResultContext, expanduser
 
 

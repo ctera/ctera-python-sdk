@@ -63,7 +63,7 @@ class Session(BaseSession):
             software_version = session.v1.api.get('/version')
             authorizations = await session.roles.get(user_session.role) if user_session.role in Administrators else None
             account = PortalUser(user_session.username, user_session.domain, await current_tenant or Session.Administration,
-                                user_session.role, authorizations)
+                                 user_session.role, authorizations)
             self._update_software_version(await software_version)
         else:
             account = ExternalUser()

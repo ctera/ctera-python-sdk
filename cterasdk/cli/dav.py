@@ -48,7 +48,7 @@ async def handle_download(args):
     target = Path(args.dest or os.getcwd())
 
     try:
-    
+
         Path.mkdir(target, exist_ok=True)
 
         async def download(invitation, resource, objects=None, archive=False, destination=None):
@@ -81,7 +81,7 @@ async def handle_download(args):
                                     await asynfs.mkdir(target.joinpath(r.path.relative), parents=True, exist_ok=True)
                                 else:
                                     jobs.append(download(invitation, r, destination=target))
-                except (GetMetadataError, ListDirectoryError) as e:
+                except (GetMetadataError, ListDirectoryError):
                     print(f"error: failed to obtain properties or list a directory: '{args.src}'", file=sys.stderr)
                     sys.exit(1)
 
@@ -104,7 +104,7 @@ async def handle_upload(args):
 
     async with AsyncInvitation.from_uri(args.endpoint) as invitation:
         if not invitation.details.is_dir:
-            print(f"error: destination is not a directory", file=sys.stderr)
+            print("error: destination is not a directory", file=sys.stderr)
             sys.exit(1)
         elif invitation.details.access not in [FileAccessMode.RW, FileAccessMode.UO]:
             print(f"error: insufficient permissions to write to: {args.dest}", file=sys.stderr)

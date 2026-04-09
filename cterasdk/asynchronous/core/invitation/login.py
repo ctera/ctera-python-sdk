@@ -10,7 +10,7 @@ class Login(BaseCommand):
     Portal Login APIs
     """
 
-    async def login(self, key, value):  #pylint: disable=unused-argument
+    async def login(self, key, value):
         logger.info('Creating external session. %s', {'invite': value})
         await self._core.clients.v1.ctera.get('', params={key: value})
 

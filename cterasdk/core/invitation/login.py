@@ -1,6 +1,5 @@
 import logging
 from ..base_command import BaseCommand
-from ...exceptions.transport import InternalServerError
 
 
 logger = logging.getLogger('cterasdk.core')
@@ -11,7 +10,7 @@ class Login(BaseCommand):
     Portal Login APIs
     """
 
-    def login(self, key, value):  #pylint: disable=unused-argument
+    def login(self, key, value):
         logger.info('Creating external session. %s', {'invite': value})
         self._core.clients.ctera.get('', params={key: value})
 

@@ -696,7 +696,6 @@ class CreateDirectory(PortalCommand):
     def _suppress_file_conflict_error(e):
         if not isinstance(e.__cause__, exceptions.io.core.FileConflictError):
             raise e
-        
 
     def _handle_response(self, r):
         path = self.path.relative

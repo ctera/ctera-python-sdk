@@ -56,5 +56,5 @@ async def mkdir(p, parents=False, exist_ok=True):
         await aiofiles.os.makedirs(location, exist_ok=exist_ok)
     else:
         await aiofiles.os.mkdir(location, exist_ok=exist_ok)
-        
+
     return location.as_posix()

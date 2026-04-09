@@ -110,7 +110,7 @@ class InvitationPath(PortalPath):
     Invitation Path Object
     """
     Namespace = '/invitations/webdav'
-    expr = f'{Namespace}/share\/([a-zA-Z0-9]+)'
+    expr = f'{Namespace}/share/([a-zA-Z0-9]+)'
 
     @staticmethod
     def from_context(reference):

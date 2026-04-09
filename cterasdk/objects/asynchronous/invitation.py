@@ -15,9 +15,12 @@ class AsyncInvitation(AsyncPortal):
     def __init__(self, host, port, invite):
         super().__init__(host, port)
         self.invite = invite
-        self.clients.v1.api = self.default.clone(clients.AsyncAPI, EndpointBuilder.new(self.base, self.context, f'/portalInvitation/share/{invite}'))
-        self.clients.io._webdav = self.default.clone(clients.AsyncWebDAV, EndpointBuilder.new(self.base, self.context, f'/webdav/share/{invite}'))
-        self.clients.io._upload = self.default.clone(clients.AsyncUpload, EndpointBuilder.new(self.base, self.context, f'/upload/share/{invite}'))
+        self.clients.v1.api = self.default.clone(clients.AsyncAPI, EndpointBuilder.new(self.base,
+                                                                                       self.context, f'/portalInvitation/share/{invite}'))
+        self.clients.io._webdav = self.default.clone(clients.AsyncWebDAV, EndpointBuilder.new(self.base,
+                                                                                              self.context, f'/webdav/share/{invite}'))
+        self.clients.io._upload = self.default.clone(clients.AsyncUpload, EndpointBuilder.new(self.base,
+                                                                                              self.context, f'/upload/share/{invite}'))
         self.files = files.InvitationBrowser(self)
         self.details = None
 
@@ -25,7 +28,7 @@ class AsyncInvitation(AsyncPortal):
     def context(self):
         return 'invitations'
 
-    def _authenticator(self, url):  #pylint: disable=unused-argument
+    def _authenticator(self, url):  # pylint: disable=unused-argument
         return True
 
     async def login(self):
