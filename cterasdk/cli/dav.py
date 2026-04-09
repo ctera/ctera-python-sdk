@@ -63,7 +63,7 @@ async def handle_download(args):
                 if args.src:
                     print(f"error: object not found error: '{args.src}'", file=sys.stderr)
                     sys.exit(1)
-                resource = await anext(invitation.files.listdir())
+                resource = await anext(invitation.files.listdir())  # noqa: F821
                 jobs.append(download(invitation, resource, destination=target))
             else:
                 try:
