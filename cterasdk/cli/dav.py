@@ -6,7 +6,7 @@ from pathlib import Path
 from ..core.enum import FileAccessMode
 from ..lib.storage import asynfs, commonfs
 from ..objects.asynchronous.invitation import AsyncInvitation
-from ..exceptions.io.core import ListDirectoryError, GetMetadataError
+from ..exceptions.io.core import ListDirectoryError, GetMetadataError, ExternalShareError
 
 
 async def handle_ls(args):
@@ -83,9 +83,9 @@ async def handle_download(args):  # pylint: disable=too-many-branches
                                     jobs.append(download(invitation, r, destination=target))
                 except (GetMetadataError, ListDirectoryError):
                     print(f"error: failed to obtain properties or list a directory: '{args.src}'", file=sys.stderr)
-                    sys.exit(1)
 
-            await asyncio.gather(*jobs)
+            if jobs:
+                await asyncio.gather(*jobs)
 
     except PermissionError:
         print(f"error: permission denied: Cannot create files and folders at '{target}'.", file=sys.stderr)
@@ -123,9 +123,10 @@ async def handle_upload(args):
             for p in args.files:
                 jobs.append(invitation.files.upload_file(p, destination))
 
-            await asyncio.gather(*jobs)
+            if jobs:
+                await asyncio.gather(*jobs)
 
-        except GetMetadataError:
+        except (GetMetadataError, ExternalShareError):
             print(f"error: failed to obtain properties for directory: '{args.dest}'", file=sys.stderr)
             sys.exit(1)
 
