@@ -128,6 +128,18 @@ class GetShareMetadataError(PathError):
         super().__init__(EREMOTEIO, 'Failed to retrieve collaboration-share metadata', filename)
 
 
+class ExternalShareError(PathError):
+
+    def __init__(self, filename):
+        super().__init__(EREMOTEIO, 'Failed to retrieve external share details', filename)
+
+
+class InvalidShareError(PathError):
+
+    def __init__(self, filename):
+        super().__init__(EREMOTEIO, 'This external share is invalid or has expired.', filename)
+
+
 class CreateLinkError(PathError):
 
     def __init__(self, filename):

@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from ...common import Object, DateTimeUtils
 from ...core.enum import ProtectionLevel, CollaboratorType, SearchType, PortalAccountType, FileAccessMode, \
     UploadError, ResourceScope, ResourceError, Context, Administrators
-from ...core.types import PortalAccount, UserAccount, GroupAccount, Collaborator
+from ...core.types import PortalAccount, UserAccount, GroupAccount, Collaborator, PortalInvitation
 from ... import exceptions
 from ...lib.storage import synfs, asynfs, commonfs
 from .types import SrcDstParam, CreateShareParam, ActionResourcesParam, FetchResourcesError, \
@@ -47,15 +47,16 @@ def ensure_user_access(user_session, path):
         The target path to validate.
     """
     relative = path.relative
-    if user_session.account.role.name in Administrators:
-        if user_session.context == Context.admin:
-            if not administrator_namespace(path):
-                return False, exceptions.io.core.ContextError(relative)
-            if not user_session.account.role.access_end_user_folders and is_password_protected(path):
-                return False, exceptions.io.core.PrivilegeError(relative)
-        elif user_session.context == Context.ServicesPortal:
-            if not user_session.account.role.access_end_user_folders and is_password_protected(path):
-                return False, exceptions.io.core.PrivilegeError(relative)
+    if not user_session.context == Context.Invitations:
+        if user_session.account.role.name in Administrators:
+            if user_session.context == Context.admin:
+                if not administrator_namespace(path):
+                    return False, exceptions.io.core.ContextError(relative)
+                if not user_session.account.role.access_end_user_folders and is_password_protected(path):
+                    return False, exceptions.io.core.PrivilegeError(relative)
+            elif user_session.context == Context.ServicesPortal:
+                if not user_session.account.role.access_end_user_folders and is_password_protected(path):
+                    return False, exceptions.io.core.PrivilegeError(relative)
     return True, None
 
 
@@ -412,7 +413,7 @@ class OpenMany(PortalCommand):
 
     def __init__(self, function, receiver, resource, directory, *objects):
         super().__init__(function, receiver)
-        self.uid = str(resource.cloudFolderInfo.uid)
+        self.uid = str(resource.cloudFolderInfo.uid) if receiver.context != Context.Invitations else f'share/{receiver.invite}'
         self.directory = automatic_resolution(directory, receiver.context)
         self.objects = objects
 
@@ -589,7 +590,6 @@ class RecursiveIterator:
     def generate(self):
         for path in self._generator():
             try:
-                print('Enumerating: ', path or '.')
                 for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).execute():
                     yield self._process_object(o)
             except (exceptions.io.core.ListDirectoryError, exceptions.io.core.PrivilegeError) as e:
@@ -605,7 +605,7 @@ class RecursiveIterator:
 
     def _process_object(self, o):
         if o.is_dir:
-            self.tree.append(o.path.relative)
+            self.tree.append(o.path)
         return o
 
     @staticmethod
@@ -668,7 +668,7 @@ class CreateDirectory(PortalCommand):
         if self.parents:
             parts = self.path.parts
             for i in range(1, len(parts)):
-                yield automatic_resolution('/'.join(parts[:i]), self._receiver.context)
+                yield self.path[:i]
         else:
             yield self.path
 
@@ -696,6 +696,7 @@ class CreateDirectory(PortalCommand):
     def _suppress_file_conflict_error(e):
         if not isinstance(e.__cause__, exceptions.io.core.FileConflictError):
             raise e
+        
 
     def _handle_response(self, r):
         path = self.path.relative
@@ -712,7 +713,7 @@ class CreateDirectory(PortalCommand):
         if r == ResourceError.InvalidName:
             cause = exceptions.io.core.FilenameError(path)
         if r == ResourceError.PermissionDenied:
-            cause = exceptions.io.core.ReservedNameError(path)
+            cause = exceptions.io.core.PrivilegeError(path)
 
         raise error from cause
 
@@ -743,6 +744,36 @@ class GetShareMetadata(PortalCommand):
         if e.error.response.error.msg == 'Resource does not exist':
             raise error from exceptions.io.core.ObjectNotFoundError(path)
         raise exceptions.io.core.GetShareMetadataError(path) from e
+
+
+class GetExternalShareInfo(PortalCommand):
+
+    def __init__(self, function, receiver, invite):
+        super().__init__(function, receiver)
+        self.invite = invite
+
+    def _before_command(self):
+        logger.info('Querying external share details: %s', self.invite)
+
+    def get_parameter(self):
+        return self.invite
+
+    def _execute(self):
+        with self.trace_execution():
+            return self._function(self._receiver, self.get_parameter())
+
+    async def _a_execute(self):
+        with self.trace_execution():
+            return await self._function(self._receiver, self.get_parameter())
+
+    def _handle_response(self, r):
+        return PortalInvitation.from_server_object(r)
+
+    def _handle_exception(self, e):
+        error = exceptions.io.core.ExternalShareError(self._receiver.uri)
+        if 'no longer valid' in e.error.response.error.msg:
+            raise error from exceptions.io.core.InvalidShareError(self.invite)
+        raise error
 
 
 class Link(PortalCommand):

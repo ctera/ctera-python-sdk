@@ -9,7 +9,7 @@ import yarl
 from .. import settings
 from ..common import utils
 from ..lib.storage import commonfs
-from .client import DirectIO
+from ..direct.client import DirectIO
 from ..exceptions.direct import StreamError, DirectIOError
 from ..exceptions.transport import TLSError
 
@@ -22,6 +22,7 @@ logger = logging.getLogger('cterasdk.direct')
 
 def validate_endpoint(endpoint):
     baseurl, port = yarl.URL(endpoint), 443
+    assert baseurl.scheme in ('http', 'https'), 'Error: Endpoint scheme must be http or https.'
     logger.debug('Validating connection to host: %s on port: %s', baseurl.host, port)
     utils.tcp_connect(baseurl.host, port, timeout=5)
     return f'{baseurl}'

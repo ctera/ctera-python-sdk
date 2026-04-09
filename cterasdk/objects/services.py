@@ -1,5 +1,4 @@
 from abc import abstractmethod
-
 from . import endpoints, uri
 from .utils import URI
 from ..clients import clients

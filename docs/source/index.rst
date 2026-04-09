@@ -18,8 +18,8 @@ Key Features
 2. Managing `Data Discovery and Migration Jobs <UserGuides/Edge/Migration.html>`_
 3. File Data Management APIs for `CTERA Edge Filer <UserGuides/Edge/Files.html>`_ and `CTERA Portal <UserGuides/Portal/Files.html>`_.
 4. Data Services Framework:
-    1. `Subscribing to File System Notifications <UserGuides/DataServices/NotificationService.html>`_
-    2. `CTERA Direct IO <UserGuides/DataServices/DirectIO.html>`_, enabling parallel high-performnace retrieval directly from object storage.
+    1. `Subscribing to File System Notifications <UserGuides/ContentServices/NotificationService.html>`_
+    2. `CTERA Direct IO <UserGuides/ContentServices/DirectIO.html>`_, enabling parallel high-performnace retrieval directly from object storage.
 
 .. _cterasdk-installation:
 
@@ -147,7 +147,8 @@ Table of Contents
 
    UserGuides/Edge/Index
    UserGuides/Portal/Index
-   UserGuides/DataServices/Index
+   UserGuides/ContentServices/Index
+   UserGuides/CLI/Index
    UserGuides/Miscellaneous/Index
    api/cterasdk
 

@@ -6,11 +6,29 @@ from ...common import Object, Version
 from ...exceptions import CTERAException
 
 
+class AccountType:
+    """
+    Account Type
+
+    :ivar str Internal: Internal
+    :ivar str External: External
+    """
+    Internal = 'internal'
+    External = 'external'
+
+
 class BaseUser(Object):
     """Base User Account"""
 
+    def __init__(self, type_of):
+        self.type = type_of
+
+
+class InternalUser(BaseUser):
+    """Base User Account"""
+
     def __init__(self, name, domain=None):
-        super().__init__()
+        super().__init__(AccountType.Internal)
         self.name = name
         self.domain = domain
 

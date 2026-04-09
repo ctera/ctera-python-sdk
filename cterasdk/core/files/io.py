@@ -73,3 +73,7 @@ def add_share_recipients(core, path, members):
 
 def public_link(core, param):
     return core.api.execute('', 'createShare', param)
+
+
+def get_share_details(core, param):
+    return core.api.execute('', 'getShareDetails', param)

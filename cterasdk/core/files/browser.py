@@ -1,7 +1,8 @@
 from .. import query
 from ...cio.core.commands import Open, OpenMany, Upload, Download, EnsureDirectory, \
     DownloadMany, UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, \
-    Delete, Recover, Rename, GetShareMetadata, Link, Copy, Move, ResourceIterator, GetPermalink
+    Delete, Recover, Rename, GetShareMetadata, Link, Copy, Move, ResourceIterator, GetPermalink, GetExternalShareInfo
+from ...cio.core.types import InvitationPath
 from ...lib.storage import commonfs
 from ..base_command import BaseCommand
 from . import io
@@ -90,8 +91,7 @@ class FileBrowser(BaseCommand):
         :rtype: cterasdk.cio.core.types.PortalResource
         :raises cterasdk.exceptions.io.core.GetMetadataError: Raised on error retrieving object metadata.
         """
-        _, metadata = GetProperties(io.listdir, self._core, path, False).execute()
-        return metadata
+        return GetProperties(io.listdir, self._core, path, False).execute()
 
     def exists(self, path):
         """
@@ -353,3 +353,44 @@ class Backups(FileBrowser):
         """
         destination = destination if destination is not None else f'{commonfs.downloads()}/{device}.xml'
         return Download(io.handle, self._core, f'backups/{device}/Device Configuration/db.xml', destination).execute()
+
+
+class InvitationBrowser:
+
+    def __init__(self, core):
+        self._invitation = InvitationPath.from_context(core.invite)
+        self._core = core
+        self._file_browser = CloudDrive(core)
+
+    def listdir(self, path=None):
+        return self._file_browser.listdir(self._invitation.join(path))
+
+    def walk(self, path=None):
+        return self._file_browser.walk(self._invitation.join(path))
+
+    def properties(self, path):
+        return self._file_browser.properties(self._invitation.join(path))
+
+    def exists(self, path):
+        return self._file_browser.exists(self._invitation.join(path))
+
+    def mkdir(self, path):
+        return self._file_browser.mkdir(self._invitation.join(path))
+
+    def makedirs(self, path):
+        return self._file_browser.makedirs(self._invitation.join(path))
+
+    def download(self, path, destination=None):
+        return self._file_browser.download(self._invitation.join(path), destination)
+
+    def download_many(self, directory, objects, destination=None):
+        return self._file_browser.download_many(self._invitation.join(directory), objects, destination)
+
+    def upload(self, destination, handle, name=None, size=None):
+        return self._file_browser.upload(self._invitation.join(destination), handle, name, size)
+
+    def upload_file(self, path, destination):
+        return self._file_browser.upload_file(path, self._invitation.join(destination))
+
+    def details(self):
+        return GetExternalShareInfo(io.get_share_details, self._core, self._core.invite).execute()
