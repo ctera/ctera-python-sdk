@@ -46,7 +46,8 @@ class Servers(BaseCommand):
     def list_servers(self, include=None):
         """
         Retrieve the servers that comprise CTERA Portal.
-         Restricted to the Global Administration Portal. Browse it using :py:func:`cterasdk.core.portals.browse_global_admin`.
+        Restricted to the Global Administration Portal. Browse it using :py:func:`cterasdk.core.portals.browse_global_admin`.
+
         :param list[str],optional include: List of fields to retrieve, defaults to ['name']
         """
         # browse administration

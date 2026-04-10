@@ -43,7 +43,7 @@ Getting Started
 ===============
 
 In this example, a file is downloaded using its unique ID (e.g., ``12345``) and written to disk as ``example.pdf``.
-For more information on how to obtain the File ID, name, refer to the `Event <https://ctera-python-sdk.readthedocs.io/en/latest/api/cterasdk.asynchronous.core.types.html#cterasdk.asynchronous.core.types.Event>`_ object returned by the `Notification Service <https://ctera-python-sdk.readthedocs.io/en/latest/UserGuides/DataServices/NotificationService.html>`_.
+For more information on how to obtain the File ID, name, refer to the `Event <https://ctera-python-sdk.readthedocs.io/en/latest/api/cterasdk.asynchronous.core.types.html#cterasdk.asynchronous.core.types.Event>`_ object returned by the `Notification Service <https://ctera-python-sdk.readthedocs.io/en/latest/UserGuides/ContentServices/NotificationService.html>`_.
 
 
 .. code-block:: python

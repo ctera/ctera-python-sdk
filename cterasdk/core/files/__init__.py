@@ -1,1 +1,1 @@
-from .browser import CloudDrive, Backups  # noqa: E402, F401
+from .browser import CloudDrive, Backups, InvitationBrowser  # noqa: E402, F401

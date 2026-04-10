@@ -60,7 +60,7 @@ class BasePath:
 
     @property
     def parent(self):
-        return self.__class__(self._reference.parent.as_posix())  # pylint: disable=no-value-for-parameter
+        return self.__class__(self._scope, self._reference.parent.as_posix())  # pylint: disable=no-value-for-parameter
 
     @property
     def absolute(self):
@@ -80,7 +80,7 @@ class BasePath:
 
     @resolver
     def relative_to(self, p):
-        return self.__class__(self.reference.relative_to(p).as_posix())  # pylint: disable=no-value-for-parameter
+        return self.__class__(self._scope, self.reference.relative_to(p).as_posix())  # pylint: disable=no-value-for-parameter
 
     @property
     def extension(self):
@@ -92,7 +92,9 @@ class BasePath:
 
         :param str p: Path.
         """
-        return self.__class__(self.reference.joinpath(p).as_posix())  # pylint: disable=no-value-for-parameter
+        if p is not None:
+            return self.__class__(self._scope, self.reference.joinpath(p).as_posix())  # pylint: disable=no-value-for-parameter
+        return self
 
     @property
     def parts(self):
@@ -100,7 +102,7 @@ class BasePath:
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            return self.__class__(self.parts[key])  # pylint: disable=no-value-for-parameter
+            return self.__class__(self._scope, self.parts[key])  # pylint: disable=no-value-for-parameter
         if isinstance(key, int):
             return self.parts[key]
         raise TypeError("Invalid argument type")

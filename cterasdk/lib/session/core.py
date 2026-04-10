@@ -1,11 +1,18 @@
 import logging
-from .base import BaseSession, BaseUser
+from .base import BaseSession, BaseUser, AccountType, InternalUser
 from .types import Product
 from ...common import Object
-from ...core.enum import Administrators
+from ...core.enum import Administrators, Context
 
 
-class PortalUser(BaseUser):
+class ExternalUser(BaseUser):
+    """External User"""
+
+    def __init__(self):
+        super().__init__(AccountType.External)
+
+
+class PortalUser(InternalUser):
     """Local User"""
 
     def __init__(self, name, domain, tenant, role, authorizations):
@@ -33,32 +40,34 @@ class Session(BaseSession):
         self.context = context
 
     def _start_session(self, session):
-        logging.getLogger('cterasdk.core').debug('Starting Session.')
-        user_session = session.api.get('/currentSession')
-        current_tenant = session.api.get('/currentPortal') or Session.Administration
-        software_version = session.api.get('/version')
-        authorizations = session.roles.get(user_session.role) if user_session.role in Administrators else None
-        self._update_session(user_session, current_tenant, software_version, authorizations)
+        account = None
+        if session.context != Context.Invitations:
+            logging.getLogger('cterasdk.core').debug('Starting Session.')
+            user_session = session.api.get('/currentSession')
+            current_tenant = session.api.get('/currentPortal') or Session.Administration
+            software_version = session.api.get('/version')
+            authorizations = session.roles.get(user_session.role) if user_session.role in Administrators else None
+            account = PortalUser(user_session.username, user_session.domain, current_tenant or Session.Administration,
+                                 user_session.role, authorizations)
+            self._update_software_version(software_version)
+        else:
+            account = ExternalUser()
+        self._update_account(account)
 
     async def _async_start_session(self, session):
         logging.getLogger('cterasdk.core').debug('Starting Session.')
-        user_session = await session.v1.api.get('/currentSession')
-        current_tenant = session.v1.api.get('/currentPortal')
-        software_version = session.v1.api.get('/version')
-        authorizations = await session.roles.get(user_session.role) if user_session.role in Administrators else None
-        self._update_session(user_session, await current_tenant or Session.Administration, await software_version, authorizations)
-
-    def _update_session(self, user_session, current_tenant, software_version, authorizations):
-        self._update_account(
-            PortalUser(
-                user_session.username,
-                user_session.domain,
-                current_tenant,
-                user_session.role,
-                authorizations
-            )
-        )
-        self._update_software_version(software_version)
+        account = None
+        if session.context != Context.Invitations:
+            user_session = await session.v1.api.get('/currentSession')
+            current_tenant = session.v1.api.get('/currentPortal')
+            software_version = session.v1.api.get('/version')
+            authorizations = await session.roles.get(user_session.role) if user_session.role in Administrators else None
+            account = PortalUser(user_session.username, user_session.domain, await current_tenant or Session.Administration,
+                                 user_session.role, authorizations)
+            self._update_software_version(await software_version)
+        else:
+            account = ExternalUser()
+        self._update_account(account)
 
     def _stop_session(self):  # pylint: disable=no-self-use
         logging.getLogger('cterasdk.core').debug('Stopping Session.')

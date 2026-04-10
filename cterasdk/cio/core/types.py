@@ -3,6 +3,7 @@ import urllib.parse
 from datetime import datetime
 from ...common import Object
 from ..common import BasePath, BaseResource
+from ...core.enum import Context
 from ...lib.iterator import DefaultResponse
 
 
@@ -71,11 +72,12 @@ class PortalPath(BasePath):
 
         :param str path: Path
         """
-        groups = [f'(?P<{o.__name__}>{namespace})' for namespace, o in Namespaces.items()]
+        groups = [f'(?P<{c.__name__}>{c.expr})' for c in [ServicesPortalPath, GlobalAdminPath, InvitationPath]]
         regex = re.compile(f"^{'|'.join(groups)}")
         match = re.match(regex, path)
         if match:
-            return Namespaces[match.group()](path[match.end():])
+            scope, reference = path[:match.end()], path[match.end():]
+            return resolve_namespace_from_href(scope)(scope, reference)
         raise ValueError(f'Could not determine object path: {path}')
 
 
@@ -84,9 +86,11 @@ class ServicesPortalPath(PortalPath):
     ServicesPortal Path Object
     """
     Namespace = '/ServicesPortal/webdav'
+    expr = Namespace
 
-    def __init__(self, reference):
-        super().__init__(ServicesPortalPath.Namespace, reference)
+    @staticmethod
+    def from_context(reference):
+        return ServicesPortalPath(ServicesPortalPath.Namespace, reference)
 
 
 class GlobalAdminPath(PortalPath):
@@ -94,15 +98,43 @@ class GlobalAdminPath(PortalPath):
     Global Admin Path Object
     """
     Namespace = '/admin/webdav'
+    expr = Namespace
 
-    def __init__(self, reference):
-        super().__init__(GlobalAdminPath.Namespace, reference)
+    @staticmethod
+    def from_context(reference):
+        return ServicesPortalPath(GlobalAdminPath.Namespace, reference)
 
 
-Namespaces = {
-    ServicesPortalPath.Namespace: ServicesPortalPath,
-    GlobalAdminPath.Namespace: GlobalAdminPath
-}
+class InvitationPath(PortalPath):
+    """
+    Invitation Path Object
+    """
+    Namespace = '/invitations/webdav'
+    expr = f'{Namespace}/share/([a-zA-Z0-9]+)'
+
+    @staticmethod
+    def from_context(reference):
+        return PortalPath.from_str(f'{InvitationPath.Namespace}/share/{reference}')
+
+
+def resolve_namespace_from_context(ctx):
+    if ctx == Context.admin:
+        return GlobalAdminPath
+    if ctx == Context.ServicesPortal:
+        return ServicesPortalPath
+    if ctx == Context.Invitations:
+        return InvitationPath
+    return None
+
+
+def resolve_namespace_from_href(href):
+    if href.startswith(GlobalAdminPath.Namespace):
+        return GlobalAdminPath
+    if href.startswith(ServicesPortalPath.Namespace):
+        return ServicesPortalPath
+    if href.startswith(InvitationPath.Namespace):
+        return InvitationPath
+    raise ValueError(f'Could not find namespace associated with href: {href}')
 
 
 def resolve(path, namespace=None):
@@ -111,6 +143,7 @@ def resolve(path, namespace=None):
 
     :param object path: Path
     :param namespace: :class:`cterasdk.cio.core.types.ServicesPortalPath` or :class:`cterasdk.cio.core.types.GlobalAdminPath` (optional)
+     or :class:`cterasdk.cio.core.types.InvitationPath` (optional)
     """
     if isinstance(path, PortalPath):
         return path
@@ -123,7 +156,7 @@ def resolve(path, namespace=None):
 
     if namespace:
         if path is None or isinstance(path, str):
-            return namespace(path or '')
+            return namespace.from_context(path or '')
 
     raise ValueError(f'Error: Could not resolve path: {path}. Type: {type(path)}')
 
@@ -144,14 +177,14 @@ def create_generator(paths, namespace=None):
     return wrapper()
 
 
-def automatic_resolution(p, context=None):
+def automatic_resolution(p, ctx=None):
     """
     Automatic Resolution of Path Object
 
     :param object p: Path
-    :param str,optional context: Context (e.g. 'ServicesPortal' or 'admin')
+    :param str,optional ctx: Context (e.g. 'ServicesPortal', 'admin', or 'invitations')
     """
-    namespace = Namespaces.get(f'/{context}/webdav', None)
+    namespace = resolve_namespace_from_context(ctx)
 
     if isinstance(p, (list, tuple)):
         return create_generator(p, namespace)

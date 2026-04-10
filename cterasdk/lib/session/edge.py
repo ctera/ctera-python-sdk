@@ -1,5 +1,5 @@
 import logging
-from .base import BaseSession, BaseUser
+from .base import BaseSession, InternalUser
 from .types import Product
 
 from ...common import Object
@@ -15,11 +15,11 @@ class Connection(Object):
             self.source = source
 
 
-class LocalUser(BaseUser):
+class LocalUser(InternalUser):
     """Local User"""
 
 
-class RemoteUser(BaseUser):
+class RemoteUser(InternalUser):
     """Remote User"""
 
     def __init__(self, name, domain, tenant):

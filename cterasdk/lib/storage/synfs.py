@@ -1,5 +1,5 @@
 import logging
-from .commonfs import write_new_version, ResultContext
+from .commonfs import write_new_version, ResultContext, expanduser
 
 
 logger = logging.getLogger('cterasdk.filesystem')
@@ -36,3 +36,19 @@ def overwrite(p, handle):
                 fd.write(chunk)
         logger.debug('Wrote: %s', p.as_posix())
     return p.as_posix()
+
+
+def mkdir(p, parents=False, exist_ok=True):
+    """
+    Create a directory.
+
+    :param str p: The path to create (string or Path object).
+    :param bool,optional parents: Create a path, including all parent directories
+    :param bool,optional exist_ok: Suppress error if directory exists
+    :return: Path
+    :rtype: str
+    :raises FileExistsError: If ``exist_ok`` is ``False`` and directory exists
+    """
+    location = expanduser(p)
+    location.mkdir(parents=parents, exist_ok=exist_ok)
+    return location.as_posix()

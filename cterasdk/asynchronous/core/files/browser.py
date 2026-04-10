@@ -1,9 +1,10 @@
 from .. import query
 from ....cio.core.commands import Open, OpenMany, Upload, Download, EnsureDirectory, \
     DownloadMany, UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, \
-    Delete, Recover, Rename, GetShareMetadata, Link, Copy, Move, ResourceIterator, GetPermalink
-from ..base_command import BaseCommand
+    Delete, Recover, Rename, GetShareMetadata, Link, Copy, Move, ResourceIterator, GetPermalink, GetExternalShareInfo
+from ....cio.core.types import InvitationPath
 from ....lib.storage import commonfs
+from ..base_command import BaseCommand
 from . import io
 
 
@@ -355,3 +356,44 @@ class CloudDrive(FileBrowser):
         :param str path: Path of file/folder.
         """
         return await UnShare(io.update_share, self._core, path).a_execute()
+
+
+class InvitationBrowser:
+
+    def __init__(self, core):
+        self._invitation = InvitationPath.from_context(core.invite)
+        self._core = core
+        self._file_browser = CloudDrive(core)
+
+    def listdir(self, path=None):
+        return self._file_browser.listdir(self._invitation.join(path))
+
+    def walk(self, path=None):
+        return self._file_browser.walk(self._invitation.join(path))
+
+    async def properties(self, path):
+        return await self._file_browser.properties(self._invitation.join(path))
+
+    async def exists(self, path):
+        return await self._file_browser.exists(self._invitation.join(path))
+
+    async def mkdir(self, path):
+        return await self._file_browser.mkdir(self._invitation.join(path))
+
+    async def makedirs(self, path):
+        return await self._file_browser.makedirs(self._invitation.join(path))
+
+    async def download(self, path, destination=None):
+        return await self._file_browser.download(self._invitation.join(path), destination)
+
+    async def download_many(self, directory, objects, destination=None):
+        return await self._file_browser.download_many(self._invitation.join(directory), objects, destination)
+
+    async def upload(self, destination, handle, name=None, size=None):
+        return await self._file_browser.upload(self._invitation.join(destination), handle, name, size)
+
+    async def upload_file(self, path, destination):
+        return await self._file_browser.upload_file(path, self._invitation.join(destination))
+
+    async def details(self):
+        return await GetExternalShareInfo(io.get_share_details, self._core, self._core.invite).a_execute()

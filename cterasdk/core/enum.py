@@ -4,9 +4,11 @@ class Context:
 
     :ivar str admin: Global admin context
     :ivar str ServicesPortal: Services Portal context
+    :ivar str Invitations: Invitations context
     """
     admin = 'admin'
     ServicesPortal = 'ServicesPortal'
+    Invitations = 'invitations'
 
 
 class LogTopic:

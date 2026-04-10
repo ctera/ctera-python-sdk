@@ -73,3 +73,7 @@ async def add_share_recipients(core, path, members):
 
 async def public_link(core, param):
     return await core.v1.api.execute('', 'createShare', param)
+
+
+async def get_share_details(core, param):
+    return await core.v1.api.execute('', 'getShareDetails', param)

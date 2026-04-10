@@ -889,3 +889,15 @@ class ConflictResolver:
     @staticmethod
     def rename(apply_all=True):
         return ConflictResolver(ConflictHandler.Rename, apply_all)
+
+
+class PortalInvitation(Object):
+
+    def __init__(self, access, is_dir):
+        super().__init__()
+        self.access = access
+        self.is_dir = is_dir
+
+    @staticmethod
+    def from_server_object(server_object):
+        return PortalInvitation(server_object.mode, server_object.isDirectory)

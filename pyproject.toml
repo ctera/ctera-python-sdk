@@ -30,7 +30,8 @@ Documentation = "https://ctera-python-sdk.readthedocs.io/en/latest/"
 "Source Code" = "https://github.com/ctera/ctera-python-sdk"
 
 [project.scripts]
-"cterasdk.io.direct.download" = "cterasdk.direct.cli:download_object"
+"cterasdk.io.direct.download" = "cterasdk.cli.direct:download_object"
+"cterasdk.io.dav" = "cterasdk.cli.dav:webdav"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
