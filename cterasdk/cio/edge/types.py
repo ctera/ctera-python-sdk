@@ -7,10 +7,9 @@ class EdgePath(BasePath):
     """
     Edge Filer Path Object
     """
-    Namespace = '/'
 
-    def __init__(self, reference):
-        super().__init__(EdgePath.Namespace, reference or '.')
+    def __init__(self, scope, reference):
+        super().__init__(scope, reference or '.')
 
 
 class EdgeResource(BaseResource):
@@ -25,7 +24,6 @@ class EdgeResource(BaseResource):
     :ivar datetime.datetime last_modified: Last Modified
     :ivar str extension: Extension
     """
-    Scheme = 'ctera-edge'
 
     def __init__(self, path, is_dir, size, created_at, last_modified):
         super().__init__(path.name, path, is_dir, size, last_modified)
