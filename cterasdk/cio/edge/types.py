@@ -39,7 +39,7 @@ class EdgeResource(BaseResource):
     @staticmethod
     def from_server_object(server_object):
         return EdgeResource(
-            EdgePath(EdgeResource.decode_reference(server_object.href)),
+            EdgePath.from_context(EdgeResource.decode_reference(server_object.href)),
             server_object.getcontenttype == 'httpd/unix-directory',
             server_object.getcontentlength,
             datetime.fromisoformat(server_object.creationdate),
@@ -60,7 +60,7 @@ def resolve(path):
         return path.path
 
     if path is None or isinstance(path, str):
-        return EdgePath.from_context(path)
+        return EdgePath.from_context(path or '.')
 
     raise ValueError(f'Error: Could not resolve path: {path}. Type: {type(path)}')
 
