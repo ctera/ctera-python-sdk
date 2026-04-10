@@ -7,9 +7,11 @@ class EdgePath(BasePath):
     """
     Edge Filer Path Object
     """
+    Namespace = '/'
 
-    def __init__(self, scope, reference):
-        super().__init__(scope, reference or '.')
+    @staticmethod
+    def from_context(reference):
+        return EdgePath(EdgePath.Namespace, reference)
 
 
 class EdgeResource(BaseResource):
@@ -58,7 +60,7 @@ def resolve(path):
         return path.path
 
     if path is None or isinstance(path, str):
-        return EdgePath(path)
+        return EdgePath.from_context(path)
 
     raise ValueError(f'Error: Could not resolve path: {path}. Type: {type(path)}')
 
