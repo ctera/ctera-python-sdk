@@ -33,7 +33,8 @@ class Portals(BaseCommand):
     def list_tenants(self, include=None, portal_type=None):
         """
         List tenants.
-         Restricted to the Global Administration Portal. Browse it using :py:func:`cterasdk.core.portals.browse_global_admin`.
+        Restricted to the Global Administration Portal. Browse it using :py:func:`cterasdk.core.portals.browse_global_admin`.
+
         :param list[str],optional include: List of fields to retrieve, defaults to ['name']
         :param cterasdk.core.enum.PortalType portal_type: Portal type
         """
