@@ -63,7 +63,7 @@ async def handle_download(args):  # pylint: disable=too-many-branches
                 if args.src:
                     print(f"error: object not found error: '{args.src}'", file=sys.stderr)
                     sys.exit(1)
-                resource = await invitation.files.listdir().__anext__()
+                resource = await invitation.files.listdir().__anext__()  # pylint: disable=unnecessary-dunder-call
                 jobs.append(download(invitation, resource, destination=target))
             else:
                 try:
