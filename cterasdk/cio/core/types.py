@@ -397,6 +397,22 @@ class PreviousVersion(Object):
         )
 
 
+class ComplianceSettings(Object):
+    """
+    Class Representing Compliance Retention Settings
+
+    :ivar bool enabled: Current
+    :ivar str mode: Current
+    :ivar datetime.datetime expires_at: Retention Expiration Date
+    """
+    def __init__(self, server_object):
+        super().__init__(
+            enabled=server_object.worm,
+            mode=server_object.retentionMode.lower(),
+            expires_at=datetime.fromisoformat(server_object.retainUntil)
+        )
+
+
 class PortalResource(BaseResource):
     """
     Class for a Portal Filesystem Resource.
@@ -410,9 +426,10 @@ class PortalResource(BaseResource):
     :ivar datetime.datetime last_modified: Last Modified
     :ivar str extension: Extension
     :ivar str permalink: Permalink
-    :ivar cterasdk.core.types.Volume,optional volume: Volume information.
+    :ivar cterasdk.cio.core.types.PortalVolume,optional volume: Volume information.
+    :ivar cterasdk.cio.core.types.ComplianceSettings,optional worm: Compliance Retention Settings.
     """
-    def __init__(self, i, name, path, is_dir, deleted, size, permalink, last_modified, volume):
+    def __init__(self, i, name, path, is_dir, deleted, size, permalink, last_modified, volume, worm):
         super().__init__(
             name, path, is_dir, size,
             None if last_modified is None else datetime.fromisoformat(last_modified),
@@ -421,6 +438,7 @@ class PortalResource(BaseResource):
         self.deleted = deleted
         self.permalink = permalink
         self.volume = PortalVolume.from_server_object(volume) if volume else None
+        self.worm = ComplianceSettings(worm) if worm else None
 
     @staticmethod
     def from_server_object(server_object):
@@ -433,7 +451,8 @@ class PortalResource(BaseResource):
             server_object.size,
             server_object.permalink,
             server_object.lastmodified,
-            server_object.cloudFolderInfo
+            server_object.cloudFolderInfo,
+            getattr(server_object, 'complianceInfo', None)
         )
 
     @property
