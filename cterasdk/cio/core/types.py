@@ -429,7 +429,8 @@ class PortalResource(BaseResource):
     :ivar cterasdk.cio.core.types.PortalVolume,optional volume: Volume information.
     :ivar cterasdk.cio.core.types.ComplianceSettings,optional worm: Compliance Retention Settings.
     """
-    def __init__(self, i, name, path, is_dir, deleted, size, permalink, last_modified, volume, worm):
+    def __init__(self, i, name, path, is_dir, deleted,  # pylint: disable=too-many-arguments
+                 size, permalink, last_modified, volume, worm):
         super().__init__(
             name, path, is_dir, size,
             None if last_modified is None else datetime.fromisoformat(last_modified),
