@@ -209,7 +209,7 @@ class Raw(Body):
         self.raw = body if language == 'json' else utf8_decode(body)
         self.options = Object()
         self.options.raw = Object()
-        self.options.language = language
+        self.options.raw.language = language
 
     @staticmethod
     def xml(body):
