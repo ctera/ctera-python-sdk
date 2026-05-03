@@ -1,6 +1,6 @@
 from .. import query
-from ...cio.core.commands import Open, OpenMany, Upload, Download, EnsureDirectory, \
-    DownloadMany, UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, \
+from ...cio.core.commands import Open, Upload, Download, EnsureDirectory, \
+    UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, \
     Delete, Recover, Rename, GetShareMetadata, Link, Copy, Move, ResourceIterator, GetPermalink, GetExternalShareInfo
 from ...cio.core.types import InvitationPath
 from ...lib.storage import commonfs
@@ -11,61 +11,39 @@ from . import io
 class FileBrowser(BaseCommand):
     """CTERA Portal File Browser API."""
 
-    def handle(self, path):
+    def handle(self, path, objects=None):
         """
         Get a file handle.
 
         :param str path: Path to a file.
+        :param list[str],optional objects: Files and folders to include.
         :returns: File handle.
         :rtype: object
         :raises cterasdk.exceptions.io.core.OpenError: Raised on error to obtain a file handle.
-        """
-        return Open(io.handle, self._core, path).execute()
-
-    def handle_many(self, directory, *objects):
-        """
-        Get a ZIP archive file handle.
-
-        :param str directory: Path to a folder.
-        :param args objects: Files and folders to include.
-        :returns: File handle.
-        :rtype: object
         :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
         :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
         """
-        with EnsureDirectory(io.listdir, self._core, directory) as (_, resource):
-            return OpenMany(io.handle_many, self._core, resource, directory, *objects).execute()
+        with GetProperties(io.listdir, self._core, path) as properties:
+            return Open(io.handle_many if properties.is_dir else io.handle, self._core,
+                        properties.path, properties, objects).execute()
 
-    def download(self, path, destination=None):
+    def download(self, path, objects=None, destination=None):
         """
         Download a file.
 
         :param str path: Path.
+        :param list[str],optional objects: List of files and / or directory names to download.
         :param str, optional destination: File destination. If a directory is provided, the original filename is preserved.
          Defaults to the default download directory.
         :returns: Path to the local file.
         :rtype: str
         :raises cterasdk.exceptions.io.core.OpenError: Raised on error to obtain a file handle.
-        """
-        return Download(io.handle, self._core, path, destination).execute()
-
-    def download_many(self, directory, objects, destination=None):
-        """
-        Download selected files and/or directories as a ZIP archive.
-
-        .. warning::
-            Only existing files and directories will be included in the resulting ZIP file.
-
-        :param str directory: Path to a folder.
-        :param list[str] objects: List of files and / or directory names to download.
-        :param str destination: Optional path to destination file or directory. Defaults to the default download directory.
-        :returns: Path to the local file.
-        :rtype: str
         :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
         :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
         """
-        with EnsureDirectory(io.listdir, self._core, directory) as (_, resource):
-            return DownloadMany(io.handle_many, self._core, resource, directory, objects, destination).execute()
+        with GetProperties(io.listdir, self._core, path) as properties:
+            return Download(io.handle_many if properties.is_dir else io.handle, self._core,
+                            properties.path, properties, objects, destination).execute()
 
     def listdir(self, path=None, include_deleted=False):
         """
@@ -380,11 +358,8 @@ class InvitationBrowser:
     def makedirs(self, path):
         return self._file_browser.makedirs(self._invitation.join(path))
 
-    def download(self, path, destination=None):
-        return self._file_browser.download(self._invitation.join(path), destination)
-
-    def download_many(self, directory, objects, destination=None):
-        return self._file_browser.download_many(self._invitation.join(directory), objects, destination)
+    def download(self, path, objects=None, destination=None):
+        return self._file_browser.download(self._invitation.join(path), objects, destination)
 
     def upload(self, destination, handle, name=None, size=None):
         return self._file_browser.upload(self._invitation.join(destination), handle, name, size)

@@ -1,6 +1,6 @@
 from .. import query
-from ....cio.core.commands import Open, OpenMany, Upload, Download, EnsureDirectory, \
-    DownloadMany, UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, \
+from ....cio.core.commands import Open, Upload, Download, EnsureDirectory, \
+    UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, \
     Delete, Recover, Rename, GetShareMetadata, Link, Copy, Move, ResourceIterator, GetPermalink, GetExternalShareInfo
 from ....cio.core.types import InvitationPath
 from ....lib.storage import commonfs
@@ -11,60 +11,40 @@ from . import io
 class FileBrowser(BaseCommand):
     """Async File Browser API."""
 
-    async def handle(self, path):
+    async def handle(self, path, objects):
         """
         Get a file handle.
 
         :param str path: Path to a file.
+        :param list[str],optional objects: Files and folders to include.
         :returns: File handle.
         :rtype: object
-        :raises cterasdk.exceptions.io.core.OpenError: Raised on error to obtain file handle.
+        :raises cterasdk.exceptions.io.core.OpenError: Raised on error to obtain a file handle.
+        :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
+        :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
         """
-        return await Open(io.handle, self._core, path).a_execute()
+        async with GetProperties(io.listdir, self._core, path) as properties:
+            return await Open(io.handle_many if properties.is_dir else io.handle, self._core,
+                              properties.path, properties, objects).a_execute()
 
-    async def handle_many(self, directory, *objects):
-        """
-        Get a ZIP archive file handle.
-
-        :param str directory: Path to a folder.
-        :param args objects: List of files and folders to include.
-        :returns: File handle.
-        :rtype: object
-        :raises cterasdk.exceptions.io.core.GetMetadataError: If directory not found.
-        :raises cterasdk.exceptions.io.core.NotADirectoryException: If target path is not a directory.
-        """
-        async with EnsureDirectory(io.listdir, self._core, directory) as (_, resource):
-            return await OpenMany(io.handle_many, self._core, resource, directory, *objects).a_execute()
-
-    async def download(self, path, destination=None):
+    async def download(self, path, objects=None, destination=None):
         """
         Download a file.
 
         :param str path: Path.
-        :param str, optional destination: File destination. If directory, original filename preserved. Defaults to default directory.
-        :returns: Path to local file.
+        :param list[str],optional objects: List of files and / or directory names to download.
+        :param str, optional destination: File destination. If a directory is provided, the original filename is preserved.
+         Defaults to the default download directory.
+        :returns: Path to the local file.
         :rtype: str
-        :raises cterasdk.exceptions.io.core.OpenError: Raised on error to obtain file handle.
+        :raises cterasdk.exceptions.io.core.OpenError: Raised on error to obtain a file handle.
+        :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
+        :raises cterasdk.exceptions.io.core.NotADirectoryException: If the target path is not a directory.
         """
-        return await Download(io.handle, self._core, path, destination).a_execute()
+        async with GetProperties(io.listdir, self._core, path) as properties:
+            return await Download(io.handle_many if properties.is_dir else io.handle, self._core,
+                                  properties.path, properties, objects, destination).a_execute()
 
-    async def download_many(self, directory, objects, destination=None):
-        """
-        Download selected files and/or directories as a ZIP archive.
-
-        .. warning::
-            Only existing files and directories will be included in the resulting ZIP file.
-
-        :param str directory: Path to a folder.
-        :param list[str] objects: List of files and / or directory names to download.
-        :param str destination: Optional path to destination file or directory. Defaults to default download directory.
-        :returns: Path to local file.
-        :rtype: str
-        :raises cterasdk.exceptions.io.core.GetMetadataError: If directory not found.
-        :raises cterasdk.exceptions.io.core.NotADirectoryException: If target path is not a directory.
-        """
-        async with EnsureDirectory(io.listdir, self._core, directory) as (_, resource):
-            return await DownloadMany(io.handle_many, self._core, resource, directory, objects, destination).a_execute()
 
     async def listdir(self, path=None, include_deleted=False):
         """
@@ -383,11 +363,8 @@ class InvitationBrowser:
     async def makedirs(self, path):
         return await self._file_browser.makedirs(self._invitation.join(path))
 
-    async def download(self, path, destination=None):
-        return await self._file_browser.download(self._invitation.join(path), destination)
-
-    async def download_many(self, directory, objects, destination=None):
-        return await self._file_browser.download_many(self._invitation.join(directory), objects, destination)
+    async def download(self, path, objects=None, destination=None):
+        return await self._file_browser.download(self._invitation.join(path), objects, destination)
 
     async def upload(self, destination, handle, name=None, size=None):
         return await self._file_browser.upload(self._invitation.join(destination), handle, name, size)
