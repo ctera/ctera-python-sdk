@@ -195,13 +195,14 @@ File Handles
 
 .. code-block:: python
 
+   """Retrieve a handle for a file"""
    handle = files.handle('My Files/Keystone Project.docx')
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.handle_many
+   """Retrieve a handle for a folder"""
+   handle = files.handle('My Files/Project X')
 
-.. code-block:: python
-
-   handle = files.handle_many('My Files', 'Keystone Project.docx', 'Images', 'Notes.txt')
+   """Retrieve a handle for individual files within a folder"""
+   handle = files.handle('My Files', ['Keystone Project.docx', 'Images', 'Notes.txt'])
 
 Downloading Files
 -----------------
@@ -211,14 +212,14 @@ Downloading Files
 
 .. code-block:: python
 
-   local_path = files.download('My Files/Keystone Project.docx')
+   """Download a file"""
+   path = files.download('My Files/Keystone Project.docx')
 
-.. automethod:: cterasdk.core.files.browser.FileBrowser.download_many
-   :noindex:
+   """Download a folder"""
+   path = files.download('My Files/Project X')
 
-.. code-block:: python
-
-   zip_path = files.download_many('My Files', ['Keystone Project.docx', 'Images'], destination='/tmp/MyFiles.zip')
+   """Download individual files within a folder"""
+   zip_archive = files.download('My Files', ['Keystone Project.docx', 'Images'], destination='/tmp/MyFiles.zip')
 
 Create Directories
 ------------------
