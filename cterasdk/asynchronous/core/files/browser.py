@@ -45,7 +45,6 @@ class FileBrowser(BaseCommand):
             return await Download(io.handle_many if properties.is_dir else io.handle, self._core,
                                   properties.path, properties, objects, destination).a_execute()
 
-
     async def listdir(self, path=None, include_deleted=False):
         """
         List directory contents.

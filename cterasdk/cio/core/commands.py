@@ -376,7 +376,7 @@ class Open(PortalCommand):
                 else f'share/{self._receiver.invite}'
             )
             return uid, encode_request_parameter(param)
-        return self.path.relative_encode,
+        return self.path.relative_encode,  # pylint: disable=trailing-comma-tuple
 
     def _before_command(self):
         raise_or_suppress_access_error(self._receiver, self.path)
@@ -411,7 +411,7 @@ class Download(PortalCommand):
         self.destination = destination
 
     def get_parameter(self):
-        return commonfs.determine_directory_and_filename(self.path.reference,self.objects,
+        return commonfs.determine_directory_and_filename(self.path.reference, self.objects,
                                                          self.destination, self.properties.is_dir)
 
     def _before_command(self):

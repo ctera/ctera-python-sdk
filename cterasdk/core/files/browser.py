@@ -330,7 +330,8 @@ class Backups(FileBrowser):
         :raises cterasdk.exceptions.io.core.OpenError: Raised on error obtaining file handle.
         """
         destination = destination if destination is not None else f'{commonfs.downloads()}/{device}.xml'
-        return Download(io.handle, self._core, f'backups/{device}/Device Configuration/db.xml', destination).execute()
+        return Download(io.handle, self._core,
+                        f'backups/{device}/Device Configuration/db.xml', destination=destination).execute()
 
 
 class InvitationBrowser:
