@@ -1,7 +1,7 @@
 mock==2.0.0
 nose2==0.6.5
-flake8==3.7.9
-pylint==2.7.0
+flake8>=7.0.0
+pylint>=3.3.6
 pytest>=8.4.0
 cov-core==1.15.0
 sphinx>=8.2.0

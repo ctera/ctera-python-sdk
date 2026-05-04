@@ -1,0 +1,18 @@
+# CODEOWNERS — ctera-python-sdk
+#
+# These owners are automatically requested for review on every pull request.
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global ownership: original author + Portal Group lead
+* @saimonmichelson @asafa
+
+# Python package source
+/cterasdk/ @saimonmichelson @asafa
+
+# Tests
+/tests/ @saimonmichelson @asafa
+
+# CI / build config
+/.github/ @asafa
+/tox.ini @saimonmichelson @asafa
+/pyproject.toml @saimonmichelson @asafa
