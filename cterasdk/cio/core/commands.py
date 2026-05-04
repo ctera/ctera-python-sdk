@@ -363,7 +363,7 @@ class Open(PortalCommand):
         self.objects = objects or []
 
     def get_parameter(self):
-        if self.properties.is_dir:
+        if self.properties and self.properties.is_dir:
             param = Object()
             param.paths = [self.path.join(filename).absolute_encode for filename in self.objects] if self.objects else [self.path.absolute]
             param.snapshot = None
@@ -380,7 +380,7 @@ class Open(PortalCommand):
 
     def _before_command(self):
         raise_or_suppress_access_error(self._receiver, self.path)
-        if self.properties.is_dir and self.objects:
+        if self.properties and self.properties.is_dir and self.objects:
             logger.info('Getting handle: %s', [self.path.join(o).relative for o in self.objects])
         else:
             logger.info('Getting handle: %s', self.path)
@@ -403,7 +403,7 @@ class Open(PortalCommand):
 
 class Download(PortalCommand):
 
-    def __init__(self, function, receiver, path, properties, objects, destination):
+    def __init__(self, function, receiver, path, properties=None, objects=None, destination=None):
         super().__init__(function, receiver)
         self.path = automatic_resolution(path, receiver.context)
         self.properties = properties
@@ -411,11 +411,12 @@ class Download(PortalCommand):
         self.destination = destination
 
     def get_parameter(self):
+        archive = self.properties.is_dir if self.properties else False
         return commonfs.determine_directory_and_filename(self.path.reference, self.objects,
-                                                         self.destination, self.properties.is_dir)
+                                                         self.destination, archive)
 
     def _before_command(self):
-        if self.properties.is_dir and self.objects:
+        if self.properties and self.properties.is_dir and self.objects:
             logger.info('Downloading: %s', [self.path.join(o).relative for o in self.objects])
         else:
             logger.info('Downloading: %s', self.path)
