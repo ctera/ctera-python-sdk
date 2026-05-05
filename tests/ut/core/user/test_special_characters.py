@@ -35,6 +35,7 @@ class TestSpecialCharacterPaths(base_user.BaseCoreServicesTest):
         self._special_dir = 'My Files/100% Complete'
         self._special_filename = 'file_100%_done.txt'
         self._special_path = f'{self._special_dir}/{self._special_filename}'
+        self._mock_properties_response = self.patch_call('cterasdk.cio.core.commands.GetProperties._handle_response')
 
     def _expected_encoded_absolute(self, path):
         return f'{self._base}/{quote(path)}'
@@ -44,6 +45,7 @@ class TestSpecialCharacterPaths(base_user.BaseCoreServicesTest):
     def test_handle_encodes_special_characters(self):
         for filename in self.SPECIAL_FILENAMES:
             path = f'My Files/{filename}'
+            self._mock_properties_response.return_value = munch.Munch({'is_dir': False, 'path': path})
             self._init_services()
             mock_download = mock.MagicMock()
             self._services.io._webdav.download = mock_download  # pylint: disable=protected-access
@@ -57,6 +59,7 @@ class TestSpecialCharacterPaths(base_user.BaseCoreServicesTest):
     def test_handle_percent_in_directory(self):
         for directory in self.SPECIAL_DIRECTORIES:
             path = f'{directory}/document.txt'
+            self._mock_properties_response.return_value = munch.Munch({'is_dir': False, 'path': path})
             self._init_services()
             mock_download = mock.MagicMock()
             self._services.io._webdav.download = mock_download  # pylint: disable=protected-access

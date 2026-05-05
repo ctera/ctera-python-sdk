@@ -356,24 +356,42 @@ def obtain_current_accounts(collaborators):
 class Open(PortalCommand):
     """Open file"""
 
-    def __init__(self, function, receiver, path):
+    def __init__(self, function, receiver, path, properties, objects):
         super().__init__(function, receiver)
         self.path = automatic_resolution(path, receiver.context)
+        self.properties = properties
+        self.objects = objects or []
 
     def get_parameter(self):
-        return self.path.relative_encode
+        if self.properties and self.properties.is_dir:
+            param = Object()
+            param.paths = [self.path.join(filename).absolute_encode for filename in self.objects] if self.objects else [self.path.absolute]
+            param.snapshot = None
+            param.password = None
+            param.portalName = None
+            param.showDeleted = False
+            uid = (
+                str(self.properties.volume.id)
+                if self._receiver.context != Context.Invitations
+                else f'share/{self._receiver.invite}'
+            )
+            return uid, encode_request_parameter(param)
+        return self.path.relative_encode,  # pylint: disable=trailing-comma-tuple
 
     def _before_command(self):
         raise_or_suppress_access_error(self._receiver, self.path)
-        logger.info('Getting handle: %s', self.path)
+        if self.properties and self.properties.is_dir and self.objects:
+            logger.info('Getting handle: %s', [self.path.join(o).relative for o in self.objects])
+        else:
+            logger.info('Getting handle: %s', self.path)
 
     def _execute(self):
         with self.trace_execution():
-            return self._function(self._receiver, self.get_parameter())
+            return self._function(self._receiver, *self.get_parameter())
 
     async def _a_execute(self):
         with self.trace_execution():
-            return await self._function(self._receiver, self.get_parameter())
+            return await self._function(self._receiver, *self.get_parameter())
 
     def _handle_exception(self, e):
         path = self.path.relative
@@ -385,86 +403,34 @@ class Open(PortalCommand):
 
 class Download(PortalCommand):
 
-    def __init__(self, function, receiver, path, destination):
+    def __init__(self, function, receiver, path, properties=None, objects=None, destination=None):
         super().__init__(function, receiver)
         self.path = automatic_resolution(path, receiver.context)
+        self.properties = properties
+        self.objects = objects
         self.destination = destination
 
     def get_parameter(self):
-        return commonfs.determine_directory_and_filename(self.path.reference, destination=self.destination)
+        archive = self.properties.is_dir if self.properties else False
+        return commonfs.determine_directory_and_filename(self.path.reference, self.objects,
+                                                         self.destination, archive)
 
     def _before_command(self):
-        logger.info('Downloading: %s', self.path)
+        if self.properties and self.properties.is_dir and self.objects:
+            logger.info('Downloading: %s', [self.path.join(o).relative for o in self.objects])
+        else:
+            logger.info('Downloading: %s', self.path)
 
     def _execute(self):
         directory, name = self.get_parameter()
         with self.trace_execution():
-            with Open(self._function, self._receiver, self.path) as handle:
+            with Open(self._function, self._receiver, self.path, self.properties, self.objects) as handle:
                 return synfs.write(directory, name, handle)
 
     async def _a_execute(self):
         directory, name = self.get_parameter()
         with self.trace_execution():
-            async with Open(self._function, self._receiver, self.path) as handle:
-                return await asynfs.write(directory, name, handle)
-
-
-class OpenMany(PortalCommand):
-
-    def __init__(self, function, receiver, resource, directory, *objects):
-        super().__init__(function, receiver)
-        self.uid = str(resource.cloudFolderInfo.uid) if receiver.context != Context.Invitations else f'share/{receiver.invite}'
-        self.directory = automatic_resolution(directory, receiver.context)
-        self.objects = objects
-
-    def _before_command(self):
-        raise_or_suppress_access_error(self._receiver, self.directory)
-        logger.info('Getting handle: %s', [self.directory.join(o).relative for o in self.objects])
-
-    def get_parameter(self):
-        param = Object()
-        param.paths = [self.directory.join(filename).absolute_encode for filename in self.objects]
-        param.snapshot = None
-        param.password = None
-        param.portalName = None
-        param.showDeleted = False
-        return encode_request_parameter(param)
-
-    def _execute(self):
-        with self.trace_execution():
-            return self._function(self._receiver, self.uid, self.get_parameter())
-
-    async def _a_execute(self):
-        with self.trace_execution():
-            return await self._function(self._receiver, self.uid, self.get_parameter())
-
-
-class DownloadMany(PortalCommand):
-
-    def __init__(self, function, receiver, resource, directory, objects, destination):
-        super().__init__(function, receiver)
-        self.resource = resource
-        self.directory = automatic_resolution(directory, receiver.context)
-        self.objects = objects
-        self.destination = destination
-
-    def get_parameter(self):
-        return commonfs.determine_directory_and_filename(self.directory.reference, self.objects, destination=self.destination, archive=True)
-
-    def _before_command(self):
-        for o in self.objects:
-            logger.info('Downloading: %s', self.directory.join(o).relative)
-
-    def _execute(self):
-        directory, name = self.get_parameter()
-        with self.trace_execution():
-            with OpenMany(self._function, self._receiver, self.resource, self.directory, *self.objects) as handle:
-                return synfs.write(directory, name, handle)
-
-    async def _a_execute(self):
-        directory, name = self.get_parameter()
-        with self.trace_execution():
-            async with OpenMany(self._function, self._receiver, self.resource, self.directory, *self.objects) as handle:
+            async with Open(self._function, self._receiver, self.path, self.properties, self.objects) as handle:
                 return await asynfs.write(directory, name, handle)
 
 

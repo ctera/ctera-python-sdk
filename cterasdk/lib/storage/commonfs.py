@@ -96,7 +96,7 @@ def determine_zip_archive_name(directory, objects):
 
     :rtype: str
     """
-    if len(objects) > 1:
+    if not objects or len(objects) > 1:
         path = Path(directory)
     else:
         path = Path(objects[0])

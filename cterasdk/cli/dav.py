@@ -53,8 +53,8 @@ async def handle_download(args):  # pylint: disable=too-many-branches
 
         async def download(invitation, resource, objects=None, archive=False, destination=None):
             if objects is not None or archive:
-                return await invitation.files.download_many(resource.path.relative, [o.name for o in objects], f'{destination}.zip')
-            return await invitation.files.download(resource.path.relative, destination.joinpath(resource.path.relative))
+                return await invitation.files.download(resource.path.relative, [o.name for o in objects], f'{destination}.zip')
+            return await invitation.files.download(resource.path.relative, destination=destination.joinpath(resource.path.relative))
 
         async with AsyncInvitation.from_uri(args.endpoint) as invitation:
             jobs = []
