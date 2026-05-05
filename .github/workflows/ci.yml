@@ -32,7 +32,7 @@ jobs:
     - name: Coveralls
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-      run: coveralls
+      run: coveralls --service=github-actions
   deploy:
     needs: build
     if: github.event_name == 'release'
