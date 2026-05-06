@@ -1097,7 +1097,7 @@ class ResolverCommand(TaskCommand):
         try:
             return super().execute()
         except (exceptions.io.core.CopyError, exceptions.io.core.MoveError, exceptions.io.core.RenameError) as e:
-            if self.resolver:
+            if self.resolver and isinstance(e.__cause__, exceptions.io.core.FileConflictError):
                 return self._try_with_resolver(e.cursor)
             return self._handle_exception(e)
 
@@ -1105,7 +1105,7 @@ class ResolverCommand(TaskCommand):
         try:
             return await super().a_execute()
         except (exceptions.io.core.CopyError, exceptions.io.core.MoveError, exceptions.io.core.RenameError) as e:
-            if self.resolver:
+            if self.resolver and isinstance(e.__cause__, exceptions.io.core.FileConflictError):
                 return await self._a_try_with_resolver(e.cursor)
             return self._handle_exception(e)
 
