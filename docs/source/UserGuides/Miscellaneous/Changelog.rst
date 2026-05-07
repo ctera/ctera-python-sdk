@@ -1,6 +1,25 @@
 Changelog
 =========
 
+2.20.34
+-------
+
+Bug Fixes
+^^^^^^^^^
+* Raised exceptions on copy, move, and rename operations for errors unrelated to file conflicts.
+* Fixed an error when generating Postman collection output while formatting request body types.
+* Consolidated ``handle`` and ``handle_many``, as well as ``download`` and
+  ``download_many``, to dynamically determine whether the target is a file or folder.
+
+2.20.33
+-------
+
+Improvements
+^^^^^^^^^^^^
+* Added compliance metadata to Portal resources, enabling determination of whether files and folders are subject to retention policies.
+
+Related issues and pull requests on GitHub: `#347 <https://github.com/ctera/ctera-python-sdk/pull/347>`_
+
 2.20.31
 -------
 
