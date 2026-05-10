@@ -1043,6 +1043,11 @@ class Recover(MultiResourceCommand):
     def _progress_str(self):
         return 'Recovering'
 
+    def _task_complete(self, task):
+        if getattr(task, 'files_processed', None) == 0:
+            return self._task_error(task)
+        return super()._task_complete(task)
+
     def _task_error(self, task):
         cursor = task.cursor
         raise exceptions.io.core.RecoverError(self.paths, cursor)
