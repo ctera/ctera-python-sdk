@@ -11,7 +11,7 @@ from . import io
 class FileBrowser(BaseCommand):
     """Async File Browser API."""
 
-    async def handle(self, path, objects=None):
+    async def handle(self, path, objects):
         """
         Get a file handle.
 
