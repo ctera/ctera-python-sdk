@@ -20,7 +20,6 @@ CLOUD_DRIVE_FUSION_DIRECT_INCLUDE = [
     'openFabricStorageStatus',
     'openFabricStorageStatusDetails',
 ]
-CLOUD_DRIVE_OPEN_FABRIC_INCLUDE = CLOUD_DRIVE_FUSION_DIRECT_INCLUDE  # legacy alias
 
 
 def _worm_period(amount, duration_type):
@@ -242,7 +241,7 @@ class CloudDrives(BaseCommand):
         return param
 
     @staticmethod
-    def _apply_fusion_direct_storage_params(param, open_fabric_settings, open_storage_enabled):
+    def _apply_fusion_direct_add_params(param, open_fabric_settings, open_storage_enabled):
         if open_fabric_settings is not None:
             if open_storage_enabled is False:
                 raise CTERAException(
@@ -254,7 +253,7 @@ class CloudDrives(BaseCommand):
             param.openStorageEnabled = open_storage_enabled
 
     @staticmethod
-    def _apply_fusion_direct_storage_modify_params(param, open_fabric_settings, open_storage_enabled):
+    def _apply_fusion_direct_modify_params(param, open_fabric_settings, open_storage_enabled):
         if open_fabric_settings is not None:
             if open_storage_enabled is False:
                 raise CTERAException(
@@ -297,7 +296,7 @@ class CloudDrives(BaseCommand):
         param = self._build_cloud_drive_create_params(
             name, group, owner, winacls, description, quota, compliance_settings, xattrs, gfl, lock_extensions,
             archive_settings=archive_settings)
-        self._apply_fusion_direct_storage_params(param, open_fabric_settings, open_storage_enabled)
+        self._apply_fusion_direct_add_params(param, open_fabric_settings, open_storage_enabled)
 
         try:
             response = self._core.api.execute('', 'addCloudDrive', param)
@@ -332,7 +331,7 @@ class CloudDrives(BaseCommand):
         param = self._build_cloud_drive_create_params(
             name, group, owner, winacls, description, quota, compliance_settings, xattrs, gfl, lock_extensions,
             archive_settings=archive_settings)
-        self._apply_fusion_direct_storage_params(param, open_fabric_settings, open_storage_enabled)
+        self._apply_fusion_direct_add_params(param, open_fabric_settings, open_storage_enabled)
 
         try:
             response = self._core.api.execute('', 'addCloudDriveReturnID', param)
@@ -403,7 +402,7 @@ class CloudDrives(BaseCommand):
                     lock_extensions if lock_extensions else CloudDrives.default_extensions
                 )
 
-        self._apply_fusion_direct_storage_modify_params(param, open_fabric_settings, open_storage_enabled)
+        self._apply_fusion_direct_modify_params(param, open_fabric_settings, open_storage_enabled)
 
         try:
             response = self._core.api.put(f'/{param.baseObjectRef}', param)

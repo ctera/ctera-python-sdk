@@ -1424,7 +1424,7 @@ Team Portal administrators with permission to manage cloud folders can create a 
 cloud folder backed by a customer-managed S3-compatible bucket by passing ``open_fabric_settings``.
 The bucket must have object **versioning** enabled, as enforced by the portal.
 
-Use :data:`cterasdk.core.cloudfs.CLOUD_DRIVE_FUSION_DIRECT_INCLUDE` (legacy alias ``CLOUD_DRIVE_OPEN_FABRIC_INCLUDE``) with
+Use :data:`cterasdk.core.cloudfs.CLOUD_DRIVE_FUSION_DIRECT_INCLUDE` with
 :meth:`cterasdk.core.cloudfs.CloudDrives.all` or :meth:`cterasdk.core.cloudfs.CloudDrives.find` to retrieve
 ``openFabricSettings`` and related status fields.
 

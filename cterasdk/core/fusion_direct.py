@@ -1,7 +1,8 @@
 """
 Fusion Direct cloud folder API payload builders.
 
-Schema ``_classname`` values remain ``OpenFabricS3DataStorage`` and ``OpenFabricSettings`` (portal legacy names).
+These produce :class:`cterasdk.common.object.Object` trees with ``_classname`` set for portal
+``OpenFabricS3DataStorage`` and ``OpenFabricSettings`` schema types (legacy type names).
 """
 
 from .enum import OpenFabricStorageMode
@@ -10,7 +11,6 @@ from ..common import Object
 
 # Default when ``storage`` is omitted; matches portal ``LocationsType.GenericS3`` name.
 DEFAULT_FUSION_DIRECT_S3_STORAGE = 'GenericS3'
-DEFAULT_OPEN_FABRIC_S3_STORAGE = DEFAULT_FUSION_DIRECT_S3_STORAGE  # legacy alias
 
 # Matches portal ``com.ctera.infra.dataset.SimpleType.DONT_CHANGE_PASSWORD`` for ``dataStorage.secretKey``
 # on :meth:`cterasdk.core.cloudfs.CloudDrives.modify` when the secret should stay unchanged.
