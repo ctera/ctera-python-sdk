@@ -3,7 +3,7 @@ import socket
 import logging
 
 from datetime import datetime
-from packaging.version import parse as parse_version
+from packaging.version import InvalidVersion, parse as parse_version
 
 from .object import Object
 from .enum import DayOfWeek
@@ -157,7 +157,11 @@ class Version:
     """Software Version"""
 
     def __init__(self, version):
-        self._version = parse_version(version)
+        try:
+            self._version = parse_version(version)
+        except (InvalidVersion, TypeError, ValueError):
+            logger.warning('Unrecognized software version %r, using 0.0.0', version)
+            self._version = parse_version('0.0.0')
 
     def __eq__(self, v):
         return self._version == parse_version(v)

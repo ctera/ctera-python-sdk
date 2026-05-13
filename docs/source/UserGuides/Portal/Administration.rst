@@ -1414,6 +1414,35 @@ Cloud Drive Folders
    settings = core_types.ComplianceSettingsBuilder.enterprise(1, core_enum.Duration.Years).grace_period(1, core_enum.Duration.Hours).build()
    admin.cloudfs.drives.add('Compliance', 'FG-Compliance', svc_account, compliance_settings=settings)
 
+.. automethod:: cterasdk.core.cloudfs.CloudDrives.add_return_id
+   :noindex:
+
+Fusion Direct
+~~~~~~~~~~~~~
+
+Team Portal administrators with permission to manage cloud folders can create a **Fusion Direct**
+cloud folder backed by a customer-managed S3-compatible bucket by passing ``open_fabric_settings``.
+The bucket must have object **versioning** enabled, as enforced by the portal.
+
+Use :data:`cterasdk.core.cloudfs.CLOUD_DRIVE_FUSION_DIRECT_INCLUDE` (legacy alias ``CLOUD_DRIVE_OPEN_FABRIC_INCLUDE``) with
+:meth:`cterasdk.core.cloudfs.CloudDrives.all` or :meth:`cterasdk.core.cloudfs.CloudDrives.find` to retrieve
+``openFabricSettings`` and related status fields.
+
+.. code:: python
+
+   from cterasdk.core import fusion_direct
+   from cterasdk.core.cloudfs import CLOUD_DRIVE_FUSION_DIRECT_INCLUDE
+
+   svc_account = core_types.UserAccount('svc_account')
+   s3_data = fusion_direct.OpenFabricS3DataStorageBuilder(
+       'my-versioned-bucket', 'ACCESSKEY', 'SECRETKEY', 'https://s3.example.com',
+   ).build()
+   of_settings = fusion_direct.OpenFabricSettingsBuilder(s3_data).build()
+   admin.cloudfs.drives.add('OF-001', 'FG-001', svc_account, open_fabric_settings=of_settings)
+   result = admin.cloudfs.drives.add_return_id('OF-002', 'FG-001', svc_account, open_fabric_settings=of_settings)
+   for folder in admin.cloudfs.drives.all(include=CLOUD_DRIVE_FUSION_DIRECT_INCLUDE):
+       print(folder.name)
+
 
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.modify
    :noindex:
@@ -1423,6 +1452,14 @@ Cloud Drive Folders
    """Update Quota of a Cloud Drive Folder"""
    svc_account = core_types.UserAccount('svc_account')
    admin.cloudfs.drives.modify('DIR-001', svc_account, quota=5120) # Set folder quota to 5 TB
+
+   """Rename or change Fusion Direct ``storageMode`` (within portal rules: same bucket/driver, empty folder for rename)."""
+   s3_data = fusion_direct.OpenFabricS3DataStorageBuilder(
+       'my-versioned-bucket', 'ACCESSKEY', 'SECRETKEY', 'https://s3.example.com',
+       sqs_url='https://sqs...',
+   ).build()
+   of_settings = fusion_direct.OpenFabricSettingsBuilder(s3_data, storage_mode=core_enum.OpenFabricStorageMode.Bidirectional).build()
+   admin.cloudfs.drives.modify('OF-001', svc_account, new_name='OF-renamed', open_fabric_settings=of_settings)
 
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.delete
    :noindex:

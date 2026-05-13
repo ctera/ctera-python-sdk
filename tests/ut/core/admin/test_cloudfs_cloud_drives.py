@@ -3,7 +3,10 @@ import munch
 
 from cterasdk import exceptions
 from cterasdk.core import cloudfs
+from cterasdk.core import fusion_direct
+from cterasdk.core.cloudfs import _default_archive_settings
 from cterasdk.core.types import UserAccount, ComplianceSettingsBuilder, ExtendedAttributesBuilder
+from cterasdk.core.enum import OpenFabricStorageMode
 from cterasdk.core import query
 from cterasdk.common import Object, union
 from tests.ut.core.admin import base_admin
@@ -167,6 +170,79 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
 
         self.assertEqual(error_message, str(error.exception))
 
+    def test_add_cloud_drive_with_explicit_archive_settings(self):
+        custom_arch = _default_archive_settings()
+        custom_arch.archive = True
+        self._init_global_admin(get_response='admin', execute_response=self._add_cloudfolder_response)
+        self._mock_get_user_base_object_ref()
+        self._mock_get_folder_group()
+
+        cloudfs.CloudDrives(self._global_admin).add(
+            self._name, self._group, self._local_user_account, archive_settings=custom_arch)
+
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        expected_param = self._get_add_cloud_drive_object(archive_settings=custom_arch)
+        self._assert_equal_objects(actual_param, expected_param)
+
+    def test_add_cloud_drive_with_open_fabric_settings(self):
+        of_settings = fusion_direct.OpenFabricSettingsBuilder(
+            fusion_direct.OpenFabricS3DataStorageBuilder('b', 'k', 's', 'https://e').build(),
+        ).build()
+        self._init_global_admin(get_response='admin', execute_response=self._add_cloudfolder_response)
+        self._mock_get_user_base_object_ref()
+        self._mock_get_folder_group()
+
+        ret = cloudfs.CloudDrives(self._global_admin).add(
+            self._name, self._group, self._local_user_account, open_fabric_settings=of_settings)
+
+        self._global_admin.api.execute.assert_called_once_with('', 'addCloudDrive', mock.ANY)
+        expected_param = self._get_add_cloud_drive_object(open_fabric_settings=of_settings, open_storage_enabled=True)
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertEqual(ret, self._cloudfolder_path)
+
+    def test_add_return_id_uses_add_cloud_drive_return_id(self):
+        of_settings = fusion_direct.OpenFabricSettingsBuilder(
+            fusion_direct.OpenFabricS3DataStorageBuilder('b', 'k', 's', 'https://e').build(),
+        ).build()
+        xml_response = Object()
+        xml_response.rc = '0'
+        self._init_global_admin(get_response='admin', execute_response=xml_response)
+        self._mock_get_user_base_object_ref()
+        self._mock_get_folder_group()
+
+        ret = cloudfs.CloudDrives(self._global_admin).add_return_id(
+            self._name, self._group, self._local_user_account, open_fabric_settings=of_settings)
+
+        self._global_admin.api.execute.assert_called_once_with('', 'addCloudDriveReturnID', mock.ANY)
+        expected_param = self._get_add_cloud_drive_object(open_fabric_settings=of_settings, open_storage_enabled=True)
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        self._assert_equal_objects(actual_param, expected_param)
+        self.assertIs(ret, xml_response)
+
+    def test_add_open_fabric_with_open_storage_false_raises(self):
+        of_settings = fusion_direct.OpenFabricSettingsBuilder(
+            fusion_direct.OpenFabricS3DataStorageBuilder('b', 'k', 's', 'https://e').build(),
+        ).build()
+        self._init_global_admin(get_response='admin')
+        self._mock_get_user_base_object_ref()
+        self._mock_get_folder_group()
+
+        with self.assertRaises(exceptions.CTERAException):
+            cloudfs.CloudDrives(self._global_admin).add(
+                self._name, self._group, self._local_user_account,
+                open_fabric_settings=of_settings, open_storage_enabled=False)
+
+        self._global_admin.api.execute.assert_not_called()
+
+    def test_add_cloud_drive_non_string_response_returned_unchanged(self):
+        self._init_global_admin(get_response='admin', execute_response=Object())
+        self._mock_get_user_base_object_ref()
+        self._mock_get_folder_group()
+
+        ret = cloudfs.CloudDrives(self._global_admin).add(self._name, self._group, self._local_user_account)
+        self.assertIsInstance(ret, Object)
+
     def test_delete_with_local_owner(self):
         self._init_global_admin()
         with mock.patch("cterasdk.core.cloudfs.query.iterator") as query_iterator_mock:
@@ -192,8 +268,10 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         self._global_admin.files.undelete.assert_called_once_with(f'Users/{self._owner}/{self._name}')
 
     def _get_add_cloud_drive_object(self, winacls=True, description=None, quota=None, compliance_settings=None, xattrs=None,
-                                    gfl=None, lock_extensions=None):
+                                    gfl=None, lock_extensions=None, open_fabric_settings=None, open_storage_enabled=None,
+                                    archive_settings=None):
         add_cloud_drive_param = Object()
+        add_cloud_drive_param._classname = 'CloudDriveCreateParams'  # pylint: disable=protected-access
         add_cloud_drive_param.name = self._name
         add_cloud_drive_param.owner = self._owner
         add_cloud_drive_param.group = self._group
@@ -203,6 +281,7 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
             add_cloud_drive_param.description = description
         add_cloud_drive_param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
         add_cloud_drive_param.extendedAttributes = xattrs if xattrs else ExtendedAttributesBuilder.default().build()
+        add_cloud_drive_param.archiveSettings = archive_settings if archive_settings is not None else _default_archive_settings()
         if gfl:
             add_cloud_drive_param.globalFileLockSettings = Object()
             add_cloud_drive_param.globalFileLockSettings._classname = 'GlobalFileLockSettings'  # pylint: disable=protected-access
@@ -210,6 +289,17 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
             add_cloud_drive_param.globalFileLockSettings.globalFileLockExtensions = (
                 lock_extensions if lock_extensions else cloudfs.CloudDrives.default_extensions
             )
+        else:
+            add_cloud_drive_param.globalFileLockSettings = Object()
+            add_cloud_drive_param.globalFileLockSettings._classname = 'GlobalFileLockSettings'  # pylint: disable=protected-access
+            add_cloud_drive_param.globalFileLockSettings.enabled = False
+            add_cloud_drive_param.globalFileLockSettings.globalFileLockExtensions = (
+                lock_extensions if lock_extensions else cloudfs.CloudDrives.default_extensions
+            )
+        if open_fabric_settings is not None:
+            add_cloud_drive_param.openFabricSettings = open_fabric_settings
+        if open_storage_enabled is not None:
+            add_cloud_drive_param.openStorageEnabled = open_storage_enabled
         return add_cloud_drive_param
 
     def _mock_get_user_base_object_ref(self):
@@ -285,3 +375,35 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
             cloudfs.CloudDrives(self._global_admin).modify(self._cloudfolder_name, self._local_user_account)
         self._global_admin.api.get.assert_called_once_with(self._cloudfolder_baseObjecrRef)
         self._global_admin.api.put.assert_called_once_with(f'/{self._cloudfolder_baseObjecrRef}', mock.ANY)
+        include_used = mock_find_cloudfolder.call_args[1]['include']
+        for field in cloudfs.CLOUD_DRIVE_FUSION_DIRECT_INCLUDE:
+            self.assertIn(field, include_used)
+        self.assertIn('baseObjectRef', include_used)
+
+    def test_modify_cloud_drive_with_open_fabric_settings(self):
+        mock_find = self.patch_call('cterasdk.core.cloudfs.CloudDrives.find')
+        mock_find.return_value = munch.Munch({'baseObjectRef': self._cloudfolder_baseObjecrRef})
+        existing = munch.Munch({'baseObjectRef': self._cloudfolder_baseObjecrRef, 'name': self._cloudfolder_name})
+        new_of = fusion_direct.OpenFabricSettingsBuilder(
+            fusion_direct.OpenFabricS3DataStorageBuilder('b', 'k', 's', 'https://e').build(),
+            storage_mode=OpenFabricStorageMode.Bidirectional,
+        ).build()
+        self._init_global_admin(get_response=existing)
+        cloudfs.CloudDrives(self._global_admin).modify(
+            self._cloudfolder_name, self._local_user_account, open_fabric_settings=new_of)
+        self._global_admin.api.put.assert_called_once_with(f'/{self._cloudfolder_baseObjecrRef}', mock.ANY)
+        sent = self._global_admin.api.put.call_args[0][1]
+        self._assert_equal_objects(sent.openFabricSettings, new_of)
+
+    def test_modify_open_fabric_rejects_false_open_storage_with_settings(self):
+        of_settings = fusion_direct.OpenFabricSettingsBuilder(
+            fusion_direct.OpenFabricS3DataStorageBuilder('b', 'k', 's', 'https://e').build(),
+        ).build()
+        mock_find = self.patch_call('cterasdk.core.cloudfs.CloudDrives.find')
+        mock_find.return_value = munch.Munch({'baseObjectRef': self._cloudfolder_baseObjecrRef})
+        self._init_global_admin(get_response=munch.Munch({'baseObjectRef': self._cloudfolder_baseObjecrRef}))
+        with self.assertRaises(exceptions.CTERAException):
+            cloudfs.CloudDrives(self._global_admin).modify(
+                self._cloudfolder_name, self._local_user_account,
+                open_fabric_settings=of_settings, open_storage_enabled=False)
+        self._global_admin.api.put.assert_not_called()

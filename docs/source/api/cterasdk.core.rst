@@ -34,6 +34,7 @@ Submodules
    cterasdk.core.logs
    cterasdk.core.mail
    cterasdk.core.messaging
+   cterasdk.core.fusion_direct
    cterasdk.core.portals
    cterasdk.core.query
    cterasdk.core.reports

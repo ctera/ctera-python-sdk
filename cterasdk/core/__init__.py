@@ -9,6 +9,7 @@ __all__ = [
     'directoryservice',
     'enum',
     'files',
+    'fusion_direct',
     'login',
     'logs',
     'messaging',

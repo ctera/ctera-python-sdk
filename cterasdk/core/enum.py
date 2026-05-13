@@ -358,6 +358,17 @@ class ListFilter:
     NonDeleted = 'NonDeleted'
 
 
+class OpenFabricStorageMode:
+    """
+    Fusion Direct storage mode values for :class:`cterasdk.core.fusion_direct.OpenFabricSettingsBuilder`.
+
+    Must match the portal schema enum name ``OpenFabricStorageMode`` (legacy identifier).
+    """
+    Filesystem = 'Filesystem'
+    Bucket = 'Bucket'
+    Bidirectional = 'Bidirectional'
+
+
 class PlanCriteria:
     """
     Subscription Plan Auto Assignment Rule Builder Criterias

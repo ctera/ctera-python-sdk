@@ -4,13 +4,47 @@ import logging
 
 from .base_command import BaseCommand
 from . import query, devices
-from .enum import ListFilter, PolicyType
+from .enum import Duration, ListFilter, PolicyType
 from .types import ComplianceSettingsBuilder, ExtendedAttributesBuilder
 from ..common import union, Object
 from ..exceptions import CTERAException, ObjectNotFoundException
 
 
 logger = logging.getLogger('cterasdk.core')
+
+# Suggested ``include`` paths when listing or fetching Fusion Direct cloud folders.
+# Portal response fields keep legacy names ``openStorageEnabled``, ``openFabricSettings``, etc.
+CLOUD_DRIVE_FUSION_DIRECT_INCLUDE = [
+    'openStorageEnabled',
+    'openFabricSettings',
+    'openFabricStorageStatus',
+    'openFabricStorageStatusDetails',
+]
+CLOUD_DRIVE_OPEN_FABRIC_INCLUDE = CLOUD_DRIVE_FUSION_DIRECT_INCLUDE  # legacy alias
+
+
+def _worm_period(amount, duration_type):
+    period = Object()
+    period._classname = 'WormPeriod'  # pylint: disable=protected-access
+    period.amount = amount
+    period.type = duration_type
+    return period
+
+
+def _default_archive_settings():
+    """Defaults aligned with portal ``CloudDriveCreateParams`` / Java ``AdminApiOperations.createCloudFolderParams``.
+
+    Used when :meth:`CloudDrives.add` / :meth:`CloudDrives.add_return_id` are called without ``archive_settings``.
+    """
+    arch = Object()
+    arch._classname = 'ArchiveSettings'  # pylint: disable=protected-access
+    arch.archive = False
+    arch.gracePeriod = _worm_period(0, Duration.Minutes)
+    arch.retentionMode = 'Enterprise'
+    arch.retentionPeriod = _worm_period(30, Duration.Days)
+    arch.deleteData = False
+    arch.seal = False
+    return arch
 
 
 class CloudFS(BaseCommand):
@@ -149,29 +183,25 @@ class CloudDrives(BaseCommand):
         self.locks = Locks(self._core)
 
     def _get_entire_object(self, name, owner):
-        return self._core.api.get(f'{self.find(name, owner, include=["baseObjectRef"]).baseObjectRef}')
+        # Fusion Direct fields (``openFabricSettings`` / ``openStorageEnabled``) for read-modify-write on PUT.
+        include = union(CLOUD_DRIVE_FUSION_DIRECT_INCLUDE, ['baseObjectRef'])
+        ref = self.find(name, owner, include=include).baseObjectRef
+        return self._core.api.get(ref)
 
-    def add(self, name, group, owner, winacls=True, description=None,  # pylint: disable=too-many-arguments
-            quota=None, compliance_settings=None, xattrs=None, gfl=False, lock_extensions=None):
-        """
-        Create a new Cloud Drive Folder (Cloud Volume)
+    @staticmethod
+    def _parse_add_cloud_drive_response(response):
+        if isinstance(response, str):
+            match = re.search(r'/Users/(.+)', response)
+            if match:
+                return match.group()
+            return response
+        return response
 
-        :param str name: Name of the new folder
-        :param str group: Folder Group to assign this folder to
-        :param cterasdk.core.types.UserAccount owner: User account, the owner of the new folder
-        :param bool,optional winacls: Use Windows ACLs, defaults to True
-        :param str,optional description: Cloud drive folder description
-        :param str,optional quota: Cloud drive folder quota in GB
-        :param cterasdk.common.object.Object,optional compliance_settings: Compliance settings, defaults to disabled.
-         Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
-        :param cterasdk.common.object.Object,optional xattrs: Extended attributes, defaults to MacOS.
-         Use :func:`cterasdk.core.types.ExtendedAttributesBuilder` to build the extended attributes object
-        :param bool,optional gfl: Enable global file locking
-        :param list[str],optional lock_extensions: List of file extensions (without leading dot) for which global file locking is enforced.
-        :returns: Path to the Cloud Drive folder
-        :rtype: str
-        """
+    def _build_cloud_drive_create_params(self, name, group, owner, winacls=True, description=None,  # pylint: disable=too-many-arguments
+                                         quota=None, compliance_settings=None, xattrs=None, gfl=False, lock_extensions=None,
+                                         archive_settings=None):
         param = Object()
+        param._classname = 'CloudDriveCreateParams'  # pylint: disable=protected-access
         param.name = name
         param.owner = self._core.users.get(owner, ['baseObjectRef']).baseObjectRef
         param.group = self._core.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
@@ -193,6 +223,7 @@ class CloudDrives(BaseCommand):
         else:
             param.extendedAttributes = ExtendedAttributesBuilder.default().build()
 
+        param.archiveSettings = archive_settings if archive_settings is not None else _default_archive_settings()
         if gfl:
             param.globalFileLockSettings = Object()
             param.globalFileLockSettings._classname = 'GlobalFileLockSettings'  # pylint: disable=protected-access
@@ -200,6 +231,73 @@ class CloudDrives(BaseCommand):
             param.globalFileLockSettings.globalFileLockExtensions = (
                 lock_extensions if lock_extensions else CloudDrives.default_extensions
             )
+        else:
+            param.globalFileLockSettings = Object()
+            param.globalFileLockSettings._classname = 'GlobalFileLockSettings'  # pylint: disable=protected-access
+            param.globalFileLockSettings.enabled = False
+            param.globalFileLockSettings.globalFileLockExtensions = (
+                lock_extensions if lock_extensions else CloudDrives.default_extensions
+            )
+
+        return param
+
+    @staticmethod
+    def _apply_fusion_direct_storage_params(param, open_fabric_settings, open_storage_enabled):
+        if open_fabric_settings is not None:
+            if open_storage_enabled is False:
+                raise CTERAException(
+                    'openStorageEnabled cannot be False when openFabricSettings is set.'
+                )
+            param.openFabricSettings = open_fabric_settings
+            param.openStorageEnabled = True if open_storage_enabled is None else bool(open_storage_enabled)
+        elif open_storage_enabled is not None:
+            param.openStorageEnabled = open_storage_enabled
+
+    @staticmethod
+    def _apply_fusion_direct_storage_modify_params(param, open_fabric_settings, open_storage_enabled):
+        if open_fabric_settings is not None:
+            if open_storage_enabled is False:
+                raise CTERAException(
+                    'openStorageEnabled cannot be False when openFabricSettings is set.'
+                )
+            param.openFabricSettings = open_fabric_settings
+            if open_storage_enabled is not None:
+                param.openStorageEnabled = bool(open_storage_enabled)
+        elif open_storage_enabled is not None:
+            param.openStorageEnabled = open_storage_enabled
+
+    def add(self, name, group, owner, winacls=True, description=None,  # pylint: disable=too-many-arguments, too-many-locals
+            quota=None, compliance_settings=None, xattrs=None, gfl=False, lock_extensions=None,
+            open_fabric_settings=None, open_storage_enabled=None, archive_settings=None):
+        """
+        Create a new Cloud Drive Folder (Cloud Volume)
+
+        :param str name: Name of the new folder
+        :param str group: Folder Group to assign this folder to
+        :param cterasdk.core.types.UserAccount owner: User account, the owner of the new folder
+        :param bool,optional winacls: Use Windows ACLs, defaults to True
+        :param str,optional description: Cloud drive folder description
+        :param str,optional quota: Cloud drive folder quota in GB
+        :param cterasdk.common.object.Object,optional compliance_settings: Compliance settings, defaults to disabled.
+         Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
+        :param cterasdk.common.object.Object,optional xattrs: Extended attributes, defaults to MacOS.
+         Use :func:`cterasdk.core.types.ExtendedAttributesBuilder` to build the extended attributes object
+        :param bool,optional gfl: Enable global file locking
+        :param list[str],optional lock_extensions: List of file extensions (without leading dot) for which global file locking is enforced.
+        :param cterasdk.common.object.Object,optional open_fabric_settings: Fusion Direct payload: ``OpenFabricSettings`` object tree (e.g. from
+         :class:`cterasdk.core.fusion_direct.OpenFabricSettingsBuilder`). When set, ``openStorageEnabled`` defaults to ``True``;
+         passing ``open_storage_enabled=False`` raises :class:`cterasdk.exceptions.CTERAException`.
+        :param bool,optional open_storage_enabled: When ``open_fabric_settings`` is omitted, sets ``openStorageEnabled`` on the
+         create payload if not ``None``. Must not be ``False`` when ``open_fabric_settings`` is set.
+        :param cterasdk.common.object.Object,optional archive_settings: ``ArchiveSettings`` object tree. When omitted, a portal-aligned
+         default (archive off, enterprise retention) built by ``_default_archive_settings()`` is used.
+        :returns: WebDAV-style ``/Users/...`` path string when the portal returns that form; otherwise the raw execute response.
+        :rtype: str or object
+        """
+        param = self._build_cloud_drive_create_params(
+            name, group, owner, winacls, description, quota, compliance_settings, xattrs, gfl, lock_extensions,
+            archive_settings=archive_settings)
+        self._apply_fusion_direct_storage_params(param, open_fabric_settings, open_storage_enabled)
 
         try:
             response = self._core.api.execute('', 'addCloudDrive', param)
@@ -207,7 +305,42 @@ class CloudDrives(BaseCommand):
                 'Cloud drive folder created. %s',
                 {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls}
             )
-            return re.search(r'/Users\/(.+)', response).group()
+            return CloudDrives._parse_add_cloud_drive_response(response)
+        except CTERAException as error:
+            logger.error(
+                'Cloud drive folder creation failed. %s',
+                {'name': name, 'folder_group': group, 'owner': str(owner), 'win_acls': winacls}
+            )
+            raise error
+
+    def add_return_id(self, name, group, owner, winacls=True, description=None,  # pylint: disable=too-many-arguments, too-many-locals
+                      quota=None, compliance_settings=None, xattrs=None, gfl=False, lock_extensions=None,
+                      open_fabric_settings=None, open_storage_enabled=None, archive_settings=None):
+        """
+        Create a Cloud Drive Folder using ``addCloudDriveReturnID`` (structured return codes and folder id).
+
+        Parameters match :meth:`add`. Inspect ``rc`` and ``folderEntry`` on the returned object for success or errors.
+
+        .. note::
+           On some portal builds, a **global admin** session creating a folder for **another** user can leave the
+           folder created in the database yet return HTTP 500, because the ReturnID response path resolves the new
+           folder under the caller's principal instead of the owner. Prefer :meth:`add` in that scenario, or verify
+           the folder in the UI / listing before retrying with the same name.
+
+        :returns: Parsed portal response (typically XML-backed object with ``rc``, ``folderEntry``, ``errorMsg``, etc.)
+        """
+        param = self._build_cloud_drive_create_params(
+            name, group, owner, winacls, description, quota, compliance_settings, xattrs, gfl, lock_extensions,
+            archive_settings=archive_settings)
+        self._apply_fusion_direct_storage_params(param, open_fabric_settings, open_storage_enabled)
+
+        try:
+            response = self._core.api.execute('', 'addCloudDriveReturnID', param)
+            logger.info(
+                'Cloud drive folder create (return id). %s',
+                {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls}
+            )
+            return response
         except CTERAException as error:
             logger.error(
                 'Cloud drive folder creation failed. %s',
@@ -217,9 +350,12 @@ class CloudDrives(BaseCommand):
 
     def modify(self, current_name, owner, new_name=None,  # pylint: disable=too-many-arguments, too-many-locals
                new_owner=None, new_group=None, description=None, winacls=None, quota=None, compliance_settings=None, xattrs=None,
-               gfl=None, lock_extensions=None):
+               gfl=None, lock_extensions=None, open_fabric_settings=None, open_storage_enabled=None):
         """
         Modify a Cloud Drive Folder (Cloud Volume)
+
+        The folder is loaded with :data:`CLOUD_DRIVE_FUSION_DIRECT_INCLUDE` so
+        ``openFabricSettings`` / ``openStorageEnabled`` survive fields you do not change.
 
         :param str current_name: Current folder name
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the folder
@@ -235,6 +371,13 @@ class CloudDrives(BaseCommand):
          Use :func:`cterasdk.core.types.ExtendedAttributesBuilder` to build the extended attributes object
         :param bool,optional gfl: Enable global file locking
         :param list[str],optional lock_extensions: List of file extensions (without leading dot) for which global file locking is enforced.
+        :param cterasdk.common.object.Object,optional open_fabric_settings: Replacement Fusion Direct ``OpenFabricSettings`` object tree
+         (e.g. from :class:`cterasdk.core.fusion_direct.OpenFabricSettingsBuilder`). The portal forbids changing S3 bucket or
+         storage driver type after creation; ``storageMode`` and credentials may be updated within those rules.
+         To keep the existing secret when rebuilding ``dataStorage``, set ``secretKey`` to
+         :data:`cterasdk.core.fusion_direct.FUSION_DIRECT_SECRET_KEY_UNCHANGED`.
+        :param bool,optional open_storage_enabled: When ``open_fabric_settings`` is omitted, sets ``openStorageEnabled`` if not ``None``.
+         The portal rejects disabling Fusion Direct after creation; must not be ``False`` when ``open_fabric_settings`` is set.
         """
         param = self._get_entire_object(current_name, owner)
         if new_name:
@@ -259,6 +402,8 @@ class CloudDrives(BaseCommand):
                 param.globalFileLockSettings.globalFileLockExtensions = (
                     lock_extensions if lock_extensions else CloudDrives.default_extensions
                 )
+
+        self._apply_fusion_direct_storage_modify_params(param, open_fabric_settings, open_storage_enabled)
 
         try:
             response = self._core.api.put(f'/{param.baseObjectRef}', param)
