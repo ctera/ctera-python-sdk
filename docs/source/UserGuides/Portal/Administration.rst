@@ -1417,8 +1417,7 @@ Cloud Drive Folders
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.add_return_id
    :noindex:
 
-Fusion Direct
-~~~~~~~~~~~~~
+**Fusion Direct**
 
 Team Portal administrators with permission to manage cloud folders can create a **Fusion Direct**
 cloud folder backed by a customer-managed S3-compatible bucket by passing ``open_fabric_settings``.

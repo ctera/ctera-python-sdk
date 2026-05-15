@@ -283,8 +283,8 @@ class CloudDrives(BaseCommand):
          Use :func:`cterasdk.core.types.ExtendedAttributesBuilder` to build the extended attributes object
         :param bool,optional gfl: Enable global file locking
         :param list[str],optional lock_extensions: List of file extensions (without leading dot) for which global file locking is enforced.
-        :param cterasdk.common.object.Object,optional open_fabric_settings: Fusion Direct payload: ``OpenFabricSettings`` object tree (e.g. from
-         :class:`cterasdk.core.fusion_direct.OpenFabricSettingsBuilder`). When set, ``openStorageEnabled`` defaults to ``True``;
+        :param cterasdk.common.object.Object,optional open_fabric_settings: Fusion Direct ``OpenFabricSettings`` object tree
+         (e.g. from :class:`cterasdk.core.fusion_direct.OpenFabricSettingsBuilder`). When set, ``openStorageEnabled`` defaults to ``True``;
          passing ``open_storage_enabled=False`` raises :class:`cterasdk.exceptions.CTERAException`.
         :param bool,optional open_storage_enabled: When ``open_fabric_settings`` is omitted, sets ``openStorageEnabled`` on the
          create payload if not ``None``. Must not be ``False`` when ``open_fabric_settings`` is set.

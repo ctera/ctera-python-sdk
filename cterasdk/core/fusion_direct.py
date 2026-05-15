@@ -17,7 +17,7 @@ DEFAULT_FUSION_DIRECT_S3_STORAGE = 'GenericS3'
 FUSION_DIRECT_SECRET_KEY_UNCHANGED = "*****DON'T CHANGE*****"
 
 
-class OpenFabricS3DataStorageBuilder:
+class OpenFabricS3DataStorageBuilder:  # pylint: disable=too-many-instance-attributes
     """
     Build ``OpenFabricS3DataStorage`` for ``OpenFabricSettings.dataStorage`` (Fusion Direct).
 
@@ -26,7 +26,7 @@ class OpenFabricS3DataStorageBuilder:
     ``GenericS3`` is used, consistent with portal resolution of blank storage.
     """
 
-    def __init__(self, bucket, access_key, secret_key, end_point, *, storage=None, use_https=True,
+    def __init__(self, bucket, access_key, secret_key, end_point, *, storage=None, use_https=True,  # pylint: disable=too-many-arguments
                  region=None, trust_all_certificates=False, use_path_style_addressing=False,
                  sqs_url=None, metadata_tags=False):
         self._bucket = bucket

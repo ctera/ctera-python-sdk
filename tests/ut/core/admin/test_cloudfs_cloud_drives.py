@@ -267,6 +267,7 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['displayName'])
         self._global_admin.files.undelete.assert_called_once_with(f'Users/{self._owner}/{self._name}')
 
+    # pylint: disable-next=too-many-arguments
     def _get_add_cloud_drive_object(self, winacls=True, description=None, quota=None, compliance_settings=None, xattrs=None,
                                     gfl=None, lock_extensions=None, open_fabric_settings=None, open_storage_enabled=None,
                                     archive_settings=None):
