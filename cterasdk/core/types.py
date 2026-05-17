@@ -331,6 +331,19 @@ class HTTPBucket(Bucket):
     def trust_all_certificates(self):
         return not self.verify_ssl
 
+    def database_backup_server_object(self):
+        return Object(
+            storage=self.driver,
+            bucket=self.bucket,
+            accessKey=self.access_key,
+            secretKey=self.secret_key,
+            endPoint=self.endpoint,
+            useHttps=self.https,
+            trustAllCertificates=self.trust_all_certificates,
+            masterHost=None,
+            usePathStyleAddressing=False
+        )
+
 
 class AzureBlob(HTTPBucket):
 
