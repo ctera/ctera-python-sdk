@@ -52,7 +52,7 @@ class Servers(BaseCommand):
         :returns: Main database object.
         :rtype: cterasdk.common.object.Object
         """
-        response = query.database(self._core, '/servers', query.QueryParamBuilder().addFilter(
+        response = query.run(self._core, '/servers', query.QueryParamBuilder().addFilter(
             query.FilterBuilder('mainDB').eq(True)
         ).build())
         return response.objects[0]
@@ -118,7 +118,7 @@ class Backup(BaseCommand):
 
     def connected(self):
         """
-        Verify connectivity to the backup S3 bucket.   
+        Verify connectivity to the backup S3 bucket
         """
         return self._core.servers.system_database.backupToBucket.status == 'Connected'
 
@@ -127,7 +127,7 @@ class Backup(BaseCommand):
         Enable Main Database Backup to an S3 Bucket
 
         :param cterasdk.core.types.Bucket bucket: Storage bucket
-        :param int interval: Backup interval in minutes        
+        :param int interval: Backup interval in minutes
         """
         database = self._core.servers.system_database
         database.backupToBucket = Object(enabled=True, exportSchedulePeriod=interval, details=bucket.database_backup_server_object())

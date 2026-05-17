@@ -4,7 +4,7 @@ from ..lib import QueryIterator, DefaultResponse, Command
 from ..common import Object
 
 
-def database(core, path, param):
+def run(core, path, param):
     return create_callback_function(core, path, callback_response=DefaultResponse)(param)
 
 

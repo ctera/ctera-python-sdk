@@ -1,12 +1,11 @@
 import logging
 import asyncio
-import urllib.parse
 
 from ..lib.retries import execute_with_retries
 from .types import Metadata, Block
 from .crypto import decrypt_key, decrypt_block
 from .decompressor import decompress
-from ..exceptions.transport import BadRequest, Unauthorized, Forbidden, Unprocessable, InternalServerError, HTTPError
+from ..exceptions.transport import BadRequest, Unauthorized, Unprocessable, InternalServerError, HTTPError
 from ..exceptions.direct import (
     AuthorizationError, BlockListConnectionError, BlockListTimeout, BlockValidationException, BlocksNotFoundError,
     DecompressBlockError, DecryptBlockError, DecryptKeyError, DirectIOError, DownloadConnectionError,
@@ -27,7 +26,10 @@ async def get_object(client, file_id, chunk):
     :returns: Object
     :rtype: bytes
     """
-    message = f"Downloading block (offset={chunk.offset}, length={chunk.length})"
+    message = (
+        f"Downloading block #{chunk.number} "
+        f"(offset={chunk.offset}, length={chunk.length})"
+    )
 
     if file_id:
         message += f" for file ID {file_id}"
@@ -58,18 +60,16 @@ async def get_object(client, file_id, chunk):
         "unknown": "Unknown error"
     }
 
-    message = f"Failed to download block (offset={chunk.offset}, length={chunk.length})"
-
+    message = (
+        f"Failed to download block #{chunk.number} "
+        f"(offset={chunk.offset}, length={chunk.length})"
+    )
     if file_id:
         message = message + f" for file ID {file_id}"
 
     message = message + f": {error_messages.get(error_message, 'Unknown error')}."
     logger.error(message)
     raise exception
-
-
-def is_azure_object_storage(chunk):
-    return urllib.parse.urlparse(chunk.url).netloc.endswith('core.windows.net')
 
 
 async def decrypt_object(file_id, encrypted_object, encryption_key, chunk):
@@ -83,7 +83,7 @@ async def decrypt_object(file_id, encrypted_object, encryption_key, chunk):
     :rtype: bytes
     """
     try:
-        return decrypt_block(encrypted_object[16:] if is_azure_object_storage(chunk) else encrypted_object, encryption_key)
+        return decrypt_block(encrypted_object, encryption_key)
     except DirectIOError:
         logger.error('Failed to decrypt block.')
         raise DecryptBlockError(file_id, chunk)
@@ -123,14 +123,17 @@ async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
     :rtype: cterasdk.direct.types.Block
     """
     async def process(client, chunk, encryption_key):
-        message = f"Processing block (offset={chunk.offset}, length={chunk.length}) "
+        message = (
+            f"Processing block #{chunk.number} "
+            f"(offset={chunk.offset}, length={chunk.length})"
+        )
         if file_id:
             message = message + f" for file ID {file_id}"
         logger.debug(message)
         encrypted_object = await get_object(client, file_id, chunk)
         decrypted_object = await decrypt_object(file_id, encrypted_object, encryption_key, chunk)
         decompressed_object = await decompress_object(file_id, decrypted_object, chunk)
-        return Block(file_id, chunk.offset, decompressed_object, chunk.length)
+        return Block(file_id, chunk.number, chunk.offset, decompressed_object, chunk.length)
 
     if semaphore is not None:
         async with semaphore:
@@ -180,7 +183,7 @@ def decrypt_encryption_key(file_id, wrapped_key, secret_access_key):
 
 
 @execute_with_retries(retries=3, backoff=1, max_backoff=10)
-async def get_chunks(api, bearer, file_id, start=None, end=None):
+async def get_chunks(api, bearer, file_id):
     """
     Get Chunks.
 
@@ -192,15 +195,14 @@ async def get_chunks(api, bearer, file_id, start=None, end=None):
     """
     logger.debug('Listing blocks for file ID: %s', file_id)
     try:
-        params = {k: v for k, v in [('rangeStart', start), ('rangeEnd', end)] if v is not None}
-        response = await api.get(f'{file_id}', params=params, headers={'Authorization': bearer})
+        response = await api.get(f'{file_id}', headers={'Authorization': bearer})
         if not response.chunks:
             logger.error('Could not find blocks for file ID: %s.', file_id)
             raise BlocksNotFoundError(file_id)
         return Metadata(file_id, response)
     except BadRequest as error:
         raise ObjectNotFoundError(file_id) from error
-    except (Unauthorized, Forbidden) as error:
+    except Unauthorized as error:
         raise AuthorizationError(file_id) from error
     except Unprocessable as error:
         raise UnsupportedStorageError(file_id) from error

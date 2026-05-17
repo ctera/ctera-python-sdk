@@ -56,177 +56,89 @@ class CompressionLib:
 
 class Chunk(Object):
 
-    def __init__(self, offset, url, length):
+    def __init__(self, number, offset, url, length):
         """
         Initialize a Chunk.
 
+        :param int number: Chunk number.
         :param int offset: Chunk offset.
         :param str url: Signed URL.
         :param int length: Object length.
         """
         super().__init__(
+            number=number,
             offset=offset,
             url=url,
             length=length
         )
 
 
-class MetadataPart(Object):
-    """
-    CTERA Direct I/O File Metadata Part
-
-    :ivar int start: Starting offset.
-    :ivar int end: Ending offset.
-    :ivar int length: Length of the range in bytes.
-    :ivar bool encrypted: Indicates whether the range data is encrypted.
-    :ivar str encryption_key: Encryption key used for the range data.
-    :ivar bool compressed: Indicates whether the range data is compressed.
-    :ivar str compression_alg: Compression algorithm used for the range data.
-    :ivar list[cterasdk.common.object.Object] chunks: List of Chunk Objects.
-    """
-    def __init__(self, offset, end, encrypted, encryption_key, compressed, compression_alg, chunks):
-        """
-        Initialize a Direct IO metadata response object.
-
-        :param int offset: Starting offset.
-        :param int end: Ending offset.
-        :param bool encrypted: Indicates whether the file is encrypted.
-        :param str encryption_key: Encryption key used for the file.
-        :param bool compressed: Indicates whether the file is compressed.
-        :param str compression_alg: Compression algorithm used for the file.
-        :param list[cterasdk.common.object.Object] chunks: List of Chunk Objects.
-        """
-        super().__init__(
-            start=offset,
-            end=end,
-            length=(end - offset) + 1,
-            encrypted=encrypted,
-            encryption_key=encryption_key,
-            compressed=compressed,
-            compression_alg=compression_alg
-        )
-        for chunk in chunks:
-            self.chunks.append(Chunk(offset, chunk.url, chunk.len))
-            offset = offset + chunk.len
-
-    @staticmethod
-    def from_server_object(server_object):
-        compressed = server_object.compression_type != CompressionLib.Off
-        start, end = map(int, server_object.actual_blocks_range.range.split('-'))
-        return MetadataPart(
-            start,
-            end,
-            server_object.encrypt_info.data_encrypted,
-            server_object.encrypt_info.wrapped_key if server_object.encrypt_info.data_encrypted else None,
-            compressed,
-            server_object.compression_type if compressed else None
-        )
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return (
-            f"{self.__class__.__name__}("
-            f"{{'start': {self.start}, "
-            f"'end': {self.end}, "
-            f"'encrypted': {self.encrypted}, "
-            f"'compressed': {self.compressed}, "
-            f"'length': {self.length}, "
-            f"'chunks': {len(self.chunks)}}})"
-        )
-
-
 class Metadata(Object):
     """
-    CTERA Direct I/O File Metadata
-
-    :ivar int file_id: File ID.
-    :ivar int file_size: File Size.
-    :ivar list[cterasdk.direct.types.MetadataPart] parts: List of Metadata Parts.
-    :ivar bool encrypted: Indicates whether the range data is encrypted.
-    :ivar str encryption_key: Encryption key used for the range data.
-    :ivar bool compressed: Indicates whether the range data is compressed.
-    :ivar str compression_alg: Compression algorithm used for the range data.
+    CTERA Direct IO File Metadata
     """
-    def __init__(self, file_id, *parts):
+
+    def __init__(self, file_id, server_object):
         """
         Initialize a Direct IO metadata response object.
 
         :param int file_id: File ID.
-        :param list[cterasdk.direct.types.MetadataPart] parts: List of Metadata Parts.
+        :param cterasdk.common.object.Object server_object: Response Object.
         """
-        super().__init__(file_id=file_id, parts=parts)
+        super().__init__(
+            file_id=file_id,
+            encrypted=server_object.encrypt_info.data_encrypted,
+            compressed=server_object.compression_type != CompressionLib.Off,
+            chunks=Metadata._format_chunks(server_object.chunks)
+        )
+        self.encryption_key = server_object.encrypt_info.wrapped_key if self.encrypted else None
+        self.compression_library = server_object.compression_type if self.compressed else None
+        last_chunk = self.chunks[-1]
+        self.size = last_chunk.offset + last_chunk.length
 
-    @property
-    def size(self):
-        return self.parts[0].actual_blocks_range.file_size
+    @staticmethod
+    def _format_chunks(server_object):
+        """
+        Create Chunks.
 
-    @property
-    def encrypted(self):
-        return self.parts[0].encrypted
-
-    @property
-    def encryption_key(self):
-        return self.parts[0].encryption_key
-
-    @property
-    def compressed(self):
-        return self.parts[0].compressed
-
-    @property
-    def compression_alg(self):
-        return self.parts[0].compression_alg
-
-    @property
-    def start(self):
-        return self.parts[0].start
-
-    @property
-    def end(self):
-        return self.parts[-1].end
+        :param int file_id: File ID.
+        :param cterasdk.common.object.Object server_object: Server response.
+        :param list[int] blocks: List of block numbers to retrieve.
+        :returns: Chunk objects
+        :rtype: list[cterasdk.direct.types.Chunk]
+        """
+        offset = 0
+        chunks = []
+        for number, chunk in enumerate(server_object, 1):
+            chunks.append(Chunk(number, offset, chunk.url, chunk.len))
+            offset = offset + chunk.len
+        return chunks
 
     def serialize(self):
         """
-        Serialize Direct I/O metadata to a dictionary.
+        Serialize Direct IO metadata to a dictionary.
         """
-        chunks = []
-        for part in self.parts:
-            chunks.extend(part.chunks)
-
-        return {
-            'file_id': self.file_id,
-            'size': self.size,
-            'encrypted': self.encrypted,
-            'encryption_key': utils.utf8_decode(base64.b64encode(self.encryption_key)) if self.encrypted else None,
-            'compressed': self.compressed,
-            'compression_alg': self.compression_alg,
-            'chunks': chunks
-        }
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        d = self.serialize()
-        d.pop('encryption_key')
-        d['chunks'] = len(d['chunks'])
-        return d
+        x = copy.deepcopy(self)
+        if self.encrypted:
+            x.encryption_key = utils.utf8_decode(base64.b64encode(self.encryption_key))
+        return x
 
 
 class Block:
     """Block"""
 
-    def __init__(self, file_id, offset, data, length):
+    def __init__(self, file_id, number, offset, data, length):
         """
         Initialize a Block.
 
         :param int file_id: File ID.
+        :param int number: Block number.
         :param int offset: Block offset.
         :param bytes data: Bytes
         :param int length: Block length.
         """
         self._file_id = file_id
+        self._number = number
         self._offset = offset
         self._data = data
         self._length = length
@@ -234,6 +146,10 @@ class Block:
     @property
     def file_id(self):
         return self._file_id
+
+    @property
+    def number(self):
+        return self._number
 
     @property
     def offset(self):
