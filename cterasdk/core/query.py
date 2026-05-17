@@ -4,6 +4,10 @@ from ..lib import QueryIterator, DefaultResponse, Command
 from ..common import Object
 
 
+def database(core, path, param):
+    return create_callback_function(core, path, callback_response=DefaultResponse)(param)
+
+
 def create_callback_function(core, path, name=None, *, callback_response=None):
     """
     Create a query callback function

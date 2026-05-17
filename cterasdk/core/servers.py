@@ -20,6 +20,7 @@ class Servers(BaseCommand):
     def __init__(self, portal):
         super().__init__(portal)
         self.tasks = Tasks(self._core)
+        self.backup = Backup(self._core)
 
     def _get_entire_object(self, server):
         ref = f'/servers/{server}'
@@ -42,6 +43,19 @@ class Servers(BaseCommand):
         if server.name is None:
             raise ObjectNotFoundException(f'/servers/{name}')
         return server
+
+    @property
+    def system_database(self):
+        """
+        Retrieve the main database object
+
+        :returns: Main database object.
+        :rtype: cterasdk.common.object.Object
+        """
+        response = query.database(self._core, '/servers', query.QueryParamBuilder().addFilter(
+            query.FilterBuilder('mainDB').eq(True)
+        ).build())
+        return response.objects[0]
 
     def list_servers(self, include=None):
         """
@@ -70,7 +84,6 @@ class Servers(BaseCommand):
         :param bool,optional enable_replication: Enable or disable database replication
         :param str,optional replica_of: Configure as a replicate of another Portal server. `enable_replication` must be set to `True`
         """
-
         server = self._get_entire_object(name)
         if enable_replication is True and replica_of is not None:
             server.replicationSettings = Object()
@@ -99,6 +112,40 @@ class Servers(BaseCommand):
         except CTERAException as error:
             logger.error("Server modification failed: %s", ref)
             raise CTERAException(f'Server modification failed: {ref}') from error
+
+
+class Backup(BaseCommand):
+
+    def connected(self):
+        """
+        Verify connectivity to the backup S3 bucket.   
+        """
+        return self._core.servers.system_database.backupToBucket.status == 'Connected'
+
+    def enable(self, bucket, interval):
+        """
+        Enable Main Database Backup to an S3 Bucket
+
+        :param cterasdk.core.types.Bucket bucket: Storage bucket
+        :param int interval: Backup interval in minutes        
+        """
+        database = self._core.servers.system_database
+        database.backupToBucket = Object(enabled=True, exportSchedulePeriod=interval, details=bucket.database_backup_server_object())
+        logger.info("Enabling database backup. %s", {'server': database.name})
+        response = self._core.api.put(f'/servers/{database.name}', database)
+        logger.info("Database backup enabled. %s", {'server': database.name})
+        return response
+
+    def disable(self):
+        """
+        Disable Main Database Backup
+        """
+        database = self._core.servers.system_database
+        database.backupToBucket.enabled = False
+        logger.info("Disabling database backup. %s", {'server': database.name})
+        response = self._core.api.put(f'/servers/{database.name}', database)
+        logger.info("Database backup disabled. %s", {'server': database.name})
+        return response
 
 
 class Tasks(BaseCommand):
