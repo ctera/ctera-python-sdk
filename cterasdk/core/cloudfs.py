@@ -192,13 +192,11 @@ class CloudDrives(BaseCommand):
         try:
             response = self._core.api.execute('', 'addCloudDrive', param)
             logger.info('Cloud drive folder created. %s',
-                        {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls}
-            )
+                        {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls})
             return re.search(r'/Users\/(.+)', response).group()
         except CTERAException as error:
             logger.error('Cloud drive folder creation failed. %s',
-                         {'name': name, 'folder_group': group, 'owner': str(owner), 'win_acls': winacls}
-            )
+                         {'name': name, 'folder_group': group, 'owner': str(owner), 'win_acls': winacls})
             raise error
 
     def _configure_native_or_encrypted(self, param, group, native_format_settings):
