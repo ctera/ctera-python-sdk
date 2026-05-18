@@ -439,6 +439,7 @@ class BucketType:
     :ivar str Wasabi: Wasabi S3
     :ivar str Google: Google S3
     :ivar str NetAppStorageGRID: NetApp StorageGRID WebScale (S3)
+    :ivar str Cloudian: Cloudian (S3)
     """
     Azure = 'Azure'
     Scality = 'ScalityS3'
@@ -449,6 +450,7 @@ class BucketType:
     Wasabi = 'WasabiS3'
     Google = 'GoogleS3'
     NetAppStorageGRID = 'NTAP'
+    Cloudian = 'CD'
 
 
 class EnvironmentVariables:

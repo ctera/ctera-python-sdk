@@ -130,7 +130,7 @@ class Backup(BaseCommand):
         :param int interval: Backup interval in minutes
         """
         database = self._core.servers.system_database
-        database.backupToBucket = Object(enabled=True, exportSchedulePeriod=interval, details=bucket.database_backup_server_object())
+        database.backupToBucket = Object(enabled=True, exportSchedulePeriod=interval, details=bucket.to_database_backup_server_object())
         logger.info("Enabling database backup. %s", {'server': database.name})
         response = self._core.api.put(f'/servers/{database.name}', database)
         logger.info("Database backup enabled. %s", {'server': database.name})

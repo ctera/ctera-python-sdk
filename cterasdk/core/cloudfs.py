@@ -151,13 +151,14 @@ class CloudDrives(BaseCommand):
     def _get_entire_object(self, name, owner):
         return self._core.api.get(f'{self.find(name, owner, include=["baseObjectRef"]).baseObjectRef}')
 
-    def add(self, name, group, owner, winacls=True, description=None,  # pylint: disable=too-many-arguments
-            quota=None, archive_settings=None, compliance_settings=None, xattrs=None, gfl=False, lock_extensions=None):
+    def add(self, name, group=None, owner=None, winacls=True, description=None,  # pylint: disable=too-many-arguments
+            quota=None, archive_settings=None, compliance_settings=None, native_format_settings=None,
+            xattrs=None, gfl=False, lock_extensions=None):
         """
         Create a new Cloud Drive Folder (Cloud Volume)
 
         :param str name: Name of the new cloud folder
-        :param str group: Folder Group to assign this folder to
+        :param str group,optional: Folder Group to assign this folder to
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the new folder
         :param bool,optional winacls: Use Windows ACLs, defaults to True
         :param str,optional description: Cloud drive folder description
@@ -166,6 +167,8 @@ class CloudDrives(BaseCommand):
          Use :func:`cterasdk.core.types.ArchiveSettingsBuilder` to build the archive settings object
         :param cterasdk.common.object.Object,optional compliance_settings: Compliance settings, defaults to disabled.
          Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
+        :param cterasdk.common.object.Object,optional native_format_settings: Native format settings, defaults to disabled.
+         Use :func:`cterasdk.core.types.NativeFormatSettingsBuilder` to build the native format settings object
         :param cterasdk.common.object.Object,optional xattrs: Extended attributes, defaults to MacOS.
          Use :func:`cterasdk.core.types.ExtendedAttributesBuilder` to build the extended attributes object
         :param bool,optional gfl: Enable global file locking
@@ -176,7 +179,14 @@ class CloudDrives(BaseCommand):
         param = Object()
         param.name = name
         param.owner = self._core.users.get(owner, ['baseObjectRef']).baseObjectRef
-        param.group = self._core.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
+
+        if native_format_settings:
+            param.openStorageEnabled = True
+            param.openFabricSettings = native_format_settings
+            param.group = None
+        else:
+            param.group = self._core.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
+
         param.enableSyncWinNtExtendedAttributes = winacls
         param.folderQuota = quota
         if description:
@@ -222,7 +232,8 @@ class CloudDrives(BaseCommand):
 
     def modify(self, current_name, owner, new_name=None,  # pylint: disable=too-many-arguments, too-many-locals
                new_owner=None, new_group=None, description=None, winacls=None, quota=None,
-               archive_settings=None, compliance_settings=None, xattrs=None, gfl=None, lock_extensions=None):
+               archive_settings=None, compliance_settings=None, native_format_settings=None,
+               xattrs=None, gfl=None, lock_extensions=None):
         """
         Modify a Cloud Drive Folder (Cloud Volume)
 
@@ -238,6 +249,8 @@ class CloudDrives(BaseCommand):
          Use :func:`cterasdk.core.types.ArchiveSettingsBuilder` to build the archive settings object
         :param cterasdk.common.object.Object,optional compliance_settings: Compliance settings.
          Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
+        :param cterasdk.common.object.Object,optional native_format_settings: Native format settings.
+         Use :func:`cterasdk.core.types.NativeFormatSettingsBuilder` to build the native format settings object
         :param cterasdk.common.object.Object,optional xattrs: Extended attributes.
          Use :func:`cterasdk.core.types.ExtendedAttributesBuilder` to build the extended attributes object
         :param bool,optional gfl: Enable global file locking
@@ -260,6 +273,8 @@ class CloudDrives(BaseCommand):
             param.archiveSettings = archive_settings
         if compliance_settings:
             param.wormSettings = compliance_settings
+        if native_format_settings:
+            param.openFabricSettings = native_format_settings
         if xattrs:
             param.extendedAttributes = xattrs
         if gfl is not None:

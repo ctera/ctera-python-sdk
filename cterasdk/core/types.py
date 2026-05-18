@@ -331,7 +331,21 @@ class HTTPBucket(Bucket):
     def trust_all_certificates(self):
         return not self.verify_ssl
 
-    def database_backup_server_object(self):
+    def to_native_format_server_object(self):
+        return Object(
+            _classname='OpenFabricS3DataStorage',
+            storage=self.driver,
+            bucket=self.bucket,
+            accessKey=self.access_key,
+            secretKey=self.secret_key,
+            endPoint=self.endpoint,
+            useHttps=self.https,
+            trustAllCertificates=self.trust_all_certificates,
+            masterHost=None,
+            usePathStyleAddressing=False
+        )
+
+    def to_database_backup_server_object(self):
         return Object(
             storage=self.driver,
             bucket=self.bucket,
@@ -398,6 +412,13 @@ class Nutanix(S3Compatible):
     def __init__(self, bucket, access_key, secret_key,
                  endpoint, https=False, direct=False, verify_ssl=True):
         super().__init__(bucket, BucketType.Nutanix, access_key, secret_key, endpoint, https, direct, verify_ssl)
+
+
+class Cloudian(S3Compatible):
+
+    def __init__(self, bucket, access_key, secret_key,
+                 endpoint, https=False, direct=False, verify_ssl=True):
+        super().__init__(bucket, BucketType.Cloudian, access_key, secret_key, endpoint, https, direct, verify_ssl)
 
 
 class Wasabi(S3Compatible):
@@ -769,9 +790,9 @@ class ArchiveSettingsBuilder:
 
 class NativeFormatSettingsBuilder:
 
-    def __init__(self, mode, bucket, sqs=None, region=None):
+    def __init__(self, mode, bucket, sqs, region):
         self.settings = Object(_classname='OpenFabricSettings', storageMode=mode)
-        self.settings.dataStorage = bucket.to_native_format_object()
+        self.settings.dataStorage = bucket.to_native_format_server_object()
         self.settings.dataStorage.sqsUrl = sqs
         self.settings.dataStorage.region = region
 
