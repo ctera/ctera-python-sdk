@@ -151,7 +151,7 @@ class CloudDrives(BaseCommand):
     def _get_entire_object(self, name, owner):
         return self._core.api.get(f'{self.find(name, owner, include=["baseObjectRef"]).baseObjectRef}')
 
-    def add(self, name, group=None, owner=None, winacls=True, description=None,  # pylint: disable=too-many-arguments
+    def add(self, name, group=None, owner=None, winacls=True, description=None,  # pylint: disable=too-many-arguments, too-many-locals
             quota=None, archive_settings=None, compliance_settings=None, native_format_settings=None,
             xattrs=None, gfl=False, lock_extensions=None):
         """
@@ -180,13 +180,14 @@ class CloudDrives(BaseCommand):
 
         self._configure_native_or_encrypted(param, group, native_format_settings)
 
-        self._configure_attributes(param, name, winacls, quota, description, xattrs)
+        CloudDrives._configure_attributes(param, name, winacls, quota, description, xattrs)
 
-        self._configure_archive(param, archive_settings)
+        CloudDrives._configure_archive(param, archive_settings)
 
-        self._configure_compliance(param, compliance_settings)
+        CloudDrives._configure_compliance(param, compliance_settings)
 
-        self._configure_locking(param, gfl, lock_extensions)
+        if gfl:
+            CloudDrives._configure_locking(param, lock_extensions)
 
         try:
             response = self._core.api.execute('', 'addCloudDrive', param)
@@ -208,7 +209,8 @@ class CloudDrives(BaseCommand):
         else:
             param.group = self._core.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
 
-    def _configure_attributes(self, param, name, winacls, quota, description, xattrs):
+    @staticmethod
+    def _configure_attributes(param, name, winacls, quota, description, xattrs):
         param.name = name
         param.enableSyncWinNtExtendedAttributes = winacls
         param.folderQuota = quota
@@ -228,20 +230,22 @@ class CloudDrives(BaseCommand):
         else:
             param.extendedAttributes = ExtendedAttributesBuilder.default().build()
 
-    def _configure_archive(self, param, archive_settings):
+    @staticmethod
+    def _configure_archive(param, archive_settings):
         param.archiveSettings = archive_settings if archive_settings else ArchiveSettingsBuilder.default().build()
 
-    def _configure_compliance(self, param, compliance_settings):
+    @staticmethod
+    def _configure_compliance(param, compliance_settings):
         param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
 
-    def _configure_locking(self, param, gfl, lock_extensions):
-        if gfl:
-            param.globalFileLockSettings = Object()
-            param.globalFileLockSettings._classname = 'GlobalFileLockSettings'  # pylint: disable=protected-access
-            param.globalFileLockSettings.enabled = True
-            param.globalFileLockSettings.globalFileLockExtensions = (
-                lock_extensions if lock_extensions else CloudDrives.default_extensions
-            )
+    @staticmethod
+    def _configure_locking(param, lock_extensions):
+        param.globalFileLockSettings = Object()
+        param.globalFileLockSettings._classname = 'GlobalFileLockSettings'  # pylint: disable=protected-access
+        param.globalFileLockSettings.enabled = True
+        param.globalFileLockSettings.globalFileLockExtensions = (
+            lock_extensions if lock_extensions else CloudDrives.default_extensions
+        )
 
 
     def modify(self, current_name, owner, new_name=None,  # pylint: disable=too-many-arguments, too-many-locals
