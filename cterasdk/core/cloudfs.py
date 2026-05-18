@@ -245,8 +245,7 @@ class CloudDrives(BaseCommand):
             lock_extensions if lock_extensions else CloudDrives.default_extensions
         )
 
-
-    def modify(self, current_name, owner, new_name=None,  # pylint: disable=too-many-arguments, too-many-locals
+    def modify(self, current_name, owner, new_name=None,  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
                new_owner=None, new_group=None, description=None, winacls=None, quota=None,
                archive_settings=None, compliance_settings=None, native_format_settings=None,
                xattrs=None, gfl=None, lock_extensions=None):
