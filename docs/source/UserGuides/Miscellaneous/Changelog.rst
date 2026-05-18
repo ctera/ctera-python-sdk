@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Improvements
+^^^^^^^^^^^^
+* Added support for CTERA Portal main database backups to S3
+* Added support for creating Archive cloud folders
+* Added support for creating native format (Fusion Direct) cloud folders
+
+Related issues and pull requests on GitHub: `#354 <https://github.com/ctera/ctera-python-sdk/pull/354>`_,
+`#355 <https://github.com/ctera/ctera-python-sdk/pull/355>`_
+
 2.20.34
 -------
 
@@ -10,6 +19,8 @@ Bug Fixes
 * Fixed an error when generating Postman collection output while formatting request body types.
 * Consolidated ``handle`` and ``handle_many``, as well as ``download`` and
   ``download_many``, to dynamically determine whether the target is a file or folder.
+
+Related issues and pull requests on GitHub: `#348 <https://github.com/ctera/ctera-python-sdk/pull/348>`_
 
 2.20.33
 -------
