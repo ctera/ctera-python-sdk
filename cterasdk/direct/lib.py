@@ -1,12 +1,11 @@
 import logging
 import asyncio
-import urllib.parse
 
 from ..lib.retries import execute_with_retries
 from .types import Metadata, Block
 from .crypto import decrypt_key, decrypt_block
 from .decompressor import decompress
-from ..exceptions.transport import BadRequest, Unauthorized, Forbidden, Unprocessable, InternalServerError, HTTPError
+from ..exceptions.transport import BadRequest, Unauthorized, Unprocessable, InternalServerError, HTTPError
 from ..exceptions.direct import (
     AuthorizationError, BlockListConnectionError, BlockListTimeout, BlockValidationException, BlocksNotFoundError,
     DecompressBlockError, DecryptBlockError, DecryptKeyError, DirectIOError, DownloadConnectionError,
@@ -73,10 +72,6 @@ async def get_object(client, file_id, chunk):
     raise exception
 
 
-def is_azure_object_storage(chunk):
-    return urllib.parse.urlparse(chunk.url).netloc.endswith('core.windows.net')
-
-
 async def decrypt_object(file_id, encrypted_object, encryption_key, chunk):
     """
     Decrypt Encrypted Object.
@@ -88,7 +83,7 @@ async def decrypt_object(file_id, encrypted_object, encryption_key, chunk):
     :rtype: bytes
     """
     try:
-        return decrypt_block(encrypted_object[16:] if is_azure_object_storage(chunk) else encrypted_object, encryption_key)
+        return decrypt_block(encrypted_object, encryption_key)
     except DirectIOError:
         logger.error('Failed to decrypt block.')
         raise DecryptBlockError(file_id, chunk)
@@ -207,7 +202,7 @@ async def get_chunks(api, bearer, file_id):
         return Metadata(file_id, response)
     except BadRequest as error:
         raise ObjectNotFoundError(file_id) from error
-    except (Unauthorized, Forbidden) as error:
+    except Unauthorized as error:
         raise AuthorizationError(file_id) from error
     except Unprocessable as error:
         raise UnsupportedStorageError(file_id) from error

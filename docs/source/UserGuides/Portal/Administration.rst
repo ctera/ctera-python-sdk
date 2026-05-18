@@ -605,6 +605,39 @@ Server Tasks
    for task in admin.servers.tasks.scheduled('database'):
       print(task.name)
 
+
+Main Database Backup to S3
+--------------------------
+
+.. automethod:: cterasdk.core.servers.Backup.enable
+   :noindex:
+
+.. code-block:: python
+
+   name = 'target-s3-bucket-name'
+   access, secret = 'access-key', 'secret-access-key'
+   endpoint = 's3.eu-west-1.amazonaws.com'
+   https = True
+
+   bucket = core_types.AmazonS3(name, access, secret, endpoint, https)  # use verify_ssl=False to trust all certificates
+   user.servers.backup.enable(bucket, 60)  # backup every 60 minutes
+
+
+.. automethod:: cterasdk.core.servers.Backup.disable
+   :noindex:
+
+.. code-block:: python
+
+   user.servers.backup.disable()
+
+.. automethod:: cterasdk.core.servers.Backup.status
+   :noindex:
+
+.. code-block:: python
+
+   is_connected = user.servers.backup.connected()
+
+
 Messaging Service
 =================
 
