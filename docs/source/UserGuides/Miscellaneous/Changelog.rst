@@ -1,6 +1,9 @@
 Changelog
 =========
 
+2.20.35
+-------
+
 Improvements
 ^^^^^^^^^^^^
 * Added support for CTERA Portal main database backups to S3
