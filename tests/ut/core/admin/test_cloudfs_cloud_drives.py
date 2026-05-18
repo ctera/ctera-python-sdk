@@ -3,7 +3,7 @@ import munch
 
 from cterasdk import exceptions
 from cterasdk.core import cloudfs
-from cterasdk.core.types import UserAccount, ComplianceSettingsBuilder, ExtendedAttributesBuilder
+from cterasdk.core.types import UserAccount, ArchiveSettingsBuilder, ComplianceSettingsBuilder, ExtendedAttributesBuilder
 from cterasdk.core import query
 from cterasdk.common import Object, union
 from tests.ut.core.admin import base_admin
@@ -191,8 +191,8 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         self._global_admin.users.get.assert_called_once_with(self._local_user_account, ['displayName'])
         self._global_admin.files.undelete.assert_called_once_with(f'Users/{self._owner}/{self._name}')
 
-    def _get_add_cloud_drive_object(self, winacls=True, description=None, quota=None, compliance_settings=None, xattrs=None,
-                                    gfl=None, lock_extensions=None):
+    def _get_add_cloud_drive_object(self, winacls=True, description=None, quota=None, archive_settings=None,
+                                    compliance_settings=None, xattrs=None, gfl=None, lock_extensions=None):
         add_cloud_drive_param = Object()
         add_cloud_drive_param.name = self._name
         add_cloud_drive_param.owner = self._owner
@@ -202,6 +202,7 @@ class TestCoreCloudDrives(base_admin.BaseCoreTest):   # pylint: disable=too-many
         if description:
             add_cloud_drive_param.description = description
         add_cloud_drive_param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
+        add_cloud_drive_param.archiveSettings = archive_settings if archive_settings else ArchiveSettingsBuilder.default().build()
         add_cloud_drive_param.extendedAttributes = xattrs if xattrs else ExtendedAttributesBuilder.default().build()
         if gfl:
             add_cloud_drive_param.globalFileLockSettings = Object()

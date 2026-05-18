@@ -1425,10 +1425,13 @@ Cloud Drive Folders
    wbruce = core_types.UserAccount('wbruce', 'ctera.local')
    admin.cloudfs.drives.add('DIR-002', 'FG-002', wbruce)
 
+Code examples to create immutable Cloud Drive folders
+
+.. code:: python
+
    """Create immutable Cloud Drive folders"""
 
    svc_account = core_types.UserAccount('svc_account')
-
    """
    Mode: Enterprise (i.e., allow privileged delete by the CTERA Compliance Officer role)
    Retention Period: 7 Years.
@@ -1447,6 +1450,34 @@ Cloud Drive Folders
    settings = core_types.ComplianceSettingsBuilder.enterprise(1, core_enum.Duration.Years).grace_period(1, core_enum.Duration.Hours).build()
    admin.cloudfs.drives.add('Compliance', 'FG-Compliance', svc_account, compliance_settings=settings)
 
+Code examples to create archive Cloud Drive folders
+
+.. code:: python
+
+   archive_settings = core_types.ArchiveSettingsBuilder.enterprise(30, core_enum.Duration.Days).build()
+   admin.cloudfs.groups.add(
+      'ARCHIVE-DIR-001',
+      'FG-001',
+      core_types.UserAccount('svc_account'),
+      archive_settings=archive_settings
+   )
+
+Code examples to create Cloud Drive folders using Fusion Direct
+
+.. code:: python
+
+   name, access, secret = 'target-s3-bucket-name', 'access-key', 'secret-access-key'
+   endpoint, https = 's3.eu-west-1.amazonaws.com', True
+   bucket = core_types.AmazonS3(name, access, secret, endpoint, https)  # use verify_ssl=False to trust all certificates
+
+   sqs = 'https://sqs.ctera.local:18090/7ed20456b4eebb2c21c0079edcefe2ce/bucket'
+   native_format_settings = core_types.NativeFormatSettingsBuilder.bidirectional(bucket, sqs).build()
+
+   user.cloudfs.drives.add(
+      'DIR-001-Native',
+      owner=core_types.UserAccount('svc_account'),
+      native_format_settings=native_format_settings)
+   )
 
 .. automethod:: cterasdk.core.cloudfs.CloudDrives.modify
    :noindex:

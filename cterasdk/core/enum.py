@@ -439,6 +439,7 @@ class BucketType:
     :ivar str Wasabi: Wasabi S3
     :ivar str Google: Google S3
     :ivar str NetAppStorageGRID: NetApp StorageGRID WebScale (S3)
+    :ivar str Cloudian: Cloudian (S3)
     """
     Azure = 'Azure'
     Scality = 'ScalityS3'
@@ -449,6 +450,7 @@ class BucketType:
     Wasabi = 'WasabiS3'
     Google = 'GoogleS3'
     NetAppStorageGRID = 'NTAP'
+    Cloudian = 'CD'
 
 
 class EnvironmentVariables:
@@ -737,3 +739,16 @@ class ResourceError:
     FileWithTheSameNameExist = "FileWithTheSameNameExist"
     InvalidName = "InvalidName"
     ReservedName = "ReservedName"
+
+
+class NativeFormat:
+    """
+    Native Format - Fusion Direct
+
+    :ivar str Filesystem: Read-write through the filesystem only. Bucket access is read-only.
+    :ivar str Bucket: Read-write through the bucket only. Filesystem access is read-only.
+    :ivar str Bidirectional: Read-write through both the filesystem and the bucket.
+    """
+    Filesystem = 'Filesystem'
+    Bucket = 'Bucket'
+    Bidirectional = 'Bidirectional'
