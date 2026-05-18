@@ -1,9 +1,11 @@
+import logging
+
 import cterasdk.settings
 from ...clients import clients
 from ..services import Management
 from ..endpoints import EndpointBuilder
 from .. import authenticators
-from ...common import modules
+from ...common import modules, parse_base_object_ref
 from ...lib.session.edge import Session
 
 
@@ -11,23 +13,41 @@ from ...edge import (
     afp, aio, antivirus, array, audit, backup, cache, cli, config, connection, ctera_migrate,
     dedup, directoryservice, drive, files, firmware, ftp, groups, licenses, login,
     logs, mail, network, nfs, ntp, power, remote, rsync, ransom_protect, services,
-    shares, shell, smb, snmp, ssh, ssl, support, sync, syslog, tasks, telnet,
+    shares, shell, smb, snmp, ssh, ssl, stats, support, sync, syslog, tasks, telnet,
     timezone, users, volumes,
 )
+
+
+logger = logging.getLogger('cterasdk.edge')
 
 
 class Clients:
 
     def __init__(self, edge, Portal):
+        self._edge = edge
+        self._Portal = Portal
+        self._authenticated = False
         if Portal:
             edge._Portal = Portal
             edge.default.close()
             edge._ctera_session.start_remote_session(Portal.session())
-            self.api = Portal.default.clone(clients.API, EndpointBuilder.new(edge.base), authenticator=lambda *_: True)
+            self._api = Portal.default.clone(clients.API, EndpointBuilder.new(edge.base, '/admingui/api'), authenticator=lambda *_: True)
         else:
             self.migrate = edge.default.clone(clients.Migrate, EndpointBuilder.new(edge.base, '/migration/rest/v1'))
-            self.api = edge.default.clone(clients.API, EndpointBuilder.new(edge.base, '/admingui/api'))
+            self._api = edge.default.clone(clients.API, EndpointBuilder.new(edge.base, '/admingui/api'))
             self.io = IO(edge)
+
+    @property
+    def api(self):
+        if self._Portal and not self._authenticated:
+            tenant = parse_base_object_ref(self._edge.portal).name
+            device_name = self._edge.name
+            logger.debug('Auto-SSO login via relay channel. %s', {'tenant': tenant, 'device': device_name})
+            token = self._Portal.api.execute(f'/portals/{tenant}/devices/{device_name}', 'singleSignOn')
+            if token:
+                self._api.get('/ssologin', params={'ticket': token})
+            self._authenticated = True
+        return self._api
 
 
 class IO:
@@ -106,6 +126,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.shell = shell.Shell(self)
         self.smb = smb.SMB(self)
         self.snmp = snmp.SNMP(self)
+        self.stats = stats.Stats(self)
         self.ssh = ssh.SSH(self)
         self.ssl = modules.initialize(ssl.SSLModule, self)
         self.support = support.Support(self)
@@ -164,5 +185,5 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         return super()._omit_fields + ['afp', 'aio', 'array', 'audit', 'antivirus', 'backup', 'cache', 'cli', 'config', 'ctera_migrate',
                                        'dedup', 'directoryservice', 'drive', 'files', 'firmware', 'ftp', 'groups', 'licenses', 'logs',
                                        'mail', 'network', 'nfs', 'ntp', 'power', 'ransom_protect', 'rsync', 'services', 'shares', 'shell',
-                                       'smb', 'snmp', 'ssh', 'ssl', 'support', 'sync', 'syslog', 'tasks', 'telnet', 'timezone',
+                                       'smb', 'snmp', 'ssh', 'ssl', 'stats', 'support', 'sync', 'syslog', 'tasks', 'telnet', 'timezone',
                                        'users', 'volumes']

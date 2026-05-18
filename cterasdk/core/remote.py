@@ -1,11 +1,30 @@
+from urllib.parse import urlparse
 from .enum import DeviceType
 from ..objects.synchronous import edge, drive
-from ..common import parse_base_object_ref
+
+
+def _relay_base(Portal, device):
+    """
+    Build the base URL for the HTTP Relay channel.
+
+    The portal's RemoteDeviceServlet resolves the tenant from the Host header
+    using DNS suffix matching (e.g. portal.ctera.me).  Accessing the portal by
+    IP causes Host: <ip> which fails that check.  We derive the correct portal
+    hostname from the device's DDNS name (vGateway-7192.portal.ctera.me) and
+    substitute it into the base URL so every relay request carries the right
+    Host header while still connecting to the same portal endpoint.
+    """
+    device_dns = getattr(device, 'deviceDnsName', None)
+    if device_dns and device.name in device_dns:
+        portal_hostname = device_dns[len(device.name) + 1:]   # strip "vGateway-7192."
+        parsed = urlparse(Portal.ctera.baseurl)
+        port = f':{parsed.port}' if parsed.port not in (None, 80, 443) else ''
+        return f'{parsed.scheme}://{portal_hostname}{port}{parsed.path}/devices/{device.name}'
+    return f'{Portal.ctera.baseurl}/devices/{device.name}'
 
 
 def remote_command(Portal, device):
-    tenant = parse_base_object_ref(device.portal).name
-    base = f'{Portal.ctera.baseurl}/devicecmdnew/{tenant}/{device.name}'
+    base = _relay_base(Portal, device)
 
     ManagedDevice = None
     if device.deviceType in DeviceType.Gateways:
