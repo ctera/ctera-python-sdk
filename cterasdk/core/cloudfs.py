@@ -176,10 +176,31 @@ class CloudDrives(BaseCommand):
         :returns: Path to the Cloud Drive folder
         :rtype: str
         """
-        param = Object()
-        param.name = name
-        param.owner = self._core.users.get(owner, ['baseObjectRef']).baseObjectRef
+        param = Object(owner=self._core.users.get(owner, ['baseObjectRef']).baseObjectRef)
 
+        self._configure_native_or_encrypted(param, group, native_format_settings)
+
+        self._configure_attributes(param, name, winacls, quota, description, xattrs)
+
+        self._configure_archive(param, archive_settings)
+
+        self._configure_compliance(param, compliance_settings)
+
+        self._configure_locking(param, gfl, lock_extensions)
+
+        try:
+            response = self._core.api.execute('', 'addCloudDrive', param)
+            logger.info('Cloud drive folder created. %s',
+                        {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls}
+            )
+            return re.search(r'/Users\/(.+)', response).group()
+        except CTERAException as error:
+            logger.error('Cloud drive folder creation failed. %s',
+                         {'name': name, 'folder_group': group, 'owner': str(owner), 'win_acls': winacls}
+            )
+            raise error
+
+    def _configure_native_or_encrypted(self, param, group, native_format_settings):
         if native_format_settings:
             param.openStorageEnabled = True
             param.openFabricSettings = native_format_settings
@@ -187,6 +208,8 @@ class CloudDrives(BaseCommand):
         else:
             param.group = self._core.cloudfs.groups.get(group, ['baseObjectRef']).baseObjectRef
 
+    def _configure_attributes(self, param, name, winacls, quota, description, xattrs):
+        param.name = name
         param.enableSyncWinNtExtendedAttributes = winacls
         param.folderQuota = quota
         if description:
@@ -205,9 +228,13 @@ class CloudDrives(BaseCommand):
         else:
             param.extendedAttributes = ExtendedAttributesBuilder.default().build()
 
-        param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
+    def _configure_archive(self, param, archive_settings):
         param.archiveSettings = archive_settings if archive_settings else ArchiveSettingsBuilder.default().build()
 
+    def _configure_compliance(self, param, compliance_settings):
+        param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
+
+    def _configure_locking(self, param, gfl, lock_extensions):
         if gfl:
             param.globalFileLockSettings = Object()
             param.globalFileLockSettings._classname = 'GlobalFileLockSettings'  # pylint: disable=protected-access
@@ -216,19 +243,6 @@ class CloudDrives(BaseCommand):
                 lock_extensions if lock_extensions else CloudDrives.default_extensions
             )
 
-        try:
-            response = self._core.api.execute('', 'addCloudDrive', param)
-            logger.info(
-                'Cloud drive folder created. %s',
-                {'name': name, 'owner': param.owner, 'folder_group': group, 'winacls': winacls}
-            )
-            return re.search(r'/Users\/(.+)', response).group()
-        except CTERAException as error:
-            logger.error(
-                'Cloud drive folder creation failed. %s',
-                {'name': name, 'folder_group': group, 'owner': str(owner), 'win_acls': winacls}
-            )
-            raise error
 
     def modify(self, current_name, owner, new_name=None,  # pylint: disable=too-many-arguments, too-many-locals
                new_owner=None, new_group=None, description=None, winacls=None, quota=None,

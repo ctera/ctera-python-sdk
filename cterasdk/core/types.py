@@ -778,11 +778,13 @@ class ArchiveSettingsBuilder:
 
     @staticmethod
     def enterprise(amount, duration):
-        return ArchiveSettingsBuilder(True, RetentionMode.Enterprise, ComplianceSettingsBuilder._get_retention_period(amount, duration))
+        return ArchiveSettingsBuilder(True, RetentionMode.Enterprise,
+                                      ComplianceSettingsBuilder._get_retention_period(amount, duration))  # pylint: disable=protected-access
 
     @staticmethod
     def compliance(amount, duration):
-        return ArchiveSettingsBuilder(True, RetentionMode.Compliance, ComplianceSettingsBuilder._get_retention_period(amount, duration))
+        return ArchiveSettingsBuilder(True, RetentionMode.Compliance,
+                                      ComplianceSettingsBuilder._get_retention_period(amount, duration))  # pylint: disable=protected-access
 
     def build(self):
         return self.settings
