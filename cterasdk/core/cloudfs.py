@@ -5,7 +5,7 @@ import logging
 from .base_command import BaseCommand
 from . import query, devices
 from .enum import ListFilter, PolicyType
-from .types import ComplianceSettingsBuilder, ExtendedAttributesBuilder
+from .types import ArchiveSettingsBuilder, ComplianceSettingsBuilder, ExtendedAttributesBuilder
 from ..common import union, Object
 from ..exceptions import CTERAException, ObjectNotFoundException
 
@@ -152,16 +152,18 @@ class CloudDrives(BaseCommand):
         return self._core.api.get(f'{self.find(name, owner, include=["baseObjectRef"]).baseObjectRef}')
 
     def add(self, name, group, owner, winacls=True, description=None,  # pylint: disable=too-many-arguments
-            quota=None, compliance_settings=None, xattrs=None, gfl=False, lock_extensions=None):
+            quota=None, archive_settings=None, compliance_settings=None, xattrs=None, gfl=False, lock_extensions=None):
         """
         Create a new Cloud Drive Folder (Cloud Volume)
 
-        :param str name: Name of the new folder
+        :param str name: Name of the new cloud folder
         :param str group: Folder Group to assign this folder to
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the new folder
         :param bool,optional winacls: Use Windows ACLs, defaults to True
         :param str,optional description: Cloud drive folder description
         :param str,optional quota: Cloud drive folder quota in GB
+        :param cterasdk.common.object.Object,optional archive_settings: Archive settings.
+         Use :func:`cterasdk.core.types.ArchiveSettingsBuilder` to build the archive settings object
         :param cterasdk.common.object.Object,optional compliance_settings: Compliance settings, defaults to disabled.
          Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
         :param cterasdk.common.object.Object,optional xattrs: Extended attributes, defaults to MacOS.
@@ -179,7 +181,7 @@ class CloudDrives(BaseCommand):
         param.folderQuota = quota
         if description:
             param.description = description
-        param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
+
         if xattrs:
             param.extendedAttributes = xattrs
         elif not winacls:  # Only override default when winacls is False
@@ -192,6 +194,9 @@ class CloudDrives(BaseCommand):
             param.extendedAttributes.attributes[0].supported = True
         else:
             param.extendedAttributes = ExtendedAttributesBuilder.default().build()
+
+        param.wormSettings = compliance_settings if compliance_settings else ComplianceSettingsBuilder.default().build()
+        param.archiveSettings = archive_settings if archive_settings else ArchiveSettingsBuilder.default().build()
 
         if gfl:
             param.globalFileLockSettings = Object()
@@ -216,8 +221,8 @@ class CloudDrives(BaseCommand):
             raise error
 
     def modify(self, current_name, owner, new_name=None,  # pylint: disable=too-many-arguments, too-many-locals
-               new_owner=None, new_group=None, description=None, winacls=None, quota=None, compliance_settings=None, xattrs=None,
-               gfl=None, lock_extensions=None):
+               new_owner=None, new_group=None, description=None, winacls=None, quota=None,
+               archive_settings=None, compliance_settings=None, xattrs=None, gfl=None, lock_extensions=None):
         """
         Modify a Cloud Drive Folder (Cloud Volume)
 
@@ -229,6 +234,8 @@ class CloudDrives(BaseCommand):
         :param str,optional description: Folder description
         :param bool,optional winacls: Enable or disable Windows ACLs
         :param str,optional quota: Folder quota in GB
+        :param cterasdk.common.object.Object,optional archive_settings: Archive settings.
+         Use :func:`cterasdk.core.types.ArchiveSettingsBuilder` to build the archive settings object
         :param cterasdk.common.object.Object,optional compliance_settings: Compliance settings.
          Use :func:`cterasdk.core.types.ComplianceSettingsBuilder` to build the compliance settings object
         :param cterasdk.common.object.Object,optional xattrs: Extended attributes.
@@ -249,6 +256,8 @@ class CloudDrives(BaseCommand):
             param.enableSyncWinNtExtendedAttributes = winacls
         if quota:
             param.folderQuota = quota
+        if archive_settings:
+            param.archiveSettings = archive_settings
         if compliance_settings:
             param.wormSettings = compliance_settings
         if xattrs:

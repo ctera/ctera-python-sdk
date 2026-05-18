@@ -737,3 +737,16 @@ class ResourceError:
     FileWithTheSameNameExist = "FileWithTheSameNameExist"
     InvalidName = "InvalidName"
     ReservedName = "ReservedName"
+
+
+class NativeFormat:
+    """
+    Native Format - Fusion Direct
+
+    :ivar str Filesystem: Read-write through the filesystem only. Bucket access is read-only.
+    :ivar str Bucket: Read-write through the bucket only. Filesystem access is read-only.
+    :ivar str Bidirectional: Read-write through both the filesystem and the bucket.
+    """
+    Filesystem = 'Filesystem'
+    Bucket = 'Bucket'
+    Bidirectional = 'Bidirectional'

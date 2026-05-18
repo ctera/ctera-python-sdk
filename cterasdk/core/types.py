@@ -4,7 +4,7 @@ from ..common import DateTimeUtils, StringCriteriaBuilder, PredefinedListCriteri
 from ..lib.storage import commonfs
 
 from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, ProtectionLevel, \
-                  BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes, ConflictHandler
+                  BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes, ConflictHandler, NativeFormat
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
@@ -725,6 +725,56 @@ class ComplianceSettingsBuilder:
     def build(self):
         if self.settings.gracePeriod is None:
             self.grace_period()
+        return self.settings
+
+
+class ArchiveSettingsBuilder:
+
+    def __init__(self, enabled, mode, retain_for):
+        self.settings = Object()
+        self.settings._classname = 'ArchiveSettings'  # pylint: disable=protected-access
+        self.settings.archive = enabled
+        self.settings.retentionMode = mode
+        self.settings.retentionPeriod = retain_for
+        self.settings.gracePeriod = ComplianceSettingsBuilder._get_retention_period(0, Duration.Minutes)
+
+    @staticmethod
+    def default():
+        return ArchiveSettingsBuilder(False, RetentionMode.Enterprise, None)
+
+    @staticmethod
+    def enterprise(amount, duration):
+        return ArchiveSettingsBuilder(True, RetentionMode.Enterprise, ComplianceSettingsBuilder._get_retention_period(amount, duration))
+
+    @staticmethod
+    def compliance(amount, duration):
+        return ArchiveSettingsBuilder(True, RetentionMode.Compliance, ComplianceSettingsBuilder._get_retention_period(amount, duration))
+
+    def build(self):
+        return self.settings
+
+
+class NativeFormatSettingsBuilder:
+
+    def __init__(self, mode, bucket, sqs=None, region=None):
+        self.settings = Object(_classname='OpenFabricSettings', storageMode=mode)
+        self.settings.dataStorage = bucket.to_native_format_object()
+        self.settings.dataStorage.sqsUrl = sqs
+        self.settings.dataStorage.region = region
+
+    @staticmethod
+    def filesystem(bucket, region):
+        return NativeFormatSettingsBuilder(NativeFormat.Filesystem, bucket, None, region)
+
+    @staticmethod
+    def bucket(bucket, sqs, region):
+        return NativeFormatSettingsBuilder(NativeFormat.Bucket, bucket, sqs, region)
+
+    @staticmethod
+    def bidirectional(bucket, sqs, region):
+        return NativeFormatSettingsBuilder(NativeFormat.Bidirectional, bucket, sqs, region)
+
+    def build(self):
         return self.settings
 
 
