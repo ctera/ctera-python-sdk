@@ -85,7 +85,6 @@ class TestCoreRemote(base_admin.BaseCoreTest):
         return device
 
     def test_auto_sso_on_first_api_access(self):
-        """Verify that first access to edge.api triggers SSO login via relay channel."""
         device = self._setup_remote_device_with_sso()
         _ = device.api
         self._global_admin.api.execute.assert_called_once_with(
@@ -93,7 +92,6 @@ class TestCoreRemote(base_admin.BaseCoreTest):
         device._ctera_clients._api.get.assert_called_once_with('/ssologin', params={'ticket': self._sso_ticket})
 
     def test_auto_sso_not_repeated_on_subsequent_api_access(self):
-        """Verify that subsequent api accesses do not re-trigger SSO."""
         device = self._setup_remote_device_with_sso()
         _ = device.api
         _ = device.api
