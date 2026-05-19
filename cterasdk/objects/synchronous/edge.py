@@ -1,12 +1,11 @@
-import logging
-
 import cterasdk.settings
 from ...clients import clients
 from ..services import Management
 from ..endpoints import EndpointBuilder
 from .. import authenticators
-from ...common import modules, parse_base_object_ref
+from ...common import modules
 from ...lib.session.edge import Session
+from .remote_clients import RemoteClients
 
 
 from ...edge import (
@@ -18,36 +17,19 @@ from ...edge import (
 )
 
 
-logger = logging.getLogger('cterasdk.edge')
-
-
-class Clients:
+class Clients(RemoteClients):
 
     def __init__(self, edge, Portal):
-        self._edge = edge
-        self._Portal = Portal
-        self._authenticated = False
         if Portal:
             edge._Portal = Portal
             edge.default.close()
             edge._ctera_session.start_remote_session(Portal.session())
-            self._api = Portal.default.clone(clients.API, EndpointBuilder.new(edge.base, '/admingui/api'), authenticator=lambda *_: True)
+            api_client = Portal.default.clone(clients.API, EndpointBuilder.new(edge.base, '/admingui/api'), authenticator=lambda *_: True)
         else:
             self.migrate = edge.default.clone(clients.Migrate, EndpointBuilder.new(edge.base, '/migration/rest/v1'))
-            self._api = edge.default.clone(clients.API, EndpointBuilder.new(edge.base, '/admingui/api'))
+            api_client = edge.default.clone(clients.API, EndpointBuilder.new(edge.base, '/admingui/api'))
             self.io = IO(edge)
-
-    @property
-    def api(self):
-        if self._Portal and not self._authenticated:
-            tenant = parse_base_object_ref(self._edge.portal).name
-            device_name = self._edge.name
-            logger.debug('Auto-SSO login via relay channel. %s', {'tenant': tenant, 'device': device_name})
-            token = self._Portal.api.execute(f'/portals/{tenant}/devices/{device_name}', 'singleSignOn')
-            if token:
-                self._api.get('/ssologin', params={'ticket': token})
-            self._authenticated = True
-        return self._api
+        super().__init__(edge, Portal, api_client)
 
 
 class IO:

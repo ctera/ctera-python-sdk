@@ -73,8 +73,8 @@ class TestCoreRemote(base_admin.BaseCoreTest):
         param.remoteAccessUrl = remote_access_url
         return param
 
-    def test_auto_sso_on_first_api_access(self):
-        """Verify that first access to edge.api triggers SSO login via relay channel."""
+    def _setup_remote_device_with_sso(self):
+        """Common setup for SSO auto-login tests. Returns the remote device with a mocked _api."""
         remote_session = self.patch_call("cterasdk.lib.session.edge.Session.start_remote_session")
         remote_session.return_value = munch.Munch({'account': munch.Munch({'name': 'mickey', 'tenant': 'tenant'})})
         get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
@@ -83,6 +83,11 @@ class TestCoreRemote(base_admin.BaseCoreTest):
         self._activate_portal_session()
         device = devices.Devices(self._global_admin).device(self._device_name)
         device._ctera_clients._api = mock.MagicMock()
+        return device
+
+    def test_auto_sso_on_first_api_access(self):
+        """Verify that first access to edge.api triggers SSO login via relay channel."""
+        device = self._setup_remote_device_with_sso()
         _ = device.api
         self._global_admin.api.execute.assert_called_once_with(
             f'/portals/{self._tenant_name}/devices/{self._device_name}', 'singleSignOn')
@@ -90,14 +95,7 @@ class TestCoreRemote(base_admin.BaseCoreTest):
 
     def test_auto_sso_not_repeated_on_subsequent_api_access(self):
         """Verify that subsequent api accesses do not re-trigger SSO."""
-        remote_session = self.patch_call("cterasdk.lib.session.edge.Session.start_remote_session")
-        remote_session.return_value = munch.Munch({'account': munch.Munch({'name': 'mickey', 'tenant': 'tenant'})})
-        get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
-                                                                 'vGateway', self._device_remote_access_url)
-        self._init_global_admin(get_multi_response=get_multi_response, execute_response=self._sso_ticket)
-        self._activate_portal_session()
-        device = devices.Devices(self._global_admin).device(self._device_name)
-        device._ctera_clients._api = mock.MagicMock()
+        device = self._setup_remote_device_with_sso()
         _ = device.api
         _ = device.api
         _ = device.api

@@ -15,12 +15,13 @@ def _relay_base(Portal, device):
     Host header while still connecting to the same portal endpoint.
     """
     device_dns = getattr(device, 'deviceDnsName', None)
-    if device_dns and device.name in device_dns:
-        portal_hostname = device_dns[len(device.name) + 1:]   # strip "vGateway-7192."
+    if device_dns and device_dns.startswith(f'{device.name}.'):
+        portal_hostname = device_dns[len(device.name) + 1:]
         parsed = urlparse(Portal.ctera.baseurl)
         port = f':{parsed.port}' if parsed.port not in (None, 80, 443) else ''
-        return f'{parsed.scheme}://{portal_hostname}{port}{parsed.path}/devices/{device.name}'
-    return f'{Portal.ctera.baseurl}/devices/{device.name}'
+        base_path = parsed.path.rstrip('/')
+        return f'{parsed.scheme}://{portal_hostname}{port}{base_path}/devices/{device.name}'
+    return f'{Portal.ctera.baseurl.rstrip("/")}/devices/{device.name}'
 
 
 def remote_command(Portal, device):
