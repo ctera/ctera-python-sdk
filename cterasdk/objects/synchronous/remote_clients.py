@@ -7,11 +7,6 @@ logger = logging.getLogger('cterasdk.remote')
 
 
 class RemoteClients:
-    """
-    Base class for remote device client management with lazy SSO authentication.
-
-    Subclasses must set ``self._device`` before calling ``super().__init__``.
-    """
 
     def __init__(self, device, Portal, api_client):
         self._device = device

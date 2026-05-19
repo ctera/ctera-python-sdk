@@ -68,7 +68,6 @@ class TestRelayBase(unittest.TestCase):
         self.assertEqual(result, 'https://portal.ctera.me/api/v1/devices/vGateway-7192')
 
     def test_substring_device_name_does_not_false_match(self):
-        """A device named 'gw' should NOT match dns 'other-gw.portal.ctera.me'."""
         portal = self._make_portal('https://portal.ctera.me')
         device = self._make_device('gw', 'other-gw.portal.ctera.me')
         result = _relay_base(portal, device)

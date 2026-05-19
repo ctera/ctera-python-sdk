@@ -74,7 +74,6 @@ class TestCoreRemote(base_admin.BaseCoreTest):
         return param
 
     def _setup_remote_device_with_sso(self):
-        """Common setup for SSO auto-login tests. Returns the remote device with a mocked _api."""
         remote_session = self.patch_call("cterasdk.lib.session.edge.Session.start_remote_session")
         remote_session.return_value = munch.Munch({'account': munch.Munch({'name': 'mickey', 'tenant': 'tenant'})})
         get_multi_response = TestCoreRemote._create_device_param(self._device_name, self._device_portal,
