@@ -437,3 +437,43 @@ class ResourceError:
     """
     FileExists = 'File exists'
     Forbidden = 'Creating a folder in this location is forbidden'
+
+
+class Metric:
+    """
+    Metric
+
+    :ivar str CPU: CPU
+    :ivar str Memory: Memory
+    :ivar str Volume: Volume
+    :ivar str Cache: Cache Stats
+    :ivar str Connections: Connections
+    :ivar str Disk: Disk I/O
+    :ivar str Local: Local I/O
+    :ivar str CloudSync: Cloud Sync
+    """
+    CPU = 'cpu'
+    Memory = 'memory'
+    Volume = 'volume'
+    Cache = 'cache'
+    Connections = 'connections'
+    Disk = 'disk_io'
+    Local = 'local_io'
+    CloudSync = 'cloud_io'
+
+
+class Interval:
+    """
+    Interval
+
+    :ivar str Hour: Hour (Real-time)
+    :ivar str Day: Day
+    :ivar str Week: Week
+    :ivar str Month: Month
+    :ivar str Year: Year
+    """
+    Hour = 'hour'
+    Day = 'day'
+    Week = 'week'
+    Month = 'month'
+    Year = 'year'

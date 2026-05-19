@@ -93,6 +93,9 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
     def _session_id_key(self):
         return 'JSESSIONID'
 
+    def get_session_id(self):
+        return super().get_session_id(self.ctera.baseurl)
+
     def _authenticator(self, url):
         return authenticators.core(self.session(), url, self.context)
 

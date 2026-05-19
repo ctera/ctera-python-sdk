@@ -14,7 +14,7 @@ def remote_access(device, Portal):
     logger.info("Enabling remote access. %s", {'tenant': device_tenant, 'device': device_name})
     token = authn_token(Portal, device_tenant, device_name)
     device_object = create_device_object(device)
-    device_object.sso(token)
+    device_object.sso(token, {Portal._session_id_key: Portal.get_session_id()})
     logger.info("Enabled remote access. %s", {'tenant': device_tenant, 'device': device_name})
     return device_object
 

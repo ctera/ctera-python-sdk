@@ -1505,6 +1505,65 @@ SSH
 
    edge.ssh.disable()
 
+Statistics
+==========
+
+.. automethod:: cterasdk.edge.statistics.Statistics.cpu
+   :noindex:
+
+.. code-block:: python
+
+   edge.statistics.cpu(edge_enum.Interval.Day)
+
+.. automethod:: cterasdk.edge.statistics.Statistics.memory
+   :noindex:
+
+.. code-block:: python
+
+   edge.statistics.memory(edge_enum.Interval.Day)
+
+.. automethod:: cterasdk.edge.statistics.Statistics.volume
+   :noindex:
+
+.. code-block:: python
+
+   edge.statistics.volume(edge_enum.Interval.Day)
+
+.. automethod:: cterasdk.edge.statistics.Statistics.cache
+   :noindex:
+
+.. code-block:: python
+
+   edge.statistics.cache(edge_enum.Interval.Day)
+
+.. automethod:: cterasdk.edge.statistics.Statistics.connections
+   :noindex:
+
+.. code-block:: python
+
+   edge.statistics.connections(edge_enum.Interval.Day)
+
+.. automethod:: cterasdk.edge.statistics.Statistics.disk
+   :noindex:
+
+.. code-block:: python
+
+   edge.statistics.disk(edge_enum.Interval.Day)
+
+.. automethod:: cterasdk.edge.statistics.Statistics.local_io
+   :noindex:
+
+.. code-block:: python
+
+   edge.statistics.local_io(edge_enum.Interval.Day)
+
+.. automethod:: cterasdk.edge.statistics.Statistics.cloudsync
+   :noindex:
+
+.. code-block:: python
+
+   edge.statistics.cloudsync(edge_enum.Interval.Day)
+
 Miscellaneous
 -------------
 
