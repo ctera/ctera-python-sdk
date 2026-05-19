@@ -6,8 +6,6 @@ from .. import authenticators
 from ...common import modules
 from ...lib.session.edge import Session
 from .remote_clients import RemoteClients
-
-
 from ...edge import (
     afp, aio, antivirus, array, audit, backup, cache, cli, config, connection, ctera_migrate,
     dedup, directoryservice, drive, files, firmware, ftp, groups, licenses, login,

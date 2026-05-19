@@ -1,5 +1,4 @@
 import logging
-
 from ...common import parse_base_object_ref
 from ...exceptions import CTERAException
 
