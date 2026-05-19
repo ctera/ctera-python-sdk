@@ -4,16 +4,6 @@ from ..objects.synchronous import edge, drive
 
 
 def _relay_base(Portal, device):
-    """
-    Build the base URL for the HTTP Relay channel.
-
-    The portal's RemoteDeviceServlet resolves the tenant from the Host header
-    using DNS suffix matching (e.g. portal.ctera.me).  Accessing the portal by
-    IP causes Host: <ip> which fails that check.  We derive the correct portal
-    hostname from the device's DDNS name (vGateway-7192.portal.ctera.me) and
-    substitute it into the base URL so every relay request carries the right
-    Host header while still connecting to the same portal endpoint.
-    """
     device_dns = getattr(device, 'deviceDnsName', None)
     if device_dns and device_dns.startswith(f'{device.name}.'):
         portal_hostname = device_dns[len(device.name) + 1:]
