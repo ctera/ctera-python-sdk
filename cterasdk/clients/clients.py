@@ -453,7 +453,7 @@ class RestrictedAPI:
         self._raise_error()
 
     def __bool__(self):
-        self._raise_error()
+        return False
 
     def __repr__(self):
         return f'<{self._name} is unavailable in the current context>'
