@@ -1,6 +1,17 @@
 Changelog
 =========
 
+2.20.36
+-------
+
+Improvements
+^^^^^^^^^^^^
+* Added support for retrieving CTERA Edge Filer activity metrics,
+including CPU, memory, volume, cache, connections, disk I/O, local I/O, and cloud synchronization.
+
+Related issues and pull requests on GitHub: `#356 <https://github.com/ctera/ctera-python-sdk/pull/356>`_
+
+
 2.20.35
 -------
 
