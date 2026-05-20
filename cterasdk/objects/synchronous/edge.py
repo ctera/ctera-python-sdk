@@ -153,14 +153,14 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
     def test(self):
         return connection.test(self)
 
-    def sso(self, ticket, remote):
+    def sso(self, ticket, session):
         """
         Single Sign on from CTERA Portal to CTERA Edge Filer.
 
         :param str ticket: SSO Ticket
-        :param dict remote: CTERA Portal Session Cookie
+        :param dict session: CTERA Portal Session Cookie
         """
-        self.default.cookie_jar.update_cookies(remote, self.default.baseurl)
+        self.default.cookie_jar.update_cookies(session, self.default.baseurl)
         self._login_object.sso(ticket)
         self.session().start_session(self)
 

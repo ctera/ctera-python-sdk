@@ -9,7 +9,7 @@ class TestEdgeStatistics(base_edge.BaseEdgeTest):
 
     def setUp(self):
         super().setUp()
-        self._filer.clients.clients.stats.get = mock.MagicMock()
+        self._filer.clients.stats.get = mock.MagicMock()
         self.intervals = (Interval.Hour, Interval.Day, Interval.Week, Interval.Month, Interval.Year)
 
     def test_cpu(self):

@@ -30,7 +30,7 @@ __all__ = [
     'shares',
     'shell',
     'smb',
-    'statistics'
+    'statistics',
     'support',
     'sync',
     'syslog',
