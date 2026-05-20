@@ -110,6 +110,9 @@ class BasePath:
     def __eq__(self, p):
         return self.absolute == p.absolute
 
+    def __repr__(self):
+        return str(f"'{self}'")
+
     def __str__(self):
         return self.relative
 

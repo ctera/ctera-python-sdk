@@ -436,3 +436,24 @@ class SyncResponse(AsyncResponse):
         async def new_response(response):
             return SyncResponse(response)
         return new_response
+
+
+class RestrictedAPI:
+
+    def __init__(self, name):
+        self._name = name
+
+    def _raise_error(self):
+        raise RuntimeError(f'{self._name} is unavailable in the current context.')
+
+    def __getattr__(self, _):
+        self._raise_error()
+
+    def __call__(self, *_args, **_kwargs):
+        self._raise_error()
+
+    def __bool__(self):
+        return False
+
+    def __repr__(self):
+        return f'<{self._name} is unavailable in the current context>'

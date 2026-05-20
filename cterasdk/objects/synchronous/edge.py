@@ -23,7 +23,10 @@ class Clients:
             edge._Portal = Portal
             edge.default.close()
             edge._ctera_session.start_remote_session(Portal.session())
+            self.migrate = clients.RestrictedAPI('migrate')
             self.api = Portal.default.clone(clients.API, EndpointBuilder.new(edge.base), authenticator=lambda *_: True)
+            self.stats = clients.RestrictedAPI('stats')
+            self.io = clients.RestrictedAPI('io')
         else:
             self.migrate = edge.default.clone(clients.Migrate, EndpointBuilder.new(edge.base, '/migration/rest/v1'))
             self.api = edge.default.clone(clients.API, EndpointBuilder.new(edge.base, '/admingui/api'))

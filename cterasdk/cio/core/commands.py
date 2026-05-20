@@ -1027,15 +1027,30 @@ class MultiResourceCommand(TaskCommand):
     def _task_complete(self, task):
         return [str(path) for path in self.paths]
 
+    @property
+    @abstractmethod
+    def _error_object(self):
+        raise NotImplementedError('Subclass must implement the "_error_object" property.')
+
+    def _task_error(self, task):
+        cursor = task.cursor
+        error = self._error_object(self.paths, cursor)
+
+        if task.error_type == ResourceError.PermissionDenied:
+            resource = automatic_resolution(cursor).relative
+            raise error from exceptions.io.core.PrivilegeError(resource)
+
+        raise error
+
 
 class Delete(MultiResourceCommand):
 
     def _progress_str(self):
         return 'Deleting'
 
-    def _task_error(self, task):
-        cursor = task.cursor
-        raise exceptions.io.core.DeleteError(self.paths, cursor)
+    @property
+    def _error_object(self):
+        return exceptions.io.core.DeleteError
 
 
 class Recover(MultiResourceCommand):
@@ -1043,9 +1058,9 @@ class Recover(MultiResourceCommand):
     def _progress_str(self):
         return 'Recovering'
 
-    def _task_error(self, task):
-        cursor = task.cursor
-        raise exceptions.io.core.RecoverError(self.paths, cursor)
+    @property
+    def _error_object(self):
+        return exceptions.io.core.RecoverError
 
 
 class ResolverCommand(TaskCommand):
@@ -1132,7 +1147,7 @@ class ResolverCommand(TaskCommand):
             )
             raise error from exceptions.io.core.FolderNotFoundError(directory.relative)
 
-        raise self._error_object(self.paths, cursor)
+        raise error
 
 
 class Copy(ResolverCommand):
