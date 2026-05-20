@@ -1,6 +1,16 @@
 Changelog
 =========
 
+2.20.37
+-------
+
+Bug fixes
+^^^^^^^^^
+* Add runtime error when accessing restricted CTERA Edge Filer modules from CTERA Portal
+* Catch permission error when deleting or undeleting files as a read-only administrator
+
+Related issues and pull requests on GitHub: `#357 <https://github.com/ctera/ctera-python-sdk/pull/357>`_
+
 2.20.36
 -------
 
