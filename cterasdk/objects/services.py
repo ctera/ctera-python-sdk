@@ -143,13 +143,13 @@ class Management(CTERA):
     def _session_id_key(self):
         return NotImplementedError("Subclass must implement the '_session_id_key' property")
 
-    def get_session_id(self):
+    def get_session_id(self, response_url=None):
         """
         Get Session Identifier
 
         :return str: Session ID
         """
-        return self._default.cookie_jar.get(self._default.baseurl, self._session_id_key)
+        return self._default.cookie_jar.get(response_url if response_url else self._default.baseurl, self._session_id_key)
 
     def set_session_id(self, session_id):
         self._default.cookie_jar.update_cookies({self._session_id_key: session_id}, self._default.baseurl)

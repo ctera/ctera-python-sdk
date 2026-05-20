@@ -11,7 +11,7 @@ from ...edge import (
     afp, aio, antivirus, array, audit, backup, cache, cli, config, connection, ctera_migrate,
     dedup, directoryservice, drive, files, firmware, ftp, groups, licenses, login,
     logs, mail, network, nfs, ntp, power, remote, rsync, ransom_protect, services,
-    shares, shell, smb, snmp, ssh, ssl, support, sync, syslog, tasks, telnet,
+    shares, shell, smb, snmp, ssh, ssl, statistics, support, sync, syslog, tasks, telnet,
     timezone, users, volumes,
 )
 
@@ -27,6 +27,7 @@ class Clients:
         else:
             self.migrate = edge.default.clone(clients.Migrate, EndpointBuilder.new(edge.base, '/migration/rest/v1'))
             self.api = edge.default.clone(clients.API, EndpointBuilder.new(edge.base, '/admingui/api'))
+            self.stats = edge.default.clone(clients.JSON, EndpointBuilder.new(edge.base, '/stats'))
             self.io = IO(edge)
 
 
@@ -108,6 +109,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.snmp = snmp.SNMP(self)
         self.ssh = ssh.SSH(self)
         self.ssl = modules.initialize(ssl.SSLModule, self)
+        self.statistics = statistics.Statistics(self)
         self.support = support.Support(self)
         self.sync = sync.Sync(self)
         self.syslog = syslog.Syslog(self)
@@ -151,8 +153,14 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
     def test(self):
         return connection.test(self)
 
-    def sso(self, ticket):
-        """ Login using Single Sign On"""
+    def sso(self, ticket, session):
+        """
+        Single Sign on from CTERA Portal to CTERA Edge Filer.
+
+        :param str ticket: SSO Ticket
+        :param dict session: CTERA Portal Session Cookie
+        """
+        self.default.cookie_jar.update_cookies(session, self.default.baseurl)
         self._login_object.sso(ticket)
         self.session().start_session(self)
 
@@ -164,5 +172,5 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         return super()._omit_fields + ['afp', 'aio', 'array', 'audit', 'antivirus', 'backup', 'cache', 'cli', 'config', 'ctera_migrate',
                                        'dedup', 'directoryservice', 'drive', 'files', 'firmware', 'ftp', 'groups', 'licenses', 'logs',
                                        'mail', 'network', 'nfs', 'ntp', 'power', 'ransom_protect', 'rsync', 'services', 'shares', 'shell',
-                                       'smb', 'snmp', 'ssh', 'ssl', 'support', 'sync', 'syslog', 'tasks', 'telnet', 'timezone',
-                                       'users', 'volumes']
+                                       'smb', 'snmp', 'ssh', 'ssl', 'statistics', 'support', 'sync', 'syslog', 'tasks', 'telnet',
+                                       'timezone', 'users', 'volumes']
