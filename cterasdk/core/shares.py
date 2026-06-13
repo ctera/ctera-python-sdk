@@ -26,6 +26,7 @@ class Shares(BaseCommand):
         :param str, optional search: Return only shares matching the specified search string.
 
         :returns: An iterator yielding share objects.
+        :rtype: generator[cterasdk.core.types.Share]
         """
         params = {}
         if devices:
