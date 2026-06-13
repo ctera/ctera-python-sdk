@@ -46,30 +46,44 @@ class Groups(BaseCommand):
             raise ObjectNotFoundException(baseurl)
         return group_object
 
-    def list_local_groups(self, include=None):
+    def list_local_groups(self, include=None, filters=None):
         """
         List all local groups
 
         :param list[str] include: List of fields to retrieve, defaults to ['name']
+        :param list[],optional filters: List of additional filters, defaults to None
         :return: Iterator for all local groups
         :rtype: cterasdk.lib.iterator.QueryIterator
         """
-        include = union(include or [], Groups.default)
-        param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._core, '/localGroups', param)
+        return self._groups(f'/localGroups', include, filters)
 
-    def list_domain_groups(self, domain, include=None):
+    def list_domain_groups(self, domain, include=None, filters=None):
         """
         List all the groups in the domain
 
         :param str domain: Domain name
         :param list[str] include: List of fields to retrieve, defaults to ['name']
+        :param list[],optional filters: List of additional filters, defaults to None
         :return: Iterator for all the domain groups
         :rtype: cterasdk.lib.iterator.QueryIterator
         """
+        return self._groups(f'/domains/{domain}/adGroups', include, filters)
+
+    def _groups(self, path, include, filters):
+        """
+        List Groups.
+
+        :param str path: Path
+        :param list[str],optional include: List of fields to retrieve, defaults to ['name']
+        :param list[],optional filters: List of additional filters, defaults to None
+        """
         include = union(include or [], Groups.default)
-        param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._core, f'/domains/{domain}/adGroups', param)
+        builder = query.QueryParamBuilder().include(include)
+        for query_filter in filters:
+            builder.addFilter(query_filter)
+        builder.orFilter((len(filters) > 1))
+        param = builder.build()
+        return query.iterator(self._core, path, param)
 
     def _members_reference(self, users):
         return [self._core.users.get(user, include=['baseObjectRef']).baseObjectRef for user in users]

@@ -204,8 +204,6 @@ class ShareAccessControlEntry():
     :ivar cterasdk.edge.enum.FileAccessMode perm: The file access permission
     """
 
-    _valid_permissions = list({k: v for k, v in enum.FileAccessMode.__dict__.items() if not k.startswith('_')}.values())
-
     def __init__(self, principal_type, name, perm):
         AccessControlEntryValidator.validate_permission(perm)
         self._user_group_entry = UserGroupEntry(principal_type, name)

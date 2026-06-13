@@ -50,30 +50,43 @@ class Users(BaseCommand):
             raise ObjectNotFoundException(baseurl)
         return user_object
 
-    def list_local_users(self, include=None):
+    def list_local_users(self, include=None, filters=None):
         """
         List all local users
 
-        :param list[str] include: List of fields to retrieve, defaults to ['name']
+        :param list[str],optional include: List of fields to retrieve, defaults to ['name']
         :return: Iterator for all local users
         :rtype: cterasdk.lib.iterator.QueryIterator
         """
-        include = union(include or [], Users.default)
-        param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._core, '/users', param)
+        return self._users(f'/users', include, filters)
 
-    def list_domain_users(self, domain, include=None):
+    def list_domain_users(self, domain, include=None, filters=None):
         """
         List all the users in the domain
 
         :param str domain: Domain name
-        :param list[str] include: List of fields to retrieve, defaults to ['name']
+        :param list[str],optional include: List of fields to retrieve, defaults to ['name']
+        :param list[],optional filters: List of additional filters, defaults to None
         :return: Iterator for all the domain users
         :rtype: cterasdk.lib.iterator.QueryIterator
         """
+        return self._users(f'/domains/{domain}/adUsers', include, filters)
+
+    def _users(self, path, include, filters):
+        """
+        List Users.
+
+        :param str path: Path
+        :param list[str],optional include: List of fields to retrieve, defaults to ['name']
+        :param list[],optional filters: List of additional filters, defaults to None
+        """
         include = union(include or [], Users.default)
-        param = query.QueryParamBuilder().include(include).build()
-        return query.iterator(self._core, f'/domains/{domain}/adUsers', param)
+        builder = query.QueryParamBuilder().include(include)
+        for query_filter in filters:
+            builder.addFilter(query_filter)
+        builder.orFilter((len(filters) > 1))
+        param = builder.build()
+        return query.iterator(self._core, path, param)
 
     def add(self, name, email, first_name, last_name, password, role, company=None, comment=None, password_change=False):
         """

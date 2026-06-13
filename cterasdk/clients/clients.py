@@ -236,8 +236,8 @@ class Client(BaseClient):
         return self.request(request, on_response=on_response, on_error=on_error)
 
     @decorators.authenticated
-    def delete(self, path, *, on_response=None, on_error=None, **kwargs):
-        request = async_requests.DeleteRequest(self._builder(path), **kwargs)
+    def delete(self, path, data=None, *, data_serializer=None, on_response=None, on_error=None, **kwargs):
+        request = async_requests.DeleteRequest(self._builder(path), data=data_serializer(data), **kwargs)
         return self.request(request, on_response=on_response, on_error=on_error)
 
     def _request(self, request, *, on_response=None, on_error=None):
@@ -338,15 +338,21 @@ class JSON(Client):
         return response.json()
 
     def put(self, path, data, **kwargs):
-        response = super().put(path, data, data_serializer=Serializers.JSON, on_error=JSONHandler(), **kwargs)
+        response = super().put(path, data, data_serializer=Serializers.JSON, headers={
+            'Content-Type': 'application/json'
+        }, on_error=JSONHandler(), **kwargs)
         return response.json()
 
     def post(self, path, data, **kwargs):
-        response = super().post(path, data, data_serializer=Serializers.JSON, on_error=JSONHandler(), **kwargs)
+        response = super().post(path, data, data_serializer=Serializers.JSON, headers={
+            'Content-Type': 'application/json'
+        }, on_error=JSONHandler(), **kwargs)
         return response.json()
 
-    def delete(self, path, **kwargs):
-        response = super().delete(path, on_error=JSONHandler(), **kwargs)
+    def delete(self, path, data=None, **kwargs):
+        response = super().delete(path, data, data_serializer=Serializers.JSON, headers={
+            'Content-Type': 'application/json'
+        }, on_error=JSONHandler(), **kwargs)
         return response.json()
 
 

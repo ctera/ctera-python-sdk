@@ -4,7 +4,12 @@ from ..common import DateTimeUtils, StringCriteriaBuilder, PredefinedListCriteri
 from ..lib.storage import commonfs
 
 from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, ProtectionLevel, \
-                  BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes, ConflictHandler, NativeFormat
+                  BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes, ConflictHandler, NativeFormat, \
+                  PrincipalType
+
+
+from ..edge.enum import FileAccessMode
+from ..edge.types import AccessControlEntryValidator
 
 
 CloudFSFolderFindingHelper = namedtuple('CloudFSFolderFindingHelper', ('name', 'owner'))
@@ -987,3 +992,161 @@ class PortalInvitation(Object):
     @staticmethod
     def from_server_object(server_object):
         return PortalInvitation(server_object.mode, server_object.isDirectory)
+
+
+class Share(Object):
+    """
+    Class for Portal Share
+
+    :ivar str id: Share ID
+    :ivar str name: Name
+    :ivar str path: Path
+    :ivar list[str] protocols: Protocols
+    :ivar str access: Access Mode
+    :ivar list[str] devices: Devices
+    :ivar str absolute: Path, including '/cloud/users' namespace
+    """
+
+    def __init__(self, uid, name, path, protocols, access, devices):
+        super().__init__()
+        self.id = uid
+        self.name = name
+        self.path = path
+        self.protocols = protocols
+        self.access = access
+        self.devices = devices
+
+    @property
+    def absolute(self):
+        return f'/cloud/users/{self.path}'
+
+    @staticmethod
+    def from_server_object(server_object):
+        return Share(server_object.id, server_object.name, server_object.display_path, server_object.protocol,
+                     server_object.access, server_object.edge_filers)
+
+
+class ShareAccessControlEntry():
+    """
+    Share access control entry for Edge Filer shares
+
+    :ivar cterasdk.core.types.PortalAccount account: Domain User or Group
+    :ivar cterasdk.edge.enum.FileAccessMode perm: Permission
+    """
+
+    def __init__(self, account, perm):
+        AccessControlEntryValidator.validate_permission(perm)
+        self._account = account
+        self._perm = perm
+
+    @property
+    def account(self):
+        return self._account
+
+    @property
+    def principal_type(self):
+        return PrincipalType.from_account(self._account)
+
+    @property
+    def name(self):
+        return self._account.name
+
+    @name.setter
+    def name(self, name):
+        self._account.name = name
+
+    @property
+    def perm(self):
+        return self._perm
+
+    @perm.setter
+    def perm(self, perm):
+        AccessControlEntryValidator.validate_permission(perm)
+        self._perm = perm
+
+    def to_server_object(self):
+        ace = Object()
+        ace.permissions = self.perm
+        ace.manual_entry = Object()
+        ace.manual_entry.term = self.name
+        ace.manual_entry.type = self.principal_type
+        return ace
+
+
+class NFSv3AccessControlEntry():
+    """
+    NFS v3 Access Control Entry
+
+    :ivar str address: IP address, hostname or fully qualified domain name of client machine
+    :ivar str netmask: Subnet mask
+    :ivar cterasdk.edge.enum.FileAccessMode perm: File access permission
+    """
+
+    def __init__(self, address, netmask, perm):
+        AccessControlEntryValidator.validate_permission(perm)
+        self._address = address
+        self._netmask = netmask
+        self._perm = perm
+
+    @property
+    def address(self):
+        return self._address
+
+    @property
+    def netmask(self):
+        return self._netmask
+
+    @property
+    def perm(self):
+        return self._perm
+
+    @perm.setter
+    def perm(self, perm):
+        AccessControlEntryValidator.validate_permission(perm)
+        self._perm = perm
+
+    @staticmethod
+    def from_server_object(server_object):
+        return NFSv3AccessControlEntry(
+            server_object.address,
+            server_object.netmask,
+            server_object.access_level,
+        )
+
+    def to_server_object(self):
+        param = Object()
+        param.access_level = self._perm
+        param.address = self._address
+        param.netmask = self._netmask
+        return param
+
+
+class BlockRule:
+    """
+    Block Extensions Rule for a Given Principal
+    """
+    def __init__(self, account, extensions):
+        """
+        :param cterasdk.core.types.PortalAccount account: Account
+        :param list[str]: File extensions.
+        """
+        self.account = account
+        self.extensions = extensions
+
+    @staticmethod
+    def default():
+        param = Object()
+        param.screened_file_types = []
+        param.collaborator = Object()
+        param.collaborator.name = 'Everyone'
+        param.collaborator.type = PrincipalType.LG
+        return param
+
+    def to_server_object(self):
+        param = Object()
+        param.collaborator = Object()
+        param.collaborator.domain = self.account.directory
+        param.collaborator.name = self.account.name
+        param.collaborator.type = PrincipalType.from_account(self.account)
+        param.screened_file_types = [extension.lstrip('.') for extension in self.extensions]
+        return param
