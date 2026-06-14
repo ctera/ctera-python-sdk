@@ -1,6 +1,15 @@
 Changelog
 =========
 
+2.20.38
+-------
+
+Improvements
+^^^^^^^^^^^^
+* Added the ability to create and manage CTERA Edge Filer shares from CTERA Portal.
+
+Related GitHub pull request: `#360 <https://github.com/ctera/ctera-python-sdk/pull/360>`_
+
 2.20.37
 -------
 
