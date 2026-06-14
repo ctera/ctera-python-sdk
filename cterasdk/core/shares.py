@@ -1,21 +1,58 @@
 import logging
 from .base_command import BaseCommand
 from . import query
-from .enum import ShareGroup, PrincipalType
-from .types import Share, BlockRule
+from .enum import ShareGroup, CollaboratorType
+from .types import Share, BlockRule, ShareInfo
 from .enum import Context
 from ..edge.enum import Acl
 from ..common import Object
 from ..cio.core.commands import GetShareCandidate
+from ..exceptions import ObjectNotFoundException
 
 
 logger = logging.getLogger('cterasdk.core')
+
+
+def wrapper(core, param):
+    return core.api.execute('', 'fetchGwShareCandidates', param)
 
 
 class Shares(BaseCommand):
     """
     Share Management APIs
     """
+
+    def _deduce_unique_identifier(self, share):
+        if isinstance(share, (Share, ShareInfo)):
+            return share.id
+        if isinstance(share, str):
+            return share
+        raise ValueError('Could not determine share identifier')
+
+    def _get_configuration(self, share):
+        """
+        Get Share
+
+        :param cterasdk.core.types.Share or str: Share object or unique idenifier.
+        :returns: Share metadata
+        :rtype: cterasdk.common.object.Object
+        """
+        uid = self._deduce_unique_identifier(share)
+        response = self._core.clients.v2.get(f'shareManagement/configurations/{uid}')
+        if response:
+            return response.data
+        raise ObjectNotFoundException(uid)
+
+    def get(self, share):
+        """
+        Get Share.
+
+        :param cterasdk.core.types.Share or str: Share object or unique idenifier.
+        :returns: Share information
+        :rtype: cterasdk.core.types.ShareInfo
+        """
+        response = self._get_configuration(share)
+        return ShareInfo.from_server_object(response)
 
     def all(self, devices=None, protocol=None, search=None):
         """
@@ -52,7 +89,7 @@ class Shares(BaseCommand):
             param.permissions = perm
             param.collaborator = user
             param.collaborator._type = 'user'
-            param.collaborator.type = PrincipalType.DU
+            param.collaborator.type = CollaboratorType.DU
             return param
 
         users = {ace.name: ace.perm for ace in acl}
@@ -70,7 +107,7 @@ class Shares(BaseCommand):
             param.permissions = perm
             param.collaborator = group
             param.collaborator._type = 'group'
-            param.collaborator.type = PrincipalType.DG
+            param.collaborator.type = CollaboratorType.DG
             return param
     
         groups = {ace.name: ace.perm for ace in acl}
@@ -91,10 +128,10 @@ class Shares(BaseCommand):
 
             for ace in acl:
 
-                if ace.principal_type in [PrincipalType.DU]:
+                if ace.principal_type in [CollaboratorType.DU]:
                     mapping[ace.account.directory][0].append(ace)
 
-                if ace.principal_type in [PrincipalType.DG]:
+                if ace.principal_type in [CollaboratorType.DG]:
                     mapping[ace.account.directory][1].append(ace)
 
             for domain, principals in mapping.items():  # for each domain, search for members and update access control entries
@@ -108,6 +145,56 @@ class Shares(BaseCommand):
             return access_control_entries
 
         return [ace.to_server_object() for ace in acl]
+
+    def modify(self, share, name=None, directory=None, devices=None, acl=None, description=None, access=None, export_to_nfs=None,
+               nfs_krb=None, trusted_nfs_clients=None, krb_sec=None, block_files=None, export_to_ftp=None, validate_acl=True):
+        param = self._get_configuration(share)
+
+        if name:
+            param.name = name
+
+        if directory:
+            param.path_info = GetShareCandidate(wrapper, self._core, directory).execute()
+            param.directory = param.path_info.full_path
+
+        if devices:
+            param.device_ids = [device.uid for device in self._core.devices.by_name(devices, include=['uid'])]
+        else:
+            param.device_ids = [device.device_id for device in param.device_shares]
+
+        if acl:
+            acl = self._prepare_access_control_entries(acl, validate_acl)
+            param.acl_rules = acl
+
+        if trusted_nfs_clients:
+            param.trusted_nfs_clients = [network.to_server_object() for network in trusted_nfs_clients]
+
+        if block_files:
+            param.screened_file_types_rules = [rule.to_server_object() for rule in block_files] if block_files else [BlockRule.default()]
+            param.screened_file_types_enabled = True
+
+        if description:
+            param.description = description
+
+        if access:
+            param.access = access
+
+        if export_to_nfs is not None:
+            param.export_to_nfs = export_to_nfs
+
+        if param.nfs_kerberos is not None:
+            param.nfs_kerberos = nfs_krb
+
+        if export_to_ftp is not None:
+            param.export_to_ftp = export_to_ftp
+
+        if krb_sec:
+            self._nfs_krb(param, krb_sec)
+
+        logger.info("Modifying Share. %s", {'name': param.name})
+        response = self._core.clients.v2.put(f'shareManagement/configurations/{param.id}', param)
+        logger.info("Share modified. %s", {'name': param.name})
+        return response.data.share_id
 
     def add(self, name, directory, devices, acl=None, description=None, access=Acl.WindowsNT, export_to_nfs=False, nfs_krb=False,
             trusted_nfs_clients=None, krb_sec=None, block_files=None, export_to_ftp=False, validate_acl=True):
@@ -132,9 +219,6 @@ class Shares(BaseCommand):
         """
         acl = self._prepare_access_control_entries(acl, validate_acl)
 
-        def wrapper(core, param):
-            return core.api.execute('', 'fetchGwShareCandidates', param)
-
         if self._core.session().context == Context.admin:
             directory = f'Users/{directory}'
 
@@ -144,8 +228,6 @@ class Shares(BaseCommand):
             param.device_ids = [device.uid for device in self._core.devices.by_name(devices, include=['uid'])]
             param.path_info = metadata
             param.access_type = access
-            param.screened_file_types_enabled = False
-            param.screened_file_types_rules = None
             param.acl_rules = acl
             param.export_to_nfs = export_to_nfs
             param.nfs_kerberos = nfs_krb
@@ -154,14 +236,13 @@ class Shares(BaseCommand):
             if description:
                 param.description = description
 
-            krb_sec = [krb_sec] if isinstance(krb_sec, str) else krb_sec
-            for label, value in zip(['first', 'second', 'third'], krb_sec or []):
-                setattr(param, f'nfs_sec_{label}', value)
+            self._nfs_krb(param, krb_sec)
 
             if trusted_nfs_clients:
                 param.trusted_nfs_clients = [network.to_server_object() for network in (trusted_nfs_clients or [])]
 
             param.screened_file_types_rules = [rule.to_server_object() for rule in block_files] if block_files else [BlockRule.default()]
+            param.screened_file_types_enabled = True if block_files else False
 
             logger.info("Creating Share. %s", {'name': name})
             response = self._core.clients.v2.post('shareManagement/configurations', param)
@@ -175,4 +256,10 @@ class Shares(BaseCommand):
         :param list[cterasdk.core.types.Share] or str shares: List of Shares objects, or unique identifers
         """
         return self._core.clients.v2.delete('/shareManagement/configurations',
-                                            [share.id if isinstance(share, Share) else share for share in shares])
+                                            [self._deduce_unique_identifier(share) for share in shares])
+
+    def _nfs_krb(self, param, krb_sec):
+        if krb_sec:
+            krb_sec = [krb_sec] if isinstance(krb_sec, str) else krb_sec
+            for label, value in zip(['first', 'second', 'third'], krb_sec or []):
+                setattr(param, f'nfs_sec_{label}', value)

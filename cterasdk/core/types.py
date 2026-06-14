@@ -1,11 +1,11 @@
 from abc import ABC
+from datetime import datetime
 from collections import namedtuple
 from ..common import DateTimeUtils, StringCriteriaBuilder, PredefinedListCriteriaBuilder, CustomListCriteriaBuilder, Object
 from ..lib.storage import commonfs
 
 from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, ProtectionLevel, \
-                  BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes, ConflictHandler, NativeFormat, \
-                  PrincipalType
+                  BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes, ConflictHandler, NativeFormat
 
 
 from ..edge.enum import FileAccessMode
@@ -994,6 +994,62 @@ class PortalInvitation(Object):
         return PortalInvitation(server_object.mode, server_object.isDirectory)
 
 
+class ShareInfo:
+
+    def __init__(self, uid, name, path, access, description, devices, acl, export_to_nfs, nfs_kerberos,
+                 trusted_nfs_clients, export_to_ftp, created_at, updated_at):
+        self.id = uid
+        self.name = name
+        self.path = path
+        self.description = description
+        self.devices = devices
+        self.smb = Object()
+        self.smb.acl = acl
+
+        self.nfs = Object()
+        self.nfs.enabled = export_to_nfs
+        self.nfs.acl = trusted_nfs_clients
+        self.nfs.kerberos = Object()
+        self.nfs.kerberos.enabled = nfs_kerberos
+
+        self.ftp = Object()
+        self.ftp.enabled = export_to_ftp
+        self.created_at = created_at
+        self.updated_at = updated_at
+
+        self.access = access
+
+    @staticmethod
+    def from_server_object(server_object):
+        return ShareInfo(
+            server_object.id,
+            server_object.name,
+            server_object.path_info.display_path,
+            server_object.access_type,
+            getattr(server_object, 'description', None),
+            [device.device_name for device in server_object.device_shares],
+            [ShareAccessControlEntry.from_server_object(ace) for ace in server_object.acl_rules],
+            server_object.export_to_nfs,
+            server_object.nfs_kerberos,
+            [NFSv3AccessControlEntry.from_server_object(ace) for ace in server_object.trusted_nfs_clients],
+            server_object.export_to_ftp,
+            datetime.fromisoformat(server_object.created_at),
+            datetime.fromisoformat(server_object.updated_at)
+        )
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return (
+            f"{self.__class__.__name__}("
+            f"{{'name': {self.name}, "
+            f"'created_at': {self.created_at.isoformat()}, "
+            f"'path': {self.path}, "
+            f"'devices': {self.devices}}})"
+        )
+
+
 class Share(Object):
     """
     Class for Portal Share
@@ -1045,7 +1101,7 @@ class ShareAccessControlEntry():
 
     @property
     def principal_type(self):
-        return PrincipalType.from_account(self._account)
+        return CollaboratorType.from_account(self._account)
 
     @property
     def name(self):
@@ -1071,6 +1127,11 @@ class ShareAccessControlEntry():
         ace.manual_entry.term = self.name
         ace.manual_entry.type = self.principal_type
         return ace
+
+    @staticmethod
+    def from_server_object(server_object):
+        account = PortalAccount.from_collaborator(server_object.collaborator)
+        return ShareAccessControlEntry(account, server_object.permissions)
 
 
 class NFSv3AccessControlEntry():
@@ -1139,7 +1200,7 @@ class BlockRule:
         param.screened_file_types = []
         param.collaborator = Object()
         param.collaborator.name = 'Everyone'
-        param.collaborator.type = PrincipalType.LG
+        param.collaborator.type = CollaboratorType.LG
         return param
 
     def to_server_object(self):
@@ -1147,6 +1208,6 @@ class BlockRule:
         param.collaborator = Object()
         param.collaborator.domain = self.account.directory
         param.collaborator.name = self.account.name
-        param.collaborator.type = PrincipalType.from_account(self.account)
+        param.collaborator.type = CollaboratorType.from_account(self.account)
         param.screened_file_types = [extension.lstrip('.') for extension in self.extensions]
         return param

@@ -202,6 +202,14 @@ class CollaboratorType:
     DG = "adGroup"
     EXT = "external"
 
+    @staticmethod
+    def from_account(account):
+        if account.account_type == PortalAccountType.User:
+            return CollaboratorType.LU if account.is_local else CollaboratorType.DU
+        if account.account_type == PortalAccountType.Group:
+            return CollaboratorType.DU if account.is_local else CollaboratorType.DG
+        raise ValueError(f'Unknown principal type: {account.account_type}')
+
 
 class PortalType:
     """
@@ -774,28 +782,6 @@ class ShareProtocol:
     """
     SMB = 'smb'
     NFS = 'nfs'
-
-
-class PrincipalType:
-    """
-    ACL Principal Type
-
-    :ivar str LU: Local User
-    :ivar str LG: Local Group
-    :ivar str DU: Domain User
-    :ivar str DG: Domain Group
-    """
-    LU = "localUser"
-    LG = "localGroup"
-    DU = "adUser"
-    DG = "adGroup"
-
-    def from_account(account):
-        if account.account_type == PortalAccountType.User:
-            return PrincipalType.LU if account.is_local else PrincipalType.DU
-        if account.account_type == PortalAccountType.Group:
-            return PrincipalType.DU if account.is_local else PrincipalType.DG
-        raise ValueError(f'Unknown principal type: {account.account_type}')
 
 
 class KRBSecurity:

@@ -4,8 +4,10 @@ from ..lib import QueryIterator, DefaultResponse, v2DefaultResponse, Command
 from ..common import Object
 
 
-def run(core, path, param):
-    return v1_callback_function(core, path, callback_response=DefaultResponse)(param)
+def run(core, path, param, *, version=None):
+    if version != 'v2':
+        return v1_callback_function(core, path, callback_response=DefaultResponse)(param)
+    return v2_callback_function(core, path)
 
 
 def v1_callback_function(core, path, name=None, *, callback_response=None):
