@@ -325,8 +325,8 @@ class XML(Client):
         response = super().form_data(path, data, on_error=XMLHandler(), **kwargs)
         return response.xml()
 
-    def delete(self, path, **kwargs):
-        response = super().delete(path, on_error=XMLHandler(), **kwargs)
+    def delete(self, path, data=None,**kwargs):
+        response = super().delete(path, data, on_error=XMLHandler(), **kwargs)
         return response.xml()
 
 

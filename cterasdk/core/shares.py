@@ -22,7 +22,8 @@ class Shares(BaseCommand):
     Share Management APIs
     """
 
-    def _deduce_unique_identifier(self, share):
+    @staticmethod
+    def _deduce_unique_identifier(share):
         if isinstance(share, (Share, ShareInfo)):
             return share.id
         if isinstance(share, str):
@@ -37,7 +38,7 @@ class Shares(BaseCommand):
         :returns: Share metadata
         :rtype: cterasdk.common.object.Object
         """
-        uid = self._deduce_unique_identifier(share)
+        uid = Shares._deduce_unique_identifier(share)
         response = self._core.clients.v2.get(f'shareManagement/configurations/{uid}')
         if response:
             return response.data
@@ -88,7 +89,7 @@ class Shares(BaseCommand):
             param = Object()
             param.permissions = perm
             param.collaborator = user
-            param.collaborator._type = 'user'
+            param.collaborator._type = 'user'  # pylint: disable=protected-access
             param.collaborator.type = CollaboratorType.DU
             return param
 
@@ -106,7 +107,7 @@ class Shares(BaseCommand):
             param = Object()
             param.permissions = perm
             param.collaborator = group
-            param.collaborator._type = 'group'
+            param.collaborator._type = 'group'  # pylint: disable=protected-access
             param.collaborator.type = CollaboratorType.DG
             return param
 
@@ -149,8 +150,10 @@ class Shares(BaseCommand):
 
         return [ace.to_server_object() for ace in acl]
 
-    def modify(self, share, name=None, directory=None, devices=None, acl=None, description=None, access=None, export_to_nfs=None,
-               nfs_krb=None, trusted_nfs_clients=None, krb_sec=None, block_files=None, export_to_ftp=None, validate_acl=True):
+    def modify(self, share, name=None, directory=None, devices=None, acl=None,
+               description=None, access=None, export_to_nfs=None,
+               nfs_krb=None, trusted_nfs_clients=None, krb_sec=None, block_files=None,
+               export_to_ftp=None, validate_acl=True):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
         param = self._get_configuration(share)
 
         if name:
@@ -192,15 +195,16 @@ class Shares(BaseCommand):
             param.export_to_ftp = export_to_ftp
 
         if krb_sec:
-            self._nfs_krb(param, krb_sec)
+            Shares._nfs_krb(param, krb_sec)
 
         logger.info("Modifying Share. %s", {'name': param.name})
         response = self._core.clients.v2.put(f'shareManagement/configurations/{param.id}', param)
         logger.info("Share modified. %s", {'name': param.name})
         return response.data.share_id
 
-    def add(self, name, directory, devices, acl=None, description=None, access=Acl.WindowsNT, export_to_nfs=False, nfs_krb=False,
-            trusted_nfs_clients=None, krb_sec=None, block_files=None, export_to_ftp=False, validate_acl=True):
+    def add(self, name, directory, devices, acl=None, description=None,
+            access=Acl.WindowsNT, export_to_nfs=False, nfs_krb=False, trusted_nfs_clients=None, krb_sec=None, block_files=None,
+            export_to_ftp=False, validate_acl=True):    # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
         """
         Add Share.
 
@@ -239,13 +243,13 @@ class Shares(BaseCommand):
             if description:
                 param.description = description
 
-            self._nfs_krb(param, krb_sec)
+            Shares._nfs_krb(param, krb_sec)
 
             if trusted_nfs_clients:
                 param.trusted_nfs_clients = [network.to_server_object() for network in (trusted_nfs_clients or [])]
 
             param.screened_file_types_rules = [rule.to_server_object() for rule in block_files] if block_files else [BlockRule.default()]
-            param.screened_file_types_enabled = True if block_files else False
+            param.screened_file_types_enabled = bool(block_files)
 
             logger.info("Creating Share. %s", {'name': name})
             response = self._core.clients.v2.post('shareManagement/configurations', param)
@@ -259,9 +263,10 @@ class Shares(BaseCommand):
         :param list[cterasdk.core.types.Share] or str shares: List of Shares objects, or unique identifers
         """
         return self._core.clients.v2.delete('/shareManagement/configurations',
-                                            [self._deduce_unique_identifier(share) for share in shares])
+                                            [Shares._deduce_unique_identifier(share) for share in shares])
 
-    def _nfs_krb(self, param, krb_sec):
+    @staticmethod
+    def _nfs_krb(param, krb_sec):
         if krb_sec:
             krb_sec = [krb_sec] if isinstance(krb_sec, str) else krb_sec
             for label, value in zip(['first', 'second', 'third'], krb_sec or []):

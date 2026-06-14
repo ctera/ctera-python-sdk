@@ -1,3 +1,5 @@
+# pylint: disable=too-many-lines
+
 from abc import ABC
 from datetime import datetime
 from collections import namedtuple
@@ -993,10 +995,10 @@ class PortalInvitation(Object):
         return PortalInvitation(server_object.mode, server_object.isDirectory)
 
 
-class ShareInfo:
+class ShareInfo:  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, uid, name, path, access, description, devices, acl, export_to_nfs, nfs_kerberos,
-                 trusted_nfs_clients, export_to_ftp, created_at, updated_at):
+                 trusted_nfs_clients, export_to_ftp, created_at, updated_at):  # pylint: disable=too-many-arguments
         self.id = uid
         self.name = name
         self.path = path
