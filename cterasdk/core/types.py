@@ -997,8 +997,8 @@ class PortalInvitation(Object):
 
 class ShareInfo:  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, uid, name, path, access, description, devices, acl, export_to_nfs, nfs_kerberos,
-                 trusted_nfs_clients, export_to_ftp, created_at, updated_at):  # pylint: disable=too-many-arguments
+    def __init__(self, uid, name, path, access, description, devices, acl,  # pylint: disable=too-many-arguments
+                 export_to_nfs, nfs_kerberos, trusted_nfs_clients, export_to_ftp, created_at, updated_at):
         self.id = uid
         self.name = name
         self.path = path

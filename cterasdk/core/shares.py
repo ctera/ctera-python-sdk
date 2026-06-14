@@ -150,10 +150,10 @@ class Shares(BaseCommand):
 
         return [ace.to_server_object() for ace in acl]
 
-    def modify(self, share, name=None, directory=None, devices=None, acl=None,
-               description=None, access=None, export_to_nfs=None,
+    def modify(self, share, name=None, directory=None,  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
+               devices=None, acl=None, description=None, access=None, export_to_nfs=None,
                nfs_krb=None, trusted_nfs_clients=None, krb_sec=None, block_files=None,
-               export_to_ftp=None, validate_acl=True):  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
+               export_to_ftp=None, validate_acl=True):
         param = self._get_configuration(share)
 
         if name:
@@ -202,9 +202,10 @@ class Shares(BaseCommand):
         logger.info("Share modified. %s", {'name': param.name})
         return response.data.share_id
 
-    def add(self, name, directory, devices, acl=None, description=None,
-            access=Acl.WindowsNT, export_to_nfs=False, nfs_krb=False, trusted_nfs_clients=None, krb_sec=None, block_files=None,
-            export_to_ftp=False, validate_acl=True):    # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
+    def add(self, name, directory, devices, acl=None,  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
+            description=None, access=Acl.WindowsNT, export_to_nfs=False,
+            nfs_krb=False, trusted_nfs_clients=None, krb_sec=None, block_files=None,
+            export_to_ftp=False, validate_acl=True):
         """
         Add Share.
 

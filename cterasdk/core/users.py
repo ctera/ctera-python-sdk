@@ -82,9 +82,10 @@ class Users(BaseCommand):
         """
         include = union(include or [], Users.default)
         builder = query.QueryParamBuilder().include(include)
-        for query_filter in filters:
-            builder.addFilter(query_filter)
-        builder.orFilter((len(filters) > 1))
+        if filters:
+            for query_filter in filters:
+                builder.addFilter(query_filter)
+            builder.orFilter((len(filters) > 1))
         param = builder.build()
         return query.iterator(self._core, path, param)
 
