@@ -82,6 +82,18 @@ class DefaultResponse(BaseResponse):
         return self._response.objects
 
 
+class v2DefaultResponse(BaseResponse):
+
+    @property
+    def more(self):
+        return self._response.data.has_next
+
+    @property
+    @abstractmethod
+    def objects(self):
+        return self._response.data.items
+
+
 class QueryLogsResponse(DefaultResponse):
 
     @property

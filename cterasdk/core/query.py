@@ -1,14 +1,16 @@
 from datetime import datetime
 
-from ..lib import QueryIterator, DefaultResponse, Command
+from ..lib import QueryIterator, DefaultResponse, v2DefaultResponse, Command
 from ..common import Object
 
 
-def run(core, path, param):
-    return create_callback_function(core, path, callback_response=DefaultResponse)(param)
+def run(core, path, param, *, version=None):
+    if version != 'v2':
+        return v1_callback_function(core, path, callback_response=DefaultResponse)(param)
+    return v2_callback_function(core, path)
 
 
-def create_callback_function(core, path, name=None, *, callback_response=None):
+def v1_callback_function(core, path, name=None, *, callback_response=None):
     """
     Create a query callback function
 
@@ -29,22 +31,38 @@ def create_callback_function(core, path, name=None, *, callback_response=None):
     return Command(execute if name else database, core, path, name or 'query')
 
 
-def iterator(core, path, param=None, name=None, *, callback_response=None):
+def v2_callback_function(core, path):
+
+    def wrapper(core, path, params):
+        return v2DefaultResponse(core.clients.v2.get(path, params=dict(params)))
+
+    return Command(wrapper, core, path)
+
+
+def iterator(core, path, param=None, name=None, *, callback_response=None, version=None):
     """
     Create iterator
 
     :param cterasdk.objects.core.Portal core: Portal object
     :param str path: URL Path
     :param str,optional name: Schema method name
-    :param cterasdk.core.query.QueryParams,optional param: Query paramter object
+    :param cterasdk.core.query.QueryParams or dict,optional param:
+     Query parameters, either as a ``QueryParams`` object or a dictionary of key-value pairs.
     :param cterasdk.lib.iterator.BaseResponse callback_response: Class to consume callback response
+    :param str,optional version: Iterator API Version
 
     :returns: Query iterator object
     """
 
-    callback_response = callback_response if callback_response else DefaultResponse
-    callback_function = create_callback_function(core, path, name, callback_response=callback_response)
-    return QueryIterator(callback_function, param if param else QueryParams())
+    if version != 'v2':
+
+        callback_response = callback_response if callback_response else DefaultResponse
+
+        callback_function = v1_callback_function(core, path, name, callback_response=callback_response)
+
+        return QueryIterator(callback_function, param if param else QueryParams())
+
+    return QueryIterator(v2_callback_function(core, path), v2QueryParams(**param))
 
 
 class Restriction:
@@ -146,6 +164,19 @@ class FilterBuilder(Object):
         self.filter.value = value  # pylint: disable=attribute-defined-outside-init
 
         return self.filter
+
+
+class v2QueryParams(Object):
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.page = 0
+        self.size = 150
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+    def increment(self):
+        self.page = self.page + 1
 
 
 class QueryParams(Object):

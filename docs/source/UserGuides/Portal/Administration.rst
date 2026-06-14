@@ -1542,6 +1542,55 @@ Code examples to create Cloud Drive folders using Fusion Direct
    admin.cloudfs.drives.setoacl(folders_paths, owner_sid, True)
 
 
+Shares
+------
+
+.. automethod:: cterasdk.core.shares.Shares.all
+   :noindex:
+
+   for share in admin.shares.all():
+      print(share.name)
+
+.. automethod:: cterasdk.core.shares.Shares.get
+   :noindex:
+
+.. automethod:: cterasdk.core.shares.Shares.add
+   :noindex:
+
+.. code:: python
+
+   arose = core_types.UserAccount('arose', 'ad.local')
+   support = core_types.GroupAccount('Support', 'ad.local')
+
+   acl = [
+      core_types.ShareAccessControlEntry(arose, 'ReadWrite'),
+      core_types.ShareAccessControlEntry(support, 'ReadOnly')
+   ]
+
+   trusted_nfs_clients = [
+      core_types.NFSv3AccessControlEntry('192.168.0.1', '255.255.255.0', 'ReadWrite'),
+      core_types.NFSv3AccessControlEntry('192.168.1.1', '255.255.0.0', 'ReadOnly')
+   ]
+
+   block_rules = [
+      core_types.BlockRule(arose, ['exe', 'bat', 'cmd'])
+   ]
+
+   admin.shares.add('ProjectX', 'Service Account/Root/ProjectX', ['demo-edge1'], acl,
+                export_to_nfs=True, nfs_krb=True, trusted_nfs_clients=trusted_nfs_clients, block_files=block_rules)
+
+.. automethod:: cterasdk.core.shares.Shares.modify
+   :noindex:
+
+.. automethod:: cterasdk.core.shares.Shares.delete
+   :noindex:
+
+   admin.shares.delete('05db1713-842e-4f7b-ac27-43787f10c695')
+
+   for share in admin.shares.all():
+      admin.shares.delete(share)
+
+
 Global File Locking
 -------------------
 

@@ -532,6 +532,20 @@ class GetProperties(GetMetadata):
         return PortalResource.from_server_object(metadata)
 
 
+class GetShareCandidate(GetProperties):
+
+    def _handle_response(self, r):
+        candidate = r.root.gwShareManagementCandidate
+        return Object(**{
+            'full_path': candidate.fullPath,
+            'display_path': candidate.displayPath,
+            'cloud_folder_uid': candidate.cloudFolderUid,
+            'has_acl': candidate.hasAcl,
+            'web_dav_url': candidate.webDavUrl,
+            'cloud_folder_name': r.root.name
+        })
+
+
 class GetPermalink(GetMetadata):
 
     def _handle_response(self, r):

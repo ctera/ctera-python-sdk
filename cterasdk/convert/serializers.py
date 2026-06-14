@@ -36,7 +36,18 @@ def _to_protected_dict(o):
     return ret
 
 
-def tojsonstr(obj, pretty_print=True, no_log=True):
+class Encoder(json.JSONEncoder):
+
+    def default(self, o):
+        d = o.get('__dict__', None)
+        if d:
+            if '_classname' in d:
+                d['$class'] = d.pop('_classname')
+            return d
+        return super().default(o)
+
+
+def tojsonstr(obj, pretty_print=True, no_log=False):
     """
     Convert a Python object to a JSON string.
 
@@ -49,7 +60,7 @@ def tojsonstr(obj, pretty_print=True, no_log=True):
     indent = 5 if pretty_print else None
     if no_log:
         return json.dumps(obj, default=_to_protected_dict, indent=indent)
-    return json.dumps(obj, default=lambda o: o.__dict__, indent=indent)
+    return json.dumps(obj, cls=Encoder, indent=indent)
 
 
 def toxmlstr(obj, pretty_print=False, no_log=False):

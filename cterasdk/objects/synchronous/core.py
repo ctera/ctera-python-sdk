@@ -9,7 +9,7 @@ from ...core import (
     activation, admins, antivirus, buckets, cli, cloudfs, connection, credentials,
     devices, directoryservice, domains, files, firmwares, groups, kms, licenses,
     login, logs, mail, messaging, plans, portals, reports, roles, servers, settings,
-    setup, ssl, startup, storage_classes, syslog, tasks, templates, users,
+    setup, shares, ssl, startup, storage_classes, syslog, tasks, templates, users,
 )
 
 
@@ -18,6 +18,7 @@ class Clients:
     def __init__(self, core):
         self.ctera = core.default.clone(clients.Extended, EndpointBuilder.new(core.base, core.context))
         self.api = core.default.clone(clients.API, EndpointBuilder.new(core.base, core.context, '/api'))
+        self.v2 = core.default.clone(clients.JSON, EndpointBuilder.new(core.base, core.context, '/v2'))
         self.io = IO(core)
 
 
@@ -67,6 +68,7 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
         self.reports = reports.Reports(self)
         self.roles = roles.Roles(self)
         self.settings = settings.Settings(self)
+        self.shares = shares.Shares(self)
         self.storage_classes = storage_classes.StorageClasses(self)
         self.tasks = tasks.Tasks(self)
         self.templates = templates.Templates(self)
@@ -113,7 +115,7 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
     def _omit_fields(self):
         return super()._omit_fields + ['activation', 'admins', 'backups', 'cloudfs', 'credentials', 'devices', 'directoryservice',
                                        'domains', 'files', 'firmwares', 'groups', 'logs', 'plans', 'reports', 'roles', 'settings',
-                                       'storage_classes', 'tasks', 'templates', 'users']
+                                       'shares', 'storage_classes', 'tasks', 'templates', 'users']
 
 
 class GlobalAdmin(Portal):  # pylint: disable=too-many-instance-attributes

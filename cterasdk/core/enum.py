@@ -202,6 +202,14 @@ class CollaboratorType:
     DG = "adGroup"
     EXT = "external"
 
+    @staticmethod
+    def from_account(account):
+        if account.account_type == PortalAccountType.User:
+            return CollaboratorType.LU if account.is_local else CollaboratorType.DU
+        if account.account_type == PortalAccountType.Group:
+            return CollaboratorType.DU if account.is_local else CollaboratorType.DG
+        raise ValueError(f'Unknown principal type: {account.account_type}')
+
 
 class PortalType:
     """
@@ -752,3 +760,38 @@ class NativeFormat:
     Filesystem = 'Filesystem'
     Bucket = 'Bucket'
     Bidirectional = 'Bidirectional'
+
+
+class ShareGroup:
+    """
+    Grouping Criteria when Listing Network Shares
+
+    :ivar str Path: Group by Path
+    :ivar str Edge Filer: Group by Edge Filers
+    """
+    Path = 'path'
+    Edge = 'edgeFilers'
+
+
+class ShareProtocol:
+    """
+    Filter Shares by Protocol
+
+    :ivar str NFS: NFS Shares
+    :ivar str SMB: SMB Shares
+    """
+    SMB = 'smb'
+    NFS = 'nfs'
+
+
+class KRBSecurity:
+    """
+    Kerberos Security.
+
+    :ivar str KRB5: krb5
+    :ivar str KRB5I: krb5i
+    :ivar str KRB5P: krb5p
+    """
+    KRB5 = "krb5"
+    KRB5I = "krb5i"
+    KRB5P = "krb5p"

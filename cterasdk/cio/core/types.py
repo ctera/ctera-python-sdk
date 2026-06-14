@@ -102,7 +102,7 @@ class GlobalAdminPath(PortalPath):
 
     @staticmethod
     def from_context(reference):
-        return ServicesPortalPath(GlobalAdminPath.Namespace, reference)
+        return GlobalAdminPath(GlobalAdminPath.Namespace, reference)
 
 
 class InvitationPath(PortalPath):
