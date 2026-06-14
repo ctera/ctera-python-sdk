@@ -116,7 +116,10 @@ class Shares(BaseCommand):
 
         include = ['baseObjectRef', 'domain', 'name', 'uid']
 
-        return [group_ace(group, groups[group.name]) for group in self._core.groups.list_domain_groups(domain, include, filters)] if acl else []
+        return [
+            group_ace(group, groups[group.name])
+            for group in self._core.groups.list_domain_groups(domain=domain, include=include, filters=filters)
+        ]
 
     def _prepare_access_control_entries(self, acl, validate_acl):
 

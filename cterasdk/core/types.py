@@ -8,7 +8,6 @@ from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCrite
                   BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes, ConflictHandler, NativeFormat
 
 
-from ..edge.enum import FileAccessMode
 from ..edge.types import AccessControlEntryValidator
 
 
