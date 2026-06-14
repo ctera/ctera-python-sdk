@@ -1551,6 +1551,9 @@ Shares
    for share in admin.shares.all():
       print(share.name)
 
+.. automethod:: cterasdk.core.shares.Shares.get
+   :noindex:
+
 .. automethod:: cterasdk.core.shares.Shares.add
    :noindex:
 
@@ -1575,6 +1578,9 @@ Shares
 
    admin.shares.add('ProjectX', 'Service Account/Root/ProjectX', ['demo-edge1'], acl,
                 export_to_nfs=True, nfs_krb=True, trusted_nfs_clients=trusted_nfs_clients, block_files=block_rules)
+
+.. automethod:: cterasdk.core.shares.Shares.modify
+   :noindex:
 
 .. automethod:: cterasdk.core.shares.Shares.delete
    :noindex:
