@@ -55,7 +55,7 @@ class Groups(BaseCommand):
         :return: Iterator for all local groups
         :rtype: cterasdk.lib.iterator.QueryIterator
         """
-        return self._groups(f'/localGroups', include, filters)
+        return self._groups('/localGroups', include, filters)
 
     def list_domain_groups(self, domain, include=None, filters=None):
         """

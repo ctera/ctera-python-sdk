@@ -109,7 +109,7 @@ class Shares(BaseCommand):
             param.collaborator._type = 'group'
             param.collaborator.type = CollaboratorType.DG
             return param
-    
+
         groups = {ace.name: ace.perm for ace in acl}
 
         filters = [query.FilterBuilder('name').eq(name) for name in groups.keys()]

@@ -58,7 +58,7 @@ class Users(BaseCommand):
         :return: Iterator for all local users
         :rtype: cterasdk.lib.iterator.QueryIterator
         """
-        return self._users(f'/users', include, filters)
+        return self._users('/users', include, filters)
 
     def list_domain_users(self, domain, include=None, filters=None):
         """
