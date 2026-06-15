@@ -324,7 +324,7 @@ class Bucket:
 
 class HTTPBucket(Bucket):
 
-    def __init__(self, bucket, driver, access_key, secret_key, endpoint, https, direct=False, verify_ssl=True):
+    def __init__(self, bucket, driver, access_key, secret_key, endpoint, https, direct=False, verify_ssl=True, path_style=False):
         super().__init__(bucket, driver)
         self.access_key = access_key
         self.secret_key = secret_key
@@ -332,6 +332,7 @@ class HTTPBucket(Bucket):
         self.https = https
         self.direct = direct
         self.verify_ssl = verify_ssl
+        self.path_style = path_style
 
     @property
     def trust_all_certificates(self):
@@ -348,7 +349,7 @@ class HTTPBucket(Bucket):
             useHttps=self.https,
             trustAllCertificates=self.trust_all_certificates,
             masterHost=None,
-            usePathStyleAddressing=False
+            usePathStyleAddressing=self.path_style
         )
 
     def to_database_backup_server_object(self):
@@ -361,7 +362,7 @@ class HTTPBucket(Bucket):
             useHttps=self.https,
             trustAllCertificates=self.trust_all_certificates,
             masterHost=None,
-            usePathStyleAddressing=False
+            usePathStyleAddressing=self.path_style
         )
 
 
@@ -384,8 +385,8 @@ class AzureBlob(HTTPBucket):
 class S3Compatible(HTTPBucket):
 
     def __init__(self, bucket, driver, access_key, secret_key,
-                 endpoint, https, direct, verify_ssl):
-        super().__init__(bucket, driver, access_key, secret_key, endpoint, https, direct, verify_ssl)
+                 endpoint, https, direct, verify_ssl, path_style=False):
+        super().__init__(bucket, driver, access_key, secret_key, endpoint, https, direct, verify_ssl, path_style)
 
     def to_server_object(self):
         param = super().to_server_object()
@@ -444,8 +445,8 @@ class Google(S3Compatible):
 class GenericS3(S3Compatible):
 
     def __init__(self, bucket, access_key, secret_key,
-                 endpoint, https=False, direct=False, verify_ssl=True):
-        super().__init__(bucket, BucketType.GenericS3, access_key, secret_key, endpoint, https, direct, verify_ssl)
+                 endpoint, https=False, direct=False, verify_ssl=True, path_style=False):
+        super().__init__(bucket, BucketType.GenericS3, access_key, secret_key, endpoint, https, direct, verify_ssl, path_style)
 
 
 class NetAppStorageGRID(S3Compatible):
