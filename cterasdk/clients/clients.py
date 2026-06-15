@@ -237,7 +237,7 @@ class Client(BaseClient):
 
     @decorators.authenticated
     def delete(self, path, data=None, *, data_serializer=None, on_response=None, on_error=None, **kwargs):
-        request = async_requests.DeleteRequest(self._builder(path), data=data_serializer(data), **kwargs)
+        request = async_requests.DeleteRequest(self._builder(path), data=data_serializer(data) if data_serializer else None, **kwargs)
         return self.request(request, on_response=on_response, on_error=on_error)
 
     def _request(self, request, *, on_response=None, on_error=None):
@@ -407,10 +407,8 @@ event_loop = asyncio.new_event_loop()
 
 
 def execute(target, *args, **kwargs):
-    loop = asyncio.get_event_loop()
-
-    if not loop.is_running():
-        return loop.run_until_complete(target(*args, **kwargs))
+    if not event_loop.is_running():
+        return event_loop.run_until_complete(target(*args, **kwargs))
 
     return run_threadsafe(event_loop, target, *args, **kwargs)
 
