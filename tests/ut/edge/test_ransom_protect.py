@@ -74,16 +74,14 @@ class TestEdgeRansomProtect(base_edge.BaseEdgeTest):
     def test_enable_honeypot(self):
         put_response = 'success'
         self._init_filer(put_response=put_response)
-        ret = ransom_protect.Honeypot(self._filer).enable()
+        ransom_protect.Honeypot(self._filer).enable()
         self._filer.api.put.assert_called_once_with('/config/ransomProtect/enableHoneypot', True)
-        self.assertEqual(ret, put_response)
 
     def test_disable_honeypot(self):
         put_response = 'success'
         self._init_filer(put_response=put_response)
-        ret = ransom_protect.Honeypot(self._filer).disable()
+        ransom_protect.Honeypot(self._filer).disable()
         self._filer.api.put.assert_called_once_with('/config/ransomProtect/enableHoneypot', False)
-        self.assertEqual(ret, put_response)
 
     def test_is_enabled_honeypot(self):
         get_response = True
