@@ -1141,6 +1141,15 @@ Ransomware Protection
 .. automethod:: cterasdk.edge.ransom_protect.RansomProtect.details
    :noindex:
 
+.. automethod:: cterasdk.edge.ransom_protect.Honeypot.enable
+   :noindex:
+
+.. automethod:: cterasdk.edge.ransom_protect.Honeypot.is_enabled
+   :noindex:
+
+.. automethod:: cterasdk.edge.ransom_protect.Honeypot.disable
+   :noindex:
+
 
 Mail Server
 ===========

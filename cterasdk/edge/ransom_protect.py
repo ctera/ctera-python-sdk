@@ -12,6 +12,10 @@ class RansomProtect(BaseCommand):
     Ransomware Protect APIs
     """
 
+    def __init__(self, edge):
+        super().__init__(edge)
+        self.honeypot = Honeypot(self._edge)
+
     def get_configuration(self):
         """
         Get Ransom Protect Configuration
@@ -72,3 +76,26 @@ class RansomProtect(BaseCommand):
         param = query.QueryParamBuilder()
         param.put('incidentId', incident if isinstance(incident, int) else incident.incident_id)
         return query.iterator(self._edge, '/proc/rpsrv', param.build(), 'getIncidentDetails')
+
+
+class Honeypot(BaseCommand):
+
+    def enable(self):
+        """
+        Enable Honeypot.
+        """
+        self._edge.api.put('/config/ransomProtect/enableHoneypot', True)
+
+    def is_enabled(self):
+        """
+        Check if Honeypot is enabled.
+
+        :rtype: bool
+        """
+        return self._edge.api.get('/config/ransomProtect/enableHoneypot')
+
+    def disable(self):
+        """
+        Disable Honeypot.
+        """
+        self._edge.api.put('/config/ransomProtect/enableHoneypot', False)
