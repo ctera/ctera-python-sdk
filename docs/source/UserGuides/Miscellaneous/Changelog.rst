@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Improvements
+^^^^^^^^^^^^
+* Added support for enabling and disabling Honeypot Protection on CTERA Edge Filers.
+
+Related GitHub pull request: `#360 <https://github.com/ctera/ctera-python-sdk/pull/363>`_
+
 2.20.38
 -------
 
