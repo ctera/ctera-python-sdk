@@ -71,6 +71,25 @@ class TestEdgeRansomProtect(base_edge.BaseEdgeTest):
             ransom_protect.RansomProtect(self._filer).modify()
         self.assertEqual('Ransom Protect must be enabled to modify its configuration', str(error.exception))
 
+    def test_enable_honeypot(self):
+        put_response = 'success'
+        self._init_filer(put_response=put_response)
+        ransom_protect.Honeypot(self._filer).enable()
+        self._filer.api.put.assert_called_once_with('/config/ransomProtect/enableHoneypot', True)
+
+    def test_disable_honeypot(self):
+        put_response = 'success'
+        self._init_filer(put_response=put_response)
+        ransom_protect.Honeypot(self._filer).disable()
+        self._filer.api.put.assert_called_once_with('/config/ransomProtect/enableHoneypot', False)
+
+    def test_is_enabled_honeypot(self):
+        get_response = True
+        self._init_filer(get_response=get_response)
+        ret = ransom_protect.Honeypot(self._filer).is_enabled()
+        self._filer.api.get.assert_called_once_with('/config/ransomProtect/enableHoneypot')
+        self.assertEqual(ret, get_response)
+
     @staticmethod
     def _get_ransom_protect_config(block_users=None, detection_threshold=None, detection_interval=None):
         obj = munch.Munch({
