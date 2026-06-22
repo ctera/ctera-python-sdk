@@ -39,7 +39,9 @@ def _to_protected_dict(o):
 class Encoder(json.JSONEncoder):
 
     def default(self, o):
-        d = o.get('__dict__', None)
+        if isinstance(o, Exception):
+            return str(o)
+        d = getattr(o, '__dict__', None)
         if d:
             if '_classname' in d:
                 d['$class'] = d.pop('_classname')
