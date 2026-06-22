@@ -1,6 +1,9 @@
 Changelog
 =========
 
+2.20.39
+-------
+
 Improvements
 ^^^^^^^^^^^^
 * Added support for enabling and disabling Honeypot Protection on CTERA Edge Filers.
