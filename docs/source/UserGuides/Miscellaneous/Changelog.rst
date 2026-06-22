@@ -8,7 +8,7 @@ Improvements
 ^^^^^^^^^^^^
 * Added support for enabling and disabling Honeypot Protection on CTERA Edge Filers.
 
-Related GitHub pull request: `#363 <https://github.com/ctera/ctera-python-sdk/pull/363>`_
+Related issues and pull requests on GitHub: `#363 <https://github.com/ctera/ctera-python-sdk/pull/363>`_
 
 2.20.38
 -------
@@ -17,7 +17,7 @@ Improvements
 ^^^^^^^^^^^^
 * Added the ability to create and manage CTERA Edge Filer shares from CTERA Portal.
 
-Related GitHub pull request: `#360 <https://github.com/ctera/ctera-python-sdk/pull/360>`_
+Related issues and pull requests on GitHub: `#360 <https://github.com/ctera/ctera-python-sdk/pull/360>`_
 
 2.20.37
 -------
