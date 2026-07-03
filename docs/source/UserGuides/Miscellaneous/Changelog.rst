@@ -1,6 +1,15 @@
 Changelog
 =========
 
+2.20.42
+-------
+
+Improvements
+^^^^^^^^^^^^
+* Added support for content search via CTERA Portal
+
+Related issues and pull requests on GitHub: `#364 <https://github.com/ctera/ctera-python-sdk/pull/364>`_
+
 2.20.39
 -------
 
