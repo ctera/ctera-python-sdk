@@ -14,6 +14,7 @@ maintainers = [
 ]
 license = "Apache-2.0"
 readme = "README.rst"
+description = "Programmatically deploy, configure, and manage the CTERA Intelligent Data Platform using Python."
 
 classifiers = [
     "Development Status :: 5 - Production/Stable",
