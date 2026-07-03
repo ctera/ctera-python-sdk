@@ -1,6 +1,6 @@
 from .. import query
 from ...cio.core.commands import Open, Upload, Download, EnsureDirectory, \
-    UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, \
+    UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, SearchIterator, \
     Delete, Recover, Rename, GetShareMetadata, Link, Copy, Move, ResourceIterator, GetPermalink, GetExternalShareInfo
 from ...cio.core.types import InvitationPath
 from ...lib.storage import commonfs
@@ -45,12 +45,13 @@ class FileBrowser(BaseCommand):
             return Download(io.handle_many if properties.is_dir else io.handle, self._core,
                             properties.path, properties, objects, destination).execute()
 
-    def listdir(self, path=None, include_deleted=False):
+    def listdir(self, path=None, include_deleted=False, filters=None):
         """
         List directory contents.
 
         :param str, optional path: Path. Defaults to the Cloud Drive root.
         :param bool, optional include_deleted: Include deleted files. Defaults to False.
+        :param list[cterasdk.core.types.SearchFilter], optional filters: Search filters
         :returns: Directory contents.
         :rtype: list[cterasdk.cio.core.types.PortalResource]
         :raises cterasdk.exceptions.io.core.GetMetadataError: If the directory was not found.
@@ -58,7 +59,7 @@ class FileBrowser(BaseCommand):
         :raises cterasdk.exceptions.io.core.ListDirectoryError: Raised on error fetching directory contents.
         """
         with EnsureDirectory(io.listdir, self._core, path):
-            return ResourceIterator(query.iterator, self._core, path, None, include_deleted, None, None).execute()
+            return ResourceIterator(query.iterator, self._core, path, None, include_deleted, None, filters, None).execute()
 
     def properties(self, path):
         """
@@ -148,6 +149,16 @@ class FileBrowser(BaseCommand):
         :raises cterasdk.exceptions.io.core.GetMetadataError: Raised on error retrieving object metadata.
         """
         return GetPermalink(io.listdir, self._core, path).execute()
+
+    def search(self, path, filters):
+        """
+        Search for files and folders
+
+        :param str path: Path
+        :param list[cterasdk.core.types.SearchFilter], optional filters: Search filters
+        """
+        with EnsureDirectory(io.listdir, self._core, path):
+            return SearchIterator(query.iterator, self._core, path, filters).execute()
 
 
 class CloudDrive(FileBrowser):

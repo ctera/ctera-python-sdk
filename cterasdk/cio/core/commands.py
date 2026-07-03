@@ -437,12 +437,13 @@ class Download(PortalCommand):
 class ListDirectory(PortalCommand):
     """List"""
 
-    def __init__(self, function, receiver, path, depth, include_deleted, search_criteria, limit):
+    def __init__(self, function, receiver, path, depth, include_deleted, search_criteria, search_filters, limit):
         super().__init__(function, receiver)
         self.path = automatic_resolution(path, receiver.context)
         self.depth = depth
         self.include_deleted = include_deleted
         self.search_criteria = search_criteria
+        self.search_filters = search_filters
         self.limit = limit
 
     def get_parameter(self):
@@ -452,6 +453,8 @@ class ListDirectory(PortalCommand):
             builder.include_deleted()
         if self.search_criteria:
             builder.searchCriteria(self.search_criteria)
+        if self.search_filters:
+            builder.searchFilters(self.search_filters)
         if self.limit:
             builder.limit(self.limit)
         return builder.build()
@@ -499,10 +502,16 @@ class ResourceIterator(ListDirectory):
         raise error from e
 
 
+class SearchIterator(ResourceIterator):
+
+    def __init__(self, function, receiver, path, search_filters):
+        super().__init__(function, receiver, path, 'Infinity', False, None, search_filters, None)
+
+
 class GetMetadata(ListDirectory):
 
     def __init__(self, function, receiver, path, suppress_error=False):
-        super().__init__(function, receiver, path, 0, False, None, None)
+        super().__init__(function, receiver, path, 0, False, None, None, None)
         self.suppress_error = suppress_error
 
     def _before_command(self):

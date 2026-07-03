@@ -1,6 +1,6 @@
 from .. import query
 from ....cio.core.commands import Open, Upload, Download, EnsureDirectory, \
-    UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, \
+    UnShare, CreateDirectory, GetMetadata, GetProperties, ListVersions, RecursiveIterator, SearchIterator, \
     Delete, Recover, Rename, GetShareMetadata, Link, Copy, Move, ResourceIterator, GetPermalink, GetExternalShareInfo
 from ....cio.core.types import InvitationPath
 from ....lib.storage import commonfs
@@ -58,7 +58,7 @@ class FileBrowser(BaseCommand):
         :raises cterasdk.exceptions.io.core.ListDirectoryError: Raised on error fetching directory contents.
         """
         async with EnsureDirectory(io.listdir, self._core, path):
-            async for o in ResourceIterator(query.iterator, self._core, path, None, include_deleted, None, None).a_execute():
+            async for o in ResourceIterator(query.iterator, self._core, path, None, include_deleted, None, None, None).a_execute():
                 yield o
 
     async def properties(self, path):
@@ -150,6 +150,17 @@ class FileBrowser(BaseCommand):
         :raises cterasdk.exceptions.io.core.GetMetadataError: Raised on error retrieving object metadata.
         """
         return await GetPermalink(io.listdir, self._core, path).a_execute()
+
+    async def search(self, path, filters):
+        """
+        Search for files and folders
+
+        :param str path: Path
+        :param list[cterasdk.core.types.SearchFilter], optional filters: Search filters
+        """
+        async with EnsureDirectory(io.listdir, self._core, path):
+            async for o in SearchIterator(query.iterator, self._core, path, filters).a_execute():
+                yield o
 
 
 class CloudDrive(FileBrowser):
