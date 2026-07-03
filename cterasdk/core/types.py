@@ -1223,6 +1223,7 @@ class SearchOperator:
 class SearchFilter(Object):
 
     def __init__(self, field, operator, value):
+        super().__init__()
         self._classname = 'SearchFilter'
         self.field = field
         self.operator = operator

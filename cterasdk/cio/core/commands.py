@@ -579,7 +579,7 @@ class RecursiveIterator:
     def generate(self):
         for path in self._generator():
             try:
-                for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).execute():
+                for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None, None).execute():
                     yield self._process_object(o)
             except (exceptions.io.core.ListDirectoryError, exceptions.io.core.PrivilegeError) as e:
                 RecursiveIterator._suppress_error(e)
@@ -587,7 +587,8 @@ class RecursiveIterator:
     async def a_generate(self):
         for path in self._generator():
             try:
-                async for o in ResourceIterator(self._function, self._receiver, path, None, self.include_deleted, None, None).a_execute():
+                async for o in ResourceIterator(self._function, self._receiver,
+                                                path, None, self.include_deleted, None, None, None).a_execute():
                     yield self._process_object(o)
             except (exceptions.io.core.ListDirectoryError, exceptions.io.core.PrivilegeError) as e:
                 RecursiveIterator._suppress_error(e)

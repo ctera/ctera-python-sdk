@@ -293,7 +293,7 @@ class FetchResourcesParamBuilder:
         return self
 
     def searchFilters(self, filters):
-        self.param.searchFilters = filters
+        self.param.searchFilters = filters  # pylint: disable=attribute-defined-outside-init
         return self
 
     def include_deleted(self):
