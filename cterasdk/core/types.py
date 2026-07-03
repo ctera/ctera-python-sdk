@@ -1212,3 +1212,61 @@ class BlockRule:
         param.collaborator.type = CollaboratorType.from_account(self.account)
         param.screened_file_types = [extension.lstrip('.') for extension in self.extensions]
         return param
+
+
+class SearchOperator:
+    EQUALS = 'eq'
+    NOT_EQUALS = 'neq'
+    CONTAINS = 'contains'
+
+
+class SearchFilter(Object):
+
+    def __init__(self, field, operator, value):
+        super().__init__()
+        self._classname = 'SearchFilter'
+        self.field = field
+        self.operator = operator
+        self.value = value
+
+
+class FilenameFilter(SearchFilter):
+
+    def __init__(self, operator, value):
+        super().__init__('name', operator, value)
+
+    @staticmethod
+    def eq(value):
+        return FilenameFilter(SearchOperator.EQUALS, value)
+
+    @staticmethod
+    def ne(value):
+        return FilenameFilter(SearchOperator.NOT_EQUALS, value)
+
+    @staticmethod
+    def contains(value):
+        return FilenameFilter(SearchOperator.CONTAINS, value)
+
+
+class TypeFilter(SearchFilter):
+
+    def __init__(self, operator, value):
+        super().__init__('extension', operator, value)
+
+    @staticmethod
+    def eq(value):
+        return TypeFilter(SearchOperator.EQUALS, value)
+
+    @staticmethod
+    def ne(value):
+        return TypeFilter(SearchOperator.NOT_EQUALS, value)
+
+
+class ContentFilter(SearchFilter):
+
+    def __init__(self, operator, value):
+        super().__init__('content', operator, value)
+
+    @staticmethod
+    def contains(value):
+        return ContentFilter(SearchOperator.CONTAINS, value)

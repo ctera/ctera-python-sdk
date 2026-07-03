@@ -170,6 +170,7 @@ Retrieve a Permalink
    permalink = files.permalink('My Files/Keystone Project.docx')
    print(f'Permalink: {permalink}')
 
+
 Create a Public Link
 --------------------
 
@@ -186,6 +187,23 @@ Create a Public Link
 
    public_url_rw = files.public_link('My Files', access='RW', expire_in=30)
    print(f'Public read-write link: {public_url_rw}')
+
+
+Search
+------
+
+.. automethod:: cterasdk.core.files.browser.FileBrowser.search
+   :noindex:
+
+.. code-block:: python
+
+   filters = [
+      core_types.ContentFilter.contains('The quick brown fox jumped over the lazy dog'),
+   ]
+
+   for i in files.public_link('My Files', filters):
+       print(i.path)
+
 
 File Handles
 ------------
@@ -519,6 +537,9 @@ Asynchronous API
    :noindex:
 
 .. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.permalink
+   :noindex:
+
+.. automethod:: cterasdk.asynchronous.core.files.browser.FileBrowser.search
    :noindex:
 
 .. automethod:: cterasdk.asynchronous.core.files.browser.CloudDrive.upload
