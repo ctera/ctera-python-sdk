@@ -6,8 +6,8 @@ from .types import Event
 from .base_command import BaseCommand
 from ...common import Object
 from ...lib import CursorResponse
-from ...exceptions.transport import HTTPError
-from ...exceptions.notifications import NotificationsError, AncestorsError
+from ...exceptions.transport import BadRequest, HTTPError
+from ...exceptions.notifications import NotificationsError, TooManyVolumesRequestedError, AncestorsError
 
 
 logger = logging.getLogger('cterasdk.notifications')
@@ -35,9 +35,14 @@ class Notifications(BaseCommand):
         param = await self._create_parameter(cloudfolders, cursor)
         param.max_results = max_results if max_results is not None else 2000
         logger.debug('Listing updates.')
-        response = await self._core.v2.api.post('/metadata/list', param)
-        if response is not None:
-            return CursorResponse(response)
+        try:
+            response = await self._core.v2.api.post('/metadata/list', param)
+            if response is not None:
+                return CursorResponse(response)
+        except BadRequest as e:
+            message = e.error.response.error.details[0].error
+            if 'size must be between' in message:
+                raise TooManyVolumesRequestedError(cloudfolders, message) from e
         logger.error('An error occurred while trying to retrieve notifications.')
         raise NotificationsError(cloudfolders, cursor)
 
