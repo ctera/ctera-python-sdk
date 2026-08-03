@@ -1,6 +1,13 @@
 Changelog
 =========
 
+2.20.43
+-------
+
+Improvements
+^^^^^^^^^^^^
+* Clearer error reporting when too many cloudfolders are requested from the Notification Service.
+
 2.20.42
 -------
 
