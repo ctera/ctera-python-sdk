@@ -30,7 +30,8 @@ class Notifications(BaseCommand):
 
         :returns: An asynchronous iterator
         :rtype: cterasdk.asynchronous.core.iterator.CursorAsyncIterator
-        :raises: cterasdk.exceptions.NotificationsError
+        :raises cterasdk.exceptions.notifications.TooManyVolumesRequestedError: Raised when exceeding the allowed limit.
+        :raises cterasdk.exceptions.notifications.NotificationsError: Raised when an error occurs while retrieving notifications.
         """
         param = await self._create_parameter(cloudfolders, cursor)
         param.max_results = max_results if max_results is not None else 2000
