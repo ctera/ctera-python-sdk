@@ -344,9 +344,10 @@ class Shares(BaseCommand):
                     'cterasdk.edge.types.RemoveNFSv3AccessControlEntry'
                 )
 
-    def _add_share_param(self, name, directory, acl=None, access=enum.Acl.WindowsNT, csc=enum.ClientSideCaching.Manual,
+    def _add_share_param(self, name, directory, acl=None,  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
+                         access=enum.Acl.WindowsNT, csc=enum.ClientSideCaching.Manual,
                          comment=None, export_to_afp=False, export_to_ftp=False, export_to_nfs=False, indexed=False,
-                         trusted_nfs_clients=None, uuid=None):  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
+                         trusted_nfs_clients=None, uuid=None):
         acl = acl or []
 
         param = Object()
@@ -437,9 +438,10 @@ class Shares(BaseCommand):
 
 class SharesV7(Shares):
 
-    def add(self, name, directory, acl=None, access=enum.Acl.WindowsNT, csc=enum.ClientSideCaching.Manual,
+    def add(self, name, directory, acl=None,  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
+            access=enum.Acl.WindowsNT, csc=enum.ClientSideCaching.Manual,
             comment=None, export_to_afp=False, export_to_ftp=False, export_to_nfs=False, indexed=False,
-            trusted_nfs_clients=None, uuid=None):  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
+            trusted_nfs_clients=None, uuid=None):
         """
         Add a network share.
 
@@ -459,9 +461,10 @@ class SharesV7(Shares):
                                       indexed, trusted_nfs_clients, uuid)
         return self._add(param)
 
-    def modify(self, name, directory=None, acl=None, access=None, csc=None, comment=None,
+    def modify(self, name, directory=None,  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
+               acl=None, access=None, csc=None, comment=None,
                export_to_afp=None, export_to_ftp=None, export_to_nfs=None, indexed=None,
-               trusted_nfs_clients=None):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
+               trusted_nfs_clients=None):
         param = self._modify_share_param(name, directory, acl, access, csc, comment, export_to_afp, export_to_ftp,
                                          export_to_nfs, indexed, trusted_nfs_clients)
         return self._modify(name, param)
@@ -469,10 +472,11 @@ class SharesV7(Shares):
 
 class SharesV1(Shares):
 
-    def add(self, name, directory, acl=None, access=enum.Acl.WindowsNT, csc=enum.ClientSideCaching.Manual,
+    def add(self, name, directory, acl=None,  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
+            access=enum.Acl.WindowsNT, csc=enum.ClientSideCaching.Manual,
             dir_permissions=777, comment=None, export_to_afp=False, export_to_ftp=False, export_to_nfs=False,
             export_to_pc_agent=False, export_to_rsync=False, indexed=False,
-            trusted_nfs_clients=None, uuid=None):  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
+            trusted_nfs_clients=None, uuid=None):
         """
         Add a network share.
 
@@ -498,10 +502,11 @@ class SharesV1(Shares):
         param.exportToRSync = export_to_rsync
         return self._add(param)
 
-    def modify(self, name, directory=None, acl=None, access=None, csc=None, dir_permissions=None,
-               comment=None, export_to_afp=None, export_to_ftp=None, export_to_nfs=None, export_to_pc_agent=None, export_to_rsync=None,
-               indexed=None,
-               trusted_nfs_clients=None):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
+    def modify(self, name, directory=None,  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
+               acl=None, access=None, csc=None, dir_permissions=None,
+               comment=None, export_to_afp=None, export_to_ftp=None, export_to_nfs=None,
+               export_to_pc_agent=None, export_to_rsync=None, indexed=None,
+               trusted_nfs_clients=None):
         """
         Modify an existing network share. All parameters but name are optional and default to None
 

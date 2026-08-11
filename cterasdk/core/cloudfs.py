@@ -522,6 +522,7 @@ class Backups(BaseCommand):
 class ZoneQueryParams(Object):
 
     def __init__(self, zone_id, delta):
+        super().__init__()
         self._classname = 'ZoneQuery'
         self.zoneId = zone_id
         self.query = query.QueryParamBuilder().include_classname().orFilter(True).build()
@@ -589,18 +590,10 @@ class Zones(BaseCommand):
         for zone in self.all(filters):
             if expand_zone:
                 info = self._core.api.execute('', 'getZoneBasicInfo', zone.zoneId)
-                zone.devices = [device for device in query.iterator(self._core, '',
-                                                                    ZoneQueryParams(info.zoneId, DevicesDelta()), 'getZoneDevices')]
+                zone.devices = list(query.iterator(self._core, '', ZoneQueryParams(info.zoneId, DevicesDelta()), 'getZoneDevices'))
                 if info.policyType == 'selectedFolders':
-                    zone.cloudfolders = [
-                        volume
-                        for volume in query.iterator(
-                            self._core,
-                            '',
-                            ZoneQueryParams(info.zoneId, FoldersDelta()),
-                            'getZoneFolders',
-                        )
-                    ]
+                    zone.cloudfolders = list(query.iterator(self._core, '',
+                                                            ZoneQueryParams(info.zoneId, FoldersDelta()), 'getZoneFolders'))
                 yield zone
             yield zone
 

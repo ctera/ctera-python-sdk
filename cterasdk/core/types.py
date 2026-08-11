@@ -1275,6 +1275,7 @@ class ContentFilter(SearchFilter):
 class ZoneDelta(Object):
 
     def __init__(self):
+        super().__init__()
         self._classname = 'ZoneDelta'
 
 
