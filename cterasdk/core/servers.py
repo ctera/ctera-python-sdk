@@ -116,6 +116,12 @@ class Servers(BaseCommand):
 
 class Backup(BaseCommand):
 
+    def get(self):
+        """
+        Retrieve the current backup configuration
+        """
+        return self._core.servers.system_database.backupToBucket
+
     def connected(self):
         """
         Verify connectivity to the backup S3 bucket

@@ -4,7 +4,7 @@ from unittest import mock
 import munch
 from cterasdk.common import Object
 from cterasdk.core import servers
-from cterasdk.core.types import AmazonS3
+from cterasdk.core.types import AmazonS3, GenericS3
 from cterasdk import exceptions
 from tests.ut.core.admin import base_admin
 
@@ -146,6 +146,22 @@ class TestCoreServers(base_admin.BaseCoreTest):
             })
             self._assert_equal_objects(actual_param.backupToBucket, expected_param)
 
+    def test_enable_server_backup_path_style(self):
+        self._init_global_admin()
+        server_name = 'server'
+        with mock.patch("cterasdk.core.servers.Servers.system_database", new_callable=mock.PropertyMock) as query_mock:
+            query_mock.return_value = munch.Munch({'name': server_name, 'backupToBucket': None})
+            bucket = GenericS3('portal-backup', 'access', 'secret', 'os.example.com', https=True, verify_ssl=True, path_style=True)
+            servers.Servers(self._global_admin).backup.enable(bucket, 5)
+            self._global_admin.api.put.assert_called_once_with(f'/servers/{server_name}', mock.ANY)
+            actual_param = self._global_admin.api.put.call_args[0][1]
+            expected_param = munch.Munch({
+                'enabled': True,
+                'exportSchedulePeriod': 5,
+                'details': TestCoreServers._create_database_backup_server_object(bucket)
+            })
+            self._assert_equal_objects(actual_param.backupToBucket, expected_param)
+
     @staticmethod
     def _create_database_backup_server_object(bucket):
         return munch.Munch({
@@ -157,7 +173,7 @@ class TestCoreServers(base_admin.BaseCoreTest):
             'useHttps': bucket.https,
             'trustAllCertificates': bucket.trust_all_certificates,
             'masterHost': None,
-            'usePathStyleAddressing': False
+            'usePathStyleAddressing': bucket.path_style
         })
 
     def test_disable_server_backup(self):
@@ -169,6 +185,14 @@ class TestCoreServers(base_admin.BaseCoreTest):
             self._global_admin.api.put.assert_called_once_with(f'/servers/{server_name}', mock.ANY)
             actual_param = self._global_admin.api.put.call_args[0][1]
             self._assert_equal_objects(actual_param.backupToBucket.enabled, False)
+
+    def test_get_server_backup(self):
+        self._init_global_admin()
+        backup_config = munch.Munch({'enabled': True, 'exportSchedulePeriod': 5, 'status': 'Connected'})
+        with mock.patch("cterasdk.core.servers.Servers.system_database", new_callable=mock.PropertyMock) as query_mock:
+            query_mock.return_value = munch.Munch({'backupToBucket': backup_config})
+            ret = servers.Servers(self._global_admin).backup.get()
+            self._assert_equal_objects(ret, backup_config)
 
     def test_server_backup_status(self):
         self._init_global_admin()
