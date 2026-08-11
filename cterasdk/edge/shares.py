@@ -2,13 +2,19 @@ import logging
 
 from . import enum
 from ..cio.edge.types import automatic_resolution
-from ..common import Object
+from ..common import Object, BaseModule
 from ..exceptions import CTERAException, InputError
 from .base_command import BaseCommand
 from .types import NFSv3AccessControlEntry, RemoveNFSv3AccessControlEntry, ShareAccessControlEntry, RemoveShareAccessControlEntry
 
 
 logger = logging.getLogger('cterasdk.edge')
+
+
+class SharesModule(BaseModule):
+
+    def initialize_version(self, software_version):
+        return SharesV7 if software_version >= '7.12.5400' else SharesV1
 
 
 class Shares(BaseCommand):
@@ -19,77 +25,6 @@ class Shares(BaseCommand):
         :param str,optional name: Name of the share
         """
         return self._edge.api.get('/config/fileservices/share' + ('' if name is None else ('/' + name)))
-
-    def add(self,
-            name,
-            directory,
-            acl=None,
-            access=enum.Acl.WindowsNT,
-            csc=enum.ClientSideCaching.Manual,
-            dir_permissions=777,
-            comment=None,
-            export_to_afp=False,
-            export_to_ftp=False,
-            export_to_nfs=False,
-            export_to_pc_agent=False,
-            export_to_rsync=False,
-            indexed=False,
-            trusted_nfs_clients=None,
-            uuid=None
-            ):  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
-        """
-        Add a network share.
-
-        :param str name: The share name
-        :param str directory: Full directory path
-        :param list[cterasdk.edge.types.ShareAccessControlEntry] acl: List of access control entries
-        :param cterasdk.edge.enum.Acl access: The Windows File Sharing authentication mode, defaults to ``winAclMode``
-        :param cterasdk.edge.enum.ClientSideCaching csc: The client side caching (offline files) configuration, defaults to ``manual``
-        :param int dir_permissions: Directory Permission, defaults to 777
-        :param str comment: Comment
-        :param bool export_to_afp: Whether to enable AFP access, defaults to ``False``
-        :param bool export_to_ftp: Whether to enable FTP access, defaults to ``False``
-        :param bool export_to_nfs: Whether to enable NFS access, defaults to ``False``
-        :param bool export_to_pc_agent: Whether to allow as a destination share for CTERA Backup Agents, defaults to ``False``
-        :param bool export_to_rsync: Whether to enable access over rsync, defaults to ``False``
-        :param bool indexed: Whether to enable indexing for search, defaults to ``False``
-        :param list[cterasdk.edge.types.NFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients, defaults to ``None``
-        """
-        acl = acl or []
-
-        param = Object()
-        param.name = name
-
-        parts = automatic_resolution(directory).parts
-        volume = parts[0]
-        self._validate_root_directory(volume)
-        param.volume = volume
-
-        directory = '/'.join(parts[1:])
-        param.directory = directory
-
-        param.access = access
-        param.clientSideCaching = csc
-        param.dirPermissions = dir_permissions
-        param.exportToAFP = export_to_afp
-        param.exportToFTP = export_to_ftp
-        param.exportToNFS = export_to_nfs
-        param.exportToPCAgent = export_to_pc_agent
-        param.exportToRSync = export_to_rsync
-        param.indexed = indexed
-        param.comment = comment
-        Shares._validate_acl(acl)
-        param.acl = [acl_entry.to_server_object() for acl_entry in acl]
-        param.trustedNFSClients = [client.to_server_object() for client in (trusted_nfs_clients or [])]
-        if uuid:
-            param._uuid = uuid  # pylint: disable=protected-access
-
-        try:
-            self._edge.api.add('/config/fileservices/share', param)
-            logger.info("Share created. %s", {'name': param.name})
-        except CTERAException as error:
-            logger.error("Share creation failed: %s", param.name)
-            raise CTERAException(f'Share creation failed: {param.name}') from error
 
     def set_share_winacls(self, name):
         """
@@ -201,83 +136,6 @@ class Shares(BaseCommand):
         :param str name: The share name
         """
         return self._edge.api.get('/config/fileservices/share/' + name + '/acl')
-
-    def modify(
-            self,
-            name,
-            directory=None,
-            acl=None,
-            access=None,
-            csc=None,
-            dir_permissions=None,
-            comment=None,
-            export_to_afp=None,
-            export_to_ftp=None,
-            export_to_nfs=None,
-            export_to_pc_agent=None,
-            export_to_rsync=None,
-            indexed=None,
-            trusted_nfs_clients=None
-                ):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
-        """
-        Modify an existing network share. All parameters but name are optional and default to None
-
-        :param str name: The share name
-        :param str,optional directory: Full directory path
-        :param list[cterasdk.edge.types.ShareAccessControlEntry],optional acl: List of access control entries
-        :param cterasdk.edge.enum.Acl,optional access: The Windows File Sharing authentication mode
-        :param cterasdk.edge.enum.ClientSideCaching,optional csc: The client side caching (offline files) configuration
-        :param int,optional dir_permissions: Directory Permission
-        :param str,optional comment: Comment
-        :param bool,optional export_to_afp: Whether to enable AFP access
-        :param bool,optional export_to_ftp: Whether to enable FTP access
-        :param bool,optional export_to_nfs: Whether to enable NFS access
-        :param bool,optional export_to_pc_agent: Whether to allow as a destination share for CTERA Backup Agents
-        :param bool,optional export_to_rsync: Whether to enable access over rsync
-        :param bool,optional indexed: Whether to enable indexing for search
-        :param list[cterasdk.edge.types.NFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients, defaults to ``None``
-        """
-        share = self.get(name=name)
-        if directory is not None:
-            parts = automatic_resolution(directory).parts
-            volume = parts[0]
-            self._validate_root_directory(volume)
-            share.volume = volume
-            directory = '/'.join(parts[1:])
-            share.directory = directory
-        if access is not None:
-            share.access = access
-        if csc is not None:
-            share.clientSideCaching = csc
-        if dir_permissions is not None:
-            share.dirPermissions = dir_permissions
-        if export_to_afp is not None:
-            share.exportToAFP = export_to_afp
-        if export_to_ftp is not None:
-            share.exportToFTP = export_to_ftp
-        if export_to_nfs is not None:
-            share.exportToNFS = export_to_nfs
-        if export_to_pc_agent is not None:
-            share.exportToPCAgent = export_to_pc_agent
-        if export_to_rsync is not None:
-            share.exportToRSync = export_to_rsync
-        if indexed is not None:
-            share.indexed = indexed
-        if comment is not None:
-            share.comment = comment
-        if acl is not None:
-            Shares._validate_acl(acl)
-            share.acl = [acl_entry.to_server_object() for acl_entry in acl]
-        if trusted_nfs_clients is not None:
-            share.trustedNFSClients = [client.to_server_object() for client in trusted_nfs_clients]
-
-        try:
-            self._edge.api.put('/config/fileservices/share/' + name, share)
-            logger.info("Share modified. %s", {'name': name})
-        except CTERAException as error:
-            message = f'Share modification failed: {name}'
-            logger.error(message)
-            raise CTERAException(message) from error
 
     def delete(self, name):
         """
@@ -485,3 +343,180 @@ class Shares(BaseCommand):
                     repr(entry),
                     'cterasdk.edge.types.RemoveNFSv3AccessControlEntry'
                 )
+
+    def _add_share_param(self, name, directory, acl=None, access=enum.Acl.WindowsNT, csc=enum.ClientSideCaching.Manual,
+                         comment=None, export_to_afp=False, export_to_ftp=False, export_to_nfs=False, indexed=False,
+                         trusted_nfs_clients=None, uuid=None):  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
+        acl = acl or []
+        
+        param = Object()
+        param.name = name
+
+        parts = automatic_resolution(directory).parts
+        volume = parts[0]
+        self._validate_root_directory(volume)
+        param.volume = volume
+
+        directory = '/'.join(parts[1:])
+        param.directory = directory
+
+        param.access = access
+        param.clientSideCaching = csc
+        param.exportToAFP = export_to_afp
+        param.exportToFTP = export_to_ftp
+        param.exportToNFS = export_to_nfs
+        param.indexed = indexed
+        param.comment = comment
+        Shares._validate_acl(acl)
+        param.acl = [acl_entry.to_server_object() for acl_entry in acl]
+        param.trustedNFSClients = [client.to_server_object() for client in (trusted_nfs_clients or [])]
+        if uuid:
+            param._uuid = uuid  # pylint: disable=protected-access
+        return param
+
+    def _add(self, param):
+        try:
+            self._edge.api.add('/config/fileservices/share', param)
+            logger.info("Share created. %s", {'name': param.name})
+        except CTERAException as error:
+            logger.error("Share creation failed: %s", param.name)
+            raise CTERAException(f'Share creation failed: {param.name}') from error
+
+    def _modify_share_param(self, name, directory=None, acl=None, access=None, csc=None, comment=None,
+                            export_to_afp=None, export_to_ftp=None, export_to_nfs=None, indexed=None,
+                            trusted_nfs_clients=None):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
+        share = self.get(name=name)
+        if directory is not None:
+            parts = automatic_resolution(directory).parts
+            volume = parts[0]
+            self._validate_root_directory(volume)
+            share.volume = volume
+            directory = '/'.join(parts[1:])
+            share.directory = directory
+        if access is not None:
+            share.access = access
+        if csc is not None:
+            share.clientSideCaching = csc
+        if export_to_afp is not None:
+            share.exportToAFP = export_to_afp
+        if export_to_ftp is not None:
+            share.exportToFTP = export_to_ftp
+        if export_to_nfs is not None:
+            share.exportToNFS = export_to_nfs
+        if indexed is not None:
+            share.indexed = indexed
+        if comment is not None:
+            share.comment = comment
+        if acl is not None:
+            Shares._validate_acl(acl)
+            share.acl = [acl_entry.to_server_object() for acl_entry in acl]
+        if trusted_nfs_clients is not None:
+            share.trustedNFSClients = [client.to_server_object() for client in trusted_nfs_clients]
+        return share
+
+    def _modify(self, name, param):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
+        try:
+            self._edge.api.put('/config/fileservices/share/' + name, param)
+            logger.info("Share modified. %s", {'name': name})
+        except CTERAException as error:
+            message = f'Share modification failed: {name}'
+            logger.error(message)
+            raise CTERAException(message) from error
+
+
+class SharesV7(Shares):
+
+    def add(self, name, directory, acl=None, access=enum.Acl.WindowsNT, csc=enum.ClientSideCaching.Manual,
+            comment=None, export_to_afp=False, export_to_ftp=False, export_to_nfs=False, indexed=False,
+            trusted_nfs_clients=None, uuid=None):  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
+        """
+        Add a network share.
+
+        :param str name: The share name
+        :param str directory: Full directory path
+        :param list[cterasdk.edge.types.ShareAccessControlEntry] acl: List of access control entries
+        :param cterasdk.edge.enum.Acl access: The Windows File Sharing authentication mode, defaults to ``winAclMode``
+        :param cterasdk.edge.enum.ClientSideCaching csc: The client side caching (offline files) configuration, defaults to ``manual``
+        :param str comment: Comment
+        :param bool export_to_afp: Whether to enable AFP access, defaults to ``False``
+        :param bool export_to_ftp: Whether to enable FTP access, defaults to ``False``
+        :param bool export_to_nfs: Whether to enable NFS access, defaults to ``False``
+        :param bool indexed: Whether to enable indexing for search, defaults to ``False``
+        :param list[cterasdk.edge.types.NFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients, defaults to ``None``
+        """
+        param = self._add_share_param(name, directory, acl, access ,csc, comment, export_to_afp, export_to_ftp, export_to_nfs,
+                                      indexed, trusted_nfs_clients, uuid)
+        return self._add(param)
+
+    def modify(self, name, directory=None, acl=None, access=None, csc=None, comment=None, export_to_afp=None, export_to_ftp=None, export_to_nfs=None,
+               indexed=None,
+               trusted_nfs_clients=None):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
+        param = self._modify_share_param(name, directory, acl, access, csc, comment, export_to_afp, export_to_ftp,
+                                         export_to_nfs, indexed, trusted_nfs_clients)
+        return self._modify(name, param)
+
+
+class SharesV1(Shares):
+
+    def add(self, name, directory, acl=None, access=enum.Acl.WindowsNT, csc=enum.ClientSideCaching.Manual,
+            dir_permissions=777, comment=None, export_to_afp=False, export_to_ftp=False, export_to_nfs=False,
+            export_to_pc_agent=False, export_to_rsync=False, indexed=False,
+            trusted_nfs_clients=None, uuid=None):  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
+        """
+        Add a network share.
+
+        :param str name: The share name
+        :param str directory: Full directory path
+        :param list[cterasdk.edge.types.ShareAccessControlEntry] acl: List of access control entries
+        :param cterasdk.edge.enum.Acl access: The Windows File Sharing authentication mode, defaults to ``winAclMode``
+        :param cterasdk.edge.enum.ClientSideCaching csc: The client side caching (offline files) configuration, defaults to ``manual``
+        :param int dir_permissions: Directory Permission, defaults to 777
+        :param str comment: Comment
+        :param bool export_to_afp: Whether to enable AFP access, defaults to ``False``
+        :param bool export_to_ftp: Whether to enable FTP access, defaults to ``False``
+        :param bool export_to_nfs: Whether to enable NFS access, defaults to ``False``
+        :param bool export_to_pc_agent: Whether to allow as a destination share for CTERA Backup Agents, defaults to ``False``
+        :param bool export_to_rsync: Whether to enable access over rsync, defaults to ``False``
+        :param bool indexed: Whether to enable indexing for search, defaults to ``False``
+        :param list[cterasdk.edge.types.NFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients, defaults to ``None``
+        """
+        param = self._add_share_param(name, directory, acl, access ,csc, comment, export_to_afp, export_to_ftp, export_to_nfs,
+                                      indexed, trusted_nfs_clients, uuid)
+        param.dirPermissions = dir_permissions
+        param.exportToPCAgent = export_to_pc_agent
+        param.exportToRSync = export_to_rsync
+        return self._add(param)
+
+    def modify(self, name, directory=None, acl=None, access=None, csc=None, dir_permissions=None,
+               comment=None, export_to_afp=None, export_to_ftp=None, export_to_nfs=None, export_to_pc_agent=None, export_to_rsync=None,
+               indexed=None,
+               trusted_nfs_clients=None):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
+        """
+        Modify an existing network share. All parameters but name are optional and default to None
+
+        :param str name: The share name
+        :param str,optional directory: Full directory path
+        :param list[cterasdk.edge.types.ShareAccessControlEntry],optional acl: List of access control entries
+        :param cterasdk.edge.enum.Acl,optional access: The Windows File Sharing authentication mode
+        :param cterasdk.edge.enum.ClientSideCaching,optional csc: The client side caching (offline files) configuration
+        :param int,optional dir_permissions: Directory Permission
+        :param str,optional comment: Comment
+        :param bool,optional export_to_afp: Whether to enable AFP access
+        :param bool,optional export_to_ftp: Whether to enable FTP access
+        :param bool,optional export_to_nfs: Whether to enable NFS access
+        :param bool,optional export_to_pc_agent: Whether to allow as a destination share for CTERA Backup Agents
+        :param bool,optional export_to_rsync: Whether to enable access over rsync
+        :param bool,optional indexed: Whether to enable indexing for search
+        :param list[cterasdk.edge.types.NFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients, defaults to ``None``
+        """
+        param = self._modify_share_param(name, directory, acl, access, csc, comment, export_to_afp, export_to_ftp,
+                                         export_to_nfs, indexed, trusted_nfs_clients)
+        if dir_permissions is not None:
+            param.dirPermissions = dir_permissions
+        if export_to_nfs is not None:
+            param.exportToNFS = export_to_nfs
+        if export_to_pc_agent is not None:
+            param.exportToPCAgent = export_to_pc_agent
+        if export_to_rsync is not None:
+            param.exportToRSync = export_to_rsync
+        return self._modify(name, param)

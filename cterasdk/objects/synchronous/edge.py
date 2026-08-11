@@ -106,7 +106,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.ransom_protect = ransom_protect.RansomProtect(self)
         self.rsync = rsync.RSync(self)
         self.services = services.Services(self)
-        self.shares = shares.Shares(self)
+        self.shares = modules.initialize(shares.SharesModule, self)
         self.shell = shell.Shell(self)
         self.smb = smb.SMB(self)
         self.snmp = snmp.SNMP(self)
@@ -123,8 +123,9 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.volumes = volumes.Volumes(self)
 
     def _after_login(self):
-        self.ssl = modules.initialize(ssl.SSLModule, self)
         self.network = modules.initialize(network.NetworkModule, self)
+        self.shares = modules.initialize(shares.SharesModule, self)
+        self.ssl = modules.initialize(ssl.SSLModule, self)
 
     @property
     def migrate(self):
