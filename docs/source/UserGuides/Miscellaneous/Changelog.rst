@@ -7,6 +7,7 @@ Changelog
 Bug Fixes
 ^^^^^^^^^
 
+- Support listing zone cloudfolders and devices
 - Support remote access via CTTP through asynchronous I/O (``asyncio``)
 - Updated the Edge Filer shares module to accommodate the removal of the ``dirPermissions`` attribute.
 
