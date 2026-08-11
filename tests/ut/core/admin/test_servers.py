@@ -4,7 +4,7 @@ from unittest import mock
 import munch
 from cterasdk.common import Object
 from cterasdk.core import servers
-from cterasdk.core.types import AmazonS3
+from cterasdk.core.types import AmazonS3, GenericS3
 from cterasdk import exceptions
 from tests.ut.core.admin import base_admin
 
@@ -147,7 +147,6 @@ class TestCoreServers(base_admin.BaseCoreTest):
             self._assert_equal_objects(actual_param.backupToBucket, expected_param)
 
     def test_enable_server_backup_path_style(self):
-        from cterasdk.core.types import GenericS3
         self._init_global_admin()
         server_name = 'server'
         with mock.patch("cterasdk.core.servers.Servers.system_database", new_callable=mock.PropertyMock) as query_mock:
