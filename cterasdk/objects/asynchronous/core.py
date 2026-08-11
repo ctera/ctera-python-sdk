@@ -4,7 +4,7 @@ from ..endpoints import EndpointBuilder
 from ...clients import clients
 from .. import authenticators
 from ...lib.session.core import Session
-from ...asynchronous.core import files, login, cloudfs, notifications, portals, roles, settings, tasks, users
+from ...asynchronous.core import files, login, cloudfs, devices, notifications, portals, roles, settings, tasks, users
 
 
 class Clients:
@@ -91,6 +91,7 @@ class AsyncGlobalAdmin(AsyncPortal):
     def __init__(self, host, port=None, https=True):
         super().__init__(host, port, https)
         self.portals = portals.Portals(self)
+        self.devices = devices.Devices(self)
 
     @property
     def context(self):

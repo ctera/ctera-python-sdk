@@ -8,22 +8,20 @@ from ...edge import backup, cli, logs, services, support, sync
 
 class Clients:
 
-    def __init__(self, drive, Portal):
-        if Portal:
-            drive._Portal = Portal
-            drive.default.close()
-            drive._ctera_session.start_remote_session(Portal.session())
-            self.api = Portal.default.clone(clients.API, EndpointBuilder.new(drive.base), authenticator=lambda *_: True)
+    def __init__(self, drive, core):
+        if core:
+            drive.session().start_remote_session(core.session())
+            self.api = drive.default.clone(clients.API, EndpointBuilder.new(drive.base), authenticator=lambda *_: True)
         else:
             self.api = drive.default.clone(clients.API, EndpointBuilder.new(drive.base, '/admingui/api'))
 
 
 class Drive(Management):
 
-    def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
-        super().__init__(host, port, https, base, cterasdk.settings.drive.syn.settings)
+    def __init__(self, host=None, port=None, https=True, core=None, *, base=None):
+        super().__init__(host, port, https, base, cterasdk.settings.drive.syn.settings, core=core)
         self._ctera_session = Session(self.host())
-        self._ctera_clients = Clients(self, Portal)
+        self._ctera_clients = Clients(self, core)
         self.backup = backup.Backup(self)
         self.cli = cli.CLI(self)
         self.logs = logs.Logs(self)

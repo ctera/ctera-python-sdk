@@ -117,6 +117,15 @@ class AsyncJSON(AsyncClient):
         return await response.json()
 
 
+class AsyncMigrate(AsyncJSON):
+    """CTERA Migrate Service"""
+
+    async def login(self):
+        response = await Client.get(self, '/auth/user', on_error=JSONHandler())
+        self.headers.persist_response_header(response, 'x-mt-x')
+        return response.json()
+
+
 class AsyncXML(AsyncClient):
 
     async def get(self, path, **kwargs):
