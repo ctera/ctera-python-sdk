@@ -1270,3 +1270,27 @@ class ContentFilter(SearchFilter):
     @staticmethod
     def contains(value):
         return ContentFilter(SearchOperator.CONTAINS, value)
+
+
+class ZoneDelta(Object):
+
+    def __init__(self):
+        self._classname = 'ZoneDelta'
+
+
+class FoldersDelta(ZoneDelta):
+
+    def __init__(self):
+        super().__init__()
+        self.policyDelta = []
+
+
+class DevicesDelta(ZoneDelta):
+
+    def __init__(self):
+        super().__init__()
+        self.devicesDelta = Object(
+            _classname='ZoneDeviceDelta',
+            added=[],
+            removed=[]
+        )
