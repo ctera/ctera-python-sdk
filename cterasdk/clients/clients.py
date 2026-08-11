@@ -246,7 +246,8 @@ class Client(BaseClient):
 
     @decorators.authenticated
     def delete(self, path, data=None, *, data_serializer=None, on_response=None, on_error=None, **kwargs):
-        request = async_requests.DeleteRequest(self._builder(path), data=data_serializer(data), **kwargs)
+        data = data_serializer(data) if data is not None else data
+        request = async_requests.DeleteRequest(self._builder(path), data=data, **kwargs)
         return self.request(request, on_response=on_response, on_error=on_error)
 
     def _request(self, request, *, on_response=None, on_error=None):

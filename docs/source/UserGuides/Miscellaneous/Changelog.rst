@@ -4,15 +4,24 @@ Changelog
 2.20.44
 =======
 
+Improvements
+^^^^^^^^^^^^
+
+- Support path-style addressing when connecting to S3-compatible buckets
+- Support listing zone cloud folders and devices
+- Support remote access via CTTP using asynchronous I/O (`asyncio`)
+
 Bug Fixes
 ^^^^^^^^^
 
-- Support  path style addressing when connecting to S3-Compatible buckets
-- Support listing zone cloud folders and devices
-- Support remote access via CTTP through asynchronous I/O (``asyncio``)
-- Updated the Edge Filer shares module to accommodate the removal of the ``dirPermissions`` attribute.
+- Resolve a regression in delete requests that do not contain data
+- Update the Edge Filer shares module to accommodate the removal of the
+  ``dirPermissions`` attribute
 
 Related issues and pull requests on GitHub: `#365 <https://github.com/ctera/ctera-python-sdk/pull/365>`_
+`#366 <https://github.com/ctera/ctera-python-sdk/pull/366>`_
+`#367 <https://github.com/ctera/ctera-python-sdk/pull/367>`_
+
 
 2.20.43
 -------
