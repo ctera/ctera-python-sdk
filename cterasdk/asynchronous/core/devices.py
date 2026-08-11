@@ -34,4 +34,3 @@ class Devices(BaseCommand):
         iterator = query.iterator(self._core, '/devices', param)
         async for dev in iterator:
             yield remote.remote_command(self._core, dev)
-
