@@ -18,13 +18,11 @@ from ...edge import (
 
 class Clients:
 
-    def __init__(self, edge, Portal):
-        if Portal:
-            edge._Portal = Portal
-            edge.default.close()
-            edge._ctera_session.start_remote_session(Portal.session())
+    def __init__(self, edge, core):
+        if core:
+            edge.session().start_remote_session(core.session())
             self.migrate = clients.RestrictedAPI('migrate')
-            self.api = Portal.default.clone(clients.API, EndpointBuilder.new(edge.base), authenticator=lambda *_: True)
+            self.api = edge.default.clone(clients.API, EndpointBuilder.new(edge.base), authenticator=lambda *_: True)
             self.stats = clients.RestrictedAPI('stats')
             self.io = clients.RestrictedAPI('io')
         else:
@@ -75,10 +73,10 @@ class IO:
 
 class Edge(Management):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, host=None, port=None, https=True, Portal=None, *, base=None):
-        super().__init__(host, port, https, base, cterasdk.settings.edge.syn.settings)
+    def __init__(self, host=None, port=None, https=True, core=None, *, base=None):
+        super().__init__(host, port, https, base, cterasdk.settings.edge.syn.settings, core=core)
         self._ctera_session = Session(self.host())
-        self._ctera_clients = Clients(self, Portal)
+        self._ctera_clients = Clients(self, core)
         self.afp = afp.AFP(self)
         self.aio = aio.AIO(self)
         self.antivirus = antivirus.Antivirus(self)
@@ -106,7 +104,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.ransom_protect = ransom_protect.RansomProtect(self)
         self.rsync = rsync.RSync(self)
         self.services = services.Services(self)
-        self.shares = shares.Shares(self)
+        self.shares = modules.initialize(shares.SharesModule, self)
         self.shell = shell.Shell(self)
         self.smb = smb.SMB(self)
         self.snmp = snmp.SNMP(self)
@@ -123,8 +121,9 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.volumes = volumes.Volumes(self)
 
     def _after_login(self):
-        self.ssl = modules.initialize(ssl.SSLModule, self)
         self.network = modules.initialize(network.NetworkModule, self)
+        self.shares = modules.initialize(shares.SharesModule, self)
+        self.ssl = modules.initialize(ssl.SSLModule, self)
 
     @property
     def migrate(self):
@@ -168,7 +167,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.session().start_session(self)
 
     def remote_access(self):
-        return remote.remote_access(self, self._Portal)
+        return remote.remote_access(self, self._core)
 
     @property
     def _omit_fields(self):

@@ -5,7 +5,7 @@ import logging
 from .base_command import BaseCommand
 from . import query, devices
 from .enum import ListFilter, PolicyType
-from .types import ArchiveSettingsBuilder, ComplianceSettingsBuilder, ExtendedAttributesBuilder
+from .types import ArchiveSettingsBuilder, ComplianceSettingsBuilder, ExtendedAttributesBuilder, DevicesDelta, FoldersDelta
 from ..common import union, Object
 from ..exceptions import CTERAException, ObjectNotFoundException
 
@@ -519,6 +519,19 @@ class Backups(BaseCommand):
         return response
 
 
+class ZoneQueryParams(Object):
+
+    def __init__(self, zone_id, delta):
+        super().__init__()
+        self._classname = 'ZoneQuery'
+        self.zoneId = zone_id
+        self.query = query.QueryParamBuilder().include_classname().orFilter(True).build()
+        self.delta = delta
+
+    def increment(self):
+        return self.query.increment()
+
+
 class Zones(BaseCommand):
     """
     Portal Zones APIs
@@ -564,6 +577,25 @@ class Zones(BaseCommand):
         builder.orFilter((len(filters) > 1))
         param = builder.build()
         return query.iterator(self._core, '', param, 'getZonesDisplayInfo')
+
+    def list_zones(self, filters=None, expand_zone=False):
+        """
+        List Zones
+        :param list[],optional filters: List of additional filters, defaults to None
+        :param bool,optional expand_zone: Include Cloud Drive folders and devices
+
+        :return: Iterator for all Zones
+        :rtype: cterasdk.lib.iterator.QueryIterator
+        """
+        for zone in self.all(filters):
+            if expand_zone:
+                info = self._core.api.execute('', 'getZoneBasicInfo', zone.zoneId)
+                zone.devices = list(query.iterator(self._core, '', ZoneQueryParams(info.zoneId, DevicesDelta()), 'getZoneDevices'))
+                if info.policyType == 'selectedFolders':
+                    zone.cloudfolders = list(query.iterator(self._core, '',
+                                                            ZoneQueryParams(info.zoneId, FoldersDelta()), 'getZoneFolders'))
+                yield zone
+            yield zone
 
     def search(self, name):
         """

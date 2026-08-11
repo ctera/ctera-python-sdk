@@ -1,6 +1,18 @@
 Changelog
 =========
 
+2.20.44
+=======
+
+Bug Fixes
+^^^^^^^^^
+
+- Support listing zone cloud folders and devices
+- Support remote access via CTTP through asynchronous I/O (``asyncio``)
+- Updated the Edge Filer shares module to accommodate the removal of the ``dirPermissions`` attribute.
+
+Related issues and pull requests on GitHub: `#365 <https://github.com/ctera/ctera-python-sdk/pull/365>`_
+
 2.20.43
 -------
 

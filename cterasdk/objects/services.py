@@ -86,9 +86,11 @@ class AsyncManagement(CTERA):  # pylint: disable=abstract-method
     async def __aenter__(self):
         return self
 
-    def __init__(self, host, port, https, base, settings):
+    def __init__(self, host, port, https, base, settings, *, core=None):
         super().__init__(host, port, https, base)
-        self._default = clients.AsyncClient(endpoints.EndpointBuilder.new(self.base), settings=settings, authenticator=self._authenticator)
+        self._core = core
+        self._default = core.default if core else clients.AsyncClient(endpoints.EndpointBuilder.new(self.base),
+                                                                      settings=settings, authenticator=self._authenticator)
 
     async def login(self, username, password):
         self._before_login()
@@ -111,9 +113,11 @@ class Management(CTERA):
     def __enter__(self):
         return self
 
-    def __init__(self, host, port, https, base, settings):
+    def __init__(self, host, port, https, base, settings, *, core=None):
         super().__init__(host, port, https, base)
-        self._default = clients.Client(endpoints.EndpointBuilder.new(self.base), settings=settings, authenticator=self._authenticator)
+        self._core = core
+        self._default = core.default if core else clients.Client(endpoints.EndpointBuilder.new(self.base),
+                                                                 settings=settings, authenticator=self._authenticator)
 
     def login(self, username, password):
         """

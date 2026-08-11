@@ -9,9 +9,18 @@ from ...asynchronous.edge import login, files
 
 class Clients:
 
-    def __init__(self, edge):
-        self.api = edge.default.clone(clients.AsyncAPI, EndpointBuilder.new(edge.base, '/admingui/api'))
-        self.io = IO(edge)
+    def __init__(self, edge, core):
+        if core:
+            edge.session().start_remote_session(core.session())
+            self.migrate = clients.RestrictedAPI('migrate')
+            self.api = edge.default.clone(clients.AsyncAPI, EndpointBuilder.new(edge.base), authenticator=lambda *_: True)
+            self.stats = clients.RestrictedAPI('stats')
+            self.io = clients.RestrictedAPI('io')
+        else:
+            self.migrate = edge.default.clone(clients.AsyncMigrate, EndpointBuilder.new(edge.base, '/migration/rest/v1'))
+            self.api = edge.default.clone(clients.AsyncAPI, EndpointBuilder.new(edge.base, '/admingui/api'))
+            self.stats = edge.default.clone(clients.AsyncJSON, EndpointBuilder.new(edge.base, '/stats'))
+            self.io = IO(edge)
 
 
 class IO:
@@ -55,15 +64,11 @@ class IO:
 
 class AsyncEdge(AsyncManagement):
 
-    def __init__(self, host=None, port=None, https=True, *, base=None):
-        super().__init__(host, port, https, base, cterasdk.settings.edge.asyn.settings)
+    def __init__(self, host=None, port=None, https=True, core=None, *, base=None):
+        super().__init__(host, port, https, base, cterasdk.settings.edge.asyn.settings, core=core)
         self._ctera_session = Session(self.host())
-        self._ctera_clients = Clients(self)
+        self._ctera_clients = Clients(self, core)
         self.files = files.FileBrowser(self)
-
-    @property
-    def v1(self):
-        return self.clients.v1
 
     @property
     def api(self):
@@ -79,3 +84,7 @@ class AsyncEdge(AsyncManagement):
 
     def _authenticator(self, url):
         return authenticators.edge(self.session(), url)
+
+    @property
+    def _omit_fields(self):
+        return super()._omit_fields + ['files']
