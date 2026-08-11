@@ -29,4 +29,3 @@ class AsyncDrive(AsyncManagement):
     @property
     def _login_object(self):
         raise NotImplementedError("Logins to the 'Drive App' are not enabled.")
-

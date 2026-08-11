@@ -348,7 +348,7 @@ class Shares(BaseCommand):
                          comment=None, export_to_afp=False, export_to_ftp=False, export_to_nfs=False, indexed=False,
                          trusted_nfs_clients=None, uuid=None):  # pylint: disable=too-many-arguments,too-many-locals,unused-argument
         acl = acl or []
-        
+
         param = Object()
         param.name = name
 
@@ -382,9 +382,20 @@ class Shares(BaseCommand):
             logger.error("Share creation failed: %s", param.name)
             raise CTERAException(f'Share creation failed: {param.name}') from error
 
-    def _modify_share_param(self, name, directory=None, acl=None, access=None, csc=None, comment=None,
-                            export_to_afp=None, export_to_ftp=None, export_to_nfs=None, indexed=None,
-                            trusted_nfs_clients=None):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
+    def _modify_share_param(
+        self,
+        name,
+        directory=None,
+        acl=None,
+        access=None,
+        csc=None,
+        comment=None,
+        export_to_afp=None,
+        export_to_ftp=None,
+        export_to_nfs=None,
+        indexed=None,
+        trusted_nfs_clients=None,
+    ):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
         share = self.get(name=name)
         if directory is not None:
             parts = automatic_resolution(directory).parts
@@ -444,12 +455,12 @@ class SharesV7(Shares):
         :param bool indexed: Whether to enable indexing for search, defaults to ``False``
         :param list[cterasdk.edge.types.NFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients, defaults to ``None``
         """
-        param = self._add_share_param(name, directory, acl, access ,csc, comment, export_to_afp, export_to_ftp, export_to_nfs,
+        param = self._add_share_param(name, directory, acl, access, csc, comment, export_to_afp, export_to_ftp, export_to_nfs,
                                       indexed, trusted_nfs_clients, uuid)
         return self._add(param)
 
-    def modify(self, name, directory=None, acl=None, access=None, csc=None, comment=None, export_to_afp=None, export_to_ftp=None, export_to_nfs=None,
-               indexed=None,
+    def modify(self, name, directory=None, acl=None, access=None, csc=None, comment=None,
+               export_to_afp=None, export_to_ftp=None, export_to_nfs=None, indexed=None,
                trusted_nfs_clients=None):  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,unused-argument
         param = self._modify_share_param(name, directory, acl, access, csc, comment, export_to_afp, export_to_ftp,
                                          export_to_nfs, indexed, trusted_nfs_clients)
@@ -480,7 +491,7 @@ class SharesV1(Shares):
         :param bool indexed: Whether to enable indexing for search, defaults to ``False``
         :param list[cterasdk.edge.types.NFSv3AccessControlEntry] trusted_nfs_clients: Trusted NFS v3 clients, defaults to ``None``
         """
-        param = self._add_share_param(name, directory, acl, access ,csc, comment, export_to_afp, export_to_ftp, export_to_nfs,
+        param = self._add_share_param(name, directory, acl, access, csc, comment, export_to_afp, export_to_ftp, export_to_nfs,
                                       indexed, trusted_nfs_clients, uuid)
         param.dirPermissions = dir_permissions
         param.exportToPCAgent = export_to_pc_agent

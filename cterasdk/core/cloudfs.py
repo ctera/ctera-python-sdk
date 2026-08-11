@@ -592,8 +592,15 @@ class Zones(BaseCommand):
                 zone.devices = [device for device in query.iterator(self._core, '',
                                                                     ZoneQueryParams(info.zoneId, DevicesDelta()), 'getZoneDevices')]
                 if info.policyType == 'selectedFolders':
-                    zone.cloudfolders = [volume for volume in query.iterator(self._core, '',
-                                                                             ZoneQueryParams(info.zoneId, FoldersDelta()), 'getZoneFolders')]
+                    zone.cloudfolders = [
+                        volume
+                        for volume in query.iterator(
+                            self._core,
+                            '',
+                            ZoneQueryParams(info.zoneId, FoldersDelta()),
+                            'getZoneFolders',
+                        )
+                    ]
                 yield zone
             yield zone
 

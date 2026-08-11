@@ -78,7 +78,7 @@ class TestEdgeShares(base_edge.BaseEdgeTest):  # pylint: disable=too-many-public
         self._init_filer(execute_response=execute_response)
 
         shares.SharesV1(self._filer).add(self._share_name, self._share_fullpath, export_to_nfs=True,
-                                       trusted_nfs_clients=self._trusted_nfs_clients)
+                                         trusted_nfs_clients=self._trusted_nfs_clients)
 
         self._filer.api.execute.assert_called_once_with('/status/fileManager', 'listPhysicalFolders', mock.ANY)
         expected_param = self._get_list_physical_folders_param()
