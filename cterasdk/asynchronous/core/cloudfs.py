@@ -14,14 +14,52 @@ class CloudFS(BaseCommand):
 
     def __init__(self, core):
         super().__init__(core)
+        self.groups = FolderGroups(self._core)
         self.drives = CloudDrives(self._core)
         self.zones = Zones(self._core)
+        self.exports = Exports(self._core)
+
+
+class FolderGroups(BaseCommand):
+    """ Cloud Drive Folder APIs """
+
+    default = ['name']
+
+    async def all(self, include=None, namespaces=None):
+        """
+        List folder groups
+
+        :param str,optional include: List of fields to retrieve, defaults to ['name']
+        :param list[str],optional namespaces: List of namespaces to query
+        :returns: Iterator for all folder groups
+        """
+        include = union(include or [], FolderGroups.default)
+
+        for resource in [f'/portals/{namespace}' for namespace in namespaces] if namespaces is not None else ['']:
+            param = QueryParamBuilder().include(include).build()
+            async for group in query.iterator(self._core, f'{resource}/foldersGroups', param):
+                yield group
 
 
 class CloudDrives(BaseCommand):
     """ Cloud Drive Folder APIs """
 
     default = ['name']
+
+    async def all(self, include=None, namespaces=None):
+        """
+        List Cloud Drive folders.
+
+        :param str,optional include: List of fields to retrieve, defaults to ['name']
+        :param list[str],optional namespaces: List of namespaces to query
+        :returns: Iterator for all Cloud Drive folders
+        """
+        include = union(include or [], CloudDrives.default)
+
+        for resource in [f'/portals/{namespace}' for namespace in namespaces] if namespaces is not None else ['']:
+            param = QueryParamBuilder().include(include).put('includeDeleted', True).build()
+            async for drive in query.iterator(self._core, f'{resource}/cloudDrives', param):
+                yield drive
 
     async def find(self, name, owner, include=None):
         """
@@ -46,46 +84,47 @@ class Zones(BaseCommand):
     Portal Zones APIs
     """
 
-    async def all(self, filters=None):
+    async def all(self, expand_zone=False, namespaces=None):
         """
         List Zones
-        :param list[],optional filters: List of additional filters, defaults to None
+
+        :param list[str],optional namespaces: List of namespaces to query
 
         :return: Iterator for all Zones
-        :rtype: cterasdk.lib.iterator.QueryIterator
+        :rtype: cterasdk.asynchronous.core.iterator.QueryAsyncIterator
         """
-        builder = QueryParamBuilder().include_classname().startFrom(0).countLimit(25)
-        filters = filters or []
-        for query_filter in filters:
-            builder.addFilter(query_filter)
-        builder.orFilter((len(filters) > 1))
-        param = builder.build()
-        async for zone in query.iterator(self._core, '', param, 'getZonesDisplayInfo'):
-            yield zone
-
-    async def list_zones(self, filters=None, expand_zone=False):
-        """
-        List Zones
-        :param list[],optional filters: List of additional filters, defaults to None
-        :param bool,optional expand_zone: Include Cloud Drive folders and devices
-
-        :return: Iterator for all Zones
-        :rtype: cterasdk.lib.iterator.QueryIterator
-        """
-        async for zone in self.all(filters):
-            if expand_zone:
-                info = await self._core.v1.api.execute('', 'getZoneBasicInfo', zone.zoneId)
-                zone.devices = [device async for device in query.iterator(self._core, '',
-                                                                          ZoneQueryParams(info.zoneId, DevicesDelta()), 'getZoneDevices')]
-                if info.policyType == 'selectedFolders':
-                    zone.cloudfolders = [
-                        volume
-                        async for volume in query.iterator(
-                            self._core,
-                            '',
-                            ZoneQueryParams(info.zoneId, FoldersDelta()),
-                            'getZoneFolders',
-                        )
-                    ]
+        for resource in [f'/portals/{namespace}' for namespace in namespaces] if namespaces is not None else ['']:
+            param = QueryParamBuilder().include_classname().build()
+            async for zone in query.iterator(self._core, resource, param, 'getZonesDisplayInfo'):
+                if expand_zone:
+                    info = await self._core.v1.api.execute(resource, 'getZoneBasicInfo', zone.zoneId)
+                    zone.policyType = info.policyType
+                    zone.devices = [device async for device in query.iterator(self._core, resource,
+                                                                              ZoneQueryParams(info.zoneId, DevicesDelta()), 'getZoneDevices')]
+                    if zone.policyType == 'selectedFolders':
+                        zone.cloudfolders = [
+                            volume
+                            async for volume in query.iterator(
+                                self._core,
+                                resource,
+                                ZoneQueryParams(info.zoneId, FoldersDelta()),
+                                'getZoneFolders',
+                            )
+                        ]
                 yield zone
-            yield zone
+
+
+class Exports(BaseCommand):
+    """ Fusion Gateway S3 APIs """
+
+    async def all(self, namespaces=None):
+        """
+        List Fusion Gateway S3 Exports
+
+        :param str,optional include: List of fields to retrieve, defaults to ['name']
+        :param list[str],optional namespaces: List of namespaces to query
+        :returns: Iterator for all Fusion Gateway exports
+        """
+        for resource in [f'/portals/{namespace}' for namespace in namespaces] if namespaces is not None else ['']:
+            for export in await self._core.v1.api.get(f'{resource}/buckets'):
+                yield export

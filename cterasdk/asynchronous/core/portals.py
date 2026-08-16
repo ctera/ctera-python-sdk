@@ -1,5 +1,7 @@
 from .base_command import BaseCommand
 from ...core import decorator
+from ...core.query import QueryParamBuilder
+from . import query
 
 
 class Portals(BaseCommand):
@@ -18,3 +20,12 @@ class Portals(BaseCommand):
         Browse the Global Admin
         """
         await self.browse('')
+
+    def tenants(self, include_deleted=False):
+        """
+        Get all tenants
+
+        :param bool,optional include_deleted: Include deleted tenants, defaults to False
+        """
+        param = QueryParamBuilder().include_classname().put('isTrashcan', include_deleted).build()
+        return query.iterator(self._core, '', param, 'getPortalsDisplayInfo')

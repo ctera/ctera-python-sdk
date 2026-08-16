@@ -759,7 +759,7 @@ class Zones(BaseCommand):
 
 
 class Exports(BaseCommand):
-    """ S3 Exports APIs """
+    """ Fusion Gateway S3 APIs """
 
     def get(self, name):
         """
