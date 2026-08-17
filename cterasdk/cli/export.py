@@ -332,6 +332,7 @@ ATTRIBUTE_PATHS = {
         'storage.status.summary.unusedDriveCount',
         'uid',
         'version',
+        'name'
     ],
 }
 
