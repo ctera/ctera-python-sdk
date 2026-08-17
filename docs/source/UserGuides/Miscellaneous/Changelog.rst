@@ -1,6 +1,17 @@
 Changelog
 =========
 
+2.20.45
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Added a CLI command for exporting the Global File System for User Center.
+
+Related issues and pull requests on GitHub: `#368 <https://github.com/ctera/ctera-python-sdk/pull/368>`_
+
+
 2.20.44
 -------
 
