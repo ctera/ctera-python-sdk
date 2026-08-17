@@ -10,7 +10,7 @@ from ..objects.asynchronous.core import AsyncGlobalAdmin
 from ..common import Object, parse_base_object_ref
 from ..convert.deserializers import fromjsonstr
 from ..exceptions.auth import AuthenticationError
-from ..exceptions.transport import HTTPError
+from ..exceptions.transport import HTTPError, InternalServerError, BadGateway, GatewayTimeout
 
 
 logger = logging.getLogger('cterasdk.export')
@@ -230,6 +230,13 @@ ATTRIBUTE_PATHS = {
         'zoneStatistics.totalSize',
     ],
 
+    '.portals[].buckets[].': [
+        'cloudDrive',
+        'createDate',
+        'modifiedDate',
+        'uid',
+    ],
+
     '.portals[].devices[].': [
         'backup.backupStatus.backupHistory.lastSuccessfulSync',
         'backup.backupStatus.backupHistory.totalFiles',
@@ -333,6 +340,7 @@ ANONYMIZE_ATTRIBUTES = [
     '.portals[].cloudDrives[].owner',
     '.portals[].cloudDrives[].group',
     '.portals[].devices[].owner',
+    '.poratls[].buckets[].cloudDrive',
     '.locations[].storageClass',
     '.locations[].dedicatedPortal',
     '.portals[].foldersGroups[].storageClass'
@@ -425,6 +433,21 @@ def count_attributes(o, attributes):
     )
 
 
+async def retry(coro, retries, return_on_error=None):
+    for attempt in range(retries):
+        try:
+            return await coro()
+        except (GatewayTimeout, BadGateway, InternalServerError) as e:
+            if attempt == retries - 1:
+                logger.error("Operation failed after %d attempts: %s", retries, e)
+                if return_on_error:
+                    return return_on_error
+                raise
+
+            logger.warning("Operation failed (attempt %d/%d), retrying: %s", attempt + 1, retries, e)
+            await asyncio.sleep(1)
+
+
 def expand_portal_schema(array, portals, attribute, identifier='portal'):
     for element in array:
         value = getattr(element, identifier)
@@ -487,23 +510,20 @@ async def inspect_devices(devices, max_workers):
 
     async def inspect_device(device, semaphore):
         async with semaphore:
-            try:
-                device.metadata = await device.api.get_multi('/', [
-                    '/config/fileservices/nfs',
-                    '/config/fileservices/ftp',
-                    '/config/fileservices/cifs',
-                    '/config/fileservices/share',
-                    '/config/av/realtime',
-                    '/config/ransomProtect',
-                    '/config/snmp',
-                    '/config/dedup/useLocalMapFileDedup',
-                    '/status/storage',
-                    '/config/cloudsync/cloudExtender/selectedFolders',
-                    '/config/cloudsync/metadataPinning',
-                    '/config/cloudsync/cloudExtender/operationMode'
-                ])
-            except HTTPError:
-                logger.error("Could not inspect device metadata for device (name=%s, uid=%s).", device.name, device.uid)
+            device.metadata = await device.api.get_multi('/', [
+                '/config/fileservices/nfs',
+                '/config/fileservices/ftp',
+                '/config/fileservices/cifs',
+                '/config/fileservices/share',
+                '/config/av/realtime',
+                '/config/ransomProtect',
+                '/config/snmp',
+                '/config/dedup/useLocalMapFileDedup',
+                '/status/storage',
+                '/config/cloudsync/cloudExtender/selectedFolders',
+                '/config/cloudsync/metadataPinning',
+                '/config/cloudsync/cloudExtender/operationMode'
+            ])
             return device
 
     tasks = []
@@ -511,7 +531,13 @@ async def inspect_devices(devices, max_workers):
 
     for device in devices:
         if inspectable(device):
-            tasks.append(inspect_device(device, semaphore))
+            tasks.append(
+                retry(
+                    lambda device=device: inspect_device(device, semaphore),
+                    3,
+                    device
+                )
+            )
 
     return await asyncio.gather(*tasks)
 
@@ -738,7 +764,7 @@ async def export_objects(admin):
 
     names = [portal.name for portal in portals.values()]
 
-    logger.info('Retrieving plans, folder groups, cloud drives, zones, exports and devices '
+    logger.info('Retrieving plans, folder groups, cloud drives, zones, buckets, and devices '
                 '(device inspection may take a few minutes)...')
     plans, folder_groups, cloudfolders, zones, buckets, devices = await asyncio.gather(
         enumerate_subscription_plans(admin),
@@ -780,6 +806,7 @@ async def main(args):
     async with AsyncGlobalAdmin(args.address) as admin:
         try:
             await admin.login(args.user, args.password)
+            await admin.portals.browse_global_admin()
         except AuthenticationError as error:
             logger.error("Login to %s as '%s' failed: %s", args.address, args.user, error)
             return None
@@ -788,6 +815,7 @@ async def main(args):
             return await export_objects(admin)
         except HTTPError as error:
             logger.error('Failed to export objects from %s: %s', args.address, error)
+            logger.error('Reason: %s', error.error)
             return None
         finally:
             await admin.logout()
@@ -804,13 +832,20 @@ def configure_transport_layer_security(no_verify):
     settings.core.asyn.settings.connector.ssl = not no_verify
 
 
+def configure_timeout():
+    settings.core.asyn.settings.timeout.sock_connect = 180
+    settings.core.asyn.settings.timeout.sock_read = 180
+    settings.edge.asyn.settings.timeout.sock_connect = 180
+    settings.edge.asyn.settings.timeout.sock_read = 180
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='CTERA Global File System - Configuration State Snapshot.')
     parser.add_argument('-a', dest='address', required=True, help='CTERA Portal address')
     parser.add_argument('-u', dest='user', required=True, help='Support or read-only admin username')
     parser.add_argument('-p', dest='password', required=True, help='Support or read-only admin password')
     parser.add_argument('-o', '--output', default=None,
-                         help='Path to write the export file to (default: <datetime>.<address>.cterasdk.export.json)')
+                        help='Path to write the export file to (default: <datetime>.<address>.cterasdk.export.json)')
     parser.add_argument('--no-verify', action='store_true', help='Disable TLS verification')
     parser.add_argument('--debug', action='store_true', help='Enable verbose (debug) logging')
     parser.add_argument('--shared', action='store_true', help='Enable if this Portal serves multiple distinct organizations.')
@@ -826,6 +861,7 @@ def run():
     args = parse_args()
     configure_logging(args.debug)
     configure_transport_layer_security(args.no_verify)
+    configure_timeout()
 
     result = asyncio.run(main(args))
     if result is None:

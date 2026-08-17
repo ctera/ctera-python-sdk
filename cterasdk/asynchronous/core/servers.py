@@ -35,7 +35,7 @@ class Servers(BaseCommand):
         if 'systemInfo' in include:
             tasks = [self.system_info(server) for server in servers]
             systems = await asyncio.gather(*tasks)
-            
+
             for server, sys_info in zip(servers, systems):
                 server.systemInfo = sys_info
 

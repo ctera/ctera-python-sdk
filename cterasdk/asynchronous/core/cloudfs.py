@@ -100,7 +100,8 @@ class Zones(BaseCommand):
                     info = await self._core.v1.api.execute(resource, 'getZoneBasicInfo', zone.zoneId)
                     zone.policyType = info.policyType
                     zone.devices = [device async for device in query.iterator(self._core, resource,
-                                                                              ZoneQueryParams(info.zoneId, DevicesDelta()), 'getZoneDevices')]
+                                                                              ZoneQueryParams(info.zoneId, DevicesDelta()),
+                                                                              'getZoneDevices')]
                     if zone.policyType == 'selectedFolders':
                         zone.cloudfolders = [
                             volume
