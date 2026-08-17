@@ -100,3 +100,64 @@ Uploading files
 ^^^^^^^^^^^^^^^
 
 ``cterasdk.io.dav upload -e ENDPOINT [-d DEST] files [files ...]``
+
+
+User Center
+-----------
+
+The ``cterasdk.platform.export`` command generates a snapshot of the CTERA
+Global File System configuration for import into CTERA User Center.
+
+Usage
+^^^^^
+
+.. code-block:: console
+
+   cterasdk.platform.export -a <ADDRESS> -u <USER> -p <PASSWORD> [options]
+
+Arguments
+^^^^^^^^^
+
+``-a ADDRESS``
+   CTERA Portal address.
+
+``-u USER``
+   Support or read-only administrator username.
+
+``-p PASSWORD``
+   Support or read-only administrator password.
+
+``-o, --output OUTPUT``
+   Path to write the export file to. By default, the file is written as
+   ``<datetime>.<address>.cterasdk.export.json``.
+
+``--no-verify``
+   Disable TLS certificate verification.
+
+``--debug``
+   Enable verbose debug logging.
+
+``--shared``
+   Enable this option if the Portal serves multiple distinct organizations.
+
+Examples
+^^^^^^^^
+
+Generate a configuration export using the default output filename:
+
+.. code-block:: console
+
+   cterasdk.platform.export -a portal.example.com -u admin -p password
+
+Specify an output file:
+
+.. code-block:: console
+
+   cterasdk.platform.export -a portal.example.com -u admin -p password \
+       -o platform-export.json
+
+Generate an export for a Portal serving multiple distinct organizations:
+
+.. code-block:: console
+
+   cterasdk.platform.export -a portal.example.com -u admin -p password --shared

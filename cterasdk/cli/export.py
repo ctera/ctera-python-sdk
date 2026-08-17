@@ -841,7 +841,7 @@ def configure_timeout():
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='CTERA Global File System - Configuration State Snapshot.')
+    parser = argparse.ArgumentParser(description='Generate a configuration export for import into User Center.')
     parser.add_argument('-a', dest='address', required=True, help='CTERA Portal address')
     parser.add_argument('-u', dest='user', required=True, help='Support or read-only admin username')
     parser.add_argument('-p', dest='password', required=True, help='Support or read-only admin password')
