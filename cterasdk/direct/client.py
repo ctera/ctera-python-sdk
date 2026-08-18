@@ -96,7 +96,8 @@ class DirectIO:
             Asynchronous Executable of Chunk Retrieval Tasks.
             """
             return await process_chunks(self._client, file_id, chunks, metadata.encryption_key,
-                                        asyncio.Semaphore(max_workers) if max_workers else None)
+                                        asyncio.Semaphore(max_workers) if max_workers else None,
+                                        encrypted=metadata.encrypted, compressed=metadata.compressed)
 
         return execute
 
