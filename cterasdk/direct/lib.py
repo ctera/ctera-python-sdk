@@ -89,6 +89,12 @@ async def decrypt_object(file_id, encrypted_object, encryption_key, chunk):
         raise DecryptBlockError(file_id, chunk)
 
 
+def _validate_block_length(file_id, data, chunk):
+    if chunk.length != len(data):
+        logger.error('Expected block length does not match downloaded block length.')
+        raise BlockValidationException(file_id, chunk)
+
+
 async def decompress_object(file_id, compressed_object, chunk):
     """
     Decompress Object.
@@ -100,16 +106,16 @@ async def decompress_object(file_id, compressed_object, chunk):
     """
     try:
         decompressed_object = decompress(compressed_object)
-        if chunk.length != len(decompressed_object):
-            logger.error('Expected block length does not match decrypted and decompressed block length.')
-            raise BlockValidationException(file_id, chunk)
+        _validate_block_length(file_id, decompressed_object, chunk)
         return decompressed_object
+    except BlockValidationException:
+        raise
     except DirectIOError:
         logger.error('Failed to decompress block.')
         raise DecompressBlockError(file_id, chunk)
 
 
-async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
+async def process_chunk(client, file_id, chunk, encryption_key, semaphore, encrypted=True, compressed=True):
     """
     Process a Chunk.
 
@@ -118,6 +124,8 @@ async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
     :param cterasdk.direct.types.Chunk chunk: Chunk.
     :param str encryption_key: Encryption key.
     :param asyncio.Semaphore semaphore: Semaphore.
+    :param bool,optional encrypted: Decrypt the downloaded object. Defaults to ``True``.
+    :param bool,optional compressed: Decompress the downloaded object. Defaults to ``True``.
 
     :returns: Block
     :rtype: cterasdk.direct.types.Block
@@ -130,10 +138,14 @@ async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
         if file_id:
             message = message + f" for file ID {file_id}"
         logger.debug(message)
-        encrypted_object = await get_object(client, file_id, chunk)
-        decrypted_object = await decrypt_object(file_id, encrypted_object, encryption_key, chunk)
-        decompressed_object = await decompress_object(file_id, decrypted_object, chunk)
-        return Block(file_id, chunk.number, chunk.offset, decompressed_object, chunk.length)
+        downloaded_object = await get_object(client, file_id, chunk)
+        if encrypted:
+            downloaded_object = await decrypt_object(file_id, downloaded_object, encryption_key, chunk)
+        if compressed:
+            downloaded_object = await decompress_object(file_id, downloaded_object, chunk)
+        else:
+            _validate_block_length(file_id, downloaded_object, chunk)
+        return Block(file_id, chunk.number, chunk.offset, downloaded_object, chunk.length)
 
     if semaphore is not None:
         async with semaphore:
@@ -141,7 +153,7 @@ async def process_chunk(client, file_id, chunk, encryption_key, semaphore):
     return await process(client, chunk, encryption_key)
 
 
-async def process_chunks(client, file_id, chunks, encryption_key, semaphore=None):
+async def process_chunks(client, file_id, chunks, encryption_key, semaphore=None, encrypted=True, compressed=True):
     """
     Process Chunks Asynchronously.
 
@@ -150,6 +162,8 @@ async def process_chunks(client, file_id, chunks, encryption_key, semaphore=None
     :param list[cterasdk.direct.types.Chunk] chunks: Chunk.
     :param str encryption_key: Encryption key.
     :param asyncio.Semaphore,optional semaphore: Semaphore.
+    :param bool,optional encrypted: Decrypt downloaded objects. Defaults to ``True``.
+    :param bool,optional compressed: Decompress downloaded objects. Defaults to ``True``.
     :returns: List of futures.
     :rtype: list[asyncio.Task]
     """
@@ -161,7 +175,8 @@ async def process_chunks(client, file_id, chunks, encryption_key, semaphore=None
     logger.debug(' '.join(message))
     futures = []
     for chunk in chunks:
-        futures.append(asyncio.create_task(process_chunk(client, file_id, chunk, encryption_key, semaphore)))
+        futures.append(asyncio.create_task(process_chunk(
+            client, file_id, chunk, encryption_key, semaphore, encrypted=encrypted, compressed=compressed)))
     return futures
 
 

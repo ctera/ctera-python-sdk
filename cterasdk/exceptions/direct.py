@@ -116,7 +116,7 @@ class DecompressBlockError(BlockError):
 class BlockValidationException(BlockError):
 
     def __init__(self, file_id, chunk):
-        super().__init__(errno.EIO, 'Expected block length does not match decrypted and decompressed block length', file_id, chunk)
+        super().__init__(errno.EIO, 'Expected block length does not match downloaded block length', file_id, chunk)
 
 
 class BlockInfo:
