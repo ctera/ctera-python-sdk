@@ -1,6 +1,16 @@
 Changelog
 =========
 
+2.20.46
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Support CTERA Direct I/O download for files stored in Fusion Direct cloudfolders
+
+Related issues and pull requests on GitHub: `#369 <https://github.com/ctera/ctera-python-sdk/pull/369>`_
+
 2.20.45
 -------
 
