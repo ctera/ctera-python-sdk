@@ -1,6 +1,14 @@
 Changelog
 =========
 
+2.20.47
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Added metadata attributes and versioned support to the ``export`` CLI command.
+
 2.20.46
 -------
 
