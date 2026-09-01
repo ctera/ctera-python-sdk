@@ -7,7 +7,7 @@ from datetime import datetime
 
 from .. import settings
 from ..objects.asynchronous.core import AsyncGlobalAdmin
-from ..common import Object, parse_base_object_ref
+from ..common import Object, Version, parse_base_object_ref
 from ..convert.deserializers import fromjsonstr
 from ..exceptions.auth import AuthenticationError
 from ..exceptions.transport import HTTPError, InternalServerError, BadGateway, GatewayTimeout
@@ -164,6 +164,8 @@ ATTRIBUTE_PATHS = {
         'uid',
         'usedArchiveStorageQuota',
         'usedStorageQuota',
+        'ssoType',
+        'domains'
     ],
 
     '.portals[].foldersGroups[].': [
@@ -245,8 +247,8 @@ ATTRIBUTE_PATHS = {
         'backup.backupStatus.deviceTime.TimeGMT',
         'backup.backupStatus.deviceTime.uptime',
         'backup.backupStatus.serviceStatus.desc',
-        'config.device.location',
-        'config.services.remoteAccess.adminRemoteAccess',
+        'deviceReportedStatus.config.device.location',
+        'deviceReportedStatus.config.services.remoteAccess.adminRemoteAccess',
         'createDate',
         'deviceConnectionStatus.connected',
         'deviceConnectionStatus.updateTime',
@@ -260,7 +262,8 @@ ATTRIBUTE_PATHS = {
         'deviceType',
         'metadata.config.av.realtime.mode',
         'metadata.cloudsync.cloudExtender.operationMode',
-        'metadata.cloudsync.cloudExtender.selectedFolders',
+        'metadata.cloudsync.cloudExtender.selectedFolders.isIncluded',
+        'metadata.cloudsync.cloudExtender.selectedFolders.children',
         'metadata.config.fileservices.cifs.SMBEncryption',
         'metadata.config.fileservices.cifs.mode',
         'metadata.config.fileservices.cifs.packetSigning',
@@ -286,6 +289,16 @@ ATTRIBUTE_PATHS = {
         'metadata.config.ransomProtect.enabled',
         'metadata.config.snmp.mode',
         'metadata.config.snmp.snmpV3.mode',
+        'metadata.config.system.autoSupport.enabled',
+        'metadata.config.logging.syslog.mode',
+        'metadata.config.logging.files.mode',
+        'metadata.config.logging.files.auditEvents',
+        'metadata.config.beatsClient.enabled',
+        'metadata.config.cloudsync.metadataPinning.enabledFolders',
+        'metadata.config.network.ports[].ip.DHCPMode',
+        'metadata.config.network.ports[].ip.autoObtainDNS',
+        'metadata.proc.certificates.serverCertificate.notAfter',
+        'metadata.proc.certificates.trustedCACertificates',
         'metadata.status.storage.arrays[].activeDevices',
         'metadata.status.storage.arrays[].allocatedCapacity',
         'metadata.status.storage.arrays[].availableCapacity',
@@ -349,8 +362,12 @@ ANONYMIZE_ATTRIBUTES = [
 
 
 COUNT_ATTRIBUTES = [
+    '.portals[].domains'
     '.portals[].devices[].metadata.config.fileservices.share[].acl',
-    '.portals[].devices[].metadata.config.fileservices.share[].trustedNFSClients'
+    '.portals[].devices[].metadata.config.fileservices.share[].trustedNFSClients',
+    '.portals[].devices[].metadata.proc.certificates.trustedCACertificates',
+    '.portals[].devices[].metadata.config.cloudsync.cloudExtender.selectedFolders.children',
+    '.portals[].devices[].metadata.config.cloudsync.metadataPinning.enabledFolders'
 ]
 
 
@@ -510,21 +527,37 @@ async def inspect_devices(devices, max_workers):
         )
 
     async def inspect_device(device, semaphore):
+
+        RESOURCES = {
+            '/config/cloudsync/metadataPinning': '7.11',
+            '/config/ransomProtect': '7.6',
+            '/config/dedup/useLocalMapFileDedup': '7.5',
+            '/config/system/autoSupport/enabled': '7.11',
+            '/config/beatsClient/enabled': '7.8',
+            '/proc/certificates': '7.8',
+        }
+
+        BASE = [
+            '/config/fileservices/nfs',
+            '/config/fileservices/ftp',
+            '/config/fileservices/cifs',
+            '/config/fileservices/share',
+            '/config/av/realtime',
+            '/config/snmp',
+            '/config/cloudsync/cloudExtender/selectedFolders',
+            '/config/cloudsync/cloudExtender/operationMode',
+            '/config/logging/syslog',
+            '/config/logging/files',
+            '/config/network/ports',
+            '/config/storage',
+        ]
+
+        version = Version(device.version)
+
+        include = BASE + [resource for resource, min_version in RESOURCES.items() if version >= min_version]
+
         async with semaphore:
-            device.metadata = await device.api.get_multi('/', [
-                '/config/fileservices/nfs',
-                '/config/fileservices/ftp',
-                '/config/fileservices/cifs',
-                '/config/fileservices/share',
-                '/config/av/realtime',
-                '/config/ransomProtect',
-                '/config/snmp',
-                '/config/dedup/useLocalMapFileDedup',
-                '/status/storage',
-                '/config/cloudsync/cloudExtender/selectedFolders',
-                '/config/cloudsync/metadataPinning',
-                '/config/cloudsync/cloudExtender/operationMode'
-            ])
+            device.metadata = await device.api.get_multi('/', include)
             return device
 
     tasks = []
@@ -543,7 +576,7 @@ async def inspect_devices(devices, max_workers):
     return await asyncio.gather(*tasks)
 
 
-async def enumerate_portals(admin):
+async def enumerate_portals(admin, max_workers=5):
     """
     Enumerate Virtual Portals.
 
@@ -553,7 +586,37 @@ async def enumerate_portals(admin):
     Returns:
         dict: A dictionary mapping an Virtual Portal's unique numeric ID to Virtual Portal objects.
     """
-    return {portal.uid: portal async for portal in admin.portals.tenants()}
+
+    generators = [
+        admin.portals.tenants(include_deleted)
+        for include_deleted in [False, True]
+    ]
+
+    mapping = {
+        portal.uid: portal
+        for generator in generators
+        async for portal in generator
+    }
+
+    async def inspect_portal(admin, portal, semaphore):
+        async with semaphore:
+            metadata = await admin.v1.api.get_multi(f'/portals/{portal.name}', [
+                '/ssoType',
+                '/domains'
+            ])
+            portal.ssoType = metadata.ssoType
+            portal.domains = metadata.domains
+            return portal
+
+    tasks = []
+    semaphore = asyncio.Semaphore(max_workers)
+
+    for portal in mapping.values():
+        tasks.append(inspect_portal(admin, portal, semaphore))
+
+    await asyncio.gather(*tasks)
+
+    return mapping
 
 
 async def enumerate_cloudfolders(admin, portals):
@@ -829,8 +892,8 @@ def configure_logging(debug):
     )
 
 
-def configure_transport_layer_security(no_verify):
-    settings.core.asyn.settings.connector.ssl = not no_verify
+def configure_transport_layer_security():
+    settings.core.asyn.settings.connector.ssl = False
 
 
 def configure_timeout():
@@ -847,7 +910,6 @@ def parse_args():
     parser.add_argument('-p', dest='password', required=True, help='Support or read-only admin password')
     parser.add_argument('-o', '--output', default=None,
                         help='Path to write the export file to (default: <datetime>.<address>.cterasdk.export.json)')
-    parser.add_argument('--no-verify', action='store_true', help='Disable TLS verification')
     parser.add_argument('--debug', action='store_true', help='Enable verbose (debug) logging')
     parser.add_argument('--shared', action='store_true', help='Enable if this Portal serves multiple distinct organizations.')
     args = parser.parse_args()
@@ -861,7 +923,7 @@ def parse_args():
 def run():
     args = parse_args()
     configure_logging(args.debug)
-    configure_transport_layer_security(args.no_verify)
+    configure_transport_layer_security()
     configure_timeout()
 
     result = asyncio.run(main(args))
