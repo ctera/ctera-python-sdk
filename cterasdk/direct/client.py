@@ -73,6 +73,7 @@ class DirectIO:
         :returns: Streamer object.
         :rtype: cterasdk.direct.stream.Streamer
         """
+        byte_range = byte_range if byte_range is not None else ByteRange.default()
         executor = self.executor(await self._chunks(file_id), byte_range=byte_range, max_workers=max_workers)
         return Streamer(executor, byte_range)
 
@@ -95,7 +96,9 @@ class DirectIO:
             """
             Asynchronous Executable of Chunk Retrieval Tasks.
             """
-            return await process_chunks(self._client, file_id, chunks, metadata.encryption_key,
+            return await process_chunks(self._client, file_id, chunks,
+                                        metadata.encryption_key,
+                                        metadata.compression_library,
                                         asyncio.Semaphore(max_workers) if max_workers else None)
 
         return execute
