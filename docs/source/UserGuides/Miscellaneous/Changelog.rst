@@ -7,7 +7,9 @@ Changelog
 Bug Fixes
 ^^^^^^^^^
 
-* Restore portal validation details in ``admins.modify`` failure messages when the API returns an HTTP error with a portal ``msg`` attribute (for example, when the new password matches the current password).
+* Restore portal validation details in ``admins.modify`` failure messages when the API returns an
+  HTTP error with a portal ``msg`` attribute (for example, when the new password matches the current
+  password).
 
 Related issue: `SDK-369 <https://cteranet.atlassian.net/browse/SDK-369>`_
 
