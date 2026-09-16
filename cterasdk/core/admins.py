@@ -2,6 +2,7 @@ import logging
 
 from .base_command import BaseCommand
 from ..exceptions import CTERAException, ObjectNotFoundException
+from ..exceptions.transport import HTTPError
 from ..common import Object, DateTimeUtils
 from ..common import union
 from . import query
@@ -127,7 +128,17 @@ class Administrators(BaseCommand):
             return response
         except CTERAException as error:
             logger.error('Could not modify user: %s', ref)
-            raise CTERAException(f'Could not modify user: {ref}') from error
+            raise CTERAException(Administrators._modify_failure_message(ref, error)) from error
+
+    @staticmethod
+    def _modify_failure_message(ref, error):
+        message = f'Could not modify user: {ref}'
+        if not isinstance(error, HTTPError):
+            return message
+        err_detail = error.error.response.error
+        if hasattr(err_detail, 'msg') and err_detail.msg:
+            return f'{message}. {err_detail.msg}'
+        return message
 
     def delete(self, name):
         """

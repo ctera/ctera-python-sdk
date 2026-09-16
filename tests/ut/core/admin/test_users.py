@@ -319,6 +319,41 @@ class TestCoreAdministrators(base_admin.BaseCoreTest):
         actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, new_user_object)
 
+    def test_modify_admin_user_same_password_includes_portal_msg(self):
+        current_user_object = self._get_admin_object(
+            name=self._username,
+            email=self._email,
+            firstName=self._first_name,
+            lastName=self._last_name,
+            password=self._password,
+            role=self._role,
+            company=None,
+            comment=None
+        )
+        portal_msg = 'Object validation failed (field: password error: Old and new passwords cannot be the same)'
+        password_value = 'Str0ngP@ssword!1'
+        portal_error = Object()
+        portal_error.msg = portal_msg
+        field = Object()
+        field.name = 'password'
+        field.desc = 'Old and new passwords cannot be the same'
+        field.val = password_value
+        portal_error.fields = [field]
+        http_error = Object()
+        http_error.request = Object(url='/administrators/' + self._username)
+        http_error.response = Object(status=500, error=portal_error)
+        self._init_global_admin(get_response=current_user_object)
+        self._global_admin.api.put = mock.MagicMock(side_effect=exceptions.transport.InternalServerError(http_error))
+        with self.assertRaises(exceptions.CTERAException) as error:
+            admins.Administrators(self._global_admin).modify(self._username, password=self._password)
+        ref = f'/administrators/{self._username}'
+        self._global_admin.api.get.assert_called_once_with(ref)
+        self._global_admin.api.put.assert_called_once_with(ref, mock.ANY)
+        exception_text = str(error.exception)
+        self.assertIn(f'Could not modify user: {ref}', exception_text)
+        self.assertIn('Old and new passwords cannot be the same', exception_text)
+        self.assertNotIn(password_value, exception_text)
+
     def test_delete_admin_user(self):
         execute_response = 'Success'
         self._init_global_admin(execute_response=execute_response)
