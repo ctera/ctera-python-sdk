@@ -127,8 +127,9 @@ class Administrators(BaseCommand):
             logger.info("User modified. %s", {'username': user.name})
             return response
         except CTERAException as error:
-            logger.error('Could not modify user: %s', ref)
-            raise CTERAException(Administrators._modify_failure_message(ref, error)) from error
+            failure_message = Administrators._modify_failure_message(ref, error)
+            logger.error('%s', failure_message)
+            raise CTERAException(failure_message) from error
 
     @staticmethod
     def _modify_failure_message(ref, error):
