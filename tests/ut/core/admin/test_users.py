@@ -319,7 +319,8 @@ class TestCoreAdministrators(base_admin.BaseCoreTest):
         actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, new_user_object)
 
-    def test_modify_admin_user_same_password_includes_portal_msg(self):
+    @mock.patch('cterasdk.core.admins.logger')
+    def test_modify_admin_user_same_password_includes_portal_msg(self, logger_mock):
         current_user_object = self._get_admin_object(
             name=self._username,
             email=self._email,
@@ -353,6 +354,51 @@ class TestCoreAdministrators(base_admin.BaseCoreTest):
         self.assertIn(f'Could not modify user: {ref}', exception_text)
         self.assertIn('Old and new passwords cannot be the same', exception_text)
         self.assertNotIn(password_value, exception_text)
+        logger_mock.error.assert_called_once_with('%s', exception_text)
+
+    def test_modify_admin_user_http_error_without_portal_msg_uses_generic_message(self):
+        current_user_object = self._get_admin_object(
+            name=self._username,
+            email=self._email,
+            firstName=self._first_name,
+            lastName=self._last_name,
+            password=self._password,
+            role=self._role,
+            company=None,
+            comment=None
+        )
+        portal_error = Object()
+        http_error = Object()
+        http_error.request = Object(url='/administrators/' + self._username)
+        http_error.response = Object(status=500, error=portal_error)
+        self._init_global_admin(get_response=current_user_object)
+        self._global_admin.api.put = mock.MagicMock(side_effect=exceptions.transport.InternalServerError(http_error))
+        ref = f'/administrators/{self._username}'
+        expected_message = f'Could not modify user: {ref}'
+        with self.assertRaises(exceptions.CTERAException) as error:
+            admins.Administrators(self._global_admin).modify(self._username, password=self._password)
+        self.assertEqual(expected_message, str(error.exception))
+
+    def test_modify_admin_user_non_http_error_uses_generic_message(self):
+        current_user_object = self._get_admin_object(
+            name=self._username,
+            email=self._email,
+            firstName=self._first_name,
+            lastName=self._last_name,
+            password=self._password,
+            role=self._role,
+            company=None,
+            comment=None
+        )
+        self._init_global_admin(get_response=current_user_object)
+        self._global_admin.api.put = mock.MagicMock(
+            side_effect=exceptions.ObjectNotFoundException('Object not found')
+        )
+        ref = f'/administrators/{self._username}'
+        expected_message = f'Could not modify user: {ref}'
+        with self.assertRaises(exceptions.CTERAException) as error:
+            admins.Administrators(self._global_admin).modify(self._username, password=self._password)
+        self.assertEqual(expected_message, str(error.exception))
 
     def test_delete_admin_user(self):
         execute_response = 'Success'
