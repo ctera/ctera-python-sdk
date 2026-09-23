@@ -107,6 +107,7 @@ ATTRIBUTE_PATHS = {
     ],
 
     '.locations[].': [
+        '_classname',
         'bucket',
         'connected',
         'createDate',
