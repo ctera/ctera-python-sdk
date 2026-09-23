@@ -284,6 +284,7 @@ ATTRIBUTE_PATHS = {
         'metadata.config.fileservices.share[].exportToWebdav',
         'metadata.config.fileservices.share[].screenedFileTypesEnabled',
         'metadata.config.fileservices.share[].trustedNFSClients',
+        'metadata.config.device.activeLicenseType',
         'metadata.config.dedup.useLocalMapFileDedup',
         'metadata.config.ransomProtect.enableHoneypot',
         'metadata.config.ransomProtect.enabled',
@@ -538,6 +539,7 @@ async def inspect_devices(devices, max_workers):
         }
 
         BASE = [
+            '/config/device',
             '/config/fileservices/nfs',
             '/config/fileservices/ftp',
             '/config/fileservices/cifs',
