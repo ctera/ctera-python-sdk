@@ -364,7 +364,7 @@ ANONYMIZE_ATTRIBUTES = [
 
 
 COUNT_ATTRIBUTES = [
-    '.portals[].domains'
+    '.portals[].domains',
     '.portals[].devices[].metadata.config.fileservices.share[].acl',
     '.portals[].devices[].metadata.config.fileservices.share[].trustedNFSClients',
     '.portals[].devices[].metadata.proc.certificates.trustedCACertificates',
