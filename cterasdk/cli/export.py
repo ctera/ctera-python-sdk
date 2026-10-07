@@ -98,6 +98,7 @@ ATTRIBUTE_PATHS = {
         'isThumbnailsServer',
         'mainDB',
         'modifiedDate',
+        'uid',
         'name',
         'previewStatus',
         'renderingServer',
@@ -108,6 +109,7 @@ ATTRIBUTE_PATHS = {
 
     '.locations[].': [
         '_classname',
+        'uid',
         'bucket',
         'connected',
         'createDate',
@@ -198,7 +200,7 @@ ATTRIBUTE_PATHS = {
         'extendedAttributes.enable',
         'folderQuota',
         'folderStats.cloudFolderSize',
-        'folderStats.cloudFolderSize.totalFiles',
+        'folderStats.totalFiles',
         'globalFileLockSettings.enabled',
         'globalFileLockSettings.globalFileLockExtensions',
         'group',
@@ -206,6 +208,7 @@ ATTRIBUTE_PATHS = {
         'modifiedDate',
         'owner',
         'teamProject',
+        'name',
         'uid',
         'wormSettings.gracePeriod.amount',
         'wormSettings.gracePeriod.type',
@@ -260,6 +263,19 @@ ATTRIBUTE_PATHS = {
         'deviceReportedStatus.status.device.portalFirmware.guid',
         'deviceReportedStatus.status.device.portalFirmware.md5',
         'deviceReportedStatus.status.device.SerialNumber',
+        'deviceReportedStatus.proc.storage.summary.freeVolumeSpace',
+        'deviceReportedStatus.proc.storage.summary.totalVolumeSpace',
+        'deviceReportedStatus.proc.storage.summary.usedVolumeSpace',
+        'deviceReportedStatus.status.storage.summary.allocatedDriveSpace',
+        'deviceReportedStatus.status.storage.summary.availableDriveSpace',
+        'deviceReportedStatus.status.storage.summary.encryptedVolumeCount',
+        'deviceReportedStatus.status.storage.summary.logicalDriveSpace',
+        'deviceReportedStatus.status.storage.summary.physicalDriveSpace',
+        'deviceReportedStatus.status.storage.summary.spareDriveCount',
+        'deviceReportedStatus.status.storage.summary.state',
+        'deviceReportedStatus.status.storage.summary.totalDriveCount',
+        'deviceReportedStatus.status.storage.summary.totalVolumeCount',
+        'deviceReportedStatus.status.storage.summary.unusedDriveCount',
         'deviceType',
         'metadata.config.av.realtime.mode',
         'metadata.cloudsync.cloudExtender.operationMode',
@@ -332,19 +348,6 @@ ATTRIBUTE_PATHS = {
         'metadata.status.storage.volumes[].status',
         'modifiedDate',
         'owner',
-        'proc.storage.summary.freeVolumeSpace',
-        'proc.storage.summary.totalVolumeSpace',
-        'proc.storage.summary.usedVolumeSpace',
-        'storage.status.summary.allocatedDriveSpace',
-        'storage.status.summary.availableDriveSpace',
-        'storage.status.summary.encryptedVolumeCount',
-        'storage.status.summary.logicalDriveSpace',
-        'storage.status.summary.physicalDriveSpace',
-        'storage.status.summary.spareDriveCount',
-        'storage.status.summary.state',
-        'storage.status.summary.totalDriveCount',
-        'storage.status.summary.totalVolumeCount',
-        'storage.status.summary.unusedDriveCount',
         'uid',
         'version',
         'name'
@@ -553,6 +556,7 @@ async def inspect_devices(devices, max_workers):
             '/config/logging/files',
             '/config/network/ports',
             '/config/storage',
+            '/status/storage'
         ]
 
         version = Version(device.version)
@@ -632,12 +636,12 @@ async def enumerate_cloudfolders(admin, portals):
     """
     include = [
         "uid",
+        "name",
         "createDate",
         "modifiedDate",
         "enableSyncWinNtExtendedAttributes",
         "extendedAttributes.enable",
-        "folderStats.cloudFolderSize",
-        "folderStats.totalFiles",
+        "folderStats",
         "globalFileLockSettings",
         "group",
         "owner",
@@ -742,6 +746,7 @@ async def enumerate_servers(admin):
         admin: Global administrator session.
     """
     include = [
+        'uid',
         'createDate',
         'modifiedDate',
         'connected',
@@ -770,6 +775,7 @@ async def enumerate_locations(admin):
         admin: Global administrator session.
     """
     include = [
+        "uid",
         "connected",
         "name",
         "storage",
