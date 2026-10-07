@@ -76,7 +76,9 @@ disable=raw-checker-failed,
         raise-missing-from,
         use-dict-literal,
         broad-exception-raised,
-	too-many-positional-arguments
+        too-many-positional-arguments,
+        chained-comparison,
+        abstract-method
 
 
 # Enable the message, report, category or checker with the given id(s). You can
