@@ -6,6 +6,9 @@ Exceptions
    :members:
    :show-inheritance:
 
+:attr:`~cterasdk.exceptions.CTERAException.reason` returns the portal ``msg`` from
+:attr:`~BaseException.__cause__` when the cause is an HTTP transport error.
+
 .. autoclass:: cterasdk.exceptions.ObjectNotFoundException
    :noindex:
    :members:
