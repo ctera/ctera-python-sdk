@@ -319,8 +319,7 @@ class TestCoreAdministrators(base_admin.BaseCoreTest):
         actual_param = self._global_admin.api.put.call_args[0][1]
         self._assert_equal_objects(actual_param, new_user_object)
 
-    @mock.patch('cterasdk.core.admins.logger')
-    def test_modify_admin_user_same_password_includes_portal_msg(self, logger_mock):
+    def test_modify_admin_user_same_password_exposes_portal_reason(self):
         current_user_object = self._get_admin_object(
             name=self._username,
             email=self._email,
@@ -350,11 +349,9 @@ class TestCoreAdministrators(base_admin.BaseCoreTest):
         ref = f'/administrators/{self._username}'
         self._global_admin.api.get.assert_called_once_with(ref)
         self._global_admin.api.put.assert_called_once_with(ref, mock.ANY)
-        exception_text = str(error.exception)
-        self.assertIn(f'Could not modify user: {ref}', exception_text)
-        self.assertIn('Old and new passwords cannot be the same', exception_text)
-        self.assertNotIn(password_value, exception_text)
-        logger_mock.error.assert_called_once_with('%s', exception_text)
+        self.assertEqual(f'Could not modify user: {ref}', str(error.exception))
+        self.assertIn('Old and new passwords cannot be the same', error.exception.reason)
+        self.assertNotIn(password_value, error.exception.reason)
 
     def test_modify_admin_user_http_error_without_portal_msg_uses_generic_message(self):
         current_user_object = self._get_admin_object(
@@ -378,6 +375,7 @@ class TestCoreAdministrators(base_admin.BaseCoreTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             admins.Administrators(self._global_admin).modify(self._username, password=self._password)
         self.assertEqual(expected_message, str(error.exception))
+        self.assertIsNone(error.exception.reason)
 
     def test_modify_admin_user_non_http_error_uses_generic_message(self):
         current_user_object = self._get_admin_object(
@@ -399,6 +397,7 @@ class TestCoreAdministrators(base_admin.BaseCoreTest):
         with self.assertRaises(exceptions.CTERAException) as error:
             admins.Administrators(self._global_admin).modify(self._username, password=self._password)
         self.assertEqual(expected_message, str(error.exception))
+        self.assertIsNone(error.exception.reason)
 
     def test_delete_admin_user(self):
         execute_response = 'Success'

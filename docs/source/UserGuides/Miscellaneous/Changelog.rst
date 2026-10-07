@@ -7,9 +7,8 @@ Changelog
 Bug Fixes
 ^^^^^^^^^
 
-* Restore portal validation details in ``admins.modify`` failure messages when the API returns an
-  HTTP error with a portal ``msg`` attribute (for example, when the new password matches the current
-  password).
+* Expose portal validation details via :attr:`~cterasdk.exceptions.CTERAException.reason` (for
+  example, when ``admins.modify`` fails because the new password matches the current password).
 
 Related issue: `SDK-369 <https://cteranet.atlassian.net/browse/SDK-369>`_
 
