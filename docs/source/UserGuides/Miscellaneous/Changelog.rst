@@ -1,6 +1,17 @@
 Changelog
 =========
 
+2.20.48
+-------
+
+Bug Fixes
+^^^^^^^^^
+
+* Expose portal validation details via :attr:`~cterasdk.exceptions.CTERAException.reason` (for
+  example, when ``admins.modify`` fails because the new password matches the current password).
+
+Related issue: `SDK-369 <https://cteranet.atlassian.net/browse/SDK-369>`_
+
 2.20.47
 -------
 
