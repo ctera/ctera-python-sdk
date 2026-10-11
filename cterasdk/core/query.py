@@ -31,10 +31,10 @@ def v1_callback_function(core, path, name=None, *, callback_response=None):
     return Command(execute if name else database, core, path, name or 'query')
 
 
-def v2_callback_function(core, path):
+def v2_callback_function(core, path, *, callback_response=None):
 
     def wrapper(core, path, params):
-        return v2DefaultResponse(core.clients.v2.get(path, params=dict(params)))
+        return callback_response(core.clients.v2.get(path, params=dict(params)))
 
     return Command(wrapper, core, path)
 
@@ -53,16 +53,15 @@ def iterator(core, path, param=None, name=None, *, callback_response=None, versi
 
     :returns: Query iterator object
     """
-
-    if version != 'v2':
-
-        callback_response = callback_response if callback_response else DefaultResponse
-
+    if version == 'v2':
+        callback_response = callback_response or v2DefaultResponse
+        callback_function = v2_callback_function(core, path, callback_response=callback_response)
+        params = v2QueryParams(**(param or {}))
+    else:
+        callback_response = callback_response or DefaultResponse
         callback_function = v1_callback_function(core, path, name, callback_response=callback_response)
-
-        return QueryIterator(callback_function, param if param else QueryParams())
-
-    return QueryIterator(v2_callback_function(core, path), v2QueryParams(**param))
+        params = param or QueryParams()
+    return QueryIterator(callback_function, params)
 
 
 class Restriction:

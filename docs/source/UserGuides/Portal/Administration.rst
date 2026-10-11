@@ -395,6 +395,63 @@ Plan Auto Assignment Rules
    """Assign 'Default' if no match applies"""
    admin.plans.auto_assign.set_policy([], True, 'Default')
 
+Quotas
+======
+
+.. automethod:: cterasdk.core.quotas.CloudDrives.all
+   :noindex:
+
+.. code-block:: python
+
+   rules = list(admin.quotas.drives.all())
+
+.. automethod:: cterasdk.core.quotas.CloudDrives.add
+   :noindex:
+
+.. code-block:: python
+
+   """Add a quota rule for a domain user"""
+   admin.quotas.drives.add('shared_volume', core_types.UserAccount('domain_user', 'example.com'), 10)  # 10 GB
+
+   """Add a quota rule for a local user"""
+   admin.quotas.drives.add('personal_volume', core_types.UserAccount('local_user'), 100)  # 100 GB
+
+.. automethod:: cterasdk.core.quotas.CloudDrives.remove
+   :noindex:
+
+.. code-block:: python
+
+   admin.quotas.drives.remove('shared_volume', core_types.UserAccount('domain_user', 'example.com'))
+
+   admin.quotas.drives.remove('personal_volume', core_types.UserAccount('local_user'))
+
+.. automethod:: cterasdk.core.quotas.Subfolders.all
+   :noindex:
+
+.. code-block:: python
+
+   rules = list(admin.quotas.subfolders.all())
+
+.. automethod:: cterasdk.core.quotas.Subfolders.add
+   :noindex:
+
+.. code-block:: python
+
+   """Add a subfolder quota rule for a local user"""
+   admin.quotas.subfolders.add('My Files/the/quick/brown/fox', core_types.UserAccount('local_user'), 200, enforce=True)  # 200 MB
+
+   """Add a subfolder quota rule for a domain user"""
+   admin.quotas.subfolders.add('My Files/abc', core_types.UserAccount('domain_user', 'example.com'), 1024, enforce=False)  # 1 GB
+
+.. automethod:: cterasdk.core.quotas.Subfolders.remove
+   :noindex:
+
+.. code-block:: python
+
+   admin.quotas.subfolders.remove('My Files/the/quick/brown/fox', core_types.UserAccount('local_user'))
+
+   admin.quotas.subfolders.remove('My Files/abc', core_types.UserAccount('domain_user', 'example.com'))
+
 Configuration Templates
 =======================
 

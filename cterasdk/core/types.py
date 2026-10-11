@@ -3,7 +3,8 @@
 from abc import ABC
 from datetime import datetime
 from collections import namedtuple
-from ..common import DateTimeUtils, StringCriteriaBuilder, PredefinedListCriteriaBuilder, CustomListCriteriaBuilder, Object
+from ..common import DateTimeUtils, StringCriteriaBuilder, PredefinedListCriteriaBuilder, CustomListCriteriaBuilder, Object, \
+                     parse_base_object_ref
 from ..lib.storage import commonfs
 
 from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, ProtectionLevel, \
@@ -79,6 +80,15 @@ class PortalAccount(ABC):
             return GroupAccount(collaborator.name, collaborator.domain)
         return None
 
+    @staticmethod
+    def from_base_object_ref(ref):
+        r = parse_base_object_ref(ref)
+        if r.classname == 'ADUser':
+            return UserAccount(r.name, r.more)
+        if r.classname == 'PortalUser':
+            return UserAccount(r.name)
+        raise ValueError(f"Invalid account type: '{r.classname}'. Expected 'ADUser', or 'PortalUser'")
+
     def __eq__(self, other):
         if type(self) is type(other):
             if self.account_type == other.account_type and self.name == other.name and self.directory == other.directory:
@@ -88,6 +98,9 @@ class PortalAccount(ABC):
     @property
     def upn(self):
         return f'{self.name}@{self.directory}' if self.directory else self.name
+
+    def __repr__(self):
+        return self.upn
 
     def __str__(self):
         return (self.directory if self.directory else '') + '\\' + self.name
@@ -1298,4 +1311,37 @@ class DevicesDelta(ZoneDelta):
             _classname='ZoneDeviceDelta',
             added=[],
             removed=[]
+        )
+
+
+class QuotaRule:
+    """
+    Quota Rule
+
+    :ivar int volume: Cloud Drive Folder ID
+    :ivar str path: Path
+    :ivar cterasdk.core.types.UserAccount owner: Cloud Drive Folder Owner
+    :ivar int limit_mb: Quota limit in megabytes
+    :ivar int usage_mb: Current usage in megabytes
+    :ivar bool enforce: Quota enforcement enabled
+    :ivar bool deleted: Target folder is deleted 
+    """
+    def __init__(self, volume, path, owner, limit_mb, usage_mb, enforce, deleted):
+        self.volume = volume
+        self.path = path
+        self.owner = owner
+        self.limit_mb = limit_mb
+        self.usage_mb = usage_mb
+        self.enforce = enforce
+        self.deleted = deleted
+
+    def __repr__(self):
+        return (
+            f'{self.__class__.__name__}('
+            f'path={self.path}, '
+            f'owner={self.owner!r}, '
+            f'megabytes={self.limit_mb}, '
+            f'usage={self.usage_mb}, '
+            f'enforce={self.enforce}, '
+            f'deleted={self.deleted})'
         )
