@@ -55,7 +55,7 @@ class CloudDrives(BaseCommand):
     def add(self, name, owner, quota):
         """
         Add Cloud Drive Folder Quota Rule
-        
+
         :param str name: Cloud Drive Folder name
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the folder
         :param int quota: Quota in GB
@@ -67,7 +67,7 @@ class CloudDrives(BaseCommand):
     def remove(self, name, owner):
         """
         Remove Cloud Drive Folder Quota
-        
+
         :param str name: Cloud Drive Folder name
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the folder
         """
@@ -99,7 +99,7 @@ class Subfolders(BaseCommand):
     def add(self, path, owner, quota, enforce):
         """
         Add Subfolder Quota Rule
-        
+
         :param str path: Path
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the folder
         :param int quota: Quota in MB
@@ -120,7 +120,7 @@ class Subfolders(BaseCommand):
     def remove(self, path, owner):
         """
         Remove Subfolder Folder Quota
-        
+
         :param str path: Path
         :param cterasdk.core.types.UserAccount owner: User account, the owner of the folder
         """
