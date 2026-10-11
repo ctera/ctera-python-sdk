@@ -441,3 +441,31 @@ class NetworkInterface(Object):
     """
     def __init__(self, port, name, mac):
         super().__init__(port=port, name=name, mac=mac)
+
+
+class QuotaRule:
+    """
+    Quota Rule
+
+    :ivar str path: Path
+    :ivar str owner: Owner
+    :ivar int usage_mb: Current usage in megabytes
+    :ivar int free_mb: Free space in megabytes
+    :ivar bool enforce: Quota enforcement enabled
+    """
+    def __init__(self, path, owner, usage_mb, free_mb, enforce):
+        self.path = path
+        self.owner = owner
+        self.usage_mb = usage_mb
+        self.free_mb = free_mb
+        self.enforce = enforce
+
+    def __repr__(self):
+        return (
+            f'{self.__class__.__name__}('
+            f'path={self.path}, '
+            f'owner={self.owner}, '
+            f'usage={self.usage_mb}, '
+            f'free={self.free_mb}, '
+            f'enforce={self.enforce})'
+        )

@@ -10,7 +10,7 @@ from ...lib.session.edge import Session
 from ...edge import (
     afp, aio, antivirus, array, audit, backup, cache, cli, config, connection, ctera_migrate,
     dedup, directoryservice, drive, files, firmware, ftp, groups, licenses, login,
-    logs, mail, network, nfs, ntp, power, remote, rsync, ransom_protect, services,
+    logs, mail, network, nfs, ntp, power, quotas, remote, rsync, ransom_protect, services,
     shares, shell, smb, snmp, ssh, ssl, statistics, support, sync, syslog, tasks, telnet,
     timezone, users, volumes,
 )
@@ -101,6 +101,7 @@ class Edge(Management):  # pylint: disable=too-many-instance-attributes
         self.nfs = nfs.NFS(self)
         self.ntp = ntp.NTP(self)
         self.power = power.Power(self)
+        self.quotas = quotas.Quotas(self)
         self.ransom_protect = ransom_protect.RansomProtect(self)
         self.rsync = rsync.RSync(self)
         self.services = services.Services(self)

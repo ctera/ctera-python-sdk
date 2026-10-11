@@ -1324,7 +1324,7 @@ class QuotaRule:
     :ivar int limit_mb: Quota limit in megabytes
     :ivar int usage_mb: Current usage in megabytes
     :ivar bool enforce: Quota enforcement enabled
-    :ivar bool deleted: Target folder is deleted 
+    :ivar bool deleted: Target folder is deleted
     """
     def __init__(self, volume, path, owner, limit_mb, usage_mb, enforce, deleted):
         self.volume = volume

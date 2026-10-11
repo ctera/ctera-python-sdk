@@ -106,6 +106,13 @@ class SubfoldersQuotaResponse(BaseResponse):
         return self._response.data.content
 
 
+class QuotaResponse(DefaultResponse):
+
+    @property
+    def objects(self):
+        return self._response.entitiesQuota
+
+
 class QueryLogsResponse(DefaultResponse):
 
     @property

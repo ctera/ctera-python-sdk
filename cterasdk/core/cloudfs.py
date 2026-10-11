@@ -283,7 +283,7 @@ class CloudDrives(BaseCommand):
         if winacls:
             param.enableSyncWinNtExtendedAttributes = winacls
         if quota:
-            param.folderQuota = None if quota == QuotaValue.Unlimited else quota 
+            param.folderQuota = None if quota == QuotaValue.Unlimited else quota
         if archive_settings:
             param.archiveSettings = archive_settings
         if compliance_settings:
