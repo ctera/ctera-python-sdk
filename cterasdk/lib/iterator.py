@@ -94,6 +94,25 @@ class v2DefaultResponse(BaseResponse):
         return self._response.data.items
 
 
+class SubfoldersQuotaResponse(BaseResponse):
+
+    @property
+    def more(self):
+        return not self._response.data.last
+
+    @property
+    @abstractmethod
+    def objects(self):
+        return self._response.data.content
+
+
+class QuotaResponse(DefaultResponse):
+
+    @property
+    def objects(self):
+        return self._response.entitiesQuota
+
+
 class QueryLogsResponse(DefaultResponse):
 
     @property

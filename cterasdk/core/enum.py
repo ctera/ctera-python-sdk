@@ -795,3 +795,12 @@ class KRBSecurity:
     KRB5 = "krb5"
     KRB5I = "krb5i"
     KRB5P = "krb5p"
+
+
+class QuotaValue:
+    """
+    Quota Value
+
+    :ivar str Unlimited: Unlimited
+    """
+    Unlimited = 'Unlimited'

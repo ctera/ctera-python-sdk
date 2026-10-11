@@ -627,6 +627,19 @@ Subfolder Pinning
    """ Remove all folder pins """
    edge.cache.unpin_all()
 
+
+Quotas
+======
+
+.. automethod:: cterasdk.edge.quotas.Quotas
+   :noindex:
+
+.. code-block:: python
+
+   for policy in edge.quotas.all():
+       print(policy.path, policy.usage_mb, policy.free_mb, policy.enforce)
+
+
 Cloud Backup
 ============
 

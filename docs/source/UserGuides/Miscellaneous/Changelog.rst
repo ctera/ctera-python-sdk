@@ -1,6 +1,16 @@
 Changelog
 =========
 
+2.20.49
+-------
+
+Improvements
+^^^^^^^^^^^^
+
+* Support management of Cloud Drive Folder and subfolder quotas through CTERA Portal.
+* Support enumeration of quota rules through CTERA Edge Filer.
+
+
 2.20.47
 -------
 

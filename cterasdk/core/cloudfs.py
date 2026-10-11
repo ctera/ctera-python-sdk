@@ -4,7 +4,7 @@ import logging
 
 from .base_command import BaseCommand
 from . import query, devices
-from .enum import ListFilter, PolicyType
+from .enum import ListFilter, PolicyType, QuotaValue
 from .types import ArchiveSettingsBuilder, ComplianceSettingsBuilder, ExtendedAttributesBuilder, DevicesDelta, FoldersDelta
 from ..common import union, Object
 from ..exceptions import CTERAException, ObjectNotFoundException
@@ -283,7 +283,7 @@ class CloudDrives(BaseCommand):
         if winacls:
             param.enableSyncWinNtExtendedAttributes = winacls
         if quota:
-            param.folderQuota = quota
+            param.folderQuota = None if quota == QuotaValue.Unlimited else quota
         if archive_settings:
             param.archiveSettings = archive_settings
         if compliance_settings:

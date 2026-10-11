@@ -23,6 +23,7 @@ __all__ = [
     'ntp',
     'power',
     'query',
+    'quotas',
     'remote',
     'rsync',
     'ransom_protect',

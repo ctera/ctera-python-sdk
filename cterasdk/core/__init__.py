@@ -14,6 +14,7 @@ __all__ = [
     'messaging',
     'portals',
     'query',
+    'quotas',
     'remote',
     'reports',
     'servers',

@@ -8,7 +8,7 @@ from ...lib.session.core import Session
 from ...core import (
     activation, admins, antivirus, buckets, cli, cloudfs, connection, credentials,
     devices, directoryservice, domains, files, firmwares, groups, kms, licenses,
-    login, logs, mail, messaging, plans, portals, reports, roles, servers, settings,
+    login, logs, mail, messaging, plans, portals, quotas, reports, roles, servers, settings,
     setup, shares, ssl, startup, storage_classes, syslog, tasks, templates, users,
 )
 
@@ -65,6 +65,7 @@ class Portal(Management):  # pylint: disable=too-many-instance-attributes
         self.groups = groups.Groups(self)
         self.logs = logs.Logs(self)
         self.plans = plans.Plans(self)
+        self.quotas = quotas.Quotas(self)
         self.reports = reports.Reports(self)
         self.roles = roles.Roles(self)
         self.settings = settings.Settings(self)
