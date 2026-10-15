@@ -17,6 +17,10 @@ class HTTPError(CTERAException):
         self.name = status.name
         self.error = error
 
+    @property
+    def reason(self):
+        return getattr(self.error.response.error, 'msg', None)
+
 
 class BadRequest(HTTPError):
 
