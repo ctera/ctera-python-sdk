@@ -7,10 +7,9 @@ Changelog
 Bug Fixes
 ^^^^^^^^^
 
-* Expose portal validation details via :attr:`~cterasdk.exceptions.CTERAException.reason` (for
-  example, when ``admins.modify`` fails because the new password matches the current password).
+* Add a ``reason`` property to :py:class:`~cterasdk.exceptions.base.CTERAException`.
 
-Related issue: `SDK-369 <https://cteranet.atlassian.net/browse/SDK-369>`_
+Related issues and pull requests on GitHub: `#374 <https://github.com/ctera/ctera-python-sdk/pull/374>`_
 
 2.20.49
 -------
