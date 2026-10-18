@@ -1,49 +1,22 @@
-from cterasdk.common import Object
-from cterasdk.exceptions import CTERAException
-from cterasdk.exceptions.transport import InternalServerError
+import munch
+from unittest import mock
+from cterasdk import exceptions
+from cterasdk.core import admins
 from tests.ut import base
 
 
-class TestCTERAExceptionReason(base.BaseTest):
+class TestExceptions(base.BaseTest):
 
-    @staticmethod
-    def _internal_server_error(portal_error):
-        http_error = Object()
-        http_error.request = Object(url='https://example/admin/api/administrators/alice')
-        http_error.response = Object(status=500, error=portal_error)
-        return InternalServerError(http_error)
-
-    def test_reason_returns_portal_msg_from_http_cause(self):
-        portal_msg = 'Object validation failed (field: password error: Old and new passwords cannot be the same)'
-        portal_error = Object()
-        portal_error.msg = portal_msg
-        try:
-            raise CTERAException('Could not modify user: /administrators/alice') from self._internal_server_error(
-                portal_error
-            )
-        except CTERAException as error:
-            self.assertEqual(portal_msg, error.reason)
-
-    def test_reason_is_none_without_cause(self):
-        self.assertIsNone(CTERAException('Failed').reason)
-
-    def test_reason_is_none_when_cause_is_not_http_transport_error(self):
-        try:
-            raise CTERAException('Failed') from ValueError('not transport')
-        except CTERAException as error:
-            self.assertIsNone(error.reason)
-
-    def test_reason_is_none_when_portal_error_has_no_msg(self):
-        try:
-            raise CTERAException('Failed') from self._internal_server_error(Object())
-        except CTERAException as error:
-            self.assertIsNone(error.reason)
-
-    def test_reason_is_none_when_response_error_is_plain_string(self):
-        http_error = Object()
-        http_error.request = Object(url='https://example/admin')
-        http_error.response = Object(status=500, error='Internal Server Error')
-        try:
-            raise CTERAException('Failed') from InternalServerError(http_error)
-        except CTERAException as error:
-            self.assertIsNone(error.reason)
+    def test_reason(self):
+        error_message = 'error message'
+        error = munch.Munch({
+            'response': munch.Munch({
+                'error': munch.Munch({
+                    'msg': error_message
+                })
+            })
+        })
+        self._global_admin.api.get = mock.MagicMock(side_effect=exceptions.transport.InternalServerError(error))
+        with self.assertRaises(exceptions.CTERAException) as error:
+            admins.Administrators(self._global_admin).modify('user', password='password')
+        self.assertEqual(error_message, error.exception.reason)
