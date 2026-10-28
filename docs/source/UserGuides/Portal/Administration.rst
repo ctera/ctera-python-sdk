@@ -1959,6 +1959,24 @@ Setup
 
    admin.setup.init_master('admin', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'password1!', 'ctera.me')
 
+Initialize a master against a customer-managed external PostgreSQL database (Enterprise DB).
+Requires a Portal build that includes external database support (FM-421 / PIM-9542 family).
+Every cluster node must use the same external endpoint and credentials.
+
+.. code-block:: python
+
+   admin.setup.init_master(
+       'admin', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'password1!', 'ctera.me',
+       database_mode='external',
+       ext_db_host='edb.customer.internal',
+       ext_db_port=5432,
+       ext_db_name='ctera_portal',
+       ext_db_user='ctera_app',
+       ext_db_password='your-db-password',
+       ext_db_ssl_mode='verify-full',
+       ext_db_ssl_ca_cert='/path/to/ca.pem',
+   )
+
 .. automethod:: cterasdk.core.setup.Setup.init_application_server
    :noindex:
 
@@ -1973,6 +1991,23 @@ Setup
    master_ipaddr = '172.31.53.246'
    master_pk = """...PEM-encoded private key..."""
    admin.setup.init_application_server(master_ipaddr, master_pk)
+
+Join a secondary server to a master that uses an external database.
+SSH credentials are still required to establish cluster trust with the master;
+the SDK does not fetch the database password from the master in external mode.
+
+.. code-block:: python
+
+   admin.setup.init_application_server(
+       master_ipaddr,
+       master_password,
+       database_mode='external',
+       ext_db_host='edb.customer.internal',
+       ext_db_user='ctera_app',
+       ext_db_password='your-db-password',
+       ext_db_ssl_mode='verify-full',
+       ext_db_ssl_ca_cert='/path/to/ca.pem',
+   )
 
 
 Miscellaneous
