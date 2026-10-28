@@ -1,12 +1,16 @@
+from cryptography import x509
+
 from cterasdk.common import Object
 from cterasdk.core.enum import DatabaseMode, ExternalDbAuthMethod
 from cterasdk.exceptions import CTERAException
-from cterasdk.lib.crypto import PrivateKey, X509Certificate
+from cterasdk.lib.crypto import PrivateKey
+from cterasdk.lib.storage import commonfs
 
 DEFAULT_EXT_DB_PORT = 5432
 DEFAULT_EXT_DB_NAME = 'postgres'
 DEFAULT_EXT_DB_SSL_MODE = 'verify-full'
 
+_ALLOWED_SSL_MODES = frozenset({'require', 'verify-ca', 'verify-full'})
 _SSL_MODES_REQUIRING_CA = frozenset({'verify-ca', 'verify-full'})
 
 
@@ -52,24 +56,46 @@ def _normalize_auth_method(ext_db_auth_method):
 def _normalize_ssl_mode(ssl_mode):
     if ssl_mode is None:
         return DEFAULT_EXT_DB_SSL_MODE
-    mode = str(ssl_mode).lower()
+    mode = str(ssl_mode).lower().replace('_', '-')
     if mode == 'disable':
         raise CTERAException('ext_db_ssl_mode disable is not supported for external database mode')
-    return ssl_mode
+    if mode not in _ALLOWED_SSL_MODES:
+        raise CTERAException(
+            f'Invalid ext_db_ssl_mode: {ssl_mode}. '
+            f'Allowed values: require, verify-ca, verify-full')
+    return mode
 
 
 def _is_inline_pem(material):
     return isinstance(material, str) and '-----BEGIN' in material
 
 
-def _pem_certificate_content(cert_material):
-    if cert_material is None:
+def _read_pem_text(material):
+    if material is None:
         return None
-    if _is_inline_pem(cert_material):
-        loaded = X509Certificate.from_string(cert_material)
-    else:
-        loaded = X509Certificate.load_certificate(cert_material)
-    return loaded.pem_data.decode('utf-8')
+    if isinstance(material, bytes):
+        material = material.decode('utf-8')
+    if not isinstance(material, str):
+        raise CTERAException('Failed loading certificate.')
+    if '-----BEGIN' in material:
+        return material
+    if commonfs.exists(material):
+        with open(material, 'r', encoding='utf-8') as handle:
+            return handle.read()
+    raise CTERAException('Failed loading certificate.')
+
+
+def _pem_certificate_content(cert_material):
+    pem = _read_pem_text(cert_material)
+    if pem is None:
+        return None
+    try:
+        certificates = x509.load_pem_x509_certificates(pem.encode('utf-8'))
+    except ValueError as error:
+        raise CTERAException('Failed loading certificate.') from error
+    if not certificates:
+        raise CTERAException('Failed loading certificate.')
+    return pem
 
 
 def _pem_private_key_content(key_material):
@@ -139,7 +165,7 @@ def resolve_init_database_configuration(  # pylint: disable=too-many-arguments,t
             raise CTERAException(
                 'ext_db_ssl_client_cert and ext_db_ssl_client_key are required for certificate authentication')
 
-    ssl_mode_normalized = str(ssl_mode).lower()
+    ssl_mode_normalized = ssl_mode
     if ssl_mode_normalized in _SSL_MODES_REQUIRING_CA and not ext_db_ssl_ca_cert:
         raise CTERAException(
             f'ext_db_ssl_ca_cert is required when ext_db_ssl_mode is {ssl_mode}')

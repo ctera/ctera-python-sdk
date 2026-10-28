@@ -75,6 +75,29 @@ class TestExternalDatabase(base.BaseTest):
                 ext_db_ssl_mode='disable',
             )
 
+    def test_resolve_external_rejects_invalid_ssl_mode(self):
+        with self.assertRaises(CTERAException):
+            resolve_init_database_configuration(
+                database_mode=DatabaseMode.External,
+                ext_db_host='db.example.com',
+                ext_db_user='app',
+                ext_db_password='secret',
+                ext_db_ssl_mode='prefer',
+            )
+
+    def test_build_external_database_config_preserves_ca_bundle(self):
+        cert_pem, _ = self._generate_self_signed_material()
+        other_pem, _ = self._generate_self_signed_material()
+        bundle = cert_pem + other_pem
+        config = build_external_database_config(
+            host='db.example.com',
+            username='app',
+            password='secret',
+            ssl_mode='verify-full',
+            ssl_ca_cert=bundle,
+        )
+        self.assertEqual(config.sslCaCert.count('BEGIN CERTIFICATE'), 2)
+
     def test_resolve_external_credentials_builds_config(self):
         mode, config = resolve_init_database_configuration(
             database_mode=DatabaseMode.External,
