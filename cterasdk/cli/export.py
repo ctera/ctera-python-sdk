@@ -2,6 +2,8 @@
 import argparse
 import asyncio
 import logging
+import getpass
+import gzip
 import sys
 from datetime import datetime
 
@@ -18,7 +20,7 @@ logger = logging.getLogger('cterasdk.export')
 
 ATTRIBUTE_PATHS = {
 
-    '.': [
+    '.microservices.': [
         'insight.globalStatus.status',
         'insight.settings.enabled',
         'mcp.globalStatus.status',
@@ -26,8 +28,7 @@ ATTRIBUTE_PATHS = {
         'mediaConnector.settings.enabled',
         'messaging.globalStatus.status',
         'syslog.status.globalStatus.status',
-        'varonis.globalStatus.status',
-        'samlCertificate'
+        'varonis.globalStatus.status'
     ],
 
     '.settings.': [
@@ -208,7 +209,6 @@ ATTRIBUTE_PATHS = {
         'modifiedDate',
         'owner',
         'teamProject',
-        'name',
         'uid',
         'wormSettings.gracePeriod.amount',
         'wormSettings.gracePeriod.type',
@@ -580,7 +580,9 @@ async def inspect_devices(devices, max_workers):
                 )
             )
 
-    return await asyncio.gather(*tasks)
+    await asyncio.gather(*tasks)
+
+    return devices
 
 
 async def enumerate_portals(admin, max_workers=5):
@@ -636,7 +638,6 @@ async def enumerate_cloudfolders(admin, portals):
     """
     include = [
         "uid",
-        "name",
         "createDate",
         "modifiedDate",
         "enableSyncWinNtExtendedAttributes",
@@ -912,19 +913,48 @@ def configure_timeout():
     settings.edge.asyn.settings.timeout.sock_read = 180
 
 
+def write_export(result, output, compressed):
+    extension = f".hub.ctera.com{'.json.gz' if compressed else '.json'}"
+    output = f'{output}{extension}'
+
+    opener = gzip.open if compressed else open
+    with opener(output, 'wt', encoding='utf-8') as f:
+        f.write(str(result))
+
+    logger.info('Export written to %s', output)
+
+
 def parse_args():
-    parser = argparse.ArgumentParser(description='Generate a configuration export for import into User Center.')
-    parser.add_argument('-a', dest='address', required=True, help='CTERA Portal address')
-    parser.add_argument('-u', dest='user', required=True, help='Support or read-only admin username')
-    parser.add_argument('-p', dest='password', required=True, help='Support or read-only admin password')
+    parser = argparse.ArgumentParser(
+        description='Create a deployment file for import into CTERA SmartHub.'
+    )
+    parser.add_argument('-a', '--address', required=True,
+                        help='Your CTERA Portal address')
+    parser.add_argument('-u', '--user', required=True,
+                        help='Your Support or read-only admin username')
+    parser.add_argument('-p', '--password', default=None,
+                        help='Your admin password (prompted if omitted)')
     parser.add_argument('-o', '--output', default=None,
-                        help='Path to write the export file to (default: <datetime>.<address>.cterasdk.export.json)')
-    parser.add_argument('--debug', action='store_true', help='Enable verbose (debug) logging')
-    parser.add_argument('--shared', action='store_true', help='Enable if this Portal serves multiple distinct organizations.')
+                        help='Output file path or prefix (default: <timestamp>.<address>.hub.ctera.com.json.gz)')
+    parser.add_argument('--uncompressed', action='store_true',
+                        help='Write an uncompressed JSON file')
+    parser.add_argument('--debug', action='store_true',
+                        help='Enable debug logging')
+
     args = parser.parse_args()
+    args.compressed = not args.uncompressed
+
+    if args.password is None:
+        try:
+            args.password = getpass.getpass(
+                f'Password for {args.user}@{args.address}: '
+            )
+        except (KeyboardInterrupt, EOFError):
+            parser.exit(130)
 
     if not args.output:
-        args.output = f'{datetime.now():%Y%m%d_%H%M%S}.{args.address}.cterasdk.export.json'
+        timestamp = datetime.now().astimezone().strftime('%Y-%m-%dT%H%M%S%z')
+        args.output = f'{timestamp}.{args.address}'
 
     return args
 
@@ -939,10 +969,4 @@ def run():
     if result is None:
         sys.exit(1)
 
-    result.site = Object(**{
-        'type': 'shared' if args.shared else 'private'
-    })
-
-    with open(args.output, 'w', encoding='utf-8') as f:
-        f.write(str(result))
-    logger.info('Export written to %s', args.output)
+    write_export(result, args.output, args.compressed)
