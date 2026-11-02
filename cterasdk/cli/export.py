@@ -5,7 +5,6 @@ import logging
 import getpass
 import gzip
 import sys
-import os
 from datetime import datetime
 
 from .. import settings
