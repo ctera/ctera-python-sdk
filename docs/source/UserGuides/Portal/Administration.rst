@@ -998,6 +998,15 @@ Fetch Users & Groups
 Directory Services
 ==================
 
+.. automethod:: cterasdk.core.directoryservice.DirectoryService.search_directory_services
+   :noindex:
+
+.. code-block:: python
+
+   """Look up a domain group without importing it into the Portal"""
+   group = admin.directoryservice.search_directory_services(core_enum.SearchType.Groups, 'demo.local', 'Domain Users')
+   print(group.name, group.rid)
+
 .. automethod:: cterasdk.core.directoryservice.DirectoryService.connect
    :noindex:
 
@@ -1610,6 +1619,15 @@ Shares
 
 .. automethod:: cterasdk.core.shares.Shares.get
    :noindex:
+
+.. automethod:: cterasdk.core.shares.Shares.get_configuration
+   :noindex:
+
+.. code-block:: python
+
+   """Read a share's configuration, including its directory, access type and ACL rules"""
+   configuration = admin.shares.get_configuration(share)
+   print(configuration.directory, configuration.access_type)
 
 .. automethod:: cterasdk.core.shares.Shares.add
    :noindex:

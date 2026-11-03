@@ -202,6 +202,9 @@ class DirectoryService(BaseCommand):
         """
         Instruct the Portal to fetch the provided Active Directory Accounts
 
+        This imports the accounts into the Portal (``syncAD``). A read-only lookup is
+        :meth:`search_directory_services`.
+
         :param list[cterasdk.core.types.PortalAccount] active_directory_accounts: List of Active Directory Accounts to fetch
 
         :return: Response Code
@@ -233,23 +236,36 @@ class DirectoryService(BaseCommand):
         return response
 
     def _search_users(self, domain, user):
-        return self._search_directory_services(SearchType.Users, domain, user)
+        return self.search_directory_services(SearchType.Users, domain, user)
 
     def _search_groups(self, domain, group):
-        return self._search_directory_services(SearchType.Groups, domain, group)
+        return self.search_directory_services(SearchType.Groups, domain, group)
 
-    def _search_directory_services(self, search_type, domain, name):
+    def search_directory_services(self, mode, domain, name):
+        """
+        Search directory services for one user or group.
+
+        Read-only. Calls ``searchAD`` and returns the matching principal. The principal
+        carries ``rid``, not ``sid``. This method does not import the account into the Portal.
+
+        :param str mode: Search mode, :attr:`cterasdk.core.enum.SearchType.Users` or
+         :attr:`cterasdk.core.enum.SearchType.Groups`
+        :param str domain: Directory domain
+        :param str name: Account name
+        :returns: The matching directory principal
+        :rtype: cterasdk.common.object.Object
+        """
         param = Object()
-        param.mode = search_type
+        param.mode = mode
         param.name = name
         param.domain = domain
 
-        logger.info('Searching %(search_type)s: %(info)s', dict(search_type=search_type, info={'domain': domain, 'name': name}))
+        logger.info('Searching %(mode)s: %(info)s', dict(mode=mode, info={'domain': domain, 'name': name}))
 
         objects = self._core.api.execute('', 'searchAD', param)
         if not objects:
-            logger.info('Could not find %s: %s@%s.', search_type, name, domain)
-            raise CTERAException(f'Could not find {search_type[:-1]}: {name}@{domain}')
+            logger.info('Could not find %s: %s@%s.', mode, name, domain)
+            raise CTERAException(f'Could not find {mode[:-1]}: {name}@{domain}')
 
         for principal in objects:
             if principal.name == name:

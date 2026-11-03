@@ -30,12 +30,16 @@ class Shares(BaseCommand):
             return share
         raise ValueError('Could not determine share identifier')
 
-    def _get_configuration(self, share):
+    def get_configuration(self, share):
         """
-        Get Share
+        Get a share's configuration.
 
-        :param cterasdk.core.types.Share or str: Share object or unique idenifier.
-        :returns: Share metadata
+        Read-only. Returns the Portal configuration, including ``directory``, ``access_type``,
+        ``device_shares`` and ``acl_rules``. This is the raw configuration, not
+        :class:`cterasdk.core.types.ShareInfo`.
+
+        :param cterasdk.core.types.Share or str share: Share object or unique identifier.
+        :returns: Share configuration
         :rtype: cterasdk.common.object.Object
         """
         uid = Shares._deduce_unique_identifier(share)
@@ -52,7 +56,7 @@ class Shares(BaseCommand):
         :returns: Share information
         :rtype: cterasdk.core.types.ShareInfo
         """
-        response = self._get_configuration(share)
+        response = self.get_configuration(share)
         return ShareInfo.from_server_object(response)
 
     def all(self, devices=None, protocol=None, search=None):
@@ -154,7 +158,7 @@ class Shares(BaseCommand):
                devices=None, acl=None, description=None, access=None, export_to_nfs=None,
                nfs_krb=None, trusted_nfs_clients=None, krb_sec=None, block_files=None,
                export_to_ftp=None, validate_acl=True):
-        param = self._get_configuration(share)
+        param = self.get_configuration(share)
 
         if name:
             param.name = name

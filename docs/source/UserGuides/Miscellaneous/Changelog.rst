@@ -1,6 +1,16 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+Improvements
+^^^^^^^^^^^^
+
+* Publish ``Shares.get_configuration`` and ``DirectoryService.search_directory_services``.
+  Both are read-only. Directory search calls ``searchAD`` and does not import accounts.
+  ``DirectoryService.fetch`` still calls ``syncAD``.
+
 2.20.50
 -------
 

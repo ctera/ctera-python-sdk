@@ -3,7 +3,7 @@ import munch
 
 from cterasdk.core import directoryservice
 from cterasdk.core.types import UserAccount, GroupAccount, DomainControllers, AccessControlEntry
-from cterasdk.core.enum import Role, DirectoryServiceType, DirectoryServiceFetchMode, DirectorySearchEntityType
+from cterasdk.core.enum import Role, DirectoryServiceType, DirectoryServiceFetchMode, DirectorySearchEntityType, SearchType
 from cterasdk.common.types import ADDomainIDMapping
 from cterasdk.common.object import Object
 from cterasdk import exceptions
@@ -233,6 +233,34 @@ class TestCoreDirectoryServices(base_admin.BaseCoreTest):  # pylint: disable=too
                                                                                   self._account_user_name)
         self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
         self.assertEqual(ret.name, self._account_user_name)
+
+    def test_search_directory_services_returns_rid(self):
+        principal = munch.Munch({'name': self._account_group_name, 'rid': 513})
+        self._init_global_admin(execute_response=[principal])
+        ret = directoryservice.DirectoryService(self._global_admin).search_directory_services(
+            SearchType.Groups, self._domain, self._account_group_name)
+        self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
+        actual_param = self._global_admin.api.execute.call_args[0][2]
+        self.assertEqual(actual_param.mode, SearchType.Groups)
+        self.assertEqual(actual_param.domain, self._domain)
+        self.assertEqual(actual_param.name, self._account_group_name)
+        self.assertEqual(ret.rid, 513)
+        self.assertNotIn('syncAD', [call.args[1] for call in self._global_admin.api.execute.call_args_list])
+
+    def test_search_directory_services_not_found(self):
+        self._init_global_admin(execute_response=None)
+        with self.assertRaises(exceptions.CTERAException) as error:
+            directoryservice.DirectoryService(self._global_admin).search_directory_services(
+                SearchType.Users, self._domain, self._account_user_name)
+        self._global_admin.api.execute.assert_called_once_with('', 'searchAD', mock.ANY)
+        self.assertEqual(f'Could not find user: {self._account_user_name}@{self._domain}', str(error.exception))
+
+    def test_search_directory_services_no_match(self):
+        self._init_global_admin(execute_response=[munch.Munch({'name': 'random'})])
+        with self.assertRaises(exceptions.CTERAException) as error:
+            directoryservice.DirectoryService(self._global_admin).search_directory_services(
+                SearchType.Users, self._domain, self._account_user_name)
+        self.assertEqual('Search returned multiple results, but none matched the specified criteria.', str(error.exception))
 
     def _create_access_control_entry(self, ace_type, ace_name, ace_role):
         ace = Object()
