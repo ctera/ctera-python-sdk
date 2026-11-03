@@ -263,6 +263,30 @@ class SetupWizardStage:
     Finish = "finish"
 
 
+class DatabaseMode:
+    """
+    Portal database deployment mode during server initialization.
+
+    :ivar str Embedded: Portal-managed local PostgreSQL (default)
+    :ivar str External: Customer-managed external PostgreSQL (Enterprise DB)
+    """
+    Embedded = 'embedded'
+    External = 'external'
+
+
+class ExternalDbAuthMethod:
+    """
+    External database authentication method for Enterprise DB init.
+
+    :ivar str Credentials: Username and password
+    :ivar str Certificate: TLS client certificate and private key
+    :ivar str Token: Token-based authentication (not yet supported by the portal)
+    """
+    Credentials = 'credentials'
+    Certificate = 'certificate'
+    Token = 'token'
+
+
 class SlaveAuthenticaionMethod:
     """
     Secondary Portal server authentication mode

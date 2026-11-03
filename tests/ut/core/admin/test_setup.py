@@ -2,7 +2,7 @@ from unittest import mock
 
 from cterasdk import toxmlstr
 from cterasdk.core import setup
-from cterasdk.core.enum import ServerMode, SlaveAuthenticaionMethod, SetupWizardStage, SetupWizardStatus
+from cterasdk.core.enum import DatabaseMode, ServerMode, SlaveAuthenticaionMethod, SetupWizardStage, SetupWizardStatus
 from cterasdk.common import Object
 from tests.ut.core.admin import base_admin
 
@@ -62,6 +62,43 @@ class TestCoreSetup(base_admin.BaseCoreTest):  # pylint: disable=too-many-instan
             d[multi_dict['name']] = value
         return d
 
+    def test_init_master_external_credentials(self):
+        self.patch_call("time.sleep")
+        self._init_setup()
+        self._global_admin.ctera.get = mock.MagicMock(side_effect=[
+            TestCoreSetup._generate_status_response(SetupWizardStage.Server, SetupWizardStatus.NA, ''),
+            TestCoreSetup._generate_status_response(SetupWizardStage.Portal, SetupWizardStatus.NA, ''),
+            TestCoreSetup._generate_status_response(SetupWizardStage.Finish, SetupWizardStatus.NA, '')
+        ])
+        self.patch_call("cterasdk.core.startup.Startup.wait")
+
+        setup.Setup(self._global_admin).init_master(
+            self._admin_username,
+            self._admin_email,
+            self._admin_first_name,
+            self._admin_last_name,
+            self._admin_password,
+            self._domain,
+            database_mode=DatabaseMode.External,
+            ext_db_host='edb.customer.internal',
+            ext_db_port=5432,
+            ext_db_name='ctera_portal',
+            ext_db_user='ctera_app',
+            ext_db_password='db-secret',
+            ext_db_ssl_mode='require',
+        )
+
+        params = TestCoreSetup._get_init_server_params(
+            ServerMode.Master,
+            database_mode=DatabaseMode.External,
+            external_database_config=TestCoreSetup._get_external_database_config(ssl_mode='require'),
+        )
+        expected_params = TestCoreSetup._get_form_data(params)
+        actual_param = TestCoreSetup._format_actual_parameters_to_dict(
+            self._global_admin.ctera.multipart.call_args[0][1])
+        for key in actual_param.keys():  # pylint: disable=consider-using-dict-items, consider-iterating-dictionary
+            self._assert_equal_objects(actual_param[key], expected_params[key])
+
     def test_init_master_already_finished(self):
         self._init_setup()
         self._global_admin.ctera.get = mock.MagicMock(side_effect=[
@@ -118,6 +155,44 @@ class TestCoreSetup(base_admin.BaseCoreTest):  # pylint: disable=too-many-instan
         for key in actual_param.keys():  # pylint: disable=consider-using-dict-items, consider-iterating-dictionary
             self._assert_equal_objects(actual_param[key], expected_params[key])
         mock_startup_wait.assert_called_once()
+
+    def test_init_application_server_external_password(self):
+        self.patch_call("time.sleep")
+        self._init_setup()
+        self._global_admin.ctera.get = mock.MagicMock(side_effect=[
+            TestCoreSetup._generate_status_response(SetupWizardStage.Server, SetupWizardStatus.NA, ''),
+            TestCoreSetup._generate_status_response(SetupWizardStage.Finish, SetupWizardStatus.NA, '')
+        ])
+        execute_side_effect = TestCoreSetup._create_init_slave_execute_function(SlaveAuthenticaionMethod.Password)
+        self._global_admin.ctera.execute = mock.MagicMock(side_effect=execute_side_effect)
+        self.patch_call("cterasdk.core.startup.Startup.wait")
+
+        setup.Setup(self._global_admin).init_application_server(
+            self._master_ipaddr,
+            self._master_secret,
+            database_mode=DatabaseMode.External,
+            ext_db_host='edb.customer.internal',
+            ext_db_user='ctera_app',
+            ext_db_password='db-secret',
+            ext_db_ssl_mode='require',
+        )
+
+        params = TestCoreSetup._get_init_server_params(
+            ServerMode.Slave,
+            SlaveAuthenticaionMethod.Password,
+            self._master_ipaddr,
+            self._master_secret,
+            database_mode=DatabaseMode.External,
+            external_database_config=TestCoreSetup._get_external_database_config(
+                database_name='postgres',
+                ssl_mode='require',
+            ),
+        )
+        expected_params = TestCoreSetup._get_form_data(params)
+        actual_param = TestCoreSetup._format_actual_parameters_to_dict(
+            self._global_admin.ctera.multipart.call_args[0][1])
+        for key in actual_param.keys():  # pylint: disable=consider-using-dict-items, consider-iterating-dictionary
+            self._assert_equal_objects(actual_param[key], expected_params[key])
 
     def _get_init_portal_param(self):
         params = Object()
@@ -177,7 +252,34 @@ class TestCoreSetup(base_admin.BaseCoreTest):  # pylint: disable=too-many-instan
         return form_data
 
     @staticmethod
-    def _get_init_server_params(mode, authentication_method=None, master_ipaddr=None, master_secret=None):
+    def _get_external_database_config(
+            host='edb.customer.internal',
+            port=5432,
+            database_name='ctera_portal',
+            username='ctera_app',
+            password='db-secret',
+            ssl_mode='verify-full',
+    ):
+        config = Object()
+        config._classname = 'ExternalDatabaseConfig'  # pylint: disable=protected-access
+        config.host = host
+        config.port = port
+        config.databaseName = database_name
+        config.username = username
+        config.sslMode = ssl_mode
+        config.authMode = 'Credentials'
+        config.password = password
+        return config
+
+    @staticmethod
+    def _get_init_server_params(
+            mode,
+            authentication_method=None,
+            master_ipaddr=None,
+            master_secret=None,
+            database_mode=None,
+            external_database_config=None,
+    ):
         params = Object()
         params._classname = 'InitServerParams'  # pylint: disable=protected-access
         params.serverMode = mode
@@ -190,4 +292,7 @@ class TestCoreSetup(base_admin.BaseCoreTest):  # pylint: disable=too-many-instan
                 params.slaveSettings.masterPassword = master_secret
             elif authentication_method == SlaveAuthenticaionMethod.PrivateKey:
                 params.slaveSettings.masterKey = master_secret
+        if database_mode == DatabaseMode.External:
+            params.databaseMode = DatabaseMode.External
+            params.externalDatabaseConfig = external_database_config
         return params
