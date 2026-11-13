@@ -1,6 +1,17 @@
 Changelog
 =========
 
+2.20.52
+-------
+
+Bug Fixes
+^^^^^^^^^
+
+* Add additional metadata to the ``export`` CLI command.
+
+Related issues and pull requests on GitHub: `#378 <https://github.com/ctera/ctera-python-sdk/pull/378>`_
+
+
 2.20.50
 -------
 
