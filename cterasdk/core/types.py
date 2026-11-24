@@ -6,6 +6,7 @@ from collections import namedtuple
 from ..common import DateTimeUtils, StringCriteriaBuilder, PredefinedListCriteriaBuilder, CustomListCriteriaBuilder, Object, \
                      parse_base_object_ref
 from ..lib.storage import commonfs
+from ..lib.crypto import PrivateKey, X509Certificate
 
 from .enum import PortalAccountType, CollaboratorType, FileAccessMode, PlanCriteria, TemplateCriteria, ProtectionLevel, \
                   BucketType, LocationType, Platform, RetentionMode, Duration, ExtendedAttributes, ConflictHandler, NativeFormat
@@ -1345,3 +1346,117 @@ class QuotaRule:
             f'enforce={self.enforce}, '
             f'deleted={self.deleted})'
         )
+
+
+class SSLMode:
+    """
+    SSL/TLS Connection Verification Mode.
+
+    :ivar REQUIRE: Require an encrypted connection without certificate verification.
+    :ivar VERIFY_CA: Require encryption and verify the server certificate against the CA.
+    :ivar VERIFY_FULL: Require encryption, verify the CA, and validate the server hostname (default).
+    """
+    REQUIRE = 'require'
+    VERIFY_CA = 'verify-ca'
+    VERIFY_FULL = 'verify-full'
+
+
+class RemoteDatabase:
+    """
+    Remote database configuration.
+
+    :ivar host: Remote database hostname or IP address.
+    :ivar port: Remote database port.
+    :ivar name: Database name.
+    :ivar authMode: Authentication mode.
+    :ivar username: Authentication username.
+    :ivar password: Authentication password (optional).
+    :ivar sslMode: SSL/TLS connection mode.
+    :ivar sslCaCert: SSL CA certificate (optional).
+    :ivar authCert: Client authentication certificate (optional).
+    :ivar authKey: Client authentication private key (optional).
+    """
+
+    def __init__(self, host, port, name, auth_mode, ssl_mode, ssl_ca_cert=None, username=None,
+                 password=None, auth_cert=None, auth_key=None):
+        self._classname = 'ExternalDatabaseConfig'
+        self.host = host
+        self.port = port
+        self.name = name
+        self.authMode = auth_mode
+        self.username = username
+        self.sslMode = ssl_mode
+
+        if password is not None:
+            self.password = password
+        if ssl_ca_cert is not None:
+            self.sslCaCert = ssl_ca_cert
+        if auth_cert is not None:
+            self.authCert = auth_cert
+        if auth_key is not None:
+            self.authKey = auth_key
+
+    @staticmethod
+    def _raise_on_validation_error(ssl_mode):
+        if ssl_mode not in SSLMode.__dict__.values():
+            raise ValueError(f"Invalid SSL mode: {ssl_mode}")
+
+    @staticmethod
+    def password(host, port, name, username, password, ssl_mode, ssl_ca_cert=None):
+        """
+        Connect to a remote database using password authentication.
+
+        :param str host: Remote database hostname or IP address.
+        :param int port: Remote database port.
+        :param str name: Database name.
+        :param str username: Authentication username.
+        :param str password: Authentication password.
+        :param cterasdk.core.types.SSLMode ssl_mode: SSL/TLS connection mode.
+        :param str,optional ssl_ca_cert: SSL CA certificate.
+        :rtype: cterasdk.core.types.RemoteDatabase
+        """
+        RemoteDatabase._raise_on_validation_error(ssl_mode)
+        return RemoteDatabase(host, port, name, 'credentials', ssl_mode, X509Certificate.load_certificate(ssl_ca_cert),
+                              username=username, password=password)
+
+    @staticmethod
+    def certificate(host, port, name, auth_cert, auth_key, ssl_mode, ssl_ca_cert=None):
+        """
+        Connect to a remote database using certificate authentication.
+
+        :param str host: Database hostname or IP address.
+        :param int port: Database port.
+        :param str name: Database name.
+        :param str auth_cert: Client authentication certificate.
+        :param str auth_key: Client authentication private key.
+        :param str ssl_mode: SSL/TLS connection mode.
+        :param str,optional ssl_ca_cert: SSL CA certificate.
+        :rtype: cterasdk.core.types.RemoteDatabase
+        """
+        RemoteDatabase._raise_on_validation_error(ssl_mode)
+        return RemoteDatabase(host, port, name, 'certificate', ssl_mode,
+                              X509Certificate.load_certificate(ssl_ca_cert),
+                              auth_cert=X509Certificate.load_certificate(auth_cert),
+                              auth_key=PrivateKey.load_private_key(auth_key))
+
+    def to_server_object(self):
+        param = Object()
+        param.host = self.host
+        param.port = self.port
+        param.name = self.name
+        param.authMode = self.authMode
+
+        if self.username is not None:
+            param.username = self.username
+        if self.password is not None:
+            param.password = self.password
+        if self.sslMode is not None:
+            param.sslMode = self.sslMode
+        if self.sslCaCert is not None:
+            param.sslCaCert = self.sslCaCert
+        if self.authCert is not None:
+            param.authCert = self.authCert
+        if self.authKey is not None:
+            param.authKey = self.authKey
+
+        return param

@@ -1959,6 +1959,45 @@ Setup
 
    admin.setup.init_master('admin', 'bruce.wayne@we.com', 'Bruce', 'Wayne', 'password1!', 'ctera.me')
 
+   """Initialize the master server using a remote database, authenticating using a certificate"""
+
+   admin.setup.init_master(
+      name='admin',
+      email='admin@example.com',
+      first_name='John',
+      last_name='Doe',
+      password='SecurePassword123!',
+      domain='example.com',
+      database=RemoteDatabase.certificate(
+         host='db.example.com',
+         port=5432,
+         name='portal',
+         auth_cert='/path/to/client.crt',
+         auth_key='/path/to/client.key',
+         ssl_mode=SSLMode.VERIFY_FULL,
+         ssl_ca_cert='/path/to/ca.crt'
+      )
+   )
+
+   """Initialize the master server using a remote database, authenticating using a username and password"""
+   admin.setup.init_master(
+      name='admin',
+      email='admin@example.com',
+      first_name='John',
+      last_name='Doe',
+      password='SecurePassword123!',
+      domain='example.com',
+      database=RemoteDatabase.password(
+         host='db.example.com',
+         port=5432,
+         name='portal',
+         username='dbuser',
+         password='dbpassword',
+         ssl_mode=SSLMode.VERIFY_FULL,
+         ssl_ca_cert='/path/to/ca.crt'
+      )
+   )
+
 .. automethod:: cterasdk.core.setup.Setup.init_application_server
    :noindex:
 
@@ -1973,6 +2012,44 @@ Setup
    master_ipaddr = '172.31.53.246'
    master_pk = """...PEM-encoded private key..."""
    admin.setup.init_application_server(master_ipaddr, master_pk)
+
+   """Join an Application Server to a Portal cluster using a remote database server, using username and password."""
+
+   master_ipaddr = '172.31.53.246'
+   master_pk = """...PEM-encoded private key..."""
+
+   admin.setup.init_application_server(
+      master_ipaddr,
+      master_pk,
+      database=RemoteDatabase.password(
+         host='db.example.com',
+         port=5432,
+         name='portal',
+         username='dbuser',
+         password='dbpassword',
+         ssl_mode=SSLMode.VERIFY_FULL,
+         ssl_ca_cert='/path/to/ca.crt'
+      )
+   )
+
+   """Join an Application Server to a Portal cluster using a remote database server, authenticated using a certificate."""
+
+   master_ipaddr = '172.31.53.246'
+   master_pk = """...PEM-encoded private key..."""
+
+   admin.setup.init_application_server(
+      master_ipaddr,
+      master_pk,
+      database=RemoteDatabase.certificate(
+         host='db.example.com',
+         port=5432,
+         name='portal',
+         auth_cert='/path/to/client.crt',
+         auth_key='/path/to/client.key',
+         ssl_mode=SSLMode.VERIFY_FULL,
+         ssl_ca_cert='/path/to/ca.crt'
+      )
+   )
 
 
 Miscellaneous
