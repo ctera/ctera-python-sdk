@@ -190,4 +190,5 @@ class TestCoreSetup(base_admin.BaseCoreTest):  # pylint: disable=too-many-instan
                 params.slaveSettings.masterPassword = master_secret
             elif authentication_method == SlaveAuthenticaionMethod.PrivateKey:
                 params.slaveSettings.masterKey = master_secret
+        params.databaseMode = 'embedded'
         return params

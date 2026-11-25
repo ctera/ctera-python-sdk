@@ -8,8 +8,10 @@ Bug Fixes
 ^^^^^^^^^
 
 * Add additional metadata to the ``export`` CLI command.
+* Support initializing CTERA Portal using an external database server.
 
 Related issues and pull requests on GitHub: `#378 <https://github.com/ctera/ctera-python-sdk/pull/378>`_
+`#380 <https://github.com/ctera/ctera-python-sdk/pull/380>`_
 
 
 2.20.50

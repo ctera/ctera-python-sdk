@@ -26,7 +26,7 @@ class Setup(BaseCommand):
         self.stage = status.wizard
         return self.stage
 
-    def init_master(self, name, email, first_name, last_name, password, domain):
+    def init_master(self, name, email, first_name, last_name, password, domain, *, database=None):
         """
         Initialize the CTERA Portal master server.
 
@@ -36,10 +36,11 @@ class Setup(BaseCommand):
         :param str last_name: The last name of the new user
         :param str password: Password for the new user
         :param str domain: The domain suffix for CTERA Portal
+        :param cterasdk.core.types.RemoteDatabase database,optional database: Remote database parameter.
         """
         self._get_current_stage()
 
-        params = Setup._init_server_params(ServerMode.Master)
+        params = Setup._init_server_params(ServerMode.Master, database)
         self._init_server(params, True)
 
         if self.stage == SetupWizardStage.Portal:
@@ -64,10 +65,10 @@ class Setup(BaseCommand):
             logger.warning('Portal already initialized. %s', {'host': self._core.host()})
         self._core.startup.wait()
 
-    def _init_slave(self, ipaddr, secret):
+    def _init_slave(self, ipaddr, secret, database):
         self._get_current_stage()
         response = self._core.ctera.execute('/setup/authenticaionMethod', 'askMasterForSlaveAuthenticaionMethod', ipaddr)
-        params = Setup._init_server_params(ServerMode.Slave)
+        params = Setup._init_server_params(ServerMode.Slave, database)
         params.slaveSettings.masterIpAddr = ipaddr
         if response == SlaveAuthenticaionMethod.Password:
             params.slaveSettings.masterPassword = secret
@@ -86,7 +87,11 @@ class Setup(BaseCommand):
             if params.serverMode == ServerMode.Slave:
                 form.add('masterIpAddr', params.slaveSettings.masterIpAddr)
 
-            logger.info('Initializing server. %s', {'host': self._core.host(), 'mode': params.serverMode})
+            logger.info('Initializing server. %s', {
+                'host': self._core.host(),
+                'mode': params.serverMode,
+                'database': params.databaseMode
+            })
             self._core.ctera.multipart('/setup', form)
             if wait:
                 status = SetupWizardStatusMonitor(self._core).wait(SetupWizardStage.Server)
@@ -95,25 +100,33 @@ class Setup(BaseCommand):
         else:
             logger.warning('Server already initialized. %s', {'host': self._core.host()})
 
-    def init_application_server(self, ipaddr, secret):
+    def init_application_server(self, ipaddr, secret, *, database=None):
         """
         Initialize a CTERA Portal Application Server.
 
         :param str ipaddr: The CTERA Portal master server IP address
         :param str secret: A password or a PEM-encoded private key
+        :param cterasdk.core.types.RemoteDatabase database,optional database: Remote database parameter.
         """
-        self._init_slave(ipaddr, secret)
+        self._init_slave(ipaddr, secret, database)
         logger.info('Initializing Application Server. %s', {'host': ipaddr})
         self._core.startup.wait()
 
     @staticmethod
-    def _init_server_params(mode):
+    def _init_server_params(mode, database):
         params = Object()
         params._classname = 'InitServerParams'  # pylint: disable=protected-access
         params.serverMode = mode
         if mode == ServerMode.Slave:
             params.slaveSettings = Object()
             params.slaveSettings._classname = 'SlaveServerSettings'  # pylint: disable=protected-access
+
+        if database is not None:
+            params.databaseMode = 'external'
+            params.externalDatabaseConfig = database
+        else:
+            params.databaseMode = 'embedded'
+
         return params
 
     def get_setup_status(self):
