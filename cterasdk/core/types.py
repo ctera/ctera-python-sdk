@@ -1361,7 +1361,7 @@ class SSLMode:
     VERIFY_FULL = 'verify-full'
 
 
-class RemoteDatabase:
+class RemoteDatabase(Object):
     """
     Remote database configuration.
 
@@ -1382,7 +1382,7 @@ class RemoteDatabase:
         self._classname = 'ExternalDatabaseConfig'
         self.host = host
         self.port = port
-        self.name = name
+        self.databaseName = name
         self.authMode = auth_mode
         self.username = username
         self.sslMode = ssl_mode
@@ -1416,7 +1416,8 @@ class RemoteDatabase:
         :rtype: cterasdk.core.types.RemoteDatabase
         """
         RemoteDatabase._raise_on_validation_error(ssl_mode)
-        return RemoteDatabase(host, port, name, 'credentials', ssl_mode, X509Certificate.load_certificate(ssl_ca_cert),
+        return RemoteDatabase(host, port, name, 'Credentials', ssl_mode,
+                              X509Certificate.load_certificate(ssl_ca_cert) if ssl_ca_cert else None,
                               username=username, password=password)
 
     @staticmethod
@@ -1434,29 +1435,7 @@ class RemoteDatabase:
         :rtype: cterasdk.core.types.RemoteDatabase
         """
         RemoteDatabase._raise_on_validation_error(ssl_mode)
-        return RemoteDatabase(host, port, name, 'certificate', ssl_mode,
-                              X509Certificate.load_certificate(ssl_ca_cert),
+        return RemoteDatabase(host, port, name, 'Cert', ssl_mode,
+                              X509Certificate.load_certificate(ssl_ca_cert) if ssl_ca_cert else None,
                               auth_cert=X509Certificate.load_certificate(auth_cert),
                               auth_key=PrivateKey.load_private_key(auth_key))
-
-    def to_server_object(self):
-        param = Object()
-        param.host = self.host
-        param.port = self.port
-        param.name = self.name
-        param.authMode = self.authMode
-
-        if self.username is not None:
-            param.username = self.username
-        if self.password is not None:
-            param.password = self.password
-        if self.sslMode is not None:
-            param.sslMode = self.sslMode
-        if self.sslCaCert is not None:
-            param.sslCaCert = self.sslCaCert
-        if self.authCert is not None:
-            param.authCert = self.authCert
-        if self.authKey is not None:
-            param.authKey = self.authKey
-
-        return param
