@@ -171,7 +171,7 @@ class TestCoreSetup(base_admin.BaseCoreTest):  # pylint: disable=too-many-instan
 
     @staticmethod
     def _get_form_data(params):
-        form_data = {'inputXml': toxmlstr(params).decode('utf-8'), 'serverMode': params.serverMode, 'databaseMode': 'embedded'}
+        form_data = {'inputXml': toxmlstr(params).decode('utf-8'), 'serverMode': params.serverMode}
         if params.serverMode == ServerMode.Slave:
             form_data['masterIpAddr'] = params.slaveSettings.masterIpAddr
         return form_data
@@ -181,7 +181,6 @@ class TestCoreSetup(base_admin.BaseCoreTest):  # pylint: disable=too-many-instan
         params = Object()
         params._classname = 'InitServerParams'  # pylint: disable=protected-access
         params.serverMode = mode
-        params.databaseMode = 'embedded'
         if mode == ServerMode.Slave:
             params.slaveSettings = Object()
             params.slaveSettings._classname = 'SlaveServerSettings'  # pylint: disable=protected-access
@@ -191,4 +190,5 @@ class TestCoreSetup(base_admin.BaseCoreTest):  # pylint: disable=too-many-instan
                 params.slaveSettings.masterPassword = master_secret
             elif authentication_method == SlaveAuthenticaionMethod.PrivateKey:
                 params.slaveSettings.masterKey = master_secret
+        params.databaseMode = 'embedded'
         return params

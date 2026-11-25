@@ -3,6 +3,7 @@ from .common import utilities
 
 
 class BaseTest(unittest.TestCase):
+    maxDiff = None
 
     def setUp(self):
         super().setUp()
