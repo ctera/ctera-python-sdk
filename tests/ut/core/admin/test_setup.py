@@ -171,7 +171,7 @@ class TestCoreSetup(base_admin.BaseCoreTest):  # pylint: disable=too-many-instan
 
     @staticmethod
     def _get_form_data(params):
-        form_data = {'inputXml': toxmlstr(params).decode('utf-8'), 'serverMode': params.serverMode}
+        form_data = {'inputXml': toxmlstr(params).decode('utf-8'), 'serverMode': params.serverMode, 'databaseMode': 'embedded'}
         if params.serverMode == ServerMode.Slave:
             form_data['masterIpAddr'] = params.slaveSettings.masterIpAddr
         return form_data
