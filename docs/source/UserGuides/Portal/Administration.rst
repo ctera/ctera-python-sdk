@@ -2021,7 +2021,7 @@ Setup
    admin.setup.init_application_server(
       master_ipaddr,
       master_pk,
-      database=RemoteDatabase.password(
+      database=RemoteDatabase.credentials(
          host='db.example.com',
          port=5432,
          name='portal',

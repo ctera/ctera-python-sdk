@@ -1361,7 +1361,7 @@ class SSLMode:
     VERIFY_FULL = 'verify-full'
 
 
-class RemoteDatabase(Object):
+class RemoteDatabase(Object):  # pylint: disable=too-many-instance-attributes
     """
     Remote database configuration.
 
@@ -1379,6 +1379,7 @@ class RemoteDatabase(Object):
 
     def __init__(self, host, port, name, auth_mode, ssl_mode, ssl_ca_cert=None, username=None,
                  password=None, auth_cert=None, auth_key=None):
+        super().__init__()
         self._classname = 'ExternalDatabaseConfig'
         self.host = host
         self.port = port
@@ -1402,7 +1403,7 @@ class RemoteDatabase(Object):
             raise ValueError(f"Invalid SSL mode: {ssl_mode}")
 
     @staticmethod
-    def password(host, port, name, username, password, ssl_mode, ssl_ca_cert=None):
+    def credentials(host, port, name, username, password, ssl_mode, ssl_ca_cert=None):
         """
         Connect to a remote database using password authentication.
 

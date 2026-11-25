@@ -181,6 +181,7 @@ class TestCoreSetup(base_admin.BaseCoreTest):  # pylint: disable=too-many-instan
         params = Object()
         params._classname = 'InitServerParams'  # pylint: disable=protected-access
         params.serverMode = mode
+        params.databaseMode = 'embedded'
         if mode == ServerMode.Slave:
             params.slaveSettings = Object()
             params.slaveSettings._classname = 'SlaveServerSettings'  # pylint: disable=protected-access
